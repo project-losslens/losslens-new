@@ -93,7 +93,7 @@ function UsernamePrompt({ userId, onComplete }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.97)', zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
       <div style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '400px' }}>
-        <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px', textAlign: 'center' }}>👋</span>
+        <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px', textAlign: 'center' }}></span>
         <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#fff', marginBottom: '8px', textAlign: 'center' }}>One last thing</h2>
         <p style={{ fontSize: '13px', color: '#3b7a5a', marginBottom: '1.5rem', textAlign: 'center', lineHeight: 1.6 }}>Choose a username for The Circle, Whispers, and your profile. This is how others will see you — anonymously.</p>
         {error && <div style={{ background: '#791F1F', border: '1px solid #F09595', borderRadius: '8px', padding: '10px 14px', color: '#F09595', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
@@ -102,8 +102,8 @@ function UsernamePrompt({ userId, onComplete }) {
           <div style={{ position: 'relative' }}>
             <input type="text" placeholder="e.g. amina_w" value={username} onChange={e => handleChange(e.target.value)} style={{ paddingRight: 40 }} onKeyDown={e => e.key === 'Enter' && handleSave()} />
             {status === 'checking' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Checking">⏳</span>}
-            {status === 'available' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Available">✅</span>}
-            {status === 'taken' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Taken">❌</span>}
+            {status === 'available' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Available"></span>}
+            {status === 'taken' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Taken">âŒ</span>}
           </div>
           {status === 'taken' && <span style={{ fontSize: '11px', color: '#F09595' }}>Username already taken</span>}
           {status === 'available' && <span style={{ fontSize: '11px', color: '#6ee7b7' }}>Username available!</span>}
@@ -175,7 +175,10 @@ function Dashboard() {
 
     setProfile(profileData)
     if (!profileData.username) { setShowUsernamePrompt(true); setLoading(false); return }
-    if (profileData && !profileData.onboarding_completed) { navigate('/onboarding', { replace: true }); return }
+    if (sessionStorage.getItem('losslens_new_signup') === uid && profileData.onboarding_completed !== true && profileData.onboarding_skipped !== true) {
+      navigate('/onboarding', { replace: true })
+      return
+    }
 
     setEntries(entriesData); setCbtCount(cbtRes.count || 0); setCircleOnline(circleRes.count || 0); setWhispersActive(whispersRes.count || 0)
 
@@ -209,19 +212,19 @@ function Dashboard() {
     if (profile?.streak_days > 0 && profile.streak_days % 7 === 0 && !streakCelebrated) {
       setStreakCelebrated(true)
       if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) triggerConfetti()
-      showToast(`🔥 ${profile.streak_days} days clean! You're amazing!`, 4000)
+      showToast(` ${profile.streak_days} days clean! You're amazing!`, 4000)
     }
   }, [profile?.streak_days, streakCelebrated])
 
   const handleTouchStart = (e) => { if (window.scrollY === 0) touchStartY.current = e.touches[0].clientY }
   const handleTouchMove = (e) => { if (touchStartY.current === 0) return; const distance = e.touches[0].clientY - touchStartY.current; if (distance > 0 && window.scrollY === 0) { setPullDistance(Math.min(distance * 0.4, 120)) } }
-  const handleTouchEnd = async () => { if (pullDistance >= pullThreshold && !refreshing) { setRefreshing(true); await fetchData(); showToast('Dashboard refreshed ✅', 2000); setRefreshing(false) } touchStartY.current = 0; setPullDistance(0) }
+  const handleTouchEnd = async () => { if (pullDistance >= pullThreshold && !refreshing) { setRefreshing(true); await fetchData(); showToast('Dashboard refreshed ', 2000); setRefreshing(false) } touchStartY.current = 0; setPullDistance(0) }
 
   const stats = [
-    { label: 'Days clean', value: profile?.streak_days ?? 0, icon: '🔥', ariaLabel: 'Streak days', highlight: (profile?.streak_days ?? 0) >= 7 },
-    { label: 'Money saved', value: profile?.money_saved ? `KES ${profile.money_saved.toLocaleString()}` : 'KES 0', icon: '💰', ariaLabel: 'Money saved' },
-    { label: 'Sessions logged', value: entries.length, icon: '📓', ariaLabel: 'Sessions logged', emptyMessage: 'First entry coming soon!' },
-    { label: 'CBT modules', value: cbtCount, icon: '🧠', ariaLabel: 'CBT modules completed', highlight: cbtCount >= 3 },
+    { label: 'Days clean', value: profile?.streak_days ?? 0, icon: '', ariaLabel: 'Streak days', highlight: (profile?.streak_days ?? 0) >= 7 },
+    { label: 'Money saved', value: profile?.money_saved ? `KES ${profile.money_saved.toLocaleString()}` : 'KES 0', icon: '', ariaLabel: 'Money saved' },
+    { label: 'Sessions logged', value: entries.length, icon: '', ariaLabel: 'Sessions logged', emptyMessage: 'First entry coming soon!' },
+    { label: 'CBT modules', value: cbtCount, icon: '', ariaLabel: 'CBT modules completed', highlight: cbtCount >= 3 },
   ]
 
   const firstName = profile?.full_name?.split(' ')[0] || 'there'
@@ -229,7 +232,7 @@ function Dashboard() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
-        <div style={{ animation: 'logoBreathe 2s ease-in-out infinite' }}><span style={{ fontFamily: "'Playfair Display', serif", fontSize: '36px', color: '#f59e0b', fontWeight: 700 }}>Precious</span></div>
+        <div style={{ animation: 'logoBreathe 2s ease-in-out infinite' }}><span style={{ fontFamily: "'Playfair Display', serif", fontSize: '36px', color: '#f59e0b', fontWeight: 700 }}>LossLens</span></div>
         <div style={{ display: 'flex', gap: '10px' }}>{[0, 1, 2].map(i => (<div key={i} style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#f59e0b', animation: `loadingDot 1.2s ${i * 0.2}s ease-in-out infinite` }} />))}</div>
       </div>
     )
@@ -239,7 +242,7 @@ function Dashboard() {
     return (
       <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
-          <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true">🔒</span>
+          <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
           <h2 style={{ color: '#f59e0b', fontFamily: "'Playfair Display', serif", fontSize: '22px', marginBottom: '8px' }}>Please log in</h2>
           <p style={{ color: '#6ee7b7', fontSize: '14px', marginBottom: '24px' }}>Your session has expired.</p>
           <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#f59e0b', border: 'none', color: '#041f13', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%' }}>Go to Login →</button>
@@ -252,16 +255,16 @@ function Dashboard() {
     <div className="root" style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
       {showUsernamePrompt && userId && (
-        <UsernamePrompt userId={userId} onComplete={(newUsername) => { setProfile(prev => ({ ...prev, username: newUsername })); setShowUsernamePrompt(false); showToast(`Welcome to Precious, @${newUsername}! 🎉`, 3000); }} />
+        <UsernamePrompt userId={userId} onComplete={(newUsername) => { setProfile(prev => ({ ...prev, username: newUsername })); setShowUsernamePrompt(false); showToast(`Welcome to LossLens, @${newUsername}! `, 3000); }} />
       )}
 
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#041f13', borderBottom: '1px solid #0a3d22', position: 'sticky', top: 0, zIndex: 100 }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}>
-              {new Date().getHours() < 12 ? '🌅' : new Date().getHours() < 17 ? '☀️' : '🌙'} {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}, <span style={{ color: '#f59e0b' }}>{firstName}</span>
+              {new Date().getHours() < 12 ? '' : new Date().getHours() < 17 ? '' : ''} {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}, <span style={{ color: '#f59e0b' }}>{firstName}</span>
             </h1>
-            <p style={{ fontSize: '12px', color: '#3b7a5a', margin: '2px 0 0' }}>{profile?.streak_days ? `${profile.streak_days}-day streak 🔥` : 'Start your streak today'}</p>
+            <p style={{ fontSize: '12px', color: '#3b7a5a', margin: '2px 0 0' }}>{profile?.streak_days ? `${profile.streak_days}-day streak ` : 'Start your streak today'}</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <NotificationBell />
@@ -271,11 +274,11 @@ function Dashboard() {
 
         {showInstallPrompt && (
           <div style={{ background: 'linear-gradient(135deg, #0a3d22, #1d5c38)', border: '2px solid #f59e0b', borderRadius: '16px', padding: '16px 20px', margin: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', animation: 'slideDown 0.4s ease-out', boxShadow: '0 4px 20px rgba(245,158,11,0.2)' }}>
-            <span style={{ fontSize: '36px', flexShrink: 0 }} aria-hidden="true">📲</span>
-            <div style={{ flex: 1, minWidth: '200px' }}><p style={{ color: '#f59e0b', fontSize: '14px', fontWeight: 600, margin: '0 0 4px' }}>Add Precious to your home screen</p><p style={{ color: '#6ee7b7', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Install for quick access — works offline, no app store needed.</p></div>
+            <span style={{ fontSize: '36px', flexShrink: 0 }} aria-hidden="true"></span>
+            <div style={{ flex: 1, minWidth: '200px' }}><p style={{ color: '#f59e0b', fontSize: '14px', fontWeight: 600, margin: '0 0 4px' }}>Add LossLens to your home screen</p><p style={{ color: '#6ee7b7', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Install for quick access — works offline, no app store needed.</p></div>
             <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
               <button onClick={() => { setShowInstallPrompt(false); sessionStorage.setItem('pwa_install_dismissed', 'true') }} style={{ padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid #3b7a5a', color: '#3b7a5a', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>Not now</button>
-              <button onClick={installPWA} style={{ padding: '8px 20px', borderRadius: '100px', background: '#f59e0b', border: 'none', color: '#041f13', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>Install 📲</button>
+              <button onClick={installPWA} style={{ padding: '8px 20px', borderRadius: '100px', background: '#f59e0b', border: 'none', color: '#041f13', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>Install </button>
             </div>
           </div>
         )}
@@ -284,7 +287,7 @@ function Dashboard() {
           {pullDistance > 0 && (
             <div style={{ position: 'fixed', top: 0, left: '50%', zIndex: 2000, transform: 'translateX(-50%)', paddingTop: Math.max(pullDistance - 40, 4), pointerEvents: 'none' }}>
               <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#062616', border: '2px solid #f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `rotate(${Math.min(pullDistance * 3, 360)}deg)`, opacity: Math.min(pullDistance / pullThreshold, 1) }}>
-                {refreshing ? <div style={{ width: '16px', height: '16px', border: '2px solid #f59e0b', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> : <span style={{ fontSize: '16px', color: '#f59e0b' }}>{pullDistance >= pullThreshold ? '✓' : '↓'}</span>}
+                {refreshing ? <div style={{ width: '16px', height: '16px', border: '2px solid #f59e0b', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> : <span style={{ fontSize: '16px', color: '#f59e0b' }}>{pullDistance >= pullThreshold ? '' : '↓'}</span>}
               </div>
             </div>
           )}
@@ -293,11 +296,11 @@ function Dashboard() {
             {riskData && (
               <div role="alert" aria-live="polite" style={{ background: getRiskColor(riskData.score).bg, border: `1px solid ${getRiskColor(riskData.score).color}`, borderRadius: '12px', padding: '14px 16px', marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: riskData.factors?.length > 0 ? '8px' : '0' }}>
-                  <h3 style={{ color: getRiskColor(riskData.score).color, fontSize: '14px', margin: 0 }}>{riskData.level === 'high' ? '⚠️ ' : riskData.level === 'medium' ? '⚡ ' : '✅ '}{getRiskColor(riskData.score).label} Today</h3>
+                  <h3 style={{ color: getRiskColor(riskData.score).color, fontSize: '14px', margin: 0 }}>{riskData.level === 'high' ? 'âš ï¸ ' : riskData.level === 'medium' ? ' ' : ' '}{getRiskColor(riskData.score).label} Today</h3>
                   <span style={{ color: getRiskColor(riskData.score).color, fontSize: '20px', fontWeight: 700 }}>{riskData.score}%</span>
                 </div>
                 {(riskData.factors || []).map((f, i) => (<p key={i} style={{ color: getRiskColor(riskData.score).color, fontSize: '12px', opacity: 0.8, margin: '2px 0' }}>• {f}</p>))}
-                {riskData.level === 'high' && <button onClick={() => navigate('/urge-toolkit')} style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#f59e0b', border: 'none', borderRadius: '8px', color: '#041f13', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>🛠️ Open Urge Toolkit</button>}
+                {riskData.level === 'high' && <button onClick={() => navigate('/urge-toolkit')} style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#f59e0b', border: 'none', borderRadius: '8px', color: '#041f13', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}> Open Urge Toolkit</button>}
               </div>
             )}
 
@@ -313,23 +316,23 @@ function Dashboard() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '1rem' }}>
               <div style={{ background: 'linear-gradient(135deg, #0a3d22 0%, #1d5c38 100%)', border: '1px solid #f59e0b', borderRadius: '12px', padding: '1rem', cursor: 'pointer' }} onClick={() => navigate('/circle')}>
-                <span style={{ fontSize: '24px' }} aria-hidden="true">💬</span><h3 style={{ color: '#f59e0b', fontSize: '13px', margin: '6px 0 4px' }}>The Circle</h3><p style={{ color: '#6ee7b7', fontSize: '11px', fontWeight: 300, margin: 0 }}>{circleOnline > 0 ? `${circleOnline} members online` : 'Join the conversation'}</p>
+                <span style={{ fontSize: '24px' }} aria-hidden="true"></span><h3 style={{ color: '#f59e0b', fontSize: '13px', margin: '6px 0 4px' }}>The Circle</h3><p style={{ color: '#6ee7b7', fontSize: '11px', fontWeight: 300, margin: 0 }}>{circleOnline > 0 ? `${circleOnline} members online` : 'Join the conversation'}</p>
               </div>
               <div style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '12px', padding: '1rem', cursor: 'pointer' }} onClick={() => navigate('/whispers')}>
-                <span style={{ fontSize: '24px' }} aria-hidden="true">🤝</span><h3 style={{ color: '#e2f5ec', fontSize: '13px', margin: '6px 0 4px' }}>Whispers</h3><p style={{ color: '#6ee7b7', fontSize: '11px', fontWeight: 300, margin: 0 }}>{whispersActive > 0 ? `${whispersActive} active chats` : 'Find a peer'}</p>
+                <span style={{ fontSize: '24px' }} aria-hidden="true"></span><h3 style={{ color: '#e2f5ec', fontSize: '13px', margin: '6px 0 4px' }}>Whispers</h3><p style={{ color: '#6ee7b7', fontSize: '11px', fontWeight: 300, margin: 0 }}>{whispersActive > 0 ? `${whispersActive} active chats` : 'Find a peer'}</p>
               </div>
             </div>
 
             <div className="dash-section">
-              <div className="section-header"><h3>This week</h3><div className="tab-group"><button className={activeTab === 'week' ? 'tab active' : 'tab'} onClick={() => setActiveTab('week')}>Week</button><button className={activeTab === 'month' ? 'tab active' : 'tab'} onClick={() => { setActiveTab('month'); showToast('Monthly view coming soon! 📅', 2000) }}>Month</button></div></div>
+              <div className="section-header"><h3>This week</h3><div className="tab-group"><button className={activeTab === 'week' ? 'tab active' : 'tab'} onClick={() => setActiveTab('week')}>Week</button><button className={activeTab === 'month' ? 'tab active' : 'tab'} onClick={() => { setActiveTab('month'); showToast('Monthly view coming soon! ', 2000) }}>Month</button></div></div>
               <div className="week-chart">{weekData.map((d, i) => (<div className="week-day" key={i}><div className={`day-bar ${d.gambled ? 'gambled' : 'clean'}`} style={{ height: d.gambled ? '40px' : d.mood ? '60px' : '30px', transition: 'height 0.3s ease' }} /><span className="day-label">{d.day}</span></div>))}</div>
               <div className="chart-legend"><span className="legend-item"><span className="dot clean"></span> Clean day</span><span className="legend-item"><span className="dot gambled"></span> Gambled</span></div>
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
-              <h3 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '0.75rem' }}>Explore Precious</h3>
+              <h3 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '0.75rem' }}>Explore LossLens</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '8px' }}>
-                {[{ emoji: '📓', label: 'Diary', path: '/diary' }, { emoji: '🧠', label: 'CBT Modules', path: '/cbt' }, { emoji: '🛠️', label: 'Urge Toolkit', path: '/urge-toolkit' }, { emoji: '📅', label: 'Events', path: '/events' }, { emoji: '📞', label: 'Resources', path: '/resources' }, { emoji: '👨‍👩‍👧', label: 'Family Portal', path: '/family-portal' }, { emoji: '🪞', label: 'Monthly Mirror', path: '/monthly-mirror' }, { emoji: '🤝', label: 'Precious Pact', path: '/precious-pact' }].map(item => (
+                {[{ emoji: '', label: 'Diary', path: '/diary' }, { emoji: '', label: 'CBT Modules', path: '/cbt' }, { emoji: '', label: 'Urge Toolkit', path: '/urge-toolkit' }, { emoji: '', label: 'Events', path: '/events' }, { emoji: '', label: 'Resources', path: '/resources' }, { emoji: '', label: 'Family Portal', path: '/family-portal' }, { emoji: '', label: 'Monthly Mirror', path: '/monthly-mirror' }, { emoji: '', label: 'LossLens Pact', path: '/precious-pact' }].map(item => (
                   <button key={item.path} onClick={() => navigate(item.path)} style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '10px', padding: '12px', color: '#9fe1cb', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = '#f59e0b'; e.currentTarget.style.transform = 'translateY(-2px)' }} onMouseLeave={e => { e.currentTarget.style.borderColor = '#0a3d22'; e.currentTarget.style.transform = 'translateY(0)' }}>
                     <span style={{ fontSize: '22px' }} aria-hidden="true">{item.emoji}</span><span>{item.label}</span>
@@ -389,7 +392,7 @@ function Dashboard() {
                 }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#f59e0b'; e.currentTarget.style.transform = 'scale(1.02)' }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = contact.priority ? '#F09595' : '#0a3d22'; e.currentTarget.style.transform = 'scale(1)' }}>
-                  <span style={{ fontSize: contact.priority ? '28px' : '20px', flexShrink: 0 }}>{contact.priority ? '⭐' : '📞'}</span>
+                  <span style={{ fontSize: contact.priority ? '28px' : '20px', flexShrink: 0 }}>{contact.priority ? '⭐' : ''}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <span style={{ color: contact.priority ? '#F09595' : '#e2f5ec', fontSize: contact.priority ? '15px' : '13px', fontWeight: 600 }}>{contact.name}</span>

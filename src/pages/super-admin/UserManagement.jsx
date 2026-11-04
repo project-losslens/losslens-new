@@ -7,10 +7,10 @@ import SuperAdminSidebar from '../../components/SuperAdminSidebar'
 const fmt = (d) => d ? new Date(d).toLocaleDateString('en-KE') : '—'
 
 const TABS = [
-  { id: 'all', label: 'All Users', icon: '👥' },
-  { id: 'premium', label: 'Premium', icon: '💎' },
-  { id: 'company', label: 'Company', icon: '🏢' },
-  { id: 'free', label: 'Free', icon: '💚' },
+  { id: 'all', label: 'All Users', icon: '' },
+  { id: 'premium', label: 'Premium', icon: '' },
+  { id: 'company', label: 'Company', icon: '' },
+  { id: 'free', label: 'Free', icon: '' },
   { id: 'pending', label: 'Pending', icon: '⏳' },
 ]
 
@@ -359,7 +359,7 @@ export default function UserManagement() {
                             <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '4px' }}>
                               <span style={{ color: '#6ee7b7', fontSize: '11px' }}>
                                 {'\u{2709}'} {u.email || 'No email'}
-                                {u.email && <button onClick={() => { navigator.clipboard.writeText(u.email); showToast('Email copied!') }} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '10px', cursor: 'pointer', marginLeft: '4px' }} title="Copy email">📋</button>}
+                                {u.email && <button onClick={() => { navigator.clipboard.writeText(u.email); showToast('Email copied!') }} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '10px', cursor: 'pointer', marginLeft: '4px' }} title="Copy email"></button>}
                               </span>
                               <span style={{ color: '#6ee7b7', fontSize: '11px' }}>{'\u{1F4DE}'} {u.phone || 'No phone'}</span>
                               <span style={{ color: '#f59e0b', fontSize: '11px' }}>{'\u{1F525}'} {u.streak_days || 0}d streak</span>
@@ -373,7 +373,7 @@ export default function UserManagement() {
                                 {u.accountability_partner_phone && (
                                   <span style={{ color: '#3b7a5a', fontSize: '11px' }}>
                                     {'\u{1F4DE}'} {u.accountability_partner_phone}
-                                    <button onClick={() => { navigator.clipboard.writeText(u.accountability_partner_phone); showToast('Partner phone copied!') }} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '10px', cursor: 'pointer', marginLeft: '4px' }}>📋</button>
+                                    <button onClick={() => { navigator.clipboard.writeText(u.accountability_partner_phone); showToast('Partner phone copied!') }} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '10px', cursor: 'pointer', marginLeft: '4px' }}></button>
                                   </span>
                                 )}
                               </div>
@@ -451,9 +451,9 @@ export default function UserManagement() {
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '8px', marginBottom: '1rem' }}>
                 {[
-                  { label: 'Premium Users', value: paymentStats.premium, icon: '💎', color: '#f59e0b' },
-                  { label: 'Company Users', value: paymentStats.company, icon: '🏢', color: '#f59e0b' },
-                  { label: 'Free Users', value: paymentStats.free, icon: '💚', color: '#6ee7b7' },
+                  { label: 'Premium Users', value: paymentStats.premium, icon: '', color: '#f59e0b' },
+                  { label: 'Company Users', value: paymentStats.company, icon: '', color: '#f59e0b' },
+                  { label: 'Free Users', value: paymentStats.free, icon: '', color: '#6ee7b7' },
                   { label: 'Pending', value: paymentStats.pending, icon: '⏳', color: '#FAC775' },
                 ].map((s, i) => (
                   <div key={i} style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
@@ -466,7 +466,7 @@ export default function UserManagement() {
 
               {filtered.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a', background: '#062616', borderRadius: '12px', border: '1px solid #0a3d22' }}>
-                  <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>💳</span>
+                  <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
                   <p style={{ color: '#6ee7b7', fontSize: '14px' }}>No users match this filter.</p>
                 </div>
               ) : (
@@ -569,7 +569,7 @@ export default function UserManagement() {
               <button onClick={() => setShowNewPassword(!showNewPassword)}
                 style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '18px', cursor: 'pointer', padding: '4px 8px' }}
                 title={showNewPassword ? 'Hide password' : 'Show password'}>
-                {showNewPassword ? '🙈' : '👁️'}
+                {showNewPassword ? '' : ''}
               </button>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -586,7 +586,7 @@ export default function UserManagement() {
       {showGrantPremium && (
         <div onClick={() => setShowGrantPremium(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '1px solid #6ee7b7', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>💎</span>
+            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}></span>
             <h3 style={{ color: '#6ee7b7', fontSize: '16px', margin: '0 0 8px' }}>Grant Premium Access?</h3>
             <p style={{ color: '#6ee7b7', fontSize: '13px', marginBottom: '20px' }}>
               Give <strong style={{ color: '#f59e0b' }}>"{showGrantPremium.full_name || 'User'}"</strong> free Premium access? This can be revoked later.
@@ -603,7 +603,7 @@ export default function UserManagement() {
       {showRevokePremium && (
         <div onClick={() => setShowRevokePremium(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '1px solid #FAC775', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>⬇️</span>
+            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>⬇</span>
             <h3 style={{ color: '#FAC775', fontSize: '16px', margin: '0 0 8px' }}>Revoke Premium Access?</h3>
             <p style={{ color: '#6ee7b7', fontSize: '13px', marginBottom: '20px' }}>
               <strong style={{ color: '#f59e0b' }}>"{showRevokePremium.full_name || 'User'}"</strong> will be moved back to the Free plan.

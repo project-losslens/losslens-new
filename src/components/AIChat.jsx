@@ -35,7 +35,7 @@ function getProactiveQuestions(userContext) {
 
   const questions = {
     morning: [
-      "Good morning! Ready to start the day strong? 💪",
+      "Good morning! Ready to start the day strong? ",
       "How did you sleep? A fresh day means fresh choices.",
       "Morning check-in: What's your intention for today?",
     ],
@@ -45,12 +45,12 @@ function getProactiveQuestions(userContext) {
       "Afternoons can be tough. What's keeping you busy?",
     ],
     evening: [
-      "Evening check-in: How was your day? Any wins to celebrate? 🌟",
+      "Evening check-in: How was your day? Any wins to celebrate? ",
       "Nighttime can bring urges. Want to talk about it?",
       "Before bed — what went well today?",
     ],
     weekend: [
-      "Weekends can be challenging. How are you holding up? 💚",
+      "Weekends can be challenging. How are you holding up? ",
       "Lots of matches today. Want to talk through any urges?",
     ],
   };
@@ -67,12 +67,12 @@ function getProactiveQuestions(userContext) {
   if (userContext) {
     const { profile } = userContext;
     if (profile?.streak_days >= 7) {
-      timeQuestions.push(`🎉 ${profile.streak_days} days gamble-free! How does that feel?`);
+      timeQuestions.push(` ${profile.streak_days} days gamble-free! How does that feel?`);
     } else if (profile?.streak_days >= 3) {
       timeQuestions.push(`Day ${profile.streak_days} of your streak — you're building momentum!`);
     }
     if (profile?.money_saved >= 1000) {
-      timeQuestions.push(`KES ${profile.money_saved.toLocaleString()} saved so far! What are you saving for? 💰`);
+      timeQuestions.push(`KES ${profile.money_saved.toLocaleString()} saved so far! What are you saving for? `);
     }
   }
 
@@ -88,7 +88,7 @@ function AIChat({ profile }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: `Hi ${firstName}! 👋 I'm Oloo, your support companion. How are you feeling today?`,
+      content: `Hi ${firstName}!  I'm Oloo, your support companion. How are you feeling today?`,
     }
   ]);
   const [input, setInput] = useState('');
@@ -151,7 +151,7 @@ function AIChat({ profile }) {
       if (profileData?.streak_days >= 7) {
         setMessages([{
           role: 'assistant',
-          content: `Hi ${firstName}! 👋 Welcome back! 🎉 ${profileData.streak_days} days gamble-free — that's amazing! How are you feeling today?`,
+          content: `Hi ${firstName}!  Welcome back!  ${profileData.streak_days} days gamble-free — that's amazing! How are you feeling today?`,
         }]);
       }
     } catch (error) {
@@ -315,7 +315,7 @@ function AIChat({ profile }) {
       setOlooEmotion('neutral');
       setMessages([...updatedMessages, {
         role: 'assistant',
-        content: "I'm having trouble responding right now. Please try again. 💚",
+        content: "I'm having trouble responding right now. Please try again. ",
       }]);
     } finally {
       setLoading(false);
@@ -461,9 +461,9 @@ function AIChat({ profile }) {
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {userContext?.profile && (
               <div style={{ background: '#0a3d22', borderRadius: '12px', padding: '12px', marginBottom: '4px', display: 'flex', gap: '16px', fontSize: '12px', color: '#6ee7b7', flexWrap: 'wrap' }}>
-                {userContext.profile.streak_days > 0 && <span>🔥 {userContext.profile.streak_days} days clean</span>}
-                {userContext.profile.money_saved > 0 && <span>💰 KES {userContext.profile.money_saved.toLocaleString()} saved</span>}
-                {userContext.cbtCompleted > 0 && <span>📚 {userContext.cbtCompleted} modules done</span>}
+                {userContext.profile.streak_days > 0 && <span> {userContext.profile.streak_days} days clean</span>}
+                {userContext.profile.money_saved > 0 && <span> KES {userContext.profile.money_saved.toLocaleString()} saved</span>}
+                {userContext.cbtCompleted > 0 && <span> {userContext.cbtCompleted} modules done</span>}
               </div>
             )}
 
@@ -481,7 +481,7 @@ function AIChat({ profile }) {
                     {speakingId === msg.id ? (
                       <button onClick={stopSpeaking} style={{ background: 'transparent', border: 'none', color: '#F09595', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>⏹ Stop</button>
                     ) : (
-                      <button onClick={() => speakText(msg.content, msg.id)} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>🔊 Listen</button>
+                      <button onClick={() => speakText(msg.content, msg.id)} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Listen</button>
                     )}
                   </div>
                 )}
@@ -521,7 +521,7 @@ function AIChat({ profile }) {
                   fontSize: '14px', cursor: 'pointer', flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
-              >🔊</button>
+              ></button>
             )}
 
             <input
@@ -534,7 +534,7 @@ function AIChat({ profile }) {
                   sendMessage();
                 }
               }}
-              placeholder={isListening ? '🎤 Listening...' : 'Talk to Oloo...'}
+              placeholder={isListening ? ' Listening...' : 'Talk to Oloo...'}
               style={{
                 flex: 1, background: '#062616', border: `1px solid ${isListening ? '#F09595' : '#0a3d22'}`,
                 borderRadius: '100px', padding: '10px 16px', color: '#fff', fontSize: '13px',
@@ -558,7 +558,7 @@ function AIChat({ profile }) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   animation: isListening ? 'pulse 1.5s infinite' : 'none',
                 }}
-              >{isListening ? '⏹' : '🎤'}</button>
+              >{isListening ? '⏹' : ''}</button>
             )}
 
             <button

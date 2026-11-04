@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import SuperAdminSidebar from '../../components/SuperAdminSidebar'
 
-// ✅ Constants
+//  Constants
 const LOG_LIMIT = 300
 const TABLES = ['all', 'profiles', 'diary_entries', 'events', 'crisis_alerts', 'broadcasts', 'resources', 'groups']
 const ACTIONS = ['all', 'INSERT', 'UPDATE', 'DELETE']
@@ -12,7 +12,7 @@ const ACTIONS = ['all', 'INSERT', 'UPDATE', 'DELETE']
 const fmtDateTime = (d) => d ? new Date(d).toLocaleString('en-KE') : '—'
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-KE') : '—'
 
-// ✅ Proper CSV escaping
+//  Proper CSV escaping
 function escapeCSV(value) {
   if (value === null || value === undefined) return ''
   const str = String(value)
@@ -61,7 +61,7 @@ export default function AuditLogs() {
     try {
       let query = supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(LOG_LIMIT)
       
-      // ✅ Server-side filters
+      //  Server-side filters
       if (filter !== 'all') query = query.eq('table_name', filter)
       if (actionFilter !== 'all') query = query.eq('action', actionFilter)
       
@@ -88,7 +88,7 @@ export default function AuditLogs() {
 
   useEffect(() => { fetchLogs() }, [fetchLogs])
 
-  // ✅ Real-time subscription
+  //  Real-time subscription
   useEffect(() => {
     const channel = supabase.channel('audit_logs_live')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'audit_logs' }, (payload) => {
@@ -118,7 +118,7 @@ export default function AuditLogs() {
     }
   }
 
-  // ✅ Client-side search (after server filters)
+  //  Client-side search (after server filters)
   const filteredLogs = useMemo(() => {
     if (!search) return logs
     const q = search.toLowerCase()
@@ -184,19 +184,19 @@ export default function AuditLogs() {
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#041f13', borderBottom: '2px solid #f59e0b', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#f59e0b', fontFamily: "'Inter', sans-serif", margin: 0 }}>📋 Audit Logs</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#f59e0b', fontFamily: "'Inter', sans-serif", margin: 0 }}> Audit Logs</h1>
             <p style={{ fontSize: '12px', color: '#FAC775', margin: '2px 0 0' }}>{logs.length} events · Live monitoring</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={handleExport} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #6ee7b7', color: '#6ee7b7', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>📥 Export CSV</button>
-            <button onClick={fetchLogs} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #FAC775', color: '#FAC775', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>🔄 Refresh</button>
+            <button onClick={handleExport} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #6ee7b7', color: '#6ee7b7', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Export CSV</button>
+            <button onClick={fetchLogs} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #FAC775', color: '#FAC775', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
           </div>
         </nav>
 
         <div style={{ padding: '1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
           {/* Filters */}
           <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <input type="text" placeholder="🔍 Search logs..." value={search} onChange={e => setSearch(e.target.value)}
+            <input type="text" placeholder=" Search logs..." value={search} onChange={e => setSearch(e.target.value)}
               style={{ flex: 1, minWidth: '200px', maxWidth: '280px', padding: '8px 14px', borderRadius: '100px', background: '#062616', border: '1px solid #0a3d22', color: '#fff', fontSize: '12px', outline: 'none', fontFamily: "'Inter', sans-serif" }} />
             
             {/* Date Range */}
@@ -209,7 +209,7 @@ export default function AuditLogs() {
             </select>
 
             <button onClick={toggleExpandAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #0a3d22', color: '#6ee7b7', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>
-              {expandedAll ? '📂 Collapse all' : '📂 Expand all'}
+              {expandedAll ? ' Collapse all' : ' Expand all'}
             </button>
           </div>
 
@@ -237,7 +237,7 @@ export default function AuditLogs() {
           {/* Log list */}
           {filteredLogs.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a', background: '#062616', borderRadius: '12px', border: '1px solid #0a3d22' }}>
-              <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>📋</span>
+              <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
               <p style={{ color: '#6ee7b7', fontSize: '14px' }}>No logs found.</p>
             </div>
           ) : (
@@ -262,10 +262,10 @@ export default function AuditLogs() {
                     </div>
                     {isExpanded && (
                       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', paddingTop: '8px', borderTop: '1px solid #0a3d22' }}>
-                        {log.performed_by && <span style={{ color: '#6ee7b7', fontSize: '11px' }}>👤 {log.performed_by}</span>}
+                        {log.performed_by && <span style={{ color: '#6ee7b7', fontSize: '11px' }}> {log.performed_by}</span>}
                         {log.metadata && (
                           <div style={{ flex: 1, minWidth: '200px' }}>
-                            <span style={{ color: '#3b7a5a', fontSize: '11px', fontWeight: 500 }}>📄 Metadata:</span>
+                            <span style={{ color: '#3b7a5a', fontSize: '11px', fontWeight: 500 }}> Metadata:</span>
                             <pre style={{ color: '#9fe1cb', fontSize: '11px', margin: '4px 0 0', whiteSpace: 'pre-wrap', wordBreak: 'break-all', background: '#041f13', padding: '8px 10px', borderRadius: '6px', maxHeight: '200px', overflowY: 'auto' }}>
                               {JSON.stringify(log.metadata, null, 2)}
                             </pre>

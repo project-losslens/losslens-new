@@ -51,3 +51,132 @@ button, a, input, select, textarea {
   background: #f59e0b;
   color: #041f13;
 }
+
+/* LossLens design tokens derived from the official logo */
+:root {
+  --ll-primary: #20c9d4;
+  --ll-primary-strong: #0ea5b3;
+  --ll-primary-soft: #b8f3f4;
+  --ll-secondary: #56d6a8;
+  --ll-accent: #f59e0b;
+  --ll-background: #050913;
+  --ll-background-elevated: #0a1020;
+  --ll-surface: #101827;
+  --ll-surface-raised: #172235;
+  --ll-text: #f7fbfc;
+  --ll-text-secondary: #c9d4dc;
+  --ll-text-muted: #8fa1af;
+  --ll-border: #26384a;
+  --ll-success: #56d6a8;
+  --ll-warning: #f7b955;
+  --ll-error: #f09595;
+  --ll-info: #20c9d4;
+  --ll-focus: #73e7ed;
+  --ll-radius-sm: 8px;
+  --ll-radius-md: 12px;
+  --ll-radius-lg: 18px;
+  --ll-shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.18);
+  --ll-shadow-md: 0 14px 38px rgba(0, 0, 0, 0.28);
+}
+
+body,
+.root {
+  background: var(--ll-background) !important;
+  color: var(--ll-text);
+}
+
+.navbar,
+.sidebar {
+  background: rgba(10, 16, 32, 0.96) !important;
+  border-color: var(--ll-border) !important;
+  backdrop-filter: blur(18px);
+}
+
+.main-content {
+  background: var(--ll-background);
+}
+
+.card,
+.auth-card,
+.cta-block {
+  background: var(--ll-surface) !important;
+  border-color: var(--ll-border) !important;
+  border-radius: var(--ll-radius-md) !important;
+  box-shadow: var(--ll-shadow-sm);
+}
+
+.btn-primary,
+.nav-btn {
+  background: var(--ll-primary) !important;
+  color: #042027 !important;
+  border-radius: var(--ll-radius-sm) !important;
+  box-shadow: 0 6px 18px rgba(32, 201, 212, 0.18);
+}
+
+.btn-primary:hover,
+.nav-btn:hover {
+  background: var(--ll-primary-soft) !important;
+}
+
+.btn-ghost,
+.nav-ghost {
+  border-color: var(--ll-border) !important;
+  color: var(--ll-primary-soft) !important;
+  border-radius: var(--ll-radius-sm) !important;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select,
+input,
+textarea,
+select {
+  border-color: var(--ll-border) !important;
+  border-radius: var(--ll-radius-sm) !important;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgba(115, 231, 237, 0.72) !important;
+  outline-offset: 2px;
+}
+
+.logo,
+.auth-title,
+h1,
+h2 {
+  color: var(--ll-text) !important;
+}
+
+.logo {
+  font-family: 'Inter', sans-serif !important;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+}
+
+.mobile-hamburger,
+.desktop-toggle {
+  min-width: 44px;
+  min-height: 44px;
+  background: var(--ll-surface-raised) !important;
+  border: 1px solid var(--ll-border) !important;
+  color: var(--ll-primary) !important;
+}
+
+.sidebar-overlay {
+  backdrop-filter: blur(2px);
+  background: rgba(5, 9, 19, 0.72) !important;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0.85rem 1rem !important;
+  }
+
+  .auth-card {
+    padding: 1.5rem !important;
+  }
+}

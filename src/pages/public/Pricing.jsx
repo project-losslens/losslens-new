@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import '../../styles/globals.css'
 
 const FAQS = [
-  { q: 'Is Precious really free?', a: 'Yes — forever. The Free plan includes all core features: diary, CBT modules, AI companion Oloo, The Circle community, and more. No credit card needed.' },
-  { q: 'What does Premium add?', a: 'Premium unlocks advanced features like detailed analytics, priority AI responses, extended video storage, and more. You also directly support keeping Precious free for everyone.' },
+  { q: 'Is LossLens really free?', a: 'Yes — forever. The Free plan includes all core features: diary, CBT modules, AI companion Oloo, The Circle community, and more. No credit card needed.' },
+  { q: 'What does Premium add?', a: 'Premium unlocks advanced features like detailed analytics, priority AI responses, extended video storage, and more. You also directly support keeping LossLens free for everyone.' },
   { q: 'Can I switch plans?', a: 'Absolutely. Upgrade or downgrade anytime. If you downgrade, you keep access to Premium features until the end of your billing period.' },
   { q: 'How do I pay?', a: 'Premium subscriptions are processed securely via M-Pesa. We never store your payment details — all transactions are handled by our payment partner.' },
   { q: 'Is my data private?', a: 'Completely. Your diary, mood logs, and conversations are encrypted. You can delete everything anytime with one click. We never sell your data.' },
-  { q: 'What is the Company plan?', a: 'For organizations that want to offer Precious to their employees. Includes subsidized pricing, admin dashboard for the company, usage reports, and dedicated support. Ask your employer if they offer Precious.' },
+  { q: 'What is the Company plan?', a: 'For organizations that want to offer LossLens to their employees. Includes subsidized pricing, admin dashboard for the company, usage reports, and dedicated support. Ask your employer if they offer LossLens.' },
 ]
 
 export default function Pricing() {
@@ -41,18 +41,18 @@ export default function Pricing() {
       period: 'forever',
       desc: 'Full access to all core recovery tools — no catch, no credit card.',
       features: [
-        '📓 Daily Gambling Diary',
-        '🧠 8 CBT Modules',
-        '🤖 AI Companion Oloo',
-        '💬 The Circle community',
-        '🤝 Whispers peer matching',
-        '📅 Events & RSVPs',
-        '📞 Resource Directory',
-        '👨‍👩‍👧 Family Portal (1 supporter)',
-        '🪞 Monthly Mirror (3 videos)',
-        '🤝 Precious Pact (3 recordings)',
-        '📄 Recovery Report',
-        '🛠️ Urge Toolkit',
+        ' Daily Gambling Diary',
+        ' 8 CBT Modules',
+        ' AI Companion Oloo',
+        ' The Circle community',
+        ' Whispers peer matching',
+        ' Events & RSVPs',
+        ' Resource Directory',
+        ' Family Portal (1 supporter)',
+        ' Monthly Mirror (3 videos)',
+        ' LossLens Pact (3 recordings)',
+        ' Recovery Report',
+        ' Urge Toolkit',
       ],
       cta: 'Get started free',
       featured: false,
@@ -63,17 +63,17 @@ export default function Pricing() {
       badge: 'Most Popular',
       price: 'KES 499',
       period: '/month',
-      desc: 'Advanced features for committed recovery — and you support keeping Precious free for everyone.',
+      desc: 'Advanced features for committed recovery — and you support keeping LossLens free for everyone.',
       features: [
-        '✅ Everything in Free',
-        '📊 Advanced Analytics & Insights',
-        '⚡ Priority AI Responses',
-        '🎥 Unlimited Monthly Mirror videos',
-        '🎤 Unlimited Precious Pact recordings',
-        '👨‍👩‍👧 Up to 5 supporters',
-        '📈 Detailed Progress Reports',
-        '🔔 Custom Reminders & Alerts',
-        '🎯 Personalized Goal Tracking',
+        ' Everything in Free',
+        ' Advanced Analytics & Insights',
+        ' Priority AI Responses',
+        ' Unlimited Monthly Mirror videos',
+        ' Unlimited LossLens Pact recordings',
+        ' Up to 5 supporters',
+        ' Detailed Progress Reports',
+        ' Custom Reminders & Alerts',
+        ' Personalized Goal Tracking',
       ],
       cta: 'Start 7-day free trial',
       featured: true,
@@ -88,14 +88,14 @@ export default function Pricing() {
     period: '/employee/month',
     desc: 'Your employer covers part of the cost. You get Premium features at a fraction of the price.',
     features: [
-      '✅ Everything in Premium',
-      '🏢 Paid by your employer',
-      '💰 Save 60% vs individual Premium',
-      '🛡️ Company admin dashboard',
-      '📊 Anonymous usage reports',
-      '👥 Team progress insights',
-      '📧 Priority support',
-      '🔒 Your data stays private from employer',
+      ' Everything in Premium',
+      ' Paid by your employer',
+      ' Save 60% vs individual Premium',
+      ' Company admin dashboard',
+      ' Anonymous usage reports',
+      ' Team progress insights',
+      ' Priority support',
+      ' Your data stays private from employer',
     ],
     cta: 'Join with company code',
     featured: true,
@@ -105,7 +105,7 @@ export default function Pricing() {
     <div className="root">
       {/* Nav */}
       <nav className="navbar">
-        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>Precious</span>
+        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
         <div className="nav-links" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <button className="nav-ghost" onClick={() => navigate('/login')}>Log in</button>
           <button className="nav-btn" onClick={() => navigate('/signup')}>Sign up free</button>
@@ -125,8 +125,8 @@ export default function Pricing() {
           </h1>
           <p className="sub" style={{ maxWidth: '520px', margin: '0 auto 1.5rem' }}>
             {planType === 'individual'
-              ? 'Every feature you need to recover is free. Premium helps you go deeper — and supports keeping Precious accessible to everyone in Kenya.'
-              : 'If your company offers Precious, you get all Premium features at a subsidized rate. Your personal data stays private.'}
+              ? 'Every feature you need to recover is free. Premium helps you go deeper — and supports keeping LossLens accessible to everyone in Kenya.'
+              : 'If your company offers LossLens, you get all Premium features at a subsidized rate. Your personal data stays private.'}
           </p>
 
           {/* Plan Type Toggle */}
@@ -140,7 +140,7 @@ export default function Pricing() {
                 fontSize: '13px', fontWeight: planType === 'individual' ? 600 : 400,
                 cursor: 'pointer', fontFamily: "'Inter', sans-serif", transition: 'all 0.2s'
               }}>
-              👤 Individual
+               Individual
             </button>
             <button
               onClick={() => setPlanType('company')}
@@ -151,7 +151,7 @@ export default function Pricing() {
                 fontSize: '13px', fontWeight: planType === 'company' ? 600 : 400,
                 cursor: 'pointer', fontFamily: "'Inter', sans-serif", transition: 'all 0.2s'
               }}>
-              🏢 Company
+               Company
             </button>
           </div>
         </div>
@@ -267,7 +267,7 @@ export default function Pricing() {
 
               <div style={{ background: '#0a3d22', borderRadius: '8px', padding: '10px 14px', marginBottom: '1rem', border: '1px solid #f59e0b33' }}>
                 <p style={{ color: '#6ee7b7', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>
-                  💡 <strong style={{ color: '#f59e0b' }}>How it works:</strong> Your employer gives you a company code. Enter it during signup to unlock the subsidized rate.
+                   <strong style={{ color: '#f59e0b' }}>How it works:</strong> Your employer gives you a company code. Enter it during signup to unlock the subsidized rate.
                 </p>
               </div>
 
@@ -317,10 +317,10 @@ export default function Pricing() {
           <p style={{ color: '#3b7a5a', fontSize: '12px', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Built with trust & transparency</p>
           <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', flexWrap: 'wrap' }}>
             {[
-              { icon: '🔒', label: 'End-to-end encrypted' },
+              { icon: '', label: 'End-to-end encrypted' },
               { icon: '🇰🇪', label: 'Kenya-based & compliant' },
-              { icon: '🗑️', label: 'Delete data anytime' },
-              { icon: '💚', label: 'Free forever for individuals' },
+              { icon: 'ï¸', label: 'Delete data anytime' },
+              { icon: '', label: 'Free forever for individuals' },
             ].map((t, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6ee7b7', fontSize: '12px' }}>
                 <span aria-hidden="true">{t.icon}</span>
@@ -334,7 +334,7 @@ export default function Pricing() {
       {/* Footer */}
       <footer className="footer" style={{ flexDirection: 'column', gap: '12px', textAlign: 'center', borderTop: '1px solid #0a3d22', padding: '1.5rem 2rem' }}>
         <div>
-          <p>Precious · Gambling Harm Reduction · Kenya · 2026</p>
+          <p>LossLens · Gambling Harm Reduction · Kenya · 2026</p>
           <p style={{ fontSize: '11px', marginTop: '4px' }}>
             <a href="mailto:projectkingsly@gmail.com" style={{ color: '#3b7a5a', textDecoration: 'none' }}>projectkingsly@gmail.com</a>
           </p>

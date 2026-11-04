@@ -143,7 +143,7 @@ export default function SubscriptionPage() {
       setCompanyInfo({ company_name: client.company_name, plan: client.plan, company_code: companyCode.toUpperCase().trim() })
       setShowJoinCompany(false)
       setCompanyCode('')
-      showToast(`✅ Joined ${client.company_name}! You now have company-subsidized access.`)
+      showToast(` Joined ${client.company_name}! You now have company-subsidized access.`)
     } catch (err) {
       setJoinError('Failed to join. Try again.')
     }
@@ -169,8 +169,8 @@ export default function SubscriptionPage() {
   return (
     <div className="root">
       <nav className="navbar">
-        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>Precious</span>
-        <button className="nav-ghost" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">← Dashboard</button>
+        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>LossLens</span>
+        <button className="nav-ghost" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">â† Dashboard</button>
       </nav>
 
       <div className="dashboard" style={{ padding: '2rem 1.5rem', maxWidth: '600px', margin: '0 auto' }}>
@@ -189,8 +189,8 @@ export default function SubscriptionPage() {
             {isCompanyPlan
               ? `You're covered by ${companyInfo?.company_name || 'your employer'}. All Premium features are included.`
               : currentPlan === PLANS.FREE 
-                ? 'Unlock advanced features and support keeping Precious free for everyone.'
-                : 'Thank you for supporting Precious! Here\'s what you have access to.'}
+                ? 'Unlock advanced features and support keeping LossLens free for everyone.'
+                : 'Thank you for supporting LossLens! Here\'s what you have access to.'}
           </p>
         </div>
 
@@ -204,13 +204,13 @@ export default function SubscriptionPage() {
             marginBottom: '1.5rem',
             textAlign: 'center'
           }}>
-            <span style={{ fontSize: '32px', display: 'block', marginBottom: '8px' }}>🏢</span>
+            <span style={{ fontSize: '32px', display: 'block', marginBottom: '8px' }}></span>
             <h3 style={{ color: '#f59e0b', fontSize: '16px', margin: '0 0 4px' }}>{companyInfo.company_name}</h3>
             <p style={{ color: '#6ee7b7', fontSize: '12px', margin: 0 }}>
               {companyInfo.plan?.charAt(0).toUpperCase() + companyInfo.plan?.slice(1)} Plan · Subsidized Access
             </p>
             <p style={{ color: '#3b7a5a', fontSize: '11px', marginTop: '8px' }}>
-              💡 Your employer covers most of the cost. You get all Premium features while your personal data stays private.
+               Your employer covers most of the cost. You get all Premium features while your personal data stays private.
             </p>
           </div>
         )}
@@ -223,7 +223,7 @@ export default function SubscriptionPage() {
               borderRadius: '14px', padding: '1.5rem', textAlign: 'center',
               opacity: currentPlan === PLANS.PREMIUM ? 0.6 : 1,
             }}>
-              <span style={{ fontSize: '28px', display: 'block', marginBottom: '8px' }}>💚</span>
+              <span style={{ fontSize: '28px', display: 'block', marginBottom: '8px' }}></span>
               <h3 style={{ color: '#e2f5ec', fontSize: '15px', marginBottom: '4px' }}>Free</h3>
               <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#f59e0b', margin: '0 0 4px' }}>KES 0</p>
               <p style={{ color: '#3b7a5a', fontSize: '11px' }}>Forever</p>
@@ -239,7 +239,7 @@ export default function SubscriptionPage() {
               position: 'relative',
             }}>
               <span style={{ position: 'absolute', top: '-10px', right: '16px', background: '#f59e0b', color: '#041f13', fontSize: '10px', fontWeight: 600, padding: '3px 10px', borderRadius: '100px' }}>Premium</span>
-              <span style={{ fontSize: '28px', display: 'block', marginBottom: '8px' }}>💎</span>
+              <span style={{ fontSize: '28px', display: 'block', marginBottom: '8px' }}></span>
               <h3 style={{ color: '#e2f5ec', fontSize: '15px', marginBottom: '4px' }}>Premium</h3>
               <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#f59e0b', margin: '0 0 4px' }}>KES 499</p>
               <p style={{ color: '#3b7a5a', fontSize: '11px' }}>/month</p>
@@ -253,21 +253,21 @@ export default function SubscriptionPage() {
         {/* Premium Features */}
         <div className="dash-section" style={{ marginBottom: '1.5rem', borderColor: '#f59e0b' }}>
           <h3 style={{ color: '#f59e0b', fontSize: '14px', marginBottom: '1rem' }}>
-            {isCompanyPlan ? '✨ Your Company Plan Includes:' : '✨ Premium Includes Everything in Free, Plus:'}
+            {isCompanyPlan ? ' Your Company Plan Includes:' : ' Premium Includes Everything in Free, Plus:'}
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {[
-              { emoji: '📊', text: 'Advanced Analytics & Insights' },
-              { emoji: '⚡', text: 'Priority AI Responses from Oloo' },
-              { emoji: '🎥', text: 'Unlimited Monthly Mirror Videos' },
-              { emoji: '🎤', text: 'Unlimited Precious Pact Recordings' },
-              { emoji: '👨‍👩‍👧', text: 'Up to 5 Family Supporters' },
-              { emoji: '📈', text: 'Detailed Progress Reports' },
-              { emoji: '🔔', text: 'Custom Reminders & Alerts' },
-              { emoji: '🎯', text: 'Personalized Goal Tracking' },
+              { emoji: '', text: 'Advanced Analytics & Insights' },
+              { emoji: '', text: 'Priority AI Responses from Oloo' },
+              { emoji: '', text: 'Unlimited Monthly Mirror Videos' },
+              { emoji: '', text: 'Unlimited LossLens Pact Recordings' },
+              { emoji: '', text: 'Up to 5 Family Supporters' },
+              { emoji: '', text: 'Detailed Progress Reports' },
+              { emoji: '', text: 'Custom Reminders & Alerts' },
+              { emoji: '', text: 'Personalized Goal Tracking' },
               ...(isCompanyPlan ? [
-                { emoji: '🏢', text: 'Subsidized by your employer' },
-                { emoji: '🔒', text: 'Your data stays private from employer' },
+                { emoji: '', text: 'Subsidized by your employer' },
+                { emoji: '', text: 'Your data stays private from employer' },
               ] : []),
             ].map((f, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#9fe1cb', fontSize: '13px' }}>
@@ -281,10 +281,10 @@ export default function SubscriptionPage() {
         {/* Join Company Section — only for individual users */}
         {!isCompanyPlan && (
           <div style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '14px', padding: '1.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>
-            <span style={{ fontSize: '24px', display: 'block', marginBottom: '8px' }}>🏢</span>
+            <span style={{ fontSize: '24px', display: 'block', marginBottom: '8px' }}></span>
             <h4 style={{ color: '#e2f5ec', fontSize: '14px', margin: '0 0 6px' }}>Have a company code?</h4>
             <p style={{ color: '#3b7a5a', fontSize: '12px', margin: '0 0 12px' }}>
-              If your employer offers Precious, enter your code for subsidized Premium access.
+              If your employer offers LossLens, enter your code for subsidized Premium access.
             </p>
             {!showJoinCompany ? (
               <button onClick={() => setShowJoinCompany(true)} style={{
@@ -339,13 +339,13 @@ export default function SubscriptionPage() {
             disabled={loading === PLANS.PREMIUM}
             style={{ padding: '14px', fontSize: '15px', marginBottom: '1rem' }}
           >
-            {loading === PLANS.PREMIUM ? <span className="spinner"></span> : '💎 Upgrade to Premium'}
+            {loading === PLANS.PREMIUM ? <span className="spinner"></span> : ' Upgrade to Premium'}
           </button>
         )}
 
         {interestRegistered && (
           <div style={{ textAlign: 'center', padding: '1rem', background: '#0a3d22', borderRadius: '12px', border: '1px solid #f59e0b', marginBottom: '1rem' }}>
-            <span style={{ fontSize: '24px', display: 'block', marginBottom: '8px' }}>✅</span>
+            <span style={{ fontSize: '24px', display: 'block', marginBottom: '8px' }}></span>
             <p style={{ color: '#6ee7b7', fontSize: '14px', fontWeight: 500, margin: 0 }}>Thanks for your interest!</p>
             <p style={{ color: '#3b7a5a', fontSize: '12px', marginTop: '4px' }}>We'll notify you when Premium launches.</p>
           </div>
@@ -353,13 +353,13 @@ export default function SubscriptionPage() {
 
         {/* FAQ */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1.5rem' }}>
-          <h3 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '4px' }}>💡 FAQ</h3>
+          <h3 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '4px' }}> FAQ</h3>
           {[
             { q: 'Can I switch back to Free?', a: 'Yes, anytime. You keep Premium access until the end of your billing period.' },
             { q: 'How do I pay?', a: 'Premium will use M-Pesa — Kenya\'s most trusted mobile payment. No credit card needed.' },
             { q: 'Is my data still private?', a: 'Absolutely. Premium doesn\'t change our privacy commitment. Your data is yours.' },
             ...(isCompanyPlan ? [{ q: 'Can my employer see my diary?', a: 'No. Your diary, messages, and personal data are completely private. Your employer only sees anonymized usage statistics — never your personal content.' }] : []),
-            { q: 'What if my company stops offering Precious?', a: 'Your account stays active. You can switch to an individual Free or Premium plan anytime.' },
+            { q: 'What if my company stops offering LossLens?', a: 'Your account stays active. You can switch to an individual Free or Premium plan anytime.' },
           ].map((faq, i) => (
             <div key={i} style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '10px', padding: '12px 14px' }}>
               <p style={{ color: '#e2f5ec', fontSize: '12px', fontWeight: 500, margin: '0 0 4px' }}>{faq.q}</p>
@@ -369,7 +369,7 @@ export default function SubscriptionPage() {
         </div>
 
         <p style={{ color: '#1d5c38', fontSize: '11px', textAlign: 'center' }}>
-          💚 Precious Premium launches soon. All features are free during testing.
+           LossLens Premium launches soon. All features are free during testing.
         </p>
       </div>
 
@@ -377,7 +377,7 @@ export default function SubscriptionPage() {
       {showComingSoon && (
         <div onClick={handleCloseComingSoon} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.92)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '2px solid #f59e0b', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>🚀</span>
+            <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
             <h3 style={{ color: '#f59e0b', fontSize: '18px', fontFamily: "'Playfair Display', serif", marginBottom: '12px' }}>Premium Coming Soon!</h3>
             <p style={{ color: '#6ee7b7', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
               M-Pesa payments are being set up. During testing, <strong style={{ color: '#f59e0b' }}>all features are free</strong>.
@@ -386,18 +386,18 @@ export default function SubscriptionPage() {
               We've noted your interest — you'll be the first to know when Premium launches!
             </p>
             <button onClick={handleCloseComingSoon} className="btn-primary full" style={{ padding: '12px', fontSize: '14px' }}>
-              Got it — keep exploring! 💚
+              Got it — keep exploring!
             </button>
           </div>
         </div>
       )}
 
       <nav className="bottom-nav">
-        <button onClick={() => navigate('/dashboard')} className="bottom-nav-item"><span>🏠</span><span>Home</span></button>
-        <button onClick={() => navigate('/diary')} className="bottom-nav-item"><span>📓</span><span>Diary</span></button>
-        <button onClick={() => navigate('/cbt')} className="bottom-nav-item"><span>🧠</span><span>Learn</span></button>
-        <button onClick={() => navigate('/urge-toolkit')} className="bottom-nav-item"><span>🛠️</span><span>Toolkit</span></button>
-        <button onClick={() => navigate('/profile')} className="bottom-nav-item"><span>👤</span><span>Profile</span></button>
+        <button onClick={() => navigate('/dashboard')} className="bottom-nav-item"><span></span><span>Home</span></button>
+        <button onClick={() => navigate('/diary')} className="bottom-nav-item"><span></span><span>Diary</span></button>
+        <button onClick={() => navigate('/cbt')} className="bottom-nav-item"><span></span><span>Learn</span></button>
+        <button onClick={() => navigate('/urge-toolkit')} className="bottom-nav-item"><span></span><span>Toolkit</span></button>
+        <button onClick={() => navigate('/profile')} className="bottom-nav-item"><span></span><span>Profile</span></button>
       </nav>
     </div>
   )

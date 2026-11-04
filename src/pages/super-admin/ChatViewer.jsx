@@ -213,7 +213,7 @@ function ChatViewer() {
 
             {!selectedUser ? (
               <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#3b7a5a' }}>
-                <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }} aria-hidden="true">💬</span>
+                <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }} aria-hidden="true"></span>
                 <p style={{ color: '#6ee7b7', fontSize: '14px' }}>Select a user to view their conversations</p>
                 <p style={{ fontSize: '12px' }}>All chats are read-only</p>
               </div>
@@ -251,7 +251,7 @@ function ChatViewer() {
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: '12px', flexShrink: 0,
                         }} aria-hidden="true">
-                          {msg.role === 'user' ? '👤' : '🤖'}
+                          {msg.role === 'user' ? '' : ''}
                         </div>
                         <div style={{ maxWidth: '80%' }}>
                           <div style={{

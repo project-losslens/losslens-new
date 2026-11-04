@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import AdminSidebar from '../../components/AdminSidebar'
 
-// ✅ Constants
+//  Constants
 const CATEGORIES = ['Helpline', 'App', 'Podcast', 'Self-exclusion', 'Financial', 'Mindfulness', 'Other']
 
 function showToast(message, duration = 3000) {
@@ -37,7 +37,7 @@ export default function ManageResources() {
     setTimeout(() => setToast(null), 3000)
   }, [])
 
-  // ✅ Debounce search
+  //  Debounce search
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 300)
     return () => clearTimeout(timer)
@@ -72,7 +72,7 @@ export default function ManageResources() {
     setShowForm(true)
   }
 
-  // ✅ Validate form
+  //  Validate form
   const validateForm = () => {
     const errors = {}
     if (!form.name.trim()) errors.name = 'Name is required'
@@ -100,7 +100,7 @@ export default function ManageResources() {
 
   const toggleActive = async (r) => {
     const newActive = !r.active
-    // ✅ Optimistic update
+    //  Optimistic update
     setResources(prev => prev.map(item => item.id === r.id ? { ...item, active: newActive } : item))
     const { error: toggleError } = await supabase.from('resources').update({ active: newActive }).eq('id', r.id)
     if (toggleError) {
@@ -125,7 +125,7 @@ export default function ManageResources() {
     setShowDeleteConfirm(null)
   }
 
-  // ✅ Memoized filtered resources
+  //  Memoized filtered resources
   const filtered = useMemo(() => resources.filter(r =>
     (filter === 'All' || r.category === filter) &&
     (r.name.toLowerCase().includes(debouncedSearch.toLowerCase()) || (r.description || '').toLowerCase().includes(debouncedSearch.toLowerCase()))
@@ -173,11 +173,11 @@ export default function ManageResources() {
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#041f13', borderBottom: '2px solid #791F1F', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#F09595', fontFamily: "'Inter', sans-serif", margin: 0 }}>📞 Manage Resources</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#F09595', fontFamily: "'Inter', sans-serif", margin: 0 }}> Manage Resources</h1>
             <p style={{ fontSize: '12px', color: '#791F1F', margin: '2px 0 0' }}>{resources.length} total · {activeCount} active</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #791F1F', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>🔄 Refresh</button>
+            <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #791F1F', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
             <button onClick={() => navigate('/admin')} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #791F1F', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>← Back</button>
           </div>
         </nav>
@@ -190,7 +190,7 @@ export default function ManageResources() {
         {showForm && (
           <div onClick={() => setShowForm(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.92)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '1px solid #0a3d22', maxWidth: '500px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
-              <h3 style={{ color: '#6ee7b7', fontSize: '16px', margin: '0 0 1.25rem' }}>{editing ? '✏️ Edit Resource' : '➕ Add Resource'}</h3>
+              <h3 style={{ color: '#6ee7b7', fontSize: '16px', margin: '0 0 1.25rem' }}>{editing ? ' Edit Resource' : ' Add Resource'}</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div>
                   <label style={{ color: '#3b7a5a', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Name *</label>
@@ -240,20 +240,20 @@ export default function ManageResources() {
           {/* Controls */}
           <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <div style={{ position: 'relative', flex: '0 0 auto' }}>
-              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Search resources..." style={{ ...inputStyle, width: '220px', paddingRight: '32px' }} />
-              {search && <button onClick={() => setSearch('')} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#3b7a5a', cursor: 'pointer', fontSize: '14px', padding: '4px 6px' }}>✕</button>}
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder=" Search resources..." style={{ ...inputStyle, width: '220px', paddingRight: '32px' }} />
+              {search && <button onClick={() => setSearch('')} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#3b7a5a', cursor: 'pointer', fontSize: '14px', padding: '4px 6px' }}></button>}
             </div>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', flex: 1 }}>
               {['All', ...CATEGORIES].map(c => (
                 <button key={c} onClick={() => setFilter(c)} style={{ padding: '6px 12px', borderRadius: '100px', border: `1px solid ${filter === c ? '#6ee7b7' : '#0a3d22'}`, background: filter === c ? '#0a3d22' : 'transparent', color: filter === c ? '#6ee7b7' : '#3b7a5a', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', transition: 'all 0.2s' }}>{c}</button>
               ))}
             </div>
-            <button onClick={openCreate} style={btnStyle('#6ee7b7', '#041f13', '#6ee7b7')}>➕ Add</button>
+            <button onClick={openCreate} style={btnStyle('#6ee7b7', '#041f13', '#6ee7b7')}> Add</button>
           </div>
 
           {filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a', background: '#062616', borderRadius: '12px', border: '1px solid #0a3d22' }}>
-              <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>📞</span>
+              <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
               <p style={{ color: '#6ee7b7', fontSize: '14px' }}>{debouncedSearch || filter !== 'All' ? 'No resources match your search.' : 'No resources yet.'}</p>
               {(debouncedSearch || filter !== 'All') && <button onClick={() => { setSearch(''); setFilter('All') }} style={{ marginTop: '10px', padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid #6ee7b7', color: '#6ee7b7', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Clear filters</button>}
             </div>
@@ -272,21 +272,21 @@ export default function ManageResources() {
                       </div>
                       {r.description && <p style={{ color: '#3b7a5a', fontSize: '12px', margin: '0 0 6px', lineHeight: '1.4' }}>{r.description}</p>}
                       <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
-                        {r.phone && <span style={{ color: '#6ee7b7', fontSize: '12px' }}>📞 {r.phone}</span>}
-                        {r.hours && <span style={{ color: '#3b7a5a', fontSize: '11px' }}>🕐 {r.hours}</span>}
+                        {r.phone && <span style={{ color: '#6ee7b7', fontSize: '12px' }}> {r.phone}</span>}
+                        {r.hours && <span style={{ color: '#3b7a5a', fontSize: '11px' }}> {r.hours}</span>}
                         {r.url && (
                           <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ color: '#FAC775', fontSize: '12px', textDecoration: 'none' }} title={r.url}>
-                            🔗 {r.url.length > 40 ? r.url.substring(0, 40) + '…' : r.url}
+                             {r.url.length > 40 ? r.url.substring(0, 40) + '…' : r.url}
                           </a>
                         )}
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
-                      <button onClick={() => openEdit(r)} style={btnStyle('transparent', '#FAC775', '#FAC775')} title="Edit">✏️</button>
+                      <button onClick={() => openEdit(r)} style={btnStyle('transparent', '#FAC775', '#FAC775')} title="Edit"></button>
                       <button onClick={() => toggleActive(r)} style={btnStyle('transparent', r.active ? '#FAC775' : '#6ee7b7', r.active ? '#FAC775' : '#6ee7b7')} title={r.active ? 'Hide from users' : 'Show to users'}>
-                        {r.active ? '👁 Hide' : '👁 Show'}
+                        {r.active ? ' Hide' : ' Show'}
                       </button>
-                      <button onClick={() => setShowDeleteConfirm(r)} style={btnStyle('transparent', '#F09595', '#791F1F')} title="Delete">🗑️</button>
+                      <button onClick={() => setShowDeleteConfirm(r)} style={btnStyle('transparent', '#F09595', '#791F1F')} title="Delete"></button>
                     </div>
                   </div>
                 </div>
@@ -300,7 +300,7 @@ export default function ManageResources() {
       {showDeleteConfirm && (
         <div onClick={() => setShowDeleteConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '1px solid #791F1F', maxWidth: '360px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>🗑️</span>
+            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}></span>
             <h3 style={{ color: '#F09595', fontSize: '16px', margin: '0 0 8px' }}>Delete Resource?</h3>
             <p style={{ color: '#6ee7b7', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
               Permanently delete <strong style={{ color: '#f59e0b' }}>"{showDeleteConfirm.name}"</strong>? This cannot be undone.

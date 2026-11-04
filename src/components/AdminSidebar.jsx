@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import AppIcon from './AppIcon'
 
 function AdminSidebar() {
   const navigate = useNavigate()
@@ -9,15 +10,15 @@ function AdminSidebar() {
   const [collapsed, setCollapsed] = useState(true)
 
   const menuItems = [
-    { path: '/admin', icon: '🛡️', label: 'Dashboard', desc: 'Admin overview' },
-    { path: '/admin/events', icon: '📅', label: 'Events', desc: 'Manage events' },
-    { path: '/admin/groups', icon: '👥', label: 'Groups', desc: 'Support groups' },
-    { path: '/admin/resources', icon: '📞', label: 'Resources', desc: 'Manage resources' },
-    { path: '/admin/analytics', icon: '📊', label: 'Analytics', desc: 'User data' },
-    { path: '/admin/broadcast', icon: '📢', label: 'Broadcast', desc: 'Send messages' },
-    { path: '/admin/crisis', icon: '🆘', label: 'Crisis Alerts', desc: 'Active alerts' },
-    { path: '/dashboard', icon: '🏠', label: 'User App', desc: 'Switch view' },
-    { path: '/logout', icon: '🚪', label: 'Logout', desc: 'Sign out' },
+    { path: '/admin', icon: 'shield', label: 'Dashboard', desc: 'Admin overview' },
+    { path: '/admin/events', icon: 'calendar', label: 'Events', desc: 'Manage events' },
+    { path: '/admin/groups', icon: 'users', label: 'Groups', desc: 'Support groups' },
+    { path: '/admin/resources', icon: 'resources', label: 'Resources', desc: 'Manage resources' },
+    { path: '/admin/analytics', icon: 'analytics', label: 'Analytics', desc: 'User data' },
+    { path: '/admin/broadcast', icon: 'broadcast', label: 'Broadcast', desc: 'Send messages' },
+    { path: '/admin/crisis', icon: 'alert', label: 'Crisis Alerts', desc: 'Active alerts' },
+    { path: '/dashboard', icon: 'home', label: 'User App', desc: 'Switch view' },
+    { path: '/logout', icon: 'logout', label: 'Logout', desc: 'Sign out' },
   ]
 
   const isActive = (path) => location.pathname === path
@@ -44,7 +45,7 @@ function AdminSidebar() {
           color: '#F09595',
         }}
       >
-        {mobileOpen ? '✕' : '☰'}
+        {mobileOpen ? '' : ''}
       </button>
 
       {mobileOpen && (
@@ -65,7 +66,7 @@ function AdminSidebar() {
           color: '#F09595',
         }}
       >
-        {collapsed ? '☰' : '◂'}
+        {collapsed ? '' : 'Collapse'}
       </button>
 
       <div
@@ -98,7 +99,7 @@ function AdminSidebar() {
             }}
             onClick={() => handleNav('/admin')}
           >
-            Precious <span style={{ fontSize: '12px', color: '#791F1F' }}>ADMIN</span>
+            LossLens <span style={{ fontSize: '12px', color: '#791F1F' }}>ADMIN</span>
           </span>
         </div>
 
@@ -145,7 +146,7 @@ function AdminSidebar() {
                   flexShrink: 0,
                 }}
               >
-                {item.icon}
+                <AppIcon name={item.icon} size={18} />
               </span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div

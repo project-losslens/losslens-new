@@ -18,7 +18,7 @@ function ResetPassword() {
   const [strength, setStrength] = useState(0)
   const [success, setSuccess] = useState(false)
 
-  // ✅ Verify token on mount
+  //  Verify token on mount
   useEffect(() => {
     const verifyToken = async () => {
       try {
@@ -40,7 +40,7 @@ function ResetPassword() {
     verifyToken()
   }, [])
 
-  // ✅ Cleanup timeout on unmount
+  //  Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (redirectTimer.current) clearTimeout(redirectTimer.current)
@@ -78,7 +78,7 @@ function ResetPassword() {
     setLoading(true)
     const { error: updateError } = await supabase.auth.updateUser({ password })
     if (updateError) {
-      // ✅ Use error code/status instead of brittle message.includes
+      //  Use error code/status instead of brittle message.includes
       if (updateError.status === 422 || updateError.code === 'same_password') {
         setError('New password must be different from your current password.')
       } else {
@@ -89,13 +89,13 @@ function ResetPassword() {
     }
     setSuccess(true)
     setLoading(false)
-    // ✅ Longer redirect delay, with cleanup
+    //  Longer redirect delay, with cleanup
     redirectTimer.current = setTimeout(() => navigate('/login', { replace: true }), 4000)
   }
 
   const canSubmit = password.length >= 8 && /[a-zA-Z]/.test(password) && /[0-9]/.test(password) && password === confirmPassword && !loading
 
-  // ✅ Token checking screen
+  //  Token checking screen
   if (checkingToken) {
     return (
       <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -104,12 +104,12 @@ function ResetPassword() {
     )
   }
 
-  // ✅ Invalid/expired token
+  //  Invalid/expired token
   if (!tokenValid) {
     return (
       <div className="root">
         <nav className="navbar">
-          <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>Precious</span>
+          <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
         </nav>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
@@ -123,16 +123,16 @@ function ResetPassword() {
     )
   }
 
-  // ✅ Success screen
+  //  Success screen
   if (success) {
     return (
       <div className="root">
         <nav className="navbar">
-          <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>Precious</span>
+          <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
         </nav>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} role="img" aria-label="Success">✅</span>
+            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} role="img" aria-label="Success"></span>
             <h2 className="auth-title">Password updated!</h2>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>Your password has been changed. You'll be redirected to the login page.</p>
             <button className="btn-primary full" onClick={() => { if (redirectTimer.current) clearTimeout(redirectTimer.current); navigate('/login') }}>Go to login now →</button>
@@ -146,8 +146,8 @@ function ResetPassword() {
   return (
     <div className="root">
       <nav className="navbar">
-        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>Precious</span>
-        <button className="nav-ghost" onClick={() => navigate('/login')}>← Log in</button>
+        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
+        <button className="nav-ghost" onClick={() => navigate('/login')}>â† Log in</button>
       </nav>
 
       <div className="auth-container">
@@ -178,7 +178,7 @@ function ResetPassword() {
                   aria-label={showPw ? 'Hide password' : 'Show password'}
                   style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#3b7a5a', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  {showPw ? '🙈' : '👁️'}
+                  {showPw ? '' : ''}
                 </button>
               </div>
               {password.length > 0 && (
@@ -210,11 +210,11 @@ function ResetPassword() {
                   aria-label={showConfirmPw ? 'Hide password' : 'Show password'}
                   style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#3b7a5a', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  {showConfirmPw ? '🙈' : '👁️'}
+                  {showConfirmPw ? '' : ''}
                 </button>
               </div>
               {confirmPassword && password !== confirmPassword && <span style={{ fontSize: '11px', color: '#F09595' }}>Passwords do not match</span>}
-              {confirmPassword && password === confirmPassword && <span style={{ fontSize: '11px', color: '#6ee7b7' }}>Passwords match ✅</span>}
+              {confirmPassword && password === confirmPassword && <span style={{ fontSize: '11px', color: '#6ee7b7' }}>Passwords match </span>}
             </div>
 
             {/* Password Requirements Checklist */}
@@ -222,7 +222,7 @@ function ResetPassword() {
               <p style={{ color: '#3b7a5a', fontSize: '11px', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Requirements</p>
               {requirements.map((req, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', fontSize: '12px', color: req.met ? '#6ee7b7' : '#3b7a5a' }}>
-                  <span style={{ fontSize: '12px', minWidth: '16px' }}>{req.met ? '✅' : '⚪'}</span>
+                  <span style={{ fontSize: '12px', minWidth: '16px' }}>{req.met ? '' : ''}</span>
                   <span>{req.text}</span>
                 </div>
               ))}

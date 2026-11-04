@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import Sidebar from '../../components/Sidebar'
 
-// ✅ Constants
+//  Constants
 const MAX_RECORDING_DURATION = 300 // 5 minutes
 const MAX_STORAGE_SIZE = 50 * 1024 * 1024 // 50MB limit for localStorage fallback
 const UPLOAD_RETRY_MAX = 3
@@ -66,13 +66,13 @@ export default function MonthlyMirrorPage() {
   ]
 
   const milestones = [
-    { type: '1', emoji: '🎬', text: 'Your journey starts here. You recorded your first reflection.' },
-    { type: '3', emoji: '🌟', text: '3 months of showing up for yourself.' },
-    { type: '6', emoji: '💪', text: 'Half a year of growth.' },
-    { type: '12', emoji: '🏆', text: 'A full year. You\'ve built something rare.' },
+    { type: '1', emoji: '', text: 'Your journey starts here. You recorded your first reflection.' },
+    { type: '3', emoji: '', text: '3 months of showing up for yourself.' },
+    { type: '6', emoji: '', text: 'Half a year of growth.' },
+    { type: '12', emoji: '', text: 'A full year. You\'ve built something rare.' },
   ]
 
-  // ✅ Cleanup all resources
+  //  Cleanup all resources
   const cleanup = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current)
     if (milestoneTimerRef.current) clearTimeout(milestoneTimerRef.current)
@@ -117,7 +117,7 @@ export default function MonthlyMirrorPage() {
     const uid = session.user.id
 
     try {
-      // ✅ Fetch only current month's recordings
+      //  Fetch only current month's recordings
       const { data: allData, count } = await supabase
         .from('mirror_recordings')
         .select('*')
@@ -172,7 +172,7 @@ export default function MonthlyMirrorPage() {
         milestoneTimerRef.current = setTimeout(() => { if (mountedRef.current) setMilestone(null) }, MILESTONE_DISPLAY_DURATION)
       }
 
-      // ✅ Auto-sync pending — but only once, with guard
+      //  Auto-sync pending — but only once, with guard
       if (localData.length > 0 && !syncInProgressRef.current) {
         syncInProgressRef.current = true
         await autoSyncPending(localData, localKey)
@@ -181,7 +181,7 @@ export default function MonthlyMirrorPage() {
     } catch (err) { console.error('Load recordings error:', err) }
   }
 
-  // ✅ Fixed autoSyncPending — no infinite loop
+  //  Fixed autoSyncPending — no infinite loop
   const autoSyncPending = async (localData, localKey) => {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session || !localData || localData.length === 0) return
@@ -217,7 +217,7 @@ export default function MonthlyMirrorPage() {
         if (success) {
           localData.splice(i, 1)
           changed = true
-          setSyncStatus(prev => ({ ...prev, [i]: 'Synced ✅' }))
+          setSyncStatus(prev => ({ ...prev, [i]: 'Synced ' }))
         }
       } catch (err) {
         setSyncStatus(prev => ({ ...prev, [i]: `Failed: ${err.message || 'Unknown error'}` }))
@@ -234,7 +234,7 @@ export default function MonthlyMirrorPage() {
     }
   }
 
-  // ✅ Guard against double-start
+  //  Guard against double-start
   const startRecording = async () => {
     if (streamRef.current || mediaRecorderRef.current?.state === 'recording') {
       showToast('Already recording')
@@ -245,7 +245,7 @@ export default function MonthlyMirrorPage() {
       streamRef.current = stream
       if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.muted = true; await videoRef.current.play() }
 
-      // ✅ Feature-detect mime type
+      //  Feature-detect mime type
       const mimeType = MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : 'video/mp4'
       const mediaRecorder = new MediaRecorder(stream, { mimeType })
       mediaRecorderRef.current = mediaRecorder
@@ -269,7 +269,7 @@ export default function MonthlyMirrorPage() {
         })
       }, 1000)
     } catch (err) {
-      showToast('⚠️ Camera/Microphone access denied.')
+      showToast(' Camera/Microphone access denied.')
       console.error('Recording start error:', err)
     }
   }
@@ -279,21 +279,21 @@ export default function MonthlyMirrorPage() {
 
     const blob = new Blob(chunksRef.current, { type: 'video/webm' })
 
-    // ✅ Size check before upload
+    //  Size check before upload
     if (blob.size > MAX_STORAGE_SIZE) {
-      showToast('⚠️ Video too large. Please record a shorter reflection (under 5 minutes).')
+      showToast(' Video too large. Please record a shorter reflection (under 5 minutes).')
       cleanup()
       setRecording(false)
       return
     }
 
-    // ✅ Enter review mode
+    //  Enter review mode
     setReviewBlob(blob)
     setReviewMode(true)
     setRecording(false)
   }
 
-  // ✅ User confirms save
+  //  User confirms save
   const confirmSave = async () => {
     if (!reviewBlob) return
     setReviewMode(false)
@@ -307,7 +307,7 @@ export default function MonthlyMirrorPage() {
     const fileName = `${session.user.id}/${activeMonth}/${Date.now()}.webm`
     setReviewBlob(null)
 
-    // ✅ Retry with exponential backoff
+    //  Retry with exponential backoff
     let retries = 0
     let error = null
     while (retries < UPLOAD_RETRY_MAX) {
@@ -319,7 +319,7 @@ export default function MonthlyMirrorPage() {
             user_id: session.user.id, month: activeMonth, storage_path: fileName,
             type: 'video', duration_seconds: recordingTime, prompt: prompts[currentPrompt]?.q || 'Reflection',
           })
-          showToast('✅ Reflection saved!')
+          showToast(' Reflection saved!')
           setUploading(false)
           setRecorded(true)
           setTimeout(() => setRecorded(false), 3000)
@@ -332,7 +332,7 @@ export default function MonthlyMirrorPage() {
       } catch (err) { error = err; retries++ }
     }
 
-    // ✅ Fallback to localStorage — but check size first
+    //  Fallback to localStorage — but check size first
     if (blob.size < MAX_STORAGE_SIZE) {
       try {
         const reader = new FileReader()
@@ -343,12 +343,12 @@ export default function MonthlyMirrorPage() {
             const saved = JSON.parse(localStorage.getItem(key) || '[]')
             saved.push({ url: reader.result, type: 'video', duration: recordingTime, date: new Date().toISOString() })
             localStorage.setItem(key, JSON.stringify(saved))
-            showToast('⚠️ Saved locally. Will sync later.')
-          } catch (err) { showToast('⚠️ Failed to save. Video may be too large.') }
+            showToast(' Saved locally. Will sync later.')
+          } catch (err) { showToast(' Failed to save. Video may be too large.') }
         }
-      } catch (err) { showToast('⚠️ Failed to save. Video may be too large.') }
+      } catch (err) { showToast(' Failed to save. Video may be too large.') }
     } else {
-      showToast('⚠️ Video too large to save locally. Please try again.')
+      showToast(' Video too large to save locally. Please try again.')
     }
 
     setUploading(false)
@@ -356,7 +356,7 @@ export default function MonthlyMirrorPage() {
     await loadAllRecordings()
   }
 
-  // ✅ User chooses retake
+  //  User chooses retake
   const handleRetake = () => {
     setReviewMode(false)
     setReviewBlob(null)
@@ -378,7 +378,7 @@ export default function MonthlyMirrorPage() {
       if (storagePath && storagePath !== 'pending') {
         await supabase.storage.from('mirror-recordings').remove([storagePath])
       }
-      // ✅ Verify ownership before delete
+      //  Verify ownership before delete
       const { data: { session } } = await supabase.auth.getSession()
       const query = supabase.from('mirror_recordings').delete().eq('id', recordingId)
       if (userRole !== 'admin' && userRole !== 'super_admin') {
@@ -411,7 +411,7 @@ export default function MonthlyMirrorPage() {
         localData.splice(localIndex, 1)
         if (localData.length === 0) localStorage.removeItem(localKey)
         else localStorage.setItem(localKey, JSON.stringify(localData))
-        showToast('✅ Synced!')
+        showToast(' Synced!')
         loadAllRecordings()
       } else { showToast('Sync failed. Try again.') }
     } catch (err) { showToast('Sync failed. Try again.') }
@@ -461,7 +461,7 @@ export default function MonthlyMirrorPage() {
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0, overflowX: 'hidden' }} className="main-content">
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: '#041f13', borderBottom: '1px solid #0a3d22', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}>🪞 Monthly Mirror</h1>
+            <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}> Monthly Mirror</h1>
             <p style={{ fontSize: '11px', color: '#3b7a5a', margin: '2px 0 0' }}>{syncedRecordings.length + pendingRecordings.length} recordings</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -475,7 +475,7 @@ export default function MonthlyMirrorPage() {
         {milestone && (
           <div style={{ background: '#0a3d22', border: '1px solid #3db88a', padding: '10px 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ color: '#6ee7b7', fontSize: '12px' }}>{milestone.emoji} {milestone.text}</span>
-            <button onClick={() => { setMilestone(null); if (milestoneTimerRef.current) clearTimeout(milestoneTimerRef.current) }} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '16px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Dismiss milestone">✕</button>
+            <button onClick={() => { setMilestone(null); if (milestoneTimerRef.current) clearTimeout(milestoneTimerRef.current) }} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '16px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Dismiss milestone"></button>
           </div>
         )}
 
@@ -484,14 +484,14 @@ export default function MonthlyMirrorPage() {
           {/* Review Mode */}
           {reviewMode && reviewBlob && (
             <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: '#f59e0b', textAlign: 'center' }}>
-              <h3 style={{ color: '#f59e0b', fontSize: '13px', marginBottom: '0.75rem' }}>👀 Review Your Recording</h3>
+              <h3 style={{ color: '#f59e0b', fontSize: '13px', marginBottom: '0.75rem' }}> Review Your Recording</h3>
               <div style={{ background: '#000', borderRadius: '10px', overflow: 'hidden', marginBottom: '0.75rem' }}>
                 <video ref={reviewVideoRef} src={URL.createObjectURL(reviewBlob)} controls style={{ width: '100%', maxHeight: '300px' }} />
               </div>
               <p style={{ color: '#3b7a5a', fontSize: '12px', marginBottom: '0.75rem' }}>Duration: {formatTime(recordingTime)}</p>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button onClick={handleRetake} className="btn-ghost" style={{ flex: 1, padding: '10px', fontSize: '13px' }}>🔄 Retake</button>
-                <button onClick={confirmSave} className="btn-primary" style={{ flex: 1, padding: '10px', fontSize: '13px' }}>💾 Save</button>
+                <button onClick={handleRetake} className="btn-ghost" style={{ flex: 1, padding: '10px', fontSize: '13px' }}> Retake</button>
+                <button onClick={confirmSave} className="btn-primary" style={{ flex: 1, padding: '10px', fontSize: '13px' }}> Save</button>
               </div>
             </div>
           )}
@@ -508,7 +508,7 @@ export default function MonthlyMirrorPage() {
 
           {/* Prompts */}
           <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-            <p style={{ color: '#f59e0b', fontSize: '11px', marginBottom: '10px', letterSpacing: '0.05em', fontWeight: 600 }}>💬 CHOOSE YOUR REFLECTION PROMPT</p>
+            <p style={{ color: '#f59e0b', fontSize: '11px', marginBottom: '10px', letterSpacing: '0.05em', fontWeight: 600 }}> CHOOSE YOUR REFLECTION PROMPT</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {prompts.map((p, i) => (
                 <button key={i} onClick={() => setCurrentPrompt(i)} role="radio" aria-checked={currentPrompt === i}
@@ -522,7 +522,7 @@ export default function MonthlyMirrorPage() {
                   </div>
                   {currentPrompt === i && (
                     <div style={{ marginTop: '10px', padding: '10px 12px', background: '#062616', borderRadius: '8px', border: '1px dashed #1d5c38' }}>
-                      <p style={{ color: '#3b7a5a', fontSize: '10px', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>💡 Example</p>
+                      <p style={{ color: '#3b7a5a', fontSize: '10px', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}> Example</p>
                       <p style={{ color: '#6ee7b7', fontSize: '11px', lineHeight: '1.5', fontStyle: 'italic', margin: 0 }}>{p.example}</p>
                     </div>
                   )}
@@ -534,20 +534,20 @@ export default function MonthlyMirrorPage() {
           {/* Record Section */}
           <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: (syncedRecordings.length + pendingRecordings.length) > 0 ? '#0a3d22' : '#f59e0b' }}>
             <h3 style={{ color: (syncedRecordings.length + pendingRecordings.length) > 0 ? '#3b7a5a' : '#f59e0b', fontSize: '13px', marginBottom: '0.75rem' }}>
-              {(syncedRecordings.length + pendingRecordings.length) > 0 ? '+ Add another reflection' : `🎥 Record your ${monthLabel} reflection`}
+              {(syncedRecordings.length + pendingRecordings.length) > 0 ? '+ Add another reflection' : ` Record your ${monthLabel} reflection`}
             </h3>
 
             {!recording && !reviewMode && !uploading && (
               <>
                 {(syncedRecordings.length + pendingRecordings.length) === 0 && (
                   <div style={{ background: '#000', borderRadius: '10px', minHeight: '180px', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '40px' }}>🎥</span>
+                    <span style={{ fontSize: '40px' }}></span>
                     <p style={{ color: '#6ee7b7', fontSize: '12px', marginTop: '6px' }}>Camera preview will appear here</p>
                     <p style={{ color: '#3b7a5a', fontSize: '10px', marginTop: '4px' }}>Record up to {Math.floor(MAX_RECORDING_DURATION / 60)} minutes</p>
                   </div>
                 )}
                 <button className="btn-primary full" onClick={startRecording} disabled={uploading} style={{ fontSize: '13px', padding: '10px' }}>
-                  {(syncedRecordings.length + pendingRecordings.length) > 0 ? '🎥 Record another video' : '🎥 Record video'}
+                  {(syncedRecordings.length + pendingRecordings.length) > 0 ? ' Record another video' : ' Record video'}
                 </button>
               </>
             )}
@@ -608,7 +608,7 @@ export default function MonthlyMirrorPage() {
           {/* Synced Recordings */}
           {syncedRecordings.length > 0 && (
             <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-              <h3 style={{ color: '#e2f5ec', fontSize: '12px', marginBottom: '0.75rem' }}>📼 Your recordings ({syncedRecordings.length})</h3>
+              <h3 style={{ color: '#e2f5ec', fontSize: '12px', marginBottom: '0.75rem' }}> Your recordings ({syncedRecordings.length})</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {syncedRecordings.map(r => (
                   <div key={r.id} style={{ background: '#041f13', border: '1px solid #0a3d22', borderRadius: '8px', overflow: 'hidden' }}>
@@ -622,14 +622,14 @@ export default function MonthlyMirrorPage() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ color: '#e2f5ec', fontSize: '11px', fontWeight: 500, margin: 0 }}>{new Date(r.created_at).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                          <span style={{ color: '#3db88a', fontSize: '9px', background: '#0a3d22', padding: '1px 6px', borderRadius: '100px' }}>✓ Synced</span>
+                          <span style={{ color: '#3db88a', fontSize: '9px', background: '#0a3d22', padding: '1px 6px', borderRadius: '100px' }}> Synced</span>
                           <span style={{ color: '#3b7a5a', fontSize: '10px' }}>{formatTime(r.duration_seconds)}</span>
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '3px', flexShrink: 0 }}>
                         <button onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)} style={{ background: expandedPlayer === r.id ? '#0a3d22' : 'transparent', border: '1px solid #0a3d22', color: '#6ee7b7', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label={expandedPlayer === r.id ? 'Collapse video' : 'Expand video'}>{expandedPlayer === r.id ? '▼' : '▶'}</button>
                         <button onClick={() => handleDownload(getPublicUrl(r.storage_path), `precious-${activeMonth}-reflection.webm`)} style={{ background: 'transparent', border: '1px solid #0a3d22', color: '#6ee7b7', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Download" aria-label="Download recording">⬇</button>
-                        <button onClick={() => handleDelete(r.id, r.storage_path)} style={{ background: 'transparent', border: '1px solid #3a1010', color: '#F09595', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Delete" aria-label="Delete recording">🗑</button>
+                        <button onClick={() => handleDelete(r.id, r.storage_path)} style={{ background: 'transparent', border: '1px solid #3a1010', color: '#F09595', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Delete" aria-label="Delete recording"></button>
                       </div>
                     </div>
                     {expandedPlayer === r.id && (
@@ -645,7 +645,7 @@ export default function MonthlyMirrorPage() {
 
           {/* Stats */}
           <div className="dash-section">
-            <h3 style={{ color: '#e2f5ec', fontSize: '12px', marginBottom: '0.5rem' }}>🎬 Your journey</h3>
+            <h3 style={{ color: '#e2f5ec', fontSize: '12px', marginBottom: '0.5rem' }}> Your journey</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: recordingsPerMonth.length > 0 ? '10px' : '0' }}>
               <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#041f13', border: '2px solid #3db88a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <span style={{ color: '#3db88a', fontSize: '18px', fontWeight: 700 }}>{totalRecordings}</span>
@@ -677,7 +677,7 @@ export default function MonthlyMirrorPage() {
           </div>
 
           <p style={{ color: '#1d5c38', fontSize: '10px', textAlign: 'center', fontStyle: 'italic', padding: '0.75rem 0 0' }}>
-            🪞 The mirror doesn't judge — it just shows how far you've come.
+             The mirror doesn't judge — it just shows how far you've come.
           </p>
         </div>
       </div>

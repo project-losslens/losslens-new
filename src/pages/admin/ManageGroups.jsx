@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import AdminSidebar from '../../components/AdminSidebar'
 
-// ✅ Constants
+//  Constants
 const SORT_OPTIONS = { NEWEST: 'newest', NAME: 'name', ACTIVE: 'active' }
 
 function showToast(message, duration = 3000) {
@@ -40,7 +40,7 @@ export default function ManageGroups() {
     setTimeout(() => setToast(null), 3000)
   }, [])
 
-  // ✅ Debounce search
+  //  Debounce search
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300)
     return () => clearTimeout(timer)
@@ -80,7 +80,7 @@ export default function ManageGroups() {
     setShowForm(true)
   }
 
-  // ✅ Validate form
+  //  Validate form
   const validateForm = () => {
     const errors = {}
     if (!form.name.trim()) errors.name = 'Group name is required'
@@ -110,7 +110,7 @@ export default function ManageGroups() {
 
   const toggleActive = async (g) => {
     const newActive = !g.active
-    // ✅ Optimistic update
+    //  Optimistic update
     setGroups(prev => prev.map(item => item.id === g.id ? { ...item, active: newActive } : item))
     const { error: toggleError } = await supabase.from('groups').update({ active: newActive }).eq('id', g.id)
     if (toggleError) {
@@ -134,7 +134,7 @@ export default function ManageGroups() {
     setShowDeleteConfirm(null)
   }
 
-  // ✅ Memoized filtered + sorted
+  //  Memoized filtered + sorted
   const { filteredGroups, activeCount } = useMemo(() => {
     let filtered = groups.filter(g =>
       !debouncedSearch ||
@@ -191,12 +191,12 @@ export default function ManageGroups() {
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#041f13', borderBottom: '2px solid #791F1F', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#F09595', fontFamily: "'Inter', sans-serif", margin: 0 }}>👥 Manage Groups</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#F09595', fontFamily: "'Inter', sans-serif", margin: 0 }}> Manage Groups</h1>
             <p style={{ fontSize: '12px', color: '#791F1F', margin: '2px 0 0' }}>{groups.length} total · {activeCount} active</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchGroups} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #791F1F', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }} aria-label="Refresh groups">🔄</button>
-            <button onClick={openCreate} style={{ padding: '8px 18px', borderRadius: '100px', background: '#f59e0b', border: 'none', color: '#041f13', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>➕ New Group</button>
+            <button onClick={fetchGroups} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #791F1F', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }} aria-label="Refresh groups"></button>
+            <button onClick={openCreate} style={{ padding: '8px 18px', borderRadius: '100px', background: '#f59e0b', border: 'none', color: '#041f13', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> New Group</button>
           </div>
         </nav>
 
@@ -208,7 +208,7 @@ export default function ManageGroups() {
         {showForm && (
           <div onClick={() => setShowForm(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.92)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '1px solid #0a3d22', maxWidth: '520px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
-              <h3 style={{ color: '#f59e0b', fontSize: '16px', margin: '0 0 1.25rem' }}>{editingGroup ? '✏️ Edit Group' : '➕ New Group'}</h3>
+              <h3 style={{ color: '#f59e0b', fontSize: '16px', margin: '0 0 1.25rem' }}>{editingGroup ? ' Edit Group' : ' New Group'}</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div>
                   <label style={{ color: '#3b7a5a', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Group Name *</label>
@@ -269,8 +269,8 @@ export default function ManageGroups() {
           {/* Controls */}
           <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <div style={{ position: 'relative', flex: '0 0 auto' }}>
-              <input type="text" placeholder="🔍 Search groups..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ ...inputStyle, width: '240px', paddingRight: '32px', borderRadius: '100px' }} />
-              {searchQuery && <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#3b7a5a', cursor: 'pointer', fontSize: '14px', padding: '4px 6px' }}>✕</button>}
+              <input type="text" placeholder=" Search groups..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ ...inputStyle, width: '240px', paddingRight: '32px', borderRadius: '100px' }} />
+              {searchQuery && <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#3b7a5a', cursor: 'pointer', fontSize: '14px', padding: '4px 6px' }}></button>}
             </div>
             <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{ ...inputStyle, width: 'auto', minWidth: '120px', cursor: 'pointer', borderRadius: '100px' }}>
               <option value={SORT_OPTIONS.NEWEST}>Newest</option>
@@ -281,7 +281,7 @@ export default function ManageGroups() {
 
           {filteredGroups.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a', background: '#062616', borderRadius: '12px', border: '1px solid #0a3d22' }}>
-              <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>👥</span>
+              <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
               <p style={{ color: '#6ee7b7', fontSize: '14px' }}>{debouncedSearch ? 'No groups match your search.' : 'No groups yet. Create your first support group.'}</p>
               {debouncedSearch && <button onClick={() => setSearchQuery('')} style={{ marginTop: '10px', padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid #6ee7b7', color: '#6ee7b7', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Clear search</button>}
             </div>
@@ -299,10 +299,10 @@ export default function ManageGroups() {
                         {g.category && <span style={{ background: '#041f13', color: '#FAC775', border: '1px solid #633806', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{g.category}</span>}
                       </div>
                       <p style={{ color: '#3b7a5a', fontSize: '12px', margin: '0 0 4px' }}>
-                        👤 {g.facilitator || 'No facilitator'} · 📅 {g.meets || 'Schedule TBD'}
+                         {g.facilitator || 'No facilitator'} ·  {g.meets || 'Schedule TBD'}
                       </p>
                       <p style={{ color: '#3b7a5a', fontSize: '12px', margin: '0 0 4px' }}>
-                        📍 {g.location || 'Location TBD'} · 👥 {g.max_members ? `${g.max_members} max` : 'Unlimited'}
+                         {g.location || 'Location TBD'} ·  {g.max_members ? `${g.max_members} max` : 'Unlimited'}
                       </p>
                       {g.description && (
                         <p style={{ color: '#3b7a5a', fontSize: '11px', margin: '4px 0 0', lineHeight: '1.4' }}>
@@ -313,11 +313,11 @@ export default function ManageGroups() {
                       )}
                     </div>
                     <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
-                      <button onClick={() => openEdit(g)} style={btnStyle('transparent', '#FAC775', '#FAC775')} title="Edit">✏️</button>
+                      <button onClick={() => openEdit(g)} style={btnStyle('transparent', '#FAC775', '#FAC775')} title="Edit"></button>
                       <button onClick={() => toggleActive(g)} style={btnStyle('transparent', g.active ? '#FAC775' : '#6ee7b7', g.active ? '#FAC775' : '#6ee7b7')} title={g.active ? 'Deactivate' : 'Activate'}>
                         {g.active ? 'Deactivate' : 'Activate'}
                       </button>
-                      <button onClick={() => setShowDeleteConfirm(g)} style={btnStyle('transparent', '#F09595', '#791F1F')} title="Delete">🗑️</button>
+                      <button onClick={() => setShowDeleteConfirm(g)} style={btnStyle('transparent', '#F09595', '#791F1F')} title="Delete"></button>
                     </div>
                   </div>
                 </div>
@@ -331,7 +331,7 @@ export default function ManageGroups() {
       {showDeleteConfirm && (
         <div onClick={() => setShowDeleteConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '1px solid #791F1F', maxWidth: '360px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>🗑️</span>
+            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}></span>
             <h3 style={{ color: '#F09595', fontSize: '16px', margin: '0 0 8px' }}>Delete Group?</h3>
             <p style={{ color: '#6ee7b7', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
               Permanently delete <strong style={{ color: '#f59e0b' }}>"{showDeleteConfirm.name}"</strong>? This cannot be undone.

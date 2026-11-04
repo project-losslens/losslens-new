@@ -108,7 +108,7 @@ export default function SuperAdminDashboard() {
       health.push({
         name: 'Database',
         status: dbCheck.error ? 'down' : 'operational',
-        icon: '🗄️',
+        icon: '',
         detail: dbCheck.error?.message || ''
       })
 
@@ -116,7 +116,7 @@ export default function SuperAdminDashboard() {
       health.push({
         name: 'Auth Service',
         status: authCheck.error ? 'down' : authCheck.data?.session ? 'operational' : 'degraded',
-        icon: '🔐',
+        icon: '',
         detail: authCheck.error?.message || ''
       })
 
@@ -125,7 +125,7 @@ export default function SuperAdminDashboard() {
       health.push({
         name: 'Storage',
         status: storageCheck.error ? 'down' : hasAvatars ? 'operational' : 'degraded',
-        icon: '📁',
+        icon: '',
         detail: storageCheck.error?.message || (!hasAvatars ? 'avatars bucket missing' : '')
       })
 
@@ -133,14 +133,14 @@ export default function SuperAdminDashboard() {
       health.push({
         name: 'Edge Functions',
         status: 'unknown',
-        icon: '⚡',
+        icon: '',
         detail: 'Check Supabase dashboard'
       })
 
       health.push({
         name: 'Realtime',
         status: 'operational',
-        icon: '🔄',
+        icon: '',
         detail: ''
       })
 
@@ -174,39 +174,39 @@ export default function SuperAdminDashboard() {
   }
 
   const statsCards = useMemo(() => [
-    { label: 'Total Users', value: stats.totalUsers, icon: '👥', path: ROUTES.USERS, color: '#6ee7b7' },
-    { label: 'Active Today', value: stats.activeToday, icon: '🟢', color: '#3db88a' },
-    { label: 'Admins', value: stats.totalAdmins, icon: '🛡️', path: ROUTES.ADMINS, color: '#f59e0b' },
+    { label: 'Total Users', value: stats.totalUsers, icon: '', path: ROUTES.USERS, color: '#6ee7b7' },
+    { label: 'Active Today', value: stats.activeToday, icon: '', color: '#3db88a' },
+    { label: 'Admins', value: stats.totalAdmins, icon: '', path: ROUTES.ADMINS, color: '#f59e0b' },
     { label: 'Crisis Open', value: stats.crisisOpen, icon: '🆘', path: ROUTES.CRISIS, color: '#F09595', urgent: stats.crisisOpen > 0 },
-    { label: 'B2B Clients', value: stats.b2bClients, icon: '🏢', path: ROUTES.B2B, color: '#FAC775' },
-    { label: 'Grants Pending', value: stats.grantsPending, icon: '📝', path: ROUTES.GRANTS, color: '#f59e0b' },
-    { label: 'Insurance', value: stats.insurancePartners, icon: '🏥', path: ROUTES.INSURANCE, color: '#6ee7b7' },
+    { label: 'B2B Clients', value: stats.b2bClients, icon: '', path: ROUTES.B2B, color: '#FAC775' },
+    { label: 'Grants Pending', value: stats.grantsPending, icon: '', path: ROUTES.GRANTS, color: '#f59e0b' },
+    { label: 'Insurance', value: stats.insurancePartners, icon: '', path: ROUTES.INSURANCE, color: '#6ee7b7' },
   ], [stats])
 
   const sections = useMemo(() => [
     {
       title: 'User & Admin Management',
       items: [
-        { emoji: '👥', label: 'User Management', desc: 'View, edit, suspend, delete users', path: ROUTES.USERS },
-        { emoji: '🛡️', label: 'Admin Management', desc: 'Create, manage admin accounts', path: ROUTES.ADMINS },
-        { emoji: '📋', label: 'Audit Logs', desc: 'Full platform activity trail', path: ROUTES.LOGS },
-        { emoji: '💬', label: 'Chat Viewer', desc: 'Monitor conversations', path: ROUTES.CHATS },
+        { emoji: '', label: 'User Management', desc: 'View, edit, suspend, delete users', path: ROUTES.USERS },
+        { emoji: '', label: 'Admin Management', desc: 'Create, manage admin accounts', path: ROUTES.ADMINS },
+        { emoji: '', label: 'Audit Logs', desc: 'Full platform activity trail', path: ROUTES.LOGS },
+        { emoji: '', label: 'Chat Viewer', desc: 'Monitor conversations', path: ROUTES.CHATS },
       ],
     },
     {
       title: 'Business & Finance',
       items: [
-        { emoji: '🏢', label: 'B2B Clients', desc: 'Corporate partnerships', path: ROUTES.B2B },
-        { emoji: '🏥', label: 'Insurance Partners', desc: 'Insurance integrations', path: ROUTES.INSURANCE },
-        { emoji: '📝', label: 'Grant Applications', desc: 'Track funding', path: ROUTES.GRANTS },
+        { emoji: '', label: 'B2B Clients', desc: 'Corporate partnerships', path: ROUTES.B2B },
+        { emoji: '', label: 'Insurance Partners', desc: 'Insurance integrations', path: ROUTES.INSURANCE },
+        { emoji: '', label: 'Grant Applications', desc: 'Track funding', path: ROUTES.GRANTS },
       ],
     },
     {
       title: 'Platform Settings',
       items: [
-        { emoji: '⚙️', label: 'System Settings', desc: 'Features, security, policies', path: ROUTES.SETTINGS },
-        { emoji: '📊', label: 'Analytics', desc: 'Full analytics dashboard', path: ROUTES.ANALYTICS },
-        { emoji: '📢', label: 'Broadcast', desc: 'Platform-wide announcements', path: ROUTES.BROADCAST },
+        { emoji: '', label: 'System Settings', desc: 'Features, security, policies', path: ROUTES.SETTINGS },
+        { emoji: '', label: 'Analytics', desc: 'Full analytics dashboard', path: ROUTES.ANALYTICS },
+        { emoji: '', label: 'Broadcast', desc: 'Platform-wide announcements', path: ROUTES.BROADCAST },
       ],
     },
   ], [])
@@ -262,12 +262,12 @@ export default function SuperAdminDashboard() {
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#041f13', borderBottom: '2px solid #f59e0b', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#f59e0b', fontFamily: "'Inter', sans-serif", margin: 0 }}>⚡ Super Admin</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#f59e0b', fontFamily: "'Inter', sans-serif", margin: 0 }}> Super Admin</h1>
             <p style={{ fontSize: '12px', color: '#FAC775', margin: '2px 0 0' }}>{stats.totalUsers.toLocaleString()} users · Full platform control</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchAllData} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #f59e0b', color: '#f59e0b', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>🔄 Refresh</button>
-            <button onClick={() => navigate(ROUTES.ADMIN)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #FAC775', color: '#FAC775', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>🛡️ Admin Panel</button>
+            <button onClick={fetchAllData} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #f59e0b', color: '#f59e0b', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
+            <button onClick={() => navigate(ROUTES.ADMIN)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #FAC775', color: '#FAC775', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Admin Panel</button>
             <button onClick={handleSignOut} style={{ padding: '6px 14px', borderRadius: '100px', background: '#791F1F', border: '1px solid #F09595', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Sign out</button>
           </div>
         </nav>
@@ -275,16 +275,16 @@ export default function SuperAdminDashboard() {
         <div style={{ padding: '1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
           {partialError && (
             <div style={{ background: '#633806', border: '1px solid #f59e0b', borderRadius: '10px', padding: '10px 14px', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: '#FAC775', fontSize: '12px' }}>⚠️ Some data failed to load: {partialError}</span>
+              <span style={{ color: '#FAC775', fontSize: '12px' }}> Some data failed to load: {partialError}</span>
               <button onClick={fetchAllData} style={{ background: 'transparent', border: '1px solid #f59e0b', color: '#f59e0b', borderRadius: '6px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>Retry</button>
             </div>
           )}
 
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1.5rem', background: '#062616', borderRadius: '12px', padding: '4px', border: '1px solid #0a3d22', overflowX: 'auto' }}>
             {[
-              { id: 'overview', label: '📊 Overview' },
-              { id: 'admins', label: '🛡️ Admins' },
-              { id: 'health', label: '💚 System Health' },
+              { id: 'overview', label: ' Overview' },
+              { id: 'admins', label: ' Admins' },
+              { id: 'health', label: ' System Health' },
             ].map(tab => (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                 style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? '#633806' : 'transparent', color: activeTab === tab.id ? '#f59e0b' : '#3b7a5a', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', minWidth: '100px', transition: 'background 0.2s, color 0.2s' }}>{tab.label}</button>
@@ -348,7 +348,7 @@ export default function SuperAdminDashboard() {
           {activeTab === 'admins' && (
             <div style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '14px', padding: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h3 style={{ color: '#e2f5ec', fontSize: '14px', margin: 0 }}>🛡️ Recent Admins</h3>
+                <h3 style={{ color: '#e2f5ec', fontSize: '14px', margin: 0 }}> Recent Admins</h3>
                 <button onClick={() => navigate(ROUTES.ADMINS)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #f59e0b', color: '#f59e0b', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Manage →</button>
               </div>
               {recentAdmins.length === 0 ? (
@@ -373,7 +373,7 @@ export default function SuperAdminDashboard() {
                           {/* FIXED: Removed email <td> — email doesn't exist in profiles */}
                           <td style={{ padding: '10px 8px' }}>
                             <span style={{ background: a.role === 'super_admin' ? '#633806' : '#0a3d22', color: a.role === 'super_admin' ? '#f59e0b' : '#6ee7b7', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', border: `1px solid ${a.role === 'super_admin' ? '#f59e0b' : '#6ee7b7'}` }}>
-                              {a.role === 'super_admin' ? '⚡ Super Admin' : '🛡️ Admin'}
+                              {a.role === 'super_admin' ? ' Super Admin' : ' Admin'}
                             </span>
                           </td>
                           <td style={{ padding: '10px 8px', color: '#3b7a5a', fontSize: '11px' }}>{fmtDate(a.created_at)}</td>
@@ -389,7 +389,7 @@ export default function SuperAdminDashboard() {
           {activeTab === 'health' && (
             <div style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '14px', padding: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h3 style={{ color: '#e2f5ec', fontSize: '14px', margin: 0 }}>💚 System Health</h3>
+                <h3 style={{ color: '#e2f5ec', fontSize: '14px', margin: 0 }}> System Health</h3>
                 {lastChecked && (
                   <span style={{ color: '#3b7a5a', fontSize: '11px' }}>Checked: {lastChecked.toLocaleTimeString('en-KE')}</span>
                 )}

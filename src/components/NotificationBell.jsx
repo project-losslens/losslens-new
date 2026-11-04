@@ -100,7 +100,7 @@ function NotificationBell() {
           transition: 'color 0.2s',
         }}
       >
-        <span aria-hidden="true">🔔</span>
+        <span aria-hidden="true"></span>
         {unreadCount > 0 && (
           <span
             aria-label={`${unreadCount} unread notifications`}
@@ -153,7 +153,7 @@ function NotificationBell() {
           {/* List */}
           {notifications.length === 0 ? (
             <div style={{ padding: '2rem', textAlign: 'center' }}>
-              <span style={{ fontSize: '32px', display: 'block', marginBottom: '8px' }} aria-hidden="true">🔔</span>
+              <span style={{ fontSize: '32px', display: 'block', marginBottom: '8px' }} aria-hidden="true"></span>
               <p style={{ color: '#3b7a5a', fontSize: '13px' }}>No notifications yet</p>
             </div>
           ) : (

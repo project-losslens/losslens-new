@@ -13,9 +13,8 @@ function ProtectedRoute({ children, adminOnly = false, superAdminOnly = false })
 
     const checkAuth = async () => {
       try {
-        const { data: { session: refreshedSession } } = await supabase.auth.refreshSession()
         const { data: { session } } = await supabase.auth.getSession()
-        const currentSession = refreshedSession || session
+        const currentSession = session
 
         if (!currentSession) {
           if (mounted) {
@@ -39,7 +38,7 @@ function ProtectedRoute({ children, adminOnly = false, superAdminOnly = false })
           .eq('id', currentSession.user.id)
           .single()
 
-        if (profileError || !profile) {
+        if (profileError && profileError.code !== 'PGRST116') {
           if (mounted) {
             setSessionExpired(true)
             setChecking(false)
@@ -111,7 +110,7 @@ function ProtectedRoute({ children, adminOnly = false, superAdminOnly = false })
     return (
       <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
-          <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true">🔒</span>
+          <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
           <h2 style={{ color: '#f59e0b', fontFamily: "'Playfair Display', serif", fontSize: '22px', marginBottom: '8px' }}>Session Expired</h2>
           <p style={{ color: '#6ee7b7', fontSize: '14px', marginBottom: '24px', lineHeight: '1.6' }}>
             Your session has expired. Please log in again to continue.

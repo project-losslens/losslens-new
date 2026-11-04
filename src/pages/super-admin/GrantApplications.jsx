@@ -4,12 +4,12 @@ import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import SuperAdminSidebar from '../../components/SuperAdminSidebar'
 
-// ✅ Constants
+//  Constants
 const STATUS_CONFIG = {
   pending: { color: '#FAC775', bg: '#633806', label: 'Pending', icon: '⏳' },
-  under_review: { color: '#6ee7b7', bg: '#0a3d22', label: 'Under Review', icon: '🔍' },
-  approved: { color: '#3db88a', bg: '#0a3d22', label: 'Approved', icon: '✅' },
-  rejected: { color: '#F09595', bg: '#791F1F', label: 'Rejected', icon: '❌' },
+  under_review: { color: '#6ee7b7', bg: '#0a3d22', label: 'Under Review', icon: '' },
+  approved: { color: '#3db88a', bg: '#0a3d22', label: 'Approved', icon: '' },
+  rejected: { color: '#F09595', bg: '#791F1F', label: 'Rejected', icon: '' },
 }
 
 const STATUSES = ['all', 'pending', 'under_review', 'approved', 'rejected']
@@ -79,7 +79,7 @@ export default function GrantApplications() {
     catch { return '—' }
   }
 
-  // ✅ Memoized filtered + sorted
+  //  Memoized filtered + sorted
   const filteredApplications = useMemo(() => {
     let list = applications
     if (searchQuery) {
@@ -148,18 +148,18 @@ export default function GrantApplications() {
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#041f13', borderBottom: '2px solid #f59e0b', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#f59e0b', fontFamily: "'Inter', sans-serif", margin: 0 }}>📝 Grant Applications</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#f59e0b', fontFamily: "'Inter', sans-serif", margin: 0 }}> Grant Applications</h1>
             <p style={{ fontSize: '12px', color: '#FAC775', margin: '2px 0 0' }}>{applications.length} applications · {counts.pending} pending</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchApplications} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #FAC775', color: '#FAC775', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>🔄 Refresh</button>
+            <button onClick={fetchApplications} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #FAC775', color: '#FAC775', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
           </div>
         </nav>
 
         <div style={{ padding: '1.5rem', maxWidth: '1000px', margin: '0 auto' }}>
           {/* Filters */}
           <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <input type="text" placeholder="🔍 Search applications..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+            <input type="text" placeholder=" Search applications..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
               style={{ ...inputStyle, width: '240px' }} />
             <select value={sortBy} onChange={e => setSortBy(e.target.value)}
               style={{ ...inputStyle, cursor: 'pointer', width: 'auto' }}>
@@ -173,7 +173,7 @@ export default function GrantApplications() {
           {/* Status Tabs */}
           <div style={{ display: 'flex', gap: '6px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
             {STATUSES.map(s => {
-              const config = STATUS_CONFIG[s] || { color: '#6ee7b7', bg: '#0a3d22', label: 'All', icon: '📋' }
+              const config = STATUS_CONFIG[s] || { color: '#6ee7b7', bg: '#0a3d22', label: 'All', icon: '' }
               return (
                 <button key={s} onClick={() => setFilter(s)}
                   style={{
@@ -185,7 +185,7 @@ export default function GrantApplications() {
                     cursor: 'pointer', fontFamily: "'Inter', sans-serif",
                     transition: 'all 0.2s',
                   }}>
-                  {s === 'all' ? '📋 All' : `${config.icon} ${config.label}`} ({counts[s] || 0})
+                  {s === 'all' ? ' All' : `${config.icon} ${config.label}`} ({counts[s] || 0})
                 </button>
               )
             })}
@@ -193,7 +193,7 @@ export default function GrantApplications() {
 
           {filteredApplications.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a', background: '#062616', borderRadius: '12px', border: '1px solid #0a3d22' }}>
-              <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>📝</span>
+              <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
               <p style={{ color: '#6ee7b7', fontSize: '14px' }}>{searchQuery ? 'No applications match your search.' : 'No applications found.'}</p>
             </div>
           ) : (
@@ -231,7 +231,7 @@ export default function GrantApplications() {
                         )}
                         {a.rejection_reason && (
                           <p style={{ color: '#F09595', fontSize: '12px', margin: '6px 0 0', padding: '8px 12px', background: '#3a1010', borderRadius: '6px', border: '1px solid #791F1F' }}>
-                            ❌ Rejection reason: {a.rejection_reason}
+                             Rejection reason: {a.rejection_reason}
                           </p>
                         )}
                       </div>
@@ -242,16 +242,16 @@ export default function GrantApplications() {
                         {a.status === 'pending' && (
                           <button onClick={() => updateStatus(a.id, 'under_review')} disabled={!!actionLoading}
                             style={btnStyle('transparent', '#6ee7b7', '#6ee7b7')}>
-                            {actionLoading === `${a.id}-under_review` ? '...' : '🔍 Mark Under Review'}
+                            {actionLoading === `${a.id}-under_review` ? '...' : ' Mark Under Review'}
                           </button>
                         )}
                         <button onClick={() => updateStatus(a.id, 'approved')} disabled={!!actionLoading}
                           style={btnStyle('transparent', '#3db88a', '#3db88a')}>
-                          {actionLoading === `${a.id}-approved` ? '...' : '✅ Approve'}
+                          {actionLoading === `${a.id}-approved` ? '...' : ' Approve'}
                         </button>
                         <button onClick={() => setShowRejectModal(a)} disabled={!!actionLoading}
                           style={btnStyle('transparent', '#F09595', '#791F1F')}>
-                          {actionLoading === `${a.id}-rejected` ? '...' : '❌ Reject'}
+                          {actionLoading === `${a.id}-rejected` ? '...' : ' Reject'}
                         </button>
                       </div>
                     )}
@@ -267,7 +267,7 @@ export default function GrantApplications() {
       {showRejectModal && (
         <div onClick={() => { setShowRejectModal(null); setRejectReason('') }} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
           <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '1px solid #791F1F', maxWidth: '420px', width: '100%' }}>
-            <h3 style={{ color: '#F09595', fontSize: '16px', margin: '0 0 4px' }}>❌ Reject Application</h3>
+            <h3 style={{ color: '#F09595', fontSize: '16px', margin: '0 0 4px' }}> Reject Application</h3>
             <p style={{ color: '#6ee7b7', fontSize: '13px', marginBottom: '16px' }}>
               <strong style={{ color: '#f59e0b' }}>"{showRejectModal.organization_name}"</strong> · {formatCurrency(showRejectModal.amount_requested)}
             </p>

@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import Sidebar from '../../components/Sidebar'
 
-// ✅ Constants
+//  Constants
 const TIMER_DURATION = 900 // 15 minutes
 const BREATH_INHALE = 4000
 const BREATH_HOLD = 7000
@@ -35,20 +35,20 @@ function triggerConfetti() {
   if (navigator.vibrate) navigator.vibrate([200, 100, 200])
 }
 
-// ✅ Static data outside component
+//  Static data outside component
 const DISTRACTION_CHALLENGES = [
-  { emoji: '🚶', text: 'Walk outside for 10 min — no phone', category: 'Physical' },
-  { emoji: '💪', text: 'Do 20 pushups right now', category: 'Physical' },
-  { emoji: '💃', text: 'Put on music and dance', category: 'Physical' },
-  { emoji: '📞', text: 'Call a friend — ask about THEIR day', category: 'Social' },
-  { emoji: '✍️', text: "Write 5 things you're grateful for", category: 'Mental' },
-  { emoji: '🧹', text: 'Clean one thing thoroughly', category: 'Physical' },
-  { emoji: '📝', text: 'Write a letter to future you', category: 'Creative' },
-  { emoji: '🎨', text: 'Draw anything for 5 minutes', category: 'Creative' },
-  { emoji: '🧘', text: 'Count your breaths to 50', category: 'Relaxing' },
-  { emoji: '📖', text: 'Read one chapter of a book', category: 'Mental' },
-  { emoji: '🍳', text: 'Cook or prepare a healthy snack', category: 'Creative' },
-  { emoji: '🚿', text: 'Take a cold shower — resets you', category: 'Physical' },
+  { emoji: '', text: 'Walk outside for 10 min — no phone', category: 'Physical' },
+  { emoji: '', text: 'Do 20 pushups right now', category: 'Physical' },
+  { emoji: '', text: 'Put on music and dance', category: 'Physical' },
+  { emoji: '', text: 'Call a friend — ask about THEIR day', category: 'Social' },
+  { emoji: '', text: "Write 5 things you're grateful for", category: 'Mental' },
+  { emoji: '', text: 'Clean one thing thoroughly', category: 'Physical' },
+  { emoji: '', text: 'Write a letter to future you', category: 'Creative' },
+  { emoji: '', text: 'Draw anything for 5 minutes', category: 'Creative' },
+  { emoji: '', text: 'Count your breaths to 50', category: 'Relaxing' },
+  { emoji: '', text: 'Read one chapter of a book', category: 'Mental' },
+  { emoji: '', text: 'Cook or prepare a healthy snack', category: 'Creative' },
+  { emoji: '', text: 'Take a cold shower — resets you', category: 'Physical' },
 ]
 
 const HELPLINES = [
@@ -59,14 +59,14 @@ const HELPLINES = [
 ]
 
 const TOOLS = [
-  { id: 'timer', icon: '⏱️', title: '15-Minute Urge Timer', desc: 'Urges pass. Prove it.', color: '#f59e0b' },
-  { id: 'breathing', icon: '🌬️', title: '4-7-8 Breathing', desc: 'Calm your body', color: '#6ee7b7' },
-  { id: 'thought', icon: '💭', title: 'Thought Challenger', desc: 'Challenge the urge', color: '#FAC775' },
-  { id: 'distraction', icon: '🎯', title: 'Spin the Wheel', desc: 'Random challenge', color: '#3db88a' },
+  { id: 'timer', icon: '⏱', title: '15-Minute Urge Timer', desc: 'Urges pass. Prove it.', color: '#f59e0b' },
+  { id: 'breathing', icon: '', title: '4-7-8 Breathing', desc: 'Calm your body', color: '#6ee7b7' },
+  { id: 'thought', icon: '', title: 'Thought Challenger', desc: 'Challenge the urge', color: '#FAC775' },
+  { id: 'distraction', icon: '', title: 'Spin the Wheel', desc: 'Random challenge', color: '#3db88a' },
   { id: 'helpline', icon: '🆘', title: 'Emergency & Support', desc: 'Get help now', color: '#F09595' },
 ]
 
-// ✅ Breathing Human — React.memo for performance
+//  Breathing Human — React.memo for performance
 const BreathingHuman = ({ phase, size = 200 }) => {
   const scale = phase === 'inhale' ? 1.1 : phase === 'hold' ? 1.1 : 1
   const bellyScale = phase === 'inhale' ? 1.3 : phase === 'exhale' ? 0.85 : 1.1
@@ -161,12 +161,12 @@ export default function UrgeToolkitPage() {
 
   useEffect(() => { if (userId) loadPartner() }, [userId])
 
-  // ✅ Timer logic with proper cleanup
+  //  Timer logic with proper cleanup
   useEffect(() => {
     if (timerRunning && timer > 0) {
       timerRef.current = setInterval(() => {
         setTimer(t => {
-          if (t <= 1) { setTimerRunning(false); setTimerComplete(true); triggerConfetti(); showToast('🎉 You made it through!', 4000); return 0 }
+          if (t <= 1) { setTimerRunning(false); setTimerComplete(true); triggerConfetti(); showToast(' You made it through!', 4000); return 0 }
           return t - 1
         })
       }, 1000)
@@ -174,7 +174,7 @@ export default function UrgeToolkitPage() {
     return () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null } }
   }, [timerRunning])
 
-  // ✅ Breathing — actual 4-7-8 with dynamic timeouts
+  //  Breathing — actual 4-7-8 with dynamic timeouts
   useEffect(() => {
     if (!breathingActive || activeTool !== 'breathing') return
     let cancelled = false
@@ -201,7 +201,7 @@ export default function UrgeToolkitPage() {
   const formatTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
   const getTimerProgress = () => ((TIMER_DURATION - timer) / TIMER_DURATION) * 100
 
-  // ✅ Spinning wheel — fixed seed for bar heights
+  //  Spinning wheel — fixed seed for bar heights
   const voiceBarHeights = useMemo(() => [1,2,3,4,5,6,7,8].map(i => 15 + Math.sin(i * 1.5) * 10), [])
 
   const spinWheel = () => {
@@ -221,7 +221,7 @@ export default function UrgeToolkitPage() {
       await supabase.from('profiles').update({ accountability_partner_name: partnerName, accountability_partner_phone: partnerPhone }).eq('id', userId)
       setAccountabilityPartner({ name: partnerName, phone: partnerPhone })
       setShowAddPartner(false)
-      showToast('✅ Partner saved!', 3000)
+      showToast(' Partner saved!', 3000)
     } catch (err) { showToast('Failed to save.', 2000) }
   }
 
@@ -230,7 +230,7 @@ export default function UrgeToolkitPage() {
       <Sidebar />
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#041f13', borderBottom: '1px solid #0a3d22', position: 'sticky', top: 0, zIndex: 100 }}>
-          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}>🛠️ Urge Toolkit</h1><p style={{ fontSize: '12px', color: '#3b7a5a', margin: '2px 0 0' }}>Every urge is beatable</p></div>
+          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}> Urge Toolkit</h1><p style={{ fontSize: '12px', color: '#3b7a5a', margin: '2px 0 0' }}>Every urge is beatable</p></div>
         </nav>
         <div style={{ padding: '1.5rem' }}>
           <div className="tools-grid" style={{ marginBottom: '1rem' }}>
@@ -282,7 +282,7 @@ export default function UrgeToolkitPage() {
                     style={{ transition: 'stroke-dashoffset 1s linear', filter: timerRunning ? 'drop-shadow(0 0 8px rgba(245,158,11,0.5))' : 'none' }} />
                 </svg>
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', textAlign: 'center' }}>
-                  <div style={{ fontFamily: "'Playfair Display', serif", fontSize: timerComplete ? '1rem' : '2.5rem', color: timerComplete ? '#6ee7b7' : '#f59e0b', fontWeight: 700 }}>{timerComplete ? '✅ Done!' : formatTime(timer)}</div>
+                  <div style={{ fontFamily: "'Playfair Display', serif", fontSize: timerComplete ? '1rem' : '2.5rem', color: timerComplete ? '#6ee7b7' : '#f59e0b', fontWeight: 700 }}>{timerComplete ? ' Done!' : formatTime(timer)}</div>
                   {!timerComplete && <div style={{ fontSize: '11px', color: '#3b7a5a', marginTop: '4px' }}>{timerRunning ? 'Hang in there...' : 'Press start'}</div>}
                 </div>
               </div>
@@ -294,7 +294,7 @@ export default function UrgeToolkitPage() {
                   </>
                 ) : (
                   <div style={{ width: '100%' }}>
-                    <p style={{ color: '#6ee7b7', fontSize: '14px', marginBottom: '1rem' }}>🎉 You proved it — urges DO pass!</p>
+                    <p style={{ color: '#6ee7b7', fontSize: '14px', marginBottom: '1rem' }}> You proved it — urges DO pass!</p>
                     <button className="btn-primary" onClick={() => { setTimer(TIMER_DURATION); setTimerRunning(false); setTimerComplete(false) }} style={{ width: '100%' }}>Start a new timer</button>
                   </div>
                 )}
@@ -310,7 +310,7 @@ export default function UrgeToolkitPage() {
               <BreathingHuman phase={breathPhase} size={180} />
               <div style={{ marginTop: '1rem' }}>
                 <p style={{ color: '#6ee7b7', fontSize: '14px', fontWeight: 500 }} aria-live="polite">Round {breathRounds + 1}</p>
-                {breathRounds >= 3 && <p style={{ color: '#3db88a', fontSize: '14px', marginTop: '0.5rem' }}>✅ {breathRounds} rounds complete! How does your body feel?</p>}
+                {breathRounds >= 3 && <p style={{ color: '#3db88a', fontSize: '14px', marginTop: '0.5rem' }}> {breathRounds} rounds complete! How does your body feel?</p>}
               </div>
               <button className="toggle-btn active-green" onClick={() => setBreathingActive(!breathingActive)} style={{ marginTop: '1rem', minWidth: '120px' }}>
                 {breathingActive ? 'Pause ⏸' : 'Start ▶'}
@@ -354,7 +354,7 @@ export default function UrgeToolkitPage() {
                   <div className="form-group" style={{marginTop:'12px'}}><label>How do you feel now?</label><div className="chip-group">{['Calmer','In control','Still struggling','Relieved','Empowered','Hopeful'].map(e => <button key={e} className={`chip ${thoughtRecord.newEmotion===e?'chip-active':''}`} onClick={()=>setThoughtRecord({...thoughtRecord,newEmotion:e})}>{e}</button>)}</div></div>
                   {thoughtRecord.balancedThought && (
                     <div style={{marginTop:'1rem',padding:'16px',background:'#0a3d22',borderRadius:'12px',border:'1px solid #1d5c38'}}>
-                      <p style={{fontSize:'11px',color:'#f59e0b',marginBottom:'8px',textTransform:'uppercase'}}>📋 Your Coping Card</p>
+                      <p style={{fontSize:'11px',color:'#f59e0b',marginBottom:'8px',textTransform:'uppercase'}}> Your Coping Card</p>
                       <p style={{fontSize:'12px',color:'#3b7a5a'}}><strong>Old:</strong> "{thoughtRecord.automaticThought}"</p>
                       <p style={{fontSize:'12px',color:'#6ee7b7'}}><strong>New:</strong> "{thoughtRecord.balancedThought}"</p>
                       <p style={{fontSize:'12px',color:'#3b7a5a',marginTop:'4px'}}><strong>Feeling:</strong> {thoughtRecord.emotion || '...'} → {thoughtRecord.newEmotion || '...'}</p>
@@ -363,10 +363,10 @@ export default function UrgeToolkitPage() {
                         const updated = [newCard, ...copingCards].slice(0, 20)
                         setCopingCards(updated)
                         try { localStorage.setItem('precious_coping_cards', JSON.stringify(updated)) } catch {}
-                        showToast('✅ Coping card saved!', 3000)
+                        showToast(' Coping card saved!', 3000)
                         setThoughtStep(0)
                         setThoughtRecord({ situation: '', automaticThought: '', emotion: '', evidenceFor: '', evidenceAgainst: '', balancedThought: '', newEmotion: '' })
-                      }}>💾 Save to coping cards</button>
+                      }}> Save to coping cards</button>
                     </div>
                   )}
                   <button className="btn-ghost" style={{width:'100%',marginTop:'0.5rem'}} onClick={()=>setThoughtStep(2)}>← Back</button>
@@ -374,13 +374,13 @@ export default function UrgeToolkitPage() {
               )}
               {copingCards.length > 0 && (
                 <div style={{ marginTop: '1.5rem', borderTop: '1px solid #0a3d22', paddingTop: '1rem' }}>
-                  <h4 style={{ color: '#e2f5ec', fontSize: '13px', marginBottom: '8px' }}>📚 Your Coping Cards ({copingCards.length})</h4>
+                  <h4 style={{ color: '#e2f5ec', fontSize: '13px', marginBottom: '8px' }}> Your Coping Cards ({copingCards.length})</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {copingCards.slice(0, 5).map(card => (
                       <div key={card.id} style={{ background: '#041f13', borderRadius: '8px', padding: '10px', border: '1px solid #0a3d22', fontSize: '12px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                           <span style={{ color: '#f59e0b', fontWeight: 500 }}>{new Date(card.date).toLocaleDateString('en-KE')}</span>
-                          <button onClick={() => { const updated = copingCards.filter(c => c.id !== card.id); setCopingCards(updated); try { localStorage.setItem('precious_coping_cards', JSON.stringify(updated)) } catch {} }} style={{ background: 'transparent', border: 'none', color: '#F09595', fontSize: '12px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Delete coping card">🗑</button>
+                          <button onClick={() => { const updated = copingCards.filter(c => c.id !== card.id); setCopingCards(updated); try { localStorage.setItem('precious_coping_cards', JSON.stringify(updated)) } catch {} }} style={{ background: 'transparent', border: 'none', color: '#F09595', fontSize: '12px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Delete coping card"></button>
                         </div>
                         <p style={{ color: '#F09595', margin: '0 0 2px', textDecoration: 'line-through' }}>"{card.automaticThought}"</p>
                         <p style={{ color: '#6ee7b7', margin: 0 }}>→ "{card.balancedThought}"</p>
@@ -395,16 +395,16 @@ export default function UrgeToolkitPage() {
           {/* ─── SPINNING WHEEL ─── */}
           {activeTool === 'distraction' && (
             <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out' }}>
-              <h3 style={{ color: '#e2f5ec', fontSize: '16px', marginBottom: '0.5rem' }}>Spin the Wheel 🎡</h3>
+              <h3 style={{ color: '#e2f5ec', fontSize: '16px', marginBottom: '0.5rem' }}>Spin the Wheel </h3>
               <p style={{ color: '#3b7a5a', fontSize: '13px', marginBottom: '1.5rem' }}>Let fate decide your distraction</p>
               <div style={{ position: 'relative', width: '180px', height: '180px', margin: '0 auto 1.5rem' }}>
                 <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'conic-gradient(#f59e0b 0deg 60deg, #6ee7b7 60deg 120deg, #FAC775 120deg 180deg, #3db88a 180deg 240deg, #F09595 240deg 300deg, #9fe1cb 300deg 360deg)', animation: spinning ? 'wheelSpin 1s ease-out' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(245,158,11,0.3)' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '20px' }}>{spinning ? '🎰' : '🎯'}</span></div>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '20px' }}>{spinning ? '' : ''}</span></div>
                 </div>
                 <div style={{ position: 'absolute', top: '-8px', left: '50%', transform: 'translateX(-50%)', fontSize: '20px' }}>▼</div>
               </div>
               {!randomChallenge ? (
-                <button className="btn-primary" style={{ padding: '16px 32px', fontSize: '16px' }} onClick={spinWheel} disabled={spinning}>{spinning ? '🎰 Spinning...' : '🎡 Spin the wheel'}</button>
+                <button className="btn-primary" style={{ padding: '16px 32px', fontSize: '16px' }} onClick={spinWheel} disabled={spinning}>{spinning ? ' Spinning...' : ' Spin the wheel'}</button>
               ) : (
                 <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
                   <div style={{ background: '#041f13', border: `2px solid ${challengeDone ? '#6ee7b7' : '#f59e0b'}`, borderRadius: '16px', padding: '24px', marginBottom: '1rem', transition: 'border-color 0.3s' }}>
@@ -414,13 +414,13 @@ export default function UrgeToolkitPage() {
                   </div>
                   {!challengeAccepted ? (
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className="btn-primary" style={{ flex: 1 }} onClick={() => { setChallengeAccepted(true); showToast('💪 You got this!', 2000) }}>✅ Accept</button>
-                      <button className="btn-ghost" style={{ flex: 1 }} onClick={spinWheel} disabled={spinning}>🎡 Spin again</button>
+                      <button className="btn-primary" style={{ flex: 1 }} onClick={() => { setChallengeAccepted(true); showToast(' You got this!', 2000) }}> Accept</button>
+                      <button className="btn-ghost" style={{ flex: 1 }} onClick={spinWheel} disabled={spinning}> Spin again</button>
                     </div>
                   ) : !challengeDone ? (
-                    <button className="btn-primary" style={{ width: '100%', background: '#6ee7b7', color: '#041f13' }} onClick={() => { setChallengeDone(true); triggerConfetti(); showToast('🎉 Challenge complete!', 3000) }}>✅ I did it!</button>
+                    <button className="btn-primary" style={{ width: '100%', background: '#6ee7b7', color: '#041f13' }} onClick={() => { setChallengeDone(true); triggerConfetti(); showToast(' Challenge complete!', 3000) }}> I did it!</button>
                   ) : (
-                    <div><p style={{ color: '#6ee7b7', fontSize: '14px', marginBottom: '1rem' }}>🎉 Notice how the urge faded while you were busy?</p><button className="btn-primary" style={{ width: '100%' }} onClick={() => { setRandomChallenge(null); setChallengeAccepted(false); setChallengeDone(false) }}>🎡 Spin again</button></div>
+                    <div><p style={{ color: '#6ee7b7', fontSize: '14px', marginBottom: '1rem' }}> Notice how the urge faded while you were busy?</p><button className="btn-primary" style={{ width: '100%' }} onClick={() => { setRandomChallenge(null); setChallengeAccepted(false); setChallengeDone(false) }}> Spin again</button></div>
                   )}
                 </div>
               )}
@@ -430,7 +430,7 @@ export default function UrgeToolkitPage() {
           {/* ─── HELPLINE ─── */}
           {activeTool === 'helpline' && (
             <div className="dash-section" style={{ animation: 'fadeIn 0.3s ease-out' }}>
-              <h3 style={{ color: '#e2f5ec', fontSize: '16px', marginBottom: '1rem' }}>Emergency & Support 📞</h3>
+              <h3 style={{ color: '#e2f5ec', fontSize: '16px', marginBottom: '1rem' }}>Emergency & Support </h3>
               {HELPLINES.map((h, i) => (
                 <div key={i} className="helpline-card" style={{ marginBottom: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -438,17 +438,17 @@ export default function UrgeToolkitPage() {
                     <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isOpenNow(h.hours) ? '#3db88a' : '#3b7a5a', flexShrink: 0 }} title={isOpenNow(h.hours) ? 'Available now' : 'May be closed'} />
                   </div>
                   <p className="helpline-num">{h.number}</p>
-                  <p className="helpline-hours">{h.hours} · {h.free ? '🆓 Free' : '💳 Charges may apply'}</p>
-                  <a href={`tel:${h.number.replace(/\s/g,'')}`} style={{ display: 'block', textAlign: 'center', background: '#791F1F', color: '#F09595', padding: '10px', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: 500, marginTop: '8px' }}>📞 Call {h.number}</a>
+                  <p className="helpline-hours">{h.hours} · {h.free ? '🆓 Free' : ' Charges may apply'}</p>
+                  <a href={`tel:${h.number.replace(/\s/g,'')}`} style={{ display: 'block', textAlign: 'center', background: '#791F1F', color: '#F09595', padding: '10px', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: 500, marginTop: '8px' }}> Call {h.number}</a>
                 </div>
               ))}
               <div style={{ marginTop: '1rem', padding: '16px', background: '#041f13', borderRadius: '12px', border: '1px solid #0a3d22' }}>
-                <h4 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '8px' }}>🤝 Accountability Partner</h4>
+                <h4 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '8px' }}> Accountability Partner</h4>
                 {accountabilityPartner ? (
                   <div>
                     <p style={{ color: '#e2f5ec', fontSize: '14px' }}>{accountabilityPartner.name}</p>
-                    {accountabilityPartner.phone && <a href={`tel:${accountabilityPartner.phone}`} style={{ display: 'block', textAlign: 'center', background: '#f59e0b', color: '#041f13', padding: '10px', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: 500, marginTop: '8px' }}>📞 Call {accountabilityPartner.name}</a>}
-                    <button className="btn-ghost" style={{ width: '100%', marginTop: '8px', fontSize: '12px' }} onClick={() => setShowAddPartner(true)}>✏️ Change</button>
+                    {accountabilityPartner.phone && <a href={`tel:${accountabilityPartner.phone}`} style={{ display: 'block', textAlign: 'center', background: '#f59e0b', color: '#041f13', padding: '10px', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: 500, marginTop: '8px' }}> Call {accountabilityPartner.name}</a>}
+                    <button className="btn-ghost" style={{ width: '100%', marginTop: '8px', fontSize: '12px' }} onClick={() => setShowAddPartner(true)}> Change</button>
                   </div>
                 ) : (
                   <button className="btn-primary" style={{ width: '100%' }} onClick={() => setShowAddPartner(true)}>+ Add partner</button>

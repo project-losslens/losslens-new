@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import SuperAdminSidebar from '../../components/SuperAdminSidebar'
 
-// ✅ Constants
+//  Constants
 const SETTINGS_KEYS = {
   APP_NAME: 'app_name', MAINTENANCE_MODE: 'maintenance_mode',
   ALLOW_SIGNUPS: 'allow_signups', REQUIRE_EMAIL_VERIFICATION: 'require_email_verification',
@@ -21,7 +21,7 @@ const SETTINGS_KEYS = {
 }
 
 const DEFAULTS = {
-  [SETTINGS_KEYS.APP_NAME]: 'Precious',
+  [SETTINGS_KEYS.APP_NAME]: 'LossLens',
   [SETTINGS_KEYS.MAINTENANCE_MODE]: false,
   [SETTINGS_KEYS.ALLOW_SIGNUPS]: true,
   [SETTINGS_KEYS.REQUIRE_EMAIL_VERIFICATION]: true,
@@ -58,11 +58,11 @@ const VALIDATION = {
 }
 
 const SECTION_TABS = [
-  { id: 'general', label: 'General', icon: '⚙️' },
-  { id: 'security', label: 'Security', icon: '🔐' },
-  { id: 'features', label: 'Features', icon: '🔧' },
-  { id: 'pricing', label: 'Pricing', icon: '💵' },
-  { id: 'integrations', label: 'Integrations', icon: '📡' },
+  { id: 'general', label: 'General', icon: '' },
+  { id: 'security', label: 'Security', icon: '' },
+  { id: 'features', label: 'Features', icon: '' },
+  { id: 'pricing', label: 'Pricing', icon: '' },
+  { id: 'integrations', label: 'Integrations', icon: '' },
 ]
 
 function showToast(message, duration = 3000) {
@@ -90,13 +90,13 @@ export default function SystemSettings() {
     setTimeout(() => setToast(null), 3000)
   }, [])
 
-  // ✅ Check for unsaved changes
+  //  Check for unsaved changes
   const hasUnsavedChanges = useMemo(() => {
     if (!originalSettings) return false
     return Object.keys(settings).some(key => settings[key] !== originalSettings[key])
   }, [settings, originalSettings])
 
-  // ✅ Warn on unsaved changes
+  //  Warn on unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (hasUnsavedChanges) {
@@ -145,7 +145,7 @@ export default function SystemSettings() {
   const saveSettings = async () => {
     if (!validateAll()) { displayToast('Fix validation errors before saving.', 'error'); return }
     
-    // ✅ Confirmation for critical changes
+    //  Confirmation for critical changes
     if (settings[SETTINGS_KEYS.MAINTENANCE_MODE] && !originalSettings?.[SETTINGS_KEYS.MAINTENANCE_MODE]) {
       setShowConfirm('maintenance')
       return
@@ -323,7 +323,7 @@ export default function SystemSettings() {
                   <ToggleRow label="The Circle (Anonymous Chat)" desc="Peer support rooms" value={settings.circle_enabled} onChange={v => update(SETTINGS_KEYS.CIRCLE_ENABLED, v)} />
                   <ToggleRow label="Whispers (Peer Matching)" desc="1-on-1 anonymous chats" value={settings.whispers_enabled} onChange={v => update(SETTINGS_KEYS.WHISPERS_ENABLED, v)} />
                   <ToggleRow label="Family Portal" desc="Supporter invitations & oversight" value={settings.family_portal_enabled} onChange={v => update(SETTINGS_KEYS.FAMILY_PORTAL_ENABLED, v)} />
-                  <ToggleRow label="Precious Pact" desc="Audio messages to future self" value={settings.precious_pact_enabled} onChange={v => update(SETTINGS_KEYS.PRECIOUS_PACT_ENABLED, v)} />
+                  <ToggleRow label="LossLens Pact" desc="Audio messages to future self" value={settings.precious_pact_enabled} onChange={v => update(SETTINGS_KEYS.PRECIOUS_PACT_ENABLED, v)} />
                   <ToggleRow label="Monthly Mirror" desc="Video reflection recordings" value={settings.monthly_mirror_enabled} onChange={v => update(SETTINGS_KEYS.MONTHLY_MIRROR_ENABLED, v)} />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginTop: '14px' }}>

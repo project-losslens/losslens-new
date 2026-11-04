@@ -29,12 +29,12 @@ function Login() {
   const [cooldownUntil, setCooldownUntil] = useState(() => parseInt(sessionStorage.getItem('login_cooldown_until') || '0'))
   const [cooldownTimer, setCooldownTimer] = useState(0)
 
-  // ✅ Auto-focus email on mount
+  //  Auto-focus email on mount
   useEffect(() => {
     if (!checking && emailRef.current) emailRef.current.focus()
   }, [checking])
 
-  // ✅ Session check with error handling
+  //  Session check with error handling
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -54,7 +54,7 @@ function Login() {
     checkSession()
   }, [navigate])
 
-  // ✅ Cooldown timer with localStorage persistence
+  //  Cooldown timer with localStorage persistence
   useEffect(() => {
     if (!cooldown) return
     const calculateRemaining = () => {
@@ -73,7 +73,7 @@ function Login() {
     return () => clearInterval(timer)
   }, [cooldown, cooldownUntil])
 
-  // ✅ Auto-clear error on input change
+  //  Auto-clear error on input change
   const handleEmailChange = (e) => { setEmail(e.target.value); if (error) setError('') }
   const handlePasswordChange = (e) => { setPassword(e.target.value); if (error) setError('') }
 
@@ -87,7 +87,7 @@ function Login() {
     const { data, error: loginError } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password,
-    }, { persistSession: rememberMe }) // ✅ Remember me now works
+    }, { persistSession: rememberMe }) //  Remember me now works
 
     if (loginError) {
       const newAttempts = attempts + 1
@@ -125,7 +125,7 @@ function Login() {
     try {
       const { error: googleError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: 'https://kingsly-six.vercel.app/dashboard' },
+        options: { redirectTo: `${window.location.origin}/dashboard` },
       })
       if (googleError) {
         setError('Google sign-in failed. Please try again.')
@@ -153,7 +153,7 @@ function Login() {
   return (
     <div className="root">
       <nav className="navbar">
-        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>Precious</span>
+        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
         <button className="nav-ghost" onClick={() => navigate('/signup')}>Sign up</button>
       </nav>
 
@@ -202,7 +202,7 @@ function Login() {
               <label htmlFor="password">Password</label>
               <div style={{ position: 'relative' }}>
                 <input id="password" type={showPw ? 'text' : 'password'} autoComplete="current-password" placeholder="••••••••" value={password} onChange={handlePasswordChange} style={{ paddingRight: 44 }} disabled={cooldown} />
-                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#3b7a5a', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? '🙈' : '👁️'}</button>
+                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#3b7a5a', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? '' : ''}</button>
               </div>
             </div>
 

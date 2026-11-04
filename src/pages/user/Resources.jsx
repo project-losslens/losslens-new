@@ -4,11 +4,11 @@ import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import Sidebar from '../../components/Sidebar'
 
-// ✅ Constants
+//  Constants
 const CATEGORY_ICONS = {
-  Crisis: '🆘', Professional: '👨‍⚕️', 'Self-Exclusion': '🚫',
-  'Financial Recovery': '💰', International: '🌍', Apps: '📱',
-  Podcasts: '🎙️', 'Blocking Tools': '🛡️', Mindfulness: '🧘', Other: '📌',
+  Crisis: '🆘', Professional: '', 'Self-Exclusion': '',
+  'Financial Recovery': '', International: '', Apps: '',
+  Podcasts: '', 'Blocking Tools': '', Mindfulness: '', Other: '',
 }
 const ALL_CATEGORIES = Object.keys(CATEGORY_ICONS)
 
@@ -57,7 +57,7 @@ export default function Resources() {
 
   useEffect(() => { fetchResources(); loadSaved(); loadRecent(); fetchProfile() }, [])
 
-  // ✅ Debounce search
+  //  Debounce search
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300)
     return () => clearTimeout(timer)
@@ -110,7 +110,7 @@ export default function Resources() {
     try { localStorage.setItem('precious_recent_resources', JSON.stringify(updated)) } catch {}
   }
 
-  // ✅ Open with noopener for security
+  //  Open with noopener for security
   const handleVisit = (resource) => {
     markViewed(resource)
     if (resource.link) {
@@ -142,10 +142,10 @@ export default function Resources() {
         await navigator.share({ title: resource.name, text })
       } else {
         await navigator.clipboard.writeText(text)
-        showToast('📋 Copied!')
+        showToast(' Copied!')
       }
     } catch {
-      try { await navigator.clipboard.writeText(text); showToast('📋 Copied!') }
+      try { await navigator.clipboard.writeText(text); showToast(' Copied!') }
       catch { showToast('Could not copy.', 2000) }
     }
   }
@@ -161,13 +161,13 @@ export default function Resources() {
         category: suggestion.category || 'Crisis',
       })
       setSuggestionSent(true)
-      showToast('✅ Suggestion submitted!')
+      showToast(' Suggestion submitted!')
       setTimeout(() => { setShowSuggestionForm(false); setSuggestionSent(false); setSuggestion({ name: '', link: '', category: 'Crisis', notes: '' }) }, 1500)
     } catch (err) { showToast('Failed to submit.', 2000) }
     setSubmittingSuggestion(false)
   }
 
-  // ✅ Check actual hours field
+  //  Check actual hours field
   const isOpenNow = (resource) => {
     const hours = resource.hours || resource.detail || ''
     if (hours.toLowerCase().includes('24/7')) return true
@@ -186,7 +186,7 @@ export default function Resources() {
     return ['Financial Recovery', 'Podcasts', 'Mindfulness']
   }
 
-  // ✅ Memoized filtered + grouped + topRated
+  //  Memoized filtered + grouped + topRated
   const { filteredResources, grouped, topRated } = useMemo(() => {
     const filtered = resources.filter(r => {
       const matchesSearch = !debouncedSearch || r.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) || r.detail?.toLowerCase().includes(debouncedSearch.toLowerCase())
@@ -213,7 +213,7 @@ export default function Resources() {
     return (
       <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
-          <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}>🔒</span>
+          <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}></span>
           <h2 style={{ color: '#f59e0b', fontFamily: "'Playfair Display', serif" }}>Please log in</h2>
           <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#f59e0b', border: 'none', color: '#041f13', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%', marginTop: '16px' }}>Go to Login →</button>
         </div>
@@ -233,13 +233,13 @@ export default function Resources() {
         </div>
 
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#041f13', borderBottom: '1px solid #0a3d22' }}>
-          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}>📞 Resources</h1><p style={{ fontSize: '12px', color: '#3b7a5a', margin: '2px 0 0' }}>{resources.length} resources available</p></div>
+          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}> Resources</h1><p style={{ fontSize: '12px', color: '#3b7a5a', margin: '2px 0 0' }}>{resources.length} resources available</p></div>
         </nav>
 
         <div style={{ padding: '1.5rem' }}>
           {/* Daily Affirmation */}
           <div style={{ background: 'linear-gradient(135deg, #0a3d22, #1d5c38)', border: '1px solid #f59e0b', borderRadius: '12px', padding: '14px 16px', marginBottom: '1rem', textAlign: 'center' }}>
-            <p style={{ color: '#f59e0b', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>🌟 Daily Affirmation</p>
+            <p style={{ color: '#f59e0b', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}> Daily Affirmation</p>
             <p style={{ color: '#6ee7b7', fontSize: '14px', fontStyle: 'italic', margin: 0, lineHeight: '1.6' }}>"{affirmation.text}"</p>
           </div>
 
@@ -249,7 +249,7 @@ export default function Resources() {
               <p style={{ color: '#3b7a5a', fontSize: '11px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>Recently viewed</p>
               <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {recentlyViewed.map(r => (
-                  <button key={r.id} onClick={() => handleVisit(r)} style={{ padding: '6px 12px', borderRadius: '100px', background: '#0a3d22', border: '1px solid #1d5c38', color: '#6ee7b7', fontSize: '11px', whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: "'Inter', sans-serif", flexShrink: 0 }}>{CATEGORY_ICONS[r.category] || '📌'} {r.name}</button>
+                  <button key={r.id} onClick={() => handleVisit(r)} style={{ padding: '6px 12px', borderRadius: '100px', background: '#0a3d22', border: '1px solid #1d5c38', color: '#6ee7b7', fontSize: '11px', whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: "'Inter', sans-serif", flexShrink: 0 }}>{CATEGORY_ICONS[r.category] || ''} {r.name}</button>
                 ))}
               </div>
             </div>
@@ -261,7 +261,7 @@ export default function Resources() {
               <p style={{ color: '#3b7a5a', fontSize: '11px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>Recommended for you</p>
               <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {recommendedCats.map(cat => (
-                  <button key={cat} onClick={() => setActiveCategory(cat)} style={{ padding: '6px 12px', borderRadius: '100px', background: '#0a3d22', border: '1px solid #f59e0b', color: '#f59e0b', fontSize: '11px', whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: "'Inter', sans-serif", flexShrink: 0 }}>{CATEGORY_ICONS[cat] || '📌'} {cat}</button>
+                  <button key={cat} onClick={() => setActiveCategory(cat)} style={{ padding: '6px 12px', borderRadius: '100px', background: '#0a3d22', border: '1px solid #f59e0b', color: '#f59e0b', fontSize: '11px', whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: "'Inter', sans-serif", flexShrink: 0 }}>{CATEGORY_ICONS[cat] || ''} {cat}</button>
                 ))}
               </div>
             </div>
@@ -269,10 +269,10 @@ export default function Resources() {
 
           {/* Search */}
           <div style={{ position: 'relative', marginBottom: '1rem' }}>
-            <input type="text" placeholder="🔍 Search resources..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+            <input type="text" placeholder=" Search resources..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
               style={{ width: '100%', padding: '10px 40px 10px 14px', borderRadius: '100px', background: '#062616', border: '1px solid #0a3d22', color: '#fff', fontSize: '13px', outline: 'none', fontFamily: "'Inter', sans-serif", boxSizing: 'border-box' }} />
             {searchQuery && (
-              <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '16px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Clear search">✕</button>
+              <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '16px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Clear search"></button>
             )}
           </div>
 
@@ -290,13 +290,13 @@ export default function Resources() {
               <p style={{ color: '#f59e0b', fontSize: '11px', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>⭐ Most helpful</p>
               {topRated.map(r => (
                 <div key={r.id} style={{ padding: '12px', background: '#0a3d22', borderRadius: '10px', marginBottom: '6px', border: '1px solid #1d5c38', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '24px' }}>{CATEGORY_ICONS[r.category] || '📌'}</span>
+                  <span style={{ fontSize: '24px' }}>{CATEGORY_ICONS[r.category] || ''}</span>
                   <div style={{ flex: 1 }}>
                     <p style={{ color: '#e2f5ec', fontSize: '13px', fontWeight: 500, margin: 0 }}>{r.name}</p>
                     <p style={{ color: '#6ee7b7', fontSize: '11px', margin: '2px 0' }}>{r.detail}</p>
                   </div>
                   <div style={{ display: 'flex', gap: '4px' }}>
-                    <button onClick={() => handleRate(r.id, true)} style={{ background: 'transparent', border: 'none', fontSize: '14px', cursor: 'pointer', padding: '4px' }} title="Helpful">👍</button>
+                    <button onClick={() => handleRate(r.id, true)} style={{ background: 'transparent', border: 'none', fontSize: '14px', cursor: 'pointer', padding: '4px' }} title="Helpful"></button>
                     <button onClick={() => handleVisit(r)} style={{ padding: '6px 12px', borderRadius: '100px', background: '#f59e0b', border: 'none', color: '#041f13', fontSize: '11px', fontWeight: 500, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{r.link ? 'Visit' : 'View'}</button>
                   </div>
                 </div>
@@ -313,14 +313,14 @@ export default function Resources() {
             <div className="dash-section" style={{ textAlign: 'center', padding: '2rem' }}><p style={{ color: '#F09595' }}>{error}</p><button className="btn-ghost" onClick={fetchResources}>Retry</button></div>
           ) : filteredResources.length === 0 ? (
             <div className="dash-section" style={{ textAlign: 'center', padding: '2rem' }}>
-              <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>📞</span>
+              <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
               <p style={{ color: '#6ee7b7', fontSize: '14px' }}>{debouncedSearch || activeCategory !== 'all' ? 'No resources match your search.' : 'No resources yet.'}</p>
               {(debouncedSearch || activeCategory !== 'all') && <button onClick={() => { setSearchQuery(''); setActiveCategory('all') }} style={{ marginTop: '10px', padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid #6ee7b7', color: '#6ee7b7', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Clear filters</button>}
             </div>
           ) : (
             Object.entries(grouped).map(([category, items]) => (
               <div key={category} className="dash-section" style={{ marginBottom: '1rem' }}>
-                <h3 style={{ color: '#f59e0b', fontSize: '13px', marginBottom: '1rem' }}>{CATEGORY_ICONS[category] || '📌'} {category}</h3>
+                <h3 style={{ color: '#f59e0b', fontSize: '13px', marginBottom: '1rem' }}>{CATEGORY_ICONS[category] || ''} {category}</h3>
                 {items.map(r => (
                   <div key={r.id} style={{ padding: '10px 0', borderBottom: '1px solid #0a3d22', display: 'flex', alignItems: 'center', gap: '10px', transition: 'background 0.15s', borderRadius: '8px', paddingLeft: '8px', paddingRight: '8px' }}
                     onMouseEnter={e => e.currentTarget.style.background = '#041f13'}
@@ -333,9 +333,9 @@ export default function Resources() {
                       <p style={{ color: '#3b7a5a', fontSize: '12px', margin: '2px 0 0', lineHeight: '1.4' }}>{r.detail}</p>
                     </div>
                     <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexShrink: 0 }}>
-                      <button onClick={() => handleRate(r.id, true)} style={{ background: 'transparent', border: 'none', fontSize: '13px', cursor: 'pointer', padding: '4px' }} title="Helpful">👍</button>
-                      <button onClick={() => toggleSave(r.id)} style={{ background: 'transparent', border: 'none', fontSize: '13px', cursor: 'pointer', padding: '4px', color: savedIds.includes(r.id) ? '#f59e0b' : '#3b7a5a' }} title={savedIds.includes(r.id) ? 'Saved' : 'Save'}>{savedIds.includes(r.id) ? '⭐' : '☆'}</button>
-                      <button onClick={() => handleShare(r)} style={{ background: 'transparent', border: 'none', fontSize: '12px', cursor: 'pointer', padding: '4px', color: '#3b7a5a' }} title="Share">🔗</button>
+                      <button onClick={() => handleRate(r.id, true)} style={{ background: 'transparent', border: 'none', fontSize: '13px', cursor: 'pointer', padding: '4px' }} title="Helpful"></button>
+                      <button onClick={() => toggleSave(r.id)} style={{ background: 'transparent', border: 'none', fontSize: '13px', cursor: 'pointer', padding: '4px', color: savedIds.includes(r.id) ? '#f59e0b' : '#3b7a5a' }} title={savedIds.includes(r.id) ? 'Saved' : 'Save'}>{savedIds.includes(r.id) ? '⭐' : ''}</button>
+                      <button onClick={() => handleShare(r)} style={{ background: 'transparent', border: 'none', fontSize: '12px', cursor: 'pointer', padding: '4px', color: '#3b7a5a' }} title="Share"></button>
                       <button onClick={() => handleVisit(r)} style={{ padding: '6px 12px', borderRadius: '100px', background: '#0a3d22', border: '1px solid #1d5c38', color: '#6ee7b7', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>{r.link ? 'Visit' : 'View'}</button>
                     </div>
                   </div>
@@ -344,16 +344,16 @@ export default function Resources() {
             ))
           )}
 
-          {/* ✅ Saved Resources Section — Now Functional */}
+          {/*  Saved Resources Section — Now Functional */}
           {savedResources.length > 0 && (
             <div className="dash-section" style={{ marginTop: '1rem', borderColor: '#f59e0b' }}>
               <h3 style={{ color: '#f59e0b', fontSize: '13px', marginBottom: '0.75rem' }}>⭐ Saved ({savedResources.length})</h3>
               {savedResources.map(r => (
                 <div key={r.id} style={{ padding: '8px 0', borderBottom: '1px solid #0a3d22', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>{CATEGORY_ICONS[r.category] || '📌'}</span>
+                  <span>{CATEGORY_ICONS[r.category] || ''}</span>
                   <span style={{ color: '#e2f5ec', fontSize: '12px', flex: 1 }}>{r.name}</span>
                   <button onClick={() => handleVisit(r)} style={{ padding: '4px 10px', borderRadius: '100px', background: '#0a3d22', border: '1px solid #1d5c38', color: '#6ee7b7', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Visit</button>
-                  <button onClick={() => toggleSave(r.id)} style={{ background: 'transparent', border: 'none', color: '#F09595', fontSize: '11px', cursor: 'pointer' }}>✕</button>
+                  <button onClick={() => toggleSave(r.id)} style={{ background: 'transparent', border: 'none', color: '#F09595', fontSize: '11px', cursor: 'pointer' }}></button>
                 </div>
               ))}
             </div>
@@ -362,10 +362,10 @@ export default function Resources() {
           {/* Suggestion Form */}
           <div className="dash-section" style={{ marginTop: '1.5rem', textAlign: 'center' }}>
             {!showSuggestionForm ? (
-              <button onClick={() => setShowSuggestionForm(true)} style={{ background: 'transparent', border: '1px solid #0a3d22', color: '#6ee7b7', padding: '10px 20px', borderRadius: '100px', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>💡 Know a resource we're missing?</button>
+              <button onClick={() => setShowSuggestionForm(true)} style={{ background: 'transparent', border: '1px solid #0a3d22', color: '#6ee7b7', padding: '10px 20px', borderRadius: '100px', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Know a resource we're missing?</button>
             ) : suggestionSent ? (
               <div style={{ padding: '1rem', background: '#0a3d22', borderRadius: '10px', border: '1px solid #6ee7b7' }}>
-                <p style={{ color: '#6ee7b7', fontSize: '14px', margin: 0 }}>✅ Suggestion submitted! Thank you!</p>
+                <p style={{ color: '#6ee7b7', fontSize: '14px', margin: 0 }}> Suggestion submitted! Thank you!</p>
               </div>
             ) : (
               <div>

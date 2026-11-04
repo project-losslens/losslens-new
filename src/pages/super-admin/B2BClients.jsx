@@ -217,12 +217,12 @@ export default function B2BClients() {
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#041f13', borderBottom: '2px solid #f59e0b', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#f59e0b', fontFamily: "'Inter', sans-serif", margin: 0 }}>🏢 B2B Clients</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#f59e0b', fontFamily: "'Inter', sans-serif", margin: 0 }}> B2B Clients</h1>
             <p style={{ fontSize: '12px', color: '#FAC775', margin: '2px 0 0' }}>{clients.length} total · {activeCount} active</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchClients} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #FAC775', color: '#FAC775', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>🔄 Refresh</button>
-            <button onClick={openCreate} style={{ padding: '8px 18px', borderRadius: '100px', background: '#f59e0b', border: 'none', color: '#041f13', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>➕ Add Client</button>
+            <button onClick={fetchClients} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #FAC775', color: '#FAC775', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
+            <button onClick={openCreate} style={{ padding: '8px 18px', borderRadius: '100px', background: '#f59e0b', border: 'none', color: '#041f13', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Add Client</button>
           </div>
         </nav>
 
@@ -231,7 +231,7 @@ export default function B2BClients() {
           {showForm && (
             <div onClick={() => setShowForm(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.92)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
               <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '1px solid #0a3d22', maxWidth: '560px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
-                <h3 style={{ color: '#f59e0b', fontSize: '16px', margin: '0 0 1.25rem' }}>{editingClient ? '✏️ Edit Client' : '➕ New B2B Client'}</h3>
+                <h3 style={{ color: '#f59e0b', fontSize: '16px', margin: '0 0 1.25rem' }}>{editingClient ? ' Edit Client' : ' New B2B Client'}</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div>
                     <label style={{ color: '#3b7a5a', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Company Name *</label>
@@ -293,7 +293,7 @@ export default function B2BClients() {
 
           {/* Filters */}
           <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <input type="text" placeholder="🔍 Search clients or code..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+            <input type="text" placeholder=" Search clients or code..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
               style={{ ...inputStyle, width: '240px', borderRadius: '100px' }} />
             <select value={planFilter} onChange={e => setPlanFilter(e.target.value)}
               style={{ ...inputStyle, width: 'auto', minWidth: '110px', cursor: 'pointer', borderRadius: '100px' }}>
@@ -310,7 +310,7 @@ export default function B2BClients() {
 
           {filteredClients.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a', background: '#062616', borderRadius: '12px', border: '1px solid #0a3d22' }}>
-              <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>🏢</span>
+              <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
               <p style={{ color: '#6ee7b7', fontSize: '14px' }}>{searchQuery || planFilter !== 'all' || statusFilter !== 'all' ? 'No clients match your filters.' : 'No B2B clients yet.'}</p>
             </div>
           ) : (
@@ -340,7 +340,7 @@ export default function B2BClients() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                             <span style={{ color: '#3b7a5a', fontSize: '11px' }}>Code:</span>
                             <code style={{ background: '#041f13', padding: '3px 8px', borderRadius: '4px', color: '#f59e0b', fontSize: '12px', fontFamily: 'monospace', letterSpacing: '1px' }}>{c.company_code}</code>
-                            <button onClick={() => copyCode(c.company_code)} style={{ background: 'transparent', border: 'none', color: '#6ee7b7', fontSize: '11px', cursor: 'pointer', padding: '2px 4px' }} title="Copy code">📋</button>
+                            <button onClick={() => copyCode(c.company_code)} style={{ background: 'transparent', border: 'none', color: '#6ee7b7', fontSize: '11px', cursor: 'pointer', padding: '2px 4px' }} title="Copy code"></button>
                           </div>
                         )}
 
@@ -348,7 +348,7 @@ export default function B2BClients() {
                         {seatsTotal > 0 && (
                           <div style={{ marginTop: '6px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
-                              <span style={{ color: '#3b7a5a', fontSize: '10px' }}>👥 Seats</span>
+                              <span style={{ color: '#3b7a5a', fontSize: '10px' }}> Seats</span>
                               <span style={{ color: seatColor, fontSize: '10px', fontWeight: 500 }}>{memberCount} / {seatsTotal}</span>
                             </div>
                             <div style={{ height: '4px', background: '#0a3d22', borderRadius: '2px', overflow: 'hidden' }}>
@@ -359,17 +359,17 @@ export default function B2BClients() {
 
                         <p style={{ color: '#3b7a5a', fontSize: '11px', margin: '6px 0 0' }}>
                           Joined {new Date(c.created_at).toLocaleDateString('en-KE')}
-                          {c.notes && <span style={{ display: 'block', marginTop: '4px', color: '#1d5c38', fontSize: '11px', fontStyle: 'italic' }}>📝 {c.notes.substring(0, 80)}{c.notes.length > 80 ? '…' : ''}</span>}
+                          {c.notes && <span style={{ display: 'block', marginTop: '4px', color: '#1d5c38', fontSize: '11px', fontStyle: 'italic' }}> {c.notes.substring(0, 80)}{c.notes.length > 80 ? '…' : ''}</span>}
                         </p>
                       </div>
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                        <button onClick={() => fetchClientMembers(c)} style={btnStyle('transparent', '#6ee7b7', '#6ee7b7')}>👥 Members</button>
-                        <button onClick={() => openEdit(c)} style={btnStyle('transparent', '#FAC775', '#FAC775')}>✏️</button>
+                        <button onClick={() => fetchClientMembers(c)} style={btnStyle('transparent', '#6ee7b7', '#6ee7b7')}> Members</button>
+                        <button onClick={() => openEdit(c)} style={btnStyle('transparent', '#FAC775', '#FAC775')}></button>
                         <button onClick={() => setShowToggleConfirm(c)} disabled={actionLoading === c.id}
                           style={btnStyle('transparent', c.status === 'active' ? '#FAC775' : '#6ee7b7', c.status === 'active' ? '#FAC775' : '#6ee7b7')}>
                           {actionLoading === c.id ? '...' : c.status === 'active' ? 'Deactivate' : 'Activate'}
                         </button>
-                        <button onClick={() => setShowDeleteConfirm(c)} style={btnStyle('transparent', '#F09595', '#791F1F')}>🗑️</button>
+                        <button onClick={() => setShowDeleteConfirm(c)} style={btnStyle('transparent', '#F09595', '#791F1F')}></button>
                       </div>
                     </div>
                   </div>
@@ -385,8 +385,8 @@ export default function B2BClients() {
         <div onClick={() => setShowMembers(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.92)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '1px solid #0a3d22', maxWidth: '600px', width: '100%', maxHeight: '80vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ color: '#f59e0b', fontSize: '16px', margin: 0 }}>👥 {showMembers.client.company_name} — Members</h3>
-              <button onClick={() => setShowMembers(null)} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+              <h3 style={{ color: '#f59e0b', fontSize: '16px', margin: 0 }}> {showMembers.client.company_name} — Members</h3>
+              <button onClick={() => setShowMembers(null)} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '20px', cursor: 'pointer' }}></button>
             </div>
             {showMembers.members.length === 0 ? (
               <p style={{ color: '#3b7a5a', fontSize: '13px', textAlign: 'center', padding: '2rem' }}>No members yet. Share the company code <strong style={{ color: '#f59e0b' }}>{showMembers.client.company_code}</strong> with employees.</p>
@@ -419,7 +419,7 @@ export default function B2BClients() {
       {showToggleConfirm && (
         <div onClick={() => setShowToggleConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
           <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: `1px solid ${showToggleConfirm.status === 'active' ? '#FAC775' : '#6ee7b7'}`, maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{showToggleConfirm.status === 'active' ? '⏸️' : '▶️'}</span>
+            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{showToggleConfirm.status === 'active' ? '⏸' : '▶'}</span>
             <h3 style={{ color: showToggleConfirm.status === 'active' ? '#FAC775' : '#6ee7b7', fontSize: '16px', margin: '0 0 8px' }}>
               {showToggleConfirm.status === 'active' ? 'Deactivate Client?' : 'Activate Client?'}
             </h3>
@@ -440,7 +440,7 @@ export default function B2BClients() {
       {showDeleteConfirm && (
         <div onClick={() => setShowDeleteConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
           <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '1px solid #791F1F', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>🗑️</span>
+            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}></span>
             <h3 style={{ color: '#F09595', fontSize: '16px', margin: '0 0 8px' }}>Delete Client?</h3>
             <p style={{ color: '#6ee7b7', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
               Permanently delete <strong style={{ color: '#f59e0b' }}>"{showDeleteConfirm.company_name}"</strong>? This cannot be undone.

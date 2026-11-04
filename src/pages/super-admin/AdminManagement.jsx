@@ -216,12 +216,12 @@ export default function AdminManagement() {
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#041f13', borderBottom: '2px solid #f59e0b', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#f59e0b', fontFamily: "'Inter', sans-serif", margin: 0 }}>🛡️ Admin Management</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#f59e0b', fontFamily: "'Inter', sans-serif", margin: 0 }}> Admin Management</h1>
             <p style={{ fontSize: '12px', color: '#FAC775', margin: '2px 0 0' }}>{regularAdmins.length} admins · {superAdmins.length} super admins · {suspendedAdmins.length} suspended</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchAdmins} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #FAC775', color: '#FAC775', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>🔄 Refresh</button>
-            <button onClick={() => setShowPromote(!showPromote)} style={{ padding: '8px 18px', borderRadius: '100px', background: '#f59e0b', border: 'none', color: '#041f13', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{showPromote ? '✕ Cancel' : '➕ Promote to Admin'}</button>
+            <button onClick={fetchAdmins} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #FAC775', color: '#FAC775', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
+            <button onClick={() => setShowPromote(!showPromote)} style={{ padding: '8px 18px', borderRadius: '100px', background: '#f59e0b', border: 'none', color: '#041f13', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{showPromote ? ' Cancel' : ' Promote to Admin'}</button>
           </div>
         </nav>
 
@@ -236,7 +236,7 @@ export default function AdminManagement() {
 
           {showPromote && (
             <div style={{ background: '#062616', border: '1px solid #f59e0b', borderRadius: '14px', padding: '20px', marginBottom: '1.5rem' }}>
-              <h3 style={{ color: '#f59e0b', fontSize: '15px', margin: '0 0 1rem' }}>⬆️ Promote User to Admin</h3>
+              <h3 style={{ color: '#f59e0b', fontSize: '15px', margin: '0 0 1rem' }}>⬆ Promote User to Admin</h3>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 <input type="text" placeholder="Enter user name, username, or ID..." value={promoteInput} onChange={e => setPromoteInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && promoteToAdmin()}
@@ -246,14 +246,14 @@ export default function AdminManagement() {
                   {promoting ? '⏳...' : 'Promote'}
                 </button>
               </div>
-              <p style={{ color: '#3b7a5a', fontSize: '11px', marginTop: '6px' }}>⚠️ Admins have full access to user data, crisis alerts, and platform management.</p>
+              <p style={{ color: '#3b7a5a', fontSize: '11px', marginTop: '6px' }}> Admins have full access to user data, crisis alerts, and platform management.</p>
             </div>
           )}
 
           {/* Super Admins Section — View Only */}
           {superAdmins.length > 0 && (
             <div style={{ marginBottom: '1.5rem' }}>
-              <h3 style={{ color: '#f59e0b', fontSize: '14px', marginBottom: '0.75rem' }}>⚡ Super Admins</h3>
+              <h3 style={{ color: '#f59e0b', fontSize: '14px', marginBottom: '0.75rem' }}> Super Admins</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {superAdmins.map(a => {
                   const isCurrentUser = isSelf(a.id)
@@ -270,12 +270,12 @@ export default function AdminManagement() {
                               {a.full_name || 'Unnamed'}
                               {a.username && <span style={{ color: '#3b7a5a', fontSize: '12px', fontWeight: 400 }}> @{a.username}</span>}
                             </span>
-                            <span style={{ background: '#633806', color: '#f59e0b', border: '1px solid #f59e0b', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>⚡ Super Admin</span>
+                            <span style={{ background: '#633806', color: '#f59e0b', border: '1px solid #f59e0b', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}> Super Admin</span>
                             {isCurrentUser && <span style={{ background: '#0a3d22', color: '#6ee7b7', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', border: '1px solid #6ee7b7' }}>You</span>}
                           </div>
                           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                            <span style={{ color: '#3b7a5a', fontSize: '11px' }}>✉️ {a.email || 'No email'}</span>
-                            <span style={{ color: '#3b7a5a', fontSize: '11px' }}>📞 {a.phone || 'No phone'}</span>
+                            <span style={{ color: '#3b7a5a', fontSize: '11px' }}> {a.email || 'No email'}</span>
+                            <span style={{ color: '#3b7a5a', fontSize: '11px' }}> {a.phone || 'No phone'}</span>
                             <span style={{ color: '#3b7a5a', fontSize: '11px' }}>Joined {new Date(a.created_at).toLocaleDateString('en-KE')}</span>
                           </div>
                         </div>
@@ -294,12 +294,12 @@ export default function AdminManagement() {
           {/* Regular Admins Section — Full Management */}
           {regularAdmins.length === 0 && superAdmins.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a', background: '#062616', borderRadius: '12px', border: '1px solid #0a3d22' }}>
-              <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>🛡️</span>
+              <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
               <p style={{ color: '#6ee7b7', fontSize: '14px' }}>No admins found. Promote a user to get started.</p>
             </div>
           ) : regularAdmins.length > 0 && (
             <div>
-              <h3 style={{ color: '#6ee7b7', fontSize: '14px', marginBottom: '0.75rem' }}>🛡️ Admins</h3>
+              <h3 style={{ color: '#6ee7b7', fontSize: '14px', marginBottom: '0.75rem' }}> Admins</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {regularAdmins.map(a => {
                   const isSuspended = a.status === 'suspended'
@@ -321,14 +321,14 @@ export default function AdminManagement() {
                               {a.username && <span style={{ color: '#3b7a5a', fontSize: '12px', fontWeight: 400 }}> @{a.username}</span>}
                               {isCurrentUser && <span style={{ background: '#0a3d22', color: '#6ee7b7', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', border: '1px solid #6ee7b7' }}>You</span>}
                             </span>
-                            <span style={{ background: '#0a3d22', color: '#6ee7b7', border: '1px solid #6ee7b7', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>🛡️ Admin</span>
+                            <span style={{ background: '#0a3d22', color: '#6ee7b7', border: '1px solid #6ee7b7', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}> Admin</span>
                             {isSuspended && (
-                              <span style={{ background: '#791F1F', color: '#F09595', border: '1px solid #F09595', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>⏸️ Suspended</span>
+                              <span style={{ background: '#791F1F', color: '#F09595', border: '1px solid #F09595', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>⏸ Suspended</span>
                             )}
                           </div>
                           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                            <span style={{ color: '#3b7a5a', fontSize: '11px' }}>✉️ {a.email || 'No email'}</span>
-                            <span style={{ color: '#3b7a5a', fontSize: '11px' }}>📞 {a.phone || 'No phone'}</span>
+                            <span style={{ color: '#3b7a5a', fontSize: '11px' }}> {a.email || 'No email'}</span>
+                            <span style={{ color: '#3b7a5a', fontSize: '11px' }}> {a.phone || 'No phone'}</span>
                             <span style={{ color: '#3b7a5a', fontSize: '11px' }}>Joined {new Date(a.created_at).toLocaleDateString('en-KE')}</span>
                           </div>
                         </div>
@@ -337,17 +337,17 @@ export default function AdminManagement() {
                           <button onClick={() => setShowSuspendConfirm(a)} disabled={actionLoading === a.id || isCurrentUser}
                             style={btnStyle('transparent', isSuspended ? '#6ee7b7' : '#FAC775', isSuspended ? '#6ee7b7' : '#FAC775')}
                             title={isCurrentUser ? 'Cannot suspend yourself' : isSuspended ? 'Reactivate admin' : 'Suspend admin'}>
-                            {actionLoading === a.id ? '...' : isSuspended ? '▶️ Reactivate' : '⏸️ Suspend'}
+                            {actionLoading === a.id ? '...' : isSuspended ? '▶ Reactivate' : '⏸ Suspend'}
                           </button>
                           <button onClick={() => setShowRevokeConfirm(a)} disabled={actionLoading === a.id || isCurrentUser}
                             style={btnStyle('transparent', '#FAC775', '#FAC775')}
                             title={isCurrentUser ? 'Cannot revoke yourself' : 'Revoke admin to user'}>
-                            {actionLoading === a.id ? '...' : '⬇️ Revoke'}
+                            {actionLoading === a.id ? '...' : '⬇ Revoke'}
                           </button>
                           <button onClick={() => setShowDeleteConfirm(a)} disabled={actionLoading === a.id || isCurrentUser}
                             style={btnStyle('transparent', '#F09595', '#791F1F')}
                             title={isCurrentUser ? 'Cannot delete yourself' : 'Permanently delete admin'}>
-                            {actionLoading === a.id ? '...' : '🗑️ Delete'}
+                            {actionLoading === a.id ? '...' : ' Delete'}
                           </button>
                         </div>
                       </div>
@@ -364,7 +364,7 @@ export default function AdminManagement() {
       {showSuspendConfirm && (
         <div onClick={() => setShowSuspendConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
           <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: `1px solid ${showSuspendConfirm.status === 'suspended' ? '#6ee7b7' : '#FAC775'}`, maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{showSuspendConfirm.status === 'suspended' ? '▶️' : '⏸️'}</span>
+            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{showSuspendConfirm.status === 'suspended' ? '▶' : '⏸'}</span>
             <h3 style={{ color: showSuspendConfirm.status === 'suspended' ? '#6ee7b7' : '#FAC775', fontSize: '16px', margin: '0 0 8px' }}>
               {showSuspendConfirm.status === 'suspended' ? 'Reactivate Admin?' : 'Suspend Admin?'}
             </h3>
@@ -385,7 +385,7 @@ export default function AdminManagement() {
       {showRevokeConfirm && (
         <div onClick={() => setShowRevokeConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
           <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '1px solid #FAC775', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>⬇️</span>
+            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>⬇</span>
             <h3 style={{ color: '#FAC775', fontSize: '16px', margin: '0 0 8px' }}>Revoke Admin Access?</h3>
             <p style={{ color: '#6ee7b7', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
               <strong style={{ color: '#f59e0b' }}>"{showRevokeConfirm.full_name}"</strong> will become a regular user.
@@ -402,7 +402,7 @@ export default function AdminManagement() {
       {showDeleteConfirm && (
         <div onClick={() => setShowDeleteConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
           <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '1px solid #791F1F', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>🗑️</span>
+            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}></span>
             <h3 style={{ color: '#F09595', fontSize: '16px', margin: '0 0 8px' }}>Delete Admin?</h3>
             <p style={{ color: '#6ee7b7', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
               Permanently delete <strong style={{ color: '#f59e0b' }}>"{showDeleteConfirm.full_name}"</strong>?

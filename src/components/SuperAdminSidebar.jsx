@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import AppIcon from './AppIcon'
 
 function SuperAdminSidebar() {
   const navigate = useNavigate()
@@ -14,18 +15,18 @@ function SuperAdminSidebar() {
   }, [location.pathname])
 
   const menuItems = [
-    { path: '/super-admin', icon: '⚡', label: 'Dashboard', desc: 'Platform overview' },
-    { path: '/super-admin/users', icon: '👥', label: 'Users', desc: 'User management' },
-    { path: '/super-admin/admins', icon: '🛡️', label: 'Admins', desc: 'Admin management' },
-    { path: '/super-admin/settings', icon: '⚙️', label: 'Settings', desc: 'System config' },
-    { path: '/super-admin/logs', icon: '📋', label: 'Audit Logs', desc: 'Activity trail' },
-    { path: '/super-admin/b2b', icon: '🏢', label: 'B2B Clients', desc: 'Corporate clients' },
-    { path: '/super-admin/insurance', icon: '🏥', label: 'Insurance', desc: 'Partners' },
-    { path: '/super-admin/grants', icon: '📝', label: 'Grants', desc: 'Applications' },
-    { path: '/admin', icon: '🛡️', label: 'Admin Panel', desc: 'Switch to admin' },
-    { path: '/dashboard', icon: '🏠', label: 'User App', desc: 'Switch view' },
-    { path: '/logout', icon: '🚪', label: 'Logout', desc: 'Sign out' },
-    { path: '/super-admin/chats', icon: '💬', label: 'Chat Viewer', desc: 'User conversations' },
+    { path: '/super-admin', icon: 'analytics', label: 'Dashboard', desc: 'Platform overview' },
+    { path: '/super-admin/users', icon: 'users', label: 'Users', desc: 'User management' },
+    { path: '/super-admin/admins', icon: 'shield', label: 'Admins', desc: 'Admin management' },
+    { path: '/super-admin/settings', icon: 'settings', label: 'Settings', desc: 'System config' },
+    { path: '/super-admin/logs', icon: 'document', label: 'Audit Logs', desc: 'Activity trail' },
+    { path: '/super-admin/b2b', icon: 'building', label: 'B2B Clients', desc: 'Corporate clients' },
+    { path: '/super-admin/insurance', icon: 'medical', label: 'Insurance', desc: 'Partners' },
+    { path: '/super-admin/grants', icon: 'document', label: 'Grants', desc: 'Applications' },
+    { path: '/admin', icon: 'shield', label: 'Admin Panel', desc: 'Switch to admin' },
+    { path: '/dashboard', icon: 'home', label: 'User App', desc: 'Switch view' },
+    { path: '/logout', icon: 'logout', label: 'Logout', desc: 'Sign out' },
+    { path: '/super-admin/chats', icon: 'chat', label: 'Chat Viewer', desc: 'User conversations' },
   ]
 
   const isActive = (path) => location.pathname === path
@@ -60,7 +61,7 @@ function SuperAdminSidebar() {
         }}
         className="mobile-hamburger"
       >
-        {mobileOpen ? '✕' : '☰'}
+        {mobileOpen ? '' : ''}
       </button>
 
       {(!collapsed || mobileOpen) && (
@@ -88,7 +89,7 @@ function SuperAdminSidebar() {
         }}
         className="desktop-toggle"
       >
-        {collapsed ? '☰' : '◂'}
+        {collapsed ? '' : 'Collapse'}
       </button>
 
       <nav
@@ -111,7 +112,7 @@ function SuperAdminSidebar() {
             fontFamily: "'Playfair Display', serif", fontSize: '20px',
             color: '#f59e0b', fontWeight: 700, cursor: 'pointer',
           }} onClick={() => handleNav('/super-admin')}>
-            Precious <span style={{ fontSize: '12px', color: '#f59e0b' }}>⚡SA</span>
+            LossLens <span style={{ fontSize: '12px', color: '#f59e0b' }}>SA</span>
           </span>
         </div>
 
@@ -145,7 +146,7 @@ function SuperAdminSidebar() {
               }}
             >
               <span aria-hidden="true" style={{ fontSize: '18px', width: '24px', textAlign: 'center', flexShrink: 0 }}>
-                {item.icon}
+                <AppIcon name={item.icon} size={18} />
               </span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: isActive(item.path) ? 600 : 400, fontSize: '13px' }}>
@@ -167,7 +168,7 @@ function SuperAdminSidebar() {
           padding: '0.75rem 1rem', borderTop: '1px solid #f59e0b',
           fontSize: '11px', color: '#f59e0b', textAlign: 'center',
         }}>
-          <p>Super Admin v1.0 ⚡</p>
+          <p>Super Admin v1.0 </p>
         </div>
       </nav>
 

@@ -153,7 +153,7 @@ function Signup() {
     setError('')
     setGoogleLoading(true)
     try {
-      const options = { redirectTo: 'https://kingsly-six.vercel.app/dashboard' }
+      const options = { redirectTo: `${window.location.origin}/dashboard` }
       if (signupType === 'company' && companyValidation?.valid) {
         options.data = { plan_type: 'company', company_code: companyCode }
       }
@@ -240,6 +240,7 @@ function Signup() {
       }
 
       sessionStorage.setItem('signup_email', form.email)
+      if (data.user && data.session) sessionStorage.setItem('losslens_new_signup', data.user.id)
       setSignedUpEmail(form.email)
       setSignedUp(true)
     } catch (err) {
@@ -264,25 +265,25 @@ function Signup() {
   if (signedUp) {
     return (
       <div className="root">
-        <nav className="navbar"><span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>Precious</span></nav>
+        <nav className="navbar"><span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span></nav>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}>📧</span>
+            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}></span>
             <h2 className="auth-title">Check your email</h2>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>We've sent a confirmation link to <strong style={{ color: '#f59e0b' }}>{signedUpEmail}</strong></p>
             {signupType === 'company' && companyValidation?.company_name && (
               <p style={{ color: '#6ee7b7', fontSize: '13px', marginTop: '8px' }}>
-                🏢 Linked to <strong>{companyValidation.company_name}</strong>
+                 Linked to <strong>{companyValidation.company_name}</strong>
               </p>
             )}
             <p style={{ color: '#6ee7b7', fontSize: '13px', margin: '16px 0', lineHeight: '1.6' }}>Click the link in the email to activate your account. Then come back here to log in.</p>
             <div style={{ background: '#0a3d22', borderRadius: '8px', padding: '12px', marginBottom: '20px', border: '1px solid #f59e0b' }}>
-              <p style={{ color: '#f59e0b', fontSize: '13px', fontWeight: 600, margin: '0 0 4px' }}>📬 Didn't receive it?</p>
+              <p style={{ color: '#f59e0b', fontSize: '13px', fontWeight: 600, margin: '0 0 4px' }}> Didn't receive it?</p>
               <p style={{ color: '#6ee7b7', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Check your <strong>spam/junk folder</strong>. Some email providers filter automated messages.</p>
             </div>
             <button className="btn-primary full" onClick={() => navigate('/login')}>Go to login →</button>
             <button onClick={handleResendEmail} disabled={resending || resendSent} style={{ width: '100%', marginTop: '10px', padding: '10px', borderRadius: '100px', background: 'transparent', border: '1px solid #0a3d22', color: resendSent ? '#6ee7b7' : '#3b7a5a', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
-              {resendSent ? '✅ Sent!' : resending ? 'Sending...' : 'Resend email'}
+              {resendSent ? ' Sent!' : resending ? 'Sending...' : 'Resend email'}
             </button>
           </div>
         </div>
@@ -293,7 +294,7 @@ function Signup() {
   return (
     <div className="root">
       <nav className="navbar">
-        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>Precious</span>
+        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
         <button className="nav-ghost" onClick={() => navigate('/login')}>Log in</button>
       </nav>
 
@@ -319,7 +320,7 @@ function Signup() {
                 fontSize: '12px', fontWeight: signupType === 'individual' ? 600 : 400,
                 cursor: 'pointer', fontFamily: "'Inter', sans-serif", transition: 'all 0.2s'
               }}>
-              👤 Individual
+               Individual
             </button>
             <button
               onClick={() => setSignupType('company')}
@@ -330,7 +331,7 @@ function Signup() {
                 fontSize: '12px', fontWeight: signupType === 'company' ? 600 : 400,
                 cursor: 'pointer', fontFamily: "'Inter', sans-serif", transition: 'all 0.2s'
               }}>
-              🏢 Company
+               Company
             </button>
           </div>
 
@@ -373,17 +374,17 @@ function Signup() {
                   />
                   {validatingCode && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>⏳</span>}
                   {!validatingCode && companyValidation?.valid && (
-                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#6ee7b7', fontSize: '12px', fontWeight: 500 }}>✅ Valid</span>
+                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#6ee7b7', fontSize: '12px', fontWeight: 500 }}> Valid</span>
                   )}
                   {!validatingCode && companyValidation && !companyValidation.valid && !companyValidation.seats_full && (
-                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#F09595', fontSize: '12px' }}>❌ Invalid</span>
+                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#F09595', fontSize: '12px' }}>âŒ Invalid</span>
                   )}
                   {!validatingCode && companyValidation?.seats_full && (
-                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FAC775', fontSize: '10px' }}>⚠️ Full</span>
+                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FAC775', fontSize: '10px' }}>âš ï¸ Full</span>
                   )}
                 </div>
                 {companyValidation?.valid && (
-                  <span style={{ fontSize: '11px', color: '#6ee7b7' }}>✅ {companyValidation.company_name} — {companyValidation.plan?.charAt(0).toUpperCase() + companyValidation.plan?.slice(1)} Plan</span>
+                  <span style={{ fontSize: '11px', color: '#6ee7b7' }}> {companyValidation.company_name} — {companyValidation.plan?.charAt(0).toUpperCase() + companyValidation.plan?.slice(1)} Plan</span>
                 )}
                 {companyValidation && !companyValidation.valid && !companyValidation.seats_full && (
                   <span style={{ fontSize: '11px', color: '#F09595' }}>Invalid company code. Check with your employer.</span>
@@ -406,8 +407,8 @@ function Signup() {
               <div style={{ position: 'relative' }}>
                 <input id="username" type="text" autoComplete="username" required placeholder="e.g. amina_w" value={form.username} onChange={e => handleUsernameChange(e.target.value)} style={{ paddingRight: 40, ...(fieldErrors.username ? { borderColor: '#F09595' } : {}) }} />
                 {usernameStatus === 'checking' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>⏳</span>}
-                {usernameStatus === 'available' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>✅</span>}
-                {usernameStatus === 'taken' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>❌</span>}
+                {usernameStatus === 'available' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}></span>}
+                {usernameStatus === 'taken' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>âŒ</span>}
               </div>
               {usernameStatus === 'taken' && <span style={{ fontSize: '11px', color: '#F09595' }}>Username already taken</span>}
               {usernameStatus === 'available' && <span style={{ fontSize: '11px', color: '#6ee7b7' }}>Username available!</span>}
@@ -433,7 +434,7 @@ function Signup() {
               <label htmlFor="password">PASSWORD *</label>
               <div style={{ position: 'relative' }}>
                 <input id="password" type={showPw ? 'text' : 'password'} autoComplete="new-password" required placeholder="Min 8 chars, 1 letter + 1 number" value={form.password} onChange={e => { setForm(p => ({ ...p, password: e.target.value })); setPasswordStrength(calculateStrength(e.target.value)); setFieldErrors(p => ({ ...p, password: '' })) }} style={{ paddingRight: 44, ...(fieldErrors.password ? { borderColor: '#F09595' } : {}) }} />
-                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#3b7a5a', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? '🙈' : '👁️'}</button>
+                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#3b7a5a', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? '' : ''}</button>
               </div>
               {form.password.length > 0 && (
                 <div style={{ marginTop: '6px' }}>
@@ -442,7 +443,7 @@ function Signup() {
                       <div key={level} style={{ flex: 1, height: '4px', borderRadius: '2px', background: passwordStrength >= level ? (passwordStrength === 4 ? '#4CAF50' : strength.color) : '#0a3d22', transition: 'background 0.3s ease' }} />
                     ))}
                   </div>
-                  <span style={{ fontSize: '11px', color: passwordStrength === 4 ? '#4CAF50' : (strength.color || '#3b7a5a') }}>{passwordStrength === 4 ? 'Strong 💪' : (strength.label || 'Type a password')}</span>
+                  <span style={{ fontSize: '11px', color: passwordStrength === 4 ? '#4CAF50' : (strength.color || '#3b7a5a') }}>{passwordStrength === 4 ? 'Strong ' : (strength.label || 'Type a password')}</span>
                 </div>
               )}
               {fieldErrors.password && <span style={{ fontSize: '11px', color: '#F09595' }}>{fieldErrors.password}</span>}
@@ -452,10 +453,10 @@ function Signup() {
               <label htmlFor="confirmPassword">CONFIRM PASSWORD *</label>
               <div style={{ position: 'relative' }}>
                 <input id="confirmPassword" type={showConfirmPw ? 'text' : 'password'} autoComplete="new-password" required placeholder="Re-enter your password" value={form.confirmPassword} onChange={e => { setForm(p => ({ ...p, confirmPassword: e.target.value })); setFieldErrors(p => ({ ...p, confirmPassword: '' })) }} style={{ paddingRight: 44, ...(fieldErrors.confirmPassword ? { borderColor: '#F09595' } : {}) }} />
-                <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} aria-label={showConfirmPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#3b7a5a', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showConfirmPw ? '🙈' : '👁️'}</button>
+                <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} aria-label={showConfirmPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#3b7a5a', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showConfirmPw ? '' : ''}</button>
               </div>
               {form.confirmPassword && form.password !== form.confirmPassword && <span style={{ fontSize: '11px', color: '#F09595' }}>Passwords don't match</span>}
-              {form.confirmPassword && form.password === form.confirmPassword && <span style={{ fontSize: '11px', color: '#6ee7b7' }}>Passwords match ✅</span>}
+              {form.confirmPassword && form.password === form.confirmPassword && <span style={{ fontSize: '11px', color: '#6ee7b7' }}>Passwords match </span>}
               {fieldErrors.confirmPassword && <span style={{ fontSize: '11px', color: '#F09595' }}>{fieldErrors.confirmPassword}</span>}
             </div>
 
@@ -478,7 +479,7 @@ function Signup() {
           <p className="auth-switch">Already have an account? <span onClick={() => navigate('/login')}>Sign in</span></p>
 
           <p style={{ color: '#1d5c38', fontSize: '11px', textAlign: 'center', marginTop: '0.75rem' }}>
-            🔒 Your data is private and never sold. You can delete everything anytime.
+             Your data is private and never sold. You can delete everything anytime.
           </p>
 
           <div style={{ marginTop: '1.25rem', background: '#0a3d22', border: '1px solid #1d5c38', borderRadius: 8, padding: '10px 14px', textAlign: 'center' }}>

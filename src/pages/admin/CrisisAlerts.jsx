@@ -53,7 +53,7 @@ export default function CrisisAlerts() {
     if (resolveError) {
       showToast('Failed to resolve.', 'error')
     } else {
-      showToast('✅ Alert marked as resolved.')
+      showToast(' Alert marked as resolved.')
       setNotes(prev => { const n = { ...prev }; delete n[id]; return n })
       setExpandedId(null)
       fetchAll()
@@ -64,12 +64,12 @@ export default function CrisisAlerts() {
   const escalate = async (alert) => {
     setEscalatingId(alert.id)
     const { error: escError } = await supabase.from('crisis_alerts').update({
-      admin_notes: `🚨 ESCALATED: ${new Date().toLocaleString('en-KE')} — Requires immediate counselor intervention.`
+      admin_notes: ` ESCALATED: ${new Date().toLocaleString('en-KE')} — Requires immediate counselor intervention.`
     }).eq('id', alert.id)
     if (escError) {
       showToast('Escalation failed.', 'error')
     } else {
-      showToast('🚨 Alert escalated! Contact counselor immediately.')
+      showToast(' Alert escalated! Contact counselor immediately.')
     }
     setEscalatingId(null)
   }
@@ -115,7 +115,7 @@ export default function CrisisAlerts() {
             <p style={{ fontSize: '12px', color: '#791F1F', margin: '2px 0 0' }}>{alerts.length} open · {resolved.length} resolved</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #791F1F', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>🔄 Refresh</button>
+            <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #791F1F', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
             <button onClick={() => navigate('/admin')} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #791F1F', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>← Back</button>
           </div>
         </nav>
@@ -126,13 +126,13 @@ export default function CrisisAlerts() {
 
         {alerts.length > 0 && (
           <div style={{ margin: '1rem 1.5rem 0', padding: '12px 16px', background: '#791F1F', borderRadius: '10px', border: '1px solid #F09595' }}>
-            <p style={{ color: '#F09595', fontSize: '13px', fontWeight: 600, margin: 0 }}>⚠️ {alerts.length} open crisis alert{alerts.length > 1 ? 's' : ''} — requires immediate attention</p>
+            <p style={{ color: '#F09595', fontSize: '13px', fontWeight: 600, margin: 0 }}> {alerts.length} open crisis alert{alerts.length > 1 ? 's' : ''} — requires immediate attention</p>
           </div>
         )}
 
         <div style={{ padding: '1.5rem', maxWidth: '900px', margin: '0 auto' }}>
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1.5rem', background: '#062616', borderRadius: '12px', padding: '4px', border: '1px solid #0a3d22' }}>
-            {[{ id: 'open', label: `🔴 Open (${alerts.length})` }, { id: 'resolved', label: `✅ Resolved (${resolved.length})` }].map(tab => (
+            {[{ id: 'open', label: ` Open (${alerts.length})` }, { id: 'resolved', label: ` Resolved (${resolved.length})` }].map(tab => (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? (tab.id === 'open' ? '#791F1F' : '#0a3d22') : 'transparent', color: activeTab === tab.id ? (tab.id === 'open' ? '#F09595' : '#6ee7b7') : '#3b7a5a', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{tab.label}</button>
             ))}
           </div>
@@ -140,7 +140,7 @@ export default function CrisisAlerts() {
           {activeTab === 'open' && (
             alerts.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a' }}>
-                <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>💚</span>
+                <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
                 <p style={{ color: '#6ee7b7', fontSize: '14px' }}>No open crisis alerts. All clear.</p>
               </div>
             ) : alerts.map(a => (
@@ -152,19 +152,19 @@ export default function CrisisAlerts() {
                         {a.profiles?.full_name || a.profiles?.username || `User #${a.user_id?.slice(0, 8)}`}
                       </p>
                       {a.profiles?.risk_level === 'high' && (
-                        <span style={{ background: '#791F1F', color: '#F09595', border: '1px solid #F09595', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>⚠️ HIGH RISK</span>
+                        <span style={{ background: '#791F1F', color: '#F09595', border: '1px solid #F09595', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}> HIGH RISK</span>
                       )}
                     </div>
                     <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '4px' }}>
-                      <span style={{ color: '#3b7a5a', fontSize: '11px' }}>🕐 {fmtTime(a.created_at)}</span>
-                      {a.profiles?.streak_days !== undefined && <span style={{ color: '#FAC775', fontSize: '11px' }}>🔥 {a.profiles.streak_days}d streak</span>}
+                      <span style={{ color: '#3b7a5a', fontSize: '11px' }}> {fmtTime(a.created_at)}</span>
+                      {a.profiles?.streak_days !== undefined && <span style={{ color: '#FAC775', fontSize: '11px' }}> {a.profiles.streak_days}d streak</span>}
                     </div>
                   </div>
                 </div>
 
                 {a.keyword && (
                   <div style={{ background: '#791F1F33', border: '1px solid #791F1F', borderRadius: '8px', padding: '10px 14px', marginBottom: '10px' }}>
-                    <p style={{ color: '#F09595', fontSize: '13px', margin: 0 }}>🚨 Trigger keyword: <strong>"{a.keyword}"</strong></p>
+                    <p style={{ color: '#F09595', fontSize: '13px', margin: 0 }}> Trigger keyword: <strong>"{a.keyword}"</strong></p>
                   </div>
                 )}
 
@@ -175,8 +175,8 @@ export default function CrisisAlerts() {
                 )}
 
                 <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '10px' }}>
-                  {a.profiles?.email && <a href={`mailto:${a.profiles.email}`} style={{ color: '#6ee7b7', fontSize: '11px', textDecoration: 'none' }}>✉️ {a.profiles.email}</a>}
-                  {a.profiles?.phone && <a href={`tel:${a.profiles.phone}`} style={{ color: '#6ee7b7', fontSize: '11px', textDecoration: 'none' }}>📞 {a.profiles.phone}</a>}
+                  {a.profiles?.email && <a href={`mailto:${a.profiles.email}`} style={{ color: '#6ee7b7', fontSize: '11px', textDecoration: 'none' }}> {a.profiles.email}</a>}
+                  {a.profiles?.phone && <a href={`tel:${a.profiles.phone}`} style={{ color: '#6ee7b7', fontSize: '11px', textDecoration: 'none' }}> {a.profiles.phone}</a>}
                 </div>
 
                 <button onClick={() => setExpandedId(expandedId === a.id ? null : a.id)} style={{ ...btn('transparent', '#3b7a5a', '#0a3d22'), marginBottom: '8px', fontSize: '11px' }}>
@@ -197,10 +197,10 @@ export default function CrisisAlerts() {
 
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   <button onClick={() => resolveAlert(a.id)} disabled={resolvingId === a.id} style={btn('#0a3d22', '#6ee7b7', '#6ee7b7')}>
-                    {resolvingId === a.id ? '⏳...' : '✅ Mark Resolved'}
+                    {resolvingId === a.id ? '⏳...' : ' Mark Resolved'}
                   </button>
                   <button onClick={() => escalate(a)} disabled={escalatingId === a.id} style={btn('#791F1F', '#F09595', '#F09595')}>
-                    {escalatingId === a.id ? '⏳...' : '🚨 Escalate'}
+                    {escalatingId === a.id ? '⏳...' : ' Escalate'}
                   </button>
                 </div>
               </div>
@@ -210,7 +210,7 @@ export default function CrisisAlerts() {
           {activeTab === 'resolved' && (
             resolved.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a' }}>
-                <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>✅</span>
+                <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
                 <p style={{ color: '#6ee7b7', fontSize: '14px' }}>No resolved alerts yet.</p>
               </div>
             ) : resolved.map(a => (
@@ -219,7 +219,7 @@ export default function CrisisAlerts() {
                   <div>
                     <p style={{ color: '#e2f5ec', fontSize: '13px', fontWeight: 500, margin: '0 0 4px' }}>{a.profiles?.full_name || `User #${a.user_id?.slice(0, 8)}`}</p>
                     {a.keyword && <p style={{ color: '#3b7a5a', fontSize: '11px', margin: 0 }}>Keyword: "{a.keyword}"</p>}
-                    {a.admin_notes && <p style={{ color: '#FAC775', fontSize: '11px', margin: '4px 0 0' }}>📝 {a.admin_notes}</p>}
+                    {a.admin_notes && <p style={{ color: '#FAC775', fontSize: '11px', margin: '4px 0 0' }}> {a.admin_notes}</p>}
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <span style={{ background: '#0a3d22', color: '#6ee7b7', border: '1px solid #6ee7b7', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>Resolved</span>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import AppIcon from './AppIcon'
 
 function Sidebar() {
   const navigate = useNavigate()
@@ -25,21 +26,33 @@ function Sidebar() {
     }
   }, [location.pathname, isMobile])
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') closeAll()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    document.body.style.overflow = mobileOpen ? 'hidden' : ''
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = ''
+    }
+  }, [mobileOpen])
+
   const menuItems = [
-    { path: '/dashboard', icon: '🏠', label: 'Home', desc: 'Your dashboard' },
-    { path: '/diary', icon: '📓', label: 'Diary', desc: 'Track your day' },
-    { path: '/cbt', icon: '🧠', label: 'CBT Modules', desc: 'Learn & grow' },
-    { path: '/urge-toolkit', icon: '🛠️', label: 'Urge Toolkit', desc: 'Beat urges' },
-    { path: '/circle', icon: '💬', label: 'The Circle', desc: 'Anonymous peer support' },
-    { path: '/whispers', icon: '🤝', label: 'Whispers', desc: '1:1 peer matching' },
-    { path: '/events', icon: '📅', label: 'Events', desc: 'Support groups' },
-    { path: '/resources', icon: '📞', label: 'Resources', desc: 'Get help' },
-    { path: '/family-portal', icon: '👨‍👩‍👧', label: 'Family Portal', desc: 'Invite support' },
-    { path: '/monthly-mirror', icon: '🪞', label: 'Monthly Mirror', desc: 'See progress' },
-    { path: '/precious-pact', icon: '🤝', label: 'Precious Pact', desc: 'Future message' },
-    { path: '/profile', icon: '👤', label: 'Profile', desc: 'Settings & data' },
-    { path: '/subscription', icon: '💎', label: 'Subscription', desc: 'Plans & billing' },
-    { path: '/logout', icon: '🚪', label: 'Logout', desc: 'Sign out' },
+    { path: '/dashboard', icon: 'home', label: 'Home', desc: 'Your dashboard' },
+    { path: '/diary', icon: 'diary', label: 'Diary', desc: 'Track your day' },
+    { path: '/cbt', icon: 'brain', label: 'CBT Modules', desc: 'Learn & grow' },
+    { path: '/urge-toolkit', icon: 'toolkit', label: 'Urge Toolkit', desc: 'Beat urges' },
+    { path: '/circle', icon: 'chat', label: 'The Circle', desc: 'Anonymous peer support' },
+    { path: '/whispers', icon: 'users', label: 'Whispers', desc: '1:1 peer matching' },
+    { path: '/events', icon: 'calendar', label: 'Events', desc: 'Support groups' },
+    { path: '/resources', icon: 'resources', label: 'Resources', desc: 'Get help' },
+    { path: '/family-portal', icon: 'users', label: 'Family Portal', desc: 'Invite support' },
+    { path: '/monthly-mirror', icon: 'profile', label: 'Monthly Mirror', desc: 'See progress' },
+    { path: '/precious-pact', icon: 'users', label: 'LossLens Pact', desc: 'Future message' },
+    { path: '/profile', icon: 'profile', label: 'Profile', desc: 'Settings & data' },
+    { path: '/subscription', icon: 'diamond', label: 'Subscription', desc: 'Plans & billing' },
+    { path: '/logout', icon: 'logout', label: 'Logout', desc: 'Sign out' },
   ]
 
   const isActive = (path) => location.pathname === path
@@ -76,7 +89,7 @@ function Sidebar() {
           color: '#6ee7b7',
         }}
       >
-        {mobileOpen ? '✕' : '☰'}
+        {mobileOpen ? '' : ''}
       </button>
 
       {/* Mobile overlay */}
@@ -105,7 +118,7 @@ function Sidebar() {
             color: '#6ee7b7',
           }}
         >
-          {collapsed ? '☰' : '◂'}
+          {collapsed ? '' : 'Collapse'}
         </button>
       )}
 
@@ -113,7 +126,7 @@ function Sidebar() {
         aria-label="Main navigation"
         className="sidebar"
         style={{
-          left: mobileOpen ? 0 : (collapsed && !isMobile) ? '-260px' : '0',
+          left: isMobile ? (mobileOpen ? 0 : '-260px') : (collapsed ? '-260px' : 0),
           background: '#062616',
           borderRight: '1px solid #0a3d22',
         }}
@@ -138,7 +151,7 @@ function Sidebar() {
             }}
             onClick={() => handleNav('/dashboard')}
           >
-            Precious
+            LossLens
           </span>
         </div>
 
@@ -188,7 +201,7 @@ function Sidebar() {
                   flexShrink: 0,
                 }}
               >
-                {item.icon}
+                <AppIcon name={item.icon} size={18} />
               </span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div
@@ -226,8 +239,8 @@ function Sidebar() {
             textAlign: 'center',
           }}
         >
-          <p>Precious v1.0</p>
-          <p style={{ marginTop: '2px' }}>You've got this 💚</p>
+          <p>LossLens v1.0</p>
+          <p style={{ marginTop: '2px' }}>You've got this </p>
         </div>
       </nav>
     </>

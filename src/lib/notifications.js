@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 
 // Create a notification
-export async function createNotification(userId, { title, message, type = 'info', icon = '🔔', link = null }) {
+export async function createNotification(userId, { title, message, type = 'info', icon = '', link = null }) {
   if (!userId) return
   const { error } = await supabase.from('notifications').insert({
     user_id: userId,
@@ -80,7 +80,7 @@ export function subscribeToNotifications(userId, callback) {
 // Notification triggers for various events
 export const notifyBadgeEarned = (userId, badgeName, badgeEmoji) => {
   createNotification(userId, {
-    title: '🏆 Badge Earned!',
+    title: ' Badge Earned!',
     message: `You earned the ${badgeEmoji} ${badgeName} badge!`,
     type: 'badge',
     icon: badgeEmoji,
@@ -90,40 +90,40 @@ export const notifyBadgeEarned = (userId, badgeName, badgeEmoji) => {
 
 export const notifyStreak = (userId, days) => {
   createNotification(userId, {
-    title: '🔥 Streak Milestone!',
+    title: ' Streak Milestone!',
     message: `${days} days gamble-free! You're building real strength.`,
     type: 'success',
-    icon: '🔥',
+    icon: '',
     link: '/dashboard',
   })
 }
 
 export const notifyHighRisk = (userId, score) => {
   createNotification(userId, {
-    title: '⚠️ High Risk Day',
+    title: ' High Risk Day',
     message: `Your risk score is ${score}% today. Open your urge toolkit to stay prepared.`,
     type: 'danger',
-    icon: '⚠️',
+    icon: '',
     link: '/urge-toolkit',
   })
 }
 
 export const notifyStreakFreeze = (userId) => {
   createNotification(userId, {
-    title: '🛡️ Streak Freeze Used',
+    title: ' Streak Freeze Used',
     message: 'Your streak freeze protected your progress. It renews in 30 days.',
     type: 'warning',
-    icon: '🛡️',
+    icon: '',
     link: '/dashboard',
   })
 }
 
 export const notifyNewEvent = (userId, eventTitle) => {
   createNotification(userId, {
-    title: '📅 New Event',
+    title: ' New Event',
     message: `"${eventTitle}" has been added. Check it out!`,
     type: 'info',
-    icon: '📅',
+    icon: '',
     link: '/events',
   })
 }

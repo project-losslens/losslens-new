@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import Sidebar from '../../components/Sidebar'
 
-// ✅ Constants
+//  Constants
 const MAX_RECORDING_DURATION = 600 // 10 minutes
 const MAX_WRITTEN_LENGTH = 2000
 const STORAGE_PATH_PENDING = 'pending'
@@ -18,7 +18,7 @@ function showToast(message, duration = 3000) {
   setTimeout(() => toast.remove(), duration)
 }
 
-export default function PreciousPactPage() {
+export default function LossLensPactPage() {
   const navigate = useNavigate()
   const [identity, setIdentity] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -50,7 +50,7 @@ export default function PreciousPactPage() {
     { q: 'What would you tell your struggling self?', hint: 'When the urge hits, what words of strength do you need?' },
   ]
 
-  // ✅ Cleanup all resources
+  //  Cleanup all resources
   const cleanup = useCallback(() => {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
     if (streamRef.current) {
@@ -71,7 +71,7 @@ export default function PreciousPactPage() {
     }
   }, [cleanup])
 
-  // ✅ Fetch pacts only when identity is set — no double fetch
+  //  Fetch pacts only when identity is set — no double fetch
   useEffect(() => {
     if (identity) fetchPacts()
   }, [identity])
@@ -93,7 +93,7 @@ export default function PreciousPactPage() {
       const { data } = await supabase.from('precious_pacts').select('*').eq('user_id', uid).order('created_at', { ascending: false }).limit(30)
       const syncedPacts = (data || []).map(p => ({ ...p, _synced: true }))
 
-      // ✅ User-specific localStorage key
+      //  User-specific localStorage key
       const localKey = `precious_pacts_${uid}`
       let localPacts = []
       try {
@@ -120,7 +120,7 @@ export default function PreciousPactPage() {
     } catch (err) { console.error('Fetch pacts error:', err) }
   }
 
-  // ✅ Guard against double-click
+  //  Guard against double-click
   const startRecording = async () => {
     if (recording || streamRef.current || mediaRecorderRef.current?.state === 'recording') {
       showToast('Already recording')
@@ -152,7 +152,7 @@ export default function PreciousPactPage() {
         })
       }, 1000)
     } catch (err) {
-      showToast('⚠️ Microphone access denied.')
+      showToast('âš ï¸ Microphone access denied.')
       console.error('Recording start error:', err)
     }
   }
@@ -162,13 +162,13 @@ export default function PreciousPactPage() {
 
     const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
 
-    // ✅ Enter review mode
+    //  Enter review mode
     setReviewBlob(blob)
     setReviewMode(true)
     setRecording(false)
   }
 
-  // ✅ User confirms save
+  //  User confirms save
   const confirmSave = async () => {
     if (!reviewBlob) return
     setReviewMode(false)
@@ -191,12 +191,12 @@ export default function PreciousPactPage() {
           duration_seconds: recordingTime,
           prompt: prompts[activePrompt].q,
         })
-        showToast('✅ Pact saved!')
+        showToast(' Pact saved!')
       } else {
         throw error
       }
     } catch (err) {
-      // ✅ Fallback to localStorage
+      //  Fallback to localStorage
       try {
         const reader = new FileReader()
         reader.readAsDataURL(blob)
@@ -211,7 +211,7 @@ export default function PreciousPactPage() {
             date: new Date().toISOString(),
           })
           try { localStorage.setItem(localKey, JSON.stringify(localPacts)) } catch {}
-          showToast('⚠️ Saved locally.')
+          showToast('âš ï¸ Saved locally.')
         }
       } catch {}
     }
@@ -222,7 +222,7 @@ export default function PreciousPactPage() {
     await fetchPacts()
   }
 
-  // ✅ Retake
+  //  Retake
   const handleRetake = () => {
     setReviewMode(false)
     setReviewBlob(null)
@@ -246,7 +246,7 @@ export default function PreciousPactPage() {
       if (localPacts.length === 0) localStorage.removeItem(localKey)
       else localStorage.setItem(localKey, JSON.stringify(localPacts))
     } else {
-      // ✅ Verify ownership
+      //  Verify ownership
       const { data: { session } } = await supabase.auth.getSession()
       if (storagePath && storagePath !== STORAGE_PATH_PENDING) {
         await supabase.storage.from('precious-pacts').remove([storagePath])
@@ -260,7 +260,7 @@ export default function PreciousPactPage() {
     showToast('Pact deleted.', 2000)
   }
 
-  // ✅ Fixed incrementPlayCount using RPC
+  //  Fixed incrementPlayCount using RPC
   const incrementPlayCount = async (pactId) => {
     if (!pactId || pactId.startsWith('local_')) return
     try {
@@ -299,7 +299,7 @@ export default function PreciousPactPage() {
         play_count: 0,
       })
       if (error) throw error
-      showToast('✅ Written pact saved!')
+      showToast(' Written pact saved!')
       setWrittenPact('')
       setPactTitle('')
       setShowWritten(false)
@@ -326,7 +326,7 @@ export default function PreciousPactPage() {
 
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: '#041f13', borderBottom: '1px solid #0a3d22', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}>🤝 The Precious Pact</h1>
+            <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}> The LossLens Pact</h1>
             <p style={{ fontSize: '11px', color: '#3b7a5a', margin: '2px 0 0' }}>{totalPacts} pacts · A promise to your future self</p>
           </div>
         </nav>
@@ -336,9 +336,9 @@ export default function PreciousPactPage() {
           {/* Explanation Card */}
           <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: '#f59e0b' }}>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-              <span style={{ fontSize: '28px', flexShrink: 0 }}>🎯</span>
+              <span style={{ fontSize: '28px', flexShrink: 0 }}></span>
               <div>
-                <h3 style={{ color: '#f59e0b', fontSize: '13px', marginBottom: '4px' }}>What is the Precious Pact?</h3>
+                <h3 style={{ color: '#f59e0b', fontSize: '13px', marginBottom: '4px' }}>What is the LossLens Pact?</h3>
                 <p style={{ color: '#9fe1cb', fontSize: '12px', lineHeight: '1.5', fontWeight: 300, margin: 0 }}>
                   Record a message to your future self when you're feeling strong. When you're struggling, play it back to remember why you started.
                 </p>
@@ -349,12 +349,12 @@ export default function PreciousPactPage() {
           {/* Review Mode */}
           {reviewMode && reviewBlob && (
             <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: '#f59e0b', textAlign: 'center' }}>
-              <h3 style={{ color: '#f59e0b', fontSize: '13px', marginBottom: '0.75rem' }}>👂 Review Your Recording</h3>
+              <h3 style={{ color: '#f59e0b', fontSize: '13px', marginBottom: '0.75rem' }}> Review Your Recording</h3>
               <audio ref={reviewAudioRef} src={URL.createObjectURL(reviewBlob)} controls style={{ width: '100%', marginBottom: '0.75rem' }} />
               <p style={{ color: '#3b7a5a', fontSize: '12px', marginBottom: '0.75rem' }}>Duration: {formatTime(recordingTime)}</p>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button onClick={handleRetake} className="btn-ghost" style={{ flex: 1, padding: '10px', fontSize: '13px' }}>🔄 Retake</button>
-                <button onClick={confirmSave} className="btn-primary" style={{ flex: 1, padding: '10px', fontSize: '13px' }}>💾 Save</button>
+                <button onClick={handleRetake} className="btn-ghost" style={{ flex: 1, padding: '10px', fontSize: '13px' }}> Retake</button>
+                <button onClick={confirmSave} className="btn-primary" style={{ flex: 1, padding: '10px', fontSize: '13px' }}> Save</button>
               </div>
             </div>
           )}
@@ -367,7 +367,7 @@ export default function PreciousPactPage() {
 
           {/* Prompts */}
           <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-            <p style={{ color: '#f59e0b', fontSize: '10px', marginBottom: '8px', letterSpacing: '0.05em', fontWeight: 600 }}>💬 CHOOSE YOUR PROMPT</p>
+            <p style={{ color: '#f59e0b', fontSize: '10px', marginBottom: '8px', letterSpacing: '0.05em', fontWeight: 600 }}> CHOOSE YOUR PROMPT</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {prompts.map((p, i) => (
                 <button key={i} onClick={() => setActivePrompt(i)} role="radio" aria-checked={activePrompt === i}
@@ -391,12 +391,12 @@ export default function PreciousPactPage() {
           {/* Record Section */}
           {!reviewMode && !uploading && (
             <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-              <h3 style={{ color: '#f59e0b', fontSize: '13px', marginBottom: '0.75rem' }}>🎤 Record your pact</h3>
+              <h3 style={{ color: '#f59e0b', fontSize: '13px', marginBottom: '0.75rem' }}> Record your pact</h3>
 
               {!recording && (
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button className="btn-primary" style={{ flex: 1, padding: '12px', fontSize: '13px' }} onClick={startRecording} aria-label="Start recording audio">🎤 Record audio</button>
-                  <button className="btn-ghost" style={{ flex: 1, padding: '12px', fontSize: '13px' }} onClick={() => setShowWritten(!showWritten)} aria-label="Write instead of recording">✍️ Write instead</button>
+                  <button className="btn-primary" style={{ flex: 1, padding: '12px', fontSize: '13px' }} onClick={startRecording} aria-label="Start recording audio"> Record audio</button>
+                  <button className="btn-ghost" style={{ flex: 1, padding: '12px', fontSize: '13px' }} onClick={() => setShowWritten(!showWritten)} aria-label="Write instead of recording">âœï¸ Write instead</button>
                 </div>
               )}
 
@@ -404,10 +404,10 @@ export default function PreciousPactPage() {
                 <div>
                   <div style={{ background: '#041f13', borderRadius: '12px', padding: '2rem', textAlign: 'center', marginBottom: '10px', border: '2px solid #F09595' }}>
                     <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#791F1F', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'pulse 1s infinite' }}>
-                      <span style={{ fontSize: '24px' }} aria-hidden="true">🎤</span>
+                      <span style={{ fontSize: '24px' }} aria-hidden="true"></span>
                     </div>
                     <p style={{ color: '#F09595', fontSize: '18px', fontWeight: 600, fontFamily: "'Playfair Display', serif", margin: '0 0 4px' }} aria-label={`Recording time: ${formatTime(recordingTime)}`}>{formatTime(recordingTime)}</p>
-                    <p style={{ color: '#F09595', fontSize: '13px', margin: 0 }} aria-label="Recording in progress">🔴 Recording... Speak from the heart.</p>
+                    <p style={{ color: '#F09595', fontSize: '13px', margin: 0 }} aria-label="Recording in progress"> Recording... Speak from the heart.</p>
                     <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '3px', height: '40px', marginTop: '16px' }}>
                       {[1,2,3,4,5,6,7,8].map((_, i) => (
                         <div key={i} style={{ width: '5px', background: '#F09595', borderRadius: '3px', animation: `voiceBar 0.4s ${i*0.1}s ease-in-out infinite alternate`, height: `${20 + Math.sin(i * 1.5) * 15}px` }} />
@@ -426,32 +426,32 @@ export default function PreciousPactPage() {
           {/* Written Pact */}
           {showWritten && (
             <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-              <h3 style={{ color: '#e2f5ec', fontSize: '13px', marginBottom: '0.75rem' }}>✍️ Write your pact</h3>
+              <h3 style={{ color: '#e2f5ec', fontSize: '13px', marginBottom: '0.75rem' }}>âœï¸ Write your pact</h3>
               <textarea value={writtenPact} onChange={e => setWrittenPact(e.target.value.slice(0, MAX_WRITTEN_LENGTH))} placeholder="Dear future me, when you read this, remember..." rows={5}
                 style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#041f13', border: '1px solid #0a3d22', color: '#fff', fontSize: '12px', outline: 'none', fontFamily: "'Inter', sans-serif", resize: 'vertical', lineHeight: '1.6', boxSizing: 'border-box' }} />
               <p style={{ color: '#3b7a5a', fontSize: '10px', marginTop: '4px' }}>{writtenPact.length}/{MAX_WRITTEN_LENGTH}</p>
-              <button className="btn-primary full" style={{ marginTop: '8px', padding: '10px', fontSize: '12px' }} onClick={saveWrittenPact} disabled={!writtenPact.trim()}>Save written pact 💾</button>
+              <button className="btn-primary full" style={{ marginTop: '8px', padding: '10px', fontSize: '12px' }} onClick={saveWrittenPact} disabled={!writtenPact.trim()}>Save written pact </button>
             </div>
           )}
 
           {/* Pacts List */}
           {pacts.length > 0 && (
             <div className="dash-section">
-              <h3 style={{ color: '#e2f5ec', fontSize: '13px', margin: '0 0 0.75rem' }}>📼 Your pacts ({pacts.length})</h3>
+              <h3 style={{ color: '#e2f5ec', fontSize: '13px', margin: '0 0 0.75rem' }}> Your pacts ({pacts.length})</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {pacts.map((pact) => (
                   <div key={pact.id} style={{ background: '#041f13', border: `1px solid ${pact._pending ? '#FAC775' : '#0a3d22'}`, borderRadius: '8px', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px' }}>
                       <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: pact._pending ? '#633806' : pact.storage_path === STORAGE_PATH_WRITTEN ? '#062616' : '#0a3d22', border: `2px solid ${pact._pending ? '#FAC775' : pact.storage_path === STORAGE_PATH_WRITTEN ? '#3b7a5a' : '#f59e0b'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
-                        {pact.storage_path === STORAGE_PATH_WRITTEN ? '📝' : pact._pending ? '⏳' : '🎤'}
+                        {pact.storage_path === STORAGE_PATH_WRITTEN ? '' : pact._pending ? '⏳' : ''}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ color: '#e2f5ec', fontSize: '12px', fontWeight: 500, margin: 0 }}>{pact.title || `Pact`}</p>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '3px' }}>
                           <span style={{ color: '#3b7a5a', fontSize: '10px' }}>{new Date(pact.created_at).toLocaleDateString('en-KE', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                           {pact.duration_seconds > 0 && <span style={{ color: '#3b7a5a', fontSize: '10px' }}>{formatTime(pact.duration_seconds)}</span>}
-                          {pact._pending ? <span style={{ color: '#FAC775', fontSize: '9px', background: '#633806', padding: '1px 6px', borderRadius: '100px' }}>⏳ Local</span> : <span style={{ color: '#3db88a', fontSize: '9px', background: '#0a3d22', padding: '1px 6px', borderRadius: '100px' }}>✓ Saved</span>}
-                          {pact.play_count > 0 && <span style={{ color: '#3b7a5a', fontSize: '9px' }}>▶️ {pact.play_count}</span>}
+                          {pact._pending ? <span style={{ color: '#FAC775', fontSize: '9px', background: '#633806', padding: '1px 6px', borderRadius: '100px' }}>⏳ Local</span> : <span style={{ color: '#3db88a', fontSize: '9px', background: '#0a3d22', padding: '1px 6px', borderRadius: '100px' }}> Saved</span>}
+                          {pact.play_count > 0 && <span style={{ color: '#3b7a5a', fontSize: '9px' }}>â–¶ï¸ {pact.play_count}</span>}
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '3px', flexShrink: 0 }}>
@@ -461,12 +461,12 @@ export default function PreciousPactPage() {
                         )}
                         {pact.storage_path === STORAGE_PATH_WRITTEN && (
                           <button onClick={() => setExpandedPlayer(expandedPlayer === pact.id ? null : pact.id)} style={{ background: expandedPlayer === pact.id ? '#0a3d22' : 'transparent', border: '1px solid #0a3d22', color: '#6ee7b7', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px' }}
-                            aria-label={expandedPlayer === pact.id ? 'Collapse' : 'Expand'}>{expandedPlayer === pact.id ? '▲' : '📖'}</button>
+                            aria-label={expandedPlayer === pact.id ? 'Collapse' : 'Expand'}>{expandedPlayer === pact.id ? '▲' : ''}</button>
                         )}
                         {!pact._pending && pact.storage_path !== STORAGE_PATH_WRITTEN && (
                           <a href={getPublicUrl(pact.storage_path) || '#'} download style={{ background: 'transparent', border: '1px solid #0a3d22', color: '#6ee7b7', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }} aria-label="Download">⬇</a>
                         )}
-                        <button onClick={() => setDeleteConfirm({ id: pact.id, path: pact.storage_path, isLocal: pact._pending, localIndex: pact._localIndex })} style={{ background: 'transparent', border: '1px solid #3a1010', color: '#F09595', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px' }} aria-label="Delete">🗑</button>
+                        <button onClick={() => setDeleteConfirm({ id: pact.id, path: pact.storage_path, isLocal: pact._pending, localIndex: pact._localIndex })} style={{ background: 'transparent', border: '1px solid #3a1010', color: '#F09595', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px' }} aria-label="Delete"></button>
                       </div>
                     </div>
                     {expandedPlayer === pact.id && pact.storage_path !== STORAGE_PATH_WRITTEN && (
@@ -485,21 +485,21 @@ export default function PreciousPactPage() {
 
           {pacts.length === 0 && !reviewMode && !uploading && (
             <div style={{ textAlign: 'center', padding: '2rem', color: '#3b7a5a' }}>
-              <span style={{ fontSize: '40px', display: 'block', marginBottom: '8px' }}>🤝</span>
+              <span style={{ fontSize: '40px', display: 'block', marginBottom: '8px' }}></span>
               <p style={{ color: '#6ee7b7', fontSize: '14px' }}>No pacts yet. Record your first promise to your future self.</p>
             </div>
           )}
 
           {/* Privacy */}
           <div className="dash-section" style={{ marginTop: '0.75rem' }}>
-            <h3 style={{ color: '#e2f5ec', fontSize: '12px', marginBottom: '0.75rem' }}>🔒 Privacy</h3>
+            <h3 style={{ color: '#e2f5ec', fontSize: '12px', marginBottom: '0.75rem' }}> Privacy</h3>
             <p style={{ color: '#3b7a5a', fontSize: '11px', lineHeight: '1.5', margin: 0 }}>
               Your pacts are stored securely and only accessible to you. Delete them anytime.
             </p>
           </div>
 
           <p style={{ color: '#1d5c38', fontSize: '10px', textAlign: 'center', fontStyle: 'italic', padding: '0.75rem 0 0' }}>
-            🤝 Your future self will thank you.
+             Your future self will thank you.
           </p>
         </div>
 
@@ -507,7 +507,7 @@ export default function PreciousPactPage() {
         {deleteConfirm && (
           <div onClick={() => setDeleteConfirm(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(4,31,19,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
             <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '14px', padding: '1.5rem', border: '1px solid #0a3d22', maxWidth: '340px', width: '100%', textAlign: 'center' }}>
-              <span style={{ fontSize: '32px', display: 'block', marginBottom: '8px' }}>🗑</span>
+              <span style={{ fontSize: '32px', display: 'block', marginBottom: '8px' }}></span>
               <h3 style={{ color: '#F09595', fontSize: '15px', marginBottom: '6px' }}>Delete this pact?</h3>
               <p style={{ color: '#3b7a5a', fontSize: '11px', marginBottom: '14px' }}>This cannot be undone.</p>
               <div style={{ display: 'flex', gap: '8px' }}>

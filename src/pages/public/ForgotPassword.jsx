@@ -14,12 +14,12 @@ function ForgotPassword() {
   const [countdown, setCountdown] = useState(0)
   const [resending, setResending] = useState(false)
 
-  // ✅ Auto-focus email on mount
+  //  Auto-focus email on mount
   useEffect(() => {
     if (emailRef.current) emailRef.current.focus()
   }, [])
 
-  // ✅ Countdown with proper cleanup
+  //  Countdown with proper cleanup
   useEffect(() => {
     if (countdown <= 0) {
       if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null }
@@ -36,7 +36,7 @@ function ForgotPassword() {
     }
   }, [countdown])
 
-  // ✅ Cleanup on unmount
+  //  Cleanup on unmount
   useEffect(() => {
     return () => {
       if (countdownRef.current) clearInterval(countdownRef.current)
@@ -51,7 +51,7 @@ function ForgotPassword() {
 
     setLoading(true)
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-      redirectTo: 'https://kingsly-six.vercel.app/reset-password',
+      redirectTo: `${window.location.origin}/reset-password`,
     })
     if (resetError) {
       setError('Failed to send reset link. Please try again.')
@@ -69,7 +69,7 @@ function ForgotPassword() {
     setError('')
     try {
       const { error: resendError } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-        redirectTo: 'https://kingsly-six.vercel.app/reset-password',
+        redirectTo: `${window.location.origin}/reset-password`,
       })
       if (resendError) throw resendError
       setCountdown(60)
@@ -98,12 +98,12 @@ function ForgotPassword() {
     return (
       <div className="root">
         <nav className="navbar">
-          <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>Precious</span>
-          <button className="nav-ghost" onClick={() => navigate('/login')}>← Back to login</button>
+          <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
+          <button className="nav-ghost" onClick={() => navigate('/login')}>â† Back to login</button>
         </nav>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-label="Email sent">📬</span>
+            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-label="Email sent"></span>
             <h2 className="auth-title">Check your inbox</h2>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>
               We've sent password reset instructions to <strong style={{ color: '#f59e0b' }}>{email}</strong>
@@ -112,7 +112,7 @@ function ForgotPassword() {
               Click the link in the email to reset your password. The link expires in 60 minutes.
             </p>
             <div style={{ background: '#0a3d22', borderRadius: '8px', padding: '12px', marginBottom: '20px', border: '1px solid #f59e0b' }}>
-              <p style={{ color: '#f59e0b', fontSize: '13px', fontWeight: 600, margin: '0 0 4px' }}>📬 Didn't receive it?</p>
+              <p style={{ color: '#f59e0b', fontSize: '13px', fontWeight: 600, margin: '0 0 4px' }}> Didn't receive it?</p>
               <p style={{ color: '#6ee7b7', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Check your <strong>spam/junk folder</strong>. Sometimes our emails end up there.</p>
             </div>
 
@@ -134,8 +134,8 @@ function ForgotPassword() {
   return (
     <div className="root">
       <nav className="navbar">
-        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>Precious</span>
-        <button className="nav-ghost" onClick={() => navigate('/login')}>← Log in</button>
+        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
+        <button className="nav-ghost" onClick={() => navigate('/login')}>â† Log in</button>
       </nav>
 
       <div className="auth-container">

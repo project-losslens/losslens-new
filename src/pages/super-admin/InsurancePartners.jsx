@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import SuperAdminSidebar from '../../components/SuperAdminSidebar'
 
-// ✅ Constants
+//  Constants
 const COVERAGE_TYPES = ['Mental Health', 'Addiction Rehab', 'Inpatient', 'Outpatient', 'Counseling', 'Crisis Intervention', 'General Health', 'Employee Wellness', 'Other']
 
 function showToast(message, duration = 3000) {
@@ -68,7 +68,7 @@ export default function InsurancePartners() {
     setShowForm(true)
   }
 
-  // ✅ Validate form
+  //  Validate form
   const validateForm = () => {
     const errors = {}
     if (!form.company_name.trim()) errors.company_name = 'Company name is required'
@@ -127,7 +127,7 @@ export default function InsurancePartners() {
     setShowDeleteConfirm(null)
   }
 
-  // ✅ Memoized filtered
+  //  Memoized filtered
   const filteredPartners = useMemo(() => {
     return partners.filter(p => {
       const matchesSearch = !searchQuery ||

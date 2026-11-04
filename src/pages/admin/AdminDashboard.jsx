@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import AdminSidebar from '../../components/AdminSidebar'
 
-// ✅ Constants
+//  Constants
 const ROUTES = {
   EVENTS: '/admin/events', GROUPS: '/admin/groups', RESOURCES: '/admin/resources',
   BROADCAST: '/admin/broadcast', ANALYTICS: '/admin/analytics', CRISIS: '/admin/crisis',
@@ -33,7 +33,7 @@ export default function AdminDashboard() {
   const [revealedEmails, setRevealedEmails] = useState({})
   const [revealedPhones, setRevealedPhones] = useState({})
 
-  // ✅ Auto-poll crisis alerts every 30s
+  //  Auto-poll crisis alerts every 30s
   useEffect(() => {
     if (!alertPolling) return
     const interval = setInterval(async () => {
@@ -45,7 +45,7 @@ export default function AdminDashboard() {
     return () => clearInterval(interval)
   }, [alertPolling])
 
-  // ✅ Realtime crisis alerts
+  //  Realtime crisis alerts
   useEffect(() => {
     const channel = supabase.channel('admin_crisis')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'crisis_alerts', filter: 'resolved=eq.false' }, (payload) => {
@@ -112,13 +112,13 @@ export default function AdminDashboard() {
 
   useEffect(() => { fetchAllData() }, [fetchAllData])
 
-  // ✅ Toggle PII reveal
+  //  Toggle PII reveal
   const toggleReveal = (type, id) => {
     if (type === 'email') setRevealedEmails(prev => ({ ...prev, [id]: !prev[id] }))
     if (type === 'phone') setRevealedPhones(prev => ({ ...prev, [id]: !prev[id] }))
   }
 
-  // ✅ Mask PII
+  //  Mask PII
   const maskEmail = (email) => {
     if (!email || !email.includes('@')) return email
     const [name, domain] = email.split('@')
@@ -130,22 +130,22 @@ export default function AdminDashboard() {
   }
 
   const statsCards = useMemo(() => [
-    { label: 'Total Users', value: stats.totalUsers, icon: '👥', color: '#6ee7b7', path: ROUTES.USERS },
-    { label: 'Active Today', value: stats.activeToday, icon: '🟢', color: '#3db88a' },
-    { label: 'High Risk', value: stats.highRisk, icon: '⚠️', color: '#F09595', urgent: stats.highRisk > 0, path: ROUTES.USERS },
+    { label: 'Total Users', value: stats.totalUsers, icon: '', color: '#6ee7b7', path: ROUTES.USERS },
+    { label: 'Active Today', value: stats.activeToday, icon: '', color: '#3db88a' },
+    { label: 'High Risk', value: stats.highRisk, icon: '', color: '#F09595', urgent: stats.highRisk > 0, path: ROUTES.USERS },
     { label: 'Crisis Open', value: stats.crisisOpen, icon: '🆘', color: '#F09595', urgent: stats.crisisOpen > 0, path: ROUTES.CRISIS },
-    { label: 'Active Events', value: stats.eventsActive, icon: '📅', color: '#FAC775', path: ROUTES.EVENTS },
-    { label: 'Resources', value: stats.resources, icon: '📞', color: '#9fe1cb', path: ROUTES.RESOURCES },
-    { label: 'CBT Done', value: stats.cbtCompletions, icon: '🧠', color: '#6ee7b7' },
-    { label: 'Diary Today', value: stats.diaryEntriesToday, icon: '📓', color: '#3db88a' },
+    { label: 'Active Events', value: stats.eventsActive, icon: '', color: '#FAC775', path: ROUTES.EVENTS },
+    { label: 'Resources', value: stats.resources, icon: '', color: '#9fe1cb', path: ROUTES.RESOURCES },
+    { label: 'CBT Done', value: stats.cbtCompletions, icon: '', color: '#6ee7b7' },
+    { label: 'Diary Today', value: stats.diaryEntriesToday, icon: '', color: '#3db88a' },
   ], [stats])
 
   const quickActions = [
-    { emoji: '📅', label: 'Manage Events', path: ROUTES.EVENTS, desc: 'Create, edit, view RSVPs' },
-    { emoji: '👥', label: 'Manage Groups', path: ROUTES.GROUPS, desc: 'Circle & community oversight' },
-    { emoji: '📞', label: 'Manage Resources', path: ROUTES.RESOURCES, desc: 'Helplines & content' },
-    { emoji: '📢', label: 'Broadcast', path: ROUTES.BROADCAST, desc: 'Send announcements' },
-    { emoji: '📊', label: 'Analytics', path: ROUTES.ANALYTICS, desc: 'Platform insights' },
+    { emoji: '', label: 'Manage Events', path: ROUTES.EVENTS, desc: 'Create, edit, view RSVPs' },
+    { emoji: '', label: 'Manage Groups', path: ROUTES.GROUPS, desc: 'Circle & community oversight' },
+    { emoji: '', label: 'Manage Resources', path: ROUTES.RESOURCES, desc: 'Helplines & content' },
+    { emoji: '', label: 'Broadcast', path: ROUTES.BROADCAST, desc: 'Send announcements' },
+    { emoji: '', label: 'Analytics', path: ROUTES.ANALYTICS, desc: 'Platform insights' },
     { emoji: '🆘', label: 'Crisis Alerts', path: ROUTES.CRISIS, desc: `${stats.crisisOpen} open` },
   ]
 
@@ -192,12 +192,12 @@ export default function AdminDashboard() {
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#041f13', borderBottom: '2px solid #791F1F', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#F09595', fontFamily: "'Inter', sans-serif", margin: 0 }}>🛡️ Admin Dashboard</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#F09595', fontFamily: "'Inter', sans-serif", margin: 0 }}> Admin Dashboard</h1>
             <p style={{ fontSize: '12px', color: '#791F1F', margin: '2px 0 0' }}>{stats.totalUsers} users · {stats.activeToday} active today</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchAllData} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #791F1F', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>🔄 Refresh</button>
-            <button onClick={() => navigate('/dashboard')} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #791F1F', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>🏠 User App</button>
+            <button onClick={fetchAllData} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #791F1F', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
+            <button onClick={() => navigate('/dashboard')} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #791F1F', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> User App</button>
             <button onClick={() => navigate('/')} style={{ padding: '6px 14px', borderRadius: '100px', background: '#791F1F', border: '1px solid #F09595', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Exit Admin</button>
           </div>
         </nav>
@@ -206,10 +206,10 @@ export default function AdminDashboard() {
           {/* Tab Navigation */}
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1.5rem', background: '#062616', borderRadius: '12px', padding: '4px', border: '1px solid #0a3d22', overflowX: 'auto' }}>
             {[
-              { id: 'overview', label: '📊 Overview' },
-              { id: 'users', label: '👥 Recent Users' },
+              { id: 'overview', label: ' Overview' },
+              { id: 'users', label: ' Recent Users' },
               { id: 'alerts', label: `🆘 Alerts (${stats.crisisOpen})` },
-              { id: 'messages', label: `📩 Messages (${contactRequests.length})` },
+              { id: 'messages', label: ` Messages (${contactRequests.length})` },
             ].map(tab => (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? '#0a3d22' : 'transparent', color: activeTab === tab.id ? '#f59e0b' : '#3b7a5a', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', minWidth: '100px', transition: 'background 0.2s, color 0.2s' }}>{tab.label}</button>
             ))}
@@ -232,7 +232,7 @@ export default function AdminDashboard() {
               </div>
 
               <div style={{ marginBottom: '1.5rem' }}>
-                <h3 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '0.75rem' }}>⚡ Quick Actions</h3>
+                <h3 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '0.75rem' }}> Quick Actions</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '8px' }}>
                   {quickActions.map(a => (
                     <button key={a.path} onClick={() => navigate(a.path)} style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '12px', padding: '16px', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', fontFamily: "'Inter', sans-serif", transition: 'all 0.2s' }}
@@ -247,7 +247,7 @@ export default function AdminDashboard() {
 
               {topTriggers.length > 0 && (
                 <div className="dash-section" style={{ marginBottom: '1.5rem' }}>
-                  <h3 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '0.75rem' }}>📊 Top Triggers Across Users</h3>
+                  <h3 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '0.75rem' }}> Top Triggers Across Users</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {topTriggers.map(([trigger, count], i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -268,7 +268,7 @@ export default function AdminDashboard() {
           {activeTab === 'users' && (
             <div className="dash-section">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h3 style={{ color: '#e2f5ec', fontSize: '14px', margin: 0 }}>👥 Recent Users</h3>
+                <h3 style={{ color: '#e2f5ec', fontSize: '14px', margin: 0 }}> Recent Users</h3>
                 <button onClick={() => navigate(ROUTES.USERS)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #f59e0b', color: '#f59e0b', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Manage Users →</button>
               </div>
               <div style={{ overflowX: 'auto' }}>
@@ -297,7 +297,7 @@ export default function AdminDashboard() {
                               {u.risk_level ? u.risk_level.toUpperCase() : 'N/A'}
                             </span>
                           </td>
-                          <td style={{ padding: '10px 8px', color: '#f59e0b', fontWeight: 600 }}>🔥 {u.streak_days || 0}</td>
+                          <td style={{ padding: '10px 8px', color: '#f59e0b', fontWeight: 600 }}> {u.streak_days || 0}</td>
                           <td style={{ padding: '10px 8px', color: '#3b7a5a', fontSize: '11px' }}>{fmtTime(u.last_active)}</td>
                           <td style={{ padding: '10px 8px', color: '#3b7a5a', fontSize: '11px' }}>{fmtDate(u.created_at)}</td>
                         </tr>
@@ -315,19 +315,19 @@ export default function AdminDashboard() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h3 style={{ color: stats.crisisOpen > 0 ? '#F09595' : '#e2f5ec', fontSize: '14px', margin: 0 }}>🆘 Crisis Alerts {stats.crisisOpen > 0 && `(${stats.crisisOpen} open)`}</h3>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => setAlertPolling(!alertPolling)} style={{ padding: '4px 10px', borderRadius: '100px', background: 'transparent', border: `1px solid ${alertPolling ? '#6ee7b7' : '#3b7a5a'}`, color: alertPolling ? '#6ee7b7' : '#3b7a5a', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{alertPolling ? '🔄 Live' : '⏸ Paused'}</button>
+                  <button onClick={() => setAlertPolling(!alertPolling)} style={{ padding: '4px 10px', borderRadius: '100px', background: 'transparent', border: `1px solid ${alertPolling ? '#6ee7b7' : '#3b7a5a'}`, color: alertPolling ? '#6ee7b7' : '#3b7a5a', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{alertPolling ? ' Live' : '⏸ Paused'}</button>
                   <button onClick={() => navigate(ROUTES.CRISIS)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #F09595', color: '#F09595', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Manage →</button>
                 </div>
               </div>
               {alerts.length === 0 ? (
-                <p style={{ color: '#6ee7b7', fontSize: '13px', textAlign: 'center', padding: '2rem' }}>✅ No open crisis alerts</p>
+                <p style={{ color: '#6ee7b7', fontSize: '13px', textAlign: 'center', padding: '2rem' }}> No open crisis alerts</p>
               ) : (
                 <div className="entries-list">
                   {alerts.map((a, i) => (
                     <div key={i} className="entry-item" style={{ borderColor: '#791F1F', animation: 'urgentPulse 2s ease-in-out infinite' }}>
                       <div className="entry-top">
                         <span className="entry-date">{a.profiles?.full_name || a.profiles?.username || `User #${a.user_id?.slice(0, 8)}`}</span>
-                        <span className="entry-status gambled">⚠️ Crisis</span>
+                        <span className="entry-status gambled"> Crisis</span>
                       </div>
                       {a.keyword && <p style={{ color: '#F09595', fontSize: '11px', margin: '4px 0' }}>Keyword: "{a.keyword}"</p>}
                       <p className="entry-note" style={{ color: '#3b7a5a' }}>{fmtTime(a.created_at)}</p>
@@ -341,7 +341,7 @@ export default function AdminDashboard() {
           {/* MESSAGES TAB */}
           {activeTab === 'messages' && (
             <div className="dash-section">
-              <h3 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '1rem' }}>📩 Recent Contact Requests</h3>
+              <h3 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '1rem' }}> Recent Contact Requests</h3>
               {contactRequests.length === 0 ? (
                 <p style={{ color: '#3b7a5a', fontSize: '13px', textAlign: 'center', padding: '2rem' }}>No contact requests yet</p>
               ) : (
@@ -356,8 +356,8 @@ export default function AdminDashboard() {
                       </div>
                       <p className="entry-note">{c.message?.substring(0, 100)}</p>
                       <div style={{ display: 'flex', gap: '12px', marginTop: '4px' }}>
-                        {c.email && <span style={{ color: '#6ee7b7', fontSize: '11px', cursor: 'pointer' }} onClick={() => toggleReveal('email', c.id)}>✉️ {revealedEmails[c.id] ? c.email : maskEmail(c.email)}</span>}
-                        {c.phone && <span style={{ color: '#6ee7b7', fontSize: '11px', cursor: 'pointer' }} onClick={() => toggleReveal('phone', c.id)}>📞 {revealedPhones[c.id] ? c.phone : maskPhone(c.phone)}</span>}
+                        {c.email && <span style={{ color: '#6ee7b7', fontSize: '11px', cursor: 'pointer' }} onClick={() => toggleReveal('email', c.id)}> {revealedEmails[c.id] ? c.email : maskEmail(c.email)}</span>}
+                        {c.phone && <span style={{ color: '#6ee7b7', fontSize: '11px', cursor: 'pointer' }} onClick={() => toggleReveal('phone', c.id)}> {revealedPhones[c.id] ? c.phone : maskPhone(c.phone)}</span>}
                       </div>
                     </div>
                   ))}

@@ -68,7 +68,7 @@ function Diary() {
   const [activeView, setActiveView] = useState('today')
   const [stats, setStats] = useState({ totalEntries: 0, cleanDays: 0, gambleDays: 0, cleanRate: 0, topTriggers: [], topCoping: [] })
 
-  const moods = ['😌 Calm', '😰 Stressed', '😟 Anxious', '😔 Depressed', '😄 Happy']
+  const moods = [' Calm', ' Stressed', ' Anxious', ' Depressed', ' Happy']
   const triggerOptions = ['Boredom', 'Stress', 'Social Pressure', 'Financial Pressure', 'Celebration', 'Ads/Promotions', 'Other']
   const copingOptions = ['Breathing', 'Left Situation', 'Called Someone', 'App Tools', 'Exercise', 'Other']
   const gamblingTypes = ['Sports Betting', 'Casino', 'Lottery', 'Online', 'Other']
@@ -198,7 +198,7 @@ function Diary() {
       console.error('Save error:', error)
       setSaveError(error.message || 'Failed to save. Please try again.')
       setLoading(false)
-      showToast('❌ Failed to save. Try again.', 3000)
+      showToast(' Failed to save. Try again.', 3000)
       return
     }
 
@@ -218,7 +218,7 @@ function Diary() {
       
       const freezeAvailable = await checkStreakFreeze(userId)
       if (freezeAvailable && profile?.streak_freeze_used) {
-        showToast('🛡️ Streak freeze renewed!', 3000)
+        showToast(' Streak freeze renewed!', 3000)
       }
     } catch (err) {
       console.error('Gamification error:', err)
@@ -229,8 +229,8 @@ function Diary() {
     setShowCheckmark(true)
     setSaveError('')
     
-    if (!gambled && !error) { triggerConfetti(); showToast('🔥 Clean day logged! Keep going!', 3000) }
-    else showToast('📝 Entry saved. Tomorrow is a new day.', 3000)
+    if (!gambled && !error) { triggerConfetti(); showToast(' Clean day logged! Keep going!', 3000) }
+    else showToast(' Entry saved. Tomorrow is a new day.', 3000)
     
     setTimeout(() => { setSaved(false); setShowCheckmark(false) }, 2000)
   }
@@ -248,7 +248,7 @@ function Diary() {
         if (available) {
           await useStreakFreeze(userId)
           newStreak = (prof.streak_days || 0) + 1
-          showToast('🛡️ Streak freeze activated! Your streak is safe.', 4000)
+          showToast(' Streak freeze activated! Your streak is safe.', 4000)
         }
       } catch (err) {}
     }
@@ -265,14 +265,14 @@ function Diary() {
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#041f13', borderBottom: '1px solid #0a3d22', position: 'sticky', top: 0, zIndex: 100 }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}>📓 Today's Diary</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}> Today's Diary</h1>
             <p style={{ fontSize: '12px', color: '#3b7a5a', margin: '2px 0 0' }}>{new Date().toLocaleDateString('en-KE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
           </div>
         </nav>
         <div style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', background: '#062616', borderRadius: '12px', padding: '4px', border: '1px solid #0a3d22' }}>
-            <button onClick={() => setActiveView('today')} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeView === 'today' ? '#0a3d22' : 'transparent', color: activeView === 'today' ? '#f59e0b' : '#3b7a5a', fontSize: '13px', fontWeight: activeView === 'today' ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>📝 Today's Entry</button>
-            <button onClick={() => setActiveView('history')} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeView === 'history' ? '#0a3d22' : 'transparent', color: activeView === 'history' ? '#f59e0b' : '#3b7a5a', fontSize: '13px', fontWeight: activeView === 'history' ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>📊 History {stats.totalEntries > 0 ? `(${stats.totalEntries})` : ''}</button>
+            <button onClick={() => setActiveView('today')} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeView === 'today' ? '#0a3d22' : 'transparent', color: activeView === 'today' ? '#f59e0b' : '#3b7a5a', fontSize: '13px', fontWeight: activeView === 'today' ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Today's Entry</button>
+            <button onClick={() => setActiveView('history')} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeView === 'history' ? '#0a3d22' : 'transparent', color: activeView === 'history' ? '#f59e0b' : '#3b7a5a', fontSize: '13px', fontWeight: activeView === 'history' ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> History {stats.totalEntries > 0 ? `(${stats.totalEntries})` : ''}</button>
           </div>
 
           {activeView === 'today' && (
@@ -282,7 +282,7 @@ function Diary() {
                   <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#0a3d22', border: '3px solid #6ee7b7', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'checkmarkPop 0.5s ease-out' }}>
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
                   </div>
-                  <p style={{ color: '#6ee7b7', fontSize: '14px', marginTop: '12px', fontWeight: 500 }}>{gambled ? 'Entry saved 💚' : 'Great job staying clean! 🎉'}</p>
+                  <p style={{ color: '#6ee7b7', fontSize: '14px', marginTop: '12px', fontWeight: 500 }}>{gambled ? 'Entry saved ' : 'Great job staying clean! '}</p>
                 </div>
               )}
 
@@ -295,7 +295,7 @@ function Diary() {
               <div className="dash-section">
                 <h3 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '1rem' }}>Did you gamble today?</h3>
                 <div className="toggle-group">
-                  <button className={`toggle-btn ${gambled === false ? 'active-green' : ''}`} onClick={() => { setGambled(false); showToast('🙌 Clean day — proud of you!', 1500) }}>No 🙌</button>
+                  <button className={`toggle-btn ${gambled === false ? 'active-green' : ''}`} onClick={() => { setGambled(false); showToast(' Clean day — proud of you!', 1500) }}>No </button>
                   <button className={`toggle-btn ${gambled === true ? 'active-red' : ''}`} onClick={() => setGambled(true)}>Yes</button>
                 </div>
               </div>
@@ -320,8 +320,8 @@ function Diary() {
                 <h3 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '1rem' }}>Notes</h3>
                 {voiceSupported && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', padding: '8px 12px', background: isListening ? '#791F1F' : '#0a3d22', borderRadius: '8px', border: `1px solid ${isListening ? '#F09595' : '#1d5c38'}` }}>
-                    <button onClick={() => isListening ? stopListening() : startListening()} style={{ width: '36px', height: '36px', borderRadius: '50%', border: 'none', background: isListening ? '#F09595' : '#6ee7b7', color: '#041f13', fontSize: '16px', cursor: 'pointer', animation: isListening ? 'pulse 1.5s infinite' : 'none' }}>🎤</button>
-                    <span style={{ flex: 1, fontSize: '12px', color: isListening ? '#F09595' : '#6ee7b7' }}>{isListening ? '🔴 Listening...' : 'Tap to speak'}</span>
+                    <button onClick={() => isListening ? stopListening() : startListening()} style={{ width: '36px', height: '36px', borderRadius: '50%', border: 'none', background: isListening ? '#F09595' : '#6ee7b7', color: '#041f13', fontSize: '16px', cursor: 'pointer', animation: isListening ? 'pulse 1.5s infinite' : 'none' }}></button>
+                    <span style={{ flex: 1, fontSize: '12px', color: isListening ? '#F09595' : '#6ee7b7' }}>{isListening ? ' Listening...' : 'Tap to speak'}</span>
                     {isListening && <button onClick={stopListening} style={{ background: 'transparent', border: 'none', color: '#F09595', fontSize: '18px', cursor: 'pointer' }}>⏹</button>}
                   </div>
                 )}
@@ -329,7 +329,7 @@ function Diary() {
               </div>
 
               <button className="btn-primary full" onClick={handleSave} disabled={loading || saved || gambled === null}>
-                {loading ? <span className="spinner"></span> : saved ? '✅ Saved!' : todayEntry ? 'Update entry' : 'Save entry'}
+                {loading ? <span className="spinner"></span> : saved ? ' Saved!' : todayEntry ? 'Update entry' : 'Save entry'}
               </button>
             </>
           )}
@@ -337,7 +337,7 @@ function Diary() {
           {activeView === 'history' && (
             <>
               <div className="stats-grid" style={{ marginBottom: '1rem' }}>
-                {[{ icon: '📓', value: stats.totalEntries, label: 'Total' }, { icon: '✅', value: `${stats.cleanRate}%`, label: 'Clean rate', hl: stats.cleanRate >= 70 }, { icon: '🔥', value: stats.cleanDays, label: 'Clean days' }, { icon: '⚠️', value: stats.gambleDays, label: 'Gamble days' }].map((s, i) => (
+                {[{ icon: '', value: stats.totalEntries, label: 'Total' }, { icon: '', value: `${stats.cleanRate}%`, label: 'Clean rate', hl: stats.cleanRate >= 70 }, { icon: '', value: stats.cleanDays, label: 'Clean days' }, { icon: '', value: stats.gambleDays, label: 'Gamble days' }].map((s, i) => (
                   <div className="stat-card" key={i} style={s.hl ? { borderColor: '#6ee7b7' } : {}}><span className="stat-icon">{s.icon}</span><span className="stat-value" style={s.hl ? { color: '#6ee7b7' } : {}}>{s.value}</span><span className="stat-label">{s.label}</span></div>
                 ))}
               </div>

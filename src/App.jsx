@@ -1,6 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
-import SiteGate from './components/SiteGate'
 
 import Landing from './pages/public/Landing'
 import Login from './pages/public/Login'
@@ -23,6 +22,7 @@ import PreciousPactPage from './pages/user/PreciousPactPage'
 import MonthlyMirrorPage from './pages/user/MonthlyMirrorPage'
 import FamilyPortalPage from './pages/user/FamilyPortalPage'
 import Onboarding from './pages/user/Onboarding'
+import SubscriptionPage from './pages/user/SubscriptionPage'
 
 import AdminDashboard from './pages/admin/AdminDashboard'
 import ManageEvents from './pages/admin/ManageEvents'
@@ -42,12 +42,8 @@ import InsurancePartners from './pages/super-admin/InsurancePartners'
 import GrantApplications from './pages/super-admin/GrantApplications'
 import ChatViewer from './pages/super-admin/ChatViewer'
 
-// TODO: Remove hardcoded password during testing
-const SITE_PASSWORD = 'precious2026'
-
 function App() {
   return (
-    <SiteGate sitePassword={SITE_PASSWORD}>
       <Routes>
         {/* Public */}
         <Route path="/" element={<Landing />} />
@@ -72,6 +68,7 @@ function App() {
         <Route path="/monthly-mirror" element={<ProtectedRoute><MonthlyMirrorPage /></ProtectedRoute>} />
         <Route path="/family-portal" element={<ProtectedRoute><FamilyPortalPage /></ProtectedRoute>} />
         <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+        <Route path="/subscription" element={<ProtectedRoute><SubscriptionPage /></ProtectedRoute>} />
 
         {/* Admin */}
         <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
@@ -96,7 +93,6 @@ function App() {
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
-    </SiteGate>
   )
 }
 

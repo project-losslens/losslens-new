@@ -39,9 +39,9 @@ function SiteGate({ children, sitePassword }) {
         background: '#062616', border: '2px solid #f59e0b', borderRadius: '16px',
         padding: '2.5rem 2rem', maxWidth: '420px', width: '100%', textAlign: 'center',
       }}>
-        <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }} aria-hidden="true">🔒</span>
+        <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }} aria-hidden="true"></span>
         <h1 style={{ color: '#f59e0b', fontFamily: "'Playfair Display', serif", fontSize: '24px', marginBottom: '8px' }}>
-          Precious
+          LossLens
         </h1>
         <p style={{ color: '#6ee7b7', fontSize: '13px', marginBottom: '24px', lineHeight: '1.6' }}>
           The site is currently in development.
@@ -79,7 +79,7 @@ function SiteGate({ children, sitePassword }) {
             aria-label={showPw ? 'Hide password' : 'Show password'}
             style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#3b7a5a', fontSize: '16px', cursor: 'pointer' }}
           >
-            <span aria-hidden="true">{showPw ? '🙈' : '👁️'}</span>
+            <span aria-hidden="true">{showPw ? '' : ''}</span>
           </button>
         </div>
 

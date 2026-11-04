@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import AdminSidebar from '../../components/AdminSidebar'
 
-// ✅ Constants
+//  Constants
 const EVENT_TYPES = ['Workshop', 'Support Group', 'Seminar', 'Webinar', 'Social Event', 'Training', 'Other']
 const TABS = { EVENTS: 'events', RSVPS: 'rsvps', DISCUSSIONS: 'discussions', CONTACTS: 'contacts' }
 
@@ -96,7 +96,7 @@ export default function ManageEvents() {
     setShowForm(true)
   }
 
-  // ✅ Validate form
+  //  Validate form
   const validateForm = () => {
     const errors = {}
     if (!form.title.trim()) errors.title = 'Title is required'
@@ -144,12 +144,12 @@ export default function ManageEvents() {
       setEvents(prev => prev.map(e => e.id === ev.id ? { ...e, discussion_enabled: !newVal } : e))
       displayToast('Failed to update.', 'error')
     } else {
-      displayToast(newVal ? '💬 Discussion enabled.' : '🔒 Discussion disabled.')
+      displayToast(newVal ? ' Discussion enabled.' : ' Discussion disabled.')
     }
     setTogglingDiscussion(null)
   }
 
-  // ✅ Cascade delete RSVPs + discussions + messages
+  //  Cascade delete RSVPs + discussions + messages
   const deleteEvent = async (id) => {
     setDeleting(true)
     try {
@@ -212,7 +212,7 @@ export default function ManageEvents() {
 
   const unreadContacts = useMemo(() => contacts.filter(c => !c.read).length, [contacts])
 
-  // ✅ RSVP events with data
+  //  RSVP events with data
   const rsvpEvents = useMemo(() => events.filter(ev => {
     const r = rsvps[ev.id]
     return r && (r.going.length + r.maybe.length + r.cant.length) > 0
@@ -263,11 +263,11 @@ export default function ManageEvents() {
 
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#041f13', borderBottom: '2px solid #791F1F', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#F09595', fontFamily: "'Inter', sans-serif", margin: 0 }}>📅 Manage Events</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#F09595', fontFamily: "'Inter', sans-serif", margin: 0 }}> Manage Events</h1>
             <p style={{ fontSize: '12px', color: '#791F1F', margin: '2px 0 0' }}>{events.length} events · {contacts.length} messages{unreadContacts > 0 ? ` · ${unreadContacts} unread` : ''}</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #791F1F', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>🔄 Refresh</button>
+            <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #791F1F', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
             <button onClick={() => navigate('/admin')} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #791F1F', color: '#F09595', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>← Back</button>
           </div>
         </nav>
@@ -280,7 +280,7 @@ export default function ManageEvents() {
         {showForm && (
           <div onClick={() => setShowForm(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.92)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '1px solid #0a3d22', maxWidth: '540px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
-              <h3 style={{ color: '#f59e0b', fontSize: '16px', margin: '0 0 1.25rem' }}>{editingEvent ? '✏️ Edit Event' : '➕ New Event'}</h3>
+              <h3 style={{ color: '#f59e0b', fontSize: '16px', margin: '0 0 1.25rem' }}>{editingEvent ? ' Edit Event' : ' New Event'}</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div>
                   <label style={{ color: '#3b7a5a', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Title *</label>
@@ -343,7 +343,7 @@ export default function ManageEvents() {
         {showDeleteConfirm && (
           <div onClick={() => setShowDeleteConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '1px solid #791F1F', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
-              <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>🗑️</span>
+              <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}></span>
               <h3 style={{ color: '#F09595', fontSize: '16px', margin: '0 0 8px' }}>Delete Event?</h3>
               <p style={{ color: '#6ee7b7', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
                 Permanently delete <strong style={{ color: '#f59e0b' }}>"{showDeleteConfirm.title}"</strong> and ALL its RSVPs, discussions, and messages? This cannot be undone.
@@ -360,10 +360,10 @@ export default function ManageEvents() {
           {/* Tabs */}
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1.5rem', background: '#062616', borderRadius: '12px', padding: '4px', border: '1px solid #0a3d22', overflowX: 'auto' }}>
             {[
-              { id: TABS.EVENTS, label: `📅 Events (${events.length})` },
-              { id: TABS.RSVPS, label: `✅ RSVPs (${rsvpEvents.length})` },
-              { id: TABS.DISCUSSIONS, label: `💬 Discussions (${discussions.length})` },
-              { id: TABS.CONTACTS, label: `📩 Messages (${contacts.length})${unreadContacts > 0 ? ' 🔴' : ''}` },
+              { id: TABS.EVENTS, label: ` Events (${events.length})` },
+              { id: TABS.RSVPS, label: ` RSVPs (${rsvpEvents.length})` },
+              { id: TABS.DISCUSSIONS, label: ` Discussions (${discussions.length})` },
+              { id: TABS.CONTACTS, label: ` Messages (${contacts.length})${unreadContacts > 0 ? ' ' : ''}` },
             ].map(tab => (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? '#633806' : 'transparent', color: activeTab === tab.id ? '#f59e0b' : '#3b7a5a', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', minWidth: '100px', transition: 'background 0.2s, color 0.2s' }}>{tab.label}</button>
             ))}
@@ -374,15 +374,15 @@ export default function ManageEvents() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '8px', flexWrap: 'wrap' }}>
                 <div style={{ position: 'relative' }}>
-                  <input type="text" placeholder="🔍 Search events..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ ...inputStyle, width: '260px', borderRadius: '100px', paddingRight: '32px' }} />
-                  {searchQuery && <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#3b7a5a', cursor: 'pointer', fontSize: '14px', padding: '4px 6px' }}>✕</button>}
+                  <input type="text" placeholder=" Search events..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ ...inputStyle, width: '260px', borderRadius: '100px', paddingRight: '32px' }} />
+                  {searchQuery && <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#3b7a5a', cursor: 'pointer', fontSize: '14px', padding: '4px 6px' }}></button>}
                 </div>
-                <button onClick={openCreate} style={btnStyle('#f59e0b', '#041f13', '#f59e0b')}>➕ New Event</button>
+                <button onClick={openCreate} style={btnStyle('#f59e0b', '#041f13', '#f59e0b')}> New Event</button>
               </div>
 
               {filteredEvents.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a', background: '#062616', borderRadius: '12px', border: '1px solid #0a3d22' }}>
-                  <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>📅</span>
+                  <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
                   <p style={{ color: '#6ee7b7', fontSize: '14px' }}>{searchQuery ? 'No events match your search.' : 'No events yet.'}</p>
                   {searchQuery && <button onClick={() => setSearchQuery('')} style={{ marginTop: '10px', padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid #6ee7b7', color: '#6ee7b7', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Clear search</button>}
                 </div>
@@ -401,35 +401,35 @@ export default function ManageEvents() {
                               <span style={{ color: '#e2f5ec', fontSize: '14px', fontWeight: 600 }}>{ev.title}</span>
                               <span style={badge(ev.active ? '#6ee7b7' : '#3b7a5a', ev.active ? '#0a3d22' : '#062616', ev.active ? '#6ee7b7' : '#3b7a5a')}>{ev.active ? 'Active' : 'Inactive'}</span>
                               {ev.type && <span style={badge('#FAC775', '#633806', '#FAC775')}>{ev.type}</span>}
-                              <span style={badge(discussionOn ? '#6ee7b7' : '#F09595', discussionOn ? '#041f13' : '#1a0a0a', discussionOn ? '#6ee7b7' : '#F09595')}>{discussionOn ? '💬 Chat' : '🔒 Chat off'}</span>
+                              <span style={badge(discussionOn ? '#6ee7b7' : '#F09595', discussionOn ? '#041f13' : '#1a0a0a', discussionOn ? '#6ee7b7' : '#F09595')}>{discussionOn ? ' Chat' : ' Chat off'}</span>
                             </div>
-                            <p style={{ color: '#3b7a5a', fontSize: '11px', margin: '0 0 4px' }}>📍 {ev.location || 'No location'} · 🗓️ {fmtTime(ev.date)}{ev.spots ? ` · 👥 ${ev.spots} spots` : ''}</p>
+                            <p style={{ color: '#3b7a5a', fontSize: '11px', margin: '0 0 4px' }}> {ev.location || 'No location'} ·  {fmtTime(ev.date)}{ev.spots ? ` ·  ${ev.spots} spots` : ''}</p>
                             {ev.description && <p style={{ color: '#3b7a5a', fontSize: '12px', margin: '4px 0 0', lineHeight: '1.5' }}>{isExpanded ? ev.description : ev.description.substring(0, 120)}{!isExpanded && ev.description.length > 120 ? '…' : ''}</p>}
                             <div style={{ display: 'flex', gap: '16px', marginTop: '10px', flexWrap: 'wrap' }}>
-                              <span style={{ color: '#6ee7b7', fontSize: '12px' }}>✅ {r.going.length} Going</span>
-                              <span style={{ color: '#FAC775', fontSize: '12px' }}>🤔 {r.maybe.length} Maybe</span>
-                              <span style={{ color: '#F09595', fontSize: '12px' }}>❌ {r.cant.length} Can't</span>
+                              <span style={{ color: '#6ee7b7', fontSize: '12px' }}> {r.going.length} Going</span>
+                              <span style={{ color: '#FAC775', fontSize: '12px' }}> {r.maybe.length} Maybe</span>
+                              <span style={{ color: '#F09595', fontSize: '12px' }}> {r.cant.length} Can't</span>
                               {ev.spots && <span style={{ color: totalRSVPs >= ev.spots ? '#F09595' : '#3b7a5a', fontSize: '12px' }}>{totalRSVPs}/{ev.spots} spots</span>}
                             </div>
                           </div>
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
                             <button onClick={() => setExpandedEvent(isExpanded ? null : ev.id)} style={btnStyle('transparent', '#6ee7b7', '#0a3d22')}>{isExpanded ? '▲' : '▼'}</button>
-                            <button onClick={() => openEdit(ev)} style={btnStyle('transparent', '#FAC775', '#FAC775')}>✏️</button>
+                            <button onClick={() => openEdit(ev)} style={btnStyle('transparent', '#FAC775', '#FAC775')}></button>
                             <button onClick={() => toggleActive(ev)} style={btnStyle('transparent', ev.active ? '#FAC775' : '#6ee7b7', ev.active ? '#FAC775' : '#6ee7b7')}>{ev.active ? 'Hide' : 'Show'}</button>
-                            <button onClick={() => toggleDiscussion(ev)} disabled={togglingDiscussion === ev.id} style={btnStyle(discussionOn ? '#0a3d22' : '#1a0a0a', discussionOn ? '#6ee7b7' : '#F09595', discussionOn ? '#6ee7b7' : '#F09595')}>{togglingDiscussion === ev.id ? '...' : discussionOn ? '🔒' : '💬'}</button>
-                            <button onClick={() => setShowDeleteConfirm(ev)} style={btnStyle('transparent', '#F09595', '#791F1F')}>🗑️</button>
+                            <button onClick={() => toggleDiscussion(ev)} disabled={togglingDiscussion === ev.id} style={btnStyle(discussionOn ? '#0a3d22' : '#1a0a0a', discussionOn ? '#6ee7b7' : '#F09595', discussionOn ? '#6ee7b7' : '#F09595')}>{togglingDiscussion === ev.id ? '...' : discussionOn ? '' : ''}</button>
+                            <button onClick={() => setShowDeleteConfirm(ev)} style={btnStyle('transparent', '#F09595', '#791F1F')}></button>
                           </div>
                         </div>
                         {isExpanded && (
                           <div style={{ marginTop: '16px', borderTop: '1px solid #0a3d22', paddingTop: '14px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-                            {[{ label: '✅ Going', list: r.going, color: '#6ee7b7' }, { label: '🤔 Maybe', list: r.maybe, color: '#FAC775' }, { label: "❌ Can't", list: r.cant, color: '#F09595' }].map(({ label, list, color }) => (
+                            {[{ label: ' Going', list: r.going, color: '#6ee7b7' }, { label: ' Maybe', list: r.maybe, color: '#FAC775' }, { label: " Can't", list: r.cant, color: '#F09595' }].map(({ label, list, color }) => (
                               <div key={label}>
                                 <p style={{ color, fontSize: '12px', fontWeight: 600, margin: '0 0 6px' }}>{label} ({list.length})</p>
                                 {list.length === 0 ? <p style={{ color: '#3b7a5a', fontSize: '11px' }}>None</p> : list.map((u, i) => (
                                   <div key={i} style={{ padding: '4px 0', borderBottom: '1px solid #0a3d22' }}>
                                     <p style={{ color: '#e2f5ec', fontSize: '12px', margin: 0 }}>{u.full_name || u.username || 'Attendee'}</p>
                                     {u.email && <p style={{ color: '#3b7a5a', fontSize: '10px', margin: '2px 0 0' }}>{u.email}</p>}
-                                    {u.phone && <p style={{ color: '#6ee7b7', fontSize: '10px' }}>📞 {u.phone}</p>}
+                                    {u.phone && <p style={{ color: '#6ee7b7', fontSize: '10px' }}> {u.phone}</p>}
                                   </div>
                                 ))}
                               </div>
@@ -449,7 +449,7 @@ export default function ManageEvents() {
             <div>
               {rsvpEvents.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a', background: '#062616', borderRadius: '12px', border: '1px solid #0a3d22' }}>
-                  <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>✅</span>
+                  <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
                   <p style={{ color: '#6ee7b7', fontSize: '14px' }}>No RSVPs yet.</p>
                 </div>
               ) : rsvpEvents.map(ev => {
@@ -459,7 +459,7 @@ export default function ManageEvents() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                       <p style={{ color: '#f59e0b', fontSize: '14px', fontWeight: 600, margin: 0 }}>{ev.title}</p>
                       <button onClick={() => {
-                        // ✅ Export RSVPs as CSV
+                        //  Export RSVPs as CSV
                         const headers = 'Name,Email,Phone,Status\n'
                         const rows = [
                           ...r.going.map(u => `"${u.full_name || ''}","${u.email || ''}","${u.phone || ''}","Going"`),
@@ -471,17 +471,17 @@ export default function ManageEvents() {
                         const a = document.createElement('a')
                         a.href = url; a.download = `rsvp-${ev.title?.replace(/\s/g,'-') || 'event'}.csv`
                         a.click(); URL.revokeObjectURL(url)
-                        displayToast('📥 RSVP list downloaded!')
-                      }} style={btnStyle('transparent', '#6ee7b7', '#6ee7b7')}>📥 Export CSV</button>
+                        displayToast(' RSVP list downloaded!')
+                      }} style={btnStyle('transparent', '#6ee7b7', '#6ee7b7')}> Export CSV</button>
                     </div>
-                    {[{ label: '✅ Going', list: r.going, color: '#6ee7b7' }, { label: '🤔 Maybe', list: r.maybe, color: '#FAC775' }, { label: "❌ Can't", list: r.cant, color: '#F09595' }].map(({ label, list, color }) => list.length > 0 && (
+                    {[{ label: ' Going', list: r.going, color: '#6ee7b7' }, { label: ' Maybe', list: r.maybe, color: '#FAC775' }, { label: " Can't", list: r.cant, color: '#F09595' }].map(({ label, list, color }) => list.length > 0 && (
                       <div key={label} style={{ marginBottom: '10px' }}>
                         <p style={{ color, fontSize: '12px', fontWeight: 600, margin: '0 0 6px' }}>{label} ({list.length})</p>
                         {list.map((u, i) => (
                           <div key={i} style={{ display: 'flex', gap: '12px', padding: '6px 0', borderBottom: '1px solid #0a3d22', flexWrap: 'wrap' }}>
                             <span style={{ color: '#e2f5ec', fontSize: '13px' }}>{u.full_name || u.username || 'Attendee'}</span>
                             {u.email && <span style={{ color: '#3b7a5a', fontSize: '11px' }}>{u.email}</span>}
-                            {u.phone && <span style={{ color: '#6ee7b7', fontSize: '11px' }}>📞 {u.phone}</span>}
+                            {u.phone && <span style={{ color: '#6ee7b7', fontSize: '11px' }}> {u.phone}</span>}
                           </div>
                         ))}
                       </div>
@@ -497,7 +497,7 @@ export default function ManageEvents() {
             <div>
               {discussions.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a', background: '#062616', borderRadius: '12px', border: '1px solid #0a3d22' }}>
-                  <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>💬</span>
+                  <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
                   <p style={{ color: '#6ee7b7', fontSize: '14px' }}>No discussions yet.</p>
                 </div>
               ) : discussions.map((d, i) => (
@@ -518,7 +518,7 @@ export default function ManageEvents() {
                     </div>
                   )}
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
-                    <button onClick={() => deleteDiscussion(d.id)} style={btnStyle('transparent', '#F09595', '#791F1F')}>🗑️ Delete</button>
+                    <button onClick={() => deleteDiscussion(d.id)} style={btnStyle('transparent', '#F09595', '#791F1F')}> Delete</button>
                   </div>
                 </div>
               ))}
@@ -530,7 +530,7 @@ export default function ManageEvents() {
             <div>
               {contacts.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a', background: '#062616', borderRadius: '12px', border: '1px solid #0a3d22' }}>
-                  <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>📩</span>
+                  <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
                   <p style={{ color: '#6ee7b7', fontSize: '14px' }}>No messages yet.</p>
                 </div>
               ) : contacts.map((c, i) => (
@@ -545,12 +545,12 @@ export default function ManageEvents() {
                   {c.events?.title && <p style={{ color: '#f59e0b', fontSize: '11px', margin: '0 0 6px' }}>Re: {c.events.title}</p>}
                   <p style={{ color: '#9fe1cb', fontSize: '13px', margin: '0 0 10px', lineHeight: '1.6' }}>{c.message}</p>
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '10px' }}>
-                    {c.phone && <a href={`tel:${c.phone}`} style={{ color: '#6ee7b7', fontSize: '12px', textDecoration: 'none' }}>📞 {c.phone}</a>}
-                    {c.email && <a href={`mailto:${c.email}`} style={{ color: '#6ee7b7', fontSize: '12px', textDecoration: 'none' }}>✉️ {c.email}</a>}
+                    {c.phone && <a href={`tel:${c.phone}`} style={{ color: '#6ee7b7', fontSize: '12px', textDecoration: 'none' }}> {c.phone}</a>}
+                    {c.email && <a href={`mailto:${c.email}`} style={{ color: '#6ee7b7', fontSize: '12px', textDecoration: 'none' }}> {c.email}</a>}
                   </div>
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                    {!c.read && <button onClick={() => markContactRead(c.id)} style={btnStyle('#0a3d22', '#6ee7b7', '#6ee7b7')}>✅ Mark read</button>}
-                    <button onClick={() => deleteContact(c.id)} style={btnStyle('transparent', '#F09595', '#791F1F')}>🗑️ Delete</button>
+                    {!c.read && <button onClick={() => markContactRead(c.id)} style={btnStyle('#0a3d22', '#6ee7b7', '#6ee7b7')}> Mark read</button>}
+                    <button onClick={() => deleteContact(c.id)} style={btnStyle('transparent', '#F09595', '#791F1F')}> Delete</button>
                   </div>
                 </div>
               ))}

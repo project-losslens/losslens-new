@@ -5,13 +5,13 @@ import '../../styles/globals.css'
 import Sidebar from '../../components/Sidebar'
 import { createNotification } from '../../lib/notifications'
 
-// ✅ Constants
+//  Constants
 const ROOMS = [
-  { id: 'check_in', name: 'Daily Check-In', icon: '☀️', desc: 'Morning & evening mood sharing', expiry_hours: 24 },
+  { id: 'check_in', name: 'Daily Check-In', icon: '', desc: 'Morning & evening mood sharing', expiry_hours: 24 },
   { id: 'urge_support', name: 'Urge Support', icon: '🆘', desc: 'Real-time help during urges', expiry_hours: 2 },
-  { id: 'victory', name: 'Victory Circle', icon: '🎉', desc: 'Celebrate wins big and small', expiry_hours: 168 },
-  { id: 'slip_recovery', name: 'Slip & Recovery', icon: '💙', desc: 'No-judgment space for setbacks', expiry_hours: 24 },
-  { id: 'family_friends', name: 'Family & Friends', icon: '👨‍👩‍👧', desc: 'For supporters of gamblers', expiry_hours: 168 },
+  { id: 'victory', name: 'Victory Circle', icon: '', desc: 'Celebrate wins big and small', expiry_hours: 168 },
+  { id: 'slip_recovery', name: 'Slip & Recovery', icon: '', desc: 'No-judgment space for setbacks', expiry_hours: 24 },
+  { id: 'family_friends', name: 'Family & Friends', icon: '', desc: 'For supporters of gamblers', expiry_hours: 168 },
 ]
 
 const MAX_MESSAGE_LENGTH = 280
@@ -20,11 +20,11 @@ const MESSAGE_COOLDOWN_MS = 3000
 const PRESENCE_POLL_INTERVAL = 15000
 
 const REACTIONS = [
-  { key: 'reaction_support', emoji: '💪', label: 'Support' },
-  { key: 'reaction_love', emoji: '🤝', label: 'With you' },
-  { key: 'reaction_fire', emoji: '🔥', label: 'Fire' },
-  { key: 'reaction_heart', emoji: '❤️', label: 'Love' },
-  { key: 'reaction_star', emoji: '🌟', label: 'Star' },
+  { key: 'reaction_support', emoji: '', label: 'Support' },
+  { key: 'reaction_love', emoji: '', label: 'With you' },
+  { key: 'reaction_fire', emoji: '', label: 'Fire' },
+  { key: 'reaction_heart', emoji: '', label: 'Love' },
+  { key: 'reaction_star', emoji: '', label: 'Star' },
 ]
 
 const CHECK_IN_TEMPLATES = [
@@ -41,7 +41,7 @@ const MENTION_REGEX = /@([A-Z][a-z]+ [A-Z][a-z]+)/g
 
 const ANIMALS = ['Elephant', 'Lion', 'Giraffe', 'Zebra', 'Rhino', 'Cheetah', 'Leopard', 'Buffalo', 'Eagle', 'Crane']
 const PREFIXES = ['Savannah', 'Pride', 'Acacia', 'Serengeti', 'Rift', 'Highland', 'Coastal', 'Forest', 'Plains', 'Valley']
-const ANIMAL_EMOJI = { Elephant:'🐘', Lion:'🦁', Giraffe:'🦒', Zebra:'🦓', Rhino:'🦏', Cheetah:'🐆', Leopard:'🐆', Buffalo:'🐃', Eagle:'🦅', Crane:'🦩' }
+const ANIMAL_EMOJI = { Elephant:'', Lion:'', Giraffe:'', Zebra:'', Rhino:'', Cheetah:'', Leopard:'', Buffalo:'', Eagle:'', Crane:'' }
 
 function generateUserHash(userId) {
   let hash = 0
@@ -152,7 +152,7 @@ export default function TheCircle() {
     if (!showScrollButton) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  // ✅ Single presence poll — less frequent
+  //  Single presence poll — less frequent
   const startPresencePolling = useCallback(() => {
     if (presenceRef.current) clearInterval(presenceRef.current)
     const fetchPresence = async () => {
@@ -171,7 +171,7 @@ export default function TheCircle() {
     presenceRef.current = setInterval(fetchPresence, PRESENCE_POLL_INTERVAL)
   }, [])
 
-  // ✅ Use only Realtime, not polling
+  //  Use only Realtime, not polling
   const subscribeToRoom = (room) => {
     if (channelRef.current) supabase.removeChannel(channelRef.current)
     const channel = supabase.channel(`circle_${room}_${Date.now()}`)
@@ -192,7 +192,7 @@ export default function TheCircle() {
 
   const startPolling = (room) => {
     if (pollRef.current) clearInterval(pollRef.current)
-    // ✅ Fallback polling every 10s as backup for Realtime
+    //  Fallback polling every 10s as backup for Realtime
     pollRef.current = setInterval(async () => {
       try {
         const { data } = await supabase.from('circle_messages').select('*').eq('room', room).order('created_at', { ascending: true }).limit(150)
@@ -221,7 +221,7 @@ export default function TheCircle() {
     } catch (err) { /* silent */ }
   }
 
-  // ✅ Map user_hash to user_id for notifications
+  //  Map user_hash to user_id for notifications
   const resolveUserHash = async (displayName) => {
     if (userHashMap[displayName]) return userHashMap[displayName]
     try {
@@ -243,9 +243,9 @@ export default function TheCircle() {
       if (crisisTimerRef.current) clearTimeout(crisisTimerRef.current)
       crisisTimerRef.current = setTimeout(() => setShowCrisisBanner(false), 10000)
     }
-    if (containsBlockedContent(text)) { showToast('⚠️ Please don\'t share personal information.', 4000); return }
+    if (containsBlockedContent(text)) { showToast(' Please don\'t share personal information.', 4000); return }
 
-    // ✅ Rate limiting
+    //  Rate limiting
     const now = Date.now()
     if (now - lastSendTime < MESSAGE_COOLDOWN_MS) { showToast('Slow down!', 1500); return }
     setLastSendTime(now)
@@ -281,13 +281,13 @@ export default function TheCircle() {
       setMessages(prev => prev.map(m => m.id === tempId ? { ...data, _sending: false, _delivered: true, reply_to: replyData ? { id: replyData.id, name: replyData.name, message: replyData.message?.substring(0, 50), userId: replyData.userId } : null } : m))
       setTimeout(() => setMessages(prev => prev.map(m => m.id === data.id ? { ...m, _delivered: false } : m)), 2000)
 
-      // ✅ Send mention notifications — properly resolve user IDs
+      //  Send mention notifications — properly resolve user IDs
       const mentions = extractMentions(text)
       for (const mention of mentions) {
         const mentionedUserId = await resolveUserHash(mention)
         if (mentionedUserId && mentionedUserId !== userId) {
           try {
-            await createNotification(mentionedUserId, { title: '💬 You were mentioned', message: `${identity.displayName} mentioned you in The Circle`, type: 'info', icon: '💬', link: '/circle' })
+            await createNotification(mentionedUserId, { title: ' You were mentioned', message: `${identity.displayName} mentioned you in The Circle`, type: 'info', icon: '', link: '/circle' })
           } catch (err) { /* silent */ }
         }
       }
@@ -295,7 +295,7 @@ export default function TheCircle() {
       // Send reply notification
       if (replyData?.userId && replyData.userId !== userId) {
         try {
-          await createNotification(replyData.userId, { title: '↩️ Someone replied to you', message: `${identity.displayName} replied in The Circle`, type: 'info', icon: '↩️', link: '/circle' })
+          await createNotification(replyData.userId, { title: '↩ Someone replied to you', message: `${identity.displayName} replied in The Circle`, type: 'info', icon: '↩', link: '/circle' })
         } catch (err) { /* silent */ }
       }
     } catch (err) {
@@ -336,7 +336,7 @@ export default function TheCircle() {
     return new Date(d).toLocaleDateString('en-KE', { month: 'short', day: 'numeric' })
   }
 
-  const getAvatarEmoji = (a) => ANIMAL_EMOJI[a] || '🦁'
+  const getAvatarEmoji = (a) => ANIMAL_EMOJI[a] || ''
   const activeRoomData = useMemo(() => ROOMS.find(r => r.id === activeRoom), [activeRoom])
 
   if (!identity) return (
@@ -351,7 +351,7 @@ export default function TheCircle() {
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0, display: 'flex', flexDirection: 'column', height: '100vh' }} className="main-content">
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#041f13', borderBottom: '1px solid #0a3d22', flexShrink: 0 }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}>💬 The Circle</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}> The Circle</h1>
             <p style={{ fontSize: '12px', color: '#3b7a5a', margin: '2px 0 0' }}>{onlineCount} online · You: {getAvatarEmoji(identity.animal)} {identity.displayName}</p>
           </div>
         </nav>
@@ -382,7 +382,7 @@ export default function TheCircle() {
 
           {messages.length === 0 && (
             <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a' }}>
-              <p style={{ fontSize: '32px' }}>💬</p>
+              <p style={{ fontSize: '32px' }}></p>
               <p style={{ fontSize: '14px', color: '#6ee7b7' }}>No messages yet</p>
               <p style={{ fontSize: '12px' }}>Be the first to share in {activeRoomData?.name}.</p>
             </div>
@@ -398,12 +398,12 @@ export default function TheCircle() {
                     <span style={{ fontSize: '11px', color: isOwn ? '#f59e0b' : '#6ee7b7', fontWeight: 500 }}>{msg.display_name}</span>
                     <span style={{ fontSize: '10px', color: '#3b7a5a' }} title={new Date(msg.created_at).toLocaleString('en-KE')}>{formatTime(msg.created_at)}</span>
                     {msg._sending && <span style={{ fontSize: '10px', color: '#FAC775' }}>sending...</span>}
-                    {msg._delivered && <span style={{ fontSize: '10px', color: '#6ee7b7' }}>✓</span>}
-                    {msg._failed && <span onClick={() => retryMessage(msg)} style={{ fontSize: '10px', color: '#F09595', cursor: 'pointer', textDecoration: 'underline' }}>⚠️ Retry</span>}
+                    {msg._delivered && <span style={{ fontSize: '10px', color: '#6ee7b7' }}></span>}
+                    {msg._failed && <span onClick={() => retryMessage(msg)} style={{ fontSize: '10px', color: '#F09595', cursor: 'pointer', textDecoration: 'underline' }}> Retry</span>}
                   </div>
                   {msg.reply_to && (
                     <div style={{ fontSize: '10px', color: '#3b7a5a', marginBottom: '2px', padding: '4px 8px', background: '#041f13', borderRadius: '6px', borderLeft: '2px solid #f59e0b' }}>
-                      ↩️ <strong>{msg.reply_to.name}</strong>: "{msg.reply_to.message}..."
+                      ↩ <strong>{msg.reply_to.name}</strong>: "{msg.reply_to.message}..."
                     </div>
                   )}
                   <div style={{ padding: '10px 14px', borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: isOwn ? '#0a3d22' : '#062616', border: `1px solid ${msg._failed ? '#791F1F' : isOwn ? '#1d5c38' : '#0a3d22'}`, color: '#9fe1cb', fontSize: '13px', lineHeight: '1.5', wordBreak: 'break-word' }}>
@@ -411,11 +411,11 @@ export default function TheCircle() {
                   </div>
                   {!msg._sending && !msg._failed && (
                     <div style={{ display: 'flex', gap: '4px', marginTop: '4px', flexDirection: isOwn ? 'row-reverse' : 'row', flexWrap: 'wrap', opacity: 0.7 }}>
-                      <button onClick={() => handleReply(msg)} style={{ background: '#041f13', border: '1px solid #0a3d22', borderRadius: '100px', padding: '2px 8px', fontSize: '10px', color: '#6ee7b7', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }} aria-label="Reply">↩️</button>
+                      <button onClick={() => handleReply(msg)} style={{ background: '#041f13', border: '1px solid #0a3d22', borderRadius: '100px', padding: '2px 8px', fontSize: '10px', color: '#6ee7b7', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }} aria-label="Reply">↩</button>
                       {REACTIONS.filter(r => (msg[r.key] || 0) > 0).map(r => (
                         <button key={r.key} onClick={() => handleReaction(msg.id, r.key)} style={{ background: '#041f13', border: '1px solid #0a3d22', borderRadius: '100px', padding: '2px 8px', fontSize: '11px', color: '#6ee7b7', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }} aria-label={`${r.label} (${msg[r.key]})`}>{r.emoji} {msg[r.key]}</button>
                       ))}
-                      {isOwn && <button onClick={() => handleDeleteMessage(msg.id)} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '10px', cursor: 'pointer', padding: '2px 4px' }} aria-label="Delete message">✕</button>}
+                      {isOwn && <button onClick={() => handleDeleteMessage(msg.id)} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '10px', cursor: 'pointer', padding: '2px 4px' }} aria-label="Delete message"></button>}
                     </div>
                   )}
                 </div>
@@ -429,8 +429,8 @@ export default function TheCircle() {
         <div style={{ padding: '12px 1.5rem', borderTop: '1px solid #0a3d22', background: '#062616', flexShrink: 0 }}>
           {replyTo && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: '#0a3d22', borderRadius: '8px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '12px', color: '#f59e0b', flex: 1 }}>↩️ Replying to <strong>{replyTo.name}</strong></span>
-              <button onClick={() => setReplyTo(null)} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '16px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Cancel reply">✕</button>
+              <span style={{ fontSize: '12px', color: '#f59e0b', flex: 1 }}>↩ Replying to <strong>{replyTo.name}</strong></span>
+              <button onClick={() => setReplyTo(null)} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '16px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Cancel reply"></button>
             </div>
           )}
           {showTemplates && (
@@ -439,11 +439,11 @@ export default function TheCircle() {
             </div>
           )}
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={() => setShowTemplates(!showTemplates)} style={{ width: '36px', height: '36px', borderRadius: '8px', background: showTemplates ? '#0a3d22' : '#041f13', border: '1px solid #0a3d22', color: '#6ee7b7', fontSize: '14px', cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Message templates">📝</button>
+            <button onClick={() => setShowTemplates(!showTemplates)} style={{ width: '36px', height: '36px', borderRadius: '8px', background: showTemplates ? '#0a3d22' : '#041f13', border: '1px solid #0a3d22', color: '#6ee7b7', fontSize: '14px', cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Message templates"></button>
             <input ref={inputRef} value={input} onChange={e => setInput(e.target.value.substring(0, MAX_MESSAGE_LENGTH))} onKeyDown={e => e.key === 'Enter' && handleSend()} placeholder={replyTo ? `Reply to ${replyTo.name}...` : `Share... (${MAX_MESSAGE_LENGTH - input.length})`} style={{ flex: 1, background: '#041f13', border: '1px solid #0a3d22', borderRadius: '100px', padding: '10px 16px', color: '#fff', fontSize: '16px', outline: 'none', fontFamily: "'Inter', sans-serif" }} aria-label="Type a message" />
             <button onClick={handleSend} disabled={!input.trim() || sending} style={{ width: '40px', height: '40px', borderRadius: '50%', background: input.trim() && !sending ? '#f59e0b' : '#0a3d22', border: 'none', color: input.trim() && !sending ? '#041f13' : '#3b7a5a', fontSize: '18px', cursor: input.trim() && !sending ? 'pointer' : 'not-allowed', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Send message">→</button>
           </div>
-          <p style={{ fontSize: '10px', color: '#1d5c38', textAlign: 'center', marginTop: '6px', marginBottom: 0 }}>Anonymous · Use @Name to tag · Be kind 💚</p>
+          <p style={{ fontSize: '10px', color: '#1d5c38', textAlign: 'center', marginTop: '6px', marginBottom: 0 }}>Anonymous · Use @Name to tag · Be kind </p>
         </div>
       </div>
       <style>{`

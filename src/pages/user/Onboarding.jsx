@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 
-// ✅ Constants
+//  Constants
 const GOAL_MAP = {
   cut_down: 'Cut down',
   abstinence: 'Abstinence',
@@ -17,9 +17,9 @@ const QUESTIONS = [
     title: 'How often do you gamble?',
     subtitle: 'Be honest — this helps us personalize your experience',
     options: [
-      { value: 'daily', label: 'Daily', emoji: '📅', desc: 'Most days of the week' },
-      { value: 'weekly', label: 'Weekly', emoji: '📆', desc: 'A few times per week' },
-      { value: 'monthly', label: 'Monthly', emoji: '🗓️', desc: 'A few times per month' },
+      { value: 'daily', label: 'Daily', emoji: '', desc: 'Most days of the week' },
+      { value: 'weekly', label: 'Weekly', emoji: '', desc: 'A few times per week' },
+      { value: 'monthly', label: 'Monthly', emoji: '', desc: 'A few times per month' },
       { value: 'rarely', label: 'Rarely', emoji: '⏰', desc: 'Once in a while' },
     ]
   },
@@ -28,10 +28,10 @@ const QUESTIONS = [
     title: 'How much do you typically spend?',
     subtitle: 'Per gambling session',
     options: [
-      { value: 'high', label: 'KES 5,000+', emoji: '💰', desc: 'Significant amounts' },
-      { value: 'medium', label: 'KES 500-5,000', emoji: '💵', desc: 'Moderate amounts' },
-      { value: 'low', label: 'Under KES 500', emoji: '🪙', desc: 'Small amounts' },
-      { value: 'varies', label: 'It varies a lot', emoji: '📊', desc: 'Depends on the day' },
+      { value: 'high', label: 'KES 5,000+', emoji: '', desc: 'Significant amounts' },
+      { value: 'medium', label: 'KES 500-5,000', emoji: '', desc: 'Moderate amounts' },
+      { value: 'low', label: 'Under KES 500', emoji: '', desc: 'Small amounts' },
+      { value: 'varies', label: 'It varies a lot', emoji: '', desc: 'Depends on the day' },
     ]
   },
   {
@@ -40,11 +40,11 @@ const QUESTIONS = [
     subtitle: 'Select all that apply',
     multi: true,
     options: [
-      { value: 'financial', label: 'Financial stress', emoji: '💸' },
-      { value: 'relationships', label: 'Relationship problems', emoji: '💔' },
-      { value: 'mental', label: 'Mental health (anxiety, guilt)', emoji: '😰' },
-      { value: 'work', label: 'Work or study performance', emoji: '📉' },
-      { value: 'minimal', label: 'Minimal impact so far', emoji: '🙂' },
+      { value: 'financial', label: 'Financial stress', emoji: '' },
+      { value: 'relationships', label: 'Relationship problems', emoji: '' },
+      { value: 'mental', label: 'Mental health (anxiety, guilt)', emoji: '' },
+      { value: 'work', label: 'Work or study performance', emoji: '' },
+      { value: 'minimal', label: 'Minimal impact so far', emoji: '' },
     ]
   },
   {
@@ -53,23 +53,23 @@ const QUESTIONS = [
     subtitle: 'Select all that apply',
     multi: true,
     options: [
-      { value: 'stress', label: 'Stress or anxiety', emoji: '😥' },
-      { value: 'boredom', label: 'Boredom', emoji: '😴' },
-      { value: 'sports', label: 'Sports matches', emoji: '⚽' },
-      { value: 'money', label: 'Financial pressure / Payday', emoji: '💳' },
-      { value: 'social', label: 'Friends or peer pressure', emoji: '👥' },
-      { value: 'ads', label: 'Ads and promotions', emoji: '📱' },
+      { value: 'stress', label: 'Stress or anxiety', emoji: '' },
+      { value: 'boredom', label: 'Boredom', emoji: '' },
+      { value: 'sports', label: 'Sports matches', emoji: '' },
+      { value: 'money', label: 'Financial pressure / Payday', emoji: '' },
+      { value: 'social', label: 'Friends or peer pressure', emoji: '' },
+      { value: 'ads', label: 'Ads and promotions', emoji: '' },
     ]
   },
   {
     id: 'goal',
-    title: 'What brings you to Precious today?',
+    title: 'What brings you to LossLens today?',
     subtitle: 'Choose your primary goal',
     options: [
-      { value: 'cut_down', label: 'Cut down', emoji: '📉', desc: 'Gamble less than I do now' },
-      { value: 'abstinence', label: 'Stop completely', emoji: '🚫', desc: 'Quit gambling entirely' },
-      { value: 'maintain', label: 'Stay on track', emoji: '✅', desc: "I've already cut down, want to maintain" },
-      { value: 'exploring', label: 'Just exploring', emoji: '🔍', desc: 'Learning about my options' },
+      { value: 'cut_down', label: 'Cut down', emoji: '', desc: 'Gamble less than I do now' },
+      { value: 'abstinence', label: 'Stop completely', emoji: '', desc: 'Quit gambling entirely' },
+      { value: 'maintain', label: 'Stay on track', emoji: '', desc: "I've already cut down, want to maintain" },
+      { value: 'exploring', label: 'Just exploring', emoji: '', desc: 'Learning about my options' },
     ]
   },
 ]
@@ -89,14 +89,16 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false)
   const [animate, setAnimate] = useState(false)
   const [skipped, setSkipped] = useState(false)
+  const [validationWarning, setValidationWarning] = useState('')
+  const [saveError, setSaveError] = useState('')
 
-  // ✅ Persist progress
+  //  Persist progress
   const saveProgress = useCallback((newStep, newAnswers) => {
     sessionStorage.setItem('onboarding_step', newStep.toString())
     sessionStorage.setItem('onboarding_answers', JSON.stringify(newAnswers))
   }, [])
 
-  // ✅ Question lookup map for O(1) access
+  //  Question lookup map for O(1) access
   const questionMap = useMemo(() => {
     const map = {}
     QUESTIONS.forEach(q => { map[q.id] = q })
@@ -109,12 +111,16 @@ export default function Onboarding() {
   }, [])
 
   const nextStep = useCallback(() => {
+    if (!canProceed()) {
+      setValidationWarning('Please select an option before continuing.')
+      return
+    }
     if (step >= QUESTIONS.length - 1) return
     triggerAnimate()
     const newStep = step + 1
     setStep(newStep)
     saveProgress(newStep, answers)
-  }, [step, answers, triggerAnimate, saveProgress])
+  }, [step, answers, triggerAnimate, saveProgress, canProceed])
 
   const prevStep = useCallback(() => {
     if (step <= 0) return
@@ -139,6 +145,7 @@ export default function Onboarding() {
     }
     const newAnswers = { ...answers, [questionId]: updated }
     setAnswers(newAnswers)
+    setValidationWarning('')
     saveProgress(step, newAnswers)
   }, [answers, questionMap, step, saveProgress])
 
@@ -156,7 +163,7 @@ export default function Onboarding() {
     return !!answers[q.id]
   }, [step, answers])
 
-  // ✅ Memoized scoring
+  //  Memoized scoring
   const { score, risk, recommendations } = useMemo(() => {
     let s = 0
     if (answers.frequency === 'daily') s += 3
@@ -172,23 +179,23 @@ export default function Onboarding() {
     else if (impacts.length >= 1) s += 2
 
     let riskLevel, riskColor, riskEmoji, riskLabel
-    if (s >= 7) { riskLevel = 'high'; riskColor = '#F09595'; riskEmoji = '🔴'; riskLabel = 'Significant Risk' }
-    else if (s >= 4) { riskLevel = 'medium'; riskColor = '#FAC775'; riskEmoji = '🟡'; riskLabel = 'Moderate Risk' }
-    else { riskLevel = 'low'; riskColor = '#6ee7b7'; riskEmoji = '🟢'; riskLabel = 'Lower Risk' }
+    if (s >= 7) { riskLevel = 'high'; riskColor = '#F09595'; riskEmoji = ''; riskLabel = 'Significant Risk' }
+    else if (s >= 4) { riskLevel = 'medium'; riskColor = '#FAC775'; riskEmoji = ''; riskLabel = 'Moderate Risk' }
+    else { riskLevel = 'low'; riskColor = '#6ee7b7'; riskEmoji = ''; riskLabel = 'Lower Risk' }
 
     const recs = []
     if (s >= 7) {
-      recs.push({ icon: '🧠', text: 'Start with CBT Module 1: Understanding Your Gambling', action: '/cbt' })
-      recs.push({ icon: '📓', text: 'Log your first diary entry today — awareness is the first step', action: '/diary' })
+      recs.push({ icon: '', text: 'Start with CBT Module 1: Understanding Your Gambling', action: '/cbt' })
+      recs.push({ icon: '', text: 'Log your first diary entry today — awareness is the first step', action: '/diary' })
       recs.push({ icon: '🆘', text: 'Save emergency helplines — reaching out is strength', action: '/resources' })
     } else if (s >= 4) {
-      recs.push({ icon: '📊', text: 'Track your patterns with the daily diary', action: '/diary' })
-      recs.push({ icon: '🛠️', text: 'Explore the Urge Toolkit for coping strategies', action: '/urge-toolkit' })
-      recs.push({ icon: '🧠', text: 'Try CBT Module 1 to understand your triggers', action: '/cbt' })
+      recs.push({ icon: '', text: 'Track your patterns with the daily diary', action: '/diary' })
+      recs.push({ icon: '', text: 'Explore the Urge Toolkit for coping strategies', action: '/urge-toolkit' })
+      recs.push({ icon: '', text: 'Try CBT Module 1 to understand your triggers', action: '/cbt' })
     } else {
-      recs.push({ icon: '📓', text: 'Start with a daily diary entry to build awareness', action: '/diary' })
-      recs.push({ icon: '💬', text: 'Join The Circle to connect with others on this journey', action: '/circle' })
-      recs.push({ icon: '🏆', text: 'Set a small goal — every clean day counts', action: '/dashboard' })
+      recs.push({ icon: '', text: 'Start with a daily diary entry to build awareness', action: '/diary' })
+      recs.push({ icon: '', text: 'Join The Circle to connect with others on this journey', action: '/circle' })
+      recs.push({ icon: '', text: 'Set a small goal — every clean day counts', action: '/dashboard' })
     }
 
     return {
@@ -201,6 +208,7 @@ export default function Onboarding() {
   const progress = useMemo(() => ((step + 1) / QUESTIONS.length) * 100, [step])
 
   const handleFinish = async () => {
+    setSaveError('')
     setLoading(true)
     const { data: { session } } = await supabase.auth.getSession()
 
@@ -215,12 +223,14 @@ export default function Onboarding() {
 
       if (error) {
         console.error('Onboarding save error:', error)
+        setSaveError('We could not save your onboarding answers. Please try again.')
         setLoading(false)
         return
       }
+      sessionStorage.removeItem('losslens_new_signup')
     }
 
-    // ✅ Clear saved progress on success
+    //  Clear saved progress on success
     sessionStorage.removeItem('onboarding_step')
     sessionStorage.removeItem('onboarding_answers')
 
@@ -244,12 +254,12 @@ export default function Onboarding() {
 
   const q = QUESTIONS[step]
 
-  // ✅ Results Screen
+  //  Results Screen
   if (step >= QUESTIONS.length) {
     return (
       <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '16px', padding: '2.5rem 2rem', maxWidth: '500px', width: '100%', textAlign: 'center', animation: 'fadeIn 0.5s ease-out' }}>
-          <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>🎉</span>
+          <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
           <h2 style={{ color: '#f59e0b', fontFamily: "'Playfair Display', serif", fontSize: '22px', marginBottom: '8px' }}>Your journey begins</h2>
 
           <div style={{ background: '#041f13', borderRadius: '12px', padding: '16px', margin: '16px 0', border: `2px solid ${risk.color}` }}>
@@ -258,8 +268,14 @@ export default function Onboarding() {
             <p style={{ color: '#3b7a5a', fontSize: '12px' }}>Based on your answers, we've personalized your experience.</p>
           </div>
 
+          {validationWarning && (
+            <div role="alert" style={{ color: '#F09595', border: '1px solid #F09595', background: '#791F1F22', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', marginBottom: '16px' }}>
+              {validationWarning}
+            </div>
+          )}
+
           <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-            <p style={{ color: '#6ee7b7', fontSize: '13px', fontWeight: 500, marginBottom: '10px' }}>📋 Recommended first steps:</p>
+            <p style={{ color: '#6ee7b7', fontSize: '13px', fontWeight: 500, marginBottom: '10px' }}> Recommended first steps:</p>
             {recommendations.map((r, i) => (
               <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'flex-start', cursor: 'pointer', padding: '8px', borderRadius: '8px', transition: 'background 0.2s' }}
                 onClick={() => r.action && navigate(r.action)}
@@ -278,16 +294,17 @@ export default function Onboarding() {
           <button className="btn-primary full" onClick={handleFinish} disabled={loading} style={{ padding: '14px', fontSize: '15px' }}>
             {loading ? <span className="spinner"></span> : 'Start my journey →'}
           </button>
+          {saveError && <p role="alert" style={{ color: '#F09595', fontSize: '13px', marginTop: '12px' }}>{saveError}</p>}
 
           <button onClick={() => { setStep(QUESTIONS.length - 1); triggerAnimate() }} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
-            ← Change my answers
+            â† Change my answers
           </button>
         </div>
       </div>
     )
   }
 
-  // ✅ Skip confirmation
+  //  Skip confirmation
   if (skipped) {
     return (
       <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
@@ -349,7 +366,7 @@ export default function Onboarding() {
                     <p style={{ color: '#e2f5ec', fontSize: '14px', fontWeight: 500, margin: 0 }}>{option.label}</p>
                     {option.desc && <p style={{ color: '#3b7a5a', fontSize: '12px', margin: '2px 0 0' }}>{option.desc}</p>}
                   </div>
-                  {selected && <span style={{ color: '#f59e0b', fontSize: '18px', marginLeft: 'auto', flexShrink: 0 }}>✓</span>}
+                  {selected && <span style={{ color: '#f59e0b', fontSize: '18px', marginLeft: 'auto', flexShrink: 0 }}></span>}
                 </button>
               )
             })}
@@ -365,13 +382,12 @@ export default function Onboarding() {
         <div style={{ display: 'flex', gap: '8px' }}>
           {step > 0 && (
             <button onClick={prevStep} className="btn-ghost" style={{ flex: 1, padding: '14px', fontSize: '15px' }}>
-              ← Back
+              â† Back
             </button>
           )}
           <button
             className="btn-primary full"
             onClick={step < QUESTIONS.length - 1 ? nextStep : () => setStep(QUESTIONS.length)}
-            disabled={!canProceed()}
             style={{ padding: '14px', fontSize: '15px', flex: step > 0 ? 2 : 1 }}
           >
             {step < QUESTIONS.length - 1 ? 'Next →' : 'See my results →'}

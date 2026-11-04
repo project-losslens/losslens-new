@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "Precious - Gambling Harm Reduction",
-  "short_name": "Precious",
+  "name": "LossLens - Gambling Harm Reduction",
+  "short_name": "LossLens",
   "description": "Your path beyond gambling. CBT-based support for gambling harm in Kenya.",
   "start_url": "/",
   "scope": "/",
@@ -11,25 +11,25 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-192.png",
+      "src": "/losslens-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/losslens-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/losslens-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-maskable-192.png",
+      "src": "/losslens-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"

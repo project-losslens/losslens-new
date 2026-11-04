@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import Sidebar from '../../components/Sidebar'
 
-// ✅ Toast helper using React state instead of DOM manipulation
+//  Toast helper using React state instead of DOM manipulation
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
   toast.textContent = message
@@ -22,7 +22,7 @@ function showToast(message, duration = 3000) {
   }, duration)
 }
 
-// ✅ Confetti respects reduced motion
+//  Confetti respects reduced motion
 function triggerConfetti() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const isMobile = window.innerWidth < 768
@@ -56,24 +56,24 @@ function CBTModules() {
   const [saving, setSaving] = useState(false)
   const celebrationTimer = useRef(null)
 
-  // ✅ Cleanup celebration timer
+  //  Cleanup celebration timer
   useEffect(() => { return () => { if (celebrationTimer.current) clearTimeout(celebrationTimer.current) } }, [])
 
   const modules = [
     {
-      id: 1, title: 'Understanding Your Gambling', duration: '8 min', icon: '🎯',
+      id: 1, title: 'Understanding Your Gambling', duration: '8 min', icon: '',
       preview: 'Discover what gambling harm really means and learn to spot your personal triggers.',
       description: 'Learn what gambling harm looks like and identify your personal triggers.',
       howItHelps: "You'll understand WHY you gamble — the first step to breaking the cycle.",
       outcome: "After this module, you'll be able to spot your triggers before they lead to urges.",
       lessons: [
         { title: 'What is gambling harm?', readTime: '3 min', content: `Gambling harm isn't just about losing money. It's a spectrum that affects your mental health, relationships, work, and self-worth.\n\nIn Kenya, sports betting has exploded — especially among young men. The Premier League isn't just entertainment anymore; it's become a trigger for millions.\n\nGambling harm happens when:\n• You spend more than you planned\n• You chase losses hoping to "recover"\n• It affects your mood, sleep, or relationships\n• You hide your betting from loved ones\n• You use M-Pesa loans or borrow to bet\n\nThe good news? Recognizing where you are is the first and most powerful step. This isn't about shame — it's about awareness.`, reflection: 'Think about your own gambling. Where do you fall on the spectrum? Be honest with yourself.' },
-        { title: 'Identifying your personal triggers', readTime: '3 min', content: `Triggers are situations, feelings, or thoughts that push you toward gambling.\n\nCommon triggers in Kenya:\n• 📱 M-Pesa balance notifications\n• ⚽ Premier League match days\n• 😔 Stress from unemployment\n• 🍻 Peer pressure\n• 📺 Ads and promotions\n• 😴 Boredom or loneliness\n\nYour task: Notice what happens right BEFORE the urge. Write it down. Patterns will emerge.`, reflection: 'What are YOUR top 3 triggers? Write them down where you can see them daily.' },
+        { title: 'Identifying your personal triggers', readTime: '3 min', content: `Triggers are situations, feelings, or thoughts that push you toward gambling.\n\nCommon triggers in Kenya:\n•  M-Pesa balance notifications\n•  Premier League match days\n•  Stress from unemployment\n•  Peer pressure\n•  Ads and promotions\n•  Boredom or loneliness\n\nYour task: Notice what happens right BEFORE the urge. Write it down. Patterns will emerge.`, reflection: 'What are YOUR top 3 triggers? Write them down where you can see them daily.' },
         { title: 'The gambling cycle', readTime: '2 min', content: `TRIGGER → URGE → ACTION → CONSEQUENCE → GUILT → (back to TRIGGER)\n\nBreaking this cycle means interrupting it EARLY — at the trigger or urge stage. Every module from here will give you tools to do exactly that.`, reflection: 'Draw your own gambling cycle. Where could YOU interrupt it?' },
       ]
     },
     {
-      id: 2, title: 'Challenging Cognitive Distortions', duration: '10 min', icon: '🧩',
+      id: 2, title: 'Challenging Cognitive Distortions', duration: '10 min', icon: '',
       preview: 'Your brain plays tricks on you. Learn to catch the lies your mind tells you.',
       description: 'Recognize and challenge the thoughts that keep you gambling.',
       howItHelps: 'Your brain plays tricks. This module exposes them so they lose power.',
@@ -85,7 +85,7 @@ function CBTModules() {
       ]
     },
     {
-      id: 3, title: 'Urge Surfing', duration: '7 min', icon: '🌊',
+      id: 3, title: 'Urge Surfing', duration: '7 min', icon: '',
       preview: 'Urges feel overwhelming but always pass. Learn to ride them like waves.',
       description: 'Learn to ride out urges without acting on them.',
       howItHelps: 'Urges feel overwhelming but they ALWAYS pass.',
@@ -97,7 +97,7 @@ function CBTModules() {
       ]
     },
     {
-      id: 4, title: 'Trigger Management', duration: '9 min', icon: '⚡',
+      id: 4, title: 'Trigger Management', duration: '9 min', icon: '',
       preview: 'Build a personalized strategy to handle your specific triggers.',
       description: 'Build strategies to handle your specific triggers.',
       howItHelps: 'Intercept the process at the trigger stage — before it becomes an urge.',
@@ -109,7 +109,7 @@ function CBTModules() {
       ]
     },
     {
-      id: 5, title: 'Coping Strategies', duration: '8 min', icon: '🛡️',
+      id: 5, title: 'Coping Strategies', duration: '8 min', icon: '',
       preview: 'Build a personal toolkit of healthy alternatives to gambling.',
       description: 'Build a personal toolkit of coping strategies.',
       howItHelps: "When triggers can't be avoided, coping strategies are your shield.",
@@ -121,19 +121,19 @@ function CBTModules() {
       ]
     },
     {
-      id: 6, title: 'Relapse Prevention', duration: '10 min', icon: '🔒',
+      id: 6, title: 'Relapse Prevention', duration: '10 min', icon: '',
       preview: 'Plan for high-risk situations before they happen.',
       description: 'Prepare for high-risk situations.',
       howItHelps: "A slip doesn't have to become a full return to gambling.",
       outcome: "You'll have an emergency plan for your riskiest situations.",
       lessons: [
         { title: 'High-risk situations', readTime: '3 min', content: `What puts you at highest risk?\n\n• Payday? (M-Pesa high)\n• Weekend nights?\n• After arguments?\n• Watching matches alone?\n• Friends betting?\n\nKnowing your danger zones = never surprised.`, reflection: 'What are YOUR top 3 high-risk situations?' },
-        { title: 'Coping cards', readTime: '3 min', content: `Create a card for each situation:\n\nSITUATION: Payday\n⚠️ RISK: I'll bet "just a little"\n🛡️ PLAN: Send savings first, pay bills, call friend, reward myself\n\nMake cards for your top 3. Read them BEFORE the risk hits.`, reflection: 'Create your first coping card now.' },
+        { title: 'Coping cards', readTime: '3 min', content: `Create a card for each situation:\n\nSITUATION: Payday\n RISK: I'll bet "just a little"\n PLAN: Send savings first, pay bills, call friend, reward myself\n\nMake cards for your top 3. Read them BEFORE the risk hits.`, reflection: 'Create your first coping card now.' },
         { title: 'Emergency plans', readTime: '4 min', content: `If you slip:\n1. STOP immediately\n2. Call support person\n3. Write what happened\n4. Don't shame yourself — say "slip" not "failure"\n5. Get back to routine tomorrow\n6. Review coping cards\n\nA slip is data, not disaster.`, reflection: "What's your plan if a slip happens?" },
       ]
     },
     {
-      id: 7, title: 'Building Healthy Alternatives', duration: '8 min', icon: '🌱',
+      id: 7, title: 'Building Healthy Alternatives', duration: '8 min', icon: '',
       preview: 'Replace gambling with a life that\'s genuinely more fulfilling.',
       description: 'Replace gambling with meaningful activities.',
       howItHelps: 'Nature abhors a vacuum. Fill gambling\'s space with something better.',
@@ -141,11 +141,11 @@ function CBTModules() {
       lessons: [
         { title: 'Value identification', readTime: '3 min', content: `What matters to YOU?\n\n• What did you love before gambling?\n• What would you do if money wasn't a concern?\n• Who do you want to be in 5 years?\n\nYour values are your compass. Recovery brings you closer to them.`, reflection: 'What are your top 3 values? Are your actions aligned?' },
         { title: 'Goal-setting', readTime: '3 min', content: `Instead of "stop gambling," try:\n• Save KES 50,000 by December\n• Buy land in 2 years\n• Start a business\n• Take family on holiday\n\nKES 500/week saved = KES 26,000/year. What could you do with that?`, reflection: "What's ONE exciting goal for the money you save?" },
-        { title: 'Life balance', readTime: '2 min', content: `Rate yourself 1-10 on:\n🏋️ Health | 🧠 Growth | 👥 Social | 💼 Work | 😴 Rest | 🎨 Fun\n\nWhere are you lowest? What's ONE small action this week?\n\nRecovery isn't just stopping gambling — it's building a life you don't want to escape from.`, reflection: 'Which area needs the most attention? Take one action this week.' },
+        { title: 'Life balance', readTime: '2 min', content: `Rate yourself 1-10 on:\n Health |  Growth |  Social |  Work |  Rest |  Fun\n\nWhere are you lowest? What's ONE small action this week?\n\nRecovery isn't just stopping gambling — it's building a life you don't want to escape from.`, reflection: 'Which area needs the most attention? Take one action this week.' },
       ]
     },
     {
-      id: 8, title: 'Long-Term Maintenance & Helping Others', duration: '9 min', icon: '🏆',
+      id: 8, title: 'Long-Term Maintenance & Helping Others', duration: '9 min', icon: '',
       preview: 'Lock in your progress and help others on their journey.',
       description: 'Sustain your progress and help others.',
       howItHelps: 'The best way to keep recovery strong is helping someone else.',
@@ -173,7 +173,7 @@ function CBTModules() {
     }
   }
 
-  // ✅ Auto-expand first incomplete module
+  //  Auto-expand first incomplete module
   useEffect(() => {
     if (completedIds.length < modules.length) {
       const firstIncomplete = modules.find(m => !completedIds.includes(m.id))
@@ -184,10 +184,10 @@ function CBTModules() {
   const handleComplete = async (moduleId, moduleTitle) => {
     if (!userId || completedIds.includes(moduleId) || saving) return
 
-    // ✅ Gate: Must have viewed at least one lesson from this module
+    //  Gate: Must have viewed at least one lesson from this module
     const hasViewedLesson = activeLesson && activeLesson.moduleId === moduleId
     if (!hasViewedLesson) {
-      showToast('📖 Please view at least one lesson before completing.', 2000)
+      showToast(' Please view at least one lesson before completing.', 2000)
       return
     }
 
@@ -199,7 +199,7 @@ function CBTModules() {
 
     if (error) {
       console.error('Failed to save progress:', error)
-      showToast('❌ Failed to save. Please try again.', 3000)
+      showToast(' Failed to save. Please try again.', 3000)
       setSaving(false)
       return
     }
@@ -209,20 +209,20 @@ function CBTModules() {
     setCelebratingModule(moduleTitle)
     setShowCelebration(true)
 
-    // ✅ Respect reduced motion
+    //  Respect reduced motion
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       triggerConfetti()
     }
 
-    showToast(`🎉 Module completed! Great work!`, 3000)
+    showToast(` Module completed! Great work!`, 3000)
 
     const newCount = completedIds.length + 1
-    if (newCount === 8) setBadgeEarned({ emoji: '🧠', name: 'CBT Master', color: '#3db88a' })
-    else if (newCount === 5) setBadgeEarned({ emoji: '💪', name: 'Dedicated Learner', color: '#f59e0b' })
-    else if (newCount === 3) setBadgeEarned({ emoji: '📚', name: 'Active Learner', color: '#FAC775' })
-    else if (newCount === 1) setBadgeEarned({ emoji: '🌱', name: 'Getting Started', color: '#6ee7b7' })
+    if (newCount === 8) setBadgeEarned({ emoji: '', name: 'CBT Master', color: '#3db88a' })
+    else if (newCount === 5) setBadgeEarned({ emoji: '', name: 'Dedicated Learner', color: '#f59e0b' })
+    else if (newCount === 3) setBadgeEarned({ emoji: '', name: 'Active Learner', color: '#FAC775' })
+    else if (newCount === 1) setBadgeEarned({ emoji: '', name: 'Getting Started', color: '#6ee7b7' })
 
-    // ✅ Error-handled badge check
+    //  Error-handled badge check
     try {
       const { checkBadges } = await import('../../lib/gamification')
       const newBadges = await checkBadges(userId)
@@ -251,7 +251,7 @@ function CBTModules() {
             aria-label="Module completed"
             style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(4,31,19,0.9)', zIndex: 2000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
           >
-            <div style={{ fontSize: '60px', animation: 'checkmarkPop 0.5s ease-out' }}>🎉</div>
+            <div style={{ fontSize: '60px', animation: 'checkmarkPop 0.5s ease-out' }}></div>
             <h2 style={{ color: '#f59e0b', fontFamily: "'Playfair Display', serif", marginTop: '16px' }}>Module Complete!</h2>
             <p style={{ color: '#6ee7b7', fontSize: '14px', marginTop: '8px' }}>{celebratingModule}</p>
             {badgeEarned && (
@@ -265,7 +265,7 @@ function CBTModules() {
         )}
 
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#041f13', borderBottom: '1px solid #0a3d22', position: 'sticky', top: 0, zIndex: 100 }}>
-          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}>🧠 CBT Modules</h1><p style={{ fontSize: '12px', color: '#3b7a5a', margin: '2px 0 0' }}>{allCompleted ? 'All complete! 🎉' : `${completedCount} of ${modules.length} completed`}</p></div>
+          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}> CBT Modules</h1><p style={{ fontSize: '12px', color: '#3b7a5a', margin: '2px 0 0' }}>{allCompleted ? 'All complete! ' : `${completedCount} of ${modules.length} completed`}</p></div>
           <span style={{ fontSize: '14px', color: '#f59e0b', fontWeight: 600 }}>{Math.round((completedCount / modules.length) * 100)}%</span>
         </nav>
 
@@ -274,7 +274,7 @@ function CBTModules() {
 
           {allCompleted && (
             <div className="dash-section" style={{ marginBottom: '1rem', textAlign: 'center', borderColor: '#f59e0b', background: '#0a3d22' }}>
-              <div style={{ fontSize: '40px', marginBottom: '8px' }}>🏆</div>
+              <div style={{ fontSize: '40px', marginBottom: '8px' }}></div>
               <h3 style={{ color: '#f59e0b', fontSize: '16px', marginBottom: '8px' }}>You've completed all modules!</h3>
               <p style={{ color: '#6ee7b7', fontSize: '13px', lineHeight: '1.6' }}>Amazing work! Revisit any module to refresh your knowledge.</p>
             </div>
@@ -292,7 +292,7 @@ function CBTModules() {
                       className="module-top"
                       onClick={() => {
                         setActiveModule(isActive ? null : m.id)
-                        // ✅ Reset lesson when switching modules
+                        //  Reset lesson when switching modules
                         if (activeLesson?.moduleId !== m.id) setActiveLesson(null)
                       }}
                       style={{ cursor: 'pointer' }}
@@ -304,7 +304,7 @@ function CBTModules() {
                     >
                       <div className="module-icon">{m.icon}</div>
                       <div className="module-info">
-                        <div className="module-title-row"><h3 className="module-title">{m.title}</h3>{completed && <span className="badge-done">✅ Done</span>}</div>
+                        <div className="module-title-row"><h3 className="module-title">{m.title}</h3>{completed && <span className="badge-done"> Done</span>}</div>
                         <p className="module-meta">{m.duration} · {m.lessons.length} lessons</p>
                         <p className="module-desc">{completed ? m.description : m.preview}</p>
                       </div>
@@ -333,7 +333,7 @@ function CBTModules() {
                             {saving ? <span className="spinner"></span> : 'Mark module as complete'}
                           </button>
                         )}
-                        {completed && <p style={{ color: '#6ee7b7', fontSize: '12px', textAlign: 'center', marginTop: '12px' }}>✅ Completed — you can still review lessons</p>}
+                        {completed && <p style={{ color: '#6ee7b7', fontSize: '12px', textAlign: 'center', marginTop: '12px' }}> Completed — you can still review lessons</p>}
                       </div>
                     )}
 
@@ -344,14 +344,14 @@ function CBTModules() {
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}><span style={{ fontSize: '11px', color: '#f59e0b' }}>Lesson {activeLesson.lessonIndex + 1}/{m.lessons.length}</span><span style={{ fontSize: '11px', color: '#3b7a5a' }}>{m.lessons[activeLesson.lessonIndex].readTime}</span></div>
                           <h3 style={{ color: '#e2f5ec', fontSize: '16px', marginBottom: '16px', fontFamily: "'Playfair Display', serif" }}>{m.lessons[activeLesson.lessonIndex].title}</h3>
                           <div style={{ color: '#9fe1cb', fontSize: '13px', lineHeight: '1.8', fontWeight: 300, whiteSpace: 'pre-line' }}>{m.lessons[activeLesson.lessonIndex].content}</div>
-                          <div style={{ marginTop: '20px', padding: '14px', background: '#0a3d22', borderRadius: '8px', border: '1px dashed #1d5c38' }}><p style={{ fontSize: '11px', color: '#f59e0b', marginBottom: '6px' }}>💭 Reflection</p><p style={{ fontSize: '13px', color: '#6ee7b7', lineHeight: '1.6', fontStyle: 'italic', margin: 0 }}>{m.lessons[activeLesson.lessonIndex].reflection}</p></div>
+                          <div style={{ marginTop: '20px', padding: '14px', background: '#0a3d22', borderRadius: '8px', border: '1px dashed #1d5c38' }}><p style={{ fontSize: '11px', color: '#f59e0b', marginBottom: '6px' }}> Reflection</p><p style={{ fontSize: '13px', color: '#6ee7b7', lineHeight: '1.6', fontStyle: 'italic', margin: 0 }}>{m.lessons[activeLesson.lessonIndex].reflection}</p></div>
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
                           {activeLesson.lessonIndex > 0 && <button onClick={() => setActiveLesson({ moduleId: m.id, lessonIndex: activeLesson.lessonIndex - 1 })} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid #0a3d22', color: '#6ee7b7', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>← Previous</button>}
                           {activeLesson.lessonIndex < m.lessons.length - 1 ? (
                             <button onClick={() => setActiveLesson({ moduleId: m.id, lessonIndex: activeLesson.lessonIndex + 1 })} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: '#0a3d22', border: '1px solid #1d5c38', color: '#6ee7b7', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Next →</button>
                           ) : (
-                            <button onClick={() => { setActiveLesson(null); if (!completed) handleComplete(m.id, m.title) }} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: completed ? '#0a3d22' : '#f59e0b', border: 'none', color: completed ? '#6ee7b7' : '#041f13', fontSize: '13px', fontWeight: 500, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{completed ? '✅ Complete' : 'Complete ✅'}</button>
+                            <button onClick={() => { setActiveLesson(null); if (!completed) handleComplete(m.id, m.title) }} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: completed ? '#0a3d22' : '#f59e0b', border: 'none', color: completed ? '#6ee7b7' : '#041f13', fontSize: '13px', fontWeight: 500, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{completed ? ' Complete' : 'Complete '}</button>
                           )}
                         </div>
                       </div>
