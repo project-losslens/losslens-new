@@ -71,8 +71,8 @@ The following frontend references retain the authorized legacy address until an 
 - Branch: `main`
 - Repository: `project-losslens/losslens-new`
 - Commit: `5320d82` (`Complete LossLens redesign and professional UI polish`).
-- GitHub push: NOT PERFORMED.
-- Vercel deployment: NOT VERIFIED.
+- GitHub push: COMPLETED to `main` at `d6c702b8a24bb47fde91cc7d91160ab93c2e42f4`.
+- Vercel deployment: Production site responds with HTTP 200 and renders LossLens branding at the production URL. Vercel dashboard Ready status and deployed commit identity were not available in this environment.
 - Production URL: `https://losslens-mu.vercel.app/`
 
 ## Manual checks still required
