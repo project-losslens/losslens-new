@@ -1,0 +1,73 @@
+{
+  "id": "/",
+  "name": "Precious - Gambling Harm Reduction",
+  "short_name": "Precious",
+  "description": "Your path beyond gambling. CBT-based support for gambling harm in Kenya.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#041f13",
+  "theme_color": "#041f13",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Home Dashboard"
+    },
+    {
+      "src": "/screenshots/diary.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "CBT Diary"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Daily Check-in",
+      "short_name": "Check-in",
+      "description": "Log your mood and urges today",
+      "url": "/checkin",
+      "icons": [{ "src": "/shortcut-checkin.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Crisis Support",
+      "short_name": "Crisis",
+      "description": "Get immediate help",
+      "url": "/crisis",
+      "icons": [{ "src": "/shortcut-crisis.png", "sizes": "96x96" }]
+    }
+  ],
+  "categories": ["health", "lifestyle", "medical"],
+  "lang": "en-KE",
+  "dir": "ltr"
+}
