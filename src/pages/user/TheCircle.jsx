@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import Sidebar from '../../components/Sidebar'
 import { createNotification } from '../../lib/notifications'
+import { ensureCircleHash } from '../../lib/circleHash'
 
 //  Constants
 const ROOMS = [
@@ -139,13 +140,13 @@ export default function TheCircle() {
     if (!session) return
     const uid = session.user.id; setUserId(uid)
     const { data: profile } = await supabase.from('profiles').select('circle_user_hash, circle_display_name').eq('id', uid).single()
-    if (profile?.circle_user_hash) {
-      setIdentity({ hash: profile.circle_user_hash, displayName: profile.circle_display_name })
-    } else {
-      const newId = generateIdentity(uid)
-      setIdentity(newId)
-      await supabase.from('profiles').update({ circle_user_hash: newId.hash, circle_display_name: newId.displayName }).eq('id', uid)
-    }
+    const userHash = profile?.circle_user_hash || await ensureCircleHash(uid)
+    const generatedIdentity = generateIdentity(uid)
+    setIdentity({
+      ...generatedIdentity,
+      hash: userHash,
+      displayName: profile?.circle_display_name || generatedIdentity.displayName,
+    })
   }
 
   const scrollToBottom = () => {
@@ -215,9 +216,10 @@ export default function TheCircle() {
   }
 
   const updatePresence = async (room) => {
-    if (!identity) return
+    if (!identity || !userId) return
     try {
-      await supabase.from('circle_room_members').upsert({ room, user_hash: identity.hash, last_seen: new Date().toISOString() }, { onConflict: 'room,user_hash' })
+      const userHash = await ensureCircleHash(userId)
+      await supabase.from('circle_room_members').upsert({ room, user_hash: userHash, last_seen: new Date().toISOString() }, { onConflict: 'room,user_hash' })
     } catch (err) { /* silent */ }
   }
 

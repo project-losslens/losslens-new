@@ -213,13 +213,15 @@ export default function Onboarding() {
     const { data: { session } } = await supabase.auth.getSession()
 
     if (session) {
+      const user = session.user
       const { error } = await supabase.from('profiles').update({
         onboarding_completed: true,
         screening_score: score,
         screening_answers: answers,
         risk_level: risk.level,
         goal: GOAL_MAP[answers.goal] || 'Abstinence',
-      }).eq('id', session.user.id)
+        phone: user.user_metadata?.phone,
+      }).eq('id', user.id)
 
       if (error) {
         console.error('Onboarding save error:', error)
@@ -242,10 +244,12 @@ export default function Onboarding() {
     setSkipped(true)
     const { data: { session } } = await supabase.auth.getSession()
     if (session) {
+      const user = session.user
       await supabase.from('profiles').update({
         onboarding_completed: true,
         onboarding_skipped: true,
-      }).eq('id', session.user.id)
+        phone: user.user_metadata?.phone,
+      }).eq('id', user.id)
     }
     sessionStorage.removeItem('onboarding_step')
     sessionStorage.removeItem('onboarding_answers')

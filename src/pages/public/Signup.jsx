@@ -216,6 +216,7 @@ function Signup() {
         id: data.user.id,
         full_name: form.name.trim(),
         username: form.username.toLowerCase().trim(),
+        email: form.email.trim().toLowerCase(),
         phone: form.phone.trim(),
         plan_type: signupType,
         streak_days: 0,

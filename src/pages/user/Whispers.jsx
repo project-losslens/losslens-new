@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import Sidebar from '../../components/Sidebar'
+import { ensureCircleHash } from '../../lib/circleHash'
 
 //  Constants
 const MAX_ACTIVE_CHATS = 3
@@ -31,12 +32,6 @@ const REQUEST_MESSAGES = [
 
 const CRISIS_KEYWORDS = ['suicide', 'kill myself', 'end it all', 'self-harm', 'want to die', 'hopeless', 'kujiua', 'nataka kufa']
 const BLOCKED_PATTERNS = [/\d{10,}/g, /\b[\w.-]+@[\w.-]+\.\w+\b/g, /07\d{8}/g, /\+254\d{9}/g]
-
-function generateUserHash(userId) {
-  let hash = 0
-  for (let i = 0; i < userId.length; i++) { hash = ((hash << 5) - hash) + userId.charCodeAt(i); hash = hash & hash }
-  return 'user_' + Math.abs(hash).toString(36).substring(0, 8)
-}
 
 function generateAnonymousName(userId, roomId) {
   let combined = userId + roomId
@@ -104,9 +99,7 @@ export default function Whispers() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
     const uid = session.user.id
-    const { data: profile } = await supabase.from('profiles').select('circle_user_hash').eq('id', uid).single()
-    let hash = profile?.circle_user_hash
-    if (!hash) { hash = generateUserHash(uid); await supabase.from('profiles').update({ circle_user_hash: hash }).eq('id', uid) }
+    const hash = await ensureCircleHash(uid)
     setIdentity({ hash, uid })
     identityRef.current = { hash, uid }
     fetchMatches(hash)
@@ -163,8 +156,9 @@ export default function Whispers() {
     if (matches.filter(m => m.status === 'active' && m.user2_hash).length >= MAX_ACTIVE_CHATS) { showToast('Maximum active chats reached. End one first.'); return }
     setSendingRequest(true)
     try {
+      const userHash = await ensureCircleHash(identity.uid)
       const { data, error } = await supabase.from('whispers_matches').insert({
-        user1_hash: identity.hash, user1_role: 'flexible', status: 'pending',
+        user1_hash: userHash, user1_role: 'flexible', status: 'pending',
         request_message: requestMessage.substring(0, 140), request_type: 'request',
       }).select().single()
       if (error) throw error

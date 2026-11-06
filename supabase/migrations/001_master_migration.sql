@@ -616,11 +616,12 @@ security definer
 set search_path = pg_catalog, public
 as $$
 begin
-  insert into public.profiles (id, full_name, email, role, status)
+  insert into public.profiles (id, full_name, email, phone, role, status)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'full_name', ''),
     new.email,
+    new.raw_user_meta_data->>'phone',
     'user',
     'active'
   )
