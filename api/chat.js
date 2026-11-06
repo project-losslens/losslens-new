@@ -1,3 +1,5 @@
+/* global process */
+
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
 const GROQ_MODEL = 'openai/gpt-oss-20b'
 const MAX_MESSAGE_LENGTH = 4000
@@ -41,7 +43,7 @@ async function getAuthenticatedUser(request) {
   const response = await fetchWithTimeout(`${supabaseUrl}/auth/v1/user`, {
     headers: {
       apikey: supabaseKey,
-      Authorization: `Bearer ${auth.token}`,
+      Authorization: `Bearer `,
     },
   }, REQUEST_TIMEOUT_MS)
 
@@ -53,7 +55,7 @@ async function getAuthenticatedUser(request) {
 async function fetchUserContext(auth) {
   const headers = {
     apikey: auth.supabaseKey,
-    Authorization: `Bearer ${auth.token}`,
+    Authorization: `Bearer `,
   }
   const [profileResponse, diaryResponse, cbtResponse] = await Promise.all([
     fetchWithTimeout(`${auth.supabaseUrl}/rest/v1/profiles?id=eq.${auth.user.id}&select=full_name,streak_days,money_saved&limit=1`, { headers }, REQUEST_TIMEOUT_MS),
@@ -61,7 +63,7 @@ async function fetchUserContext(auth) {
     fetchWithTimeout(`${auth.supabaseUrl}/rest/v1/cbt_progress?user_id=eq.${auth.user.id}&completed=eq.true&select=id`, { headers }, REQUEST_TIMEOUT_MS),
   ])
 
-  let context = ''
+  let context
   if (profileResponse.ok) {
     const profiles = await profileResponse.json()
     const profile = profiles?.[0]
@@ -89,7 +91,7 @@ async function saveHistory(auth, role, message) {
     method: 'POST',
     headers: {
       apikey: auth.supabaseKey,
-      Authorization: `Bearer ${auth.token}`,
+      Authorization: `Bearer `,
       'Content-Type': 'application/json',
       Prefer: 'return=minimal',
     },
@@ -112,7 +114,12 @@ export default async function handler(request, response) {
     return json(response, 405, { error: 'Method not allowed' })
   }
 
-  const auth = await getAuthenticatedUser(request)
+  let auth
+  try {
+    auth = await getAuthenticatedUser(request)
+  } catch {
+    // Authentication failures are handled as unauthenticated.
+  }
   if (!auth) return json(response, 401, { error: 'Authentication required' })
 
   const body = request.body || {}
@@ -141,18 +148,18 @@ export default async function handler(request, response) {
       return json(response, 503, { error: 'AI service is temporarily unavailable' })
     }
 
-    let context = ''
+    let context
     try {
       context = await fetchUserContext(auth)
     } catch {
-      context = ''
+      // User context is optional.
     }
 
     try {
       const groqResponse = await fetchWithTimeout(GROQ_URL, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          Authorization: `Bearer `,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({

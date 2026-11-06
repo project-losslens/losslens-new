@@ -324,7 +324,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
   }
 
   //  Memoized derived values
-  const initials = useMemo(() => fullName.split(' ').map(n => n[0]).join('').toUpperCase() || '??', [fullName])
+  const initials = useMemo(() => fullName.split(' ').map(n => n[0]).join('').toUpperCase() || 'x', [fullName])
   const cleanRate = useMemo(() => stats.totalEntries > 0 ? Math.round((stats.cleanDays / stats.totalEntries) * 100) : 0, [stats])
   const earnedBadges = useMemo(() => stats.badges.filter(b => b.earned).length, [stats.badges])
 

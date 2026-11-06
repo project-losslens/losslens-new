@@ -4,11 +4,11 @@ import { supabase } from '../lib/supabase'
 
 // â”€â”€â”€ Oloo Character Avatar â”€â”€â”€
 const OlooAvatar = ({ size = 40, emotion = 'neutral' }) => (
-  <div style={{
+  <div className="oloo-chat-panel" style={{
     width: size,
     height: size,
     borderRadius: '50%',
-    background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)',
+    background: '#171E2B',
     border: '2px solid #2DD4BF',
     display: 'flex',
     alignItems: 'center',
@@ -195,7 +195,7 @@ function AIChat({ profile }) {
     };
   }, [messages, isOpen]);
 
-  // â”€â”€â”€ VOICE: Start Listening â”€â”€â”€
+  // â”€â”€â”€ VOICE: StartListening â”€â”€â”€
   const startListening = () => {
     if (typeof window === 'undefined') return;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -225,7 +225,7 @@ function AIChat({ profile }) {
     setIsListening(true);
   };
 
-  // â”€â”€â”€ VOICE: Stop Listening â”€â”€â”€
+  // â”€â”€â”€ VOICE: StopListening â”€â”€â”€
   const stopListening = () => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
@@ -341,7 +341,7 @@ function AIChat({ profile }) {
         {/* Proactive Notification Popup */}
         {showNotification && proactive && (
           <div style={{
-            background: 'rgba(255,255,255,0.06)',
+            background: '#171E2B',
             border: '2px solid #2DD4BF',
             borderRadius: '16px',
             padding: '16px',
@@ -388,7 +388,7 @@ function AIChat({ profile }) {
                 </button>
               ))}
             </div>
-            <button onClick={() => setShowNotification(false)} style={{ position: 'absolute', top: '8px', right: '8px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '18px', cursor: 'pointer', padding: '0 4px' }}>Ã—</button>
+            <button onClick={() => setShowNotification(false)} style={{ position: 'absolute', top: '8px', right: '8px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '18px', cursor: 'pointer', padding: '0 4px' }}>{'\u00D7'}</button>
           </div>
         )}
 
@@ -403,7 +403,7 @@ function AIChat({ profile }) {
           }}
           style={{
             width: '60px', height: '60px', borderRadius: '50%',
-            background: isOpen ? 'rgba(255,255,255,0.08)' : 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)',
+            background: isOpen ? '#171E2B' : '#2DD4BF',
             border: '2px solid #2DD4BF', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 4px 20px rgba(45,212,191,0.4)',
@@ -414,7 +414,7 @@ function AIChat({ profile }) {
           onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(45,212,191,0.4)'; }}
         >
           {isOpen ? (
-            <span style={{ color: '#FFFFFF', fontSize: '24px' }}>Ã—</span>
+            <span style={{ color: '#FFFFFF', fontSize: '24px' }}>{'\u00D7'}</span>
           ) : (
             <OlooAvatar size={36} />
           )}
@@ -427,8 +427,8 @@ function AIChat({ profile }) {
         <div style={{
           position: 'fixed', bottom: '8rem', right: '1.5rem',
           width: '380px', maxWidth: 'calc(100vw - 2rem)',
-          height: '520px', maxHeight: 'calc(100vh - 12rem)',
-          background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
+          height: '520px', maxHeight: 'calc(100vh - 10rem)',
+          background: '#171E2B', border: '1px solid rgba(255,255,255,0.12)',
           borderRadius: '16px', boxShadow: '0 12px 48px rgba(11,18,32,0.5)',
           display: 'flex', flexDirection: 'column', zIndex: 999,
           animation: 'chatSlideUp 0.3s ease-out', overflow: 'hidden',
@@ -436,7 +436,7 @@ function AIChat({ profile }) {
 
           {/* Chat Header */}
           <div style={{
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)',
+            background: '#0B1220',
             padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.12)',
             display: 'flex', alignItems: 'center', gap: '12px',
           }}>
@@ -471,7 +471,7 @@ function AIChat({ profile }) {
               <div key={msg.id || i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start', animation: 'messageIn 0.3s ease-out' }}>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', flexDirection: msg.role === 'user' ? 'row-reverse' : 'row' }}>
                   {msg.role === 'assistant' && <OlooAvatar size={24} emotion={speakingId === msg.id ? 'speaking' : 'neutral'} />}
-                  <div style={{ maxWidth: '80%', padding: '10px 14px', borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: msg.role === 'user' ? '#2DD4BF' : 'rgba(255,255,255,0.12)', color: msg.role === 'user' ? '#0B1220' : '#7DBDEE', fontSize: '13px', lineHeight: '1.6', fontWeight: msg.role === 'user' ? 500 : 300, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+                  <div style={{ maxWidth: '80%', padding: '10px 14px', borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: msg.role === 'user' ? '#2DD4BF' : 'rgba(255,255,255,0.12)', color: msg.role === 'user' ? '#0B1220' : '#FFFFFF', fontSize: '13px', lineHeight: '1.6', fontWeight: msg.role === 'user' ? 500 : 300, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
                     {msg.content}
                   </div>
                 </div>
@@ -479,9 +479,9 @@ function AIChat({ profile }) {
                 {msg.role === 'assistant' && (
                   <div style={{ paddingLeft: '32px', marginTop: '2px', display: 'flex', gap: '6px' }}>
                     {speakingId === msg.id ? (
-                      <button onClick={stopSpeaking} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>â¹ Stop</button>
+                      <button onClick={stopSpeaking} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Stop</button>
                     ) : (
-                      <button onClick={() => speakText(msg.content, msg.id)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Listen</button>
+                      <button onClick={() => speakText(msg.content, msg.id)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Listen</button>
                     )}
                   </div>
                 )}
@@ -534,9 +534,9 @@ function AIChat({ profile }) {
                   sendMessage();
                 }
               }}
-              placeholder={isListening ? ' Listening...' : 'Talk to Oloo...'}
+              placeholder={isListening ? 'Listening...' : 'Talk to Oloo...'}
               style={{
-                flex: 1, background: 'rgba(255,255,255,0.06)', border: `1px solid ${isListening ? '#FFFFFF' : 'rgba(255,255,255,0.12)'}`,
+                flex: 1, background: '#171E2B', border: `1px solid ${isListening ? '#FFFFFF' : 'rgba(255,255,255,0.12)'}`,
                 borderRadius: '100px', padding: '10px 16px', color: '#FFFFFF', fontSize: '13px',
                 outline: 'none', fontFamily: "'Inter', sans-serif", transition: 'border-color 0.2s',
               }}
@@ -558,7 +558,7 @@ function AIChat({ profile }) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   animation: isListening ? 'pulse 1.5s infinite' : 'none',
                 }}
-              >{isListening ? 'â¹' : ''}</button>
+>{isListening ? 'Stop' : ''}</button>
             )}
 
             <button
@@ -579,6 +579,9 @@ function AIChat({ profile }) {
 
       {/* CSS Animations */}
       <style>{`
+        @media (max-width: 479px) {
+          .oloo-chat-panel { right: 1rem !important; bottom: 6rem !important; width: calc(100vw - 2rem) !important; max-height: calc(100vh - 10rem) !important; }
+        }
         @keyframes avatarFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
         @keyframes avatarPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         @keyframes avatarSpeak { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }

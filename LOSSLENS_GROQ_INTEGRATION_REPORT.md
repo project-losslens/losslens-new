@@ -90,3 +90,46 @@ Production connectivity was not claimed from the local build alone. Deployment a
 - Production API routing: verified
 - Unauthenticated production chat request: safely rejected with HTTP 401
 - Authenticated Oloo completion, chat-history persistence, user isolation, and Groq failure-path checks require a valid signed-in browser session and were not simulated with production credentials.
+
+## Five repair fixes
+
+### Files changed
+
+- `src/components/AIChat.jsx`: opaque Oloo panel, header, button, notification, controls, assistant text, input, responsive sizing, and encoding corrections.
+- `src/index.css`: added the `--color-surface-solid` opaque surface token.
+- `src/pages/user/Dashboard.jsx`: opaque install-app banner and mojibake correction.
+- `src/pages/user/Profile.jsx`: mojibake correction.
+- `api/chat.js`: fixed authenticated Supabase header variable use and wrapped authentication lookup failures with a clean 401.
+- `src/lib/relapsePrediction.js`: added one-time missing-column warnings and safe low-risk fallbacks; corrected trigger text.
+- `index.html`: removed duplicate inline service-worker registration.
+- `supabase/migrations/20261106152654_add_profile_risk_columns.sql`: adds the missing profile risk columns.
+
+Risk column references are in `src/lib/relapsePrediction.js` at lines 104-105 and 123, 138, and 146.
+
+### Required Supabase SQL
+
+```sql
+alter table public.profiles
+  add column if not exists daily_risk_score integer not null default 0,
+  add column if not exists risk_factors jsonb not null default '[]'::jsonb,
+  add column if not exists last_risk_check date;
+
+notify pgrst, 'reload schema';
+```
+
+The SQL was not executed against Supabase.
+
+### Additional findings
+
+- `api/chat.js` authentication fallback is caught inside the exported handler, preventing a thrown authentication lookup from becoming HTTP 500.
+- Missing profile risk columns now use a single warning and return `{ score: 0, level: 'low', factors: [] }`.
+- The service worker is registered only by `src/main.jsx` through `src/lib/pwa.js`.
+- Opaque floating surfaces also include the Dashboard install-app banner; the existing Notification Bell, sidebar and toast surfaces were reviewed and mobile install/chat overlays were kept within the palette.
+
+### Verification
+
+- `npm run build`: passed.
+- `node --check api/chat.js`: passed.
+- Focused lint for `api/chat.js` and `src/lib/relapsePrediction.js`: passed.
+- Full repository lint remains nonzero due to pre-existing React hook and unrelated lint findings, including `src/components/AIChat.jsx`.
+- Production `POST /api/chat` without authentication is expected to return HTTP 401 after deployment.

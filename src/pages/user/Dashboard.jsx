@@ -221,7 +221,7 @@ function Dashboard() {
   const handleTouchEnd = async () => { if (pullDistance >= pullThreshold && !refreshing) { setRefreshing(true); await fetchData(); showToast('Dashboard refreshed ', 2000); setRefreshing(false) } touchStartY.current = 0; setPullDistance(0) }
 
   const stats = [
-    { label: 'Days clean', value: profile?.streak_days ?? 0, icon: '', ariaLabel: 'Streak days', highlight: (profile?.streak_days ?? 0) >= 7 },
+    { label: 'Days clean', value: profile?.streak_days || 0, icon: '', ariaLabel: 'Streak days', highlight: (profile?.streak_days || 0) >= 7 },
     { label: 'Money saved', value: profile?.money_saved ? `KES ${profile.money_saved.toLocaleString()}` : 'KES 0', icon: '', ariaLabel: 'Money saved' },
     { label: 'Sessions logged', value: entries.length, icon: '', ariaLabel: 'Sessions logged', emptyMessage: 'First entry coming soon!' },
     { label: 'CBT modules', value: cbtCount, icon: '', ariaLabel: 'CBT modules completed', highlight: cbtCount >= 3 },
@@ -273,9 +273,9 @@ function Dashboard() {
         </nav>
 
         {showInstallPrompt && (
-          <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #2DD4BF', borderRadius: '16px', padding: '16px 20px', margin: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', animation: 'slideDown 0.4s ease-out', boxShadow: '0 4px 20px rgba(45,212,191,0.2)' }}>
+          <div style={{ background: '#171E2B', border: '2px solid #2DD4BF', borderRadius: '16px', padding: '16px 20px', margin: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', animation: 'slideDown 0.4s ease-out', boxShadow: '0 4px 20px rgba(45,212,191,0.2)' }}>
             <span style={{ fontSize: '36px', flexShrink: 0 }} aria-hidden="true"></span>
-            <div style={{ flex: 1, minWidth: '200px' }}><p style={{ color: '#2DD4BF', fontSize: '14px', fontWeight: 600, margin: '0 0 4px' }}>Add LossLens to your home screen</p><p style={{ color: '#2DD4BF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Install for quick access â€” works offline, no app store needed.</p></div>
+            <div style={{ flex: 1, minWidth: '200px' }}><p style={{ color: '#2DD4BF', fontSize: '14px', fontWeight: 600, margin: '0 0 4px' }}>Add LossLens to your home screen</p><p style={{ color: '#FFFFFF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Install for quick access â€” works offline, no app store needed.</p></div>
             <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
               <button onClick={() => { setShowInstallPrompt(false); sessionStorage.setItem('pwa_install_dismissed', 'true') }} style={{ padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>Not now</button>
               <button onClick={installPWA} style={{ padding: '8px 20px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>Install </button>

@@ -1,5 +1,14 @@
 import { supabase } from './supabase'
 
+let riskWarningShown = false
+
+function warnRiskColumns(error) {
+  if (!riskWarningShown) {
+    console.warn('Risk profile columns are unavailable; using the safe low-risk fallback.', error?.message || error)
+    riskWarningShown = true
+  }
+}
+
 // Calculate risk score based on diary patterns
 export async function calculateRiskScore(userId) {
   if (!userId) return { score: 0, factors: [] }
@@ -18,8 +27,8 @@ export async function calculateRiskScore(userId) {
     .order('date', { ascending: false })
 
   if (entriesError) {
-    console.error('Risk entries fetch error:', entriesError)
-    return { score: 0, factors: [] }
+    warnRiskColumns(entriesError)
+    return { score: 0, level: 'low', factors: [] }
   }
 
   if (!entries || entries.length < 3) {
@@ -70,19 +79,19 @@ export async function calculateRiskScore(userId) {
   const dayOfMonth = today.getDate()
   if (dayOfMonth >= 28 || dayOfMonth <= 3) {
     score += 10
-    factors.push('Payday period â€” financial triggers may be higher')
+    factors.push('Payday period - financial triggers may be higher')
   }
 
   // Factor 6: Weekend
   if (dayOfWeek === 5 || dayOfWeek === 6) {
     score += 5
-    factors.push('Weekend â€” historically higher gambling risk')
+    factors.push('Weekend - historically higher gambling risk')
   }
 
   // Factor 7: Evening hours
   if (hourOfDay >= 18 || hourOfDay <= 2) {
     score += 5
-    factors.push('Evening hours â€” common trigger time')
+    factors.push('Evening hours - common trigger time')
   }
 
   score = Math.min(score, 100)
@@ -97,7 +106,10 @@ export async function calculateRiskScore(userId) {
     })
     .eq('id', userId)
 
-  if (updateError) console.error('Risk score save error:', updateError)
+  if (updateError) {
+    warnRiskColumns(updateError)
+    return { score: 0, level: 'low', factors: [] }
+  }
 
   return { score, factors }
 }
@@ -113,7 +125,7 @@ export async function getRiskLevel(userId) {
     .single()
 
   if (profileError || !profile) {
-    if (profileError) console.error('Risk level fetch error:', profileError)
+    if (profileError) warnRiskColumns(profileError)
     return { score: 0, level: 'low', factors: [] }
   }
 
