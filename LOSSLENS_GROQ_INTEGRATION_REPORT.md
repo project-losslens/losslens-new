@@ -81,3 +81,12 @@ Production connectivity was not claimed from the local build alone. Deployment a
 - Local route verification requires running the Vercel server function runtime.
 - Existing ESLint errors remain outside this integration and were not changed.
 - No database schema or RLS changes are required.
+
+## Release status
+
+- Integration commit: `92e8981`
+- GitHub push: completed to `main` on `project-losslens/losslens-new`
+- Production deployment: completed and reachable at `https://losslens-mu.vercel.app/`
+- Production API routing: verified
+- Unauthenticated production chat request: safely rejected with HTTP 401
+- Authenticated Oloo completion, chat-history persistence, user isolation, and Groq failure-path checks require a valid signed-in browser session and were not simulated with production credentials.
