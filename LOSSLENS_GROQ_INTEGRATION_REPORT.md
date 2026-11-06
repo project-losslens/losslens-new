@@ -133,3 +133,11 @@ The SQL was not executed against Supabase.
 - Focused lint for `api/chat.js` and `src/lib/relapsePrediction.js`: passed.
 - Full repository lint remains nonzero due to pre-existing React hook and unrelated lint findings, including `src/components/AIChat.jsx`.
 - Production `POST /api/chat` without authentication is expected to return HTTP 401 after deployment.
+
+### Final deployment
+
+- Fix commit: `271debd`
+- Main branch push: completed
+- Production site: returned HTTP 200.
+- Production unauthenticated `POST /api/chat`: returned HTTP 401 with an authentication error, not HTTP 500.
+- Vercel CLI was unavailable locally, so server-side environment variable presence could not be inspected from this environment.
