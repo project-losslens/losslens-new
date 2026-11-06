@@ -18,7 +18,7 @@ function triggerConfetti() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const isMobile = window.innerWidth < 768
   const count = isMobile ? 25 : 50
-  const colors = ['#f59e0b', '#6ee7b7', '#3db88a', '#F09595', '#FAC775', '#9fe1cb']
+  const colors = ['#2DD4BF', '#2DD4BF', '#2DD4BF', '#FFFFFF', '#7DBDEE', '#7DBDEE']
   for (let i = 0; i < count; i++) {
     setTimeout(() => {
       const piece = document.createElement('div')
@@ -40,9 +40,9 @@ function showToast(message, duration = 3000) {
   toast.textContent = message
   toast.style.cssText = `
     position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
-    background: #1d5c38; color: #6ee7b7; padding: 10px 20px; border-radius: 100px;
+    background: #7DBDEE; color: #2DD4BF; padding: 10px 20px; border-radius: 100px;
     font-size: 13px; font-weight: 500; z-index: 3000;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.4); border: 1px solid #3b7a5a;
+    box-shadow: 0 4px 16px rgba(11,18,32,0.4); border: 1px solid rgba(255,255,255,0.4);
     animation: slideInRight 0.3s ease-out; white-space: nowrap;
   `
   document.body.appendChild(toast)
@@ -91,25 +91,25 @@ function UsernamePrompt({ userId, onComplete }) {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.97)', zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-      <div style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '400px' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.97)', zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '400px' }}>
         <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px', textAlign: 'center' }}></span>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#fff', marginBottom: '8px', textAlign: 'center' }}>One last thing</h2>
-        <p style={{ fontSize: '13px', color: '#3b7a5a', marginBottom: '1.5rem', textAlign: 'center', lineHeight: 1.6 }}>Choose a username for The Circle, Whispers, and your profile. This is how others will see you — anonymously.</p>
-        {error && <div style={{ background: '#791F1F', border: '1px solid #F09595', borderRadius: '8px', padding: '10px 14px', color: '#F09595', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#FFFFFF', marginBottom: '8px', textAlign: 'center' }}>One last thing</h2>
+        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem', textAlign: 'center', lineHeight: 1.6 }}>Choose a username for The Circle, Whispers, and your profile. This is how others will see you â€” anonymously.</p>
+        {error && <div style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
         <div className="form-group">
           <label>USERNAME</label>
           <div style={{ position: 'relative' }}>
             <input type="text" placeholder="e.g. amina_w" value={username} onChange={e => handleChange(e.target.value)} style={{ paddingRight: 40 }} onKeyDown={e => e.key === 'Enter' && handleSave()} />
-            {status === 'checking' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Checking">⏳</span>}
+            {status === 'checking' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Checking">â³</span>}
             {status === 'available' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Available"></span>}
-            {status === 'taken' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Taken">âŒ</span>}
+            {status === 'taken' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Taken">Ã¢ÂÅ’</span>}
           </div>
-          {status === 'taken' && <span style={{ fontSize: '11px', color: '#F09595' }}>Username already taken</span>}
-          {status === 'available' && <span style={{ fontSize: '11px', color: '#6ee7b7' }}>Username available!</span>}
-          <span style={{ fontSize: '10px', color: '#3b7a5a' }}>Letters, numbers, and underscores only</span>
+          {status === 'taken' && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Username already taken</span>}
+          {status === 'available' && <span style={{ fontSize: '11px', color: '#2DD4BF' }}>Username available!</span>}
+          <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>Letters, numbers, and underscores only</span>
         </div>
-        <button className="btn-primary full" onClick={handleSave} disabled={loading || status === 'taken' || status === 'checking'}>{loading ? <span className="spinner" /> : 'Save & Continue →'}</button>
+        <button className="btn-primary full" onClick={handleSave} disabled={loading || status === 'taken' || status === 'checking'}>{loading ? <span className="spinner" /> : 'Save & Continue â†’'}</button>
       </div>
     </div>
   )
@@ -231,21 +231,21 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
-        <div style={{ animation: 'logoBreathe 2s ease-in-out infinite' }}><span style={{ fontFamily: "'Playfair Display', serif", fontSize: '36px', color: '#f59e0b', fontWeight: 700 }}>LossLens</span></div>
-        <div style={{ display: 'flex', gap: '10px' }}>{[0, 1, 2].map(i => (<div key={i} style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#f59e0b', animation: `loadingDot 1.2s ${i * 0.2}s ease-in-out infinite` }} />))}</div>
+      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
+        <div style={{ animation: 'logoBreathe 2s ease-in-out infinite' }}><span style={{ fontFamily: "'Playfair Display', serif", fontSize: '36px', color: '#2DD4BF', fontWeight: 700 }}>LossLens</span></div>
+        <div style={{ display: 'flex', gap: '10px' }}>{[0, 1, 2].map(i => (<div key={i} style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i * 0.2}s ease-in-out infinite` }} />))}</div>
       </div>
     )
   }
 
   if (sessionExpired) {
     return (
-      <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
           <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
-          <h2 style={{ color: '#f59e0b', fontFamily: "'Playfair Display', serif", fontSize: '22px', marginBottom: '8px' }}>Please log in</h2>
-          <p style={{ color: '#6ee7b7', fontSize: '14px', marginBottom: '24px' }}>Your session has expired.</p>
-          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#f59e0b', border: 'none', color: '#041f13', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%' }}>Go to Login →</button>
+          <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif", fontSize: '22px', marginBottom: '8px' }}>Please log in</h2>
+          <p style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '24px' }}>Your session has expired.</p>
+          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%' }}>Go to Login â†’</button>
         </div>
       </div>
     )
@@ -259,12 +259,12 @@ function Dashboard() {
       )}
 
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#041f13', borderBottom: '1px solid #0a3d22', position: 'sticky', top: 0, zIndex: 100 }}>
+        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 100 }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}>
-              {new Date().getHours() < 12 ? '' : new Date().getHours() < 17 ? '' : ''} {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}, <span style={{ color: '#f59e0b' }}>{firstName}</span>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}>
+              {new Date().getHours() < 12 ? '' : new Date().getHours() < 17 ? '' : ''} {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}, <span style={{ color: '#2DD4BF' }}>{firstName}</span>
             </h1>
-            <p style={{ fontSize: '12px', color: '#3b7a5a', margin: '2px 0 0' }}>{profile?.streak_days ? `${profile.streak_days}-day streak ` : 'Start your streak today'}</p>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{profile?.streak_days ? `${profile.streak_days}-day streak ` : 'Start your streak today'}</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <NotificationBell />
@@ -273,12 +273,12 @@ function Dashboard() {
         </nav>
 
         {showInstallPrompt && (
-          <div style={{ background: 'linear-gradient(135deg, #0a3d22, #1d5c38)', border: '2px solid #f59e0b', borderRadius: '16px', padding: '16px 20px', margin: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', animation: 'slideDown 0.4s ease-out', boxShadow: '0 4px 20px rgba(245,158,11,0.2)' }}>
+          <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #2DD4BF', borderRadius: '16px', padding: '16px 20px', margin: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', animation: 'slideDown 0.4s ease-out', boxShadow: '0 4px 20px rgba(45,212,191,0.2)' }}>
             <span style={{ fontSize: '36px', flexShrink: 0 }} aria-hidden="true"></span>
-            <div style={{ flex: 1, minWidth: '200px' }}><p style={{ color: '#f59e0b', fontSize: '14px', fontWeight: 600, margin: '0 0 4px' }}>Add LossLens to your home screen</p><p style={{ color: '#6ee7b7', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Install for quick access — works offline, no app store needed.</p></div>
+            <div style={{ flex: 1, minWidth: '200px' }}><p style={{ color: '#2DD4BF', fontSize: '14px', fontWeight: 600, margin: '0 0 4px' }}>Add LossLens to your home screen</p><p style={{ color: '#2DD4BF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Install for quick access â€” works offline, no app store needed.</p></div>
             <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-              <button onClick={() => { setShowInstallPrompt(false); sessionStorage.setItem('pwa_install_dismissed', 'true') }} style={{ padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid #3b7a5a', color: '#3b7a5a', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>Not now</button>
-              <button onClick={installPWA} style={{ padding: '8px 20px', borderRadius: '100px', background: '#f59e0b', border: 'none', color: '#041f13', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>Install </button>
+              <button onClick={() => { setShowInstallPrompt(false); sessionStorage.setItem('pwa_install_dismissed', 'true') }} style={{ padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>Not now</button>
+              <button onClick={installPWA} style={{ padding: '8px 20px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>Install </button>
             </div>
           </div>
         )}
@@ -286,8 +286,8 @@ function Dashboard() {
         <div onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} style={{ position: 'relative' }}>
           {pullDistance > 0 && (
             <div style={{ position: 'fixed', top: 0, left: '50%', zIndex: 2000, transform: 'translateX(-50%)', paddingTop: Math.max(pullDistance - 40, 4), pointerEvents: 'none' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#062616', border: '2px solid #f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `rotate(${Math.min(pullDistance * 3, 360)}deg)`, opacity: Math.min(pullDistance / pullThreshold, 1) }}>
-                {refreshing ? <div style={{ width: '16px', height: '16px', border: '2px solid #f59e0b', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> : <span style={{ fontSize: '16px', color: '#f59e0b' }}>{pullDistance >= pullThreshold ? '' : '↓'}</span>}
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '2px solid #2DD4BF', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `rotate(${Math.min(pullDistance * 3, 360)}deg)`, opacity: Math.min(pullDistance / pullThreshold, 1) }}>
+                {refreshing ? <div style={{ width: '16px', height: '16px', border: '2px solid #2DD4BF', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> : <span style={{ fontSize: '16px', color: '#2DD4BF' }}>{pullDistance >= pullThreshold ? '' : 'â†“'}</span>}
               </div>
             </div>
           )}
@@ -296,30 +296,30 @@ function Dashboard() {
             {riskData && (
               <div role="alert" aria-live="polite" style={{ background: getRiskColor(riskData.score).bg, border: `1px solid ${getRiskColor(riskData.score).color}`, borderRadius: '12px', padding: '14px 16px', marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: riskData.factors?.length > 0 ? '8px' : '0' }}>
-                  <h3 style={{ color: getRiskColor(riskData.score).color, fontSize: '14px', margin: 0 }}>{riskData.level === 'high' ? 'âš ï¸ ' : riskData.level === 'medium' ? ' ' : ' '}{getRiskColor(riskData.score).label} Today</h3>
+                  <h3 style={{ color: getRiskColor(riskData.score).color, fontSize: '14px', margin: 0 }}>{riskData.level === 'high' ? 'Ã¢Å¡Â Ã¯Â¸Â ' : riskData.level === 'medium' ? ' ' : ' '}{getRiskColor(riskData.score).label} Today</h3>
                   <span style={{ color: getRiskColor(riskData.score).color, fontSize: '20px', fontWeight: 700 }}>{riskData.score}%</span>
                 </div>
-                {(riskData.factors || []).map((f, i) => (<p key={i} style={{ color: getRiskColor(riskData.score).color, fontSize: '12px', opacity: 0.8, margin: '2px 0' }}>• {f}</p>))}
-                {riskData.level === 'high' && <button onClick={() => navigate('/urge-toolkit')} style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#f59e0b', border: 'none', borderRadius: '8px', color: '#041f13', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}> Open Urge Toolkit</button>}
+                {(riskData.factors || []).map((f, i) => (<p key={i} style={{ color: getRiskColor(riskData.score).color, fontSize: '12px', opacity: 0.8, margin: '2px 0' }}>â€¢ {f}</p>))}
+                {riskData.level === 'high' && <button onClick={() => navigate('/urge-toolkit')} style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#2DD4BF', border: 'none', borderRadius: '8px', color: '#0B1220', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}> Open Urge Toolkit</button>}
               </div>
             )}
 
             <div className="stats-grid">
               {stats.map((s, i) => (
-                <div className="stat-card" key={i} style={s.highlight ? { borderColor: '#f59e0b', boxShadow: '0 0 12px rgba(245,158,11,0.3)' } : {}}>
+                <div className="stat-card" key={i} style={s.highlight ? { borderColor: '#2DD4BF', boxShadow: '0 0 12px rgba(45,212,191,0.3)' } : {}}>
                   <span className="stat-icon" aria-label={s.ariaLabel}>{s.highlight ? <span className="streak-fire">{s.icon}</span> : s.icon}</span>
-                  <span className="stat-value" style={s.highlight ? { color: '#f59e0b' } : {}}>{s.value || '—'}</span>
+                  <span className="stat-value" style={s.highlight ? { color: '#2DD4BF' } : {}}>{s.value || 'â€”'}</span>
                   <span className="stat-label">{s.value === 0 && s.emptyMessage ? s.emptyMessage : s.label}</span>
                 </div>
               ))}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '1rem' }}>
-              <div style={{ background: 'linear-gradient(135deg, #0a3d22 0%, #1d5c38 100%)', border: '1px solid #f59e0b', borderRadius: '12px', padding: '1rem', cursor: 'pointer' }} onClick={() => navigate('/circle')}>
-                <span style={{ fontSize: '24px' }} aria-hidden="true"></span><h3 style={{ color: '#f59e0b', fontSize: '13px', margin: '6px 0 4px' }}>The Circle</h3><p style={{ color: '#6ee7b7', fontSize: '11px', fontWeight: 300, margin: 0 }}>{circleOnline > 0 ? `${circleOnline} members online` : 'Join the conversation'}</p>
+              <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, #7DBDEE 100%)', border: '1px solid #2DD4BF', borderRadius: '12px', padding: '1rem', cursor: 'pointer' }} onClick={() => navigate('/circle')}>
+                <span style={{ fontSize: '24px' }} aria-hidden="true"></span><h3 style={{ color: '#2DD4BF', fontSize: '13px', margin: '6px 0 4px' }}>The Circle</h3><p style={{ color: '#2DD4BF', fontSize: '11px', fontWeight: 300, margin: 0 }}>{circleOnline > 0 ? `${circleOnline} members online` : 'Join the conversation'}</p>
               </div>
-              <div style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '12px', padding: '1rem', cursor: 'pointer' }} onClick={() => navigate('/whispers')}>
-                <span style={{ fontSize: '24px' }} aria-hidden="true"></span><h3 style={{ color: '#e2f5ec', fontSize: '13px', margin: '6px 0 4px' }}>Whispers</h3><p style={{ color: '#6ee7b7', fontSize: '11px', fontWeight: 300, margin: 0 }}>{whispersActive > 0 ? `${whispersActive} active chats` : 'Find a peer'}</p>
+              <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '1rem', cursor: 'pointer' }} onClick={() => navigate('/whispers')}>
+                <span style={{ fontSize: '24px' }} aria-hidden="true"></span><h3 style={{ color: '#FFFFFF', fontSize: '13px', margin: '6px 0 4px' }}>Whispers</h3><p style={{ color: '#2DD4BF', fontSize: '11px', fontWeight: 300, margin: 0 }}>{whispersActive > 0 ? `${whispersActive} active chats` : 'Find a peer'}</p>
               </div>
             </div>
 
@@ -330,11 +330,11 @@ function Dashboard() {
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
-              <h3 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '0.75rem' }}>Explore LossLens</h3>
+              <h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '0.75rem' }}>Explore LossLens</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '8px' }}>
                 {[{ emoji: '', label: 'Diary', path: '/diary' }, { emoji: '', label: 'CBT Modules', path: '/cbt' }, { emoji: '', label: 'Urge Toolkit', path: '/urge-toolkit' }, { emoji: '', label: 'Events', path: '/events' }, { emoji: '', label: 'Resources', path: '/resources' }, { emoji: '', label: 'Family Portal', path: '/family-portal' }, { emoji: '', label: 'Monthly Mirror', path: '/monthly-mirror' }, { emoji: '', label: 'LossLens Pact', path: '/precious-pact' }].map(item => (
-                  <button key={item.path} onClick={() => navigate(item.path)} style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '10px', padding: '12px', color: '#9fe1cb', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#f59e0b'; e.currentTarget.style.transform = 'translateY(-2px)' }} onMouseLeave={e => { e.currentTarget.style.borderColor = '#0a3d22'; e.currentTarget.style.transform = 'translateY(0)' }}>
+                  <button key={item.path} onClick={() => navigate(item.path)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '12px', color: '#7DBDEE', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#2DD4BF'; e.currentTarget.style.transform = 'translateY(-2px)' }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'translateY(0)' }}>
                     <span style={{ fontSize: '22px' }} aria-hidden="true">{item.emoji}</span><span>{item.label}</span>
                   </button>
                 ))}
@@ -347,11 +347,11 @@ function Dashboard() {
               <div className="section-header"><h3>Recent diary entries</h3><span className="see-all" onClick={() => navigate('/diary')}>See all</span></div>
               <div className="entries-list">
                 {entries.length === 0 ? (
-                  <p style={{ color: '#3b7a5a', fontSize: '13px', textAlign: 'center', padding: '1.5rem' }}>No entries yet. Log your first diary entry!</p>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', textAlign: 'center', padding: '1.5rem' }}>No entries yet. Log your first diary entry!</p>
                 ) : entries.slice(0, 3).map((e) => (
                   <div className="entry-item" key={e.id || e.date}>
                     <div className="entry-top"><span className="entry-date">{new Date(e.date).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric' })}</span><span className={`entry-status ${e.gambled ? 'gambled' : 'clean'}`}>{e.gambled ? 'Gambled' : 'Clean'}</span></div>
-                    <div className="entry-mood">{e.mood || '—'}</div>
+                    <div className="entry-mood">{e.mood || 'â€”'}</div>
                     <p className="entry-note">{e.notes || 'No notes added.'}</p>
                   </div>
                 ))}
@@ -359,14 +359,14 @@ function Dashboard() {
             </div>
 
             {/* Crisis Support Bar - Updated with multiple contacts */}
-            <div style={{ background: '#791F1F20', border: '2px solid #F09595', borderRadius: '14px', padding: '16px', marginBottom: '1rem', cursor: 'pointer' }} onClick={() => setShowCrisisModal(true)}>
+            <div style={{ background: 'rgba(255,255,255,0.12)', border: '2px solid #FFFFFF', borderRadius: '14px', padding: '16px', marginBottom: '1rem', cursor: 'pointer' }} onClick={() => setShowCrisisModal(true)}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                <span style={{ fontSize: '24px' }}>🆘</span>
+                <span style={{ fontSize: '24px' }}>ðŸ†˜</span>
                 <div>
-                  <p style={{ color: '#F09595', fontSize: '13px', fontWeight: 600, margin: 0 }}>Feeling overwhelmed? You're not alone.</p>
-                  <p style={{ color: '#6ee7b7', fontSize: '11px', margin: '2px 0 0' }}>Tap here for free 24/7 support options</p>
+                  <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 600, margin: 0 }}>Feeling overwhelmed? You're not alone.</p>
+                  <p style={{ color: '#2DD4BF', fontSize: '11px', margin: '2px 0 0' }}>Tap here for free 24/7 support options</p>
                 </div>
-                <span style={{ color: '#F09595', fontSize: '18px', marginLeft: 'auto' }}>→</span>
+                <span style={{ color: '#FFFFFF', fontSize: '18px', marginLeft: 'auto' }}>â†’</span>
               </div>
             </div>
           </div>
@@ -375,36 +375,36 @@ function Dashboard() {
 
       {/* Crisis Support Modal */}
       {showCrisisModal && (
-        <div onClick={() => setShowCrisisModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.95)', zIndex: 5000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '2px solid #F09595', maxWidth: '450px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div onClick={() => setShowCrisisModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.95)', zIndex: 5000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '2px solid #FFFFFF', maxWidth: '450px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-              <span style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>🆘</span>
-              <h2 style={{ color: '#F09595', fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', margin: '0 0 8px' }}>You're Not Alone</h2>
-              <p style={{ color: '#6ee7b7', fontSize: '13px', lineHeight: '1.6', margin: 0 }}>These services are free, confidential, and available to anyone in Kenya. Reach out anytime.</p>
+              <span style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>ðŸ†˜</span>
+              <h2 style={{ color: '#FFFFFF', fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', margin: '0 0 8px' }}>You're Not Alone</h2>
+              <p style={{ color: '#2DD4BF', fontSize: '13px', lineHeight: '1.6', margin: 0 }}>These services are free, confidential, and available to anyone in Kenya. Reach out anytime.</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '1.5rem' }}>
               {CRISIS_CONTACTS.map((contact, i) => (
                 <a key={i} href={`tel:${contact.phone.replace(/\s/g, '')}`} style={{
-                  textDecoration: 'none', background: contact.priority ? 'linear-gradient(135deg, #791F1F, #5a1717)' : '#041f13',
-                  border: contact.priority ? '2px solid #F09595' : '1px solid #0a3d22',
+                  textDecoration: 'none', background: contact.priority ? 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.08))' : '#0B1220',
+                  border: contact.priority ? '2px solid #FFFFFF' : '1px solid rgba(255,255,255,0.12)',
                   borderRadius: '12px', padding: contact.priority ? '18px' : '14px',
                   display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.2s'
                 }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = '#f59e0b'; e.currentTarget.style.transform = 'scale(1.02)' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = contact.priority ? '#F09595' : '#0a3d22'; e.currentTarget.style.transform = 'scale(1)' }}>
-                  <span style={{ fontSize: contact.priority ? '28px' : '20px', flexShrink: 0 }}>{contact.priority ? '⭐' : ''}</span>
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#2DD4BF'; e.currentTarget.style.transform = 'scale(1.02)' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = contact.priority ? '#FFFFFF' : 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'scale(1)' }}>
+                  <span style={{ fontSize: contact.priority ? '28px' : '20px', flexShrink: 0 }}>{contact.priority ? 'â­' : ''}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <span style={{ color: contact.priority ? '#F09595' : '#e2f5ec', fontSize: contact.priority ? '15px' : '13px', fontWeight: 600 }}>{contact.name}</span>
-                      {contact.priority && <span style={{ background: '#F09595', color: '#791F1F', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 600 }}>First Call</span>}
+                      <span style={{ color: contact.priority ? '#FFFFFF' : '#FFFFFF', fontSize: contact.priority ? '15px' : '13px', fontWeight: 600 }}>{contact.name}</span>
+                      {contact.priority && <span style={{ background: '#FFFFFF', color: 'rgba(255,255,255,0.08)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 600 }}>First Call</span>}
                     </div>
-                    <p style={{ color: '#6ee7b7', fontSize: '12px', margin: '2px 0 0' }}>{contact.phone} · {contact.hours}</p>
+                    <p style={{ color: '#2DD4BF', fontSize: '12px', margin: '2px 0 0' }}>{contact.phone} Â· {contact.hours}</p>
                   </div>
-                  <span style={{ color: contact.priority ? '#F09595' : '#3b7a5a', fontSize: '18px' }}>→</span>
+                  <span style={{ color: contact.priority ? '#FFFFFF' : 'rgba(255,255,255,0.4)', fontSize: '18px' }}>â†’</span>
                 </a>
               ))}
             </div>
-            <p style={{ color: '#3b7a5a', fontSize: '11px', textAlign: 'center', marginBottom: '1rem' }}>All calls are free, confidential, and available 24/7.</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', textAlign: 'center', marginBottom: '1rem' }}>All calls are free, confidential, and available 24/7.</p>
             <button onClick={() => setShowCrisisModal(false)} className="btn-primary full" style={{ padding: '12px', fontSize: '14px' }}>Close</button>
           </div>
         </div>

@@ -117,14 +117,14 @@ function ChatViewer() {
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
         <nav style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '1rem 1.5rem', background: '#041f13', borderBottom: '2px solid #f59e0b',
+          padding: '1rem 1.5rem', background: '#0B1220', borderBottom: '2px solid #2DD4BF',
           position: 'sticky', top: 0, zIndex: 100,
         }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#f59e0b', fontFamily: "'Inter', sans-serif", margin: 0 }}>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#2DD4BF', fontFamily: "'Inter', sans-serif", margin: 0 }}>
               Chat Viewer
             </h1>
-            <p style={{ fontSize: '12px', color: '#FAC775', margin: '2px 0 0' }}>
+            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>
               {users.length} users with chat history
             </p>
           </div>
@@ -133,8 +133,8 @@ function ChatViewer() {
         <div style={{ display: 'flex', height: 'calc(100vh - 60px)' }}>
           {/* User List */}
           <div style={{
-            width: '300px', borderRight: '1px solid #0a3d22', overflowY: 'auto',
-            flexShrink: 0, background: '#062616',
+            width: '300px', borderRight: '1px solid rgba(255,255,255,0.12)', overflowY: 'auto',
+            flexShrink: 0, background: 'rgba(255,255,255,0.06)',
             display: showUserList ? 'block' : 'none',
           }} className="chat-user-list">
             <div style={{ padding: '12px' }}>
@@ -146,16 +146,16 @@ function ChatViewer() {
                 aria-label="Search users"
                 style={{
                   width: '100%', padding: '8px 12px', borderRadius: '8px',
-                  background: '#041f13', border: '1px solid #0a3d22', color: '#fff',
+                  background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF',
                   fontSize: '12px', outline: 'none', fontFamily: "'Inter', sans-serif",
                 }}
               />
             </div>
 
             {loading ? (
-              <p style={{ color: '#3b7a5a', fontSize: '12px', textAlign: 'center', padding: '1rem' }}>Loading...</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textAlign: 'center', padding: '1rem' }}>Loading...</p>
             ) : filteredUsers.length === 0 ? (
-              <p style={{ color: '#3b7a5a', fontSize: '12px', textAlign: 'center', padding: '1rem' }}>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textAlign: 'center', padding: '1rem' }}>
                 {search ? 'No users found' : 'No chat history yet'}
               </p>
             ) : (
@@ -169,18 +169,18 @@ function ChatViewer() {
                   onKeyDown={e => e.key === 'Enter' && fetchConversations(u.id)}
                   style={{
                     padding: '12px 16px', cursor: 'pointer',
-                    background: selectedUser === u.id ? '#0a3d22' : 'transparent',
-                    borderBottom: '1px solid #0a3d22',
+                    background: selectedUser === u.id ? 'rgba(255,255,255,0.12)' : 'transparent',
+                    borderBottom: '1px solid rgba(255,255,255,0.12)',
                     transition: 'background 0.15s',
                   }}
-                  onMouseEnter={e => { if (selectedUser !== u.id) e.currentTarget.style.background = '#041f13' }}
+                  onMouseEnter={e => { if (selectedUser !== u.id) e.currentTarget.style.background = '#0B1220' }}
                   onMouseLeave={e => { if (selectedUser !== u.id) e.currentTarget.style.background = 'transparent' }}
                 >
-                  <p style={{ color: '#e2f5ec', fontSize: '13px', fontWeight: 500, margin: 0 }}>
+                  <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 500, margin: 0 }}>
                     {u.full_name}
                   </p>
-                  <p style={{ color: '#3b7a5a', fontSize: '11px', margin: '2px 0 0' }}>
-                    {u.id.slice(0, 8)}…
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '2px 0 0' }}>
+                    {u.id.slice(0, 8)}â€¦
                   </p>
                 </div>
               ))
@@ -188,9 +188,9 @@ function ChatViewer() {
           </div>
 
           {/* Chat Area */}
-          <div style={{ 
-            flex: 1, 
-            overflowY: 'auto', 
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
             padding: '1.5rem',
             display: 'flex',
             flexDirection: 'column',
@@ -200,27 +200,27 @@ function ChatViewer() {
               <button
                 onClick={handleBackToUsers}
                 style={{
-                  background: 'transparent', border: '1px solid #0a3d22', color: '#6ee7b7',
+                  background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF',
                   padding: '8px 16px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer',
                   fontFamily: "'Inter', sans-serif", marginBottom: '12px', alignSelf: 'flex-start',
                   display: 'flex', alignItems: 'center', gap: '6px',
                 }}
                 className="mobile-back-btn"
               >
-                <span>←</span> Back to users
+                <span>â†</span> Back to users
               </button>
             )}
 
             {!selectedUser ? (
-              <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#3b7a5a' }}>
+              <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'rgba(255,255,255,0.4)' }}>
                 <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }} aria-hidden="true"></span>
-                <p style={{ color: '#6ee7b7', fontSize: '14px' }}>Select a user to view their conversations</p>
+                <p style={{ color: '#2DD4BF', fontSize: '14px' }}>Select a user to view their conversations</p>
                 <p style={{ fontSize: '12px' }}>All chats are read-only</p>
               </div>
             ) : chatLoading ? (
-              <p style={{ color: '#3b7a5a', fontSize: '13px', textAlign: 'center', padding: '2rem' }}>Loading conversations...</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', textAlign: 'center', padding: '2rem' }}>Loading conversations...</p>
             ) : conversations.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a' }}>
+              <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)' }}>
                 <p style={{ fontSize: '13px' }}>No conversations found for this user.</p>
               </div>
             ) : (
@@ -232,7 +232,7 @@ function ChatViewer() {
                       position: 'sticky', top: 0, zIndex: 10,
                     }}>
                       <span style={{
-                        background: '#0a3d22', color: '#6ee7b7', padding: '4px 14px',
+                        background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '4px 14px',
                         borderRadius: '100px', fontSize: '11px',
                       }}>
                         {date}
@@ -246,8 +246,8 @@ function ChatViewer() {
                       }}>
                         <div style={{
                           width: '28px', height: '28px', borderRadius: '50%',
-                          background: msg.role === 'user' ? '#1d5c38' : '#0a3d22',
-                          border: `2px solid ${msg.role === 'user' ? '#3b7a5a' : '#f59e0b'}`,
+                          background: msg.role === 'user' ? '#7DBDEE' : 'rgba(255,255,255,0.12)',
+                          border: `2px solid ${msg.role === 'user' ? 'rgba(255,255,255,0.4)' : '#2DD4BF'}`,
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: '12px', flexShrink: 0,
                         }} aria-hidden="true">
@@ -256,15 +256,15 @@ function ChatViewer() {
                         <div style={{ maxWidth: '80%' }}>
                           <div style={{
                             padding: '10px 14px', borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                            background: msg.role === 'user' ? '#041f13' : '#0a3d22',
-                            color: '#9fe1cb',
+                            background: msg.role === 'user' ? '#0B1220' : 'rgba(255,255,255,0.12)',
+                            color: '#7DBDEE',
                             fontSize: '13px', lineHeight: '1.6',
                             wordBreak: 'break-word',
                           }}>
                             {msg.message}
                           </div>
                           <span style={{
-                            fontSize: '10px', color: '#3b7a5a', marginTop: '2px',
+                            fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '2px',
                             display: 'block', textAlign: msg.role === 'user' ? 'right' : 'left',
                           }}>
                             {formatTime(msg.created_at)}

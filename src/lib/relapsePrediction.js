@@ -58,7 +58,7 @@ export async function calculateRiskScore(userId) {
 
   // Factor 4: Stress/mood pattern
   const recentMoods = entries.slice(0, 7).map(e => e.mood)
-  const negativeMoods = recentMoods.filter(m => 
+  const negativeMoods = recentMoods.filter(m =>
     m && (m.includes('Stressed') || m.includes('Anxious') || m.includes('Depressed'))
   ).length
   if (negativeMoods >= 3) {
@@ -70,19 +70,19 @@ export async function calculateRiskScore(userId) {
   const dayOfMonth = today.getDate()
   if (dayOfMonth >= 28 || dayOfMonth <= 3) {
     score += 10
-    factors.push('Payday period — financial triggers may be higher')
+    factors.push('Payday period â€” financial triggers may be higher')
   }
 
   // Factor 6: Weekend
   if (dayOfWeek === 5 || dayOfWeek === 6) {
     score += 5
-    factors.push('Weekend — historically higher gambling risk')
+    factors.push('Weekend â€” historically higher gambling risk')
   }
 
   // Factor 7: Evening hours
   if (hourOfDay >= 18 || hourOfDay <= 2) {
     score += 5
-    factors.push('Evening hours — common trigger time')
+    factors.push('Evening hours â€” common trigger time')
   }
 
   score = Math.min(score, 100)
@@ -118,7 +118,7 @@ export async function getRiskLevel(userId) {
   }
 
   const today = new Date().toISOString().split('T')[0]
-  
+
   if (profile.last_risk_check !== today) {
     return await calculateRiskScore(userId)
   }
@@ -137,7 +137,7 @@ export async function getRiskLevel(userId) {
 
 // Get risk color
 export function getRiskColor(score) {
-  if (score >= 60) return { bg: '#791F1F', color: '#F09595', label: 'High Risk' }
-  if (score >= 30) return { bg: '#633806', color: '#FAC775', label: 'Medium Risk' }
-  return { bg: '#0a3d22', color: '#6ee7b7', label: 'Low Risk' }
+  if (score >= 60) return { bg: 'rgba(255,255,255,0.08)', color: '#FFFFFF', label: 'High Risk' }
+  if (score >= 30) return { bg: 'rgba(45,212,191,0.15)', color: '#7DBDEE', label: 'Medium Risk' }
+  return { bg: 'rgba(255,255,255,0.12)', color: '#2DD4BF', label: 'Low Risk' }
 }

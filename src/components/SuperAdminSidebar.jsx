@@ -55,9 +55,9 @@ function SuperAdminSidebar() {
         aria-expanded={mobileOpen}
         style={{
           position: 'fixed', top: '12px', left: '12px', zIndex: 1100,
-          background: '#633806', border: '1px solid #f59e0b', borderRadius: '8px',
+          background: 'rgba(45,212,191,0.15)', border: '1px solid #2DD4BF', borderRadius: '8px',
           width: '36px', height: '36px', display: 'none', alignItems: 'center',
-          justifyContent: 'center', cursor: 'pointer', color: '#f59e0b', fontSize: '18px',
+          justifyContent: 'center', cursor: 'pointer', color: '#2DD4BF', fontSize: '18px',
         }}
         className="mobile-hamburger"
       >
@@ -70,7 +70,7 @@ function SuperAdminSidebar() {
           aria-hidden="true"
           style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(4, 31, 19, 0.8)', zIndex: 1050,
+            background: 'rgba(11,18,32, 0.8)', zIndex: 1050,
           }}
         />
       )}
@@ -81,10 +81,10 @@ function SuperAdminSidebar() {
         aria-expanded={!collapsed}
         style={{
           position: 'fixed', top: '16px', left: collapsed ? '16px' : '220px',
-          zIndex: 1100, background: '#633806', border: '1px solid #f59e0b',
+          zIndex: 1100, background: 'rgba(45,212,191,0.15)', border: '1px solid #2DD4BF',
           borderRadius: '50%', width: '32px', height: '32px',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: 'pointer', color: '#f59e0b', fontSize: '14px',
+          cursor: 'pointer', color: '#2DD4BF', fontSize: '14px',
           transition: 'left 0.3s ease',
         }}
         className="desktop-toggle"
@@ -97,22 +97,22 @@ function SuperAdminSidebar() {
         style={{
           position: 'fixed', top: 0, bottom: 0,
           left: mobileOpen ? 0 : collapsed ? '-260px' : '0',
-          width: '260px', background: '#062616', borderRight: '2px solid #f59e0b',
+          width: '260px', background: 'rgba(255,255,255,0.06)', borderRight: '2px solid #2DD4BF',
           zIndex: 1090, display: 'flex', flexDirection: 'column',
           transition: 'left 0.3s ease', overflowY: 'auto', paddingBottom: '1rem',
         }}
         className="sidebar"
       >
         <div style={{
-          padding: '1.25rem 1rem', borderBottom: '1px solid #f59e0b',
+          padding: '1.25rem 1rem', borderBottom: '1px solid #2DD4BF',
           marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between',
-          alignItems: 'center', background: '#0a0a0a',
+          alignItems: 'center', background: '#0B1220',
         }}>
           <span style={{
             fontFamily: "'Playfair Display', serif", fontSize: '20px',
-            color: '#f59e0b', fontWeight: 700, cursor: 'pointer',
+            color: '#2DD4BF', fontWeight: 700, cursor: 'pointer',
           }} onClick={() => handleNav('/super-admin')}>
-            LossLens <span style={{ fontSize: '12px', color: '#f59e0b' }}>SA</span>
+            LossLens <span style={{ fontSize: '12px', color: '#2DD4BF' }}>SA</span>
           </span>
         </div>
 
@@ -127,21 +127,21 @@ function SuperAdminSidebar() {
                 width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
                 padding: '10px 12px', marginBottom: '2px', borderRadius: '8px',
                 border: 'none',
-                background: isActive(item.path) ? '#633806' : 'transparent',
-                color: item.path === '/logout' ? '#F09595' : isActive(item.path) ? '#f59e0b' : '#6ee7b7',
+                background: isActive(item.path) ? 'rgba(45,212,191,0.15)' : 'transparent',
+                color: item.path === '/logout' ? '#FFFFFF' : isActive(item.path) ? '#2DD4BF' : '#2DD4BF',
                 cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: '13px',
                 textAlign: 'left', transition: 'all 0.15s ease',
               }}
               onMouseEnter={(e) => {
                 if (!isActive(item.path)) {
-                  e.currentTarget.style.background = '#0a0a0a'
-                  e.currentTarget.style.color = '#f59e0b'
+                  e.currentTarget.style.background = '#0B1220'
+                  e.currentTarget.style.color = '#2DD4BF'
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isActive(item.path)) {
                   e.currentTarget.style.background = 'transparent'
-                  e.currentTarget.style.color = item.path === '/logout' ? '#F09595' : '#6ee7b7'
+                  e.currentTarget.style.color = item.path === '/logout' ? '#FFFFFF' : '#2DD4BF'
                 }
               }}
             >
@@ -153,7 +153,7 @@ function SuperAdminSidebar() {
                   {item.label}
                 </div>
                 <div style={{
-                  fontSize: '10px', color: isActive(item.path) ? '#f59e0b' : '#3b7a5a',
+                  fontSize: '10px', color: isActive(item.path) ? '#2DD4BF' : 'rgba(255,255,255,0.4)',
                   fontWeight: 300, marginTop: '1px', whiteSpace: 'nowrap',
                   overflow: 'hidden', textOverflow: 'ellipsis',
                 }}>
@@ -165,8 +165,8 @@ function SuperAdminSidebar() {
         </div>
 
         <div style={{
-          padding: '0.75rem 1rem', borderTop: '1px solid #f59e0b',
-          fontSize: '11px', color: '#f59e0b', textAlign: 'center',
+          padding: '0.75rem 1rem', borderTop: '1px solid #2DD4BF',
+          fontSize: '11px', color: '#2DD4BF', textAlign: 'center',
         }}>
           <p>Super Admin v1.0 </p>
         </div>
@@ -175,27 +175,27 @@ function SuperAdminSidebar() {
       <style>{`
         .desktop-toggle { display: flex; }
         .mobile-hamburger { display: none; }
-        
+
         @media (max-width: 768px) {
           .desktop-toggle { display: none !important; }
           .mobile-hamburger { display: flex !important; }
-          
+
           .main-content {
             margin-left: 0 !important;
             padding-top: 60px !important;
           }
-          
+
           .main-content > nav:first-child {
             position: relative !important;
             top: auto !important;
           }
         }
-        
+
         @media (min-width: 769px) {
           .main-content {
             margin-left: 48px !important;
           }
-          
+
           .main-content > nav:first-child {
             padding-left: 40px !important;
           }

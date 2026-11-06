@@ -15,12 +15,12 @@ const QUESTIONS = [
   {
     id: 'frequency',
     title: 'How often do you gamble?',
-    subtitle: 'Be honest — this helps us personalize your experience',
+    subtitle: 'Be honest â€” this helps us personalize your experience',
     options: [
       { value: 'daily', label: 'Daily', emoji: '', desc: 'Most days of the week' },
       { value: 'weekly', label: 'Weekly', emoji: '', desc: 'A few times per week' },
       { value: 'monthly', label: 'Monthly', emoji: '', desc: 'A few times per month' },
-      { value: 'rarely', label: 'Rarely', emoji: '⏰', desc: 'Once in a while' },
+      { value: 'rarely', label: 'Rarely', emoji: 'â°', desc: 'Once in a while' },
     ]
   },
   {
@@ -179,15 +179,15 @@ export default function Onboarding() {
     else if (impacts.length >= 1) s += 2
 
     let riskLevel, riskColor, riskEmoji, riskLabel
-    if (s >= 7) { riskLevel = 'high'; riskColor = '#F09595'; riskEmoji = ''; riskLabel = 'Significant Risk' }
-    else if (s >= 4) { riskLevel = 'medium'; riskColor = '#FAC775'; riskEmoji = ''; riskLabel = 'Moderate Risk' }
-    else { riskLevel = 'low'; riskColor = '#6ee7b7'; riskEmoji = ''; riskLabel = 'Lower Risk' }
+    if (s >= 7) { riskLevel = 'high'; riskColor = '#FFFFFF'; riskEmoji = ''; riskLabel = 'Significant Risk' }
+    else if (s >= 4) { riskLevel = 'medium'; riskColor = '#7DBDEE'; riskEmoji = ''; riskLabel = 'Moderate Risk' }
+    else { riskLevel = 'low'; riskColor = '#2DD4BF'; riskEmoji = ''; riskLabel = 'Lower Risk' }
 
     const recs = []
     if (s >= 7) {
       recs.push({ icon: '', text: 'Start with CBT Module 1: Understanding Your Gambling', action: '/cbt' })
-      recs.push({ icon: '', text: 'Log your first diary entry today — awareness is the first step', action: '/diary' })
-      recs.push({ icon: '🆘', text: 'Save emergency helplines — reaching out is strength', action: '/resources' })
+      recs.push({ icon: '', text: 'Log your first diary entry today â€” awareness is the first step', action: '/diary' })
+      recs.push({ icon: 'ðŸ†˜', text: 'Save emergency helplines â€” reaching out is strength', action: '/resources' })
     } else if (s >= 4) {
       recs.push({ icon: '', text: 'Track your patterns with the daily diary', action: '/diary' })
       recs.push({ icon: '', text: 'Explore the Urge Toolkit for coping strategies', action: '/urge-toolkit' })
@@ -195,7 +195,7 @@ export default function Onboarding() {
     } else {
       recs.push({ icon: '', text: 'Start with a daily diary entry to build awareness', action: '/diary' })
       recs.push({ icon: '', text: 'Join The Circle to connect with others on this journey', action: '/circle' })
-      recs.push({ icon: '', text: 'Set a small goal — every clean day counts', action: '/dashboard' })
+      recs.push({ icon: '', text: 'Set a small goal â€” every clean day counts', action: '/dashboard' })
     }
 
     return {
@@ -257,47 +257,47 @@ export default function Onboarding() {
   //  Results Screen
   if (step >= QUESTIONS.length) {
     return (
-      <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-        <div style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '16px', padding: '2.5rem 2rem', maxWidth: '500px', width: '100%', textAlign: 'center', animation: 'fadeIn 0.5s ease-out' }}>
+      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+        <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2.5rem 2rem', maxWidth: '500px', width: '100%', textAlign: 'center', animation: 'fadeIn 0.5s ease-out' }}>
           <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
-          <h2 style={{ color: '#f59e0b', fontFamily: "'Playfair Display', serif", fontSize: '22px', marginBottom: '8px' }}>Your journey begins</h2>
+          <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif", fontSize: '22px', marginBottom: '8px' }}>Your journey begins</h2>
 
-          <div style={{ background: '#041f13', borderRadius: '12px', padding: '16px', margin: '16px 0', border: `2px solid ${risk.color}` }}>
+          <div style={{ background: '#0B1220', borderRadius: '12px', padding: '16px', margin: '16px 0', border: `2px solid ${risk.color}` }}>
             <span style={{ fontSize: '32px' }}>{risk.emoji}</span>
             <p style={{ color: risk.color, fontSize: '14px', fontWeight: 600, margin: '8px 0 4px' }}>{risk.label}</p>
-            <p style={{ color: '#3b7a5a', fontSize: '12px' }}>Based on your answers, we've personalized your experience.</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>Based on your answers, we've personalized your experience.</p>
           </div>
 
           {validationWarning && (
-            <div role="alert" style={{ color: '#F09595', border: '1px solid #F09595', background: '#791F1F22', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', marginBottom: '16px' }}>
+            <div role="alert" style={{ color: '#FFFFFF', border: '1px solid #FFFFFF', background: 'rgba(255,255,255,0.13)', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', marginBottom: '16px' }}>
               {validationWarning}
             </div>
           )}
 
           <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-            <p style={{ color: '#6ee7b7', fontSize: '13px', fontWeight: 500, marginBottom: '10px' }}> Recommended first steps:</p>
+            <p style={{ color: '#2DD4BF', fontSize: '13px', fontWeight: 500, marginBottom: '10px' }}> Recommended first steps:</p>
             {recommendations.map((r, i) => (
               <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'flex-start', cursor: 'pointer', padding: '8px', borderRadius: '8px', transition: 'background 0.2s' }}
                 onClick={() => r.action && navigate(r.action)}
-                onMouseEnter={e => e.currentTarget.style.background = '#0a3d22'}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.12)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 role="button"
                 tabIndex={0}
                 onKeyDown={e => { if (e.key === 'Enter' && r.action) navigate(r.action) }}
               >
                 <span style={{ fontSize: '18px', flexShrink: 0 }}>{r.icon}</span>
-                <span style={{ color: '#9fe1cb', fontSize: '13px', lineHeight: '1.5' }}>{r.text}</span>
+                <span style={{ color: '#7DBDEE', fontSize: '13px', lineHeight: '1.5' }}>{r.text}</span>
               </div>
             ))}
           </div>
 
           <button className="btn-primary full" onClick={handleFinish} disabled={loading} style={{ padding: '14px', fontSize: '15px' }}>
-            {loading ? <span className="spinner"></span> : 'Start my journey →'}
+            {loading ? <span className="spinner"></span> : 'Start my journey â†’'}
           </button>
-          {saveError && <p role="alert" style={{ color: '#F09595', fontSize: '13px', marginTop: '12px' }}>{saveError}</p>}
+          {saveError && <p role="alert" style={{ color: '#FFFFFF', fontSize: '13px', marginTop: '12px' }}>{saveError}</p>}
 
-          <button onClick={() => { setStep(QUESTIONS.length - 1); triggerAnimate() }} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
-            â† Change my answers
+          <button onClick={() => { setStep(QUESTIONS.length - 1); triggerAnimate() }} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+            Ã¢â€ Â Change my answers
           </button>
         </div>
       </div>
@@ -307,10 +307,10 @@ export default function Onboarding() {
   //  Skip confirmation
   if (skipped) {
     return (
-      <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ width: '32px', height: '32px', border: '3px solid #0a3d22', borderTopColor: '#f59e0b', borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 16px' }}></div>
-          <p style={{ color: '#6ee7b7', fontSize: '14px' }}>Setting up your account...</p>
+          <div style={{ width: '32px', height: '32px', border: '3px solid rgba(255,255,255,0.12)', borderTopColor: '#2DD4BF', borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 16px' }}></div>
+          <p style={{ color: '#2DD4BF', fontSize: '14px' }}>Setting up your account...</p>
         </div>
       </div>
     )
@@ -319,13 +319,13 @@ export default function Onboarding() {
   if (!q) return null
 
   return (
-    <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-      <div style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '16px', padding: '2rem', maxWidth: '500px', width: '100%', animation: 'fadeIn 0.3s ease-out' }}>
+    <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2rem', maxWidth: '500px', width: '100%', animation: 'fadeIn 0.3s ease-out' }}>
         {/* Progress bar */}
         <div style={{ marginBottom: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ color: '#3b7a5a', fontSize: '12px' }}>Question {step + 1} of {QUESTIONS.length}</span>
-            <span style={{ color: '#f59e0b', fontSize: '12px' }}>{Math.round(progress)}%</span>
+            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>Question {step + 1} of {QUESTIONS.length}</span>
+            <span style={{ color: '#2DD4BF', fontSize: '12px' }}>{Math.round(progress)}%</span>
           </div>
           <div className="progress-bar">
             <div className="progress-fill" style={{ width: `${progress}%`, transition: 'width 0.5s ease' }} />
@@ -335,10 +335,10 @@ export default function Onboarding() {
         {/* Question */}
         <div style={{ marginBottom: '24px', animation: animate ? 'fadeIn 0.3s ease-out' : 'none' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-            <h2 style={{ color: '#fff', fontSize: '18px', fontWeight: 600, fontFamily: "'Inter', sans-serif", margin: 0 }}>{q.title}</h2>
-            {q.multi && <span style={{ color: '#3b7a5a', fontSize: '11px', background: '#041f13', padding: '2px 8px', borderRadius: '100px' }}>{(answers[q.id] || []).length} selected</span>}
+            <h2 style={{ color: '#FFFFFF', fontSize: '18px', fontWeight: 600, fontFamily: "'Inter', sans-serif", margin: 0 }}>{q.title}</h2>
+            {q.multi && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', background: '#0B1220', padding: '2px 8px', borderRadius: '100px' }}>{(answers[q.id] || []).length} selected</span>}
           </div>
-          <p style={{ color: '#3b7a5a', fontSize: '13px', marginBottom: '20px' }}>{q.subtitle}</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginBottom: '20px' }}>{q.subtitle}</p>
 
           {/* Options */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -352,8 +352,8 @@ export default function Onboarding() {
                   aria-checked={selected}
                   style={{
                     width: '100%', padding: '14px 16px', borderRadius: '12px',
-                    border: selected ? '2px solid #f59e0b' : '1px solid #0a3d22',
-                    background: selected ? '#0a3d22' : '#041f13',
+                    border: selected ? '2px solid #2DD4BF' : '1px solid rgba(255,255,255,0.12)',
+                    background: selected ? 'rgba(255,255,255,0.12)' : '#0B1220',
                     cursor: 'pointer', textAlign: 'left',
                     display: 'flex', alignItems: 'center', gap: '12px',
                     transition: 'all 0.2s', fontFamily: "'Inter', sans-serif",
@@ -363,10 +363,10 @@ export default function Onboarding() {
                 >
                   <span style={{ fontSize: '24px', flexShrink: 0 }}>{option.emoji}</span>
                   <div style={{ flex: 1 }}>
-                    <p style={{ color: '#e2f5ec', fontSize: '14px', fontWeight: 500, margin: 0 }}>{option.label}</p>
-                    {option.desc && <p style={{ color: '#3b7a5a', fontSize: '12px', margin: '2px 0 0' }}>{option.desc}</p>}
+                    <p style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 500, margin: 0 }}>{option.label}</p>
+                    {option.desc && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '2px 0 0' }}>{option.desc}</p>}
                   </div>
-                  {selected && <span style={{ color: '#f59e0b', fontSize: '18px', marginLeft: 'auto', flexShrink: 0 }}></span>}
+                  {selected && <span style={{ color: '#2DD4BF', fontSize: '18px', marginLeft: 'auto', flexShrink: 0 }}></span>}
                 </button>
               )
             })}
@@ -374,7 +374,7 @@ export default function Onboarding() {
 
           {/* Multi-select helper */}
           {q.multi && (answers[q.id] || []).length === 0 && (
-            <p style={{ color: '#3b7a5a', fontSize: '11px', marginTop: '10px', textAlign: 'center' }}>Tap to select — you can choose multiple</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '10px', textAlign: 'center' }}>Tap to select â€” you can choose multiple</p>
           )}
         </div>
 
@@ -382,7 +382,7 @@ export default function Onboarding() {
         <div style={{ display: 'flex', gap: '8px' }}>
           {step > 0 && (
             <button onClick={prevStep} className="btn-ghost" style={{ flex: 1, padding: '14px', fontSize: '15px' }}>
-              â† Back
+              Ã¢â€ Â Back
             </button>
           )}
           <button
@@ -390,16 +390,16 @@ export default function Onboarding() {
             onClick={step < QUESTIONS.length - 1 ? nextStep : () => setStep(QUESTIONS.length)}
             style={{ padding: '14px', fontSize: '15px', flex: step > 0 ? 2 : 1 }}
           >
-            {step < QUESTIONS.length - 1 ? 'Next →' : 'See my results →'}
+            {step < QUESTIONS.length - 1 ? 'Next â†’' : 'See my results â†’'}
           </button>
         </div>
 
         {/* Skip */}
-        <button onClick={handleSkip} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+        <button onClick={handleSkip} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
           Skip for now
         </button>
 
-        <p style={{ color: '#1d5c38', fontSize: '10px', textAlign: 'center', marginTop: '8px' }}>
+        <p style={{ color: '#7DBDEE', fontSize: '10px', textAlign: 'center', marginTop: '8px' }}>
           Your answers help us personalize your experience. You can change them later.
         </p>
       </div>

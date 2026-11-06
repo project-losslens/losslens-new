@@ -13,7 +13,7 @@ const MILESTONE_DISPLAY_DURATION = 8000
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
   toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#1d5c38;color:#6ee7b7;padding:10px 20px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(0,0,0,0.4);border:1px solid #3b7a5a;white-space:nowrap`
+  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
   document.body.appendChild(toast)
   setTimeout(() => toast.remove(), duration)
 }
@@ -172,7 +172,7 @@ export default function MonthlyMirrorPage() {
         milestoneTimerRef.current = setTimeout(() => { if (mountedRef.current) setMilestone(null) }, MILESTONE_DISPLAY_DURATION)
       }
 
-      //  Auto-sync pending — but only once, with guard
+      //  Auto-sync pending â€” but only once, with guard
       if (localData.length > 0 && !syncInProgressRef.current) {
         syncInProgressRef.current = true
         await autoSyncPending(localData, localKey)
@@ -181,7 +181,7 @@ export default function MonthlyMirrorPage() {
     } catch (err) { console.error('Load recordings error:', err) }
   }
 
-  //  Fixed autoSyncPending — no infinite loop
+  //  Fixed autoSyncPending â€” no infinite loop
   const autoSyncPending = async (localData, localKey) => {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session || !localData || localData.length === 0) return
@@ -332,7 +332,7 @@ export default function MonthlyMirrorPage() {
       } catch (err) { error = err; retries++ }
     }
 
-    //  Fallback to localStorage — but check size first
+    //  Fallback to localStorage â€” but check size first
     if (blob.size < MAX_STORAGE_SIZE) {
       try {
         const reader = new FileReader()
@@ -450,8 +450,8 @@ export default function MonthlyMirrorPage() {
   const canDeleteSynced = userRole === 'admin' || userRole === 'super_admin'
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ display: 'flex', gap: '8px' }}>{[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}</div>
+    <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', gap: '8px' }}>{[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}</div>
     </div>
   )
 
@@ -459,23 +459,23 @@ export default function MonthlyMirrorPage() {
     <div className="root" style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0, overflowX: 'hidden' }} className="main-content">
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: '#041f13', borderBottom: '1px solid #0a3d22', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
+        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}> Monthly Mirror</h1>
-            <p style={{ fontSize: '11px', color: '#3b7a5a', margin: '2px 0 0' }}>{syncedRecordings.length + pendingRecordings.length} recordings</p>
+            <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Monthly Mirror</h1>
+            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{syncedRecordings.length + pendingRecordings.length} recordings</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <button onClick={() => navigateMonth(-1)} style={{ background: 'transparent', border: '1px solid #0a3d22', color: '#6ee7b7', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', minWidth: '36px' }} aria-label="Previous month">←</button>
-            <span style={{ color: '#f59e0b', fontSize: '12px', fontWeight: 500, minWidth: '90px', textAlign: 'center' }}>{monthLabel}</span>
-            <button onClick={() => navigateMonth(1)} disabled={isCurrentMonth} style={{ background: 'transparent', border: '1px solid #0a3d22', color: isCurrentMonth ? '#1d5c38' : '#6ee7b7', padding: '6px 10px', borderRadius: '6px', cursor: isCurrentMonth ? 'default' : 'pointer', fontSize: '14px', minWidth: '36px', opacity: isCurrentMonth ? 0.4 : 1 }} aria-label="Next month">→</button>
+            <button onClick={() => navigateMonth(-1)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', minWidth: '36px' }} aria-label="Previous month">â†</button>
+            <span style={{ color: '#2DD4BF', fontSize: '12px', fontWeight: 500, minWidth: '90px', textAlign: 'center' }}>{monthLabel}</span>
+            <button onClick={() => navigateMonth(1)} disabled={isCurrentMonth} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: isCurrentMonth ? '#7DBDEE' : '#2DD4BF', padding: '6px 10px', borderRadius: '6px', cursor: isCurrentMonth ? 'default' : 'pointer', fontSize: '14px', minWidth: '36px', opacity: isCurrentMonth ? 0.4 : 1 }} aria-label="Next month">â†’</button>
           </div>
         </nav>
 
         {/* Milestone Banner */}
         {milestone && (
-          <div style={{ background: '#0a3d22', border: '1px solid #3db88a', padding: '10px 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: '#6ee7b7', fontSize: '12px' }}>{milestone.emoji} {milestone.text}</span>
-            <button onClick={() => { setMilestone(null); if (milestoneTimerRef.current) clearTimeout(milestoneTimerRef.current) }} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '16px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Dismiss milestone"></button>
+          <div style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid #2DD4BF', padding: '10px 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: '#2DD4BF', fontSize: '12px' }}>{milestone.emoji} {milestone.text}</span>
+            <button onClick={() => { setMilestone(null); if (milestoneTimerRef.current) clearTimeout(milestoneTimerRef.current) }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '16px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Dismiss milestone"></button>
           </div>
         )}
 
@@ -483,12 +483,12 @@ export default function MonthlyMirrorPage() {
 
           {/* Review Mode */}
           {reviewMode && reviewBlob && (
-            <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: '#f59e0b', textAlign: 'center' }}>
-              <h3 style={{ color: '#f59e0b', fontSize: '13px', marginBottom: '0.75rem' }}> Review Your Recording</h3>
-              <div style={{ background: '#000', borderRadius: '10px', overflow: 'hidden', marginBottom: '0.75rem' }}>
+            <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: '#2DD4BF', textAlign: 'center' }}>
+              <h3 style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '0.75rem' }}> Review Your Recording</h3>
+              <div style={{ background: '#0B1220', borderRadius: '10px', overflow: 'hidden', marginBottom: '0.75rem' }}>
                 <video ref={reviewVideoRef} src={URL.createObjectURL(reviewBlob)} controls style={{ width: '100%', maxHeight: '300px' }} />
               </div>
-              <p style={{ color: '#3b7a5a', fontSize: '12px', marginBottom: '0.75rem' }}>Duration: {formatTime(recordingTime)}</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '0.75rem' }}>Duration: {formatTime(recordingTime)}</p>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button onClick={handleRetake} className="btn-ghost" style={{ flex: 1, padding: '10px', fontSize: '13px' }}> Retake</button>
                 <button onClick={confirmSave} className="btn-primary" style={{ flex: 1, padding: '10px', fontSize: '13px' }}> Save</button>
@@ -499,31 +499,31 @@ export default function MonthlyMirrorPage() {
           {/* Uploading Progress */}
           {uploading && (
             <div className="dash-section" style={{ marginBottom: '0.75rem', textAlign: 'center' }}>
-              <p style={{ color: '#FAC775', fontSize: '13px', marginBottom: '8px' }}>⏳ Uploading your reflection...</p>
-              <div style={{ height: '4px', background: '#0a3d22', borderRadius: '2px', overflow: 'hidden' }}>
-                <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#f59e0b', transition: 'width 0.3s ease' }} />
+              <p style={{ color: '#7DBDEE', fontSize: '13px', marginBottom: '8px' }}>â³ Uploading your reflection...</p>
+              <div style={{ height: '4px', background: 'rgba(255,255,255,0.12)', borderRadius: '2px', overflow: 'hidden' }}>
+                <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#2DD4BF', transition: 'width 0.3s ease' }} />
               </div>
             </div>
           )}
 
           {/* Prompts */}
           <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-            <p style={{ color: '#f59e0b', fontSize: '11px', marginBottom: '10px', letterSpacing: '0.05em', fontWeight: 600 }}> CHOOSE YOUR REFLECTION PROMPT</p>
+            <p style={{ color: '#2DD4BF', fontSize: '11px', marginBottom: '10px', letterSpacing: '0.05em', fontWeight: 600 }}> CHOOSE YOUR REFLECTION PROMPT</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {prompts.map((p, i) => (
                 <button key={i} onClick={() => setCurrentPrompt(i)} role="radio" aria-checked={currentPrompt === i}
-                  style={{ background: currentPrompt === i ? 'rgba(245,158,11,0.08)' : '#041f13', border: `1px solid ${currentPrompt === i ? '#f59e0b' : '#0a3d22'}`, borderRadius: '10px', padding: currentPrompt === i ? '14px' : '12px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s' }}>
+                  style={{ background: currentPrompt === i ? 'rgba(45,212,191,0.08)' : '#0B1220', border: `1px solid ${currentPrompt === i ? '#2DD4BF' : 'rgba(255,255,255,0.12)'}`, borderRadius: '10px', padding: currentPrompt === i ? '14px' : '12px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
                     <div style={{ flex: 1 }}>
-                      <span style={{ color: '#e2f5ec', fontSize: '13px', fontWeight: currentPrompt === i ? 600 : 400 }}>{p.q}</span>
-                      <p style={{ color: '#3b7a5a', fontSize: '11px', margin: '4px 0 0', lineHeight: '1.4' }}>{p.hint}</p>
+                      <span style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: currentPrompt === i ? 600 : 400 }}>{p.q}</span>
+                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '4px 0 0', lineHeight: '1.4' }}>{p.hint}</p>
                     </div>
-                    {currentPrompt === i && <span style={{ color: '#f59e0b', fontSize: '9px', fontWeight: 600, background: '#0a3d22', padding: '2px 8px', borderRadius: '100px', flexShrink: 0 }}>SELECTED</span>}
+                    {currentPrompt === i && <span style={{ color: '#2DD4BF', fontSize: '9px', fontWeight: 600, background: 'rgba(255,255,255,0.12)', padding: '2px 8px', borderRadius: '100px', flexShrink: 0 }}>SELECTED</span>}
                   </div>
                   {currentPrompt === i && (
-                    <div style={{ marginTop: '10px', padding: '10px 12px', background: '#062616', borderRadius: '8px', border: '1px dashed #1d5c38' }}>
-                      <p style={{ color: '#3b7a5a', fontSize: '10px', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}> Example</p>
-                      <p style={{ color: '#6ee7b7', fontSize: '11px', lineHeight: '1.5', fontStyle: 'italic', margin: 0 }}>{p.example}</p>
+                    <div style={{ marginTop: '10px', padding: '10px 12px', background: 'rgba(255,255,255,0.06)', borderRadius: '8px', border: '1px dashed #7DBDEE' }}>
+                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}> Example</p>
+                      <p style={{ color: '#2DD4BF', fontSize: '11px', lineHeight: '1.5', fontStyle: 'italic', margin: 0 }}>{p.example}</p>
                     </div>
                   )}
                 </button>
@@ -532,18 +532,18 @@ export default function MonthlyMirrorPage() {
           </div>
 
           {/* Record Section */}
-          <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: (syncedRecordings.length + pendingRecordings.length) > 0 ? '#0a3d22' : '#f59e0b' }}>
-            <h3 style={{ color: (syncedRecordings.length + pendingRecordings.length) > 0 ? '#3b7a5a' : '#f59e0b', fontSize: '13px', marginBottom: '0.75rem' }}>
+          <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: (syncedRecordings.length + pendingRecordings.length) > 0 ? 'rgba(255,255,255,0.12)' : '#2DD4BF' }}>
+            <h3 style={{ color: (syncedRecordings.length + pendingRecordings.length) > 0 ? 'rgba(255,255,255,0.4)' : '#2DD4BF', fontSize: '13px', marginBottom: '0.75rem' }}>
               {(syncedRecordings.length + pendingRecordings.length) > 0 ? '+ Add another reflection' : ` Record your ${monthLabel} reflection`}
             </h3>
 
             {!recording && !reviewMode && !uploading && (
               <>
                 {(syncedRecordings.length + pendingRecordings.length) === 0 && (
-                  <div style={{ background: '#000', borderRadius: '10px', minHeight: '180px', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                  <div style={{ background: '#0B1220', borderRadius: '10px', minHeight: '180px', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
                     <span style={{ fontSize: '40px' }}></span>
-                    <p style={{ color: '#6ee7b7', fontSize: '12px', marginTop: '6px' }}>Camera preview will appear here</p>
-                    <p style={{ color: '#3b7a5a', fontSize: '10px', marginTop: '4px' }}>Record up to {Math.floor(MAX_RECORDING_DURATION / 60)} minutes</p>
+                    <p style={{ color: '#2DD4BF', fontSize: '12px', marginTop: '6px' }}>Camera preview will appear here</p>
+                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '4px' }}>Record up to {Math.floor(MAX_RECORDING_DURATION / 60)} minutes</p>
                   </div>
                 )}
                 <button className="btn-primary full" onClick={startRecording} disabled={uploading} style={{ fontSize: '13px', padding: '10px' }}>
@@ -554,16 +554,16 @@ export default function MonthlyMirrorPage() {
 
             {recording && (
               <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
-                <div style={{ background: '#000', borderRadius: '10px', overflow: 'hidden', minHeight: '200px', position: 'relative' }}>
+                <div style={{ background: '#0B1220', borderRadius: '10px', overflow: 'hidden', minHeight: '200px', position: 'relative' }}>
                   <video ref={videoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 <div style={{ position: 'absolute', top: '8px', left: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#F09595', animation: 'pulse 1s infinite' }} aria-hidden="true" />
-                  <span style={{ color: '#F09595', fontSize: '11px', fontWeight: 600 }} aria-label="Recording in progress">Recording...</span>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#FFFFFF', animation: 'pulse 1s infinite' }} aria-hidden="true" />
+                  <span style={{ color: '#FFFFFF', fontSize: '11px', fontWeight: 600 }} aria-label="Recording in progress">Recording...</span>
                 </div>
-                <span style={{ position: 'absolute', top: '8px', right: '8px', color: '#fff', fontSize: '14px', fontWeight: 600, background: 'rgba(0,0,0,0.5)', padding: '2px 8px', borderRadius: '4px' }}>{formatTime(recordingTime)} / {formatTime(MAX_RECORDING_DURATION)}</span>
+                <span style={{ position: 'absolute', top: '8px', right: '8px', color: '#FFFFFF', fontSize: '14px', fontWeight: 600, background: 'rgba(11,18,32,0.5)', padding: '2px 8px', borderRadius: '4px' }}>{formatTime(recordingTime)} / {formatTime(MAX_RECORDING_DURATION)}</span>
                 <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
-                  <button className="btn-primary" style={{ flex: 1, fontSize: '12px', padding: '10px' }} onClick={stopRecording}>⏹ Stop</button>
+                  <button className="btn-primary" style={{ flex: 1, fontSize: '12px', padding: '10px' }} onClick={stopRecording}>â¹ Stop</button>
                   <button className="btn-ghost" style={{ flex: 1, fontSize: '12px', padding: '10px' }} onClick={() => { stopRecording(); cleanup(); setRecording(false); setReviewBlob(null) }}>Cancel</button>
                 </div>
               </div>
@@ -572,30 +572,30 @@ export default function MonthlyMirrorPage() {
 
           {/* Pending Recordings */}
           {pendingRecordings.length > 0 && (
-            <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: '#FAC775' }}>
+            <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: '#7DBDEE' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <h3 style={{ color: '#FAC775', fontSize: '12px', margin: 0 }}>⏳ Pending sync ({pendingRecordings.length})</h3>
+                <h3 style={{ color: '#7DBDEE', fontSize: '12px', margin: 0 }}>â³ Pending sync ({pendingRecordings.length})</h3>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {pendingRecordings.map(r => (
-                  <div key={r.id} style={{ background: '#041f13', border: '1px solid #FAC775', borderRadius: '8px', overflow: 'hidden' }}>
+                  <div key={r.id} style={{ background: '#0B1220', border: '1px solid #7DBDEE', borderRadius: '8px', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px' }}>
-                      <div style={{ width: '64px', height: '44px', borderRadius: '4px', background: '#000', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)}>
-                        <span style={{ fontSize: '20px' }}>⏳</span>
+                      <div style={{ width: '64px', height: '44px', borderRadius: '4px', background: '#0B1220', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)}>
+                        <span style={{ fontSize: '20px' }}>â³</span>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ color: '#e2f5ec', fontSize: '11px', fontWeight: 500, margin: 0 }}>{new Date(r.created_at).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-                        <p style={{ color: '#FAC775', fontSize: '10px', margin: '2px 0' }}>
-                          ⏳ {syncStatus[r._localIndex] || 'Waiting to sync'} · {formatTime(r.duration_seconds)}
+                        <p style={{ color: '#FFFFFF', fontSize: '11px', fontWeight: 500, margin: 0 }}>{new Date(r.created_at).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                        <p style={{ color: '#7DBDEE', fontSize: '10px', margin: '2px 0' }}>
+                          â³ {syncStatus[r._localIndex] || 'Waiting to sync'} Â· {formatTime(r.duration_seconds)}
                         </p>
                       </div>
                       <button onClick={() => retryUpload(r._localIndex)} disabled={uploading}
-                        style={{ padding: '8px 14px', borderRadius: '100px', background: '#FAC775', border: 'none', color: '#041f13', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', minWidth: '60px', minHeight: '44px' }}>
+                        style={{ padding: '8px 14px', borderRadius: '100px', background: '#7DBDEE', border: 'none', color: '#0B1220', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', minWidth: '60px', minHeight: '44px' }}>
                         {uploading ? '...' : 'Sync'}
                       </button>
                     </div>
                     {expandedPlayer === r.id && (
-                      <div style={{ borderTop: '1px solid #FAC775', background: '#000' }}>
+                      <div style={{ borderTop: '1px solid #7DBDEE', background: '#0B1220' }}>
                         <video controls style={{ width: '100%', display: 'block', maxHeight: '250px' }} src={r._localUrl} />
                       </div>
                     )}
@@ -608,32 +608,32 @@ export default function MonthlyMirrorPage() {
           {/* Synced Recordings */}
           {syncedRecordings.length > 0 && (
             <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-              <h3 style={{ color: '#e2f5ec', fontSize: '12px', marginBottom: '0.75rem' }}> Your recordings ({syncedRecordings.length})</h3>
+              <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.75rem' }}> Your recordings ({syncedRecordings.length})</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {syncedRecordings.map(r => (
-                  <div key={r.id} style={{ background: '#041f13', border: '1px solid #0a3d22', borderRadius: '8px', overflow: 'hidden' }}>
+                  <div key={r.id} style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px' }}>
-                      <div style={{ width: '64px', height: '44px', borderRadius: '4px', background: '#000', flexShrink: 0, position: 'relative', overflow: 'hidden', cursor: 'pointer' }} onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)}>
+                      <div style={{ width: '64px', height: '44px', borderRadius: '4px', background: '#0B1220', flexShrink: 0, position: 'relative', overflow: 'hidden', cursor: 'pointer' }} onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)}>
                         <video src={getPublicUrl(r.storage_path)} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} preload="metadata" muted playsInline />
-                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)' }}>
-                          <span style={{ fontSize: '16px' }}>▶</span>
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(11,18,32,0.3)' }}>
+                          <span style={{ fontSize: '16px' }}>â–¶</span>
                         </div>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ color: '#e2f5ec', fontSize: '11px', fontWeight: 500, margin: 0 }}>{new Date(r.created_at).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                        <p style={{ color: '#FFFFFF', fontSize: '11px', fontWeight: 500, margin: 0 }}>{new Date(r.created_at).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                          <span style={{ color: '#3db88a', fontSize: '9px', background: '#0a3d22', padding: '1px 6px', borderRadius: '100px' }}> Synced</span>
-                          <span style={{ color: '#3b7a5a', fontSize: '10px' }}>{formatTime(r.duration_seconds)}</span>
+                          <span style={{ color: '#2DD4BF', fontSize: '9px', background: 'rgba(255,255,255,0.12)', padding: '1px 6px', borderRadius: '100px' }}> Synced</span>
+                          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{formatTime(r.duration_seconds)}</span>
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '3px', flexShrink: 0 }}>
-                        <button onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)} style={{ background: expandedPlayer === r.id ? '#0a3d22' : 'transparent', border: '1px solid #0a3d22', color: '#6ee7b7', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label={expandedPlayer === r.id ? 'Collapse video' : 'Expand video'}>{expandedPlayer === r.id ? '▼' : '▶'}</button>
-                        <button onClick={() => handleDownload(getPublicUrl(r.storage_path), `precious-${activeMonth}-reflection.webm`)} style={{ background: 'transparent', border: '1px solid #0a3d22', color: '#6ee7b7', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Download" aria-label="Download recording">⬇</button>
-                        <button onClick={() => handleDelete(r.id, r.storage_path)} style={{ background: 'transparent', border: '1px solid #3a1010', color: '#F09595', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Delete" aria-label="Delete recording"></button>
+                        <button onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)} style={{ background: expandedPlayer === r.id ? 'rgba(255,255,255,0.12)' : 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label={expandedPlayer === r.id ? 'Collapse video' : 'Expand video'}>{expandedPlayer === r.id ? 'â–¼' : 'â–¶'}</button>
+                        <button onClick={() => handleDownload(getPublicUrl(r.storage_path), `precious-${activeMonth}-reflection.webm`)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Download" aria-label="Download recording">â¬‡</button>
+                        <button onClick={() => handleDelete(r.id, r.storage_path)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Delete" aria-label="Delete recording"></button>
                       </div>
                     </div>
                     {expandedPlayer === r.id && (
-                      <div style={{ borderTop: '1px solid #0a3d22', background: '#000' }}>
+                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.12)', background: '#0B1220' }}>
                         <video controls autoPlay style={{ width: '100%', display: 'block', maxHeight: '300px' }} src={getPublicUrl(r.storage_path)} />
                       </div>
                     )}
@@ -645,29 +645,29 @@ export default function MonthlyMirrorPage() {
 
           {/* Stats */}
           <div className="dash-section">
-            <h3 style={{ color: '#e2f5ec', fontSize: '12px', marginBottom: '0.5rem' }}> Your journey</h3>
+            <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.5rem' }}> Your journey</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: recordingsPerMonth.length > 0 ? '10px' : '0' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#041f13', border: '2px solid #3db88a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ color: '#3db88a', fontSize: '18px', fontWeight: 700 }}>{totalRecordings}</span>
-                <span style={{ color: '#3b7a5a', fontSize: '8px' }}>videos</span>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#0B1220', border: '2px solid #2DD4BF', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ color: '#2DD4BF', fontSize: '18px', fontWeight: 700 }}>{totalRecordings}</span>
+                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '8px' }}>videos</span>
               </div>
               <div>
-                <p style={{ color: '#9fe1cb', fontSize: '11px', margin: 0 }}>
+                <p style={{ color: '#7DBDEE', fontSize: '11px', margin: 0 }}>
                   {totalRecordings === 0 ? 'No recordings yet. Start today!' : totalRecordings === 1 ? 'Your journey starts here.' : `You've recorded ${totalRecordings} reflections.`}
                 </p>
-                {firstRecordingDate && <p style={{ color: '#3b7a5a', fontSize: '10px', margin: '3px 0 0' }}>Since {new Date(firstRecordingDate).toLocaleDateString('en-KE', { month: 'long', year: 'numeric' })}</p>}
+                {firstRecordingDate && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', margin: '3px 0 0' }}>Since {new Date(firstRecordingDate).toLocaleDateString('en-KE', { month: 'long', year: 'numeric' })}</p>}
               </div>
             </div>
             {recordingsPerMonth.length > 0 && (
               <div>
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: '3px', height: '30px' }}>
                   {recordingsPerMonth.map(([month, count]) => (
-                    <div key={month} style={{ flex: 1, height: `${(count/sparkMax)*26+4}px`, background: month === activeMonth ? '#f59e0b' : '#3db88a', borderRadius: '2px 2px 0 0', opacity: 0.8 }} title={`${count} recording${count !== 1 ? 's' : ''}`} />
+                    <div key={month} style={{ flex: 1, height: `${(count/sparkMax)*26+4}px`, background: month === activeMonth ? '#2DD4BF' : '#2DD4BF', borderRadius: '2px 2px 0 0', opacity: 0.8 }} title={`${count} recording${count !== 1 ? 's' : ''}`} />
                   ))}
                 </div>
                 <div style={{ display: 'flex', gap: '3px', marginTop: '3px' }}>
                   {recordingsPerMonth.map(([month]) => (
-                    <div key={month} style={{ flex: 1, textAlign: 'center', color: '#1d5c38', fontSize: '8px' }}>
+                    <div key={month} style={{ flex: 1, textAlign: 'center', color: '#7DBDEE', fontSize: '8px' }}>
                       {new Date(month+'-01').toLocaleDateString('en-KE',{month:'short'}).substring(0,3)}
                     </div>
                   ))}
@@ -676,8 +676,8 @@ export default function MonthlyMirrorPage() {
             )}
           </div>
 
-          <p style={{ color: '#1d5c38', fontSize: '10px', textAlign: 'center', fontStyle: 'italic', padding: '0.75rem 0 0' }}>
-             The mirror doesn't judge — it just shows how far you've come.
+          <p style={{ color: '#7DBDEE', fontSize: '10px', textAlign: 'center', fontStyle: 'italic', padding: '0.75rem 0 0' }}>
+             The mirror doesn't judge â€” it just shows how far you've come.
           </p>
         </div>
       </div>

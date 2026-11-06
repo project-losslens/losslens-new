@@ -61,7 +61,7 @@ export async function markAllAsRead(userId) {
 // Subscribe to new notifications (real-time)
 export function subscribeToNotifications(userId, callback) {
   if (!userId) return () => {}
-  
+
   const channel = supabase
     .channel(`notifications_${userId}`)
     .on('postgres_changes', {

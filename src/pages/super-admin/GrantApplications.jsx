@@ -6,10 +6,10 @@ import SuperAdminSidebar from '../../components/SuperAdminSidebar'
 
 //  Constants
 const STATUS_CONFIG = {
-  pending: { color: '#FAC775', bg: '#633806', label: 'Pending', icon: '⏳' },
-  under_review: { color: '#6ee7b7', bg: '#0a3d22', label: 'Under Review', icon: '' },
-  approved: { color: '#3db88a', bg: '#0a3d22', label: 'Approved', icon: '' },
-  rejected: { color: '#F09595', bg: '#791F1F', label: 'Rejected', icon: '' },
+  pending: { color: '#7DBDEE', bg: 'rgba(45,212,191,0.15)', label: 'Pending', icon: 'â³' },
+  under_review: { color: '#2DD4BF', bg: 'rgba(255,255,255,0.12)', label: 'Under Review', icon: '' },
+  approved: { color: '#2DD4BF', bg: 'rgba(255,255,255,0.12)', label: 'Approved', icon: '' },
+  rejected: { color: '#FFFFFF', bg: 'rgba(255,255,255,0.08)', label: 'Rejected', icon: '' },
 }
 
 const STATUSES = ['all', 'pending', 'under_review', 'approved', 'rejected']
@@ -17,7 +17,7 @@ const STATUSES = ['all', 'pending', 'under_review', 'approved', 'rejected']
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
   toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#1d5c38;color:#6ee7b7;padding:10px 20px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(0,0,0,0.4);border:1px solid #3b7a5a;white-space:nowrap`
+  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
   document.body.appendChild(toast)
   setTimeout(() => toast.remove(), duration)
 }
@@ -74,9 +74,9 @@ export default function GrantApplications() {
   }
 
   const formatDate = (ts) => {
-    if (!ts) return '—'
+    if (!ts) return 'â€”'
     try { return new Date(ts).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' }) }
-    catch { return '—' }
+    catch { return 'â€”' }
   }
 
   //  Memoized filtered + sorted
@@ -109,18 +109,18 @@ export default function GrantApplications() {
     fontFamily: "'Inter', sans-serif", fontWeight: 500,
   })
 
-  const inputStyle = { padding: '8px 14px', borderRadius: '100px', background: '#062616', border: '1px solid #0a3d22', color: '#e2f5ec', fontSize: '12px', fontFamily: "'Inter', sans-serif", outline: 'none' }
+  const inputStyle = { padding: '8px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', fontFamily: "'Inter', sans-serif", outline: 'none' }
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#041f13' }}>
+      <div style={{ display: 'flex', minHeight: '100vh', background: '#0B1220' }}>
         <SuperAdminSidebar />
         <div style={{ flex: 1, marginLeft: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="main-content">
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
-              {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
+              {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
             </div>
-            <p style={{ color: '#FAC775', fontSize: '13px' }}>Loading applications...</p>
+            <p style={{ color: '#7DBDEE', fontSize: '13px' }}>Loading applications...</p>
           </div>
         </div>
         <style>{`@keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }`}</style>
@@ -130,12 +130,12 @@ export default function GrantApplications() {
 
   if (error) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#041f13' }}>
+      <div style={{ display: 'flex', minHeight: '100vh', background: '#0B1220' }}>
         <SuperAdminSidebar />
         <div style={{ flex: 1, marginLeft: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="main-content">
           <div style={{ textAlign: 'center' }}>
-            <p style={{ color: '#F09595', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
-            <button onClick={fetchApplications} style={btnStyle('transparent', '#F09595', '#F09595')}>Retry</button>
+            <p style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
+            <button onClick={fetchApplications} style={btnStyle('transparent', '#FFFFFF', '#FFFFFF')}>Retry</button>
           </div>
         </div>
       </div>
@@ -143,16 +143,16 @@ export default function GrantApplications() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#041f13' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#0B1220' }}>
       <SuperAdminSidebar />
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#041f13', borderBottom: '2px solid #f59e0b', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
+        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid #2DD4BF', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#f59e0b', fontFamily: "'Inter', sans-serif", margin: 0 }}> Grant Applications</h1>
-            <p style={{ fontSize: '12px', color: '#FAC775', margin: '2px 0 0' }}>{applications.length} applications · {counts.pending} pending</p>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#2DD4BF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Grant Applications</h1>
+            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>{applications.length} applications Â· {counts.pending} pending</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchApplications} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #FAC775', color: '#FAC775', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
+            <button onClick={fetchApplications} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #7DBDEE', color: '#7DBDEE', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
           </div>
         </nav>
 
@@ -173,14 +173,14 @@ export default function GrantApplications() {
           {/* Status Tabs */}
           <div style={{ display: 'flex', gap: '6px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
             {STATUSES.map(s => {
-              const config = STATUS_CONFIG[s] || { color: '#6ee7b7', bg: '#0a3d22', label: 'All', icon: '' }
+              const config = STATUS_CONFIG[s] || { color: '#2DD4BF', bg: 'rgba(255,255,255,0.12)', label: 'All', icon: '' }
               return (
                 <button key={s} onClick={() => setFilter(s)}
                   style={{
                     padding: '8px 16px', borderRadius: '100px',
-                    border: `1px solid ${filter === s ? config.color : '#0a3d22'}`,
+                    border: `1px solid ${filter === s ? config.color : 'rgba(255,255,255,0.12)'}`,
                     background: filter === s ? config.bg : 'transparent',
-                    color: filter === s ? config.color : '#3b7a5a',
+                    color: filter === s ? config.color : 'rgba(255,255,255,0.4)',
                     fontSize: '12px', fontWeight: filter === s ? 600 : 400,
                     cursor: 'pointer', fontFamily: "'Inter', sans-serif",
                     transition: 'all 0.2s',
@@ -192,45 +192,45 @@ export default function GrantApplications() {
           </div>
 
           {filteredApplications.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a', background: '#062616', borderRadius: '12px', border: '1px solid #0a3d22' }}>
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
               <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
-              <p style={{ color: '#6ee7b7', fontSize: '14px' }}>{searchQuery ? 'No applications match your search.' : 'No applications found.'}</p>
+              <p style={{ color: '#2DD4BF', fontSize: '14px' }}>{searchQuery ? 'No applications match your search.' : 'No applications found.'}</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {filteredApplications.map(a => {
                 const statusConfig = STATUS_CONFIG[a.status] || STATUS_CONFIG.pending
                 return (
-                  <div key={a.id} style={{ background: '#062616', border: `1px solid ${statusConfig.color}33`, borderRadius: '12px', padding: '16px', transition: 'border-color 0.2s' }}
+                  <div key={a.id} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${statusConfig.color}33`, borderRadius: '12px', padding: '16px', transition: 'border-color 0.2s' }}
                     onMouseEnter={e => e.currentTarget.style.borderColor = statusConfig.color}
                     onMouseLeave={e => e.currentTarget.style.borderColor = `${statusConfig.color}33`}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
                       <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
-                          <span style={{ color: '#e2f5ec', fontSize: '14px', fontWeight: 600 }}>{a.organization_name || 'Unknown Organization'}</span>
+                          <span style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 600 }}>{a.organization_name || 'Unknown Organization'}</span>
                           <span style={{ background: statusConfig.bg, color: statusConfig.color, padding: '3px 10px', borderRadius: '100px', fontSize: '10px', border: `1px solid ${statusConfig.color}33` }}>
                             {statusConfig.icon} {statusConfig.label}
                           </span>
                         </div>
-                        <p style={{ color: '#3b7a5a', fontSize: '12px', margin: '0 0 4px' }}>
-                          {a.contact_name} · {a.contact_email}
+                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>
+                          {a.contact_name} Â· {a.contact_email}
                         </p>
-                        <p style={{ color: '#f59e0b', fontSize: '16px', fontWeight: 700, fontFamily: "'Playfair Display', serif", margin: '0 0 4px' }}>
+                        <p style={{ color: '#2DD4BF', fontSize: '16px', fontWeight: 700, fontFamily: "'Playfair Display', serif", margin: '0 0 4px' }}>
                           {formatCurrency(a.amount_requested)}
                         </p>
-                        <p style={{ color: '#3b7a5a', fontSize: '11px', margin: '0 0 4px' }}>
+                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 4px' }}>
                           Submitted: {formatDate(a.created_at)}
-                          {a.reviewed_at && ` · Reviewed: ${formatDate(a.reviewed_at)}`}
+                          {a.reviewed_at && ` Â· Reviewed: ${formatDate(a.reviewed_at)}`}
                         </p>
                         {a.purpose && (
-                          <p style={{ color: '#9fe1cb', fontSize: '12px', margin: '6px 0 0', lineHeight: '1.5' }}>
+                          <p style={{ color: '#7DBDEE', fontSize: '12px', margin: '6px 0 0', lineHeight: '1.5' }}>
                             {a.purpose.length > 200 ? (
-                              <span title={a.purpose}>{a.purpose.slice(0, 200)}…</span>
+                              <span title={a.purpose}>{a.purpose.slice(0, 200)}â€¦</span>
                             ) : a.purpose}
                           </p>
                         )}
                         {a.rejection_reason && (
-                          <p style={{ color: '#F09595', fontSize: '12px', margin: '6px 0 0', padding: '8px 12px', background: '#3a1010', borderRadius: '6px', border: '1px solid #791F1F' }}>
+                          <p style={{ color: '#FFFFFF', fontSize: '12px', margin: '6px 0 0', padding: '8px 12px', background: 'rgba(255,255,255,0.08)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)' }}>
                              Rejection reason: {a.rejection_reason}
                           </p>
                         )}
@@ -238,19 +238,19 @@ export default function GrantApplications() {
                     </div>
 
                     {(a.status === 'pending' || a.status === 'under_review') && (
-                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px', paddingTop: '10px', borderTop: '1px solid #0a3d22' }}>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.12)' }}>
                         {a.status === 'pending' && (
                           <button onClick={() => updateStatus(a.id, 'under_review')} disabled={!!actionLoading}
-                            style={btnStyle('transparent', '#6ee7b7', '#6ee7b7')}>
+                            style={btnStyle('transparent', '#2DD4BF', '#2DD4BF')}>
                             {actionLoading === `${a.id}-under_review` ? '...' : ' Mark Under Review'}
                           </button>
                         )}
                         <button onClick={() => updateStatus(a.id, 'approved')} disabled={!!actionLoading}
-                          style={btnStyle('transparent', '#3db88a', '#3db88a')}>
+                          style={btnStyle('transparent', '#2DD4BF', '#2DD4BF')}>
                           {actionLoading === `${a.id}-approved` ? '...' : ' Approve'}
                         </button>
                         <button onClick={() => setShowRejectModal(a)} disabled={!!actionLoading}
-                          style={btnStyle('transparent', '#F09595', '#791F1F')}>
+                          style={btnStyle('transparent', '#FFFFFF', 'rgba(255,255,255,0.08)')}>
                           {actionLoading === `${a.id}-rejected` ? '...' : ' Reject'}
                         </button>
                       </div>
@@ -265,24 +265,24 @@ export default function GrantApplications() {
 
       {/* Rejection Reason Modal */}
       {showRejectModal && (
-        <div onClick={() => { setShowRejectModal(null); setRejectReason('') }} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
-          <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '1px solid #791F1F', maxWidth: '420px', width: '100%' }}>
-            <h3 style={{ color: '#F09595', fontSize: '16px', margin: '0 0 4px' }}> Reject Application</h3>
-            <p style={{ color: '#6ee7b7', fontSize: '13px', marginBottom: '16px' }}>
-              <strong style={{ color: '#f59e0b' }}>"{showRejectModal.organization_name}"</strong> · {formatCurrency(showRejectModal.amount_requested)}
+        <div onClick={() => { setShowRejectModal(null); setRejectReason('') }} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '420px', width: '100%' }}>
+            <h3 style={{ color: '#FFFFFF', fontSize: '16px', margin: '0 0 4px' }}> Reject Application</h3>
+            <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '16px' }}>
+              <strong style={{ color: '#2DD4BF' }}>"{showRejectModal.organization_name}"</strong> Â· {formatCurrency(showRejectModal.amount_requested)}
             </p>
-            <label style={{ color: '#3b7a5a', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Rejection Reason</label>
+            <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Rejection Reason</label>
             <textarea
               value={rejectReason}
               onChange={e => setRejectReason(e.target.value)}
               rows={3}
               placeholder="Explain why this application is being rejected..."
-              style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#041f13', border: '1px solid #0a3d22', color: '#e2f5ec', fontSize: '13px', fontFamily: "'Inter', sans-serif", resize: 'vertical', boxSizing: 'border-box', outline: 'none', marginBottom: '16px' }}
+              style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '13px', fontFamily: "'Inter', sans-serif", resize: 'vertical', boxSizing: 'border-box', outline: 'none', marginBottom: '16px' }}
             />
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => { setShowRejectModal(null); setRejectReason('') }} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid #0a3d22', color: '#3b7a5a', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
+              <button onClick={() => { setShowRejectModal(null); setRejectReason('') }} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
               <button onClick={() => updateStatus(showRejectModal.id, 'rejected', rejectReason.trim() || 'No reason provided')} disabled={!!actionLoading}
-                style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#791F1F', border: 'none', color: '#F09595', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: '#FFFFFF', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
                 {actionLoading === `${showRejectModal.id}-rejected` ? '...' : 'Confirm Reject'}
               </button>
             </div>

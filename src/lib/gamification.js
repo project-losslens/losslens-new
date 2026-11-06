@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 
-// ─── Check and award badges ───
+// â”€â”€â”€ Check and award badges â”€â”€â”€
 export async function checkBadges(userId) {
   if (!userId) return []
 
@@ -101,9 +101,9 @@ export async function checkBadges(userId) {
     if (badgeFetchError) console.error('Badge fetch error:', badgeFetchError)
 
     const coinsEarned = newBadges.length * 10
-    const { error: coinError } = await supabase.rpc('add_recovery_coins', { 
-      uid: userId, 
-      amount: coinsEarned 
+    const { error: coinError } = await supabase.rpc('add_recovery_coins', {
+      uid: userId,
+      amount: coinsEarned
     })
 
     if (coinError) console.error('Coin award error:', coinError)
@@ -120,7 +120,7 @@ export async function checkBadges(userId) {
   return badgeDetails || []
 }
 
-// ─── Get all earned badges ───
+// â”€â”€â”€ Get all earned badges â”€â”€â”€
 export async function getEarnedBadges(userId) {
   if (!userId) return []
 
@@ -148,7 +148,7 @@ export async function getEarnedBadges(userId) {
   return data || []
 }
 
-// ─── Get all available badges with earned status ───
+// â”€â”€â”€ Get all available badges with earned status â”€â”€â”€
 export async function getAllBadges(userId) {
   const { data: allBadges, error: allError } = await supabase
     .from('badges')
@@ -178,7 +178,7 @@ export async function getAllBadges(userId) {
   }))
 }
 
-// ─── Streak Freeze ───
+// â”€â”€â”€ Streak Freeze â”€â”€â”€
 export async function checkStreakFreeze(userId) {
   if (!userId) return false
 

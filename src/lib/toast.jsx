@@ -19,13 +19,13 @@ function injectStyles() {
   styleInjected = true
   const style = document.createElement('style')
   style.textContent = `
-    @keyframes toastSlideIn { 
-      from { opacity: 0; transform: translateY(20px); } 
-      to { opacity: 1; transform: translateY(0); } 
+    @keyframes toastSlideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    @keyframes toastSlideOut { 
-      from { opacity: 1; transform: translateY(0); } 
-      to { opacity: 0; transform: translateY(-20px); } 
+    @keyframes toastSlideOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-20px); }
     }
   `
   document.head.appendChild(style)
@@ -38,15 +38,15 @@ export function showToast(message, options = {}) {
   const container = getContainer()
   const toast = document.createElement('div')
 
-  const bg = type === 'error' ? '#791F1F' : type === 'warning' ? '#633806' : '#1d5c38'
-  const color = type === 'error' ? '#F09595' : type === 'warning' ? '#FAC775' : '#6ee7b7'
-  const border = type === 'error' ? '#F09595' : type === 'warning' ? '#f59e0b' : '#3b7a5a'
+  const bg = type === 'error' ? 'rgba(255,255,255,0.08)' : type === 'warning' ? 'rgba(45,212,191,0.15)' : '#7DBDEE'
+  const color = type === 'error' ? '#FFFFFF' : type === 'warning' ? '#7DBDEE' : '#2DD4BF'
+  const border = type === 'error' ? '#FFFFFF' : type === 'warning' ? '#2DD4BF' : 'rgba(255,255,255,0.4)'
 
   toast.textContent = message
   toast.style.cssText = `
     background: ${bg}; color: ${color}; padding: 10px 20px;
     border-radius: 100px; font-size: 13px; font-weight: 500;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.4); border: 1px solid ${border};
+    box-shadow: 0 4px 16px rgba(11,18,32,0.4); border: 1px solid ${border};
     animation: toastSlideIn 0.3s ease-out; white-space: nowrap;
     pointer-events: auto; cursor: pointer;
     font-family: 'Inter', sans-serif;

@@ -84,9 +84,9 @@ function Sidebar() {
         aria-expanded={mobileOpen}
         className="mobile-hamburger"
         style={{
-          background: '#062616',
-          border: '1px solid #0a3d22',
-          color: '#6ee7b7',
+          background: 'rgba(255,255,255,0.06)',
+          border: '1px solid rgba(255,255,255,0.12)',
+          color: '#2DD4BF',
         }}
       >
         {mobileOpen ? '' : ''}
@@ -99,7 +99,7 @@ function Sidebar() {
           aria-hidden="true"
           className="sidebar-overlay"
           style={{
-            position: 'fixed', inset: 0, background: 'rgba(4, 31, 19, 0.8)', zIndex: 1050,
+            position: 'fixed', inset: 0, background: 'rgba(11,18,32, 0.8)', zIndex: 1050,
           }}
         />
       )}
@@ -113,9 +113,9 @@ function Sidebar() {
           className="desktop-toggle"
           style={{
             left: collapsed ? '16px' : '260px',
-            background: '#062616',
-            border: '1px solid #0a3d22',
-            color: '#6ee7b7',
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            color: '#2DD4BF',
           }}
         >
           {collapsed ? '' : 'Collapse'}
@@ -127,14 +127,14 @@ function Sidebar() {
         className="sidebar"
         style={{
           left: isMobile ? (mobileOpen ? 0 : '-260px') : (collapsed ? '-260px' : 0),
-          background: '#062616',
-          borderRight: '1px solid #0a3d22',
+          background: 'rgba(255,255,255,0.06)',
+          borderRight: '1px solid rgba(255,255,255,0.12)',
         }}
       >
         <div
           style={{
             padding: '1.25rem 1rem',
-            borderBottom: '1px solid #0a3d22',
+            borderBottom: '1px solid rgba(255,255,255,0.12)',
             marginBottom: '0.5rem',
             display: 'flex',
             justifyContent: 'space-between',
@@ -145,7 +145,7 @@ function Sidebar() {
             style={{
               fontFamily: "'Playfair Display', serif",
               fontSize: '22px',
-              color: '#f59e0b',
+              color: '#2DD4BF',
               fontWeight: 700,
               cursor: 'pointer',
             }}
@@ -171,8 +171,8 @@ function Sidebar() {
                 marginBottom: '2px',
                 borderRadius: '8px',
                 border: 'none',
-                background: isActive(item.path) ? '#0a3d22' : 'transparent',
-                color: item.path === '/logout' ? '#F09595' : isActive(item.path) ? '#f59e0b' : '#6ee7b7',
+                background: isActive(item.path) ? 'rgba(255,255,255,0.12)' : 'transparent',
+                color: item.path === '/logout' ? '#FFFFFF' : isActive(item.path) ? '#2DD4BF' : '#2DD4BF',
                 cursor: 'pointer',
                 fontFamily: "'Inter', sans-serif",
                 fontSize: '13px',
@@ -181,14 +181,14 @@ function Sidebar() {
               }}
               onMouseEnter={(e) => {
                 if (!isActive(item.path)) {
-                  e.currentTarget.style.background = '#041f13'
-                  e.currentTarget.style.color = item.path === '/logout' ? '#F09595' : '#9fe1cb'
+                  e.currentTarget.style.background = '#0B1220'
+                  e.currentTarget.style.color = item.path === '/logout' ? '#FFFFFF' : '#7DBDEE'
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isActive(item.path)) {
                   e.currentTarget.style.background = 'transparent'
-                  e.currentTarget.style.color = item.path === '/logout' ? '#F09595' : '#6ee7b7'
+                  e.currentTarget.style.color = item.path === '/logout' ? '#FFFFFF' : '#2DD4BF'
                 }
               }}
             >
@@ -215,7 +215,7 @@ function Sidebar() {
                 <div
                   style={{
                     fontSize: '10px',
-                    color: isActive(item.path) ? '#f59e0b' : '#3b7a5a',
+                    color: isActive(item.path) ? '#2DD4BF' : 'rgba(255,255,255,0.4)',
                     fontWeight: 300,
                     marginTop: '1px',
                     whiteSpace: 'nowrap',
@@ -233,9 +233,9 @@ function Sidebar() {
         <div
           style={{
             padding: '0.75rem 1rem',
-            borderTop: '1px solid #0a3d22',
+            borderTop: '1px solid rgba(255,255,255,0.12)',
             fontSize: '11px',
-            color: '#3b7a5a',
+            color: 'rgba(255,255,255,0.4)',
             textAlign: 'center',
           }}
         >

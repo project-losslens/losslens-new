@@ -9,8 +9,8 @@ const LOG_LIMIT = 300
 const TABLES = ['all', 'profiles', 'diary_entries', 'events', 'crisis_alerts', 'broadcasts', 'resources', 'groups']
 const ACTIONS = ['all', 'INSERT', 'UPDATE', 'DELETE']
 
-const fmtDateTime = (d) => d ? new Date(d).toLocaleString('en-KE') : '—'
-const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-KE') : '—'
+const fmtDateTime = (d) => d ? new Date(d).toLocaleString('en-KE') : 'â€”'
+const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-KE') : 'â€”'
 
 //  Proper CSV escaping
 function escapeCSV(value) {
@@ -32,7 +32,7 @@ function exportToCSV(logs, filename) {
     l.performed_by || '',
     l.metadata ? JSON.stringify(l.metadata) : '',
   ].map(escapeCSV).join(','))
-  
+
   const csv = [headers.join(','), ...rows].join('\n')
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
@@ -60,11 +60,11 @@ export default function AuditLogs() {
     setError(null)
     try {
       let query = supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(LOG_LIMIT)
-      
+
       //  Server-side filters
       if (filter !== 'all') query = query.eq('table_name', filter)
       if (actionFilter !== 'all') query = query.eq('action', actionFilter)
-      
+
       // Date range
       if (dateRange === 'today') {
         const today = new Date(); today.setHours(0, 0, 0, 0)
@@ -131,17 +131,17 @@ export default function AuditLogs() {
   }, [logs, search])
 
   const actionColor = (action) => {
-    if (action === 'DELETE') return { color: '#F09595', bg: '#791F1F22' }
-    if (action === 'INSERT') return { color: '#6ee7b7', bg: '#0a3d2222' }
-    if (action === 'UPDATE') return { color: '#f59e0b', bg: '#63380622' }
-    return { color: '#9fe1cb', bg: 'transparent' }
+    if (action === 'DELETE') return { color: '#FFFFFF', bg: 'rgba(255,255,255,0.13)' }
+    if (action === 'INSERT') return { color: '#2DD4BF', bg: 'rgba(255,255,255,0.04)' }
+    if (action === 'UPDATE') return { color: '#2DD4BF', bg: 'rgba(45,212,191,0.13)' }
+    return { color: '#7DBDEE', bg: 'transparent' }
   }
 
-  const btnStyle = (isActive, color = '#f59e0b') => ({
+  const btnStyle = (isActive, color = '#2DD4BF') => ({
     padding: '5px 12px', borderRadius: '100px',
-    border: `1px solid ${isActive ? color : '#0a3d22'}`,
-    background: isActive ? '#041f13' : 'transparent',
-    color: isActive ? color : '#3b7a5a',
+    border: `1px solid ${isActive ? color : 'rgba(255,255,255,0.12)'}`,
+    background: isActive ? '#0B1220' : 'transparent',
+    color: isActive ? color : 'rgba(255,255,255,0.4)',
     fontSize: '11px', cursor: 'pointer',
     fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap',
     transition: 'all 0.2s',
@@ -149,14 +149,14 @@ export default function AuditLogs() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#041f13' }}>
+      <div style={{ display: 'flex', minHeight: '100vh', background: '#0B1220' }}>
         <SuperAdminSidebar />
         <div style={{ flex: 1, marginLeft: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="main-content">
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
-              {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
+              {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
             </div>
-            <p style={{ color: '#FAC775', fontSize: '13px' }}>Loading audit logs...</p>
+            <p style={{ color: '#7DBDEE', fontSize: '13px' }}>Loading audit logs...</p>
           </div>
         </div>
         <style>{`@keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }`}</style>
@@ -166,12 +166,12 @@ export default function AuditLogs() {
 
   if (error) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#041f13' }}>
+      <div style={{ display: 'flex', minHeight: '100vh', background: '#0B1220' }}>
         <SuperAdminSidebar />
         <div style={{ flex: 1, marginLeft: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="main-content">
           <div style={{ textAlign: 'center' }}>
-            <p style={{ color: '#F09595', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
-            <button onClick={fetchLogs} style={{ padding: '8px 16px', borderRadius: '8px', background: 'transparent', border: '1px solid #F09595', color: '#F09595', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Retry</button>
+            <p style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
+            <button onClick={fetchLogs} style={{ padding: '8px 16px', borderRadius: '8px', background: 'transparent', border: '1px solid #FFFFFF', color: '#FFFFFF', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Retry</button>
           </div>
         </div>
       </div>
@@ -179,17 +179,17 @@ export default function AuditLogs() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#041f13' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#0B1220' }}>
       <SuperAdminSidebar />
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#041f13', borderBottom: '2px solid #f59e0b', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
+        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid #2DD4BF', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#f59e0b', fontFamily: "'Inter', sans-serif", margin: 0 }}> Audit Logs</h1>
-            <p style={{ fontSize: '12px', color: '#FAC775', margin: '2px 0 0' }}>{logs.length} events · Live monitoring</p>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#2DD4BF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Audit Logs</h1>
+            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>{logs.length} events Â· Live monitoring</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={handleExport} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #6ee7b7', color: '#6ee7b7', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Export CSV</button>
-            <button onClick={fetchLogs} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #FAC775', color: '#FAC775', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
+            <button onClick={handleExport} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Export CSV</button>
+            <button onClick={fetchLogs} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #7DBDEE', color: '#7DBDEE', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
           </div>
         </nav>
 
@@ -197,18 +197,18 @@ export default function AuditLogs() {
           {/* Filters */}
           <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <input type="text" placeholder=" Search logs..." value={search} onChange={e => setSearch(e.target.value)}
-              style={{ flex: 1, minWidth: '200px', maxWidth: '280px', padding: '8px 14px', borderRadius: '100px', background: '#062616', border: '1px solid #0a3d22', color: '#fff', fontSize: '12px', outline: 'none', fontFamily: "'Inter', sans-serif" }} />
-            
+              style={{ flex: 1, minWidth: '200px', maxWidth: '280px', padding: '8px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: "'Inter', sans-serif" }} />
+
             {/* Date Range */}
             <select value={dateRange} onChange={e => setDateRange(e.target.value)}
-              style={{ padding: '8px 14px', borderRadius: '100px', background: '#062616', border: '1px solid #0a3d22', color: '#e2f5ec', fontSize: '12px', fontFamily: "'Inter', sans-serif", cursor: 'pointer', outline: 'none' }}>
+              style={{ padding: '8px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', fontFamily: "'Inter', sans-serif", cursor: 'pointer', outline: 'none' }}>
               <option value="all">All Time</option>
               <option value="today">Today</option>
               <option value="week">This Week</option>
               <option value="month">This Month</option>
             </select>
 
-            <button onClick={toggleExpandAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #0a3d22', color: '#6ee7b7', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>
+            <button onClick={toggleExpandAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>
               {expandedAll ? ' Collapse all' : ' Expand all'}
             </button>
           </div>
@@ -216,16 +216,16 @@ export default function AuditLogs() {
           <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
             {/* Table filter */}
             <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
-              <span style={{ color: '#3b7a5a', fontSize: '11px', marginRight: '4px' }}>Table:</span>
+              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginRight: '4px' }}>Table:</span>
               {TABLES.map(t => (
-                <button key={t} onClick={() => setFilter(t)} style={btnStyle(filter === t, '#6ee7b7')}>
+                <button key={t} onClick={() => setFilter(t)} style={btnStyle(filter === t, '#2DD4BF')}>
                   {t === 'all' ? 'All' : t.replace(/_/g, ' ')}
                 </button>
               ))}
             </div>
             {/* Action filter */}
             <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
-              <span style={{ color: '#3b7a5a', fontSize: '11px', marginRight: '4px' }}>Action:</span>
+              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginRight: '4px' }}>Action:</span>
               {ACTIONS.map(a => (
                 <button key={a} onClick={() => setActionFilter(a)} style={btnStyle(actionFilter === a, actionColor(a).color)}>
                   {a === 'all' ? 'All' : a}
@@ -236,9 +236,9 @@ export default function AuditLogs() {
 
           {/* Log list */}
           {filteredLogs.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: '#3b7a5a', background: '#062616', borderRadius: '12px', border: '1px solid #0a3d22' }}>
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
               <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
-              <p style={{ color: '#6ee7b7', fontSize: '14px' }}>No logs found.</p>
+              <p style={{ color: '#2DD4BF', fontSize: '14px' }}>No logs found.</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -246,27 +246,27 @@ export default function AuditLogs() {
                 const ac = actionColor(log.action)
                 const isExpanded = expandedIds[log.id]
                 return (
-                  <div key={log.id} style={{ background: ac.bg, border: `1px solid ${isExpanded ? ac.color : '#0a3d22'}`, borderRadius: '10px', padding: '12px 16px', transition: 'border-color 0.2s' }}>
+                  <div key={log.id} style={{ background: ac.bg, border: `1px solid ${isExpanded ? ac.color : 'rgba(255,255,255,0.12)'}`, borderRadius: '10px', padding: '12px 16px', transition: 'border-color 0.2s' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: isExpanded ? '8px' : '0' }}>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                        <span style={{ background: '#041f13', color: ac.color, border: `1px solid ${ac.color}33`, padding: '2px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: 600 }}>
+                        <span style={{ background: '#0B1220', color: ac.color, border: `1px solid ${ac.color}33`, padding: '2px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: 600 }}>
                           {log.action}
                         </span>
-                        <span style={{ color: '#f59e0b', fontSize: '12px', fontWeight: 500 }}>{log.table_name?.replace(/_/g, ' ')}</span>
-                        {log.record_id && <span style={{ color: '#3b7a5a', fontSize: '11px', fontFamily: 'monospace' }}>ID: {log.record_id.slice(0, 12)}</span>}
-                        <span style={{ color: '#3b7a5a', fontSize: '11px' }}>{fmtDateTime(log.created_at)}</span>
+                        <span style={{ color: '#2DD4BF', fontSize: '12px', fontWeight: 500 }}>{log.table_name?.replace(/_/g, ' ')}</span>
+                        {log.record_id && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontFamily: 'monospace' }}>ID: {log.record_id.slice(0, 12)}</span>}
+                        <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{fmtDateTime(log.created_at)}</span>
                       </div>
-                      <button onClick={() => toggleExpand(log.id)} style={{ background: 'transparent', border: 'none', color: '#6ee7b7', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
-                        {isExpanded ? '▲ Hide' : '▼ Details'}
+                      <button onClick={() => toggleExpand(log.id)} style={{ background: 'transparent', border: 'none', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+                        {isExpanded ? 'â–² Hide' : 'â–¼ Details'}
                       </button>
                     </div>
                     {isExpanded && (
-                      <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', paddingTop: '8px', borderTop: '1px solid #0a3d22' }}>
-                        {log.performed_by && <span style={{ color: '#6ee7b7', fontSize: '11px' }}> {log.performed_by}</span>}
+                      <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.12)' }}>
+                        {log.performed_by && <span style={{ color: '#2DD4BF', fontSize: '11px' }}> {log.performed_by}</span>}
                         {log.metadata && (
                           <div style={{ flex: 1, minWidth: '200px' }}>
-                            <span style={{ color: '#3b7a5a', fontSize: '11px', fontWeight: 500 }}> Metadata:</span>
-                            <pre style={{ color: '#9fe1cb', fontSize: '11px', margin: '4px 0 0', whiteSpace: 'pre-wrap', wordBreak: 'break-all', background: '#041f13', padding: '8px 10px', borderRadius: '6px', maxHeight: '200px', overflowY: 'auto' }}>
+                            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 500 }}> Metadata:</span>
+                            <pre style={{ color: '#7DBDEE', fontSize: '11px', margin: '4px 0 0', whiteSpace: 'pre-wrap', wordBreak: 'break-all', background: '#0B1220', padding: '8px 10px', borderRadius: '6px', maxHeight: '200px', overflowY: 'auto' }}>
                               {JSON.stringify(log.metadata, null, 2)}
                             </pre>
                           </div>

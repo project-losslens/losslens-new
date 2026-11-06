@@ -6,10 +6,10 @@ import '../../styles/globals.css'
 // Shared Google Icon
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 48 48">
-    <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/>
-    <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.1 18.9 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.4 6.3 14.7z"/>
-    <path fill="#4CAF50" d="M24 44c5.2 0 10-1.9 13.6-5.1l-6.3-5.2C29.4 35.5 26.8 36 24 36c-5.2 0-9.6-3-11.3-7.3l-6.6 5.1C9.5 39.4 16.3 44 24 44z"/>
-    <path fill="#1976D2" d="M43.6 20H24v8h11.3c-.9 2.4-2.5 4.4-4.6 5.8l6.3 5.2C41 35.7 44 30.3 44 24c0-1.3-.1-2.7-.4-4z"/>
+    <path fill="#2DD4BF" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/>
+    <path fill="#7DBDEE" d="M6.3 14.7l6.6 4.8C14.6 15.1 18.9 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.4 6.3 14.7z"/>
+    <path fill="#2DD4BF" d="M24 44c5.2 0 10-1.9 13.6-5.1l-6.3-5.2C29.4 35.5 26.8 36 24 36c-5.2 0-9.6-3-11.3-7.3l-6.6 5.1C9.5 39.4 16.3 44 24 44z"/>
+    <path fill="#7DBDEE" d="M43.6 20H24v8h11.3c-.9 2.4-2.5 4.4-4.6 5.8l6.3 5.2C41 35.7 44 30.3 44 24c0-1.3-.1-2.7-.4-4z"/>
   </svg>
 );
 
@@ -144,8 +144,8 @@ function Login() {
 
   if (checking) {
     return (
-      <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: '32px', height: '32px', border: '3px solid #0a3d22', borderTopColor: '#f59e0b', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }}></div>
+      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '32px', height: '32px', border: '3px solid rgba(255,255,255,0.12)', borderTopColor: '#2DD4BF', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }}></div>
       </div>
     )
   }
@@ -164,21 +164,21 @@ function Login() {
 
           {error && (
             <div role="alert" aria-live="polite" style={{
-              background: cooldown ? '#633806' : '#791F1F',
-              border: `1px solid ${cooldown ? '#f59e0b' : '#F09595'}`,
+              background: cooldown ? 'rgba(45,212,191,0.15)' : 'rgba(255,255,255,0.08)',
+              border: `1px solid ${cooldown ? '#2DD4BF' : '#FFFFFF'}`,
               borderRadius: '8px', padding: '10px 14px',
-              color: cooldown ? '#f59e0b' : '#F09595',
+              color: cooldown ? '#2DD4BF' : '#FFFFFF',
               fontSize: '13px', marginBottom: '1rem'
             }}>
-              {cooldown ? `⏳ ${error} Try again in ${formatCooldown()}.` : error}
+              {cooldown ? `â³ ${error} Try again in ${formatCooldown()}.` : error}
             </div>
           )}
 
           {/* Google Sign-In */}
           <button onClick={handleGoogleLogin} disabled={googleLoading || cooldown} style={{
             width: '100%', padding: '13px', borderRadius: '100px',
-            border: '2px solid #0a3d22', background: '#fff',
-            color: '#1a1a1a', fontSize: '14px', cursor: 'pointer',
+            border: '2px solid rgba(255,255,255,0.12)', background: '#FFFFFF',
+            color: '#0B1220', fontSize: '14px', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             gap: '10px', marginBottom: '1.25rem', fontFamily: "'Inter', sans-serif",
             fontWeight: 500, opacity: (googleLoading || cooldown) ? 0.7 : 1
@@ -187,9 +187,9 @@ function Login() {
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.25rem' }}>
-            <div style={{ flex: 1, height: '1px', background: '#0a3d22' }}></div>
-            <span style={{ fontSize: '11px', color: '#3b7a5a' }}>or sign in with email</span>
-            <div style={{ flex: 1, height: '1px', background: '#0a3d22' }}></div>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.12)' }}></div>
+            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>or sign in with email</span>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.12)' }}></div>
           </div>
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -201,17 +201,17 @@ function Login() {
             <div className="form-group">
               <label htmlFor="password">Password</label>
               <div style={{ position: 'relative' }}>
-                <input id="password" type={showPw ? 'text' : 'password'} autoComplete="current-password" placeholder="••••••••" value={password} onChange={handlePasswordChange} style={{ paddingRight: 44 }} disabled={cooldown} />
-                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#3b7a5a', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? '' : ''}</button>
+                <input id="password" type={showPw ? 'text' : 'password'} autoComplete="current-password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" value={password} onChange={handlePasswordChange} style={{ paddingRight: 44 }} disabled={cooldown} />
+                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? '' : ''}</button>
               </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <input type="checkbox" id="remember" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} style={{ accentColor: '#f59e0b', width: '15px', height: '15px', cursor: 'pointer' }} />
-                <label htmlFor="remember" style={{ fontSize: '12px', color: '#3b7a5a', cursor: 'pointer' }}>Remember me</label>
+                <input type="checkbox" id="remember" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} style={{ accentColor: '#2DD4BF', width: '15px', height: '15px', cursor: 'pointer' }} />
+                <label htmlFor="remember" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>Remember me</label>
               </div>
-              <button type="button" className="forgot" onClick={() => navigate('/forgot-password')} style={{ background: 'none', border: 'none', fontSize: '12px', color: '#3b7a5a', cursor: 'pointer', fontFamily: "'Inter', sans-serif", margin: 0, padding: 0 }}>Forgot password?</button>
+              <button type="button" className="forgot" onClick={() => navigate('/forgot-password')} style={{ background: 'none', border: 'none', fontSize: '12px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: "'Inter', sans-serif", margin: 0, padding: 0 }}>Forgot password?</button>
             </div>
 
             <button className="btn-primary full" type="submit" disabled={loading || cooldown} style={{ opacity: cooldown ? 0.5 : 1 }}>
@@ -221,8 +221,8 @@ function Login() {
 
           <p className="auth-switch">Don't have an account? <span onClick={() => navigate('/signup')}>Sign up free</span></p>
 
-          <div style={{ marginTop: '1.25rem', background: '#0a3d22', border: '1px solid #1d5c38', borderRadius: 8, padding: '10px 14px', textAlign: 'center' }}>
-            <p style={{ fontSize: 12, color: '#6ee7b7' }}>🆘 In crisis? Call NACADA: <strong>1192</strong> (24/7 free)</p>
+          <div style={{ marginTop: '1.25rem', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', borderRadius: 8, padding: '10px 14px', textAlign: 'center' }}>
+            <p style={{ fontSize: 12, color: '#2DD4BF' }}>ðŸ†˜ In crisis? Call NACADA: <strong>1192</strong> (24/7 free)</p>
           </div>
         </div>
       </div>

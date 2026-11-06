@@ -93,13 +93,13 @@ function ProtectedRoute({ children, adminOnly = false, superAdminOnly = false })
 
   if (checking) {
     return (
-      <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
-            {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)
+            {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)
             }
           </div>
-          <p style={{ color: '#3b7a5a', fontSize: '12px' }}>Loading...</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>Loading...</p>
         </div>
         <style>{`@keyframes loadingDot { 0%,100%{opacity:0.3;transform:translateY(0)} 50%{opacity:1;transform:translateY(-6px)} }`}</style>
       </div>
@@ -108,24 +108,24 @@ function ProtectedRoute({ children, adminOnly = false, superAdminOnly = false })
 
   if (sessionExpired) {
     return (
-      <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
           <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
-          <h2 style={{ color: '#f59e0b', fontFamily: "'Playfair Display', serif", fontSize: '22px', marginBottom: '8px' }}>Session Expired</h2>
-          <p style={{ color: '#6ee7b7', fontSize: '14px', marginBottom: '24px', lineHeight: '1.6' }}>
+          <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif", fontSize: '22px', marginBottom: '8px' }}>Session Expired</h2>
+          <p style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '24px', lineHeight: '1.6' }}>
             Your session has expired. Please log in again to continue.
           </p>
-          <button 
+          <button
             onClick={() => {
               localStorage.clear()
               sessionStorage.clear()
               navigate('/login', { replace: true })
             }}
-            style={{ padding: '14px 32px', borderRadius: '100px', background: '#f59e0b', border: 'none', color: '#041f13', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%' }}
+            style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%' }}
           >
             Go to Login
           </button>
-          <p style={{ color: '#3b7a5a', fontSize: '11px', marginTop: '16px' }}>Your data is safe. You just need to sign in again.</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '16px' }}>Your data is safe. You just need to sign in again.</p>
         </div>
       </div>
     )

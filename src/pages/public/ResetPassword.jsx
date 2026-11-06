@@ -58,7 +58,7 @@ function ResetPassword() {
 
   const strengthInfo = useMemo(() => {
     const labels = ['', 'Weak', 'Fair', 'Good', 'Strong']
-    const colors = ['', '#F09595', '#FAC775', '#6ee7b7', '#4CAF50']
+    const colors = ['', '#FFFFFF', '#7DBDEE', '#2DD4BF', '#2DD4BF']
     return { label: labels[strength], color: colors[strength], pct: (strength / 4) * 100 }
   }, [strength])
 
@@ -98,8 +98,8 @@ function ResetPassword() {
   //  Token checking screen
   if (checkingToken) {
     return (
-      <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: '32px', height: '32px', border: '3px solid #0a3d22', borderTopColor: '#f59e0b', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }}></div>
+      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '32px', height: '32px', border: '3px solid rgba(255,255,255,0.12)', borderTopColor: '#2DD4BF', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }}></div>
       </div>
     )
   }
@@ -113,10 +113,10 @@ function ResetPassword() {
         </nav>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}>⏰</span>
+            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}>â°</span>
             <h2 className="auth-title">Link expired</h2>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>{tokenError}</p>
-            <button className="btn-primary full" onClick={() => navigate('/forgot-password')}>Request a new link →</button>
+            <button className="btn-primary full" onClick={() => navigate('/forgot-password')}>Request a new link â†’</button>
           </div>
         </div>
       </div>
@@ -135,8 +135,8 @@ function ResetPassword() {
             <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} role="img" aria-label="Success"></span>
             <h2 className="auth-title">Password updated!</h2>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>Your password has been changed. You'll be redirected to the login page.</p>
-            <button className="btn-primary full" onClick={() => { if (redirectTimer.current) clearTimeout(redirectTimer.current); navigate('/login') }}>Go to login now →</button>
-            <p style={{ color: '#3b7a5a', fontSize: '12px', marginTop: '12px' }}>Redirecting automatically...</p>
+            <button className="btn-primary full" onClick={() => { if (redirectTimer.current) clearTimeout(redirectTimer.current); navigate('/login') }}>Go to login now â†’</button>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginTop: '12px' }}>Redirecting automatically...</p>
           </div>
         </div>
       </div>
@@ -147,7 +147,7 @@ function ResetPassword() {
     <div className="root">
       <nav className="navbar">
         <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
-        <button className="nav-ghost" onClick={() => navigate('/login')}>â† Log in</button>
+        <button className="nav-ghost" onClick={() => navigate('/login')}>Ã¢â€ Â Log in</button>
       </nav>
 
       <div className="auth-container">
@@ -155,7 +155,7 @@ function ResetPassword() {
           <h2 className="auth-title">Reset your password</h2>
           <p className="auth-sub">Choose a strong password you haven't used before.</p>
 
-          {error && <div role="alert" aria-live="polite" style={{ background: '#791F1F', border: '1px solid #F09595', borderRadius: '8px', padding: '10px 14px', color: '#F09595', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
+          {error && <div role="alert" aria-live="polite" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             <div className="form-group">
@@ -176,17 +176,17 @@ function ResetPassword() {
                   type="button"
                   onClick={() => setShowPw(!showPw)}
                   aria-label={showPw ? 'Hide password' : 'Show password'}
-                  style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#3b7a5a', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
                   {showPw ? '' : ''}
                 </button>
               </div>
               {password.length > 0 && (
                 <div style={{ marginTop: '6px' }}>
-                  <div style={{ height: '4px', background: '#0a3d22', borderRadius: '2px', overflow: 'hidden', transition: 'width 0.3s ease' }}>
+                  <div style={{ height: '4px', background: 'rgba(255,255,255,0.12)', borderRadius: '2px', overflow: 'hidden', transition: 'width 0.3s ease' }}>
                     <div style={{ width: `${strengthInfo.pct}%`, height: '100%', background: strengthInfo.color, borderRadius: '2px', transition: 'width 0.3s ease' }} />
                   </div>
-                  <span style={{ fontSize: '11px', color: strengthInfo.color || '#3b7a5a', marginTop: '4px', display: 'block' }}>{strengthInfo.label || 'Type a password'}</span>
+                  <span style={{ fontSize: '11px', color: strengthInfo.color || 'rgba(255,255,255,0.4)', marginTop: '4px', display: 'block' }}>{strengthInfo.label || 'Type a password'}</span>
                 </div>
               )}
             </div>
@@ -202,26 +202,26 @@ function ResetPassword() {
                   placeholder="Re-enter your password"
                   value={confirmPassword}
                   onChange={e => { setConfirmPassword(e.target.value); if (error) setError('') }}
-                  style={{ paddingRight: 44, ...(confirmPassword && password !== confirmPassword ? { borderColor: '#F09595' } : {}) }}
+                  style={{ paddingRight: 44, ...(confirmPassword && password !== confirmPassword ? { borderColor: '#FFFFFF' } : {}) }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPw(!showConfirmPw)}
                   aria-label={showConfirmPw ? 'Hide password' : 'Show password'}
-                  style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#3b7a5a', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
                   {showConfirmPw ? '' : ''}
                 </button>
               </div>
-              {confirmPassword && password !== confirmPassword && <span style={{ fontSize: '11px', color: '#F09595' }}>Passwords do not match</span>}
-              {confirmPassword && password === confirmPassword && <span style={{ fontSize: '11px', color: '#6ee7b7' }}>Passwords match </span>}
+              {confirmPassword && password !== confirmPassword && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Passwords do not match</span>}
+              {confirmPassword && password === confirmPassword && <span style={{ fontSize: '11px', color: '#2DD4BF' }}>Passwords match </span>}
             </div>
 
             {/* Password Requirements Checklist */}
-            <div id="password-requirements" style={{ background: '#041f13', border: '1px solid #1d5c38', borderRadius: '8px', padding: '12px', marginBottom: '1.25rem' }}>
-              <p style={{ color: '#3b7a5a', fontSize: '11px', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Requirements</p>
+            <div id="password-requirements" style={{ background: '#0B1220', border: '1px solid #7DBDEE', borderRadius: '8px', padding: '12px', marginBottom: '1.25rem' }}>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Requirements</p>
               {requirements.map((req, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', fontSize: '12px', color: req.met ? '#6ee7b7' : '#3b7a5a' }}>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', fontSize: '12px', color: req.met ? '#2DD4BF' : 'rgba(255,255,255,0.4)' }}>
                   <span style={{ fontSize: '12px', minWidth: '16px' }}>{req.met ? '' : ''}</span>
                   <span>{req.text}</span>
                 </div>

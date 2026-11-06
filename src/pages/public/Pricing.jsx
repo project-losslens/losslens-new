@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import '../../styles/globals.css'
 
 const FAQS = [
-  { q: 'Is LossLens really free?', a: 'Yes — forever. The Free plan includes all core features: diary, CBT modules, AI companion Oloo, The Circle community, and more. No credit card needed.' },
+  { q: 'Is LossLens really free?', a: 'Yes â€” forever. The Free plan includes all core features: diary, CBT modules, AI companion Oloo, The Circle community, and more. No credit card needed.' },
   { q: 'What does Premium add?', a: 'Premium unlocks advanced features like detailed analytics, priority AI responses, extended video storage, and more. You also directly support keeping LossLens free for everyone.' },
   { q: 'Can I switch plans?', a: 'Absolutely. Upgrade or downgrade anytime. If you downgrade, you keep access to Premium features until the end of your billing period.' },
-  { q: 'How do I pay?', a: 'Premium subscriptions are processed securely via M-Pesa. We never store your payment details — all transactions are handled by our payment partner.' },
+  { q: 'How do I pay?', a: 'Premium subscriptions are processed securely via M-Pesa. We never store your payment details â€” all transactions are handled by our payment partner.' },
   { q: 'Is my data private?', a: 'Completely. Your diary, mood logs, and conversations are encrypted. You can delete everything anytime with one click. We never sell your data.' },
   { q: 'What is the Company plan?', a: 'For organizations that want to offer LossLens to their employees. Includes subsidized pricing, admin dashboard for the company, usage reports, and dedicated support. Ask your employer if they offer LossLens.' },
 ]
@@ -39,7 +39,7 @@ export default function Pricing() {
       badge: 'For individuals',
       price: 'KES 0',
       period: 'forever',
-      desc: 'Full access to all core recovery tools — no catch, no credit card.',
+      desc: 'Full access to all core recovery tools â€” no catch, no credit card.',
       features: [
         ' Daily Gambling Diary',
         ' 8 CBT Modules',
@@ -63,7 +63,7 @@ export default function Pricing() {
       badge: 'Most Popular',
       price: 'KES 499',
       period: '/month',
-      desc: 'Advanced features for committed recovery — and you support keeping LossLens free for everyone.',
+      desc: 'Advanced features for committed recovery â€” and you support keeping LossLens free for everyone.',
       features: [
         ' Everything in Free',
         ' Advanced Analytics & Insights',
@@ -118,25 +118,25 @@ export default function Pricing() {
           <div className="pill">Pricing</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', marginBottom: '0.75rem' }}>
             {planType === 'individual' ? (
-              <>Free for individuals.<br /><em style={{ color: '#f59e0b' }}>Premium when you're ready.</em></>
+              <>Free for individuals.<br /><em style={{ color: '#2DD4BF' }}>Premium when you're ready.</em></>
             ) : (
-              <>Subsidized by your employer.<br /><em style={{ color: '#f59e0b' }}>Premium features, lower cost.</em></>
+              <>Subsidized by your employer.<br /><em style={{ color: '#2DD4BF' }}>Premium features, lower cost.</em></>
             )}
           </h1>
           <p className="sub" style={{ maxWidth: '520px', margin: '0 auto 1.5rem' }}>
             {planType === 'individual'
-              ? 'Every feature you need to recover is free. Premium helps you go deeper — and supports keeping LossLens accessible to everyone in Kenya.'
+              ? 'Every feature you need to recover is free. Premium helps you go deeper â€” and supports keeping LossLens accessible to everyone in Kenya.'
               : 'If your company offers LossLens, you get all Premium features at a subsidized rate. Your personal data stays private.'}
           </p>
 
           {/* Plan Type Toggle */}
-          <div style={{ display: 'inline-flex', background: '#062616', borderRadius: '100px', padding: '4px', border: '1px solid #0a3d22', marginBottom: '0.5rem' }}>
+          <div style={{ display: 'inline-flex', background: 'rgba(255,255,255,0.06)', borderRadius: '100px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)', marginBottom: '0.5rem' }}>
             <button
               onClick={() => setPlanType('individual')}
               style={{
                 padding: '10px 24px', borderRadius: '100px', border: 'none',
-                background: planType === 'individual' ? '#f59e0b' : 'transparent',
-                color: planType === 'individual' ? '#041f13' : '#3b7a5a',
+                background: planType === 'individual' ? '#2DD4BF' : 'transparent',
+                color: planType === 'individual' ? '#0B1220' : 'rgba(255,255,255,0.4)',
                 fontSize: '13px', fontWeight: planType === 'individual' ? 600 : 400,
                 cursor: 'pointer', fontFamily: "'Inter', sans-serif", transition: 'all 0.2s'
               }}>
@@ -146,8 +146,8 @@ export default function Pricing() {
               onClick={() => setPlanType('company')}
               style={{
                 padding: '10px 24px', borderRadius: '100px', border: 'none',
-                background: planType === 'company' ? '#f59e0b' : 'transparent',
-                color: planType === 'company' ? '#041f13' : '#3b7a5a',
+                background: planType === 'company' ? '#2DD4BF' : 'transparent',
+                color: planType === 'company' ? '#0B1220' : 'rgba(255,255,255,0.4)',
                 fontSize: '13px', fontWeight: planType === 'company' ? 600 : 400,
                 cursor: 'pointer', fontFamily: "'Inter', sans-serif", transition: 'all 0.2s'
               }}>
@@ -164,8 +164,8 @@ export default function Pricing() {
                 key={plan.id}
                 className={`pricing-card ${plan.featured ? 'featured' : ''}`}
                 style={{
-                  background: '#062616',
-                  border: plan.featured ? '2px solid #f59e0b' : '1px solid #0a3d22',
+                  background: 'rgba(255,255,255,0.06)',
+                  border: plan.featured ? '2px solid #2DD4BF' : '1px solid rgba(255,255,255,0.12)',
                   borderRadius: '16px',
                   padding: '2rem',
                   position: 'relative',
@@ -176,7 +176,7 @@ export default function Pricing() {
                 {plan.featured && (
                   <span className="popular-tag" style={{
                     position: 'absolute', top: '-12px', right: '20px',
-                    background: '#f59e0b', color: '#041f13', fontSize: '11px',
+                    background: '#2DD4BF', color: '#0B1220', fontSize: '11px',
                     fontWeight: 600, padding: '4px 12px', borderRadius: '100px',
                   }}>
                     {plan.badge}
@@ -187,22 +187,22 @@ export default function Pricing() {
                   display: 'inline-block', fontSize: '11px', fontWeight: 500,
                   letterSpacing: '1.5px', textTransform: 'uppercase',
                   padding: '4px 12px', borderRadius: '100px', marginBottom: '1rem',
-                  background: plan.featured ? '#f59e0b' : '#0a3d22',
-                  color: plan.featured ? '#041f13' : '#6ee7b7',
+                  background: plan.featured ? '#2DD4BF' : 'rgba(255,255,255,0.12)',
+                  color: plan.featured ? '#0B1220' : '#2DD4BF',
                 }}>
                   {plan.id === 'free' ? 'Free' : 'Premium'}
                 </div>
 
                 <div className="plan-price" style={{ marginBottom: '0.5rem' }}>
-                  <span className="price-num" style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', color: '#fff' }}>{plan.price}</span>
-                  <span className="price-period" style={{ fontSize: '13px', color: '#3b7a5a', marginLeft: '4px' }}>{plan.period}</span>
+                  <span className="price-num" style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', color: '#FFFFFF' }}>{plan.price}</span>
+                  <span className="price-period" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginLeft: '4px' }}>{plan.period}</span>
                 </div>
 
-                <p className="plan-desc" style={{ fontSize: '13px', color: '#3b7a5a', lineHeight: '1.5', marginBottom: '1.5rem', fontWeight: 300 }}>{plan.desc}</p>
+                <p className="plan-desc" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', lineHeight: '1.5', marginBottom: '1.5rem', fontWeight: 300 }}>{plan.desc}</p>
 
                 <ul className="plan-features" style={{ listStyle: 'none', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
                   {plan.features.map((f, i) => (
-                    <li key={i} style={{ fontSize: '13px', color: '#9fe1cb', fontWeight: 300 }}>{f}</li>
+                    <li key={i} style={{ fontSize: '13px', color: '#7DBDEE', fontWeight: 300 }}>{f}</li>
                   ))}
                 </ul>
 
@@ -211,7 +211,7 @@ export default function Pricing() {
                   onClick={() => handleSelect(plan.id, 'individual')}
                   disabled={loading === plan.id}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '14px', fontSize: '14px' }}
-                  aria-label={`${plan.cta} — ${plan.name} plan`}
+                  aria-label={`${plan.cta} â€” ${plan.name} plan`}
                 >
                   {loading === plan.id ? <span className="spinner"></span> : plan.cta}
                 </button>
@@ -226,8 +226,8 @@ export default function Pricing() {
             <article
               className="pricing-card featured"
               style={{
-                background: '#062616',
-                border: '2px solid #f59e0b',
+                background: 'rgba(255,255,255,0.06)',
+                border: '2px solid #2DD4BF',
                 borderRadius: '16px',
                 padding: '2rem',
                 position: 'relative',
@@ -237,7 +237,7 @@ export default function Pricing() {
             >
               <span className="popular-tag" style={{
                 position: 'absolute', top: '-12px', right: '20px',
-                background: '#f59e0b', color: '#041f13', fontSize: '11px',
+                background: '#2DD4BF', color: '#0B1220', fontSize: '11px',
                 fontWeight: 600, padding: '4px 12px', borderRadius: '100px',
               }}>
                 {companyPlan.badge}
@@ -247,27 +247,27 @@ export default function Pricing() {
                 display: 'inline-block', fontSize: '11px', fontWeight: 500,
                 letterSpacing: '1.5px', textTransform: 'uppercase',
                 padding: '4px 12px', borderRadius: '100px', marginBottom: '1rem',
-                background: '#f59e0b', color: '#041f13',
+                background: '#2DD4BF', color: '#0B1220',
               }}>
                 Company
               </div>
 
               <div className="plan-price" style={{ marginBottom: '0.5rem' }}>
-                <span className="price-num" style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', color: '#fff' }}>{companyPlan.price}</span>
-                <span className="price-period" style={{ fontSize: '13px', color: '#3b7a5a', marginLeft: '4px' }}>{companyPlan.period}</span>
+                <span className="price-num" style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', color: '#FFFFFF' }}>{companyPlan.price}</span>
+                <span className="price-period" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginLeft: '4px' }}>{companyPlan.period}</span>
               </div>
 
-              <p className="plan-desc" style={{ fontSize: '13px', color: '#3b7a5a', lineHeight: '1.5', marginBottom: '1.5rem', fontWeight: 300 }}>{companyPlan.desc}</p>
+              <p className="plan-desc" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', lineHeight: '1.5', marginBottom: '1.5rem', fontWeight: 300 }}>{companyPlan.desc}</p>
 
               <ul className="plan-features" style={{ listStyle: 'none', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
                 {companyPlan.features.map((f, i) => (
-                  <li key={i} style={{ fontSize: '13px', color: '#9fe1cb', fontWeight: 300 }}>{f}</li>
+                  <li key={i} style={{ fontSize: '13px', color: '#7DBDEE', fontWeight: 300 }}>{f}</li>
                 ))}
               </ul>
 
-              <div style={{ background: '#0a3d22', borderRadius: '8px', padding: '10px 14px', marginBottom: '1rem', border: '1px solid #f59e0b33' }}>
-                <p style={{ color: '#6ee7b7', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>
-                   <strong style={{ color: '#f59e0b' }}>How it works:</strong> Your employer gives you a company code. Enter it during signup to unlock the subsidized rate.
+              <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: '8px', padding: '10px 14px', marginBottom: '1rem', border: '1px solid rgba(45,212,191,0.2)' }}>
+                <p style={{ color: '#2DD4BF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>
+                   <strong style={{ color: '#2DD4BF' }}>How it works:</strong> Your employer gives you a company code. Enter it during signup to unlock the subsidized rate.
                 </p>
               </div>
 
@@ -282,28 +282,28 @@ export default function Pricing() {
               </button>
             </article>
 
-            <p style={{ textAlign: 'center', color: '#3b7a5a', fontSize: '12px', marginTop: '1rem' }}>
-              Don't have a company code? <span onClick={() => setPlanType('individual')} style={{ color: '#f59e0b', cursor: 'pointer', textDecoration: 'underline' }}>View individual plans</span>
+            <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginTop: '1rem' }}>
+              Don't have a company code? <span onClick={() => setPlanType('individual')} style={{ color: '#2DD4BF', cursor: 'pointer', textDecoration: 'underline' }}>View individual plans</span>
             </p>
           </section>
         )}
 
         {/* FAQ Section */}
         <section style={{ padding: '2rem', maxWidth: '700px', margin: '0 auto' }} aria-label="Frequently asked questions">
-          <h2 style={{ textAlign: 'center', color: '#f59e0b', fontFamily: "'Playfair Display', serif", fontSize: '1.6rem', marginBottom: '1.5rem' }}>Frequently Asked Questions</h2>
+          <h2 style={{ textAlign: 'center', color: '#2DD4BF', fontFamily: "'Playfair Display', serif", fontSize: '1.6rem', marginBottom: '1.5rem' }}>Frequently Asked Questions</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {FAQS.map((faq, i) => (
-              <div key={i} style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '12px', overflow: 'hidden' }}>
+              <div key={i} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', overflow: 'hidden' }}>
                 <button
                   onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
-                  style={{ width: '100%', padding: '16px', background: 'transparent', border: 'none', color: '#e2f5ec', fontSize: '14px', fontWeight: 500, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', sans-serif", textAlign: 'left' }}
+                  style={{ width: '100%', padding: '16px', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '14px', fontWeight: 500, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', sans-serif", textAlign: 'left' }}
                   aria-expanded={expandedFaq === i}
                 >
                   {faq.q}
-                  <span style={{ color: '#f59e0b', fontSize: '18px', transition: 'transform 0.2s', transform: expandedFaq === i ? 'rotate(180deg)' : 'rotate(0)' }}>▼</span>
+                  <span style={{ color: '#2DD4BF', fontSize: '18px', transition: 'transform 0.2s', transform: expandedFaq === i ? 'rotate(180deg)' : 'rotate(0)' }}>â–¼</span>
                 </button>
                 {expandedFaq === i && (
-                  <div style={{ padding: '0 16px 16px', color: '#6ee7b7', fontSize: '13px', lineHeight: '1.7', fontWeight: 300 }}>
+                  <div style={{ padding: '0 16px 16px', color: '#2DD4BF', fontSize: '13px', lineHeight: '1.7', fontWeight: 300 }}>
                     {faq.a}
                   </div>
                 )}
@@ -314,15 +314,15 @@ export default function Pricing() {
 
         {/* Trust Bar */}
         <section style={{ padding: '2rem', textAlign: 'center' }} aria-label="Trust indicators">
-          <p style={{ color: '#3b7a5a', fontSize: '12px', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Built with trust & transparency</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Built with trust & transparency</p>
           <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', flexWrap: 'wrap' }}>
             {[
               { icon: '', label: 'End-to-end encrypted' },
-              { icon: '🇰🇪', label: 'Kenya-based & compliant' },
-              { icon: 'ï¸', label: 'Delete data anytime' },
+              { icon: 'ðŸ‡°ðŸ‡ª', label: 'Kenya-based & compliant' },
+              { icon: 'Ã¯Â¸Â', label: 'Delete data anytime' },
               { icon: '', label: 'Free forever for individuals' },
             ].map((t, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6ee7b7', fontSize: '12px' }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#2DD4BF', fontSize: '12px' }}>
                 <span aria-hidden="true">{t.icon}</span>
                 <span>{t.label}</span>
               </div>
@@ -332,19 +332,19 @@ export default function Pricing() {
       </main>
 
       {/* Footer */}
-      <footer className="footer" style={{ flexDirection: 'column', gap: '12px', textAlign: 'center', borderTop: '1px solid #0a3d22', padding: '1.5rem 2rem' }}>
+      <footer className="footer" style={{ flexDirection: 'column', gap: '12px', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.12)', padding: '1.5rem 2rem' }}>
         <div>
-          <p>LossLens · Gambling Harm Reduction · Kenya · 2026</p>
+          <p>LossLens Â· Gambling Harm Reduction Â· Kenya Â· 2026</p>
           <p style={{ fontSize: '11px', marginTop: '4px' }}>
-            <a href="mailto:projectkingsly@gmail.com" style={{ color: '#3b7a5a', textDecoration: 'none' }}>projectkingsly@gmail.com</a>
+            <a href="mailto:projectkingsly@gmail.com" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>projectkingsly@gmail.com</a>
           </p>
         </div>
         <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <a onClick={() => navigate('/privacy')} style={{ color: '#3b7a5a', fontSize: '12px', cursor: 'pointer', textDecoration: 'none' }}>Privacy Policy</a>
-          <a onClick={() => navigate('/terms')} style={{ color: '#3b7a5a', fontSize: '12px', cursor: 'pointer', textDecoration: 'none' }}>Terms of Service</a>
-          <a href="mailto:projectkingsly@gmail.com" style={{ color: '#3b7a5a', fontSize: '12px', cursor: 'pointer', textDecoration: 'none' }}>Contact</a>
+          <a onClick={() => navigate('/privacy')} style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', textDecoration: 'none' }}>Privacy Policy</a>
+          <a onClick={() => navigate('/terms')} style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', textDecoration: 'none' }}>Terms of Service</a>
+          <a href="mailto:projectkingsly@gmail.com" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', textDecoration: 'none' }}>Contact</a>
         </div>
-        <p>Crisis? Call NACADA <strong style={{ color: '#f59e0b' }}>1192</strong> (24/7 free)</p>
+        <p>Crisis? Call NACADA <strong style={{ color: '#2DD4BF' }}>1192</strong> (24/7 free)</p>
       </footer>
     </div>
   )

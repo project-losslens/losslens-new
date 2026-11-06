@@ -67,11 +67,11 @@ function NotificationBell() {
 
   const getTypeStyle = (type) => {
     switch (type) {
-      case 'danger': return { bg: '#791F1F', color: '#F09595' }
-      case 'warning': return { bg: '#633806', color: '#FAC775' }
-      case 'success': return { bg: '#0a3d22', color: '#6ee7b7' }
-      case 'badge': return { bg: '#0a3d22', color: '#f59e0b' }
-      default: return { bg: '#062616', color: '#9fe1cb' }
+      case 'danger': return { bg: 'rgba(255,255,255,0.08)', color: '#FFFFFF' }
+      case 'warning': return { bg: 'rgba(45,212,191,0.15)', color: '#7DBDEE' }
+      case 'success': return { bg: 'rgba(255,255,255,0.12)', color: '#2DD4BF' }
+      case 'badge': return { bg: 'rgba(255,255,255,0.12)', color: '#2DD4BF' }
+      default: return { bg: 'rgba(255,255,255,0.06)', color: '#7DBDEE' }
     }
   }
 
@@ -96,7 +96,7 @@ function NotificationBell() {
         style={{
           background: 'transparent', border: 'none', cursor: 'pointer',
           position: 'relative', fontSize: '20px', padding: '4px 8px',
-          color: unreadCount > 0 ? '#f59e0b' : '#3b7a5a',
+          color: unreadCount > 0 ? '#2DD4BF' : 'rgba(255,255,255,0.4)',
           transition: 'color 0.2s',
         }}
       >
@@ -106,7 +106,7 @@ function NotificationBell() {
             aria-label={`${unreadCount} unread notifications`}
             style={{
               position: 'absolute', top: '0', right: '0',
-              background: '#f59e0b', color: '#041f13',
+              background: '#2DD4BF', color: '#0B1220',
               fontSize: '10px', fontWeight: 700,
               width: '18px', height: '18px', borderRadius: '50%',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -125,23 +125,23 @@ function NotificationBell() {
           style={{
             position: 'absolute', top: '40px', right: '-10px',
             width: '340px', maxHeight: '420px',
-            background: '#062616', border: '1px solid #0a3d22', borderRadius: '12px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.5)', zIndex: 500,
+            background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px',
+            boxShadow: '0 8px 32px rgba(11,18,32,0.5)', zIndex: 500,
             overflowY: 'auto', animation: 'fadeIn 0.2s ease-out',
           }}
         >
           {/* Header */}
           <div style={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            padding: '12px 16px', borderBottom: '1px solid #0a3d22',
-            position: 'sticky', top: 0, background: '#062616', zIndex: 1,
+            padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.12)',
+            position: 'sticky', top: 0, background: 'rgba(255,255,255,0.06)', zIndex: 1,
           }}>
-            <h3 style={{ color: '#e2f5ec', fontSize: '14px', margin: 0 }}>Notifications</h3>
+            <h3 style={{ color: '#FFFFFF', fontSize: '14px', margin: 0 }}>Notifications</h3>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllRead}
                 style={{
-                  background: 'transparent', border: 'none', color: '#6ee7b7',
+                  background: 'transparent', border: 'none', color: '#2DD4BF',
                   fontSize: '11px', cursor: 'pointer',
                 }}
               >
@@ -154,7 +154,7 @@ function NotificationBell() {
           {notifications.length === 0 ? (
             <div style={{ padding: '2rem', textAlign: 'center' }}>
               <span style={{ fontSize: '32px', display: 'block', marginBottom: '8px' }} aria-hidden="true"></span>
-              <p style={{ color: '#3b7a5a', fontSize: '13px' }}>No notifications yet</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>No notifications yet</p>
             </div>
           ) : (
             notifications.map(n => {
@@ -165,12 +165,12 @@ function NotificationBell() {
                   role="menuitem"
                   onClick={() => handleMarkAsRead(n.id, n.link)}
                   style={{
-                    padding: '12px 16px', borderBottom: '1px solid #0a3d22',
+                    padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.12)',
                     cursor: 'pointer', transition: 'background 0.15s',
-                    background: n.read ? 'transparent' : '#041f13',
+                    background: n.read ? 'transparent' : '#0B1220',
                   }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#0a3d22'}
-                  onMouseLeave={e => e.currentTarget.style.background = n.read ? 'transparent' : '#041f13'}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.12)'}
+                  onMouseLeave={e => e.currentTarget.style.background = n.read ? 'transparent' : '#0B1220'}
                 >
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
                     <span
@@ -185,22 +185,22 @@ function NotificationBell() {
                       {n.icon}
                     </span>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ color: '#e2f5ec', fontSize: '13px', fontWeight: 500, margin: '0 0 2px' }}>
+                      <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 500, margin: '0 0 2px' }}>
                         {n.title}
                         {!n.read && (
                           <span
                             aria-label="Unread"
                             style={{
                               width: '6px', height: '6px', borderRadius: '50%',
-                              background: '#f59e0b', display: 'inline-block', marginLeft: '6px',
+                              background: '#2DD4BF', display: 'inline-block', marginLeft: '6px',
                             }}
                           />
                         )}
                       </p>
-                      <p style={{ color: '#9fe1cb', fontSize: '12px', margin: '0 0 4px', lineHeight: '1.4' }}>
+                      <p style={{ color: '#7DBDEE', fontSize: '12px', margin: '0 0 4px', lineHeight: '1.4' }}>
                         {n.message}
                       </p>
-                      <span style={{ color: '#3b7a5a', fontSize: '10px' }}>
+                      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>
                         {formatTime(n.created_at)}
                       </span>
                     </div>

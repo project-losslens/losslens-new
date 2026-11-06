@@ -25,7 +25,7 @@ const REQUEST_MESSAGES = [
   "Need support with weekend triggers",
   "Want to share coping strategies",
   "Just need someone who understands",
-  "Struggling today — could use a chat",
+  "Struggling today â€” could use a chat",
   "Open to listening or sharing",
 ]
 
@@ -51,7 +51,7 @@ function containsCrisisContent(message) { return CRISIS_KEYWORDS.some(w => messa
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
   toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#1d5c38;color:#6ee7b7;padding:10px 20px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(0,0,0,0.4);border:1px solid #3b7a5a;white-space:nowrap`
+  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
   document.body.appendChild(toast)
   setTimeout(() => toast.remove(), duration)
 }
@@ -220,7 +220,7 @@ export default function Whispers() {
 
     //  Content moderation
     if (containsCrisisContent(text)) {
-      showToast('🆘 If you or someone is in crisis, please call Befrienders Kenya: +254 722 178 177', 5000)
+      showToast('ðŸ†˜ If you or someone is in crisis, please call Befrienders Kenya: +254 722 178 177', 5000)
     }
     if (containsBlockedContent(text)) { showToast(' Please don\'t share personal info.', 4000); return }
 
@@ -306,8 +306,8 @@ export default function Whispers() {
   const canSend = pendingSent.length < MAX_PENDING_REQUESTS && activeChats.length < MAX_ACTIVE_CHATS
 
   if (!identity) return (
-    <div style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ display: 'flex', gap: '8px' }}>{[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}</div>
+    <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', gap: '8px' }}>{[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}</div>
     </div>
   )
 
@@ -315,27 +315,27 @@ export default function Whispers() {
     <div className="root" style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: '#041f13', borderBottom: '1px solid #0a3d22', position: 'sticky', top: 0, zIndex: 100 }}>
-          <div><h1 style={{ fontSize: '16px', fontWeight: 600, color: '#fff', fontFamily: "'Inter', sans-serif", margin: 0 }}> Whispers</h1><p style={{ fontSize: '11px', color: '#3b7a5a', margin: '2px 0 0' }}>Anonymous peer support · {activeChats.length} active</p></div>
+        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 100 }}>
+          <div><h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Whispers</h1><p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>Anonymous peer support Â· {activeChats.length} active</p></div>
         </nav>
 
         <div style={{ height: 'calc(100vh - 60px)', maxHeight: 'calc(100dvh - 60px)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           {activeMatch ? (
             <>
-              <div style={{ background: '#0a3d22', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #1d5c38', flexShrink: 0, position: 'sticky', top: 0, zIndex: 10 }}>
-                <button onClick={() => { setActiveMatch(null); setMessages([]); setMessageInputs({}) }} style={{ background: 'transparent', border: 'none', color: '#6ee7b7', fontSize: '18px', cursor: 'pointer', padding: '6px 10px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Back to chats">←</button>
+              <div style={{ background: 'rgba(255,255,255,0.12)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #7DBDEE', flexShrink: 0, position: 'sticky', top: 0, zIndex: 10 }}>
+                <button onClick={() => { setActiveMatch(null); setMessages([]); setMessageInputs({}) }} style={{ background: 'transparent', border: 'none', color: '#2DD4BF', fontSize: '18px', cursor: 'pointer', padding: '6px 10px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Back to chats">â†</button>
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, #0a3d22, #1d5c38)', border: '2px solid #1d5c38', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }} aria-hidden="true"></div>
-                  <div><p style={{ color: '#e2f5ec', fontSize: '13px', fontWeight: 500, margin: 0 }}>{peerAnonName || 'Anonymous Peer'}</p><p style={{ color: '#6ee7b7', fontSize: '10px', margin: 0 }}>Chat active</p></div>
+                  <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #7DBDEE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }} aria-hidden="true"></div>
+                  <div><p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 500, margin: 0 }}>{peerAnonName || 'Anonymous Peer'}</p><p style={{ color: '#2DD4BF', fontSize: '10px', margin: 0 }}>Chat active</p></div>
                 </div>
-                <button onClick={() => setShowReportModal(true)} style={{ background: 'transparent', border: '1px solid #FAC775', color: '#FAC775', padding: '6px 10px', borderRadius: '100px', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', minHeight: '32px' }}> Report</button>
-                <button onClick={() => setShowFeedback(true)} style={{ background: 'transparent', border: '1px solid #791F1F', color: '#F09595', padding: '6px 10px', borderRadius: '100px', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', minHeight: '32px' }}>End</button>
+                <button onClick={() => setShowReportModal(true)} style={{ background: 'transparent', border: '1px solid #7DBDEE', color: '#7DBDEE', padding: '6px 10px', borderRadius: '100px', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', minHeight: '32px' }}> Report</button>
+                <button onClick={() => setShowFeedback(true)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '6px 10px', borderRadius: '100px', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', minHeight: '32px' }}>End</button>
               </div>
 
-              <div style={{ flex: 1, overflowY: 'auto', padding: '10px', background: '#041f13', WebkitOverflowScrolling: 'touch' }}>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '10px', background: '#0B1220', WebkitOverflowScrolling: 'touch' }}>
                 {showStarters && messages.length === 0 && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center', marginBottom: '1rem' }}>
-                    {CONVERSATION_STARTERS.map(s => <button key={s} onClick={() => { setMessageInputs(prev => ({ ...prev, [activeMatch.id]: s })); setShowStarters(false) }} style={{ padding: '8px 14px', borderRadius: '100px', background: '#0a3d22', border: '1px solid #1d5c38', color: '#6ee7b7', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{s}</button>)}
+                    {CONVERSATION_STARTERS.map(s => <button key={s} onClick={() => { setMessageInputs(prev => ({ ...prev, [activeMatch.id]: s })); setShowStarters(false) }} style={{ padding: '8px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{s}</button>)}
                   </div>
                 )}
                 {messages.map(msg => {
@@ -344,16 +344,16 @@ export default function Whispers() {
                     <div key={msg.id} style={{ display: 'flex', justifyContent: isOwn ? 'flex-end' : 'flex-start', marginBottom: '4px' }}>
                       <div style={{ maxWidth: '82%' }}>
                         {msg.reply_to && (
-                          <div style={{ fontSize: '10px', color: '#3b7a5a', marginBottom: '2px', padding: '3px 8px', background: '#062616', borderRadius: '6px', borderLeft: '2px solid #f59e0b' }}>
-                            ↩ Replying to: "{msg.reply_to.message?.substring(0, 40)}..."
+                          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginBottom: '2px', padding: '3px 8px', background: 'rgba(255,255,255,0.06)', borderRadius: '6px', borderLeft: '2px solid #2DD4BF' }}>
+                            â†© Replying to: "{msg.reply_to.message?.substring(0, 40)}..."
                           </div>
                         )}
-                        <div style={{ padding: '8px 12px', borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: isOwn ? '#0a3d22' : '#062616', border: `1px solid ${isOwn ? '#1d5c38' : '#0a3d22'}`, color: '#9fe1cb', fontSize: '13px', lineHeight: '1.5', wordBreak: 'break-word', opacity: msg.sending ? 0.6 : 1 }}>
+                        <div style={{ padding: '8px 12px', borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: isOwn ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)', border: `1px solid ${isOwn ? '#7DBDEE' : 'rgba(255,255,255,0.12)'}`, color: '#7DBDEE', fontSize: '13px', lineHeight: '1.5', wordBreak: 'break-word', opacity: msg.sending ? 0.6 : 1 }}>
                           {msg.message}
                         </div>
                         <div style={{ display: 'flex', gap: '4px', marginTop: '2px', justifyContent: isOwn ? 'flex-end' : 'flex-start' }}>
-                          <span style={{ fontSize: '9px', color: '#3b7a5a' }}>{msg.sending ? 'Sending...' : formatTime(msg.created_at)}</span>
-                          <button onClick={() => handleReply(msg)} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '10px', cursor: 'pointer', padding: '2px 6px' }} aria-label="Reply">↩</button>
+                          <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)' }}>{msg.sending ? 'Sending...' : formatTime(msg.created_at)}</span>
+                          <button onClick={() => handleReply(msg)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', padding: '2px 6px' }} aria-label="Reply">â†©</button>
                         </div>
                       </div>
                     </div>
@@ -363,72 +363,72 @@ export default function Whispers() {
               </div>
 
               {replyTo && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: '#0a3d22', borderTop: '1px solid #1d5c38', flexShrink: 0 }}>
-                  <span style={{ color: '#f59e0b', fontSize: '10px', flex: 1 }}>↩ Replying to: "{replyTo.message.substring(0, 30)}..."</span>
-                  <button onClick={() => setReplyTo(null)} style={{ background: 'transparent', border: 'none', color: '#F09595', fontSize: '14px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Cancel reply"></button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'rgba(255,255,255,0.12)', borderTop: '1px solid #7DBDEE', flexShrink: 0 }}>
+                  <span style={{ color: '#2DD4BF', fontSize: '10px', flex: 1 }}>â†© Replying to: "{replyTo.message.substring(0, 30)}..."</span>
+                  <button onClick={() => setReplyTo(null)} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '14px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Cancel reply"></button>
                 </div>
               )}
 
-              <div style={{ background: '#062616', padding: '8px 10px', borderTop: '1px solid #0a3d22', flexShrink: 0 }}>
+              <div style={{ background: 'rgba(255,255,255,0.06)', padding: '8px 10px', borderTop: '1px solid rgba(255,255,255,0.12)', flexShrink: 0 }}>
                 <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                  <button onClick={() => setShowStarters(!showStarters)} style={{ width: '36px', height: '36px', borderRadius: '6px', background: showStarters ? '#0a3d22' : '#041f13', border: '1px solid #0a3d22', color: '#6ee7b7', fontSize: '14px', cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Conversation starters"></button>
-                  <input ref={inputRef} value={messageInputs[activeMatch.id] || ''} onChange={e => setMessageInputs(prev => ({ ...prev, [activeMatch.id]: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleSend(activeMatch.id)} placeholder="Message" style={{ flex: 1, background: '#041f13', border: '1px solid #0a3d22', borderRadius: '100px', padding: '10px 12px', color: '#fff', fontSize: '16px', outline: 'none', fontFamily: "'Inter', sans-serif" }} aria-label="Type a message" />
-                  <button onClick={() => handleSend(activeMatch.id)} disabled={!messageInputs[activeMatch.id]?.trim() || sending} style={{ width: '40px', height: '40px', borderRadius: '50%', background: messageInputs[activeMatch.id]?.trim() && !sending ? '#f59e0b' : '#0a3d22', border: 'none', color: messageInputs[activeMatch.id]?.trim() ? '#041f13' : '#3b7a5a', fontSize: '16px', cursor: messageInputs[activeMatch.id]?.trim() ? 'pointer' : 'not-allowed', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Send message">→</button>
+                  <button onClick={() => setShowStarters(!showStarters)} style={{ width: '36px', height: '36px', borderRadius: '6px', background: showStarters ? 'rgba(255,255,255,0.12)' : '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '14px', cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Conversation starters"></button>
+                  <input ref={inputRef} value={messageInputs[activeMatch.id] || ''} onChange={e => setMessageInputs(prev => ({ ...prev, [activeMatch.id]: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleSend(activeMatch.id)} placeholder="Message" style={{ flex: 1, background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '10px 12px', color: '#FFFFFF', fontSize: '16px', outline: 'none', fontFamily: "'Inter', sans-serif" }} aria-label="Type a message" />
+                  <button onClick={() => handleSend(activeMatch.id)} disabled={!messageInputs[activeMatch.id]?.trim() || sending} style={{ width: '40px', height: '40px', borderRadius: '50%', background: messageInputs[activeMatch.id]?.trim() && !sending ? '#2DD4BF' : 'rgba(255,255,255,0.12)', border: 'none', color: messageInputs[activeMatch.id]?.trim() ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '16px', cursor: messageInputs[activeMatch.id]?.trim() ? 'pointer' : 'not-allowed', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Send message">â†’</button>
                 </div>
               </div>
             </>
           ) : (
             <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', WebkitOverflowScrolling: 'touch' }}>
-              <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem', background: '#062616', borderRadius: '12px', padding: '4px', border: '1px solid #0a3d22' }}>
+              <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)' }}>
                 {[{ id: 'requests', label: ' Requests', count: pendingReceived.length }, { id: 'sent', label: ' Sent', count: pendingSent.length }, { id: 'chats', label: ' Chats', count: activeChats.length }].map(tab => (
-                  <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? '#0a3d22' : 'transparent', color: activeTab === tab.id ? '#f59e0b' : '#3b7a5a', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{tab.label}{tab.count > 0 ? ` (${tab.count})` : ''}</button>
+                  <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{tab.label}{tab.count > 0 ? ` (${tab.count})` : ''}</button>
                 ))}
               </div>
 
               {activeTab === 'requests' && (
                 <>
                   <div className="dash-section" style={{ padding: '1.25rem', marginBottom: '0.75rem' }}>
-                    <h3 style={{ color: '#e2f5ec', fontSize: '13px', marginBottom: '4px' }}>Find a peer</h3>
-                    <p style={{ color: '#3b7a5a', fontSize: '11px', marginBottom: '0.75rem' }}>Your request goes to a random available peer. Your identity stays anonymous.</p>
+                    <h3 style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '4px' }}>Find a peer</h3>
+                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '0.75rem' }}>Your request goes to a random available peer. Your identity stays anonymous.</p>
                     {canSend ? (
                       <>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '10px' }}>
-                          {REQUEST_MESSAGES.map(msg => <button key={msg} onClick={() => setRequestMessage(msg)} style={{ padding: '6px 10px', borderRadius: '100px', border: requestMessage === msg ? '2px solid #f59e0b' : '1px solid #0a3d22', background: requestMessage === msg ? '#0a3d22' : '#041f13', color: requestMessage === msg ? '#f59e0b' : '#6ee7b7', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{msg}</button>)}
+                          {REQUEST_MESSAGES.map(msg => <button key={msg} onClick={() => setRequestMessage(msg)} style={{ padding: '6px 10px', borderRadius: '100px', border: requestMessage === msg ? '2px solid #2DD4BF' : '1px solid rgba(255,255,255,0.12)', background: requestMessage === msg ? 'rgba(255,255,255,0.12)' : '#0B1220', color: requestMessage === msg ? '#2DD4BF' : '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{msg}</button>)}
                         </div>
                         <button className="btn-primary full" onClick={sendRequest} disabled={sendingRequest} style={{ fontSize: '12px', padding: '10px' }}>{sendingRequest ? '...' : ' Send request'}</button>
                       </>
-                    ) : <p style={{ color: '#FAC775', fontSize: '12px', textAlign: 'center' }}>You've reached the limit. End an active chat or cancel a pending request first.</p>}
+                    ) : <p style={{ color: '#7DBDEE', fontSize: '12px', textAlign: 'center' }}>You've reached the limit. End an active chat or cancel a pending request first.</p>}
                   </div>
                   {pendingReceived.length > 0 && (
                     <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-                      <h3 style={{ color: '#e2f5ec', fontSize: '12px', marginBottom: '0.75rem' }}> Incoming ({pendingReceived.length})</h3>
+                      <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.75rem' }}> Incoming ({pendingReceived.length})</h3>
                       {pendingReceived.map(req => (
-                        <div key={req.id} style={{ padding: '12px', background: '#041f13', borderRadius: '8px', marginBottom: '6px', border: '1px solid #f59e0b' }}>
+                        <div key={req.id} style={{ padding: '12px', background: '#0B1220', borderRadius: '8px', marginBottom: '6px', border: '1px solid #2DD4BF' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                             <span style={{ fontSize: '20px' }} aria-hidden="true"></span>
-                            <div style={{ flex: 1 }}><p style={{ color: '#e2f5ec', fontSize: '12px', fontWeight: 500, margin: 0 }}>Anonymous Peer</p><p style={{ color: '#6ee7b7', fontSize: '10px' }}>"{req.request_message || 'Wants to connect'}"</p></div>
+                            <div style={{ flex: 1 }}><p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: 0 }}>Anonymous Peer</p><p style={{ color: '#2DD4BF', fontSize: '10px' }}>"{req.request_message || 'Wants to connect'}"</p></div>
                           </div>
                           <div style={{ display: 'flex', gap: '6px' }}>
-                            <button onClick={() => acceptRequest(req.id)} style={{ flex: 1, padding: '8px', borderRadius: '6px', border: 'none', background: '#6ee7b7', color: '#041f13', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Accept</button>
-                            <button onClick={() => rejectRequest(req.id)} style={{ flex: 1, padding: '8px', borderRadius: '6px', border: '1px solid #791F1F', background: 'transparent', color: '#F09595', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Decline</button>
+                            <button onClick={() => acceptRequest(req.id)} style={{ flex: 1, padding: '8px', borderRadius: '6px', border: 'none', background: '#2DD4BF', color: '#0B1220', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Accept</button>
+                            <button onClick={() => rejectRequest(req.id)} style={{ flex: 1, padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', background: 'transparent', color: '#FFFFFF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Decline</button>
                           </div>
                         </div>
                       ))}
                     </div>
                   )}
-                  {pendingReceived.length === 0 && <p style={{ color: '#3b7a5a', fontSize: '11px', textAlign: 'center', padding: '1rem' }}>No incoming requests. Try sending one!</p>}
+                  {pendingReceived.length === 0 && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', textAlign: 'center', padding: '1rem' }}>No incoming requests. Try sending one!</p>}
                 </>
               )}
 
               {activeTab === 'sent' && (
                 <div className="dash-section">
-                  <h3 style={{ color: '#e2f5ec', fontSize: '12px', marginBottom: '0.75rem' }}> Sent ({pendingSent.length})</h3>
+                  <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.75rem' }}> Sent ({pendingSent.length})</h3>
                   {pendingSent.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '1.5rem' }}><p style={{ color: '#3b7a5a', fontSize: '11px', marginBottom: '0.75rem' }}>No pending requests.</p><button className="btn-primary" onClick={() => setActiveTab('requests')} style={{ fontSize: '11px', padding: '8px 16px' }}> Send one</button></div>
+                    <div style={{ textAlign: 'center', padding: '1.5rem' }}><p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '0.75rem' }}>No pending requests.</p><button className="btn-primary" onClick={() => setActiveTab('requests')} style={{ fontSize: '11px', padding: '8px 16px' }}> Send one</button></div>
                   ) : pendingSent.map(req => (
-                    <div key={req.id} style={{ padding: '12px', background: '#041f13', borderRadius: '8px', marginBottom: '6px', border: '1px solid #0a3d22', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div><p style={{ color: '#e2f5ec', fontSize: '12px', fontWeight: 500, margin: 0 }}>"{req.request_message || 'Request'}"</p><p style={{ color: '#FAC775', fontSize: '10px', marginTop: '3px' }}>⏳ Waiting...</p></div>
-                      <button onClick={() => cancelRequest(req.id)} style={{ background: 'transparent', border: 'none', color: '#F09595', fontSize: '10px', cursor: 'pointer', flexShrink: 0, padding: '6px 10px' }}>Cancel</button>
+                    <div key={req.id} style={{ padding: '12px', background: '#0B1220', borderRadius: '8px', marginBottom: '6px', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div><p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: 0 }}>"{req.request_message || 'Request'}"</p><p style={{ color: '#7DBDEE', fontSize: '10px', marginTop: '3px' }}>â³ Waiting...</p></div>
+                      <button onClick={() => cancelRequest(req.id)} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '10px', cursor: 'pointer', flexShrink: 0, padding: '6px 10px' }}>Cancel</button>
                     </div>
                   ))}
                 </div>
@@ -436,20 +436,20 @@ export default function Whispers() {
 
               {activeTab === 'chats' && (
                 <div className="dash-section">
-                  <h3 style={{ color: '#e2f5ec', fontSize: '12px', marginBottom: '0.75rem' }}> Active chats ({activeChats.length})</h3>
+                  <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.75rem' }}> Active chats ({activeChats.length})</h3>
                   {activeChats.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '2rem' }}>
                       <span style={{ fontSize: '40px', display: 'block', marginBottom: '8px' }}></span>
-                      <p style={{ color: '#6ee7b7', fontSize: '14px' }}>No active chats.</p>
-                      <p style={{ color: '#3b7a5a', fontSize: '11px' }}>Accept an incoming request or send one to start.</p>
+                      <p style={{ color: '#2DD4BF', fontSize: '14px' }}>No active chats.</p>
+                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Accept an incoming request or send one to start.</p>
                     </div>
                   ) : activeChats.map(m => (
-                    <div key={m.id} onClick={() => setActiveMatch(m)} style={{ padding: '12px', background: '#041f13', borderRadius: '8px', marginBottom: '6px', border: '1px solid #0a3d22', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div key={m.id} onClick={() => setActiveMatch(m)} style={{ padding: '12px', background: '#0B1220', borderRadius: '8px', marginBottom: '6px', border: '1px solid rgba(255,255,255,0.12)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontSize: '24px' }} aria-hidden="true"></span>
-                        <div><p style={{ color: '#e2f5ec', fontSize: '12px', fontWeight: 500, margin: 0 }}>Peer Match</p><p style={{ color: '#3b7a5a', fontSize: '10px' }}>{new Date(m.created_at).toLocaleDateString('en-KE')}</p></div>
+                        <div><p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: 0 }}>Peer Match</p><p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{new Date(m.created_at).toLocaleDateString('en-KE')}</p></div>
                       </div>
-                      <span style={{ color: '#f59e0b', fontSize: '16px' }}>→</span>
+                      <span style={{ color: '#2DD4BF', fontSize: '16px' }}>â†’</span>
                     </div>
                   ))}
                 </div>
@@ -460,18 +460,18 @@ export default function Whispers() {
 
         {/* Feedback Modal */}
         {showFeedback && (
-          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(4,31,19,0.92)', backdropFilter: 'blur(4px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
-            <div style={{ background: '#062616', borderRadius: '14px', padding: '1.5rem', border: '1px solid #0a3d22', maxWidth: '360px', width: '100%' }}>
-              <h3 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '0.75rem' }}>How was this match?</h3>
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(11,18,32,0.92)', backdropFilter: 'blur(4px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+            <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '14px', padding: '1.5rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '360px', width: '100%' }}>
+              <h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '0.75rem' }}>How was this match?</h3>
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '0.75rem' }}>
                 {[{ value: 'helpful', emoji: '' }, { value: 'okay', emoji: '' }, { value: 'not_helpful', emoji: '' }].map(opt => (
-                  <button key={opt.value} onClick={() => setRating(opt.value)} style={{ padding: '8px', borderRadius: '10px', border: rating === opt.value ? '2px solid #f59e0b' : '1px solid #0a3d22', background: rating === opt.value ? '#0a3d22' : '#041f13', color: '#6ee7b7', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>{opt.emoji}</button>
+                  <button key={opt.value} onClick={() => setRating(opt.value)} style={{ padding: '8px', borderRadius: '10px', border: rating === opt.value ? '2px solid #2DD4BF' : '1px solid rgba(255,255,255,0.12)', background: rating === opt.value ? 'rgba(255,255,255,0.12)' : '#0B1220', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>{opt.emoji}</button>
                 ))}
               </div>
-              <textarea placeholder="Any feedback? (optional)" value={feedback} onChange={e => setFeedback(e.target.value)} rows={2} style={{ width: '100%', background: '#041f13', border: '1px solid #0a3d22', borderRadius: '8px', padding: '8px', color: '#fff', fontSize: '12px', fontFamily: "'Inter', sans-serif", marginBottom: '0.75rem', resize: 'vertical', boxSizing: 'border-box' }} />
+              <textarea placeholder="Any feedback? (optional)" value={feedback} onChange={e => setFeedback(e.target.value)} rows={2} style={{ width: '100%', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '8px', color: '#FFFFFF', fontSize: '12px', fontFamily: "'Inter', sans-serif", marginBottom: '0.75rem', resize: 'vertical', boxSizing: 'border-box' }} />
               <div style={{ display: 'flex', gap: '6px' }}>
                 <button className="btn-primary full" onClick={submitFeedback} style={{ fontSize: '12px', padding: '10px', flex: 2 }}>Submit & end chat</button>
-                <button onClick={() => { setShowFeedback(false); setActiveMatch(null); setMessages([]); fetchMatches(identity?.hash) }} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid #0a3d22', color: '#3b7a5a', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Skip</button>
+                <button onClick={() => { setShowFeedback(false); setActiveMatch(null); setMessages([]); fetchMatches(identity?.hash) }} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Skip</button>
               </div>
             </div>
           </div>
@@ -479,14 +479,14 @@ export default function Whispers() {
 
         {/* Report Modal */}
         {showReportModal && (
-          <div onClick={() => setShowReportModal(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(4,31,19,0.92)', backdropFilter: 'blur(4px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
-            <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '14px', padding: '1.5rem', border: '1px solid #FAC775', maxWidth: '360px', width: '100%' }}>
-              <h3 style={{ color: '#FAC775', fontSize: '14px', marginBottom: '0.75rem' }}> Report this chat</h3>
-              <p style={{ color: '#6ee7b7', fontSize: '12px', marginBottom: '0.75rem' }}>Your safety matters. Reports are anonymous and reviewed by our team.</p>
-              <textarea placeholder="Briefly describe the issue..." value={reportReason} onChange={e => setReportReason(e.target.value)} rows={3} style={{ width: '100%', background: '#041f13', border: '1px solid #0a3d22', borderRadius: '8px', padding: '8px', color: '#fff', fontSize: '12px', fontFamily: "'Inter', sans-serif", marginBottom: '0.75rem', resize: 'vertical', boxSizing: 'border-box' }} />
+          <div onClick={() => setShowReportModal(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(11,18,32,0.92)', backdropFilter: 'blur(4px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+            <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '14px', padding: '1.5rem', border: '1px solid #7DBDEE', maxWidth: '360px', width: '100%' }}>
+              <h3 style={{ color: '#7DBDEE', fontSize: '14px', marginBottom: '0.75rem' }}> Report this chat</h3>
+              <p style={{ color: '#2DD4BF', fontSize: '12px', marginBottom: '0.75rem' }}>Your safety matters. Reports are anonymous and reviewed by our team.</p>
+              <textarea placeholder="Briefly describe the issue..." value={reportReason} onChange={e => setReportReason(e.target.value)} rows={3} style={{ width: '100%', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '8px', color: '#FFFFFF', fontSize: '12px', fontFamily: "'Inter', sans-serif", marginBottom: '0.75rem', resize: 'vertical', boxSizing: 'border-box' }} />
               <div style={{ display: 'flex', gap: '6px' }}>
-                <button onClick={() => setShowReportModal(false)} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid #0a3d22', color: '#3b7a5a', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-                <button onClick={handleReport} disabled={!reportReason.trim() || submittingReport} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: reportReason.trim() ? '#FAC775' : '#0a3d22', border: 'none', color: reportReason.trim() ? '#041f13' : '#3b7a5a', fontSize: '12px', fontWeight: 600, cursor: reportReason.trim() ? 'pointer' : 'not-allowed', fontFamily: "'Inter', sans-serif" }}>{submittingReport ? '...' : 'Submit report'}</button>
+                <button onClick={() => setShowReportModal(false)} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
+                <button onClick={handleReport} disabled={!reportReason.trim() || submittingReport} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: reportReason.trim() ? '#7DBDEE' : 'rgba(255,255,255,0.12)', border: 'none', color: reportReason.trim() ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: 600, cursor: reportReason.trim() ? 'pointer' : 'not-allowed', fontFamily: "'Inter', sans-serif" }}>{submittingReport ? '...' : 'Submit report'}</button>
               </div>
             </div>
           </div>

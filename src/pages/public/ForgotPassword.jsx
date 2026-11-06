@@ -99,30 +99,30 @@ function ForgotPassword() {
       <div className="root">
         <nav className="navbar">
           <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
-          <button className="nav-ghost" onClick={() => navigate('/login')}>â† Back to login</button>
+          <button className="nav-ghost" onClick={() => navigate('/login')}>Ã¢â€ Â Back to login</button>
         </nav>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
             <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-label="Email sent"></span>
             <h2 className="auth-title">Check your inbox</h2>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>
-              We've sent password reset instructions to <strong style={{ color: '#f59e0b' }}>{email}</strong>
+              We've sent password reset instructions to <strong style={{ color: '#2DD4BF' }}>{email}</strong>
             </p>
-            <p style={{ color: '#6ee7b7', fontSize: '13px', margin: '16px 0', lineHeight: '1.6' }}>
+            <p style={{ color: '#2DD4BF', fontSize: '13px', margin: '16px 0', lineHeight: '1.6' }}>
               Click the link in the email to reset your password. The link expires in 60 minutes.
             </p>
-            <div style={{ background: '#0a3d22', borderRadius: '8px', padding: '12px', marginBottom: '20px', border: '1px solid #f59e0b' }}>
-              <p style={{ color: '#f59e0b', fontSize: '13px', fontWeight: 600, margin: '0 0 4px' }}> Didn't receive it?</p>
-              <p style={{ color: '#6ee7b7', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Check your <strong>spam/junk folder</strong>. Sometimes our emails end up there.</p>
+            <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: '8px', padding: '12px', marginBottom: '20px', border: '1px solid #2DD4BF' }}>
+              <p style={{ color: '#2DD4BF', fontSize: '13px', fontWeight: 600, margin: '0 0 4px' }}> Didn't receive it?</p>
+              <p style={{ color: '#2DD4BF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Check your <strong>spam/junk folder</strong>. Sometimes our emails end up there.</p>
             </div>
 
-            {error && <div role="alert" aria-live="polite" style={{ background: '#791F1F', border: '1px solid #F09595', borderRadius: '8px', padding: '10px 14px', color: '#F09595', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
+            {error && <div role="alert" aria-live="polite" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
 
-            <button onClick={handleResend} disabled={countdown > 0 || resending} style={{ width: '100%', padding: '13px', borderRadius: '100px', background: countdown > 0 ? '#0a3d22' : '#f59e0b', border: 'none', color: countdown > 0 ? '#3b7a5a' : '#041f13', fontSize: '14px', fontWeight: 600, cursor: countdown > 0 ? 'not-allowed' : 'pointer', fontFamily: "'Inter', sans-serif", marginBottom: '10px' }}>
+            <button onClick={handleResend} disabled={countdown > 0 || resending} style={{ width: '100%', padding: '13px', borderRadius: '100px', background: countdown > 0 ? 'rgba(255,255,255,0.12)' : '#2DD4BF', border: 'none', color: countdown > 0 ? 'rgba(255,255,255,0.4)' : '#0B1220', fontSize: '14px', fontWeight: 600, cursor: countdown > 0 ? 'not-allowed' : 'pointer', fontFamily: "'Inter', sans-serif", marginBottom: '10px' }}>
               {resending ? 'Sending...' : countdown > 0 ? `Resend in ${formatCountdown()}` : 'Resend email'}
             </button>
 
-            <button onClick={handleDifferentEmail} style={{ background: 'transparent', border: 'none', color: '#3b7a5a', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", textDecoration: 'underline' }}>
+            <button onClick={handleDifferentEmail} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", textDecoration: 'underline' }}>
               Entered wrong email? Try again
             </button>
           </div>
@@ -135,7 +135,7 @@ function ForgotPassword() {
     <div className="root">
       <nav className="navbar">
         <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
-        <button className="nav-ghost" onClick={() => navigate('/login')}>â† Log in</button>
+        <button className="nav-ghost" onClick={() => navigate('/login')}>Ã¢â€ Â Log in</button>
       </nav>
 
       <div className="auth-container">
@@ -143,7 +143,7 @@ function ForgotPassword() {
           <h2 className="auth-title">Forgot password?</h2>
           <p className="auth-sub">Enter your email and we'll send you a reset link.</p>
 
-          {error && <div role="alert" aria-live="polite" style={{ background: '#791F1F', border: '1px solid #F09595', borderRadius: '8px', padding: '10px 14px', color: '#F09595', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
+          {error && <div role="alert" aria-live="polite" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             <div className="form-group">

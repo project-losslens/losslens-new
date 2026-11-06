@@ -11,7 +11,7 @@ const PLANS = {
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
   toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#1d5c38;color:#6ee7b7;padding:10px 20px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(0,0,0,0.4);border:1px solid #3b7a5a;white-space:nowrap`
+  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
   document.body.appendChild(toast)
   setTimeout(() => toast.remove(), duration)
 }
@@ -37,16 +37,16 @@ export default function SubscriptionPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { setPageLoading(false); return }
-      
+
       const { data } = await supabase
         .from('profiles')
         .select('subscription_plan, subscription_status, plan_type, b2b_client_id')
         .eq('id', session.user.id)
         .single()
-      
+
       if (data) {
         setProfile(data)
-        
+
         // If user belongs to a company, fetch company info
         if (data.b2b_client_id) {
           const { data: client } = await supabase
@@ -63,18 +63,18 @@ export default function SubscriptionPage() {
 
   const handleUpgrade = async (plan) => {
     const currentPlan = profile?.subscription_plan || PLANS.FREE
-    
+
     // If already on company plan, show info
     if (profile?.plan_type === 'company') {
       showToast('You\'re on a company-subsidized plan! All Premium features are included.')
       return
     }
-    
+
     if (plan === currentPlan) {
       showToast(`You're already on the ${plan === PLANS.FREE ? 'Free' : 'Premium'} plan!`, 2000)
       return
     }
-    
+
     setLoading(plan)
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -85,8 +85,8 @@ export default function SubscriptionPage() {
           created_at: new Date().toISOString(),
         }).select().single()
       }
-    } catch (err) { /* Silent — analytics only */ }
-    
+    } catch (err) { /* Silent â€” analytics only */ }
+
     setLoading(null)
     setShowComingSoon(true)
   }
@@ -98,7 +98,7 @@ export default function SubscriptionPage() {
     }
     setJoinLoading(true)
     setJoinError('')
-    
+
     try {
       // Validate code
       const { data: client, error: codeError } = await supabase
@@ -107,26 +107,26 @@ export default function SubscriptionPage() {
         .eq('company_code', companyCode.toUpperCase().trim())
         .eq('status', 'active')
         .maybeSingle()
-      
+
       if (codeError) throw codeError
       if (!client) {
         setJoinError('Invalid company code')
         setJoinLoading(false)
         return
       }
-      
+
       // Check seats
       const { count } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true })
         .eq('b2b_client_id', client.id)
-      
+
       if (client.seats && count >= client.seats) {
         setJoinError('All seats are currently full')
         setJoinLoading(false)
         return
       }
-      
+
       // Update profile
       const { data: { session } } = await supabase.auth.getSession()
       const { error: updateError } = await supabase
@@ -136,9 +136,9 @@ export default function SubscriptionPage() {
           plan_type: 'company',
         })
         .eq('id', session.user.id)
-      
+
       if (updateError) throw updateError
-      
+
       setProfile(prev => ({ ...prev, b2b_client_id: client.id, plan_type: 'company' }))
       setCompanyInfo({ company_name: client.company_name, plan: client.plan, company_code: companyCode.toUpperCase().trim() })
       setShowJoinCompany(false)
@@ -160,8 +160,8 @@ export default function SubscriptionPage() {
 
   if (pageLoading) {
     return (
-      <div className="root" style={{ minHeight: '100vh', background: '#041f13', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: '32px', height: '32px', border: '3px solid #0a3d22', borderTopColor: '#f59e0b', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }}></div>
+      <div className="root" style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '32px', height: '32px', border: '3px solid rgba(255,255,255,0.12)', borderTopColor: '#2DD4BF', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }}></div>
       </div>
     )
   }
@@ -170,7 +170,7 @@ export default function SubscriptionPage() {
     <div className="root">
       <nav className="navbar">
         <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>LossLens</span>
-        <button className="nav-ghost" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">â† Dashboard</button>
+        <button className="nav-ghost" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">Ã¢â€ Â Dashboard</button>
       </nav>
 
       <div className="dashboard" style={{ padding: '2rem 1.5rem', maxWidth: '600px', margin: '0 auto' }}>
@@ -178,17 +178,17 @@ export default function SubscriptionPage() {
           <div className="pill" style={{ marginBottom: '1rem' }}>
             {isCompanyPlan ? 'Company Plan' : currentPlan === PLANS.FREE ? 'Free Plan' : 'Premium Member'}
           </div>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', color: '#fff', marginBottom: '0.5rem' }}>
-            {isCompanyPlan 
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', color: '#FFFFFF', marginBottom: '0.5rem' }}>
+            {isCompanyPlan
               ? 'Company-Subsidized Access'
-              : currentPlan === PLANS.FREE 
-                ? 'Upgrade to Premium' 
+              : currentPlan === PLANS.FREE
+                ? 'Upgrade to Premium'
                 : 'Your Premium Benefits'}
           </h2>
-          <p style={{ color: '#6ee7b7', fontSize: '14px', fontWeight: 300 }}>
+          <p style={{ color: '#2DD4BF', fontSize: '14px', fontWeight: 300 }}>
             {isCompanyPlan
               ? `You're covered by ${companyInfo?.company_name || 'your employer'}. All Premium features are included.`
-              : currentPlan === PLANS.FREE 
+              : currentPlan === PLANS.FREE
                 ? 'Unlock advanced features and support keeping LossLens free for everyone.'
                 : 'Thank you for supporting LossLens! Here\'s what you have access to.'}
           </p>
@@ -196,63 +196,63 @@ export default function SubscriptionPage() {
 
         {/* Company Plan Banner */}
         {isCompanyPlan && companyInfo && (
-          <div style={{ 
-            background: 'linear-gradient(135deg, #633806, #0a3d22)', 
-            border: '2px solid #f59e0b', 
-            borderRadius: '14px', 
-            padding: '1.5rem', 
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(45,212,191,0.15), rgba(255,255,255,0.12))',
+            border: '2px solid #2DD4BF',
+            borderRadius: '14px',
+            padding: '1.5rem',
             marginBottom: '1.5rem',
             textAlign: 'center'
           }}>
             <span style={{ fontSize: '32px', display: 'block', marginBottom: '8px' }}></span>
-            <h3 style={{ color: '#f59e0b', fontSize: '16px', margin: '0 0 4px' }}>{companyInfo.company_name}</h3>
-            <p style={{ color: '#6ee7b7', fontSize: '12px', margin: 0 }}>
-              {companyInfo.plan?.charAt(0).toUpperCase() + companyInfo.plan?.slice(1)} Plan · Subsidized Access
+            <h3 style={{ color: '#2DD4BF', fontSize: '16px', margin: '0 0 4px' }}>{companyInfo.company_name}</h3>
+            <p style={{ color: '#2DD4BF', fontSize: '12px', margin: 0 }}>
+              {companyInfo.plan?.charAt(0).toUpperCase() + companyInfo.plan?.slice(1)} Plan Â· Subsidized Access
             </p>
-            <p style={{ color: '#3b7a5a', fontSize: '11px', marginTop: '8px' }}>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '8px' }}>
                Your employer covers most of the cost. You get all Premium features while your personal data stays private.
             </p>
           </div>
         )}
 
-        {/* Plan Comparison — only show for non-company users */}
+        {/* Plan Comparison â€” only show for non-company users */}
         {!isCompanyPlan && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '2rem' }}>
             <div style={{
-              background: '#062616', border: `2px solid ${currentPlan === PLANS.FREE ? '#f59e0b' : '#0a3d22'}`,
+              background: 'rgba(255,255,255,0.06)', border: `2px solid ${currentPlan === PLANS.FREE ? '#2DD4BF' : 'rgba(255,255,255,0.12)'}`,
               borderRadius: '14px', padding: '1.5rem', textAlign: 'center',
               opacity: currentPlan === PLANS.PREMIUM ? 0.6 : 1,
             }}>
               <span style={{ fontSize: '28px', display: 'block', marginBottom: '8px' }}></span>
-              <h3 style={{ color: '#e2f5ec', fontSize: '15px', marginBottom: '4px' }}>Free</h3>
-              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#f59e0b', margin: '0 0 4px' }}>KES 0</p>
-              <p style={{ color: '#3b7a5a', fontSize: '11px' }}>Forever</p>
+              <h3 style={{ color: '#FFFFFF', fontSize: '15px', marginBottom: '4px' }}>Free</h3>
+              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#2DD4BF', margin: '0 0 4px' }}>KES 0</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Forever</p>
               {currentPlan === PLANS.FREE && (
-                <span style={{ display: 'inline-block', marginTop: '8px', background: '#0a3d22', color: '#6ee7b7', padding: '3px 10px', borderRadius: '100px', fontSize: '10px', border: '1px solid #6ee7b7' }}>Current Plan</span>
+                <span style={{ display: 'inline-block', marginTop: '8px', background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '3px 10px', borderRadius: '100px', fontSize: '10px', border: '1px solid #2DD4BF' }}>Current Plan</span>
               )}
             </div>
 
             <div style={{
-              background: 'linear-gradient(135deg, #0a3d22, #1d5c38)',
-              border: `2px solid ${currentPlan === PLANS.PREMIUM ? '#f59e0b' : '#f59e0b33'}`,
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)',
+              border: `2px solid ${currentPlan === PLANS.PREMIUM ? '#2DD4BF' : 'rgba(45,212,191,0.2)'}`,
               borderRadius: '14px', padding: '1.5rem', textAlign: 'center',
               position: 'relative',
             }}>
-              <span style={{ position: 'absolute', top: '-10px', right: '16px', background: '#f59e0b', color: '#041f13', fontSize: '10px', fontWeight: 600, padding: '3px 10px', borderRadius: '100px' }}>Premium</span>
+              <span style={{ position: 'absolute', top: '-10px', right: '16px', background: '#2DD4BF', color: '#0B1220', fontSize: '10px', fontWeight: 600, padding: '3px 10px', borderRadius: '100px' }}>Premium</span>
               <span style={{ fontSize: '28px', display: 'block', marginBottom: '8px' }}></span>
-              <h3 style={{ color: '#e2f5ec', fontSize: '15px', marginBottom: '4px' }}>Premium</h3>
-              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#f59e0b', margin: '0 0 4px' }}>KES 499</p>
-              <p style={{ color: '#3b7a5a', fontSize: '11px' }}>/month</p>
+              <h3 style={{ color: '#FFFFFF', fontSize: '15px', marginBottom: '4px' }}>Premium</h3>
+              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#2DD4BF', margin: '0 0 4px' }}>KES 499</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>/month</p>
               {currentPlan === PLANS.PREMIUM && (
-                <span style={{ display: 'inline-block', marginTop: '8px', background: '#f59e0b', color: '#041f13', padding: '3px 10px', borderRadius: '100px', fontSize: '10px', fontWeight: 600 }}>Current Plan</span>
+                <span style={{ display: 'inline-block', marginTop: '8px', background: '#2DD4BF', color: '#0B1220', padding: '3px 10px', borderRadius: '100px', fontSize: '10px', fontWeight: 600 }}>Current Plan</span>
               )}
             </div>
           </div>
         )}
 
         {/* Premium Features */}
-        <div className="dash-section" style={{ marginBottom: '1.5rem', borderColor: '#f59e0b' }}>
-          <h3 style={{ color: '#f59e0b', fontSize: '14px', marginBottom: '1rem' }}>
+        <div className="dash-section" style={{ marginBottom: '1.5rem', borderColor: '#2DD4BF' }}>
+          <h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '1rem' }}>
             {isCompanyPlan ? ' Your Company Plan Includes:' : ' Premium Includes Everything in Free, Plus:'}
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -270,7 +270,7 @@ export default function SubscriptionPage() {
                 { emoji: '', text: 'Your data stays private from employer' },
               ] : []),
             ].map((f, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#9fe1cb', fontSize: '13px' }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#7DBDEE', fontSize: '13px' }}>
                 <span style={{ fontSize: '16px' }}>{f.emoji}</span>
                 <span>{f.text}</span>
               </div>
@@ -278,18 +278,18 @@ export default function SubscriptionPage() {
           </div>
         </div>
 
-        {/* Join Company Section — only for individual users */}
+        {/* Join Company Section â€” only for individual users */}
         {!isCompanyPlan && (
-          <div style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '14px', padding: '1.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>
+          <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '1.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>
             <span style={{ fontSize: '24px', display: 'block', marginBottom: '8px' }}></span>
-            <h4 style={{ color: '#e2f5ec', fontSize: '14px', margin: '0 0 6px' }}>Have a company code?</h4>
-            <p style={{ color: '#3b7a5a', fontSize: '12px', margin: '0 0 12px' }}>
+            <h4 style={{ color: '#FFFFFF', fontSize: '14px', margin: '0 0 6px' }}>Have a company code?</h4>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 12px' }}>
               If your employer offers LossLens, enter your code for subsidized Premium access.
             </p>
             {!showJoinCompany ? (
               <button onClick={() => setShowJoinCompany(true)} style={{
                 padding: '10px 20px', borderRadius: '100px', background: 'transparent',
-                border: '1px solid #f59e0b', color: '#f59e0b', fontSize: '13px',
+                border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '13px',
                 cursor: 'pointer', fontFamily: "'Inter', sans-serif"
               }}>
                 Enter Company Code
@@ -304,8 +304,8 @@ export default function SubscriptionPage() {
                     onChange={e => { setCompanyCode(e.target.value.toUpperCase()); setJoinError('') }}
                     style={{
                       flex: 1, padding: '10px 14px', borderRadius: '8px',
-                      background: '#041f13', border: `1px solid ${joinError ? '#F09595' : '#0a3d22'}`,
-                      color: '#fff', fontSize: '13px', fontFamily: "'Inter', sans-serif", outline: 'none'
+                      background: '#0B1220', border: `1px solid ${joinError ? '#FFFFFF' : 'rgba(255,255,255,0.12)'}`,
+                      color: '#FFFFFF', fontSize: '13px', fontFamily: "'Inter', sans-serif", outline: 'none'
                     }}
                     onKeyDown={e => e.key === 'Enter' && handleJoinCompany()}
                   />
@@ -313,17 +313,17 @@ export default function SubscriptionPage() {
                     onClick={handleJoinCompany}
                     disabled={joinLoading}
                     style={{
-                      padding: '10px 18px', borderRadius: '8px', background: '#f59e0b',
-                      border: 'none', color: '#041f13', fontSize: '13px', fontWeight: 600,
+                      padding: '10px 18px', borderRadius: '8px', background: '#2DD4BF',
+                      border: 'none', color: '#0B1220', fontSize: '13px', fontWeight: 600,
                       cursor: 'pointer', fontFamily: "'Inter', sans-serif"
                     }}
                   >
                     {joinLoading ? '...' : 'Join'}
                   </button>
                 </div>
-                {joinError && <p style={{ color: '#F09595', fontSize: '11px', margin: 0 }}>{joinError}</p>}
+                {joinError && <p style={{ color: '#FFFFFF', fontSize: '11px', margin: 0 }}>{joinError}</p>}
                 <button onClick={() => { setShowJoinCompany(false); setJoinError(''); setCompanyCode('') }}
-                  style={{ background: 'none', border: 'none', color: '#3b7a5a', fontSize: '11px', cursor: 'pointer', marginTop: '4px' }}>
+                  style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '11px', cursor: 'pointer', marginTop: '4px' }}>
                   Cancel
                 </button>
               </div>
@@ -331,7 +331,7 @@ export default function SubscriptionPage() {
           </div>
         )}
 
-        {/* Action Button — only for free individual users */}
+        {/* Action Button â€” only for free individual users */}
         {!isCompanyPlan && currentPlan === PLANS.FREE && !interestRegistered && (
           <button
             className="btn-primary full"
@@ -344,49 +344,49 @@ export default function SubscriptionPage() {
         )}
 
         {interestRegistered && (
-          <div style={{ textAlign: 'center', padding: '1rem', background: '#0a3d22', borderRadius: '12px', border: '1px solid #f59e0b', marginBottom: '1rem' }}>
+          <div style={{ textAlign: 'center', padding: '1rem', background: 'rgba(255,255,255,0.12)', borderRadius: '12px', border: '1px solid #2DD4BF', marginBottom: '1rem' }}>
             <span style={{ fontSize: '24px', display: 'block', marginBottom: '8px' }}></span>
-            <p style={{ color: '#6ee7b7', fontSize: '14px', fontWeight: 500, margin: 0 }}>Thanks for your interest!</p>
-            <p style={{ color: '#3b7a5a', fontSize: '12px', marginTop: '4px' }}>We'll notify you when Premium launches.</p>
+            <p style={{ color: '#2DD4BF', fontSize: '14px', fontWeight: 500, margin: 0 }}>Thanks for your interest!</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginTop: '4px' }}>We'll notify you when Premium launches.</p>
           </div>
         )}
 
         {/* FAQ */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1.5rem' }}>
-          <h3 style={{ color: '#e2f5ec', fontSize: '14px', marginBottom: '4px' }}> FAQ</h3>
+          <h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '4px' }}> FAQ</h3>
           {[
             { q: 'Can I switch back to Free?', a: 'Yes, anytime. You keep Premium access until the end of your billing period.' },
-            { q: 'How do I pay?', a: 'Premium will use M-Pesa — Kenya\'s most trusted mobile payment. No credit card needed.' },
+            { q: 'How do I pay?', a: 'Premium will use M-Pesa â€” Kenya\'s most trusted mobile payment. No credit card needed.' },
             { q: 'Is my data still private?', a: 'Absolutely. Premium doesn\'t change our privacy commitment. Your data is yours.' },
-            ...(isCompanyPlan ? [{ q: 'Can my employer see my diary?', a: 'No. Your diary, messages, and personal data are completely private. Your employer only sees anonymized usage statistics — never your personal content.' }] : []),
+            ...(isCompanyPlan ? [{ q: 'Can my employer see my diary?', a: 'No. Your diary, messages, and personal data are completely private. Your employer only sees anonymized usage statistics â€” never your personal content.' }] : []),
             { q: 'What if my company stops offering LossLens?', a: 'Your account stays active. You can switch to an individual Free or Premium plan anytime.' },
           ].map((faq, i) => (
-            <div key={i} style={{ background: '#062616', border: '1px solid #0a3d22', borderRadius: '10px', padding: '12px 14px' }}>
-              <p style={{ color: '#e2f5ec', fontSize: '12px', fontWeight: 500, margin: '0 0 4px' }}>{faq.q}</p>
-              <p style={{ color: '#3b7a5a', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>{faq.a}</p>
+            <div key={i} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '12px 14px' }}>
+              <p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: '0 0 4px' }}>{faq.q}</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>{faq.a}</p>
             </div>
           ))}
         </div>
 
-        <p style={{ color: '#1d5c38', fontSize: '11px', textAlign: 'center' }}>
+        <p style={{ color: '#7DBDEE', fontSize: '11px', textAlign: 'center' }}>
            LossLens Premium launches soon. All features are free during testing.
         </p>
       </div>
 
       {/* Coming Soon Modal */}
       {showComingSoon && (
-        <div onClick={handleCloseComingSoon} style={{ position: 'fixed', inset: 0, background: 'rgba(4,31,19,0.92)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: '#062616', borderRadius: '16px', padding: '2rem', border: '2px solid #f59e0b', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
+        <div onClick={handleCloseComingSoon} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '2px solid #2DD4BF', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
-            <h3 style={{ color: '#f59e0b', fontSize: '18px', fontFamily: "'Playfair Display', serif", marginBottom: '12px' }}>Premium Coming Soon!</h3>
-            <p style={{ color: '#6ee7b7', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
-              M-Pesa payments are being set up. During testing, <strong style={{ color: '#f59e0b' }}>all features are free</strong>.
+            <h3 style={{ color: '#2DD4BF', fontSize: '18px', fontFamily: "'Playfair Display', serif", marginBottom: '12px' }}>Premium Coming Soon!</h3>
+            <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
+              M-Pesa payments are being set up. During testing, <strong style={{ color: '#2DD4BF' }}>all features are free</strong>.
             </p>
-            <p style={{ color: '#3b7a5a', fontSize: '12px', marginBottom: '16px' }}>
-              We've noted your interest — you'll be the first to know when Premium launches!
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '16px' }}>
+              We've noted your interest â€” you'll be the first to know when Premium launches!
             </p>
             <button onClick={handleCloseComingSoon} className="btn-primary full" style={{ padding: '12px', fontSize: '14px' }}>
-              Got it — keep exploring!
+              Got it â€” keep exploring!
             </button>
           </div>
         </div>

@@ -40,9 +40,9 @@ function AdminSidebar() {
         onClick={() => setMobileOpen(!mobileOpen)}
         className="mobile-hamburger"
         style={{
-          background: '#791F1F',
-          border: '1px solid #F09595',
-          color: '#F09595',
+          background: 'rgba(255,255,255,0.08)',
+          border: '1px solid #FFFFFF',
+          color: '#FFFFFF',
         }}
       >
         {mobileOpen ? '' : ''}
@@ -61,9 +61,9 @@ function AdminSidebar() {
         className="desktop-toggle"
         style={{
           left: collapsed ? '16px' : '260px',
-          background: '#791F1F',
-          border: '1px solid #F09595',
-          color: '#F09595',
+          background: 'rgba(255,255,255,0.08)',
+          border: '1px solid #FFFFFF',
+          color: '#FFFFFF',
         }}
       >
         {collapsed ? '' : 'Collapse'}
@@ -74,32 +74,32 @@ function AdminSidebar() {
         data-collapsed={collapsed}
         style={{
           left: mobileOpen ? 0 : collapsed ? '-260px' : '0',
-          background: '#062616',
-          borderRight: '2px solid #791F1F',
+          background: 'rgba(255,255,255,0.06)',
+          borderRight: '2px solid rgba(255,255,255,0.08)',
         }}
       >
         <div
           style={{
             padding: '1.25rem 1rem',
-            borderBottom: '1px solid #791F1F',
+            borderBottom: '1px solid rgba(255,255,255,0.08)',
             marginBottom: '0.5rem',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            background: '#0a0a0a',
+            background: '#0B1220',
           }}
         >
           <span
             style={{
               fontFamily: "'Playfair Display', serif",
               fontSize: '20px',
-              color: '#F09595',
+              color: '#FFFFFF',
               fontWeight: 700,
               cursor: 'pointer',
             }}
             onClick={() => handleNav('/admin')}
           >
-            LossLens <span style={{ fontSize: '12px', color: '#791F1F' }}>ADMIN</span>
+            LossLens <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.08)' }}>ADMIN</span>
           </span>
         </div>
 
@@ -117,8 +117,8 @@ function AdminSidebar() {
                 marginBottom: '2px',
                 borderRadius: '8px',
                 border: 'none',
-                background: isActive(item.path) ? '#791F1F' : 'transparent',
-                color: item.path === '/logout' ? '#F09595' : isActive(item.path) ? '#F09595' : '#6ee7b7',
+                background: isActive(item.path) ? 'rgba(255,255,255,0.08)' : 'transparent',
+                color: item.path === '/logout' ? '#FFFFFF' : isActive(item.path) ? '#FFFFFF' : '#2DD4BF',
                 cursor: 'pointer',
                 fontFamily: "'Inter', sans-serif",
                 fontSize: '13px',
@@ -127,14 +127,14 @@ function AdminSidebar() {
               }}
               onMouseEnter={(e) => {
                 if (!isActive(item.path)) {
-                  e.currentTarget.style.background = '#0a0a0a'
-                  e.currentTarget.style.color = '#F09595'
+                  e.currentTarget.style.background = '#0B1220'
+                  e.currentTarget.style.color = '#FFFFFF'
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isActive(item.path)) {
                   e.currentTarget.style.background = 'transparent'
-                  e.currentTarget.style.color = item.path === '/logout' ? '#F09595' : '#6ee7b7'
+                  e.currentTarget.style.color = item.path === '/logout' ? '#FFFFFF' : '#2DD4BF'
                 }
               }}
             >
@@ -160,7 +160,7 @@ function AdminSidebar() {
                 <div
                   style={{
                     fontSize: '10px',
-                    color: isActive(item.path) ? '#F09595' : '#3b7a5a',
+                    color: isActive(item.path) ? '#FFFFFF' : 'rgba(255,255,255,0.4)',
                     fontWeight: 300,
                     marginTop: '1px',
                     whiteSpace: 'nowrap',
@@ -178,9 +178,9 @@ function AdminSidebar() {
         <div
           style={{
             padding: '0.75rem 1rem',
-            borderTop: '1px solid #791F1F',
+            borderTop: '1px solid rgba(255,255,255,0.08)',
             fontSize: '11px',
-            color: '#791F1F',
+            color: 'rgba(255,255,255,0.08)',
             textAlign: 'center',
           }}
         >

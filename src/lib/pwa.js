@@ -6,7 +6,7 @@ export function registerSW() {
         .register('/service-worker.js')
         .then((registration) => {
           console.log('SW registered:', registration.scope);
-          
+
           // Check for updates
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
@@ -36,12 +36,12 @@ export function isPWAInstalled() {
 let deferredPrompt = null;
 export function setupInstallPrompt() {
   if (typeof window === 'undefined') return;
-  
+
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
   });
-  
+
   // Clear prompt when app is installed
   window.addEventListener('appinstalled', () => {
     deferredPrompt = null;
@@ -51,7 +51,7 @@ export function setupInstallPrompt() {
 
 export async function showInstallPrompt() {
   if (!deferredPrompt) return false;
-  
+
   try {
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
