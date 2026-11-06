@@ -169,7 +169,7 @@ export default function FamilyJoin() {
   }
 
   const getMoodEmoji = (mood) => {
-    if (!mood) return 'Ã¢ "'
+    if (!mood) return '⠝"'
     if (mood.includes('Calm')) return ''
     if (mood.includes('Stressed')) return ''
     if (mood.includes('Anxious')) return ''
@@ -200,7 +200,7 @@ export default function FamilyJoin() {
           <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
           <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif", fontSize: '22px', marginBottom: '12px' }}>Invalid Link</h2>
           <p style={{ color: '#2DD4BF', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px' }}>{error}</p>
-          <button onClick={() => navigate('/')} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Go to LossLens â†’</button>
+          <button onClick={() => navigate('/')} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Go to LossLens →</button>
         </div>
       </div>
     )
@@ -214,7 +214,7 @@ export default function FamilyJoin() {
           <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
           <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif", fontSize: '22px', marginBottom: '12px' }}>You've Declined</h2>
           <p style={{ color: '#2DD4BF', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px' }}>That's okay. If you change your mind, ask {invitation?.supporter_name || 'your friend'} to send you a new invitation.</p>
-          <button onClick={() => navigate('/')} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Go to LossLens â†’</button>
+          <button onClick={() => navigate('/')} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Go to LossLens →</button>
         </div>
       </div>
     )

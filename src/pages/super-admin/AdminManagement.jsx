@@ -236,14 +236,14 @@ export default function AdminManagement() {
 
           {showPromote && (
             <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid #2DD4BF', borderRadius: '14px', padding: '20px', marginBottom: '1.5rem' }}>
-              <h3 style={{ color: '#2DD4BF', fontSize: '15px', margin: '0 0 1rem' }}>â¬† Promote User to Admin</h3>
+              <h3 style={{ color: '#2DD4BF', fontSize: '15px', margin: '0 0 1rem' }}>⬆ Promote User to Admin</h3>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 <input type="text" placeholder="Enter user name, username, or ID..." value={promoteInput} onChange={e => setPromoteInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && promoteToAdmin()}
                   style={{ flex: 1, minWidth: '250px', padding: '10px 14px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '13px', outline: 'none', fontFamily: "'Inter', sans-serif" }} />
                 <button onClick={promoteToAdmin} disabled={promoting || !promoteInput.trim()}
                   style={{ ...btnStyle('#2DD4BF', '#0B1220', '#2DD4BF'), opacity: !promoteInput.trim() ? 0.5 : 1 }}>
-                  {promoting ? 'â³...' : 'Promote'}
+                  {promoting ? '⏳...' : 'Promote'}
                 </button>
               </div>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '6px' }}> Admins have full access to user data, crisis alerts, and platform management.</p>
@@ -323,7 +323,7 @@ export default function AdminManagement() {
                             </span>
                             <span style={{ background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', border: '1px solid #2DD4BF', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}> Admin</span>
                             {isSuspended && (
-                              <span style={{ background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', border: '1px solid #FFFFFF', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>â¸ Suspended</span>
+                              <span style={{ background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', border: '1px solid #FFFFFF', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>⏸ Suspended</span>
                             )}
                           </div>
                           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
@@ -337,12 +337,12 @@ export default function AdminManagement() {
                           <button onClick={() => setShowSuspendConfirm(a)} disabled={actionLoading === a.id || isCurrentUser}
                             style={btnStyle('transparent', isSuspended ? '#2DD4BF' : '#7DBDEE', isSuspended ? '#2DD4BF' : '#7DBDEE')}
                             title={isCurrentUser ? 'Cannot suspend yourself' : isSuspended ? 'Reactivate admin' : 'Suspend admin'}>
-                            {actionLoading === a.id ? '...' : isSuspended ? 'â–¶ Reactivate' : 'â¸ Suspend'}
+                            {actionLoading === a.id ? '...' : isSuspended ? '▶ Reactivate' : '⏸ Suspend'}
                           </button>
                           <button onClick={() => setShowRevokeConfirm(a)} disabled={actionLoading === a.id || isCurrentUser}
                             style={btnStyle('transparent', '#7DBDEE', '#7DBDEE')}
                             title={isCurrentUser ? 'Cannot revoke yourself' : 'Revoke admin to user'}>
-                            {actionLoading === a.id ? '...' : 'â¬‡ Revoke'}
+                            {actionLoading === a.id ? '...' : '⬇ Revoke'}
                           </button>
                           <button onClick={() => setShowDeleteConfirm(a)} disabled={actionLoading === a.id || isCurrentUser}
                             style={btnStyle('transparent', '#FFFFFF', 'rgba(255,255,255,0.08)')}
@@ -364,7 +364,7 @@ export default function AdminManagement() {
       {showSuspendConfirm && (
         <div onClick={() => setShowSuspendConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
           <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: `1px solid ${showSuspendConfirm.status === 'suspended' ? '#2DD4BF' : '#7DBDEE'}`, maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{showSuspendConfirm.status === 'suspended' ? 'â–¶' : 'â¸'}</span>
+            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{showSuspendConfirm.status === 'suspended' ? '▶' : '⏸'}</span>
             <h3 style={{ color: showSuspendConfirm.status === 'suspended' ? '#2DD4BF' : '#7DBDEE', fontSize: '16px', margin: '0 0 8px' }}>
               {showSuspendConfirm.status === 'suspended' ? 'Reactivate Admin?' : 'Suspend Admin?'}
             </h3>
@@ -385,7 +385,7 @@ export default function AdminManagement() {
       {showRevokeConfirm && (
         <div onClick={() => setShowRevokeConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
           <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid #7DBDEE', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>â¬‡</span>
+            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>⬇</span>
             <h3 style={{ color: '#7DBDEE', fontSize: '16px', margin: '0 0 8px' }}>Revoke Admin Access?</h3>
             <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
               <strong style={{ color: '#2DD4BF' }}>"{showRevokeConfirm.full_name}"</strong> will become a regular user.

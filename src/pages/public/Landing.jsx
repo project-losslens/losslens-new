@@ -152,7 +152,7 @@ function Landing() {
           <a onClick={() => scrollTo('about')} style={{ color: '#2DD4BF', fontSize: 13, textDecoration: 'none', cursor: 'pointer' }}>About</a>
           <a onClick={() => scrollTo('features')} style={{ color: '#2DD4BF', fontSize: 13, textDecoration: 'none', cursor: 'pointer' }}>Features</a>
           <a onClick={() => scrollTo('community')} style={{ color: '#2DD4BF', fontSize: 13, textDecoration: 'none', cursor: 'pointer' }}>Community</a>
-          <a onClick={() => scrollTo('crisis')} style={{ color: '#FFFFFF', fontSize: 13, textDecoration: 'none', cursor: 'pointer', fontWeight: 500 }}>ðŸ†˜ Crisis Help</a>
+          <a onClick={() => scrollTo('crisis')} style={{ color: '#FFFFFF', fontSize: 13, textDecoration: 'none', cursor: 'pointer', fontWeight: 500 }}>🆘 Crisis Help</a>
           <a onClick={() => scrollTo('contact')} style={{ color: '#2DD4BF', fontSize: 13, textDecoration: 'none', cursor: 'pointer' }}>Contact</a>
           <button className="nav-ghost" onClick={() => { closeMenu(); setAuthMode('login') }}>Log In</button>
           <button className="nav-btn" onClick={() => { closeMenu(); setAuthMode('signup') }}>Get Started Free</button>
@@ -164,7 +164,7 @@ function Landing() {
               <a onClick={() => scrollTo('about')}>About</a>
               <a onClick={() => scrollTo('features')}>Features</a>
               <a onClick={() => scrollTo('community')}>Community</a>
-              <a onClick={() => scrollTo('crisis')} style={{ color: '#FFFFFF' }}>ðŸ†˜ Crisis Help</a>
+              <a onClick={() => scrollTo('crisis')} style={{ color: '#FFFFFF' }}>🆘 Crisis Help</a>
               <a onClick={() => scrollTo('contact')}>Contact</a>
               <hr style={{ borderColor: 'rgba(255,255,255,0.12)', margin: '8px 0' }} />
               <button className="nav-ghost" onClick={() => { closeMenu(); setAuthMode('login') }}>Log In</button>
@@ -179,8 +179,8 @@ function Landing() {
         <h1>Free, private gambling support <em>built for Kenya</em></h1>
         <p className="sub">LossLens combines evidence-based CBT therapy, AI companion support, anonymous peer community, and practical tools to help you understand your patterns, manage urges, and reclaim what matters most.</p>
         <div className="btns">
-          <button className="btn-primary" onClick={() => setAuthMode('signup')}>Start for free â†’</button>
-          <a onClick={() => scrollTo('about')} className="btn-ghost" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>Learn more â†“</a>
+          <button className="btn-primary" onClick={() => setAuthMode('signup')}>Start for free →</button>
+          <a onClick={() => scrollTo('about')} className="btn-ghost" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>Learn more ↓</a>
         </div>
         <p className="trust"> PRIVATE  ·  CBT-BASED  ·  FREE FOREVER</p>
       </div>
@@ -220,7 +220,7 @@ function Landing() {
 
       <div id="crisis" style={{ padding: '2.5rem 2rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div className="pill" style={{ background: 'rgba(255,255,255,0.08)', color: '#FFFFFF' }}>ðŸ†˜ Crisis Support</div>
+          <div className="pill" style={{ background: 'rgba(255,255,255,0.08)', color: '#FFFFFF' }}>🆘 Crisis Support</div>
           <h1 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', marginBottom: '0.75rem' }}>You're <em>not alone</em></h1>
           <p className="sub" style={{ maxWidth: 520, margin: '0 auto' }}>If you're feeling overwhelmed, having thoughts of self-harm, or need someone to talk to right now — reach out. These services are free and confidential.</p>
         </div>
@@ -234,7 +234,7 @@ function Landing() {
             }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = '#2DD4BF'; e.currentTarget.style.transform = 'scale(1.01)' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = contact.priority ? '#FFFFFF' : 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'scale(1)' }}>
-              <span style={{ fontSize: contact.priority ? '32px' : '24px', flexShrink: 0 }}>{contact.priority ? 'â­' : ''}</span>
+              <span style={{ fontSize: contact.priority ? '32px' : '24px', flexShrink: 0 }}>{contact.priority ? '⭐' : ''}</span>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <h3 style={{ color: contact.priority ? '#FFFFFF' : '#FFFFFF', fontSize: contact.priority ? '16px' : '14px', margin: 0 }}>{contact.name}</h3>
@@ -242,7 +242,7 @@ function Landing() {
                 </div>
                 <p style={{ color: '#2DD4BF', fontSize: '13px', margin: '4px 0 0' }}>{contact.phone}  · {contact.hours}</p>
               </div>
-              <span style={{ color: contact.priority ? '#FFFFFF' : 'rgba(255,255,255,0.4)', fontSize: '20px' }}>â†’</span>
+              <span style={{ color: contact.priority ? '#FFFFFF' : 'rgba(255,255,255,0.4)', fontSize: '20px' }}>→</span>
             </a>
           ))}
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', textAlign: 'center', marginTop: '8px' }}>All calls are free, confidential, and available to anyone in Kenya.</p>
@@ -269,7 +269,7 @@ function Landing() {
       <div className="divider" />
 
       <div style={{ padding: '2rem' }}>
-        <div className="cta-block"><h2>Your journey starts with one step</h2><p>No judgement. No cost. No barriers. LossLens is here whenever you're ready.</p><div className="btns"><button className="btn-primary" onClick={() => setAuthMode('signup')}>Begin for free â†’</button><a onClick={() => scrollTo('features')} className="btn-ghost" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>See all features</a></div><p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: '0.75rem' }}>No credit card. No subscription. Just support.</p></div>
+        <div className="cta-block"><h2>Your journey starts with one step</h2><p>No judgement. No cost. No barriers. LossLens is here whenever you're ready.</p><div className="btns"><button className="btn-primary" onClick={() => setAuthMode('signup')}>Begin for free →</button><a onClick={() => scrollTo('features')} className="btn-ghost" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>See all features</a></div><p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: '0.75rem' }}>No credit card. No subscription. Just support.</p></div>
       </div>
 
       <footer className="footer" style={{ flexDirection: 'column', gap: '12px', textAlign: 'center' }}>
@@ -282,7 +282,7 @@ function Landing() {
         </div>
         <div style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.31)', borderRadius: '8px', padding: '10px 14px', maxWidth: '500px', margin: '0 auto' }}>
           <p style={{ fontSize: 12, color: '#FFFFFF', margin: 0 }}>
-            ðŸ†˜ <strong>In crisis?</strong> Call <strong style={{ color: '#FFFFFF' }}>Befrienders Kenya 0800 722 030</strong> or <strong>NACADA 1192</strong> (24/7 free)
+            🆘 <strong>In crisis?</strong> Call <strong style={{ color: '#FFFFFF' }}>Befrienders Kenya 0800 722 030</strong> or <strong>NACADA 1192</strong> (24/7 free)
           </p>
         </div>
       </footer>
@@ -300,7 +300,7 @@ function Landing() {
             {authMode === 'signup' && (
               <>
                 <div className="form-group"><label>FULL NAME</label><input type="text" placeholder="e.g. Amina Wanjiru" value={form.name} onChange={(e) => { setForm({ ...form, name: e.target.value }); setFieldErrors(p => ({ ...p, name: '' })) }} style={fieldErrors.name ? { borderColor: '#FFFFFF' } : {}} />{fieldErrors.name && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.name}</span>}</div>
-                <div className="form-group"><label>PHONE NUMBER</label><div className="phone-input"><span className="phone-prefix">ðŸ‡°ðŸ‡ª +254</span><input type="tel" placeholder="7XX XXX XXX" value={form.phone} onChange={(e) => { setForm({ ...form, phone: e.target.value }); setFieldErrors(p => ({ ...p, phone: '' })) }} style={fieldErrors.phone ? { borderColor: '#FFFFFF' } : {}} /></div>{fieldErrors.phone && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.phone}</span>}</div>
+                <div className="form-group"><label>PHONE NUMBER</label><div className="phone-input"><span className="phone-prefix">🇰🇪 +254</span><input type="tel" placeholder="7XX XXX XXX" value={form.phone} onChange={(e) => { setForm({ ...form, phone: e.target.value }); setFieldErrors(p => ({ ...p, phone: '' })) }} style={fieldErrors.phone ? { borderColor: '#FFFFFF' } : {}} /></div>{fieldErrors.phone && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.phone}</span>}</div>
               </>
             )}
             <div className="form-group"><label>EMAIL ADDRESS</label><input type="email" placeholder="you@example.com" value={form.email} onChange={(e) => { setForm({ ...form, email: e.target.value }); setFieldErrors(p => ({ ...p, email: '' })) }} style={fieldErrors.email ? { borderColor: '#FFFFFF' } : {}} />{fieldErrors.email && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.email}</span>}</div>
@@ -316,7 +316,7 @@ function Landing() {
             <button className="btn-primary full" onClick={handleSubmit} disabled={loading || cooldown} style={{ opacity: cooldown ? 0.5 : 1 }}>{loading ? <span className="spinner" /> : cooldown ? `Wait ${formatCooldown()}` : authMode === 'login' ? 'Sign In' : 'Create My Account'}</button>
             <p className="auth-switch">{authMode === 'login' ? "Don't have an account? " : 'Already have an account? '}<span onClick={() => { setAuthMode(authMode === 'login' ? 'signup' : 'login'); setError(''); setFieldErrors({}) }}>{authMode === 'login' ? 'Sign up free' : 'Sign in'}</span></p>
             <div style={{ marginTop: '1.25rem', background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.31)', borderRadius: 8, padding: '10px 14px', textAlign: 'center' }}>
-              <p style={{ fontSize: 11, color: '#FFFFFF', margin: 0 }}>ðŸ†˜ <strong>In crisis?</strong> Call <strong style={{ color: '#FFFFFF' }}>Befrienders Kenya 0800 722 030</strong></p>
+              <p style={{ fontSize: 11, color: '#FFFFFF', margin: 0 }}>🆘 <strong>In crisis?</strong> Call <strong style={{ color: '#FFFFFF' }}>Befrienders Kenya 0800 722 030</strong></p>
             </div>
           </div>
         </div>

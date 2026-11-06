@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 
-// â”€â”€â”€ Check and award badges â”€â”€â”€
+// ─── Check and award badges ───
 export async function checkBadges(userId) {
   if (!userId) return []
 
@@ -120,7 +120,7 @@ export async function checkBadges(userId) {
   return badgeDetails || []
 }
 
-// â”€â”€â”€ Get all earned badges â”€â”€â”€
+// ─── Get all earned badges ───
 export async function getEarnedBadges(userId) {
   if (!userId) return []
 
@@ -148,7 +148,7 @@ export async function getEarnedBadges(userId) {
   return data || []
 }
 
-// â”€â”€â”€ Get all available badges with earned status â”€â”€â”€
+// ─── Get all available badges with earned status ───
 export async function getAllBadges(userId) {
   const { data: allBadges, error: allError } = await supabase
     .from('badges')
@@ -178,7 +178,7 @@ export async function getAllBadges(userId) {
   }))
 }
 
-// â”€â”€â”€ Streak Freeze â”€â”€â”€
+// ─── Streak Freeze ───
 export async function checkStreakFreeze(userId) {
   if (!userId) return false
 

@@ -234,7 +234,7 @@ function AIChat({ profile }) {
     setIsListening(false);
   };
 
-  // â”€â”€â”€ VOICE: Speak text aloud â”€â”€â”€
+  // ─── VOICE: Speak text aloud ───
   const speakText = (text, messageId) => {
     if (!synthRef.current) return;
 
@@ -269,7 +269,7 @@ function AIChat({ profile }) {
     synthRef.current.speak(utterance);
   };
 
-  // â”€â”€â”€ VOICE: Stop speaking â”€â”€â”€
+  // ─── VOICE: Stop speaking ───
   const stopSpeaking = () => {
     if (synthRef.current) {
       synthRef.current.cancel();
@@ -278,7 +278,7 @@ function AIChat({ profile }) {
     setOlooEmotion('neutral');
   };
 
-  // â”€â”€â”€ Send message â”€â”€â”€
+  // ─── Send message ───
   const sendMessage = async (text) => {
     const content = (text || input).trim();
     if (!content || loading) return;
@@ -454,7 +454,7 @@ function AIChat({ profile }) {
               style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '20px', cursor: 'pointer', padding: '4px 8px', borderRadius: '8px' }}
               onMouseEnter={(e) => { e.target.style.background = 'rgba(255,255,255,0.12)'; e.target.style.color = '#2DD4BF'; }}
               onMouseLeave={(e) => { e.target.style.background = 'transparent'; e.target.style.color = 'rgba(255,255,255,0.4)'; }}
-            >â”€</button>
+            >─</button>
           </div>
 
           {/* Messages Area */}
@@ -572,7 +572,7 @@ function AIChat({ profile }) {
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                 transition: 'all 0.2s',
               }}
-            >➤</button>
+            >→</button>
           </div>
         </div>
       )}

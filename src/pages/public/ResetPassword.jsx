@@ -113,10 +113,10 @@ function ResetPassword() {
         </nav>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}>â°</span>
+            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}>⏰</span>
             <h2 className="auth-title">Link expired</h2>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>{tokenError}</p>
-            <button className="btn-primary full" onClick={() => navigate('/forgot-password')}>Request a new link â†’</button>
+            <button className="btn-primary full" onClick={() => navigate('/forgot-password')}>Request a new link →</button>
           </div>
         </div>
       </div>
@@ -135,7 +135,7 @@ function ResetPassword() {
             <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} role="img" aria-label="Success"></span>
             <h2 className="auth-title">Password updated!</h2>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>Your password has been changed. You'll be redirected to the login page.</p>
-            <button className="btn-primary full" onClick={() => { if (redirectTimer.current) clearTimeout(redirectTimer.current); navigate('/login') }}>Go to login now â†’</button>
+            <button className="btn-primary full" onClick={() => { if (redirectTimer.current) clearTimeout(redirectTimer.current); navigate('/login') }}>Go to login now →</button>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginTop: '12px' }}>Redirecting automatically...</p>
           </div>
         </div>
@@ -147,7 +147,7 @@ function ResetPassword() {
     <div className="root">
       <nav className="navbar">
         <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
-        <button className="nav-ghost" onClick={() => navigate('/login')}>Ã¢"   Log in</button>
+        <button className="nav-ghost" onClick={() => navigate('/login')}>â"   Log in</button>
       </nav>
 
       <div className="auth-container">

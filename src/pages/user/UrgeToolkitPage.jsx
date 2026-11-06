@@ -59,11 +59,11 @@ const HELPLINES = [
 ]
 
 const TOOLS = [
-  { id: 'timer', icon: 'â±', title: '15-Minute Urge Timer', desc: 'Urges pass. Prove it.', color: '#2DD4BF' },
+  { id: 'timer', icon: '⏱', title: '15-Minute Urge Timer', desc: 'Urges pass. Prove it.', color: '#2DD4BF' },
   { id: 'breathing', icon: '', title: '4-7-8 Breathing', desc: 'Calm your body', color: '#2DD4BF' },
   { id: 'thought', icon: '', title: 'Thought Challenger', desc: 'Challenge the urge', color: '#7DBDEE' },
   { id: 'distraction', icon: '', title: 'Spin the Wheel', desc: 'Random challenge', color: '#2DD4BF' },
-  { id: 'helpline', icon: 'ðŸ†˜', title: 'Emergency & Support', desc: 'Get help now', color: '#FFFFFF' },
+  { id: 'helpline', icon: '🆘', title: 'Emergency & Support', desc: 'Get help now', color: '#FFFFFF' },
 ]
 
 //  Breathing Human — React.memo for performance
@@ -264,7 +264,7 @@ export default function UrgeToolkitPage() {
             ))}
           </div>
 
-          {/* â”€â”€â”€ TIMER â”€â”€â”€ */}
+          {/* ─── TIMER ─── */}
           {activeTool === 'timer' && (
             <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out' }}>
               <h3 style={{ color: '#FFFFFF', fontSize: '16px', marginBottom: '0.5rem' }}>Urge Timer</h3>
@@ -289,8 +289,8 @@ export default function UrgeToolkitPage() {
               <div className="toggle-group" style={{ marginTop: '1.5rem', justifyContent: 'center' }}>
                 {!timerComplete ? (
                   <>
-                    <button className="toggle-btn active-primary" onClick={() => setTimerRunning(!timerRunning)} style={{ flex: '0 1 auto', minWidth: '100px' }}>{timerRunning ? 'Pause â¸' : timer === TIMER_DURATION ? 'Start â–¶' : 'Resume â–¶'}</button>
-                    <button className="toggle-btn" onClick={() => { setTimer(TIMER_DURATION); setTimerRunning(false); setTimerComplete(false) }} style={{ flex: '0 1 auto', minWidth: '100px' }}>Reset â†º</button>
+                    <button className="toggle-btn active-primary" onClick={() => setTimerRunning(!timerRunning)} style={{ flex: '0 1 auto', minWidth: '100px' }}>{timerRunning ? 'Pause ⏸' : timer === TIMER_DURATION ? 'Start ▶' : 'Resume ▶'}</button>
+                    <button className="toggle-btn" onClick={() => { setTimer(TIMER_DURATION); setTimerRunning(false); setTimerComplete(false) }} style={{ flex: '0 1 auto', minWidth: '100px' }}>Reset ↺</button>
                   </>
                 ) : (
                   <div style={{ width: '100%' }}>
@@ -302,7 +302,7 @@ export default function UrgeToolkitPage() {
             </div>
           )}
 
-          {/* â”€â”€â”€ BREATHING â”€â”€â”€ */}
+          {/* ─── BREATHING ─── */}
           {activeTool === 'breathing' && (
             <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out' }}>
               <h3 style={{ color: '#FFFFFF', fontSize: '16px', marginBottom: '0.5rem' }}>4-7-8 Breathing</h3>
@@ -313,12 +313,12 @@ export default function UrgeToolkitPage() {
                 {breathRounds >= 3 && <p style={{ color: '#2DD4BF', fontSize: '14px', marginTop: '0.5rem' }}> {breathRounds} rounds complete! How does your body feel?</p>}
               </div>
               <button className="toggle-btn active-primary" onClick={() => setBreathingActive(!breathingActive)} style={{ marginTop: '1rem', minWidth: '120px' }}>
-                {breathingActive ? 'Pause â¸' : 'Start â–¶'}
+                {breathingActive ? 'Pause ⏸' : 'Start ▶'}
               </button>
             </div>
           )}
 
-          {/* â”€â”€â”€ THOUGHT CHALLENGER â”€â”€â”€ */}
+          {/* ─── THOUGHT CHALLENGER ─── */}
           {activeTool === 'thought' && (
             <div className="dash-section" style={{ animation: 'fadeIn 0.3s ease-out' }}>
               <h3 style={{ color: '#FFFFFF', fontSize: '16px', marginBottom: '0.5rem' }}>Thought Record</h3>
@@ -332,20 +332,20 @@ export default function UrgeToolkitPage() {
                 <>
                   <div className="form-group"><label htmlFor="situation">What situation triggered the urge?</label><textarea id="situation" className="diary-textarea" placeholder="e.g., Just got paid, M-Pesa high, match starting..." value={thoughtRecord.situation} onChange={e => setThoughtRecord({ ...thoughtRecord, situation: e.target.value })} rows={2} /></div>
                   <div className="form-group" style={{ marginTop: '12px' }}><label>Emotion?</label><div className="chip-group">{['Anxious','Bored','Stressed','Excited','Hopeless','Restless','Sad'].map(e => <button key={e} className={`chip ${thoughtRecord.emotion===e?'chip-active':''}`} onClick={()=>setThoughtRecord({...thoughtRecord,emotion:e})}>{e}</button>)}</div></div>
-                  <button className="btn-primary" style={{ width: '100%', marginTop: '1rem' }} onClick={() => thoughtRecord.situation && setThoughtStep(1)} disabled={!thoughtRecord.situation}>Next â†’</button>
+                  <button className="btn-primary" style={{ width: '100%', marginTop: '1rem' }} onClick={() => thoughtRecord.situation && setThoughtStep(1)} disabled={!thoughtRecord.situation}>Next →</button>
                 </>
               )}
               {thoughtStep === 1 && (
                 <>
                   <div className="form-group"><label htmlFor="autoThought">Automatic thought?</label><textarea id="autoThought" className="diary-textarea" placeholder="e.g., 'I could win big. Just one bet.'" value={thoughtRecord.automaticThought} onChange={e => setThoughtRecord({ ...thoughtRecord, automaticThought: e.target.value })} rows={2} /></div>
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '1rem' }}><button className="btn-ghost" onClick={()=>setThoughtStep(0)}>â† Back</button><button className="btn-primary" style={{flex:1}} onClick={()=>thoughtRecord.automaticThought&&setThoughtStep(2)} disabled={!thoughtRecord.automaticThought}>Next â†’</button></div>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '1rem' }}><button className="btn-ghost" onClick={()=>setThoughtStep(0)}>← Back</button><button className="btn-primary" style={{flex:1}} onClick={()=>thoughtRecord.automaticThought&&setThoughtStep(2)} disabled={!thoughtRecord.automaticThought}>Next →</button></div>
                 </>
               )}
               {thoughtStep === 2 && (
                 <>
                   <div className="form-group"><label htmlFor="evidenceFor">Evidence FOR this thought</label><textarea id="evidenceFor" className="diary-textarea" placeholder="e.g., 'I've won before...'" value={thoughtRecord.evidenceFor} onChange={e => setThoughtRecord({ ...thoughtRecord, evidenceFor: e.target.value })} rows={2} /></div>
                   <div className="form-group" style={{marginTop:'12px'}}><label htmlFor="evidenceAgainst">Evidence AGAINST</label><textarea id="evidenceAgainst" className="diary-textarea" placeholder="e.g., 'I've lost more than won...'" value={thoughtRecord.evidenceAgainst} onChange={e => setThoughtRecord({ ...thoughtRecord, evidenceAgainst: e.target.value })} rows={2} /></div>
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '1rem' }}><button className="btn-ghost" onClick={()=>setThoughtStep(1)}>â† Back</button><button className="btn-primary" style={{flex:1}} onClick={()=>setThoughtStep(3)}>Next â†’</button></div>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '1rem' }}><button className="btn-ghost" onClick={()=>setThoughtStep(1)}>← Back</button><button className="btn-primary" style={{flex:1}} onClick={()=>setThoughtStep(3)}>Next →</button></div>
                 </>
               )}
               {thoughtStep === 3 && (
@@ -357,7 +357,7 @@ export default function UrgeToolkitPage() {
                       <p style={{fontSize:'11px',color:'#2DD4BF',marginBottom:'8px',textTransform:'uppercase'}}> Your Coping Card</p>
                       <p style={{fontSize:'12px',color:'rgba(255,255,255,0.4)'}}><strong>Old:</strong> "{thoughtRecord.automaticThought}"</p>
                       <p style={{fontSize:'12px',color:'#2DD4BF'}}><strong>New:</strong> "{thoughtRecord.balancedThought}"</p>
-                      <p style={{fontSize:'12px',color:'rgba(255,255,255,0.4)',marginTop:'4px'}}><strong>Feeling:</strong> {thoughtRecord.emotion || '...'} â†’ {thoughtRecord.newEmotion || '...'}</p>
+                      <p style={{fontSize:'12px',color:'rgba(255,255,255,0.4)',marginTop:'4px'}}><strong>Feeling:</strong> {thoughtRecord.emotion || '...'} → {thoughtRecord.newEmotion || '...'}</p>
                       <button className="btn-primary" style={{width:'100%',marginTop:'12px'}} onClick={()=>{
                         const newCard = { id: Date.now(), date: new Date().toISOString(), ...thoughtRecord }
                         const updated = [newCard, ...copingCards].slice(0, 20)
@@ -369,7 +369,7 @@ export default function UrgeToolkitPage() {
                       }}> Save to coping cards</button>
                     </div>
                   )}
-                  <button className="btn-ghost" style={{width:'100%',marginTop:'0.5rem'}} onClick={()=>setThoughtStep(2)}>â† Back</button>
+                  <button className="btn-ghost" style={{width:'100%',marginTop:'0.5rem'}} onClick={()=>setThoughtStep(2)}>← Back</button>
                 </>
               )}
               {copingCards.length > 0 && (
@@ -383,7 +383,7 @@ export default function UrgeToolkitPage() {
                           <button onClick={() => { const updated = copingCards.filter(c => c.id !== card.id); setCopingCards(updated); try { localStorage.setItem('precious_coping_cards', JSON.stringify(updated)) } catch {} }} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Delete coping card"></button>
                         </div>
                         <p style={{ color: '#FFFFFF', margin: '0 0 2px', textDecoration: 'line-through' }}>"{card.automaticThought}"</p>
-                        <p style={{ color: '#2DD4BF', margin: 0 }}>â†’ "{card.balancedThought}"</p>
+                        <p style={{ color: '#2DD4BF', margin: 0 }}>→ "{card.balancedThought}"</p>
                       </div>
                     ))}
                   </div>
@@ -392,7 +392,7 @@ export default function UrgeToolkitPage() {
             </div>
           )}
 
-          {/* â”€â”€â”€ SPINNING WHEEL â”€â”€â”€ */}
+          {/* ─── SPINNING WHEEL ─── */}
           {activeTool === 'distraction' && (
             <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out' }}>
               <h3 style={{ color: '#FFFFFF', fontSize: '16px', marginBottom: '0.5rem' }}>Spin the Wheel </h3>
@@ -401,7 +401,7 @@ export default function UrgeToolkitPage() {
                 <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'conic-gradient(#2DD4BF 0deg 60deg, #2DD4BF 60deg 120deg, #7DBDEE 120deg 180deg, #2DD4BF 180deg 240deg, #FFFFFF 240deg 300deg, #7DBDEE 300deg 360deg)', animation: spinning ? 'wheelSpin 1s ease-out' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(45,212,191,0.3)' }}>
                   <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '20px' }}>{spinning ? '' : ''}</span></div>
                 </div>
-                <div style={{ position: 'absolute', top: '-8px', left: '50%', transform: 'translateX(-50%)', fontSize: '20px' }}>â–¼</div>
+                <div style={{ position: 'absolute', top: '-8px', left: '50%', transform: 'translateX(-50%)', fontSize: '20px' }}>▼</div>
               </div>
               {!randomChallenge ? (
                 <button className="btn-primary" style={{ padding: '16px 32px', fontSize: '16px' }} onClick={spinWheel} disabled={spinning}>{spinning ? ' Spinning...' : ' Spin the wheel'}</button>
@@ -427,7 +427,7 @@ export default function UrgeToolkitPage() {
             </div>
           )}
 
-          {/* â”€â”€â”€ HELPLINE â”€â”€â”€ */}
+          {/* ─── HELPLINE ─── */}
           {activeTool === 'helpline' && (
             <div className="dash-section" style={{ animation: 'fadeIn 0.3s ease-out' }}>
               <h3 style={{ color: '#FFFFFF', fontSize: '16px', marginBottom: '1rem' }}>Emergency & Support </h3>
@@ -438,7 +438,7 @@ export default function UrgeToolkitPage() {
                     <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isOpenNow(h.hours) ? '#2DD4BF' : 'rgba(255,255,255,0.4)', flexShrink: 0 }} title={isOpenNow(h.hours) ? 'Available now' : 'May be closed'} />
                   </div>
                   <p className="helpline-num">{h.number}</p>
-                  <p className="helpline-hours">{h.hours}  · {h.free ? 'ðŸ†“ Free' : ' Charges may apply'}</p>
+                  <p className="helpline-hours">{h.hours}  · {h.free ? '🆓 Free' : ' Charges may apply'}</p>
                   <a href={`tel:${h.number.replace(/\s/g,'')}`} style={{ display: 'block', textAlign: 'center', background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '10px', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: 500, marginTop: '8px' }}> Call {h.number}</a>
                 </div>
               ))}

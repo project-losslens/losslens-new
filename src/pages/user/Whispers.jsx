@@ -220,7 +220,7 @@ export default function Whispers() {
 
     //  Content moderation
     if (containsCrisisContent(text)) {
-      showToast('ðŸ†˜ If you or someone is in crisis, please call Befrienders Kenya: +254 722 178 177', 5000)
+      showToast('🆘 If you or someone is in crisis, please call Befrienders Kenya: +254 722 178 177', 5000)
     }
     if (containsBlockedContent(text)) { showToast(' Please don\'t share personal info.', 4000); return }
 
@@ -323,7 +323,7 @@ export default function Whispers() {
           {activeMatch ? (
             <>
               <div style={{ background: 'rgba(255,255,255,0.12)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #7DBDEE', flexShrink: 0, position: 'sticky', top: 0, zIndex: 10 }}>
-                <button onClick={() => { setActiveMatch(null); setMessages([]); setMessageInputs({}) }} style={{ background: 'transparent', border: 'none', color: '#2DD4BF', fontSize: '18px', cursor: 'pointer', padding: '6px 10px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Back to chats">â†</button>
+                <button onClick={() => { setActiveMatch(null); setMessages([]); setMessageInputs({}) }} style={{ background: 'transparent', border: 'none', color: '#2DD4BF', fontSize: '18px', cursor: 'pointer', padding: '6px 10px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Back to chats">←</button>
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #7DBDEE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }} aria-hidden="true"></div>
                   <div><p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 500, margin: 0 }}>{peerAnonName || 'Anonymous Peer'}</p><p style={{ color: '#2DD4BF', fontSize: '10px', margin: 0 }}>Chat active</p></div>
@@ -345,7 +345,7 @@ export default function Whispers() {
                       <div style={{ maxWidth: '82%' }}>
                         {msg.reply_to && (
                           <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginBottom: '2px', padding: '3px 8px', background: 'rgba(255,255,255,0.06)', borderRadius: '6px', borderLeft: '2px solid #2DD4BF' }}>
-                            â†© Replying to: "{msg.reply_to.message?.substring(0, 40)}..."
+                            ↩ Replying to: "{msg.reply_to.message?.substring(0, 40)}..."
                           </div>
                         )}
                         <div style={{ padding: '8px 12px', borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: isOwn ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)', border: `1px solid ${isOwn ? '#7DBDEE' : 'rgba(255,255,255,0.12)'}`, color: '#7DBDEE', fontSize: '13px', lineHeight: '1.5', wordBreak: 'break-word', opacity: msg.sending ? 0.6 : 1 }}>
@@ -353,7 +353,7 @@ export default function Whispers() {
                         </div>
                         <div style={{ display: 'flex', gap: '4px', marginTop: '2px', justifyContent: isOwn ? 'flex-end' : 'flex-start' }}>
                           <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)' }}>{msg.sending ? 'Sending...' : formatTime(msg.created_at)}</span>
-                          <button onClick={() => handleReply(msg)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', padding: '2px 6px' }} aria-label="Reply">â†©</button>
+                          <button onClick={() => handleReply(msg)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', padding: '2px 6px' }} aria-label="Reply">↩</button>
                         </div>
                       </div>
                     </div>
@@ -364,7 +364,7 @@ export default function Whispers() {
 
               {replyTo && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'rgba(255,255,255,0.12)', borderTop: '1px solid #7DBDEE', flexShrink: 0 }}>
-                  <span style={{ color: '#2DD4BF', fontSize: '10px', flex: 1 }}>â†© Replying to: "{replyTo.message.substring(0, 30)}..."</span>
+                  <span style={{ color: '#2DD4BF', fontSize: '10px', flex: 1 }}>↩ Replying to: "{replyTo.message.substring(0, 30)}..."</span>
                   <button onClick={() => setReplyTo(null)} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '14px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Cancel reply"></button>
                 </div>
               )}
@@ -373,7 +373,7 @@ export default function Whispers() {
                 <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                   <button onClick={() => setShowStarters(!showStarters)} style={{ width: '36px', height: '36px', borderRadius: '6px', background: showStarters ? 'rgba(255,255,255,0.12)' : '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '14px', cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Conversation starters"></button>
                   <input ref={inputRef} value={messageInputs[activeMatch.id] || ''} onChange={e => setMessageInputs(prev => ({ ...prev, [activeMatch.id]: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleSend(activeMatch.id)} placeholder="Message" style={{ flex: 1, background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '10px 12px', color: '#FFFFFF', fontSize: '16px', outline: 'none', fontFamily: "'Inter', sans-serif" }} aria-label="Type a message" />
-                  <button onClick={() => handleSend(activeMatch.id)} disabled={!messageInputs[activeMatch.id]?.trim() || sending} style={{ width: '40px', height: '40px', borderRadius: '50%', background: messageInputs[activeMatch.id]?.trim() && !sending ? '#2DD4BF' : 'rgba(255,255,255,0.12)', border: 'none', color: messageInputs[activeMatch.id]?.trim() ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '16px', cursor: messageInputs[activeMatch.id]?.trim() ? 'pointer' : 'not-allowed', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Send message">â†’</button>
+                  <button onClick={() => handleSend(activeMatch.id)} disabled={!messageInputs[activeMatch.id]?.trim() || sending} style={{ width: '40px', height: '40px', borderRadius: '50%', background: messageInputs[activeMatch.id]?.trim() && !sending ? '#2DD4BF' : 'rgba(255,255,255,0.12)', border: 'none', color: messageInputs[activeMatch.id]?.trim() ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '16px', cursor: messageInputs[activeMatch.id]?.trim() ? 'pointer' : 'not-allowed', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Send message">→</button>
                 </div>
               </div>
             </>
@@ -427,7 +427,7 @@ export default function Whispers() {
                     <div style={{ textAlign: 'center', padding: '1.5rem' }}><p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '0.75rem' }}>No pending requests.</p><button className="btn-primary" onClick={() => setActiveTab('requests')} style={{ fontSize: '11px', padding: '8px 16px' }}> Send one</button></div>
                   ) : pendingSent.map(req => (
                     <div key={req.id} style={{ padding: '12px', background: '#0B1220', borderRadius: '8px', marginBottom: '6px', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div><p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: 0 }}>"{req.request_message || 'Request'}"</p><p style={{ color: '#7DBDEE', fontSize: '10px', marginTop: '3px' }}>â³ Waiting...</p></div>
+                      <div><p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: 0 }}>"{req.request_message || 'Request'}"</p><p style={{ color: '#7DBDEE', fontSize: '10px', marginTop: '3px' }}>⏳ Waiting...</p></div>
                       <button onClick={() => cancelRequest(req.id)} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '10px', cursor: 'pointer', flexShrink: 0, padding: '6px 10px' }}>Cancel</button>
                     </div>
                   ))}
@@ -449,7 +449,7 @@ export default function Whispers() {
                         <span style={{ fontSize: '24px' }} aria-hidden="true"></span>
                         <div><p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: 0 }}>Peer Match</p><p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{new Date(m.created_at).toLocaleDateString('en-KE')}</p></div>
                       </div>
-                      <span style={{ color: '#2DD4BF', fontSize: '16px' }}>â†’</span>
+                      <span style={{ color: '#2DD4BF', fontSize: '16px' }}>→</span>
                     </div>
                   ))}
                 </div>

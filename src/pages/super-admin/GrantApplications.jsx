@@ -6,7 +6,7 @@ import SuperAdminSidebar from '../../components/SuperAdminSidebar'
 
 //  Constants
 const STATUS_CONFIG = {
-  pending: { color: '#7DBDEE', bg: 'rgba(45,212,191,0.15)', label: 'Pending', icon: 'â³' },
+  pending: { color: '#7DBDEE', bg: 'rgba(45,212,191,0.15)', label: 'Pending', icon: '⏳' },
   under_review: { color: '#2DD4BF', bg: 'rgba(255,255,255,0.12)', label: 'Under Review', icon: '' },
   approved: { color: '#2DD4BF', bg: 'rgba(255,255,255,0.12)', label: 'Approved', icon: '' },
   rejected: { color: '#FFFFFF', bg: 'rgba(255,255,255,0.08)', label: 'Rejected', icon: '' },

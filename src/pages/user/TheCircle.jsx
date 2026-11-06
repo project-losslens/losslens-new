@@ -8,7 +8,7 @@ import { createNotification } from '../../lib/notifications'
 //  Constants
 const ROOMS = [
   { id: 'check_in', name: 'Daily Check-In', icon: '', desc: 'Morning & evening mood sharing', expiry_hours: 24 },
-  { id: 'urge_support', name: 'Urge Support', icon: 'ðŸ†˜', desc: 'Real-time help during urges', expiry_hours: 2 },
+  { id: 'urge_support', name: 'Urge Support', icon: '🆘', desc: 'Real-time help during urges', expiry_hours: 2 },
   { id: 'victory', name: 'Victory Circle', icon: '', desc: 'Celebrate wins big and small', expiry_hours: 168 },
   { id: 'slip_recovery', name: 'Slip & Recovery', icon: '', desc: 'No-judgment space for setbacks', expiry_hours: 24 },
   { id: 'family_friends', name: 'Family & Friends', icon: '', desc: 'For supporters of gamblers', expiry_hours: 168 },
@@ -295,7 +295,7 @@ export default function TheCircle() {
       // Send reply notification
       if (replyData?.userId && replyData.userId !== userId) {
         try {
-          await createNotification(replyData.userId, { title: 'â†© Someone replied to you', message: `${identity.displayName} replied in The Circle`, type: 'info', icon: 'â†©', link: '/circle' })
+          await createNotification(replyData.userId, { title: '↩ Someone replied to you', message: `${identity.displayName} replied in The Circle`, type: 'info', icon: '↩', link: '/circle' })
         } catch (err) { /* silent */ }
       }
     } catch (err) {
@@ -358,7 +358,7 @@ export default function TheCircle() {
 
         {showCrisisBanner && (
           <div style={{ background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '12px 1.5rem', fontSize: '13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>ðŸ†˜ If you're in crisis: call Befrienders Kenya <strong>0722 178 177</strong></span>
+            <span>🆘 If you're in crisis: call Befrienders Kenya <strong>0722 178 177</strong></span>
             <button onClick={() => { setShowCrisisBanner(false); if (crisisTimerRef.current) clearTimeout(crisisTimerRef.current) }} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '20px', cursor: 'pointer', padding: '4px 10px', minWidth: '44px', minHeight: '44px' }} aria-label="Dismiss crisis banner">×</button>
           </div>
         )}
@@ -377,7 +377,7 @@ export default function TheCircle() {
         <div ref={messagesContainerRef} style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.5rem', position: 'relative' }}>
           {/* Scroll to bottom button */}
           {showScrollButton && (
-            <button onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })} style={{ position: 'sticky', bottom: '12px', left: '50%', transform: 'translateX(-50%)', zIndex: 50, background: 'rgba(255,255,255,0.12)', border: '1px solid #2DD4BF', borderRadius: '100px', padding: '6px 16px', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", boxShadow: '0 2px 12px rgba(11,18,32,0.4)' }}>â†“ New messages</button>
+            <button onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })} style={{ position: 'sticky', bottom: '12px', left: '50%', transform: 'translateX(-50%)', zIndex: 50, background: 'rgba(255,255,255,0.12)', border: '1px solid #2DD4BF', borderRadius: '100px', padding: '6px 16px', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", boxShadow: '0 2px 12px rgba(11,18,32,0.4)' }}>↓ New messages</button>
           )}
 
           {messages.length === 0 && (
@@ -403,7 +403,7 @@ export default function TheCircle() {
                   </div>
                   {msg.reply_to && (
                     <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginBottom: '2px', padding: '4px 8px', background: '#0B1220', borderRadius: '6px', borderLeft: '2px solid #2DD4BF' }}>
-                      â†© <strong>{msg.reply_to.name}</strong>: "{msg.reply_to.message}..."
+                      ↩ <strong>{msg.reply_to.name}</strong>: "{msg.reply_to.message}..."
                     </div>
                   )}
                   <div style={{ padding: '10px 14px', borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: isOwn ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)', border: `1px solid ${msg._failed ? 'rgba(255,255,255,0.08)' : isOwn ? '#7DBDEE' : 'rgba(255,255,255,0.12)'}`, color: '#7DBDEE', fontSize: '13px', lineHeight: '1.5', wordBreak: 'break-word' }}>
@@ -411,7 +411,7 @@ export default function TheCircle() {
                   </div>
                   {!msg._sending && !msg._failed && (
                     <div style={{ display: 'flex', gap: '4px', marginTop: '4px', flexDirection: isOwn ? 'row-reverse' : 'row', flexWrap: 'wrap', opacity: 0.7 }}>
-                      <button onClick={() => handleReply(msg)} style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '2px 8px', fontSize: '10px', color: '#2DD4BF', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }} aria-label="Reply">â†©</button>
+                      <button onClick={() => handleReply(msg)} style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '2px 8px', fontSize: '10px', color: '#2DD4BF', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }} aria-label="Reply">↩</button>
                       {REACTIONS.filter(r => (msg[r.key] || 0) > 0).map(r => (
                         <button key={r.key} onClick={() => handleReaction(msg.id, r.key)} style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '2px 8px', fontSize: '11px', color: '#2DD4BF', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }} aria-label={`${r.label} (${msg[r.key]})`}>{r.emoji} {msg[r.key]}</button>
                       ))}
@@ -429,7 +429,7 @@ export default function TheCircle() {
         <div style={{ padding: '12px 1.5rem', borderTop: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', flexShrink: 0 }}>
           {replyTo && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: 'rgba(255,255,255,0.12)', borderRadius: '8px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '12px', color: '#2DD4BF', flex: 1 }}>â†© Replying to <strong>{replyTo.name}</strong></span>
+              <span style={{ fontSize: '12px', color: '#2DD4BF', flex: 1 }}>↩ Replying to <strong>{replyTo.name}</strong></span>
               <button onClick={() => setReplyTo(null)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '16px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Cancel reply"></button>
             </div>
           )}
@@ -441,7 +441,7 @@ export default function TheCircle() {
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={() => setShowTemplates(!showTemplates)} style={{ width: '36px', height: '36px', borderRadius: '8px', background: showTemplates ? 'rgba(255,255,255,0.12)' : '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '14px', cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Message templates"></button>
             <input ref={inputRef} value={input} onChange={e => setInput(e.target.value.substring(0, MAX_MESSAGE_LENGTH))} onKeyDown={e => e.key === 'Enter' && handleSend()} placeholder={replyTo ? `Reply to ${replyTo.name}...` : `Share... (${MAX_MESSAGE_LENGTH - input.length})`} style={{ flex: 1, background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '10px 16px', color: '#FFFFFF', fontSize: '16px', outline: 'none', fontFamily: "'Inter', sans-serif" }} aria-label="Type a message" />
-            <button onClick={handleSend} disabled={!input.trim() || sending} style={{ width: '40px', height: '40px', borderRadius: '50%', background: input.trim() && !sending ? '#2DD4BF' : 'rgba(255,255,255,0.12)', border: 'none', color: input.trim() && !sending ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '18px', cursor: input.trim() && !sending ? 'pointer' : 'not-allowed', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Send message">â†’</button>
+            <button onClick={handleSend} disabled={!input.trim() || sending} style={{ width: '40px', height: '40px', borderRadius: '50%', background: input.trim() && !sending ? '#2DD4BF' : 'rgba(255,255,255,0.12)', border: 'none', color: input.trim() && !sending ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '18px', cursor: input.trim() && !sending ? 'pointer' : 'not-allowed', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Send message">→</button>
           </div>
           <p style={{ fontSize: '10px', color: '#7DBDEE', textAlign: 'center', marginTop: '6px', marginBottom: 0 }}>Anonymous  · Use @Name to tag  · Be kind </p>
         </div>

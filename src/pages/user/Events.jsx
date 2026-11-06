@@ -202,7 +202,7 @@ export default function Events() {
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
           <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
           <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif" }}>Please log in</h2>
-          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%', marginTop: '16px' }}>Go to Login â†’</button>
+          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%', marginTop: '16px' }}>Go to Login →</button>
         </div>
       </div>
     )
@@ -297,7 +297,7 @@ export default function Events() {
                         <button onClick={() => {
                           if (expandedEvent === e.id) setExpandedEvent(null)
                           else { setExpandedEvent(e.id); loadDiscussions(e.id) }
-                        }} style={{ padding: '10px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.12)', background: 'transparent', color: 'rgba(255,255,255,0.4)', fontSize: '14px', cursor: 'pointer' }} aria-expanded={isExpanded}>{isExpanded ? 'â–²' : 'â–¼'}</button>
+                        }} style={{ padding: '10px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.12)', background: 'transparent', color: 'rgba(255,255,255,0.4)', fontSize: '14px', cursor: 'pointer' }} aria-expanded={isExpanded}>{isExpanded ? '▲' : '▼'}</button>
                       </div>
                     )}
                     {isPast && (

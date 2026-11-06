@@ -300,7 +300,7 @@ export default function Pricing() {
                   aria-expanded={expandedFaq === i}
                 >
                   {faq.q}
-                  <span style={{ color: '#2DD4BF', fontSize: '18px', transition: 'transform 0.2s', transform: expandedFaq === i ? 'rotate(180deg)' : 'rotate(0)' }}>â–¼</span>
+                  <span style={{ color: '#2DD4BF', fontSize: '18px', transition: 'transform 0.2s', transform: expandedFaq === i ? 'rotate(180deg)' : 'rotate(0)' }}>▼</span>
                 </button>
                 {expandedFaq === i && (
                   <div style={{ padding: '0 16px 16px', color: '#2DD4BF', fontSize: '13px', lineHeight: '1.7', fontWeight: 300 }}>
@@ -318,8 +318,8 @@ export default function Pricing() {
           <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', flexWrap: 'wrap' }}>
             {[
               { icon: '', label: 'End-to-end encrypted' },
-              { icon: 'ðŸ‡°ðŸ‡ª', label: 'Kenya-based & compliant' },
-              { icon: 'Ã¯ ¸ ', label: 'Delete data anytime' },
+              { icon: '🇰🇪', label: 'Kenya-based & compliant' },
+              { icon: 'ï ¸ ', label: 'Delete data anytime' },
               { icon: '', label: 'Free forever for individuals' },
             ].map((t, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#2DD4BF', fontSize: '12px' }}>

@@ -80,7 +80,7 @@ export default function UserAnalytics() {
         { feature: ' Diary Entries', count: totalDiaryRes.count || 0, icon: '' },
         { feature: ' CBT Completions', count: cbtDoneRes.count || 0, icon: '' },
         { feature: ' Circle Messages', count: circleMessagesRes.count || 0, icon: '' },
-        { feature: 'ðŸ†˜ Crisis Alerts', count: crisisTotalRes.count || 0, icon: 'ðŸ†˜' },
+        { feature: '🆘 Crisis Alerts', count: crisisTotalRes.count || 0, icon: '🆘' },
         { feature: ' Family Links', count: supportLinksRes.count || 0, icon: '' },
       ].sort((a, b) => b.count - a.count)
 
@@ -198,9 +198,9 @@ export default function UserAnalytics() {
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={() => fetchAll(true)} disabled={refreshing} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
-              {refreshing ? 'â³ Refreshing...' : ' Refresh'}
+              {refreshing ? '⏳ Refreshing...' : ' Refresh'}
             </button>
-            <button onClick={() => navigate('/admin')} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>â† Back</button>
+            <button onClick={() => navigate('/admin')} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>← Back</button>
           </div>
         </nav>
 
@@ -319,7 +319,7 @@ export default function UserAnalytics() {
           {/* Recent Signups */}
           {recentSignups.length > 0 && (
             <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '20px', marginBottom: '1.5rem' }}>
-              <h3 style={{ color: '#FFFFFF', fontSize: '15px', margin: '0 0 1rem' }}>ðŸ†• Recent Signups</h3>
+              <h3 style={{ color: '#FFFFFF', fontSize: '15px', margin: '0 0 1rem' }}>🆕 Recent Signups</h3>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 {recentSignups.map((u, i) => (
                   <div key={i} style={{ background: '#0B1220', borderRadius: '10px', padding: '12px 16px', border: '1px solid rgba(255,255,255,0.12)', minWidth: '180px', flex: 1 }}>

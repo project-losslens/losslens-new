@@ -281,7 +281,7 @@ function Signup() {
               <p style={{ color: '#2DD4BF', fontSize: '13px', fontWeight: 600, margin: '0 0 4px' }}> Didn't receive it?</p>
               <p style={{ color: '#2DD4BF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Check your <strong>spam/junk folder</strong>. Some email providers filter automated messages.</p>
             </div>
-            <button className="btn-primary full" onClick={() => navigate('/login')}>Go to login â†’</button>
+            <button className="btn-primary full" onClick={() => navigate('/login')}>Go to login →</button>
             <button onClick={handleResendEmail} disabled={resending || resendSent} style={{ width: '100%', marginTop: '10px', padding: '10px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: resendSent ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
               {resendSent ? ' Sent!' : resending ? 'Sending...' : 'Resend email'}
             </button>
@@ -372,15 +372,15 @@ function Signup() {
                     }}
                     aria-invalid={!!fieldErrors.company_code}
                   />
-                  {validatingCode && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>â³</span>}
+                  {validatingCode && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>⏳</span>}
                   {!validatingCode && companyValidation?.valid && (
                     <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#2DD4BF', fontSize: '12px', fontWeight: 500 }}> Valid</span>
                   )}
                   {!validatingCode && companyValidation && !companyValidation.valid && !companyValidation.seats_full && (
-                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FFFFFF', fontSize: '12px' }}>Ã¢ Å’ Invalid</span>
+                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FFFFFF', fontSize: '12px' }}>⠝Œ Invalid</span>
                   )}
                   {!validatingCode && companyValidation?.seats_full && (
-                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#7DBDEE', fontSize: '10px' }}>Ã¢Å¡  Ã¯ ¸  Full</span>
+                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#7DBDEE', fontSize: '10px' }}>⚠️ Full</span>
                   )}
                 </div>
                 {companyValidation?.valid && (
@@ -406,9 +406,9 @@ function Signup() {
               <label htmlFor="username">USERNAME *</label>
               <div style={{ position: 'relative' }}>
                 <input id="username" type="text" autoComplete="username" required placeholder="e.g. amina_w" value={form.username} onChange={e => handleUsernameChange(e.target.value)} style={{ paddingRight: 40, ...(fieldErrors.username ? { borderColor: '#FFFFFF' } : {}) }} />
-                {usernameStatus === 'checking' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>â³</span>}
+                {usernameStatus === 'checking' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>⏳</span>}
                 {usernameStatus === 'available' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}></span>}
-                {usernameStatus === 'taken' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>Ã¢ Å’</span>}
+                {usernameStatus === 'taken' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>⠝Œ</span>}
               </div>
               {usernameStatus === 'taken' && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Username already taken</span>}
               {usernameStatus === 'available' && <span style={{ fontSize: '11px', color: '#2DD4BF' }}>Username available!</span>}
@@ -418,7 +418,7 @@ function Signup() {
             <div className="form-group">
               <label htmlFor="phone">PHONE NUMBER (optional)</label>
               <div className="phone-input">
-                <span className="phone-prefix">ðŸ‡°ðŸ‡ª +254</span>
+                <span className="phone-prefix">🇰🇪 +254</span>
                 <input id="phone" type="tel" autoComplete="tel" placeholder="7XX XXX XXX" value={form.phone} onChange={e => { handlePhoneChange(e.target.value); setFieldErrors(p => ({ ...p, phone: '' })) }} style={fieldErrors.phone ? { borderColor: '#FFFFFF' } : {}} />
               </div>
               {fieldErrors.phone && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.phone}</span>}
@@ -483,7 +483,7 @@ function Signup() {
           </p>
 
           <div style={{ marginTop: '1.25rem', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', borderRadius: 8, padding: '10px 14px', textAlign: 'center' }}>
-            <p style={{ fontSize: 12, color: '#2DD4BF' }}>ðŸ†˜ In crisis? Call NACADA: <strong>1192</strong> (24/7 free)</p>
+            <p style={{ fontSize: 12, color: '#2DD4BF' }}>🆘 In crisis? Call NACADA: <strong>1192</strong> (24/7 free)</p>
           </div>
         </div>
       </div>

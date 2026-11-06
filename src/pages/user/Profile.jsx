@@ -234,8 +234,8 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
         body: JSON.stringify({ to: email, supporterName: fullName || 'User', userName: 'LossLens', inviteLink: pw, type: 'report' })
       })
       if (res.ok) { setEmailSent(true); showToast(' Password sent! Check your inbox.', 5000) }
-      else showToast('Ã¢Å¡  Ã¯ ¸  Failed to send.', 4000)
-    } catch { showToast('Ã¢Å¡  Ã¯ ¸  Network error.', 4000) }
+      else showToast('⚠️ Failed to send.', 4000)
+    } catch { showToast('⚠️ Network error.', 4000) }
     setSendingEmail(false)
   }
 
@@ -334,7 +334,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
           <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}></span>
           <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif" }}>Please log in</h2>
-          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%', marginTop: '16px' }}>Go to Login â†’</button>
+          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%', marginTop: '16px' }}>Go to Login →</button>
         </div>
       </div>
     )
@@ -462,7 +462,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
               <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
                 <div className="form-group"><label>Full name</label><input type="text" value={fullName} onChange={e => setFullName(e.target.value)} /></div>
                 <div className="form-group"><label>Email</label><input type="email" value={email} disabled style={{ opacity: 0.5 }} /></div>
-                <div className="form-group"><label>Phone</label><div className="phone-input"><span className="phone-prefix">ðŸ‡°ðŸ‡ª +254</span><input type="tel" value={phone} onChange={e => setPhone(e.target.value.replace('+254', ''))} placeholder="7XX XXX XXX" /></div></div>
+                <div className="form-group"><label>Phone</label><div className="phone-input"><span className="phone-prefix">🇰🇪 +254</span><input type="tel" value={phone} onChange={e => setPhone(e.target.value.replace('+254', ''))} placeholder="7XX XXX XXX" /></div></div>
               </div>
               <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
                 <label style={{ color: '#2DD4BF', fontSize: '12px', marginBottom: '8px', display: 'block' }}>My goal</label>
@@ -523,7 +523,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
                   {deleteStep === 1 && (
                     <div style={{ textAlign: 'center' }}>
                       <p style={{ color: '#FFFFFF', fontSize: '11px', marginBottom: '0.75rem', lineHeight: '1.5' }}>Deletes: account, diary entries ({stats.totalEntries}), CBT progress, all data.</p>
-                      <div style={{ display: 'flex', gap: '6px' }}><button className="btn-ghost" style={{ flex: 1, fontSize: '11px', minHeight: '44px' }} onClick={() => setDeleteStep(0)}>Ã¢"   Back</button><button className="btn-danger" style={{ flex: 1, fontSize: '11px', minHeight: '44px' }} onClick={() => setDeleteStep(2)}>I understand</button></div>
+                      <div style={{ display: 'flex', gap: '6px' }}><button className="btn-ghost" style={{ flex: 1, fontSize: '11px', minHeight: '44px' }} onClick={() => setDeleteStep(0)}>â"   Back</button><button className="btn-danger" style={{ flex: 1, fontSize: '11px', minHeight: '44px' }} onClick={() => setDeleteStep(2)}>I understand</button></div>
                     </div>
                   )}
                   {deleteStep === 2 && (

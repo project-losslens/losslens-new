@@ -207,7 +207,7 @@ function ChatViewer() {
                 }}
                 className="mobile-back-btn"
               >
-                <span>â†</span> Back to users
+                <span>←</span> Back to users
               </button>
             )}
 

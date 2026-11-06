@@ -465,9 +465,9 @@ export default function MonthlyMirrorPage() {
             <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{syncedRecordings.length + pendingRecordings.length} recordings</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <button onClick={() => navigateMonth(-1)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', minWidth: '36px' }} aria-label="Previous month">â†</button>
+            <button onClick={() => navigateMonth(-1)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', minWidth: '36px' }} aria-label="Previous month">←</button>
             <span style={{ color: '#2DD4BF', fontSize: '12px', fontWeight: 500, minWidth: '90px', textAlign: 'center' }}>{monthLabel}</span>
-            <button onClick={() => navigateMonth(1)} disabled={isCurrentMonth} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: isCurrentMonth ? '#7DBDEE' : '#2DD4BF', padding: '6px 10px', borderRadius: '6px', cursor: isCurrentMonth ? 'default' : 'pointer', fontSize: '14px', minWidth: '36px', opacity: isCurrentMonth ? 0.4 : 1 }} aria-label="Next month">â†’</button>
+            <button onClick={() => navigateMonth(1)} disabled={isCurrentMonth} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: isCurrentMonth ? '#7DBDEE' : '#2DD4BF', padding: '6px 10px', borderRadius: '6px', cursor: isCurrentMonth ? 'default' : 'pointer', fontSize: '14px', minWidth: '36px', opacity: isCurrentMonth ? 0.4 : 1 }} aria-label="Next month">→</button>
           </div>
         </nav>
 
@@ -499,7 +499,7 @@ export default function MonthlyMirrorPage() {
           {/* Uploading Progress */}
           {uploading && (
             <div className="dash-section" style={{ marginBottom: '0.75rem', textAlign: 'center' }}>
-              <p style={{ color: '#7DBDEE', fontSize: '13px', marginBottom: '8px' }}>â³ Uploading your reflection...</p>
+              <p style={{ color: '#7DBDEE', fontSize: '13px', marginBottom: '8px' }}>⏳ Uploading your reflection...</p>
               <div style={{ height: '4px', background: 'rgba(255,255,255,0.12)', borderRadius: '2px', overflow: 'hidden' }}>
                 <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#2DD4BF', transition: 'width 0.3s ease' }} />
               </div>
@@ -563,7 +563,7 @@ export default function MonthlyMirrorPage() {
                 </div>
                 <span style={{ position: 'absolute', top: '8px', right: '8px', color: '#FFFFFF', fontSize: '14px', fontWeight: 600, background: 'rgba(11,18,32,0.5)', padding: '2px 8px', borderRadius: '4px' }}>{formatTime(recordingTime)} / {formatTime(MAX_RECORDING_DURATION)}</span>
                 <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
-                  <button className="btn-primary" style={{ flex: 1, fontSize: '12px', padding: '10px' }} onClick={stopRecording}>â¹ Stop</button>
+                  <button className="btn-primary" style={{ flex: 1, fontSize: '12px', padding: '10px' }} onClick={stopRecording}>⏹ Stop</button>
                   <button className="btn-ghost" style={{ flex: 1, fontSize: '12px', padding: '10px' }} onClick={() => { stopRecording(); cleanup(); setRecording(false); setReviewBlob(null) }}>Cancel</button>
                 </div>
               </div>
@@ -574,19 +574,19 @@ export default function MonthlyMirrorPage() {
           {pendingRecordings.length > 0 && (
             <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: '#7DBDEE' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <h3 style={{ color: '#7DBDEE', fontSize: '12px', margin: 0 }}>â³ Pending sync ({pendingRecordings.length})</h3>
+                <h3 style={{ color: '#7DBDEE', fontSize: '12px', margin: 0 }}>⏳ Pending sync ({pendingRecordings.length})</h3>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {pendingRecordings.map(r => (
                   <div key={r.id} style={{ background: '#0B1220', border: '1px solid #7DBDEE', borderRadius: '8px', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px' }}>
                       <div style={{ width: '64px', height: '44px', borderRadius: '4px', background: '#0B1220', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)}>
-                        <span style={{ fontSize: '20px' }}>â³</span>
+                        <span style={{ fontSize: '20px' }}>⏳</span>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ color: '#FFFFFF', fontSize: '11px', fontWeight: 500, margin: 0 }}>{new Date(r.created_at).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                         <p style={{ color: '#7DBDEE', fontSize: '10px', margin: '2px 0' }}>
-                          â³ {syncStatus[r._localIndex] || 'Waiting to sync'}  · {formatTime(r.duration_seconds)}
+                          ⏳ {syncStatus[r._localIndex] || 'Waiting to sync'}  · {formatTime(r.duration_seconds)}
                         </p>
                       </div>
                       <button onClick={() => retryUpload(r._localIndex)} disabled={uploading}
@@ -616,7 +616,7 @@ export default function MonthlyMirrorPage() {
                       <div style={{ width: '64px', height: '44px', borderRadius: '4px', background: '#0B1220', flexShrink: 0, position: 'relative', overflow: 'hidden', cursor: 'pointer' }} onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)}>
                         <video src={getPublicUrl(r.storage_path)} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} preload="metadata" muted playsInline />
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(11,18,32,0.3)' }}>
-                          <span style={{ fontSize: '16px' }}>â–¶</span>
+                          <span style={{ fontSize: '16px' }}>▶</span>
                         </div>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -627,8 +627,8 @@ export default function MonthlyMirrorPage() {
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '3px', flexShrink: 0 }}>
-                        <button onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)} style={{ background: expandedPlayer === r.id ? 'rgba(255,255,255,0.12)' : 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label={expandedPlayer === r.id ? 'Collapse video' : 'Expand video'}>{expandedPlayer === r.id ? 'â–¼' : 'â–¶'}</button>
-                        <button onClick={() => handleDownload(getPublicUrl(r.storage_path), `precious-${activeMonth}-reflection.webm`)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Download" aria-label="Download recording">â¬‡</button>
+                        <button onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)} style={{ background: expandedPlayer === r.id ? 'rgba(255,255,255,0.12)' : 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label={expandedPlayer === r.id ? 'Collapse video' : 'Expand video'}>{expandedPlayer === r.id ? '▼' : '▶'}</button>
+                        <button onClick={() => handleDownload(getPublicUrl(r.storage_path), `precious-${activeMonth}-reflection.webm`)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Download" aria-label="Download recording">⬇</button>
                         <button onClick={() => handleDelete(r.id, r.storage_path)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Delete" aria-label="Delete recording"></button>
                       </div>
                     </div>

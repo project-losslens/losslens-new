@@ -268,7 +268,7 @@ export default function ManageEvents() {
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
-            <button onClick={() => navigate('/admin')} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>â† Back</button>
+            <button onClick={() => navigate('/admin')} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>← Back</button>
           </div>
         </nav>
 
@@ -413,7 +413,7 @@ export default function ManageEvents() {
                             </div>
                           </div>
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                            <button onClick={() => setExpandedEvent(isExpanded ? null : ev.id)} style={btnStyle('transparent', '#2DD4BF', 'rgba(255,255,255,0.12)')}>{isExpanded ? 'â–²' : 'â–¼'}</button>
+                            <button onClick={() => setExpandedEvent(isExpanded ? null : ev.id)} style={btnStyle('transparent', '#2DD4BF', 'rgba(255,255,255,0.12)')}>{isExpanded ? '▲' : '▼'}</button>
                             <button onClick={() => openEdit(ev)} style={btnStyle('transparent', '#7DBDEE', '#7DBDEE')}></button>
                             <button onClick={() => toggleActive(ev)} style={btnStyle('transparent', ev.active ? '#7DBDEE' : '#2DD4BF', ev.active ? '#7DBDEE' : '#2DD4BF')}>{ev.active ? 'Hide' : 'Show'}</button>
                             <button onClick={() => toggleDiscussion(ev)} disabled={togglingDiscussion === ev.id} style={btnStyle(discussionOn ? 'rgba(255,255,255,0.12)' : '#0B1220', discussionOn ? '#2DD4BF' : '#FFFFFF', discussionOn ? '#2DD4BF' : '#FFFFFF')}>{togglingDiscussion === ev.id ? '...' : discussionOn ? '' : ''}</button>

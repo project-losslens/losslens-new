@@ -20,7 +20,7 @@ const QUESTIONS = [
       { value: 'daily', label: 'Daily', emoji: '', desc: 'Most days of the week' },
       { value: 'weekly', label: 'Weekly', emoji: '', desc: 'A few times per week' },
       { value: 'monthly', label: 'Monthly', emoji: '', desc: 'A few times per month' },
-      { value: 'rarely', label: 'Rarely', emoji: 'â°', desc: 'Once in a while' },
+      { value: 'rarely', label: 'Rarely', emoji: '⏰', desc: 'Once in a while' },
     ]
   },
   {
@@ -187,7 +187,7 @@ export default function Onboarding() {
     if (s >= 7) {
       recs.push({ icon: '', text: 'Start with CBT Module 1: Understanding Your Gambling', action: '/cbt' })
       recs.push({ icon: '', text: 'Log your first diary entry today — awareness is the first step', action: '/diary' })
-      recs.push({ icon: 'ðŸ†˜', text: 'Save emergency helplines — reaching out is strength', action: '/resources' })
+      recs.push({ icon: '🆘', text: 'Save emergency helplines — reaching out is strength', action: '/resources' })
     } else if (s >= 4) {
       recs.push({ icon: '', text: 'Track your patterns with the daily diary', action: '/diary' })
       recs.push({ icon: '', text: 'Explore the Urge Toolkit for coping strategies', action: '/urge-toolkit' })
@@ -292,12 +292,12 @@ export default function Onboarding() {
           </div>
 
           <button className="btn-primary full" onClick={handleFinish} disabled={loading} style={{ padding: '14px', fontSize: '15px' }}>
-            {loading ? <span className="spinner"></span> : 'Start my journey â†’'}
+            {loading ? <span className="spinner"></span> : 'Start my journey →'}
           </button>
           {saveError && <p role="alert" style={{ color: '#FFFFFF', fontSize: '13px', marginTop: '12px' }}>{saveError}</p>}
 
           <button onClick={() => { setStep(QUESTIONS.length - 1); triggerAnimate() }} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
-            Ã¢"   Change my answers
+            â"   Change my answers
           </button>
         </div>
       </div>
@@ -382,7 +382,7 @@ export default function Onboarding() {
         <div style={{ display: 'flex', gap: '8px' }}>
           {step > 0 && (
             <button onClick={prevStep} className="btn-ghost" style={{ flex: 1, padding: '14px', fontSize: '15px' }}>
-              Ã¢"   Back
+              â"   Back
             </button>
           )}
           <button
@@ -390,7 +390,7 @@ export default function Onboarding() {
             onClick={step < QUESTIONS.length - 1 ? nextStep : () => setStep(QUESTIONS.length)}
             style={{ padding: '14px', fontSize: '15px', flex: step > 0 ? 2 : 1 }}
           >
-            {step < QUESTIONS.length - 1 ? 'Next â†’' : 'See my results â†’'}
+            {step < QUESTIONS.length - 1 ? 'Next →' : 'See my results →'}
           </button>
         </div>
 

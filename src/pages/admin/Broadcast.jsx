@@ -22,7 +22,7 @@ const TARGET_CONFIG = {
 const TEMPLATES = [
   { label: ' Weekly Motivation', body: "Hey LossLens community! Another week, another chance to grow. Remember why you started. You've got this." },
   { label: ' Event Reminder', body: "Don't forget — we have an event coming up soon! Check the Events page for details and RSVP." },
-  { label: 'ðŸ†˜ Resources Reminder', body: 'Need support? Our Resources page has Kenyan helplines and tools available 24/7. You are never alone.' },
+  { label: '🆘 Resources Reminder', body: 'Need support? Our Resources page has Kenyan helplines and tools available 24/7. You are never alone.' },
   { label: ' Milestone Celebration', body: "We're celebrating your progress! Together you've logged thousands of clean days. Keep going!" },
 ]
 
@@ -189,7 +189,7 @@ export default function Broadcast() {
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
-            <button onClick={() => navigate('/admin')} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Ã¢"   Back</button>
+            <button onClick={() => navigate('/admin')} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>â"   Back</button>
           </div>
         </nav>
 
@@ -223,7 +223,7 @@ export default function Broadcast() {
                 <textarea value={form.body} onChange={e => setForm(p => ({ ...p, body: e.target.value.substring(0, MAX_BODY_LENGTH) }))} rows={5} style={{ ...inputStyle, resize: 'vertical' }} placeholder="Write your message to users..." />
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
                   <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>{form.body.length}/{MAX_BODY_LENGTH} characters</p>
-                  {isOverSMSLimit && <p style={{ color: '#7DBDEE', fontSize: '11px', margin: 0 }}>Ã¢Å¡  Ã¯ ¸  Over SMS limit ({SMS_MAX_LENGTH} chars)</p>}
+                  {isOverSMSLimit && <p style={{ color: '#7DBDEE', fontSize: '11px', margin: 0 }}>⚠️ Over SMS limit ({SMS_MAX_LENGTH} chars)</p>}
                 </div>
               </div>
 
@@ -251,7 +251,7 @@ export default function Broadcast() {
                 <button onClick={() => setPreview(p => !p)} style={btn('transparent', 'rgba(255,255,255,0.4)', 'rgba(255,255,255,0.12)')}>{preview ? ' Hide Preview' : ' Preview'}</button>
                 <button onClick={() => setShowConfirm(true)} disabled={sending || !form.title.trim() || !form.body.trim()}
                   style={{ ...btn('#2DD4BF', '#0B1220', '#2DD4BF'), opacity: (!form.title.trim() || !form.body.trim()) ? 0.5 : 1 }}>
-                  {sending ? 'â³ Sending...' : ` Send to ${userCount.toLocaleString()} Users`}
+                  {sending ? '⏳ Sending...' : ` Send to ${userCount.toLocaleString()} Users`}
                 </button>
               </div>
 

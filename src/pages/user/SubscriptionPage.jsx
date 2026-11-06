@@ -170,7 +170,7 @@ export default function SubscriptionPage() {
     <div className="root">
       <nav className="navbar">
         <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>LossLens</span>
-        <button className="nav-ghost" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">Ã¢"   Dashboard</button>
+        <button className="nav-ghost" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">â"   Dashboard</button>
       </nav>
 
       <div className="dashboard" style={{ padding: '2rem 1.5rem', maxWidth: '600px', margin: '0 auto' }}>

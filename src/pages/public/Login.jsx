@@ -170,7 +170,7 @@ function Login() {
               color: cooldown ? '#2DD4BF' : '#FFFFFF',
               fontSize: '13px', marginBottom: '1rem'
             }}>
-              {cooldown ? `â³ ${error} Try again in ${formatCooldown()}.` : error}
+              {cooldown ? `⏳ ${error} Try again in ${formatCooldown()}.` : error}
             </div>
           )}
 
@@ -222,7 +222,7 @@ function Login() {
           <p className="auth-switch">Don't have an account? <span onClick={() => navigate('/signup')}>Sign up free</span></p>
 
           <div style={{ marginTop: '1.25rem', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', borderRadius: 8, padding: '10px 14px', textAlign: 'center' }}>
-            <p style={{ fontSize: 12, color: '#2DD4BF' }}>ðŸ†˜ In crisis? Call NACADA: <strong>1192</strong> (24/7 free)</p>
+            <p style={{ fontSize: 12, color: '#2DD4BF' }}>🆘 In crisis? Call NACADA: <strong>1192</strong> (24/7 free)</p>
           </div>
         </div>
       </div>

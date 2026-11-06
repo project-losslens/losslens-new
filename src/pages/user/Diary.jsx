@@ -322,7 +322,7 @@ function Diary() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', padding: '8px 12px', background: isListening ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.12)', borderRadius: '8px', border: `1px solid ${isListening ? '#FFFFFF' : '#7DBDEE'}` }}>
                     <button onClick={() => isListening ? stopListening() : startListening()} style={{ width: '36px', height: '36px', borderRadius: '50%', border: 'none', background: isListening ? '#FFFFFF' : '#2DD4BF', color: '#0B1220', fontSize: '16px', cursor: 'pointer', animation: isListening ? 'pulse 1.5s infinite' : 'none' }}></button>
                     <span style={{ flex: 1, fontSize: '12px', color: isListening ? '#FFFFFF' : '#2DD4BF' }}>{isListening ? ' Listening...' : 'Tap to speak'}</span>
-                    {isListening && <button onClick={stopListening} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '18px', cursor: 'pointer' }}>â¹</button>}
+                    {isListening && <button onClick={stopListening} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '18px', cursor: 'pointer' }}>⏹</button>}
                   </div>
                 )}
                 <textarea className="diary-textarea" placeholder="How did today feel?" value={notes} onChange={e => setNotes(e.target.value)} rows={4} />

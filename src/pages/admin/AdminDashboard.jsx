@@ -133,7 +133,7 @@ export default function AdminDashboard() {
     { label: 'Total Users', value: stats.totalUsers, icon: '', color: '#2DD4BF', path: ROUTES.USERS },
     { label: 'Active Today', value: stats.activeToday, icon: '', color: '#2DD4BF' },
     { label: 'High Risk', value: stats.highRisk, icon: '', color: '#FFFFFF', urgent: stats.highRisk > 0, path: ROUTES.USERS },
-    { label: 'Crisis Open', value: stats.crisisOpen, icon: 'ðŸ†˜', color: '#FFFFFF', urgent: stats.crisisOpen > 0, path: ROUTES.CRISIS },
+    { label: 'Crisis Open', value: stats.crisisOpen, icon: '🆘', color: '#FFFFFF', urgent: stats.crisisOpen > 0, path: ROUTES.CRISIS },
     { label: 'Active Events', value: stats.eventsActive, icon: '', color: '#7DBDEE', path: ROUTES.EVENTS },
     { label: 'Resources', value: stats.resources, icon: '', color: '#7DBDEE', path: ROUTES.RESOURCES },
     { label: 'CBT Done', value: stats.cbtCompletions, icon: '', color: '#2DD4BF' },
@@ -146,7 +146,7 @@ export default function AdminDashboard() {
     { emoji: '', label: 'Manage Resources', path: ROUTES.RESOURCES, desc: 'Helplines & content' },
     { emoji: '', label: 'Broadcast', path: ROUTES.BROADCAST, desc: 'Send announcements' },
     { emoji: '', label: 'Analytics', path: ROUTES.ANALYTICS, desc: 'Platform insights' },
-    { emoji: 'ðŸ†˜', label: 'Crisis Alerts', path: ROUTES.CRISIS, desc: `${stats.crisisOpen} open` },
+    { emoji: '🆘', label: 'Crisis Alerts', path: ROUTES.CRISIS, desc: `${stats.crisisOpen} open` },
   ]
 
   const getRiskColor = (level) => {
@@ -208,7 +208,7 @@ export default function AdminDashboard() {
             {[
               { id: 'overview', label: ' Overview' },
               { id: 'users', label: ' Recent Users' },
-              { id: 'alerts', label: `ðŸ†˜ Alerts (${stats.crisisOpen})` },
+              { id: 'alerts', label: `🆘 Alerts (${stats.crisisOpen})` },
               { id: 'messages', label: ` Messages (${contactRequests.length})` },
             ].map(tab => (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', minWidth: '100px', transition: 'background 0.2s, color 0.2s' }}>{tab.label}</button>
@@ -269,7 +269,7 @@ export default function AdminDashboard() {
             <div className="dash-section">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h3 style={{ color: '#FFFFFF', fontSize: '14px', margin: 0 }}> Recent Users</h3>
-                <button onClick={() => navigate(ROUTES.USERS)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Manage Users â†’</button>
+                <button onClick={() => navigate(ROUTES.USERS)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Manage Users →</button>
               </div>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
@@ -313,10 +313,10 @@ export default function AdminDashboard() {
           {activeTab === 'alerts' && (
             <div className="dash-section" style={{ borderColor: stats.crisisOpen > 0 ? '#FFFFFF' : 'rgba(255,255,255,0.12)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h3 style={{ color: stats.crisisOpen > 0 ? '#FFFFFF' : '#FFFFFF', fontSize: '14px', margin: 0 }}>ðŸ†˜ Crisis Alerts {stats.crisisOpen > 0 && `(${stats.crisisOpen} open)`}</h3>
+                <h3 style={{ color: stats.crisisOpen > 0 ? '#FFFFFF' : '#FFFFFF', fontSize: '14px', margin: 0 }}>🆘 Crisis Alerts {stats.crisisOpen > 0 && `(${stats.crisisOpen} open)`}</h3>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => setAlertPolling(!alertPolling)} style={{ padding: '4px 10px', borderRadius: '100px', background: 'transparent', border: `1px solid ${alertPolling ? '#2DD4BF' : 'rgba(255,255,255,0.4)'}`, color: alertPolling ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{alertPolling ? ' Live' : 'â¸ Paused'}</button>
-                  <button onClick={() => navigate(ROUTES.CRISIS)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #FFFFFF', color: '#FFFFFF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Manage â†’</button>
+                  <button onClick={() => setAlertPolling(!alertPolling)} style={{ padding: '4px 10px', borderRadius: '100px', background: 'transparent', border: `1px solid ${alertPolling ? '#2DD4BF' : 'rgba(255,255,255,0.4)'}`, color: alertPolling ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{alertPolling ? ' Live' : '⏸ Paused'}</button>
+                  <button onClick={() => navigate(ROUTES.CRISIS)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #FFFFFF', color: '#FFFFFF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Manage →</button>
                 </div>
               </div>
               {alerts.length === 0 ? (

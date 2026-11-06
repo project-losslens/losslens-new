@@ -109,7 +109,7 @@ function FamilyPortalPage() {
     const newStatus = inv.status === 'paused' ? 'active' : 'paused'
     await supabase.from('supporter_invitations').update({ status: newStatus }).eq('id', inv.id)
     setInvitations(prev => prev.map(i => i.id === inv.id ? { ...i, status: newStatus } : i))
-    showToast(newStatus === 'paused' ? 'â¸ Paused' : 'Ã¢– ¶Ã¯ ¸  Resumed', 2000)
+    showToast(newStatus === 'paused' ? '⏸ Paused' : '▶ Resumed', 2000)
   }
 
   const handleToggleCrisis = async (inv) => {
@@ -160,11 +160,11 @@ function FamilyPortalPage() {
 
   const getStatusBadge = (status) => {
     const map = {
-      pending: { color: '#7DBDEE', bg: 'rgba(45,212,191,0.15)', label: 'â³ Pending' },
+      pending: { color: '#7DBDEE', bg: 'rgba(45,212,191,0.15)', label: '⏳ Pending' },
       active: { color: '#2DD4BF', bg: 'rgba(255,255,255,0.12)', label: ' Active' },
-      declined: { color: '#FFFFFF', bg: 'rgba(255,255,255,0.08)', label: 'Ã¢ Å’ Declined' },
-      expired: { color: 'rgba(255,255,255,0.4)', bg: '#0B1220', label: 'â° Expired' },
-      paused: { color: 'rgba(255,255,255,0.4)', bg: '#0B1220', label: 'â¸ Paused' },
+      declined: { color: '#FFFFFF', bg: 'rgba(255,255,255,0.08)', label: '⠝Œ Declined' },
+      expired: { color: 'rgba(255,255,255,0.4)', bg: '#0B1220', label: '⏰ Expired' },
+      paused: { color: 'rgba(255,255,255,0.4)', bg: '#0B1220', label: '⏸ Paused' },
     }
     return map[status] || map.pending
   }
@@ -208,7 +208,7 @@ function FamilyPortalPage() {
                   <div className="form-group"><label>Name *</label><input type="text" value={form.supporter_name} onChange={e => setForm({ ...form, supporter_name: e.target.value })} placeholder="e.g. Mum" /></div>
                   <div className="form-group"><label>Relationship</label><input type="text" value={form.supporter_relation} onChange={e => setForm({ ...form, supporter_relation: e.target.value })} placeholder="e.g. Mother" /></div>
                   <div className="form-group"><label>Email (optional)</label><input type="email" value={form.supporter_email} onChange={e => setForm({ ...form, supporter_email: e.target.value })} placeholder="supporter@email.com" /></div>
-                  <div className="form-group"><label>Phone (optional)</label><div className="phone-input"><span className="phone-prefix">ðŸ‡°ðŸ‡ª +254</span><input type="tel" value={form.supporter_phone} onChange={e => setForm({ ...form, supporter_phone: e.target.value })} /></div></div>
+                  <div className="form-group"><label>Phone (optional)</label><div className="phone-input"><span className="phone-prefix">🇰🇪 +254</span><input type="tel" value={form.supporter_phone} onChange={e => setForm({ ...form, supporter_phone: e.target.value })} /></div></div>
                   <div className="form-group"><label>What they can see</label><div className="chip-group">{ALL_PERMISSIONS.map(p => <button key={p} className={`chip ${form.permissions.includes(p) ? 'chip-active' : ''}`} onClick={() => togglePermission(p)}>{form.permissions.includes(p) ? ' ' : ''}{p}</button>)}</div></div>
                   <div style={{ display: 'flex', gap: '12px', marginBottom: '1rem' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#2DD4BF', cursor: 'pointer' }}><input type="checkbox" checked={form.anonymous_mode} onChange={e => setForm({ ...form, anonymous_mode: e.target.checked })} />Anonymous</label>
@@ -229,7 +229,7 @@ function FamilyPortalPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #2DD4BF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', color: '#2DD4BF' }}>{inv.supporter_name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)}</div>
                         <div>
-                          <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 500, margin: 0 }}>{inv.anonymous_mode ? 'A loved one' : inv.supporter_name}{inv.crisis_contact && <span style={{ fontSize: '10px', color: '#7DBDEE', marginLeft: '6px' }}>ðŸ†˜</span>}</p>
+                          <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 500, margin: 0 }}>{inv.anonymous_mode ? 'A loved one' : inv.supporter_name}{inv.crisis_contact && <span style={{ fontSize: '10px', color: '#7DBDEE', marginLeft: '6px' }}>🆘</span>}</p>
                           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{inv.supporter_relation || 'Supporter'}</p>
                         </div>
                       </div>

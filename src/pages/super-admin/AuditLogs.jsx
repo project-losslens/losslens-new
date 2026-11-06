@@ -257,7 +257,7 @@ export default function AuditLogs() {
                         <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{fmtDateTime(log.created_at)}</span>
                       </div>
                       <button onClick={() => toggleExpand(log.id)} style={{ background: 'transparent', border: 'none', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
-                        {isExpanded ? 'â–² Hide' : 'â–¼ Details'}
+                        {isExpanded ? '▲ Hide' : '▼ Details'}
                       </button>
                     </div>
                     {isExpanded && (

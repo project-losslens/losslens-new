@@ -6,7 +6,7 @@ import Sidebar from '../../components/Sidebar'
 
 //  Constants
 const CATEGORY_ICONS = {
-  Crisis: 'ðŸ†˜', Professional: '', 'Self-Exclusion': '',
+  Crisis: '🆘', Professional: '', 'Self-Exclusion': '',
   'Financial Recovery': '', International: '', Apps: '',
   Podcasts: '', 'Blocking Tools': '', Mindfulness: '', Other: '',
 }
@@ -215,7 +215,7 @@ export default function Resources() {
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
           <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}></span>
           <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif" }}>Please log in</h2>
-          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%', marginTop: '16px' }}>Go to Login â†’</button>
+          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%', marginTop: '16px' }}>Go to Login →</button>
         </div>
       </div>
     )
@@ -287,7 +287,7 @@ export default function Resources() {
           {/* Top Rated */}
           {topRated.length > 0 && activeCategory === 'all' && !debouncedSearch && (
             <div style={{ marginBottom: '1rem' }}>
-              <p style={{ color: '#2DD4BF', fontSize: '11px', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>â­ Most helpful</p>
+              <p style={{ color: '#2DD4BF', fontSize: '11px', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>⭐ Most helpful</p>
               {topRated.map(r => (
                 <div key={r.id} style={{ padding: '12px', background: 'rgba(255,255,255,0.12)', borderRadius: '10px', marginBottom: '6px', border: '1px solid #7DBDEE', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span style={{ fontSize: '24px' }}>{CATEGORY_ICONS[r.category] || ''}</span>
@@ -334,7 +334,7 @@ export default function Resources() {
                     </div>
                     <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexShrink: 0 }}>
                       <button onClick={() => handleRate(r.id, true)} style={{ background: 'transparent', border: 'none', fontSize: '13px', cursor: 'pointer', padding: '4px' }} title="Helpful"></button>
-                      <button onClick={() => toggleSave(r.id)} style={{ background: 'transparent', border: 'none', fontSize: '13px', cursor: 'pointer', padding: '4px', color: savedIds.includes(r.id) ? '#2DD4BF' : 'rgba(255,255,255,0.4)' }} title={savedIds.includes(r.id) ? 'Saved' : 'Save'}>{savedIds.includes(r.id) ? 'â­' : ''}</button>
+                      <button onClick={() => toggleSave(r.id)} style={{ background: 'transparent', border: 'none', fontSize: '13px', cursor: 'pointer', padding: '4px', color: savedIds.includes(r.id) ? '#2DD4BF' : 'rgba(255,255,255,0.4)' }} title={savedIds.includes(r.id) ? 'Saved' : 'Save'}>{savedIds.includes(r.id) ? '⭐' : ''}</button>
                       <button onClick={() => handleShare(r)} style={{ background: 'transparent', border: 'none', fontSize: '12px', cursor: 'pointer', padding: '4px', color: 'rgba(255,255,255,0.4)' }} title="Share"></button>
                       <button onClick={() => handleVisit(r)} style={{ padding: '6px 12px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>{r.link ? 'Visit' : 'View'}</button>
                     </div>
@@ -347,7 +347,7 @@ export default function Resources() {
           {/*  Saved Resources Section — Now Functional */}
           {savedResources.length > 0 && (
             <div className="dash-section" style={{ marginTop: '1rem', borderColor: '#2DD4BF' }}>
-              <h3 style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '0.75rem' }}>â­ Saved ({savedResources.length})</h3>
+              <h3 style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '0.75rem' }}>⭐ Saved ({savedResources.length})</h3>
               {savedResources.map(r => (
                 <div key={r.id} style={{ padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span>{CATEGORY_ICONS[r.category] || ''}</span>
@@ -387,7 +387,7 @@ export default function Resources() {
       </div>
 
       {/* Floating Emergency Button */}
-      <a href={`tel:${EMERGENCY_CONTACTS[0].number}`} style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 500, background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '12px 18px', borderRadius: '100px', fontSize: '14px', fontWeight: 600, textDecoration: 'none', boxShadow: '0 4px 16px rgba(11,18,32,0.4)', border: '2px solid #FFFFFF', display: 'flex', alignItems: 'center', gap: '6px', paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }} className="mobile-only" aria-label={`Call ${EMERGENCY_CONTACTS[0].name} at ${EMERGENCY_CONTACTS[0].number}`}>ðŸ†˜ Call {EMERGENCY_CONTACTS[0].number}</a>
+      <a href={`tel:${EMERGENCY_CONTACTS[0].number}`} style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 500, background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '12px 18px', borderRadius: '100px', fontSize: '14px', fontWeight: 600, textDecoration: 'none', boxShadow: '0 4px 16px rgba(11,18,32,0.4)', border: '2px solid #FFFFFF', display: 'flex', alignItems: 'center', gap: '6px', paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }} className="mobile-only" aria-label={`Call ${EMERGENCY_CONTACTS[0].name} at ${EMERGENCY_CONTACTS[0].number}`}>🆘 Call {EMERGENCY_CONTACTS[0].number}</a>
 
       <style>{`
         @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:0.6} }

@@ -101,15 +101,15 @@ function UsernamePrompt({ userId, onComplete }) {
           <label>USERNAME</label>
           <div style={{ position: 'relative' }}>
             <input type="text" placeholder="e.g. amina_w" value={username} onChange={e => handleChange(e.target.value)} style={{ paddingRight: 40 }} onKeyDown={e => e.key === 'Enter' && handleSave()} />
-            {status === 'checking' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Checking">â³</span>}
+            {status === 'checking' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Checking">⏳</span>}
             {status === 'available' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Available"></span>}
-            {status === 'taken' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Taken">Ã¢ Å’</span>}
+            {status === 'taken' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Taken">⠝Œ</span>}
           </div>
           {status === 'taken' && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Username already taken</span>}
           {status === 'available' && <span style={{ fontSize: '11px', color: '#2DD4BF' }}>Username available!</span>}
           <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>Letters, numbers, and underscores only</span>
         </div>
-        <button className="btn-primary full" onClick={handleSave} disabled={loading || status === 'taken' || status === 'checking'}>{loading ? <span className="spinner" /> : 'Save & Continue â†’'}</button>
+        <button className="btn-primary full" onClick={handleSave} disabled={loading || status === 'taken' || status === 'checking'}>{loading ? <span className="spinner" /> : 'Save & Continue →'}</button>
       </div>
     </div>
   )
@@ -245,7 +245,7 @@ function Dashboard() {
           <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
           <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif", fontSize: '22px', marginBottom: '8px' }}>Please log in</h2>
           <p style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '24px' }}>Your session has expired.</p>
-          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%' }}>Go to Login â†’</button>
+          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%' }}>Go to Login →</button>
         </div>
       </div>
     )
@@ -287,7 +287,7 @@ function Dashboard() {
           {pullDistance > 0 && (
             <div style={{ position: 'fixed', top: 0, left: '50%', zIndex: 2000, transform: 'translateX(-50%)', paddingTop: Math.max(pullDistance - 40, 4), pointerEvents: 'none' }}>
               <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '2px solid #2DD4BF', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `rotate(${Math.min(pullDistance * 3, 360)}deg)`, opacity: Math.min(pullDistance / pullThreshold, 1) }}>
-                {refreshing ? <div style={{ width: '16px', height: '16px', border: '2px solid #2DD4BF', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> : <span style={{ fontSize: '16px', color: '#2DD4BF' }}>{pullDistance >= pullThreshold ? '' : 'â†“'}</span>}
+                {refreshing ? <div style={{ width: '16px', height: '16px', border: '2px solid #2DD4BF', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> : <span style={{ fontSize: '16px', color: '#2DD4BF' }}>{pullDistance >= pullThreshold ? '' : '↓'}</span>}
               </div>
             </div>
           )}
@@ -296,7 +296,7 @@ function Dashboard() {
             {riskData && (
               <div role="alert" aria-live="polite" style={{ background: getRiskColor(riskData.score).bg, border: `1px solid ${getRiskColor(riskData.score).color}`, borderRadius: '12px', padding: '14px 16px', marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: riskData.factors?.length > 0 ? '8px' : '0' }}>
-                  <h3 style={{ color: getRiskColor(riskData.score).color, fontSize: '14px', margin: 0 }}>{riskData.level === 'high' ? 'Ã¢Å¡  Ã¯ ¸  ' : riskData.level === 'medium' ? ' ' : ' '}{getRiskColor(riskData.score).label} Today</h3>
+                  <h3 style={{ color: getRiskColor(riskData.score).color, fontSize: '14px', margin: 0 }}>{riskData.level === 'high' ? '⚠️ ' : riskData.level === 'medium' ? ' ' : ' '}{getRiskColor(riskData.score).label} Today</h3>
                   <span style={{ color: getRiskColor(riskData.score).color, fontSize: '20px', fontWeight: 700 }}>{riskData.score}%</span>
                 </div>
                 {(riskData.factors || []).map((f, i) => (<p key={i} style={{ color: getRiskColor(riskData.score).color, fontSize: '12px', opacity: 0.8, margin: '2px 0' }}>"¢ {f}</p>))}
@@ -361,12 +361,12 @@ function Dashboard() {
             {/* Crisis Support Bar - Updated with multiple contacts */}
             <div style={{ background: 'rgba(255,255,255,0.12)', border: '2px solid #FFFFFF', borderRadius: '14px', padding: '16px', marginBottom: '1rem', cursor: 'pointer' }} onClick={() => setShowCrisisModal(true)}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                <span style={{ fontSize: '24px' }}>ðŸ†˜</span>
+                <span style={{ fontSize: '24px' }}>🆘</span>
                 <div>
                   <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 600, margin: 0 }}>Feeling overwhelmed? You're not alone.</p>
                   <p style={{ color: '#2DD4BF', fontSize: '11px', margin: '2px 0 0' }}>Tap here for free 24/7 support options</p>
                 </div>
-                <span style={{ color: '#FFFFFF', fontSize: '18px', marginLeft: 'auto' }}>â†’</span>
+                <span style={{ color: '#FFFFFF', fontSize: '18px', marginLeft: 'auto' }}>→</span>
               </div>
             </div>
           </div>
@@ -378,7 +378,7 @@ function Dashboard() {
         <div onClick={() => setShowCrisisModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.95)', zIndex: 5000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '2px solid #FFFFFF', maxWidth: '450px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-              <span style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>ðŸ†˜</span>
+              <span style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>🆘</span>
               <h2 style={{ color: '#FFFFFF', fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', margin: '0 0 8px' }}>You're Not Alone</h2>
               <p style={{ color: '#2DD4BF', fontSize: '13px', lineHeight: '1.6', margin: 0 }}>These services are free, confidential, and available to anyone in Kenya. Reach out anytime.</p>
             </div>
@@ -392,7 +392,7 @@ function Dashboard() {
                 }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#2DD4BF'; e.currentTarget.style.transform = 'scale(1.02)' }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = contact.priority ? '#FFFFFF' : 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'scale(1)' }}>
-                  <span style={{ fontSize: contact.priority ? '28px' : '20px', flexShrink: 0 }}>{contact.priority ? 'â­' : ''}</span>
+                  <span style={{ fontSize: contact.priority ? '28px' : '20px', flexShrink: 0 }}>{contact.priority ? '⭐' : ''}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <span style={{ color: contact.priority ? '#FFFFFF' : '#FFFFFF', fontSize: contact.priority ? '15px' : '13px', fontWeight: 600 }}>{contact.name}</span>
@@ -400,7 +400,7 @@ function Dashboard() {
                     </div>
                     <p style={{ color: '#2DD4BF', fontSize: '12px', margin: '2px 0 0' }}>{contact.phone}  · {contact.hours}</p>
                   </div>
-                  <span style={{ color: contact.priority ? '#FFFFFF' : 'rgba(255,255,255,0.4)', fontSize: '18px' }}>â†’</span>
+                  <span style={{ color: contact.priority ? '#FFFFFF' : 'rgba(255,255,255,0.4)', fontSize: '18px' }}>→</span>
                 </a>
               ))}
             </div>

@@ -177,7 +177,7 @@ export default function SuperAdminDashboard() {
     { label: 'Total Users', value: stats.totalUsers, icon: '', path: ROUTES.USERS, color: '#2DD4BF' },
     { label: 'Active Today', value: stats.activeToday, icon: '', color: '#2DD4BF' },
     { label: 'Admins', value: stats.totalAdmins, icon: '', path: ROUTES.ADMINS, color: '#2DD4BF' },
-    { label: 'Crisis Open', value: stats.crisisOpen, icon: 'ðŸ†˜', path: ROUTES.CRISIS, color: '#FFFFFF', urgent: stats.crisisOpen > 0 },
+    { label: 'Crisis Open', value: stats.crisisOpen, icon: '🆘', path: ROUTES.CRISIS, color: '#FFFFFF', urgent: stats.crisisOpen > 0 },
     { label: 'B2B Clients', value: stats.b2bClients, icon: '', path: ROUTES.B2B, color: '#7DBDEE' },
     { label: 'Grants Pending', value: stats.grantsPending, icon: '', path: ROUTES.GRANTS, color: '#2DD4BF' },
     { label: 'Insurance', value: stats.insurancePartners, icon: '', path: ROUTES.INSURANCE, color: '#2DD4BF' },
@@ -349,7 +349,7 @@ export default function SuperAdminDashboard() {
             <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h3 style={{ color: '#FFFFFF', fontSize: '14px', margin: 0 }}> Recent Admins</h3>
-                <button onClick={() => navigate(ROUTES.ADMINS)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Manage â†’</button>
+                <button onClick={() => navigate(ROUTES.ADMINS)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Manage →</button>
               </div>
               {recentAdmins.length === 0 ? (
                 <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', textAlign: 'center', padding: '1rem' }}>No admins found.</p>

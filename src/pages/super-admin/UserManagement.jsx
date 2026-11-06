@@ -11,7 +11,7 @@ const TABS = [
   { id: 'premium', label: 'Premium', icon: '' },
   { id: 'company', label: 'Company', icon: '' },
   { id: 'free', label: 'Free', icon: '' },
-  { id: 'pending', label: 'Pending', icon: 'â³' },
+  { id: 'pending', label: 'Pending', icon: '⏳' },
 ]
 
 function showToast(message, duration = 3000) {
@@ -454,7 +454,7 @@ export default function UserManagement() {
                   { label: 'Premium Users', value: paymentStats.premium, icon: '', color: '#2DD4BF' },
                   { label: 'Company Users', value: paymentStats.company, icon: '', color: '#2DD4BF' },
                   { label: 'Free Users', value: paymentStats.free, icon: '', color: '#2DD4BF' },
-                  { label: 'Pending', value: paymentStats.pending, icon: 'â³', color: '#7DBDEE' },
+                  { label: 'Pending', value: paymentStats.pending, icon: '⏳', color: '#7DBDEE' },
                 ].map((s, i) => (
                   <div key={i} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
                     <span style={{ fontSize: '20px', display: 'block', marginBottom: '4px' }}>{s.icon}</span>
@@ -603,7 +603,7 @@ export default function UserManagement() {
       {showRevokePremium && (
         <div onClick={() => setShowRevokePremium(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid #7DBDEE', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>â¬‡</span>
+            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>⬇</span>
             <h3 style={{ color: '#7DBDEE', fontSize: '16px', margin: '0 0 8px' }}>Revoke Premium Access?</h3>
             <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '20px' }}>
               <strong style={{ color: '#2DD4BF' }}>"{showRevokePremium.full_name || 'User'}"</strong> will be moved back to the Free plan.

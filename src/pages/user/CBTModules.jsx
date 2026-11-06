@@ -69,7 +69,7 @@ function CBTModules() {
       lessons: [
         { title: 'What is gambling harm?', readTime: '3 min', content: `Gambling harm isn't just about losing money. It's a spectrum that affects your mental health, relationships, work, and self-worth.\n\nIn Kenya, sports betting has exploded — especially among young men. The Premier League isn't just entertainment anymore; it's become a trigger for millions.\n\nGambling harm happens when:\n"¢ You spend more than you planned\n"¢ You chase losses hoping to "recover"\n"¢ It affects your mood, sleep, or relationships\n"¢ You hide your betting from loved ones\n"¢ You use M-Pesa loans or borrow to bet\n\nThe good news? Recognizing where you are is the first and most powerful step. This isn't about shame — it's about awareness.`, reflection: 'Think about your own gambling. Where do you fall on the spectrum? Be honest with yourself.' },
         { title: 'Identifying your personal triggers', readTime: '3 min', content: `Triggers are situations, feelings, or thoughts that push you toward gambling.\n\nCommon triggers in Kenya:\n"¢  M-Pesa balance notifications\n"¢  Premier League match days\n"¢  Stress from unemployment\n"¢  Peer pressure\n"¢  Ads and promotions\n"¢  Boredom or loneliness\n\nYour task: Notice what happens right BEFORE the urge. Write it down. Patterns will emerge.`, reflection: 'What are YOUR top 3 triggers? Write them down where you can see them daily.' },
-        { title: 'The gambling cycle', readTime: '2 min', content: `TRIGGER â†’ URGE â†’ ACTION â†’ CONSEQUENCE â†’ GUILT â†’ (back to TRIGGER)\n\nBreaking this cycle means interrupting it EARLY — at the trigger or urge stage. Every module from here will give you tools to do exactly that.`, reflection: 'Draw your own gambling cycle. Where could YOU interrupt it?' },
+        { title: 'The gambling cycle', readTime: '2 min', content: `TRIGGER → URGE → ACTION → CONSEQUENCE → GUILT → (back to TRIGGER)\n\nBreaking this cycle means interrupting it EARLY — at the trigger or urge stage. Every module from here will give you tools to do exactly that.`, reflection: 'Draw your own gambling cycle. Where could YOU interrupt it?' },
       ]
     },
     {
@@ -115,7 +115,7 @@ function CBTModules() {
       howItHelps: "When triggers can't be avoided, coping strategies are your shield.",
       outcome: "You'll have 5 go-to coping strategies for your life.",
       lessons: [
-        { title: 'Behavioral alternatives', readTime: '3 min', content: `Match the need, not the behavior:\n\nExcitement â†’ Play football, workout\nEscape â†’ Read, walk, meditate\nSocial â†’ Join groups, call friends\nHope â†’ Set real savings goals, start a side hustle`, reflection: 'Why do YOU gamble? What\'s a healthy alternative?' },
+        { title: 'Behavioral alternatives', readTime: '3 min', content: `Match the need, not the behavior:\n\nExcitement → Play football, workout\nEscape → Read, walk, meditate\nSocial → Join groups, call friends\nHope → Set real savings goals, start a side hustle`, reflection: 'Why do YOU gamble? What\'s a healthy alternative?' },
         { title: 'Cognitive reframing', readTime: '2 min', content: `Old thought: "I need to bet to enjoy football."\nReframed: "I can enjoy the match without risking money."\n\nOld thought: "I'm missing out on winning."\nReframed: "I'm missing out on LOSING."\n\nPractice: Write 3 gambling thoughts and reframe each.`, reflection: "What's ONE gambling thought you have often? Reframe it." },
         { title: 'Relaxation techniques', readTime: '3 min', content: `Box Breathing:\n1. Inhale 4s\n2. Hold 4s\n3. Exhale 4s\n4. Hold 4s\nRepeat 5x\n\n5-4-3-2-1 Grounding:\nName 5 things you see, 4 you touch, 3 you hear, 2 you smell, 1 you taste.\n\n2 minutes, anywhere, no equipment.`, reflection: 'Try box breathing right now. How do you feel?' },
       ]
@@ -308,7 +308,7 @@ function CBTModules() {
                         <p className="module-meta">{m.duration}  · {m.lessons.length} lessons</p>
                         <p className="module-desc">{completed ? m.description : m.preview}</p>
                       </div>
-                      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '18px', transition: 'transform 0.2s', transform: isActive ? 'rotate(180deg)' : 'rotate(0)' }}>â–¼</span>
+                      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '18px', transition: 'transform 0.2s', transform: isActive ? 'rotate(180deg)' : 'rotate(0)' }}>▼</span>
                     </div>
 
                     {isActive && !isLessonActive && (
@@ -325,7 +325,7 @@ function CBTModules() {
                             role="button" tabIndex={0}
                             onKeyDown={e => { if (e.key === 'Enter') setActiveLesson({ moduleId: m.id, lessonIndex: i }) }}
                           >
-                            <span className="lesson-num">{i + 1}</span><div style={{ flex: 1 }}><span className="lesson-text">{l.title}</span><span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', display: 'block' }}>{l.readTime}</span></div><span style={{ color: 'rgba(255,255,255,0.4)' }}>â†’</span>
+                            <span className="lesson-num">{i + 1}</span><div style={{ flex: 1 }}><span className="lesson-text">{l.title}</span><span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', display: 'block' }}>{l.readTime}</span></div><span style={{ color: 'rgba(255,255,255,0.4)' }}>→</span>
                           </div>
                         ))}</div>
                         {!completed && (
@@ -339,7 +339,7 @@ function CBTModules() {
 
                     {isLessonActive && (
                       <div className="module-expanded" style={{ animation: 'fadeIn 0.3s ease-out' }}>
-                        <button onClick={() => setActiveLesson(null)} style={{ background: 'transparent', border: 'none', color: '#2DD4BF', fontSize: '13px', cursor: 'pointer' }}>â† Back</button>
+                        <button onClick={() => setActiveLesson(null)} style={{ background: 'transparent', border: 'none', color: '#2DD4BF', fontSize: '13px', cursor: 'pointer' }}>← Back</button>
                         <div style={{ background: '#0B1220', borderRadius: '12px', padding: '20px', border: '1px solid rgba(255,255,255,0.12)', margin: '12px 0' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}><span style={{ fontSize: '11px', color: '#2DD4BF' }}>Lesson {activeLesson.lessonIndex + 1}/{m.lessons.length}</span><span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>{m.lessons[activeLesson.lessonIndex].readTime}</span></div>
                           <h3 style={{ color: '#FFFFFF', fontSize: '16px', marginBottom: '16px', fontFamily: "'Playfair Display', serif" }}>{m.lessons[activeLesson.lessonIndex].title}</h3>
@@ -347,9 +347,9 @@ function CBTModules() {
                           <div style={{ marginTop: '20px', padding: '14px', background: 'rgba(255,255,255,0.12)', borderRadius: '8px', border: '1px dashed #7DBDEE' }}><p style={{ fontSize: '11px', color: '#2DD4BF', marginBottom: '6px' }}> Reflection</p><p style={{ fontSize: '13px', color: '#2DD4BF', lineHeight: '1.6', fontStyle: 'italic', margin: 0 }}>{m.lessons[activeLesson.lessonIndex].reflection}</p></div>
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
-                          {activeLesson.lessonIndex > 0 && <button onClick={() => setActiveLesson({ moduleId: m.id, lessonIndex: activeLesson.lessonIndex - 1 })} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>â† Previous</button>}
+                          {activeLesson.lessonIndex > 0 && <button onClick={() => setActiveLesson({ moduleId: m.id, lessonIndex: activeLesson.lessonIndex - 1 })} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>← Previous</button>}
                           {activeLesson.lessonIndex < m.lessons.length - 1 ? (
-                            <button onClick={() => setActiveLesson({ moduleId: m.id, lessonIndex: activeLesson.lessonIndex + 1 })} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Next â†’</button>
+                            <button onClick={() => setActiveLesson({ moduleId: m.id, lessonIndex: activeLesson.lessonIndex + 1 })} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Next →</button>
                           ) : (
                             <button onClick={() => { setActiveLesson(null); if (!completed) handleComplete(m.id, m.title) }} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: completed ? 'rgba(255,255,255,0.12)' : '#2DD4BF', border: 'none', color: completed ? '#2DD4BF' : '#0B1220', fontSize: '13px', fontWeight: 500, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{completed ? ' Complete' : 'Complete '}</button>
                           )}
