@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
-import SuperAdminSidebar from '../../components/SuperAdminSidebar'
 
 function ChatViewer() {
   const navigate = useNavigate()
@@ -112,7 +111,7 @@ function ChatViewer() {
 
   return (
     <div className="root" style={{ display: 'flex', minHeight: '100vh' }}>
-      <SuperAdminSidebar />
+
 
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
         <nav style={{

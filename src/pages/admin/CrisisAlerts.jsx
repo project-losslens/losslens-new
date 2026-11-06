@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
-import AdminSidebar from '../../components/AdminSidebar'
 
 const fmtTime = (d) => d ? new Date(d).toLocaleString('en-KE') : '—'
 
@@ -107,7 +106,7 @@ export default function CrisisAlerts() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#0B1220' }}>
-      <AdminSidebar />
+
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid rgba(255,255,255,0.08)', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>

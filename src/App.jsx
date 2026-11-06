@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
+import ElevatedRoute from './components/ElevatedRoute'
 
 import Landing from './pages/public/Landing'
 import Login from './pages/public/Login'
@@ -31,16 +32,14 @@ import ManageResources from './pages/admin/ManageResources'
 import UserAnalytics from './pages/admin/UserAnalytics'
 import Broadcast from './pages/admin/Broadcast'
 import CrisisAlerts from './pages/admin/CrisisAlerts'
-
-import SuperAdminDashboard from './pages/super-admin/SuperAdminDashboard'
-import UserManagement from './pages/super-admin/UserManagement'
-import AdminManagement from './pages/super-admin/AdminManagement'
-import SystemSettings from './pages/super-admin/SystemSettings'
-import AuditLogs from './pages/super-admin/AuditLogs'
-import B2BClients from './pages/super-admin/B2BClients'
-import InsurancePartners from './pages/super-admin/InsurancePartners'
-import GrantApplications from './pages/super-admin/GrantApplications'
-import ChatViewer from './pages/super-admin/ChatViewer'
+import AdminLayout from './pages/admin/AdminLayout'
+import UserManagement from './pages/admin/UserManagement'
+import AuditLogs from './pages/admin/AuditLogs'
+import B2BClients from './pages/admin/B2BClients'
+import InsurancePartners from './pages/admin/InsurancePartners'
+import GrantApplications from './pages/admin/GrantApplications'
+import ChatViewer from './pages/admin/ChatViewer'
+import SystemSettings from './pages/admin/SystemSettings'
 
 function App() {
   return (
@@ -71,24 +70,22 @@ function App() {
         <Route path="/subscription" element={<ProtectedRoute><SubscriptionPage /></ProtectedRoute>} />
 
         {/* Admin */}
-        <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/admin/events" element={<ProtectedRoute adminOnly><ManageEvents /></ProtectedRoute>} />
-        <Route path="/admin/groups" element={<ProtectedRoute adminOnly><ManageGroups /></ProtectedRoute>} />
-        <Route path="/admin/resources" element={<ProtectedRoute adminOnly><ManageResources /></ProtectedRoute>} />
-        <Route path="/admin/analytics" element={<ProtectedRoute adminOnly><UserAnalytics /></ProtectedRoute>} />
-        <Route path="/admin/broadcast" element={<ProtectedRoute adminOnly><Broadcast /></ProtectedRoute>} />
-        <Route path="/admin/crisis" element={<ProtectedRoute adminOnly><CrisisAlerts /></ProtectedRoute>} />
-
-        {/* Super Admin */}
-        <Route path="/super-admin" element={<ProtectedRoute superAdminOnly><SuperAdminDashboard /></ProtectedRoute>} />
-        <Route path="/super-admin/users" element={<ProtectedRoute superAdminOnly><UserManagement /></ProtectedRoute>} />
-        <Route path="/super-admin/admins" element={<ProtectedRoute superAdminOnly><AdminManagement /></ProtectedRoute>} />
-        <Route path="/super-admin/settings" element={<ProtectedRoute superAdminOnly><SystemSettings /></ProtectedRoute>} />
-        <Route path="/super-admin/logs" element={<ProtectedRoute superAdminOnly><AuditLogs /></ProtectedRoute>} />
-        <Route path="/super-admin/b2b" element={<ProtectedRoute superAdminOnly><B2BClients /></ProtectedRoute>} />
-        <Route path="/super-admin/insurance" element={<ProtectedRoute superAdminOnly><InsurancePartners /></ProtectedRoute>} />
-        <Route path="/super-admin/grants" element={<ProtectedRoute superAdminOnly><GrantApplications /></ProtectedRoute>} />
-        <Route path="/super-admin/chats" element={<ProtectedRoute superAdminOnly><ChatViewer /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedRoute adminOnly><AdminLayout /></ProtectedRoute>}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="events" element={<ManageEvents />} />
+          <Route path="groups" element={<ManageGroups />} />
+          <Route path="resources" element={<ManageResources />} />
+          <Route path="analytics" element={<UserAnalytics />} />
+          <Route path="broadcast" element={<Broadcast />} />
+          <Route path="crisis" element={<CrisisAlerts />} />
+          <Route path="users" element={<ElevatedRoute><UserManagement /></ElevatedRoute>} />
+          <Route path="insurance" element={<ElevatedRoute><InsurancePartners /></ElevatedRoute>} />
+          <Route path="b2b" element={<ElevatedRoute><B2BClients /></ElevatedRoute>} />
+          <Route path="grants" element={<ElevatedRoute><GrantApplications /></ElevatedRoute>} />
+          <Route path="chats" element={<ElevatedRoute><ChatViewer /></ElevatedRoute>} />
+          <Route path="logs" element={<ElevatedRoute><AuditLogs /></ElevatedRoute>} />
+          <Route path="settings" element={<ElevatedRoute><SystemSettings /></ElevatedRoute>} />
+        </Route>
 
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/login" replace />} />
