@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { askGroq } from '../lib/groq'
 import { supabase } from '../lib/supabase'
 
-// â”€â”€â”€ Oloo Character Avatar â”€â”€â”€
+// — Oloo Character Avatar —
 const OlooAvatar = ({ size = 40, emotion = 'neutral' }) => (
   <div className="oloo-chat-panel" style={{
     width: size,
@@ -28,7 +28,7 @@ const OlooAvatar = ({ size = 40, emotion = 'neutral' }) => (
   </div>
 );
 
-// â”€â”€â”€ Proactive Questions â”€â”€â”€
+// — Proactive Questions —
 function getProactiveQuestions(userContext) {
   const hour = new Date().getHours();
   const day = new Date().getDay();
@@ -79,7 +79,7 @@ function getProactiveQuestions(userContext) {
   return timeQuestions;
 }
 
-// â”€â”€â”€ Main AIChat Component â”€â”€â”€
+// — Main AIChat Component —
 function AIChat({ profile }) {
   const firstName = profile?.full_name?.split(' ')[0] || 'friend';
   const userId = profile?.id;
@@ -195,7 +195,7 @@ function AIChat({ profile }) {
     };
   }, [messages, isOpen]);
 
-  // â”€â”€â”€ VOICE: StartListening â”€â”€â”€
+  // — VOICE: StartListening —
   const startListening = () => {
     if (typeof window === 'undefined') return;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -225,7 +225,7 @@ function AIChat({ profile }) {
     setIsListening(true);
   };
 
-  // â”€â”€â”€ VOICE: StopListening â”€â”€â”€
+  // — VOICE: StopListening —
   const stopListening = () => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
@@ -572,7 +572,7 @@ function AIChat({ profile }) {
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                 transition: 'all 0.2s',
               }}
-            >â†’</button>
+            >➤</button>
           </div>
         </div>
       )}
