@@ -218,7 +218,7 @@ export default function B2BClients() {
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid #2DD4BF', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#2DD4BF', fontFamily: "'Inter', sans-serif", margin: 0 }}> B2B Clients</h1>
-            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>{clients.length} total Â· {activeCount} active</p>
+            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>{clients.length} total  · {activeCount} active</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={fetchClients} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #7DBDEE', color: '#7DBDEE', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
@@ -333,7 +333,7 @@ export default function B2BClients() {
                           <span style={{ background: planColor.bg, color: planColor.color, padding: '2px 8px', borderRadius: '100px', fontSize: '10px', border: `1px solid ${planColor.color}33` }}>{planColor.label}</span>
                           <span style={{ background: c.status === 'active' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.08)', color: c.status === 'active' ? '#2DD4BF' : '#FFFFFF', border: `1px solid ${c.status === 'active' ? '#2DD4BF' : 'rgba(255,255,255,0.08)'}`, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{c.status}</span>
                         </div>
-                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>{c.contact_name && `${c.contact_name} Â· `}{c.contact_email}</p>
+                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>{c.contact_name && `${c.contact_name}  · `}{c.contact_email}</p>
 
                         {/* Company Code */}
                         {c.company_code && (
@@ -359,7 +359,7 @@ export default function B2BClients() {
 
                         <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '6px 0 0' }}>
                           Joined {new Date(c.created_at).toLocaleDateString('en-KE')}
-                          {c.notes && <span style={{ display: 'block', marginTop: '4px', color: '#7DBDEE', fontSize: '11px', fontStyle: 'italic' }}> {c.notes.substring(0, 80)}{c.notes.length > 80 ? 'â€¦' : ''}</span>}
+                          {c.notes && <span style={{ display: 'block', marginTop: '4px', color: '#7DBDEE', fontSize: '11px', fontStyle: 'italic' }}> {c.notes.substring(0, 80)}{c.notes.length > 80 ? '"¦' : ''}</span>}
                         </p>
                       </div>
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
@@ -385,7 +385,7 @@ export default function B2BClients() {
         <div onClick={() => setShowMembers(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '600px', width: '100%', maxHeight: '80vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ color: '#2DD4BF', fontSize: '16px', margin: 0 }}> {showMembers.client.company_name} â€” Members</h3>
+              <h3 style={{ color: '#2DD4BF', fontSize: '16px', margin: 0 }}> {showMembers.client.company_name} — Members</h3>
               <button onClick={() => setShowMembers(null)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '20px', cursor: 'pointer' }}></button>
             </div>
             {showMembers.members.length === 0 ? (

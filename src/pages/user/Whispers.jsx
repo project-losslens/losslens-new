@@ -25,7 +25,7 @@ const REQUEST_MESSAGES = [
   "Need support with weekend triggers",
   "Want to share coping strategies",
   "Just need someone who understands",
-  "Struggling today â€” could use a chat",
+  "Struggling today — could use a chat",
   "Open to listening or sharing",
 ]
 
@@ -316,7 +316,7 @@ export default function Whispers() {
       <Sidebar />
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 100 }}>
-          <div><h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Whispers</h1><p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>Anonymous peer support Â· {activeChats.length} active</p></div>
+          <div><h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Whispers</h1><p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>Anonymous peer support  · {activeChats.length} active</p></div>
         </nav>
 
         <div style={{ height: 'calc(100vh - 60px)', maxHeight: 'calc(100dvh - 60px)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>

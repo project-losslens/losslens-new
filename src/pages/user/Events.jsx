@@ -216,7 +216,7 @@ export default function Events() {
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 100 }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Events</h1>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{events.length} events Â· {Object.keys(rsvps).length} responded</p>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{events.length} events  · {Object.keys(rsvps).length} responded</p>
           </div>
         </nav>
 
@@ -271,10 +271,10 @@ export default function Events() {
                       <span> {formatDate(e.date)}</span>
                       {e.time && <span> {e.time}</span>}
                       {e.location && <span> {e.location}</span>}
-                      <span> {goingCount} attending{e.spots ? ` Â· ${e.spots} spots` : ''}</span>
+                      <span> {goingCount} attending{e.spots ? `  · ${e.spots} spots` : ''}</span>
                     </div>
 
-                    {/*  RSVP Buttons â€” disabled for past events */}
+                    {/*  RSVP Buttons — disabled for past events */}
                     {!isPast && (
                       <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
                         {!myRsvp ? (

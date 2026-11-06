@@ -21,12 +21,12 @@ const TARGET_CONFIG = {
 
 const TEMPLATES = [
   { label: ' Weekly Motivation', body: "Hey LossLens community! Another week, another chance to grow. Remember why you started. You've got this." },
-  { label: ' Event Reminder', body: "Don't forget â€” we have an event coming up soon! Check the Events page for details and RSVP." },
+  { label: ' Event Reminder', body: "Don't forget — we have an event coming up soon! Check the Events page for details and RSVP." },
   { label: 'ðŸ†˜ Resources Reminder', body: 'Need support? Our Resources page has Kenyan helplines and tools available 24/7. You are never alone.' },
   { label: ' Milestone Celebration', body: "We're celebrating your progress! Together you've logged thousands of clean days. Keep going!" },
 ]
 
-const fmtTime = (d) => d ? new Date(d).toLocaleString('en-KE') : 'â€”'
+const fmtTime = (d) => d ? new Date(d).toLocaleString('en-KE') : '—'
 
 export default function Broadcast() {
   const navigate = useNavigate()
@@ -110,7 +110,7 @@ export default function Broadcast() {
 
       //  Also insert into notifications for in-app delivery
       if (form.target === 'all') {
-        // For "all users" â€” batch notification insertion
+        // For "all users" — batch notification insertion
         await supabase.from('notifications').insert({
           type: 'broadcast',
           title: form.title.trim(),
@@ -189,7 +189,7 @@ export default function Broadcast() {
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
-            <button onClick={() => navigate('/admin')} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Ã¢â€ Â Back</button>
+            <button onClick={() => navigate('/admin')} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Ã¢"   Back</button>
           </div>
         </nav>
 
@@ -223,7 +223,7 @@ export default function Broadcast() {
                 <textarea value={form.body} onChange={e => setForm(p => ({ ...p, body: e.target.value.substring(0, MAX_BODY_LENGTH) }))} rows={5} style={{ ...inputStyle, resize: 'vertical' }} placeholder="Write your message to users..." />
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
                   <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>{form.body.length}/{MAX_BODY_LENGTH} characters</p>
-                  {isOverSMSLimit && <p style={{ color: '#7DBDEE', fontSize: '11px', margin: 0 }}>Ã¢Å¡Â Ã¯Â¸Â Over SMS limit ({SMS_MAX_LENGTH} chars)</p>}
+                  {isOverSMSLimit && <p style={{ color: '#7DBDEE', fontSize: '11px', margin: 0 }}>Ã¢Å¡  Ã¯ ¸  Over SMS limit ({SMS_MAX_LENGTH} chars)</p>}
                 </div>
               </div>
 
@@ -257,10 +257,10 @@ export default function Broadcast() {
 
               {preview && form.body && (
                 <div style={{ background: '#0B1220', border: '1px solid #2DD4BF', borderRadius: '12px', padding: '16px', marginTop: '8px' }}>
-                  <p style={{ color: '#2DD4BF', fontSize: '11px', fontWeight: 600, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '1px' }}> User Preview â€” {targetLabel}</p>
+                  <p style={{ color: '#2DD4BF', fontSize: '11px', fontWeight: 600, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '1px' }}> User Preview — {targetLabel}</p>
                   <p style={{ color: '#FFFFFF', fontSize: '15px', fontWeight: 600, margin: '0 0 8px' }}>{form.title || 'Untitled'}</p>
                   <p style={{ color: '#2DD4BF', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>{form.body}</p>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '12px' }}>â€” LossLens Team </p>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '12px' }}>— LossLens Team </p>
                 </div>
               )}
             </div>
@@ -286,7 +286,7 @@ export default function Broadcast() {
                     </div>
                     <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', whiteSpace: 'nowrap' }}>{fmtTime(b.sent_at)}</span>
                   </div>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 8px', lineHeight: '1.5' }}>{b.body?.substring(0, 200)}{b.body?.length > 200 ? 'â€¦' : ''}</p>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 8px', lineHeight: '1.5' }}>{b.body?.substring(0, 200)}{b.body?.length > 200 ? '"¦' : ''}</p>
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                     <span style={{ color: '#2DD4BF', fontSize: '11px' }}> {b.sent_to_count?.toLocaleString() || '0'} recipients</span>
                     <span style={{ color: '#7DBDEE', fontSize: '11px' }}>{b.channel || 'in-app'}</span>

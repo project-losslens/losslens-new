@@ -9,8 +9,8 @@ const LOG_LIMIT = 300
 const TABLES = ['all', 'profiles', 'diary_entries', 'events', 'crisis_alerts', 'broadcasts', 'resources', 'groups']
 const ACTIONS = ['all', 'INSERT', 'UPDATE', 'DELETE']
 
-const fmtDateTime = (d) => d ? new Date(d).toLocaleString('en-KE') : 'â€”'
-const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-KE') : 'â€”'
+const fmtDateTime = (d) => d ? new Date(d).toLocaleString('en-KE') : '—'
+const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-KE') : '—'
 
 //  Proper CSV escaping
 function escapeCSV(value) {
@@ -185,7 +185,7 @@ export default function AuditLogs() {
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid #2DD4BF', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#2DD4BF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Audit Logs</h1>
-            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>{logs.length} events Â· Live monitoring</p>
+            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>{logs.length} events  · Live monitoring</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={handleExport} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Export CSV</button>

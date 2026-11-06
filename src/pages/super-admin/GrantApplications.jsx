@@ -74,9 +74,9 @@ export default function GrantApplications() {
   }
 
   const formatDate = (ts) => {
-    if (!ts) return 'â€”'
+    if (!ts) return '—'
     try { return new Date(ts).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' }) }
-    catch { return 'â€”' }
+    catch { return '—' }
   }
 
   //  Memoized filtered + sorted
@@ -149,7 +149,7 @@ export default function GrantApplications() {
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid #2DD4BF', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#2DD4BF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Grant Applications</h1>
-            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>{applications.length} applications Â· {counts.pending} pending</p>
+            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>{applications.length} applications  · {counts.pending} pending</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={fetchApplications} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #7DBDEE', color: '#7DBDEE', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
@@ -213,19 +213,19 @@ export default function GrantApplications() {
                           </span>
                         </div>
                         <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>
-                          {a.contact_name} Â· {a.contact_email}
+                          {a.contact_name}  · {a.contact_email}
                         </p>
                         <p style={{ color: '#2DD4BF', fontSize: '16px', fontWeight: 700, fontFamily: "'Playfair Display', serif", margin: '0 0 4px' }}>
                           {formatCurrency(a.amount_requested)}
                         </p>
                         <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 4px' }}>
                           Submitted: {formatDate(a.created_at)}
-                          {a.reviewed_at && ` Â· Reviewed: ${formatDate(a.reviewed_at)}`}
+                          {a.reviewed_at && `  · Reviewed: ${formatDate(a.reviewed_at)}`}
                         </p>
                         {a.purpose && (
                           <p style={{ color: '#7DBDEE', fontSize: '12px', margin: '6px 0 0', lineHeight: '1.5' }}>
                             {a.purpose.length > 200 ? (
-                              <span title={a.purpose}>{a.purpose.slice(0, 200)}â€¦</span>
+                              <span title={a.purpose}>{a.purpose.slice(0, 200)}"¦</span>
                             ) : a.purpose}
                           </p>
                         )}
@@ -269,7 +269,7 @@ export default function GrantApplications() {
           <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '420px', width: '100%' }}>
             <h3 style={{ color: '#FFFFFF', fontSize: '16px', margin: '0 0 4px' }}> Reject Application</h3>
             <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '16px' }}>
-              <strong style={{ color: '#2DD4BF' }}>"{showRejectModal.organization_name}"</strong> Â· {formatCurrency(showRejectModal.amount_requested)}
+              <strong style={{ color: '#2DD4BF' }}>"{showRejectModal.organization_name}"</strong>  · {formatCurrency(showRejectModal.amount_requested)}
             </p>
             <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Rejection Reason</label>
             <textarea

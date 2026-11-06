@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import '../../styles/globals.css'
 
 const FAQS = [
-  { q: 'Is LossLens really free?', a: 'Yes â€” forever. The Free plan includes all core features: diary, CBT modules, AI companion Oloo, The Circle community, and more. No credit card needed.' },
+  { q: 'Is LossLens really free?', a: 'Yes — forever. The Free plan includes all core features: diary, CBT modules, AI companion Oloo, The Circle community, and more. No credit card needed.' },
   { q: 'What does Premium add?', a: 'Premium unlocks advanced features like detailed analytics, priority AI responses, extended video storage, and more. You also directly support keeping LossLens free for everyone.' },
   { q: 'Can I switch plans?', a: 'Absolutely. Upgrade or downgrade anytime. If you downgrade, you keep access to Premium features until the end of your billing period.' },
-  { q: 'How do I pay?', a: 'Premium subscriptions are processed securely via M-Pesa. We never store your payment details â€” all transactions are handled by our payment partner.' },
+  { q: 'How do I pay?', a: 'Premium subscriptions are processed securely via M-Pesa. We never store your payment details — all transactions are handled by our payment partner.' },
   { q: 'Is my data private?', a: 'Completely. Your diary, mood logs, and conversations are encrypted. You can delete everything anytime with one click. We never sell your data.' },
   { q: 'What is the Company plan?', a: 'For organizations that want to offer LossLens to their employees. Includes subsidized pricing, admin dashboard for the company, usage reports, and dedicated support. Ask your employer if they offer LossLens.' },
 ]
@@ -39,7 +39,7 @@ export default function Pricing() {
       badge: 'For individuals',
       price: 'KES 0',
       period: 'forever',
-      desc: 'Full access to all core recovery tools â€” no catch, no credit card.',
+      desc: 'Full access to all core recovery tools — no catch, no credit card.',
       features: [
         ' Daily Gambling Diary',
         ' 8 CBT Modules',
@@ -63,7 +63,7 @@ export default function Pricing() {
       badge: 'Most Popular',
       price: 'KES 499',
       period: '/month',
-      desc: 'Advanced features for committed recovery â€” and you support keeping LossLens free for everyone.',
+      desc: 'Advanced features for committed recovery — and you support keeping LossLens free for everyone.',
       features: [
         ' Everything in Free',
         ' Advanced Analytics & Insights',
@@ -125,7 +125,7 @@ export default function Pricing() {
           </h1>
           <p className="sub" style={{ maxWidth: '520px', margin: '0 auto 1.5rem' }}>
             {planType === 'individual'
-              ? 'Every feature you need to recover is free. Premium helps you go deeper â€” and supports keeping LossLens accessible to everyone in Kenya.'
+              ? 'Every feature you need to recover is free. Premium helps you go deeper — and supports keeping LossLens accessible to everyone in Kenya.'
               : 'If your company offers LossLens, you get all Premium features at a subsidized rate. Your personal data stays private.'}
           </p>
 
@@ -211,7 +211,7 @@ export default function Pricing() {
                   onClick={() => handleSelect(plan.id, 'individual')}
                   disabled={loading === plan.id}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '14px', fontSize: '14px' }}
-                  aria-label={`${plan.cta} â€” ${plan.name} plan`}
+                  aria-label={`${plan.cta} — ${plan.name} plan`}
                 >
                   {loading === plan.id ? <span className="spinner"></span> : plan.cta}
                 </button>
@@ -319,7 +319,7 @@ export default function Pricing() {
             {[
               { icon: '', label: 'End-to-end encrypted' },
               { icon: 'ðŸ‡°ðŸ‡ª', label: 'Kenya-based & compliant' },
-              { icon: 'Ã¯Â¸Â', label: 'Delete data anytime' },
+              { icon: 'Ã¯ ¸ ', label: 'Delete data anytime' },
               { icon: '', label: 'Free forever for individuals' },
             ].map((t, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#2DD4BF', fontSize: '12px' }}>
@@ -334,7 +334,7 @@ export default function Pricing() {
       {/* Footer */}
       <footer className="footer" style={{ flexDirection: 'column', gap: '12px', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.12)', padding: '1.5rem 2rem' }}>
         <div>
-          <p>LossLens Â· Gambling Harm Reduction Â· Kenya Â· 2026</p>
+          <p>LossLens  · Gambling Harm Reduction  · Kenya  · 2026</p>
           <p style={{ fontSize: '11px', marginTop: '4px' }}>
             <a href="mailto:projectkingsly@gmail.com" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>projectkingsly@gmail.com</a>
           </p>

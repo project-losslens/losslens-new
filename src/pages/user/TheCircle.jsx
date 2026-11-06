@@ -152,7 +152,7 @@ export default function TheCircle() {
     if (!showScrollButton) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  //  Single presence poll â€” less frequent
+  //  Single presence poll — less frequent
   const startPresencePolling = useCallback(() => {
     if (presenceRef.current) clearInterval(presenceRef.current)
     const fetchPresence = async () => {
@@ -281,7 +281,7 @@ export default function TheCircle() {
       setMessages(prev => prev.map(m => m.id === tempId ? { ...data, _sending: false, _delivered: true, reply_to: replyData ? { id: replyData.id, name: replyData.name, message: replyData.message?.substring(0, 50), userId: replyData.userId } : null } : m))
       setTimeout(() => setMessages(prev => prev.map(m => m.id === data.id ? { ...m, _delivered: false } : m)), 2000)
 
-      //  Send mention notifications â€” properly resolve user IDs
+      //  Send mention notifications — properly resolve user IDs
       const mentions = extractMentions(text)
       for (const mention of mentions) {
         const mentionedUserId = await resolveUserHash(mention)
@@ -352,14 +352,14 @@ export default function TheCircle() {
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)', flexShrink: 0 }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> The Circle</h1>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{onlineCount} online Â· You: {getAvatarEmoji(identity.animal)} {identity.displayName}</p>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{onlineCount} online  · You: {getAvatarEmoji(identity.animal)} {identity.displayName}</p>
           </div>
         </nav>
 
         {showCrisisBanner && (
           <div style={{ background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '12px 1.5rem', fontSize: '13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>ðŸ†˜ If you're in crisis: call Befrienders Kenya <strong>0722 178 177</strong></span>
-            <button onClick={() => { setShowCrisisBanner(false); if (crisisTimerRef.current) clearTimeout(crisisTimerRef.current) }} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '20px', cursor: 'pointer', padding: '4px 10px', minWidth: '44px', minHeight: '44px' }} aria-label="Dismiss crisis banner">Ã—</button>
+            <button onClick={() => { setShowCrisisBanner(false); if (crisisTimerRef.current) clearTimeout(crisisTimerRef.current) }} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '20px', cursor: 'pointer', padding: '4px 10px', minWidth: '44px', minHeight: '44px' }} aria-label="Dismiss crisis banner">×</button>
           </div>
         )}
 
@@ -443,7 +443,7 @@ export default function TheCircle() {
             <input ref={inputRef} value={input} onChange={e => setInput(e.target.value.substring(0, MAX_MESSAGE_LENGTH))} onKeyDown={e => e.key === 'Enter' && handleSend()} placeholder={replyTo ? `Reply to ${replyTo.name}...` : `Share... (${MAX_MESSAGE_LENGTH - input.length})`} style={{ flex: 1, background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '10px 16px', color: '#FFFFFF', fontSize: '16px', outline: 'none', fontFamily: "'Inter', sans-serif" }} aria-label="Type a message" />
             <button onClick={handleSend} disabled={!input.trim() || sending} style={{ width: '40px', height: '40px', borderRadius: '50%', background: input.trim() && !sending ? '#2DD4BF' : 'rgba(255,255,255,0.12)', border: 'none', color: input.trim() && !sending ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '18px', cursor: input.trim() && !sending ? 'pointer' : 'not-allowed', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Send message">â†’</button>
           </div>
-          <p style={{ fontSize: '10px', color: '#7DBDEE', textAlign: 'center', marginTop: '6px', marginBottom: 0 }}>Anonymous Â· Use @Name to tag Â· Be kind </p>
+          <p style={{ fontSize: '10px', color: '#7DBDEE', textAlign: 'center', marginTop: '6px', marginBottom: 0 }}>Anonymous  · Use @Name to tag  · Be kind </p>
         </div>
       </div>
       <style>{`

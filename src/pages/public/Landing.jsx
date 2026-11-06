@@ -182,7 +182,7 @@ function Landing() {
           <button className="btn-primary" onClick={() => setAuthMode('signup')}>Start for free â†’</button>
           <a onClick={() => scrollTo('about')} className="btn-ghost" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>Learn more â†“</a>
         </div>
-        <p className="trust"> PRIVATE Â·  CBT-BASED Â·  FREE FOREVER</p>
+        <p className="trust"> PRIVATE  ·  CBT-BASED  ·  FREE FOREVER</p>
       </div>
 
       <div className="divider" />
@@ -191,10 +191,10 @@ function Landing() {
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div className="pill">About LossLens</div>
           <h1 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', marginBottom: '0.75rem' }}>Built for Kenya. <em>Rooted in science.</em></h1>
-          <p className="sub" style={{ maxWidth: 520, margin: '0 auto' }}>Over 78% of Kenyan gambling is sports betting â€” done via mobile phone, tied to M-Pesa, and driven by unemployment and hope. LossLens was designed from the ground up for this reality.</p>
+          <p className="sub" style={{ maxWidth: 520, margin: '0 auto' }}>Over 78% of Kenyan gambling is sports betting — done via mobile phone, tied to M-Pesa, and driven by unemployment and hope. LossLens was designed from the ground up for this reality.</p>
         </div>
         <div className="features" style={{ maxWidth: 900, margin: '0 auto' }}>
-          {[{ icon: '', title: 'Cognitive Behavioural Therapy', desc: 'Eight structured CBT modules guide you through understanding triggers, challenging distorted thinking, and building lasting coping strategies.' }, { icon: '', title: 'AI Companion â€” Oloo', desc: 'Your personal AI support companion that learns your patterns, remembers your triggers, and offers personalized encouragement when you need it most.' }, { icon: '', title: 'Anonymous Peer Support', desc: 'The Circle connects you with others who understand â€” anonymously. Share struggles, celebrate wins, and get real-time support during urges.' }, { icon: '', title: 'Privacy-First Design', desc: 'Your diary, mood logs, and conversations are private. Delete your data anytime, no questions asked. Your journey belongs to you.' }].map((c, i) => (<div className="card" key={i}><div className="icon">{c.icon}</div><h3>{c.title}</h3><p>{c.desc}</p></div>))}
+          {[{ icon: '', title: 'Cognitive Behavioural Therapy', desc: 'Eight structured CBT modules guide you through understanding triggers, challenging distorted thinking, and building lasting coping strategies.' }, { icon: '', title: 'AI Companion — Oloo', desc: 'Your personal AI support companion that learns your patterns, remembers your triggers, and offers personalized encouragement when you need it most.' }, { icon: '', title: 'Anonymous Peer Support', desc: 'The Circle connects you with others who understand — anonymously. Share struggles, celebrate wins, and get real-time support during urges.' }, { icon: '', title: 'Privacy-First Design', desc: 'Your diary, mood logs, and conversations are private. Delete your data anytime, no questions asked. Your journey belongs to you.' }].map((c, i) => (<div className="card" key={i}><div className="icon">{c.icon}</div><h3>{c.title}</h3><p>{c.desc}</p></div>))}
         </div>
       </div>
 
@@ -203,7 +203,7 @@ function Landing() {
       <div id="features" style={{ padding: '2.5rem 2rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}><div className="pill">Everything you need</div><h1 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)' }}><em>12 powerful tools</em> for your recovery</h1></div>
         <div className="features" style={{ maxWidth: 960, margin: '0 auto' }}>
-          {[{ icon: '', title: 'Daily Gambling Diary', desc: 'Log your day in 2 minutes â€” mood, triggers, money spent, and coping strategies.' }, { icon: '', title: 'Recovery Dashboard', desc: 'Visualise your patterns. Streak counters, money saved, risk indicators.' }, { icon: '', title: 'CBT Modules', desc: '8 structured lessons with real content, reflections, and progress tracking.' }, { icon: '', title: 'Urge Toolkit', desc: '15-minute urge timer, breathing exercises, thought challenger.' }, { icon: '', title: 'The Circle', desc: 'Anonymous peer support rooms â€” check-ins, urge support, celebrations.' }, { icon: '', title: 'Whispers', desc: 'Get matched with a peer for private 48-hour anonymous chats.' }, { icon: '', title: 'Events & Workshops', desc: 'RSVP to support groups, workshops, and seminars.' }, { icon: '', title: 'Resource Directory', desc: 'Kenya-specific helplines, self-exclusion tools, financial guides.' }, { icon: '', title: 'Family Portal', desc: 'Invite a trusted supporter. They see only what you choose.' }, { icon: '', title: 'Monthly Mirror', desc: 'Record monthly reflections. Watch your transformation.' }, { icon: '', title: 'LossLens Pact', desc: 'Record a message to your future self.' }, { icon: '', title: 'Profile & Reports', desc: 'Download a professional PDF report for your therapist.' }].map((f, i) => (<div className="card" key={i}><div className="icon">{f.icon}</div><h3>{f.title}</h3><p>{f.desc}</p></div>))}
+          {[{ icon: '', title: 'Daily Gambling Diary', desc: 'Log your day in 2 minutes — mood, triggers, money spent, and coping strategies.' }, { icon: '', title: 'Recovery Dashboard', desc: 'Visualise your patterns. Streak counters, money saved, risk indicators.' }, { icon: '', title: 'CBT Modules', desc: '8 structured lessons with real content, reflections, and progress tracking.' }, { icon: '', title: 'Urge Toolkit', desc: '15-minute urge timer, breathing exercises, thought challenger.' }, { icon: '', title: 'The Circle', desc: 'Anonymous peer support rooms — check-ins, urge support, celebrations.' }, { icon: '', title: 'Whispers', desc: 'Get matched with a peer for private 48-hour anonymous chats.' }, { icon: '', title: 'Events & Workshops', desc: 'RSVP to support groups, workshops, and seminars.' }, { icon: '', title: 'Resource Directory', desc: 'Kenya-specific helplines, self-exclusion tools, financial guides.' }, { icon: '', title: 'Family Portal', desc: 'Invite a trusted supporter. They see only what you choose.' }, { icon: '', title: 'Monthly Mirror', desc: 'Record monthly reflections. Watch your transformation.' }, { icon: '', title: 'LossLens Pact', desc: 'Record a message to your future self.' }, { icon: '', title: 'Profile & Reports', desc: 'Download a professional PDF report for your therapist.' }].map((f, i) => (<div className="card" key={i}><div className="icon">{f.icon}</div><h3>{f.title}</h3><p>{f.desc}</p></div>))}
         </div>
       </div>
 
@@ -222,7 +222,7 @@ function Landing() {
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div className="pill" style={{ background: 'rgba(255,255,255,0.08)', color: '#FFFFFF' }}>ðŸ†˜ Crisis Support</div>
           <h1 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', marginBottom: '0.75rem' }}>You're <em>not alone</em></h1>
-          <p className="sub" style={{ maxWidth: 520, margin: '0 auto' }}>If you're feeling overwhelmed, having thoughts of self-harm, or need someone to talk to right now â€” reach out. These services are free and confidential.</p>
+          <p className="sub" style={{ maxWidth: 520, margin: '0 auto' }}>If you're feeling overwhelmed, having thoughts of self-harm, or need someone to talk to right now — reach out. These services are free and confidential.</p>
         </div>
         <div style={{ maxWidth: 600, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {CRISIS_CONTACTS.map((contact, i) => (
@@ -240,7 +240,7 @@ function Landing() {
                   <h3 style={{ color: contact.priority ? '#FFFFFF' : '#FFFFFF', fontSize: contact.priority ? '16px' : '14px', margin: 0 }}>{contact.name}</h3>
                   {contact.priority && <span style={{ background: '#FFFFFF', color: 'rgba(255,255,255,0.08)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 600 }}>First Call</span>}
                 </div>
-                <p style={{ color: '#2DD4BF', fontSize: '13px', margin: '4px 0 0' }}>{contact.phone} Â· {contact.hours}</p>
+                <p style={{ color: '#2DD4BF', fontSize: '13px', margin: '4px 0 0' }}>{contact.phone}  · {contact.hours}</p>
               </div>
               <span style={{ color: contact.priority ? '#FFFFFF' : 'rgba(255,255,255,0.4)', fontSize: '20px' }}>â†’</span>
             </a>
@@ -253,7 +253,7 @@ function Landing() {
 
       <div style={{ padding: '2rem' }}>
         <div className="stats">
-          {[{ num: '78%', label: 'of Kenyan gambling is sports betting via mobile' }, { num: '54%', label: 'of gamblers in Kenya are under 35 years old' }, { num: '15 min', label: 'is all it takes for most urges to pass' }, { num: 'Free', label: 'forever for individuals â€” no hidden fees, ever', highlight: true }].map((s, i) => (<div className="stat" key={i}><span className="stat-num" style={s.highlight ? { background: 'linear-gradient(135deg, #2DD4BF, #7DBDEE)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 900 } : {}}>{s.num}</span><span className="stat-label">{s.label}</span></div>))}
+          {[{ num: '78%', label: 'of Kenyan gambling is sports betting via mobile' }, { num: '54%', label: 'of gamblers in Kenya are under 35 years old' }, { num: '15 min', label: 'is all it takes for most urges to pass' }, { num: 'Free', label: 'forever for individuals — no hidden fees, ever', highlight: true }].map((s, i) => (<div className="stat" key={i}><span className="stat-num" style={s.highlight ? { background: 'linear-gradient(135deg, #2DD4BF, #7DBDEE)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 900 } : {}}>{s.num}</span><span className="stat-label">{s.label}</span></div>))}
         </div>
       </div>
 
@@ -273,7 +273,7 @@ function Landing() {
       </div>
 
       <footer className="footer" style={{ flexDirection: 'column', gap: '12px', textAlign: 'center' }}>
-        <div><p>LossLens Â· Gambling Harm Reduction Â· Kenya Â· 2026</p><p style={{ fontSize: '11px', marginTop: '4px' }}><a href="mailto:projectkingsly@gmail.com" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>projectkingsly@gmail.com</a></p></div>
+        <div><p>LossLens  · Gambling Harm Reduction  · Kenya  · 2026</p><p style={{ fontSize: '11px', marginTop: '4px' }}><a href="mailto:projectkingsly@gmail.com" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>projectkingsly@gmail.com</a></p></div>
         <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
           <a onClick={() => navigate('/privacy')} style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', textDecoration: 'none' }}>Privacy Policy</a>
           <a onClick={() => navigate('/terms')} style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', textDecoration: 'none' }}>Terms of Service</a>
@@ -291,7 +291,7 @@ function Landing() {
         <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" onClick={(e) => { if (e.target === e.currentTarget) { setAuthMode(null); setError(''); setFieldErrors({}) } }}>
           <div className="auth-card">
             <h2 id="modal-title" className="auth-title">{authMode === 'login' ? 'Welcome back' : 'Begin your journey'}</h2>
-            <p className="auth-sub">{authMode === 'login' ? 'Sign in to your LossLens account' : 'Create a free account â€” no credit card needed'}</p>
+            <p className="auth-sub">{authMode === 'login' ? 'Sign in to your LossLens account' : 'Create a free account — no credit card needed'}</p>
             {error && <div style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '10px 14px', color: '#FFFFFF', fontSize: 13, marginBottom: '1rem' }}>{error}</div>}
             <button onClick={handleGoogleAuth} disabled={googleLoading || loading || cooldown} style={{ width: '100%', padding: '13px', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', color: '#FFFFFF', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '1.25rem', fontFamily: "'Inter', sans-serif", opacity: (googleLoading || loading || cooldown) ? 0.7 : 1 }}>
               {googleLoading ? <span className="spinner" style={{ borderColor: '#2DD4BF', borderTopColor: 'transparent' }} /> : <><GoogleIcon /> Continue with Google</>}
@@ -304,7 +304,7 @@ function Landing() {
               </>
             )}
             <div className="form-group"><label>EMAIL ADDRESS</label><input type="email" placeholder="you@example.com" value={form.email} onChange={(e) => { setForm({ ...form, email: e.target.value }); setFieldErrors(p => ({ ...p, email: '' })) }} style={fieldErrors.email ? { borderColor: '#FFFFFF' } : {}} />{fieldErrors.email && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.email}</span>}</div>
-            <div className="form-group"><label>PASSWORD</label><div style={{ position: 'relative' }}><input type={showPw ? 'text' : 'password'} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" value={form.password} onChange={(e) => { setForm({ ...form, password: e.target.value }); setFieldErrors(p => ({ ...p, password: '' })) }} style={{ paddingRight: 44, ...(fieldErrors.password ? { borderColor: '#FFFFFF' } : {}) }} onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit() }} /><button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>{showPw ? '' : ''}</button></div>{fieldErrors.password && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.password}</span>}</div>
+            <div className="form-group"><label>PASSWORD</label><div style={{ position: 'relative' }}><input type={showPw ? 'text' : 'password'} placeholder="Enter password" value={form.password} onChange={(e) => { setForm({ ...form, password: e.target.value }); setFieldErrors(p => ({ ...p, password: '' })) }} style={{ paddingRight: 44, ...(fieldErrors.password ? { borderColor: '#FFFFFF' } : {}) }} onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit() }} /><button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>{showPw ? '' : ''}</button></div>{fieldErrors.password && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.password}</span>}</div>
             {authMode === 'login' && <p className="forgot" onClick={() => navigate('/forgot-password')}>Forgot password?</p>}
             {authMode === 'signup' && (
               <div className="checkbox-group" style={{ marginBottom: '1rem' }}>

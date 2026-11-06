@@ -36,14 +36,14 @@ export default function UserAnalytics() {
       const weekAgo = new Date(today.getTime() - WEEK_DAYS * DAY_MS).toISOString()
       const monthAgo = new Date(today.getTime() - MONTH_DAYS * DAY_MS).toISOString()
 
-      //  Batch all queries â€” 15 parallel
+      //  Batch all queries — 15 parallel
       const [
         totalUsersRes, activeTodayRes, activeWeekRes, activeMonthRes,
         highRiskRes, medRiskRes, lowRiskRes,
         totalDiaryRes, diaryTodayRes, cbtDoneRes,
         circleMessagesRes, crisisTotalRes, supportLinksRes,
         diaryEntriesRes, streakDataRes, recentSignupsRes,
-        //  Real weekly data â€” 7 individual day queries
+        //  Real weekly data — 7 individual day queries
         ...weekQueries
       ] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
@@ -62,7 +62,7 @@ export default function UserAnalytics() {
         supabase.from('diary_entries').select('triggers, coping, mood').limit(DIARY_SAMPLE_LIMIT),
         supabase.from('profiles').select('streak_days, full_name, created_at').order('streak_days', { ascending: false }).limit(STREAK_SAMPLE_LIMIT),
         supabase.from('profiles').select('full_name, created_at').order('created_at', { ascending: false }).limit(5),
-        //  Real weekly activity â€” 7 queries, one per day
+        //  Real weekly activity — 7 queries, one per day
         ...[...Array(WEEK_DAYS)].map((_, i) => {
           const d = new Date(today.getTime() - (WEEK_DAYS - 1 - i) * DAY_MS)
           const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
@@ -194,7 +194,7 @@ export default function UserAnalytics() {
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid rgba(255,255,255,0.08)', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Analytics</h1>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.08)', margin: '2px 0 0' }}>Platform insights Â· {stats.totalUsers} total users</p>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.08)', margin: '2px 0 0' }}>Platform insights  · {stats.totalUsers} total users</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={() => fetchAll(true)} disabled={refreshing} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>

@@ -71,7 +71,7 @@ export default function LossLensPactPage() {
     }
   }, [cleanup])
 
-  //  Fetch pacts only when identity is set â€” no double fetch
+  //  Fetch pacts only when identity is set — no double fetch
   useEffect(() => {
     if (identity) fetchPacts()
   }, [identity])
@@ -80,7 +80,7 @@ export default function LossLensPactPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
     setIdentity({ uid: session.user.id })
-    // Don't call fetchPacts here â€” useEffect will handle it
+    // Don't call fetchPacts here — useEffect will handle it
     setLoading(false)
   }
 
@@ -152,7 +152,7 @@ export default function LossLensPactPage() {
         })
       }, 1000)
     } catch (err) {
-      showToast('Ã¢Å¡Â Ã¯Â¸Â Microphone access denied.')
+      showToast('Ã¢Å¡  Ã¯ ¸  Microphone access denied.')
       console.error('Recording start error:', err)
     }
   }
@@ -211,7 +211,7 @@ export default function LossLensPactPage() {
             date: new Date().toISOString(),
           })
           try { localStorage.setItem(localKey, JSON.stringify(localPacts)) } catch {}
-          showToast('Ã¢Å¡Â Ã¯Â¸Â Saved locally.')
+          showToast('Ã¢Å¡  Ã¯ ¸  Saved locally.')
         }
       } catch {}
     }
@@ -327,7 +327,7 @@ export default function LossLensPactPage() {
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> The LossLens Pact</h1>
-            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{totalPacts} pacts Â· A promise to your future self</p>
+            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{totalPacts} pacts  · A promise to your future self</p>
           </div>
         </nav>
 
@@ -396,7 +396,7 @@ export default function LossLensPactPage() {
               {!recording && (
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button className="btn-primary" style={{ flex: 1, padding: '12px', fontSize: '13px' }} onClick={startRecording} aria-label="Start recording audio"> Record audio</button>
-                  <button className="btn-ghost" style={{ flex: 1, padding: '12px', fontSize: '13px' }} onClick={() => setShowWritten(!showWritten)} aria-label="Write instead of recording">Ã¢Å“ÂÃ¯Â¸Â Write instead</button>
+                  <button className="btn-ghost" style={{ flex: 1, padding: '12px', fontSize: '13px' }} onClick={() => setShowWritten(!showWritten)} aria-label="Write instead of recording">Ã¢Å“ Ã¯ ¸  Write instead</button>
                 </div>
               )}
 
@@ -426,7 +426,7 @@ export default function LossLensPactPage() {
           {/* Written Pact */}
           {showWritten && (
             <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-              <h3 style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '0.75rem' }}>Ã¢Å“ÂÃ¯Â¸Â Write your pact</h3>
+              <h3 style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '0.75rem' }}>Ã¢Å“ Ã¯ ¸  Write your pact</h3>
               <textarea value={writtenPact} onChange={e => setWrittenPact(e.target.value.slice(0, MAX_WRITTEN_LENGTH))} placeholder="Dear future me, when you read this, remember..." rows={5}
                 style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: "'Inter', sans-serif", resize: 'vertical', lineHeight: '1.6', boxSizing: 'border-box' }} />
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '4px' }}>{writtenPact.length}/{MAX_WRITTEN_LENGTH}</p>
@@ -451,7 +451,7 @@ export default function LossLensPactPage() {
                           <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{new Date(pact.created_at).toLocaleDateString('en-KE', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                           {pact.duration_seconds > 0 && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{formatTime(pact.duration_seconds)}</span>}
                           {pact._pending ? <span style={{ color: '#7DBDEE', fontSize: '9px', background: 'rgba(45,212,191,0.15)', padding: '1px 6px', borderRadius: '100px' }}>â³ Local</span> : <span style={{ color: '#2DD4BF', fontSize: '9px', background: 'rgba(255,255,255,0.12)', padding: '1px 6px', borderRadius: '100px' }}> Saved</span>}
-                          {pact.play_count > 0 && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '9px' }}>Ã¢â€“Â¶Ã¯Â¸Â {pact.play_count}</span>}
+                          {pact.play_count > 0 && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '9px' }}>Ã¢– ¶Ã¯ ¸  {pact.play_count}</span>}
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '3px', flexShrink: 0 }}>

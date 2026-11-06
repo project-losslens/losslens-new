@@ -95,7 +95,7 @@ function UsernamePrompt({ userId, onComplete }) {
       <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '400px' }}>
         <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px', textAlign: 'center' }}></span>
         <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#FFFFFF', marginBottom: '8px', textAlign: 'center' }}>One last thing</h2>
-        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem', textAlign: 'center', lineHeight: 1.6 }}>Choose a username for The Circle, Whispers, and your profile. This is how others will see you â€” anonymously.</p>
+        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem', textAlign: 'center', lineHeight: 1.6 }}>Choose a username for The Circle, Whispers, and your profile. This is how others will see you — anonymously.</p>
         {error && <div style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
         <div className="form-group">
           <label>USERNAME</label>
@@ -103,7 +103,7 @@ function UsernamePrompt({ userId, onComplete }) {
             <input type="text" placeholder="e.g. amina_w" value={username} onChange={e => handleChange(e.target.value)} style={{ paddingRight: 40 }} onKeyDown={e => e.key === 'Enter' && handleSave()} />
             {status === 'checking' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Checking">â³</span>}
             {status === 'available' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Available"></span>}
-            {status === 'taken' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Taken">Ã¢ÂÅ’</span>}
+            {status === 'taken' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Taken">Ã¢ Å’</span>}
           </div>
           {status === 'taken' && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Username already taken</span>}
           {status === 'available' && <span style={{ fontSize: '11px', color: '#2DD4BF' }}>Username available!</span>}
@@ -275,7 +275,7 @@ function Dashboard() {
         {showInstallPrompt && (
           <div style={{ background: '#171E2B', border: '2px solid #2DD4BF', borderRadius: '16px', padding: '16px 20px', margin: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', animation: 'slideDown 0.4s ease-out', boxShadow: '0 4px 20px rgba(45,212,191,0.2)' }}>
             <span style={{ fontSize: '36px', flexShrink: 0 }} aria-hidden="true"></span>
-            <div style={{ flex: 1, minWidth: '200px' }}><p style={{ color: '#2DD4BF', fontSize: '14px', fontWeight: 600, margin: '0 0 4px' }}>Add LossLens to your home screen</p><p style={{ color: '#FFFFFF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Install for quick access â€” works offline, no app store needed.</p></div>
+            <div style={{ flex: 1, minWidth: '200px' }}><p style={{ color: '#2DD4BF', fontSize: '14px', fontWeight: 600, margin: '0 0 4px' }}>Add LossLens to your home screen</p><p style={{ color: '#FFFFFF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Install for quick access — works offline, no app store needed.</p></div>
             <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
               <button onClick={() => { setShowInstallPrompt(false); sessionStorage.setItem('pwa_install_dismissed', 'true') }} style={{ padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>Not now</button>
               <button onClick={installPWA} style={{ padding: '8px 20px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>Install </button>
@@ -296,10 +296,10 @@ function Dashboard() {
             {riskData && (
               <div role="alert" aria-live="polite" style={{ background: getRiskColor(riskData.score).bg, border: `1px solid ${getRiskColor(riskData.score).color}`, borderRadius: '12px', padding: '14px 16px', marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: riskData.factors?.length > 0 ? '8px' : '0' }}>
-                  <h3 style={{ color: getRiskColor(riskData.score).color, fontSize: '14px', margin: 0 }}>{riskData.level === 'high' ? 'Ã¢Å¡Â Ã¯Â¸Â ' : riskData.level === 'medium' ? ' ' : ' '}{getRiskColor(riskData.score).label} Today</h3>
+                  <h3 style={{ color: getRiskColor(riskData.score).color, fontSize: '14px', margin: 0 }}>{riskData.level === 'high' ? 'Ã¢Å¡  Ã¯ ¸  ' : riskData.level === 'medium' ? ' ' : ' '}{getRiskColor(riskData.score).label} Today</h3>
                   <span style={{ color: getRiskColor(riskData.score).color, fontSize: '20px', fontWeight: 700 }}>{riskData.score}%</span>
                 </div>
-                {(riskData.factors || []).map((f, i) => (<p key={i} style={{ color: getRiskColor(riskData.score).color, fontSize: '12px', opacity: 0.8, margin: '2px 0' }}>â€¢ {f}</p>))}
+                {(riskData.factors || []).map((f, i) => (<p key={i} style={{ color: getRiskColor(riskData.score).color, fontSize: '12px', opacity: 0.8, margin: '2px 0' }}>"¢ {f}</p>))}
                 {riskData.level === 'high' && <button onClick={() => navigate('/urge-toolkit')} style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#2DD4BF', border: 'none', borderRadius: '8px', color: '#0B1220', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}> Open Urge Toolkit</button>}
               </div>
             )}
@@ -308,7 +308,7 @@ function Dashboard() {
               {stats.map((s, i) => (
                 <div className="stat-card" key={i} style={s.highlight ? { borderColor: '#2DD4BF', boxShadow: '0 0 12px rgba(45,212,191,0.3)' } : {}}>
                   <span className="stat-icon" aria-label={s.ariaLabel}>{s.highlight ? <span className="streak-fire">{s.icon}</span> : s.icon}</span>
-                  <span className="stat-value" style={s.highlight ? { color: '#2DD4BF' } : {}}>{s.value || 'â€”'}</span>
+                  <span className="stat-value" style={s.highlight ? { color: '#2DD4BF' } : {}}>{s.value || '—'}</span>
                   <span className="stat-label">{s.value === 0 && s.emptyMessage ? s.emptyMessage : s.label}</span>
                 </div>
               ))}
@@ -351,7 +351,7 @@ function Dashboard() {
                 ) : entries.slice(0, 3).map((e) => (
                   <div className="entry-item" key={e.id || e.date}>
                     <div className="entry-top"><span className="entry-date">{new Date(e.date).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric' })}</span><span className={`entry-status ${e.gambled ? 'gambled' : 'clean'}`}>{e.gambled ? 'Gambled' : 'Clean'}</span></div>
-                    <div className="entry-mood">{e.mood || 'â€”'}</div>
+                    <div className="entry-mood">{e.mood || '—'}</div>
                     <p className="entry-note">{e.notes || 'No notes added.'}</p>
                   </div>
                 ))}
@@ -398,7 +398,7 @@ function Dashboard() {
                       <span style={{ color: contact.priority ? '#FFFFFF' : '#FFFFFF', fontSize: contact.priority ? '15px' : '13px', fontWeight: 600 }}>{contact.name}</span>
                       {contact.priority && <span style={{ background: '#FFFFFF', color: 'rgba(255,255,255,0.08)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 600 }}>First Call</span>}
                     </div>
-                    <p style={{ color: '#2DD4BF', fontSize: '12px', margin: '2px 0 0' }}>{contact.phone} Â· {contact.hours}</p>
+                    <p style={{ color: '#2DD4BF', fontSize: '12px', margin: '2px 0 0' }}>{contact.phone}  · {contact.hours}</p>
                   </div>
                   <span style={{ color: contact.priority ? '#FFFFFF' : 'rgba(255,255,255,0.4)', fontSize: '18px' }}>â†’</span>
                 </a>

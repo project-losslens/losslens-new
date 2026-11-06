@@ -169,7 +169,7 @@ export default function FamilyJoin() {
   }
 
   const getMoodEmoji = (mood) => {
-    if (!mood) return 'Ã¢Ââ€œ'
+    if (!mood) return 'Ã¢ "'
     if (mood.includes('Calm')) return ''
     if (mood.includes('Stressed')) return ''
     if (mood.includes('Anxious')) return ''
@@ -248,7 +248,7 @@ export default function FamilyJoin() {
     )
   }
 
-  //  Active â€” Supporter Dashboard
+  //  Active — Supporter Dashboard
   const permissions = invitation?.permissions || []
   const risk = userStats?.riskLevel ? getRisk(userStats.riskLevel) : null
 
@@ -330,7 +330,7 @@ export default function FamilyJoin() {
               {messages.map(msg => (
                 <div key={msg.id} style={{ padding: '10px 14px', borderRadius: msg.sender === 'supporter' ? '14px 14px 4px 14px' : '14px 14px 14px 4px', background: msg.sender === 'supporter' ? 'rgba(255,255,255,0.12)' : '#0B1220', alignSelf: msg.sender === 'supporter' ? 'flex-end' : 'flex-start', maxWidth: '85%', wordBreak: 'break-word' }}>
                   <p style={{ color: '#7DBDEE', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>{msg.content}</p>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '9px', margin: '4px 0 0' }}>{msg.sender === 'supporter' ? 'You' : 'Them'} Â· {new Date(msg.created_at).toLocaleDateString('en-KE')}</p>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '9px', margin: '4px 0 0' }}>{msg.sender === 'supporter' ? 'You' : 'Them'}  · {new Date(msg.created_at).toLocaleDateString('en-KE')}</p>
                 </div>
               ))}
             </div>
@@ -355,7 +355,7 @@ export default function FamilyJoin() {
           <button onClick={() => setShowStopModal(true)} disabled={acting} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '10px 24px', borderRadius: '100px', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
             {acting ? 'Processing...' : 'Stop Supporting'}
           </button>
-          <p style={{ color: '#7DBDEE', fontSize: '11px', marginTop: '8px' }}> Private & secure Â· No account created Â· You can leave anytime</p>
+          <p style={{ color: '#7DBDEE', fontSize: '11px', marginTop: '8px' }}> Private & secure  · No account created  · You can leave anytime</p>
         </div>
       </div>
 

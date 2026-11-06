@@ -11,8 +11,8 @@ const ROUTES = {
   USERS: '/super-admin/users', ADMIN: '/admin',
 }
 
-const fmtTime = (d) => d ? new Date(d).toLocaleString('en-KE') : 'â€”'
-const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-KE') : 'â€”'
+const fmtTime = (d) => d ? new Date(d).toLocaleString('en-KE') : '—'
+const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-KE') : '—'
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid rgba(255,255,255,0.08)', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Admin Dashboard</h1>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.08)', margin: '2px 0 0' }}>{stats.totalUsers} users Â· {stats.activeToday} active today</p>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.08)', margin: '2px 0 0' }}>{stats.totalUsers} users  · {stats.activeToday} active today</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={fetchAllData} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>

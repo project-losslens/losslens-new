@@ -15,7 +15,7 @@ const QUESTIONS = [
   {
     id: 'frequency',
     title: 'How often do you gamble?',
-    subtitle: 'Be honest â€” this helps us personalize your experience',
+    subtitle: 'Be honest — this helps us personalize your experience',
     options: [
       { value: 'daily', label: 'Daily', emoji: '', desc: 'Most days of the week' },
       { value: 'weekly', label: 'Weekly', emoji: '', desc: 'A few times per week' },
@@ -186,8 +186,8 @@ export default function Onboarding() {
     const recs = []
     if (s >= 7) {
       recs.push({ icon: '', text: 'Start with CBT Module 1: Understanding Your Gambling', action: '/cbt' })
-      recs.push({ icon: '', text: 'Log your first diary entry today â€” awareness is the first step', action: '/diary' })
-      recs.push({ icon: 'ðŸ†˜', text: 'Save emergency helplines â€” reaching out is strength', action: '/resources' })
+      recs.push({ icon: '', text: 'Log your first diary entry today — awareness is the first step', action: '/diary' })
+      recs.push({ icon: 'ðŸ†˜', text: 'Save emergency helplines — reaching out is strength', action: '/resources' })
     } else if (s >= 4) {
       recs.push({ icon: '', text: 'Track your patterns with the daily diary', action: '/diary' })
       recs.push({ icon: '', text: 'Explore the Urge Toolkit for coping strategies', action: '/urge-toolkit' })
@@ -195,7 +195,7 @@ export default function Onboarding() {
     } else {
       recs.push({ icon: '', text: 'Start with a daily diary entry to build awareness', action: '/diary' })
       recs.push({ icon: '', text: 'Join The Circle to connect with others on this journey', action: '/circle' })
-      recs.push({ icon: '', text: 'Set a small goal â€” every clean day counts', action: '/dashboard' })
+      recs.push({ icon: '', text: 'Set a small goal — every clean day counts', action: '/dashboard' })
     }
 
     return {
@@ -297,7 +297,7 @@ export default function Onboarding() {
           {saveError && <p role="alert" style={{ color: '#FFFFFF', fontSize: '13px', marginTop: '12px' }}>{saveError}</p>}
 
           <button onClick={() => { setStep(QUESTIONS.length - 1); triggerAnimate() }} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
-            Ã¢â€ Â Change my answers
+            Ã¢"   Change my answers
           </button>
         </div>
       </div>
@@ -374,7 +374,7 @@ export default function Onboarding() {
 
           {/* Multi-select helper */}
           {q.multi && (answers[q.id] || []).length === 0 && (
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '10px', textAlign: 'center' }}>Tap to select â€” you can choose multiple</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '10px', textAlign: 'center' }}>Tap to select — you can choose multiple</p>
           )}
         </div>
 
@@ -382,7 +382,7 @@ export default function Onboarding() {
         <div style={{ display: 'flex', gap: '8px' }}>
           {step > 0 && (
             <button onClick={prevStep} className="btn-ghost" style={{ flex: 1, padding: '14px', fontSize: '15px' }}>
-              Ã¢â€ Â Back
+              Ã¢"   Back
             </button>
           )}
           <button

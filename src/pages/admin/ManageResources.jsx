@@ -174,7 +174,7 @@ export default function ManageResources() {
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid rgba(255,255,255,0.08)', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Manage Resources</h1>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.08)', margin: '2px 0 0' }}>{resources.length} total Â· {activeCount} active</p>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.08)', margin: '2px 0 0' }}>{resources.length} total  · {activeCount} active</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
@@ -276,7 +276,7 @@ export default function ManageResources() {
                         {r.hours && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}> {r.hours}</span>}
                         {r.url && (
                           <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ color: '#7DBDEE', fontSize: '12px', textDecoration: 'none' }} title={r.url}>
-                             {r.url.length > 40 ? r.url.substring(0, 40) + 'â€¦' : r.url}
+                             {r.url.length > 40 ? r.url.substring(0, 40) + '"¦' : r.url}
                           </a>
                         )}
                       </div>

@@ -99,7 +99,7 @@ function ForgotPassword() {
       <div className="root">
         <nav className="navbar">
           <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
-          <button className="nav-ghost" onClick={() => navigate('/login')}>Ã¢â€ Â Back to login</button>
+          <button className="nav-ghost" onClick={() => navigate('/login')}>Ã¢"   Back to login</button>
         </nav>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
@@ -135,7 +135,7 @@ function ForgotPassword() {
     <div className="root">
       <nav className="navbar">
         <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
-        <button className="nav-ghost" onClick={() => navigate('/login')}>Ã¢â€ Â Log in</button>
+        <button className="nav-ghost" onClick={() => navigate('/login')}>Ã¢"   Log in</button>
       </nav>
 
       <div className="auth-container">

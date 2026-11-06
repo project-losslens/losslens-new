@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import SuperAdminSidebar from '../../components/SuperAdminSidebar'
 
-const fmt = (d) => d ? new Date(d).toLocaleDateString('en-KE') : 'â€”'
+const fmt = (d) => d ? new Date(d).toLocaleDateString('en-KE') : '—'
 
 const TABS = [
   { id: 'all', label: 'All Users', icon: '' },

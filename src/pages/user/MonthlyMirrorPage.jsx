@@ -172,7 +172,7 @@ export default function MonthlyMirrorPage() {
         milestoneTimerRef.current = setTimeout(() => { if (mountedRef.current) setMilestone(null) }, MILESTONE_DISPLAY_DURATION)
       }
 
-      //  Auto-sync pending â€” but only once, with guard
+      //  Auto-sync pending — but only once, with guard
       if (localData.length > 0 && !syncInProgressRef.current) {
         syncInProgressRef.current = true
         await autoSyncPending(localData, localKey)
@@ -181,7 +181,7 @@ export default function MonthlyMirrorPage() {
     } catch (err) { console.error('Load recordings error:', err) }
   }
 
-  //  Fixed autoSyncPending â€” no infinite loop
+  //  Fixed autoSyncPending — no infinite loop
   const autoSyncPending = async (localData, localKey) => {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session || !localData || localData.length === 0) return
@@ -332,7 +332,7 @@ export default function MonthlyMirrorPage() {
       } catch (err) { error = err; retries++ }
     }
 
-    //  Fallback to localStorage â€” but check size first
+    //  Fallback to localStorage — but check size first
     if (blob.size < MAX_STORAGE_SIZE) {
       try {
         const reader = new FileReader()
@@ -586,7 +586,7 @@ export default function MonthlyMirrorPage() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ color: '#FFFFFF', fontSize: '11px', fontWeight: 500, margin: 0 }}>{new Date(r.created_at).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                         <p style={{ color: '#7DBDEE', fontSize: '10px', margin: '2px 0' }}>
-                          â³ {syncStatus[r._localIndex] || 'Waiting to sync'} Â· {formatTime(r.duration_seconds)}
+                          â³ {syncStatus[r._localIndex] || 'Waiting to sync'}  · {formatTime(r.duration_seconds)}
                         </p>
                       </div>
                       <button onClick={() => retryUpload(r._localIndex)} disabled={uploading}
@@ -677,7 +677,7 @@ export default function MonthlyMirrorPage() {
           </div>
 
           <p style={{ color: '#7DBDEE', fontSize: '10px', textAlign: 'center', fontStyle: 'italic', padding: '0.75rem 0 0' }}>
-             The mirror doesn't judge â€” it just shows how far you've come.
+             The mirror doesn't judge — it just shows how far you've come.
           </p>
         </div>
       </div>

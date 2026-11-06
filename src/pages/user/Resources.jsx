@@ -14,7 +14,7 @@ const ALL_CATEGORIES = Object.keys(CATEGORY_ICONS)
 
 const DAILY_AFFIRMATIONS = [
   { text: "Every day you choose not to gamble is a victory.", day: 0 },
-  { text: "You are stronger than your urges. They pass â€” you remain.", day: 1 },
+  { text: "You are stronger than your urges. They pass — you remain.", day: 1 },
   { text: "Progress, not perfection. Every step counts.", day: 2 },
   { text: "Your worth is not measured by wins or losses.", day: 3 },
   { text: "You've survived every difficult day so far. Keep going.", day: 4 },
@@ -228,7 +228,7 @@ export default function Resources() {
 
         {/* Crisis Banner */}
         <div style={{ background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '10px 1.5rem', fontSize: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 101, flexWrap: 'wrap', gap: '4px' }}>
-          <span>ðŸ†˜ In crisis? Call <a href={`tel:${EMERGENCY_CONTACTS[0].number}`} style={{ color: '#7DBDEE', fontWeight: 700, textDecoration: 'none' }}>{EMERGENCY_CONTACTS[0].name} {EMERGENCY_CONTACTS[0].number}</a> â€” free, 24/7</span>
+          <span>🆘 In crisis? Call <a href={`tel:${EMERGENCY_CONTACTS[0].number}`} style={{ color: '#7DBDEE', fontWeight: 700, textDecoration: 'none' }}>{EMERGENCY_CONTACTS[0].name} {EMERGENCY_CONTACTS[0].number}</a> — free, 24/7</span>
           <span style={{ fontSize: '11px', opacity: 0.7 }}>You're not alone</span>
         </div>
 
@@ -344,7 +344,7 @@ export default function Resources() {
             ))
           )}
 
-          {/*  Saved Resources Section â€” Now Functional */}
+          {/*  Saved Resources Section — Now Functional */}
           {savedResources.length > 0 && (
             <div className="dash-section" style={{ marginTop: '1rem', borderColor: '#2DD4BF' }}>
               <h3 style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '0.75rem' }}>â­ Saved ({savedResources.length})</h3>

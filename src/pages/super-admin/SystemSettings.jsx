@@ -238,7 +238,7 @@ export default function SystemSettings() {
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#2DD4BF', fontFamily: "'Inter', sans-serif", margin: 0 }}>System Settings</h1>
             <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>
-              Platform configuration{hasUnsavedChanges ? ' Â· Unsaved changes' : ''}
+              Platform configuration{hasUnsavedChanges ? '  · Unsaved changes' : ''}
             </p>
           </div>
           <button onClick={saveSettings} disabled={saving || !hasUnsavedChanges}

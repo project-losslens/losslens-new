@@ -304,7 +304,7 @@ function Signup() {
           <p className="auth-sub">
             {signupType === 'company'
               ? 'Create your account with your company code for subsidized access.'
-              : 'Create a free account â€” no credit card needed.'}
+              : 'Create a free account — no credit card needed.'}
           </p>
 
           {error && <div role="alert" aria-live="polite" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
@@ -354,7 +354,7 @@ function Signup() {
           </div>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {/* Company Code Field â€” only for company signup */}
+            {/* Company Code Field — only for company signup */}
             {signupType === 'company' && (
               <div className="form-group">
                 <label htmlFor="companyCode">COMPANY CODE *</label>
@@ -377,14 +377,14 @@ function Signup() {
                     <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#2DD4BF', fontSize: '12px', fontWeight: 500 }}> Valid</span>
                   )}
                   {!validatingCode && companyValidation && !companyValidation.valid && !companyValidation.seats_full && (
-                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FFFFFF', fontSize: '12px' }}>Ã¢ÂÅ’ Invalid</span>
+                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FFFFFF', fontSize: '12px' }}>Ã¢ Å’ Invalid</span>
                   )}
                   {!validatingCode && companyValidation?.seats_full && (
-                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#7DBDEE', fontSize: '10px' }}>Ã¢Å¡Â Ã¯Â¸Â Full</span>
+                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#7DBDEE', fontSize: '10px' }}>Ã¢Å¡  Ã¯ ¸  Full</span>
                   )}
                 </div>
                 {companyValidation?.valid && (
-                  <span style={{ fontSize: '11px', color: '#2DD4BF' }}> {companyValidation.company_name} â€” {companyValidation.plan?.charAt(0).toUpperCase() + companyValidation.plan?.slice(1)} Plan</span>
+                  <span style={{ fontSize: '11px', color: '#2DD4BF' }}> {companyValidation.company_name} — {companyValidation.plan?.charAt(0).toUpperCase() + companyValidation.plan?.slice(1)} Plan</span>
                 )}
                 {companyValidation && !companyValidation.valid && !companyValidation.seats_full && (
                   <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Invalid company code. Check with your employer.</span>
@@ -408,7 +408,7 @@ function Signup() {
                 <input id="username" type="text" autoComplete="username" required placeholder="e.g. amina_w" value={form.username} onChange={e => handleUsernameChange(e.target.value)} style={{ paddingRight: 40, ...(fieldErrors.username ? { borderColor: '#FFFFFF' } : {}) }} />
                 {usernameStatus === 'checking' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>â³</span>}
                 {usernameStatus === 'available' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}></span>}
-                {usernameStatus === 'taken' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>Ã¢ÂÅ’</span>}
+                {usernameStatus === 'taken' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>Ã¢ Å’</span>}
               </div>
               {usernameStatus === 'taken' && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Username already taken</span>}
               {usernameStatus === 'available' && <span style={{ fontSize: '11px', color: '#2DD4BF' }}>Username available!</span>}

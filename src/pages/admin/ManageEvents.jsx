@@ -8,8 +8,8 @@ import AdminSidebar from '../../components/AdminSidebar'
 const EVENT_TYPES = ['Workshop', 'Support Group', 'Seminar', 'Webinar', 'Social Event', 'Training', 'Other']
 const TABS = { EVENTS: 'events', RSVPS: 'rsvps', DISCUSSIONS: 'discussions', CONTACTS: 'contacts' }
 
-const fmtTime = (d) => d ? new Date(d).toLocaleString('en-KE') : 'â€”'
-const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-KE') : 'â€”'
+const fmtTime = (d) => d ? new Date(d).toLocaleString('en-KE') : '—'
+const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-KE') : '—'
 
 export default function ManageEvents() {
   const navigate = useNavigate()
@@ -264,7 +264,7 @@ export default function ManageEvents() {
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid rgba(255,255,255,0.08)', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Manage Events</h1>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.08)', margin: '2px 0 0' }}>{events.length} events Â· {contacts.length} messages{unreadContacts > 0 ? ` Â· ${unreadContacts} unread` : ''}</p>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.08)', margin: '2px 0 0' }}>{events.length} events  · {contacts.length} messages{unreadContacts > 0 ? `  · ${unreadContacts} unread` : ''}</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
@@ -403,8 +403,8 @@ export default function ManageEvents() {
                               {ev.type && <span style={badge('#7DBDEE', 'rgba(45,212,191,0.15)', '#7DBDEE')}>{ev.type}</span>}
                               <span style={badge(discussionOn ? '#2DD4BF' : '#FFFFFF', discussionOn ? '#0B1220' : '#0B1220', discussionOn ? '#2DD4BF' : '#FFFFFF')}>{discussionOn ? ' Chat' : ' Chat off'}</span>
                             </div>
-                            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 4px' }}> {ev.location || 'No location'} Â·  {fmtTime(ev.date)}{ev.spots ? ` Â·  ${ev.spots} spots` : ''}</p>
-                            {ev.description && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '4px 0 0', lineHeight: '1.5' }}>{isExpanded ? ev.description : ev.description.substring(0, 120)}{!isExpanded && ev.description.length > 120 ? 'â€¦' : ''}</p>}
+                            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 4px' }}> {ev.location || 'No location'}  ·  {fmtTime(ev.date)}{ev.spots ? `  ·  ${ev.spots} spots` : ''}</p>
+                            {ev.description && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '4px 0 0', lineHeight: '1.5' }}>{isExpanded ? ev.description : ev.description.substring(0, 120)}{!isExpanded && ev.description.length > 120 ? '"¦' : ''}</p>}
                             <div style={{ display: 'flex', gap: '16px', marginTop: '10px', flexWrap: 'wrap' }}>
                               <span style={{ color: '#2DD4BF', fontSize: '12px' }}> {r.going.length} Going</span>
                               <span style={{ color: '#7DBDEE', fontSize: '12px' }}> {r.maybe.length} Maybe</span>

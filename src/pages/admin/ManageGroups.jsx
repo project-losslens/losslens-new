@@ -192,7 +192,7 @@ export default function ManageGroups() {
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid rgba(255,255,255,0.08)', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Manage Groups</h1>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.08)', margin: '2px 0 0' }}>{groups.length} total Â· {activeCount} active</p>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.08)', margin: '2px 0 0' }}>{groups.length} total  · {activeCount} active</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={fetchGroups} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }} aria-label="Refresh groups"></button>
@@ -299,15 +299,15 @@ export default function ManageGroups() {
                         {g.category && <span style={{ background: '#0B1220', color: '#7DBDEE', border: '1px solid rgba(45,212,191,0.15)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{g.category}</span>}
                       </div>
                       <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>
-                         {g.facilitator || 'No facilitator'} Â·  {g.meets || 'Schedule TBD'}
+                         {g.facilitator || 'No facilitator'}  ·  {g.meets || 'Schedule TBD'}
                       </p>
                       <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>
-                         {g.location || 'Location TBD'} Â·  {g.max_members ? `${g.max_members} max` : 'Unlimited'}
+                         {g.location || 'Location TBD'}  ·  {g.max_members ? `${g.max_members} max` : 'Unlimited'}
                       </p>
                       {g.description && (
                         <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '4px 0 0', lineHeight: '1.4' }}>
                           {g.description.length > 120 ? (
-                            <span title={g.description}>{g.description.substring(0, 120)}â€¦</span>
+                            <span title={g.description}>{g.description.substring(0, 120)}"¦</span>
                           ) : g.description}
                         </p>
                       )}

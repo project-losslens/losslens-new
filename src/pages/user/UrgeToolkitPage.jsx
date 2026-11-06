@@ -37,10 +37,10 @@ function triggerConfetti() {
 
 //  Static data outside component
 const DISTRACTION_CHALLENGES = [
-  { emoji: '', text: 'Walk outside for 10 min â€” no phone', category: 'Physical' },
+  { emoji: '', text: 'Walk outside for 10 min — no phone', category: 'Physical' },
   { emoji: '', text: 'Do 20 pushups right now', category: 'Physical' },
   { emoji: '', text: 'Put on music and dance', category: 'Physical' },
-  { emoji: '', text: 'Call a friend â€” ask about THEIR day', category: 'Social' },
+  { emoji: '', text: 'Call a friend — ask about THEIR day', category: 'Social' },
   { emoji: '', text: "Write 5 things you're grateful for", category: 'Mental' },
   { emoji: '', text: 'Clean one thing thoroughly', category: 'Physical' },
   { emoji: '', text: 'Write a letter to future you', category: 'Creative' },
@@ -48,7 +48,7 @@ const DISTRACTION_CHALLENGES = [
   { emoji: '', text: 'Count your breaths to 50', category: 'Relaxing' },
   { emoji: '', text: 'Read one chapter of a book', category: 'Mental' },
   { emoji: '', text: 'Cook or prepare a healthy snack', category: 'Creative' },
-  { emoji: '', text: 'Take a cold shower â€” resets you', category: 'Physical' },
+  { emoji: '', text: 'Take a cold shower — resets you', category: 'Physical' },
 ]
 
 const HELPLINES = [
@@ -66,12 +66,12 @@ const TOOLS = [
   { id: 'helpline', icon: 'ðŸ†˜', title: 'Emergency & Support', desc: 'Get help now', color: '#FFFFFF' },
 ]
 
-//  Breathing Human â€” React.memo for performance
+//  Breathing Human — React.memo for performance
 const BreathingHuman = ({ phase, size = 200 }) => {
   const scale = phase === 'inhale' ? 1.1 : phase === 'hold' ? 1.1 : 1
   const bellyScale = phase === 'inhale' ? 1.3 : phase === 'exhale' ? 0.85 : 1.1
   return (
-    <div style={{ width: size, height: size * 1.4, margin: '0 auto', position: 'relative', transition: 'all 4s ease-in-out' }} role="img" aria-label={`Breathing visualization â€” ${phase === 'inhale' ? 'Breathe in' : phase === 'hold' ? 'Hold' : 'Breathe out'}`}>
+    <div style={{ width: size, height: size * 1.4, margin: '0 auto', position: 'relative', transition: 'all 4s ease-in-out' }} role="img" aria-label={`Breathing visualization — ${phase === 'inhale' ? 'Breathe in' : phase === 'hold' ? 'Hold' : 'Breathe out'}`}>
       <div style={{ width: size*0.3, height: size*0.3, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #2DD4BF', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', transition: 'transform 4s', transform: `scale(${scale})` }}>
         <div style={{ display: 'flex', gap: size*0.05 }}><div style={{ width: size*0.03, height: size*0.04, borderRadius: '50%', background: '#FFFFFF' }} /><div style={{ width: size*0.03, height: size*0.04, borderRadius: '50%', background: '#FFFFFF' }} /></div>
         <div style={{ width: size*0.05, height: size*0.02, borderRadius: '50%', background: 'rgba(255,255,255,0.4)', marginTop: size*0.02 }} />
@@ -174,7 +174,7 @@ export default function UrgeToolkitPage() {
     return () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null } }
   }, [timerRunning])
 
-  //  Breathing â€” actual 4-7-8 with dynamic timeouts
+  //  Breathing — actual 4-7-8 with dynamic timeouts
   useEffect(() => {
     if (!breathingActive || activeTool !== 'breathing') return
     let cancelled = false
@@ -201,7 +201,7 @@ export default function UrgeToolkitPage() {
   const formatTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
   const getTimerProgress = () => ((TIMER_DURATION - timer) / TIMER_DURATION) * 100
 
-  //  Spinning wheel â€” fixed seed for bar heights
+  //  Spinning wheel — fixed seed for bar heights
   const voiceBarHeights = useMemo(() => [1,2,3,4,5,6,7,8].map(i => 15 + Math.sin(i * 1.5) * 10), [])
 
   const spinWheel = () => {
@@ -294,7 +294,7 @@ export default function UrgeToolkitPage() {
                   </>
                 ) : (
                   <div style={{ width: '100%' }}>
-                    <p style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '1rem' }}> You proved it â€” urges DO pass!</p>
+                    <p style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '1rem' }}> You proved it — urges DO pass!</p>
                     <button className="btn-primary" onClick={() => { setTimer(TIMER_DURATION); setTimerRunning(false); setTimerComplete(false) }} style={{ width: '100%' }}>Start a new timer</button>
                   </div>
                 )}
@@ -306,7 +306,7 @@ export default function UrgeToolkitPage() {
           {activeTool === 'breathing' && (
             <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out' }}>
               <h3 style={{ color: '#FFFFFF', fontSize: '16px', marginBottom: '0.5rem' }}>4-7-8 Breathing</h3>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginBottom: '1.5rem' }}>Inhale 4s Â· Hold 7s Â· Exhale 8s</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginBottom: '1.5rem' }}>Inhale 4s  · Hold 7s  · Exhale 8s</p>
               <BreathingHuman phase={breathPhase} size={180} />
               <div style={{ marginTop: '1rem' }}>
                 <p style={{ color: '#2DD4BF', fontSize: '14px', fontWeight: 500 }} aria-live="polite">Round {breathRounds + 1}</p>
@@ -322,7 +322,7 @@ export default function UrgeToolkitPage() {
           {activeTool === 'thought' && (
             <div className="dash-section" style={{ animation: 'fadeIn 0.3s ease-out' }}>
               <h3 style={{ color: '#FFFFFF', fontSize: '16px', marginBottom: '0.5rem' }}>Thought Record</h3>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginBottom: '1rem' }}>From CBT Module 2 â€” Challenge the thought, break the urge</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginBottom: '1rem' }}>From CBT Module 2 — Challenge the thought, break the urge</p>
               <div style={{ display: 'flex', gap: '4px', marginBottom: '1.5rem' }}>
                 {['Situation', 'Thought', 'Evidence', 'Balance'].map((step, i) => (
                   <div key={i} style={{ flex: 1, height: '6px', borderRadius: '3px', background: thoughtStep >= i ? '#2DD4BF' : 'rgba(255,255,255,0.12)', transition: 'background 0.3s' }} />
@@ -438,7 +438,7 @@ export default function UrgeToolkitPage() {
                     <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isOpenNow(h.hours) ? '#2DD4BF' : 'rgba(255,255,255,0.4)', flexShrink: 0 }} title={isOpenNow(h.hours) ? 'Available now' : 'May be closed'} />
                   </div>
                   <p className="helpline-num">{h.number}</p>
-                  <p className="helpline-hours">{h.hours} Â· {h.free ? 'ðŸ†“ Free' : ' Charges may apply'}</p>
+                  <p className="helpline-hours">{h.hours}  · {h.free ? 'ðŸ†“ Free' : ' Charges may apply'}</p>
                   <a href={`tel:${h.number.replace(/\s/g,'')}`} style={{ display: 'block', textAlign: 'center', background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '10px', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: 500, marginTop: '8px' }}> Call {h.number}</a>
                 </div>
               ))}

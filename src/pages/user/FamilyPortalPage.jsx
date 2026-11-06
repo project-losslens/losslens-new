@@ -109,7 +109,7 @@ function FamilyPortalPage() {
     const newStatus = inv.status === 'paused' ? 'active' : 'paused'
     await supabase.from('supporter_invitations').update({ status: newStatus }).eq('id', inv.id)
     setInvitations(prev => prev.map(i => i.id === inv.id ? { ...i, status: newStatus } : i))
-    showToast(newStatus === 'paused' ? 'â¸ Paused' : 'Ã¢â€“Â¶Ã¯Â¸Â Resumed', 2000)
+    showToast(newStatus === 'paused' ? 'â¸ Paused' : 'Ã¢– ¶Ã¯ ¸  Resumed', 2000)
   }
 
   const handleToggleCrisis = async (inv) => {
@@ -139,7 +139,7 @@ function FamilyPortalPage() {
   const handleShare = async (inv) => {
     const link = `${window.location.origin}/family-join?token=${inv.token}`
     const userName = inv.anonymous_mode ? 'Someone who cares about you' : profile?.full_name || 'Someone'
-    const text = `${userName} would love your support on their recovery journey with LossLens.\n\nYou don't need to create an account â€” just click the link to see how they're doing: ${link}\n\n It's private, secure, and you can stop anytime.`
+    const text = `${userName} would love your support on their recovery journey with LossLens.\n\nYou don't need to create an account — just click the link to see how they're doing: ${link}\n\n It's private, secure, and you can stop anytime.`
 
     try {
       if (navigator.share) {
@@ -162,7 +162,7 @@ function FamilyPortalPage() {
     const map = {
       pending: { color: '#7DBDEE', bg: 'rgba(45,212,191,0.15)', label: 'â³ Pending' },
       active: { color: '#2DD4BF', bg: 'rgba(255,255,255,0.12)', label: ' Active' },
-      declined: { color: '#FFFFFF', bg: 'rgba(255,255,255,0.08)', label: 'Ã¢ÂÅ’ Declined' },
+      declined: { color: '#FFFFFF', bg: 'rgba(255,255,255,0.08)', label: 'Ã¢ Å’ Declined' },
       expired: { color: 'rgba(255,255,255,0.4)', bg: '#0B1220', label: 'â° Expired' },
       paused: { color: 'rgba(255,255,255,0.4)', bg: '#0B1220', label: 'â¸ Paused' },
     }
@@ -183,11 +183,11 @@ function FamilyPortalPage() {
       <Sidebar />
       <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 100 }}>
-          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Family Portal</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{activeSupporters.length} active Â· {invitations.length} total</p></div>
+          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Family Portal</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{activeSupporters.length} active  · {invitations.length} total</p></div>
         </nav>
         <div style={{ padding: '1.5rem' }}>
           <div className="dash-section" style={{ marginBottom: '1rem', borderColor: '#2DD4BF' }}>
-            <div style={{ display: 'flex', gap: '12px' }}><span style={{ fontSize: '28px' }}></span><div><h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '6px' }}>Why invite a supporter?</h3><p style={{ color: '#7DBDEE', fontSize: '13px', lineHeight: '1.6', fontWeight: 300, margin: 0 }}>Recovery is easier with support. Invite trusted family or friends to follow your journey. They see only what you choose â€” no account needed.</p></div></div>
+            <div style={{ display: 'flex', gap: '12px' }}><span style={{ fontSize: '28px' }}></span><div><h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '6px' }}>Why invite a supporter?</h3><p style={{ color: '#7DBDEE', fontSize: '13px', lineHeight: '1.6', fontWeight: 300, margin: 0 }}>Recovery is easier with support. Invite trusted family or friends to follow your journey. They see only what you choose — no account needed.</p></div></div>
           </div>
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)' }}>
             {[{ id: 'supporters', label: ` Supporters` }, { id: 'resources', label: ' Resources' }, { id: 'privacy', label: ' Privacy' }].map(tab => (
@@ -261,7 +261,7 @@ function FamilyPortalPage() {
 
           {activeTab === 'privacy' && (
             <div className="dash-section"><h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '1rem' }}> Your privacy</h3>
-              {['Supporters never see diary content, money, or locations unless you allow it.', 'They see only what you choose to share â€” change anytime.', 'Change permissions or revoke access anytime.', 'Anonymous mode hides your identity.', 'Supporters don\'t need an account â€” they view via a secure link.'].map((t, i) => <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}><span style={{ color: '#2DD4BF' }}>â€¢</span><span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>{t}</span></div>)}
+              {['Supporters never see diary content, money, or locations unless you allow it.', 'They see only what you choose to share — change anytime.', 'Change permissions or revoke access anytime.', 'Anonymous mode hides your identity.', 'Supporters don\'t need an account — they view via a secure link.'].map((t, i) => <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}><span style={{ color: '#2DD4BF' }}>"¢</span><span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>{t}</span></div>)}
             </div>
           )}
         </div>

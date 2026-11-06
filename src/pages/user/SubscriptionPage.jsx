@@ -85,7 +85,7 @@ export default function SubscriptionPage() {
           created_at: new Date().toISOString(),
         }).select().single()
       }
-    } catch (err) { /* Silent â€” analytics only */ }
+    } catch (err) { /* Silent — analytics only */ }
 
     setLoading(null)
     setShowComingSoon(true)
@@ -170,7 +170,7 @@ export default function SubscriptionPage() {
     <div className="root">
       <nav className="navbar">
         <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>LossLens</span>
-        <button className="nav-ghost" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">Ã¢â€ Â Dashboard</button>
+        <button className="nav-ghost" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">Ã¢"   Dashboard</button>
       </nav>
 
       <div className="dashboard" style={{ padding: '2rem 1.5rem', maxWidth: '600px', margin: '0 auto' }}>
@@ -207,7 +207,7 @@ export default function SubscriptionPage() {
             <span style={{ fontSize: '32px', display: 'block', marginBottom: '8px' }}></span>
             <h3 style={{ color: '#2DD4BF', fontSize: '16px', margin: '0 0 4px' }}>{companyInfo.company_name}</h3>
             <p style={{ color: '#2DD4BF', fontSize: '12px', margin: 0 }}>
-              {companyInfo.plan?.charAt(0).toUpperCase() + companyInfo.plan?.slice(1)} Plan Â· Subsidized Access
+              {companyInfo.plan?.charAt(0).toUpperCase() + companyInfo.plan?.slice(1)} Plan  · Subsidized Access
             </p>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '8px' }}>
                Your employer covers most of the cost. You get all Premium features while your personal data stays private.
@@ -215,7 +215,7 @@ export default function SubscriptionPage() {
           </div>
         )}
 
-        {/* Plan Comparison â€” only show for non-company users */}
+        {/* Plan Comparison — only show for non-company users */}
         {!isCompanyPlan && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '2rem' }}>
             <div style={{
@@ -278,7 +278,7 @@ export default function SubscriptionPage() {
           </div>
         </div>
 
-        {/* Join Company Section â€” only for individual users */}
+        {/* Join Company Section — only for individual users */}
         {!isCompanyPlan && (
           <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '1.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>
             <span style={{ fontSize: '24px', display: 'block', marginBottom: '8px' }}></span>
@@ -331,7 +331,7 @@ export default function SubscriptionPage() {
           </div>
         )}
 
-        {/* Action Button â€” only for free individual users */}
+        {/* Action Button — only for free individual users */}
         {!isCompanyPlan && currentPlan === PLANS.FREE && !interestRegistered && (
           <button
             className="btn-primary full"
@@ -356,9 +356,9 @@ export default function SubscriptionPage() {
           <h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '4px' }}> FAQ</h3>
           {[
             { q: 'Can I switch back to Free?', a: 'Yes, anytime. You keep Premium access until the end of your billing period.' },
-            { q: 'How do I pay?', a: 'Premium will use M-Pesa â€” Kenya\'s most trusted mobile payment. No credit card needed.' },
+            { q: 'How do I pay?', a: 'Premium will use M-Pesa — Kenya\'s most trusted mobile payment. No credit card needed.' },
             { q: 'Is my data still private?', a: 'Absolutely. Premium doesn\'t change our privacy commitment. Your data is yours.' },
-            ...(isCompanyPlan ? [{ q: 'Can my employer see my diary?', a: 'No. Your diary, messages, and personal data are completely private. Your employer only sees anonymized usage statistics â€” never your personal content.' }] : []),
+            ...(isCompanyPlan ? [{ q: 'Can my employer see my diary?', a: 'No. Your diary, messages, and personal data are completely private. Your employer only sees anonymized usage statistics — never your personal content.' }] : []),
             { q: 'What if my company stops offering LossLens?', a: 'Your account stays active. You can switch to an individual Free or Premium plan anytime.' },
           ].map((faq, i) => (
             <div key={i} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '12px 14px' }}>
@@ -383,10 +383,10 @@ export default function SubscriptionPage() {
               M-Pesa payments are being set up. During testing, <strong style={{ color: '#2DD4BF' }}>all features are free</strong>.
             </p>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '16px' }}>
-              We've noted your interest â€” you'll be the first to know when Premium launches!
+              We've noted your interest — you'll be the first to know when Premium launches!
             </p>
             <button onClick={handleCloseComingSoon} className="btn-primary full" style={{ padding: '12px', fontSize: '14px' }}>
-              Got it â€” keep exploring!
+              Got it — keep exploring!
             </button>
           </div>
         </div>

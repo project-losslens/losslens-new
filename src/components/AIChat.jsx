@@ -41,13 +41,13 @@ function getProactiveQuestions(userContext) {
     ],
     afternoon: [
       "How's your afternoon going? Any triggers popped up?",
-      "Afternoon check-in â€” how are you feeling?",
+      "Afternoon check-in — how are you feeling?",
       "Afternoons can be tough. What's keeping you busy?",
     ],
     evening: [
       "Evening check-in: How was your day? Any wins to celebrate? ",
       "Nighttime can bring urges. Want to talk about it?",
-      "Before bed â€” what went well today?",
+      "Before bed — what went well today?",
     ],
     weekend: [
       "Weekends can be challenging. How are you holding up? ",
@@ -69,7 +69,7 @@ function getProactiveQuestions(userContext) {
     if (profile?.streak_days >= 7) {
       timeQuestions.push(` ${profile.streak_days} days gamble-free! How does that feel?`);
     } else if (profile?.streak_days >= 3) {
-      timeQuestions.push(`Day ${profile.streak_days} of your streak â€” you're building momentum!`);
+      timeQuestions.push(`Day ${profile.streak_days} of your streak — you're building momentum!`);
     }
     if (profile?.money_saved >= 1000) {
       timeQuestions.push(`KES ${profile.money_saved.toLocaleString()} saved so far! What are you saving for? `);
@@ -151,7 +151,7 @@ function AIChat({ profile }) {
       if (profileData?.streak_days >= 7) {
         setMessages([{
           role: 'assistant',
-          content: `Hi ${firstName}!  Welcome back!  ${profileData.streak_days} days gamble-free â€” that's amazing! How are you feeling today?`,
+          content: `Hi ${firstName}!  Welcome back!  ${profileData.streak_days} days gamble-free — that's amazing! How are you feeling today?`,
         }]);
       }
     } catch (error) {

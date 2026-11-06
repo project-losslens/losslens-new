@@ -34,16 +34,17 @@ async function fetchWithTimeout(url, options, timeoutMs) {
 
 async function getAuthenticatedUser(request) {
   const supabaseUrl = process.env.VITE_SUPABASE_URL
+  // Vercel env var must hold the sb_publishable_ key.
   const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY
   const authorization = request.headers.authorization || ''
   const token = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : ''
 
-  if (!supabaseUrl || !supabaseKey || !token) return null
+  if (!supabaseUrl || !supabaseKey || !token.startsWith('eyJ')) return null
 
   const response = await fetchWithTimeout(`${supabaseUrl}/auth/v1/user`, {
     headers: {
       apikey: supabaseKey,
-      Authorization: `Bearer `,
+      Authorization: `Bearer ${token}`,
     },
   }, REQUEST_TIMEOUT_MS)
 
@@ -55,7 +56,7 @@ async function getAuthenticatedUser(request) {
 async function fetchUserContext(auth) {
   const headers = {
     apikey: auth.supabaseKey,
-    Authorization: `Bearer `,
+      Authorization: `Bearer ${auth.token}`,
   }
   const [profileResponse, diaryResponse, cbtResponse] = await Promise.all([
     fetchWithTimeout(`${auth.supabaseUrl}/rest/v1/profiles?id=eq.${auth.user.id}&select=full_name,streak_days,money_saved&limit=1`, { headers }, REQUEST_TIMEOUT_MS),
@@ -63,7 +64,7 @@ async function fetchUserContext(auth) {
     fetchWithTimeout(`${auth.supabaseUrl}/rest/v1/cbt_progress?user_id=eq.${auth.user.id}&completed=eq.true&select=id`, { headers }, REQUEST_TIMEOUT_MS),
   ])
 
-  let context
+  let context = ''
   if (profileResponse.ok) {
     const profiles = await profileResponse.json()
     const profile = profiles?.[0]
@@ -91,7 +92,7 @@ async function saveHistory(auth, role, message) {
     method: 'POST',
     headers: {
       apikey: auth.supabaseKey,
-      Authorization: `Bearer `,
+      Authorization: `Bearer ${auth.token}`,
       'Content-Type': 'application/json',
       Prefer: 'return=minimal',
     },
@@ -114,15 +115,24 @@ export default async function handler(request, response) {
     return json(response, 405, { error: 'Method not allowed' })
   }
 
-  let auth
   try {
-    auth = await getAuthenticatedUser(request)
-  } catch {
-    // Authentication failures are handled as unauthenticated.
-  }
-  if (!auth) return json(response, 401, { error: 'Authentication required' })
+    const authorization = request.headers.authorization || ''
+    const token = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : ''
+    if (!token.startsWith('eyJ')) {
+      return json(response, 401, { error: 'unauthorized' })
+    }
 
-  const body = request.body || {}
+    const auth = await getAuthenticatedUser(request)
+    if (!auth) return json(response, 401, { error: 'unauthorized' })
+
+    let body = request.body || {}
+    if (typeof body === 'string') {
+      try {
+        body = JSON.parse(body)
+      } catch {
+        return json(response, 400, { error: 'invalid_body' })
+      }
+    }
   const messages = Array.isArray(body.messages) ? body.messages.slice(-MAX_MESSAGES) : []
   if (!messages.length) return json(response, 400, { error: 'A message is required' })
 
@@ -159,7 +169,7 @@ export default async function handler(request, response) {
       const groqResponse = await fetchWithTimeout(GROQ_URL, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer `,
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -194,4 +204,8 @@ export default async function handler(request, response) {
   }
 
   return json(response, 200, { reply })
+  } catch (error) {
+    console.error(error)
+    return json(response, 500, { error: 'internal' })
+  }
 }

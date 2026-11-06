@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import '../../styles/globals.css'
 import AdminSidebar from '../../components/AdminSidebar'
 
-const fmtTime = (d) => d ? new Date(d).toLocaleString('en-KE') : 'â€”'
+const fmtTime = (d) => d ? new Date(d).toLocaleString('en-KE') : '—'
 
 export default function CrisisAlerts() {
   const navigate = useNavigate()
@@ -64,7 +64,7 @@ export default function CrisisAlerts() {
   const escalate = async (alert) => {
     setEscalatingId(alert.id)
     const { error: escError } = await supabase.from('crisis_alerts').update({
-      admin_notes: ` ESCALATED: ${new Date().toLocaleString('en-KE')} â€” Requires immediate counselor intervention.`
+      admin_notes: ` ESCALATED: ${new Date().toLocaleString('en-KE')} — Requires immediate counselor intervention.`
     }).eq('id', alert.id)
     if (escError) {
       showToast('Escalation failed.', 'error')
@@ -112,7 +112,7 @@ export default function CrisisAlerts() {
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid rgba(255,255,255,0.08)', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}>ðŸ†˜ Crisis Alerts</h1>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.08)', margin: '2px 0 0' }}>{alerts.length} open Â· {resolved.length} resolved</p>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.08)', margin: '2px 0 0' }}>{alerts.length} open  · {resolved.length} resolved</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
@@ -126,7 +126,7 @@ export default function CrisisAlerts() {
 
         {alerts.length > 0 && (
           <div style={{ margin: '1rem 1.5rem 0', padding: '12px 16px', background: 'rgba(255,255,255,0.08)', borderRadius: '10px', border: '1px solid #FFFFFF' }}>
-            <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 600, margin: 0 }}> {alerts.length} open crisis alert{alerts.length > 1 ? 's' : ''} â€” requires immediate attention</p>
+            <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 600, margin: 0 }}> {alerts.length} open crisis alert{alerts.length > 1 ? 's' : ''} — requires immediate attention</p>
           </div>
         )}
 

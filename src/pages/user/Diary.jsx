@@ -295,7 +295,7 @@ function Diary() {
               <div className="dash-section">
                 <h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '1rem' }}>Did you gamble today?</h3>
                 <div className="toggle-group">
-                  <button className={`toggle-btn ${gambled === false ? 'active-primary' : ''}`} onClick={() => { setGambled(false); showToast(' Clean day â€” proud of you!', 1500) }}>No </button>
+                  <button className={`toggle-btn ${gambled === false ? 'active-primary' : ''}`} onClick={() => { setGambled(false); showToast(' Clean day — proud of you!', 1500) }}>No </button>
                   <button className={`toggle-btn ${gambled === true ? 'active-alert' : ''}`} onClick={() => setGambled(true)}>Yes</button>
                 </div>
               </div>

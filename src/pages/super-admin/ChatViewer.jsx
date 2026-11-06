@@ -180,7 +180,7 @@ function ChatViewer() {
                     {u.full_name}
                   </p>
                   <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '2px 0 0' }}>
-                    {u.id.slice(0, 8)}â€¦
+                    {u.id.slice(0, 8)}"¦
                   </p>
                 </div>
               ))

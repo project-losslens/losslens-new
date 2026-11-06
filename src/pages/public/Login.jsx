@@ -201,7 +201,7 @@ function Login() {
             <div className="form-group">
               <label htmlFor="password">Password</label>
               <div style={{ position: 'relative' }}>
-                <input id="password" type={showPw ? 'text' : 'password'} autoComplete="current-password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" value={password} onChange={handlePasswordChange} style={{ paddingRight: 44 }} disabled={cooldown} />
+                <input id="password" type={showPw ? 'text' : 'password'} autoComplete="current-password" placeholder="Enter password" value={password} onChange={handlePasswordChange} style={{ paddingRight: 44 }} disabled={cooldown} />
                 <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? '' : ''}</button>
               </div>
             </div>

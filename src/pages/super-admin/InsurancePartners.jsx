@@ -182,7 +182,7 @@ export default function InsurancePartners() {
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid #2DD4BF', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#2DD4BF', fontFamily: "'Inter', sans-serif", margin: 0 }}>Insurance Partners</h1>
-            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>{partners.length} total Â· {activeCount} active</p>
+            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>{partners.length} total  · {activeCount} active</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={fetchPartners} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #7DBDEE', color: '#7DBDEE', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Refresh</button>
@@ -269,9 +269,9 @@ export default function InsurancePartners() {
                         <span style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 600 }}>{p.company_name}</span>
                         <span style={{ background: p.status === 'active' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.08)', color: p.status === 'active' ? '#2DD4BF' : '#FFFFFF', border: `1px solid ${p.status === 'active' ? '#2DD4BF' : 'rgba(255,255,255,0.08)'}`, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{p.status}</span>
                       </div>
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>{p.contact_name} Â· {p.contact_email}</p>
+                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>{p.contact_name}  · {p.contact_email}</p>
                       <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: 0 }}>
-                        {p.coverage_type || 'General'} Â· {p.commission_pct || 0}% commission
+                        {p.coverage_type || 'General'}  · {p.commission_pct || 0}% commission
                         {p.notes && <span style={{ display: 'block', marginTop: '4px', color: '#7DBDEE', fontSize: '11px', fontStyle: 'italic' }}>{'\u{1F4DD}'} {p.notes.substring(0, 80)}{p.notes.length > 80 ? '...' : ''}</span>}
                       </p>
                     </div>

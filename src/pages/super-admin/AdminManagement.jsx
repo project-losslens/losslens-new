@@ -217,7 +217,7 @@ export default function AdminManagement() {
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid #2DD4BF', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#2DD4BF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Admin Management</h1>
-            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>{regularAdmins.length} admins Â· {superAdmins.length} super admins Â· {suspendedAdmins.length} suspended</p>
+            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>{regularAdmins.length} admins  · {superAdmins.length} super admins  · {suspendedAdmins.length} suspended</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={fetchAdmins} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #7DBDEE', color: '#7DBDEE', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
@@ -250,7 +250,7 @@ export default function AdminManagement() {
             </div>
           )}
 
-          {/* Super Admins Section â€” View Only */}
+          {/* Super Admins Section — View Only */}
           {superAdmins.length > 0 && (
             <div style={{ marginBottom: '1.5rem' }}>
               <h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '0.75rem' }}> Super Admins</h3>
@@ -279,7 +279,7 @@ export default function AdminManagement() {
                             <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Joined {new Date(a.created_at).toLocaleDateString('en-KE')}</span>
                           </div>
                         </div>
-                        {/* Super Admins: no actions â€” view only */}
+                        {/* Super Admins: no actions — view only */}
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', fontStyle: 'italic' }}>Protected</span>
                         </div>
@@ -291,7 +291,7 @@ export default function AdminManagement() {
             </div>
           )}
 
-          {/* Regular Admins Section â€” Full Management */}
+          {/* Regular Admins Section — Full Management */}
           {regularAdmins.length === 0 && superAdmins.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
               <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>

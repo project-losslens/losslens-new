@@ -13,9 +13,9 @@ const ROUTES = {
   BROADCAST: '/admin/broadcast', ADMIN: '/admin',
 }
 
-const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-KE') : 'â€”'
+const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-KE') : '—'
 
-// Supabase returns {error} objects â€” it doesn't throw
+// Supabase returns {error} objects — it doesn't throw
 const safeQuery = async (promise, fallback = { data: [], count: 0, error: null }) => {
   try {
     const res = await promise
@@ -77,7 +77,7 @@ export default function SuperAdminDashboard() {
       const insuranceRes = await safeQuery(
         supabase.from('insurance_partners').select('*', { count: 'exact', head: true }).eq('status', 'active')
       )
-      // FIXED: Removed 'email' â€” column doesn't exist in profiles table
+      // FIXED: Removed 'email' — column doesn't exist in profiles table
       const recentAdminsRes = await safeQuery(
         supabase.from('profiles')
           .select('id, full_name, role, created_at')
@@ -129,7 +129,7 @@ export default function SuperAdminDashboard() {
         detail: storageCheck.error?.message || (!hasAvatars ? 'avatars bucket missing' : '')
       })
 
-      // Don't ping edge functions from browser â€” CORS/auth hell
+      // Don't ping edge functions from browser — CORS/auth hell
       health.push({
         name: 'Edge Functions',
         status: 'unknown',
@@ -263,7 +263,7 @@ export default function SuperAdminDashboard() {
         <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid #2DD4BF', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#2DD4BF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Super Admin</h1>
-            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>{stats.totalUsers.toLocaleString()} users Â· Full platform control</p>
+            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>{stats.totalUsers.toLocaleString()} users  · Full platform control</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={fetchAllData} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
@@ -370,7 +370,7 @@ export default function SuperAdminDashboard() {
                           onMouseEnter={e => e.currentTarget.style.background = '#0B1220'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                           <td style={{ padding: '10px 8px', color: '#FFFFFF' }}>{a.full_name || 'Unnamed'}</td>
-                          {/* FIXED: Removed email <td> â€” email doesn't exist in profiles */}
+                          {/* FIXED: Removed email <td> — email doesn't exist in profiles */}
                           <td style={{ padding: '10px 8px' }}>
                             <span style={{ background: a.role === 'super_admin' ? 'rgba(45,212,191,0.15)' : 'rgba(255,255,255,0.12)', color: a.role === 'super_admin' ? '#2DD4BF' : '#2DD4BF', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', border: `1px solid ${a.role === 'super_admin' ? '#2DD4BF' : '#2DD4BF'}` }}>
                               {a.role === 'super_admin' ? ' Super Admin' : ' Admin'}
