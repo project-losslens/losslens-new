@@ -1,106 +1,77 @@
-const CACHE_NAME = 'precious-v2';
-const ASSETS_TO_CACHE = [
+// LossLens service worker.
+// - Precaches only the built asset manifest (injected at build time below).
+// - Never caches /api/, Supabase, or auth endpoints.
+// - Offline fallback page lists crisis helplines (works with no network).
+
+const CACHE_VERSION = 'losslens-v1'
+const CACHE_NAME = `${CACHE_VERSION}-precache`
+const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`
+
+// BUILD_MANIFEST is replaced by vite-plugin or left empty; fall back to
+// caching only the shell documents which always exist.
+const PRECACHE_URLS = [
   '/',
   '/index.html',
-  '/assets/index.css',
-  '/assets/main.js',
+  '/manifest.json',
   '/favicon.svg',
-  '/icon-192.png',
-  '/icon-512.png',
-  '/icon-maskable-192.png',
-];
+]
 
-// Install event - cache core assets
+const OFFLINE_HTML = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LossLens — Offline</title><style>body{background:#0B1220;color:#fff;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:2rem;text-align:center}h1{color:#2DD4BF}a{color:#7DBDEE}</style></head><body><div><h1>You are offline</h1><p>LossLens needs a connection for most features. If you or someone else is in crisis, these numbers work without internet being required to remember them:</p><p><strong>Befrienders Kenya:</strong> +254 722 178 177<br><strong>NACADA:</strong> 1192<br><strong>Emergency:</strong> 999 / 112</p><p><a href="/">Try again</a></p></div></body></html>`
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    }).catch((err) => {
-      console.error('Cache install failed:', err);
-    })
-  );
-  self.skipWaiting();
-});
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(PRECACHE_URLS).catch(() => {}))
+      .then(() => self.skipWaiting())
+  )
+})
 
-// Activate event - clean old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
-      );
-    })
-  );
-  self.clients.claim();
-});
+    caches.keys()
+      .then((names) => Promise.all(
+        names.filter((n) => !n.startsWith(CACHE_VERSION)).map((n) => caches.delete(n))
+      ))
+      .then(() => self.clients.claim())
+  )
+})
 
-// Fetch event - network first, fallback to cache
+function shouldBypass(url) {
+  return (
+    !url.protocol.startsWith('http') ||
+    url.pathname.startsWith('/api/') ||
+    url.hostname.includes('supabase.co') ||
+    url.hostname.includes('groq.com') ||
+    url.pathname.includes('/auth/')
+  )
+}
+
 self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
+  const { request } = event
+  if (request.method !== 'GET') return
+  const url = new URL(request.url)
+  if (shouldBypass(url)) return
 
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') {
-    return;
-  }
-
-  // Skip browser extensions and non-http(s)
-  if (!url.protocol.startsWith('http')) {
-    return;
-  }
-
-  // Skip Supabase API calls
-  if (url.hostname.includes('supabase.co')) {
-    return;
-  }
-
-  // Skip Groq API calls
-  if (url.hostname.includes('api.groq.com')) {
-    return;
-  }
-
-  // Skip auth callback URLs
-  if (url.pathname.includes('/auth/callback')) {
-    return;
-  }
-
+  // Network-first for everything; cache only same-origin GET successes.
   event.respondWith(
-    fetch(event.request)
+    fetch(request)
       .then((response) => {
-        // Don't cache opaque responses or errors
-        if (!response || response.status !== 200 || response.type === 'opaque') {
-          return response;
+        if (response && response.status === 200 && response.type !== 'opaque') {
+          const clone = response.clone()
+          caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, clone)).catch(() => {})
         }
-
-        const responseClone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseClone);
-        }).catch((err) => {
-          console.error('Cache put failed:', err);
-        });
-
-        return response;
+        return response
       })
-      .catch(() => {
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-
-          // Offline fallback for navigation requests
-          if (event.request.mode === 'navigate') {
-            return caches.match('/');
-          }
-
-          return new Response('Offline - content unavailable', {
-            status: 503,
-            statusText: 'Service Unavailable',
-            headers: new Headers({
-              'Content-Type': 'text/plain'
-            })
-          });
-        });
+      .catch(async () => {
+        const cached = await caches.match(request)
+        if (cached) return cached
+        if (request.mode === 'navigate') {
+          return new Response(OFFLINE_HTML, {
+            status: 200,
+            headers: { 'Content-Type': 'text/html; charset=utf-8' },
+          })
+        }
+        return new Response('Offline', { status: 503 })
       })
-  );
-});
+  )
+})

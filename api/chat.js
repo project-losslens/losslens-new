@@ -1,10 +1,17 @@
 /* global process */
 
+import { detectCrisis, CRISIS_HELPLINE } from '../src/lib/crisisDetection.js'
+
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
 const GROQ_MODEL = 'openai/gpt-oss-20b'
 const MAX_MESSAGE_LENGTH = 4000
 const MAX_MESSAGES = 20
 const REQUEST_TIMEOUT_MS = 30000
+const QUOTA_PER_HOUR = Number(process.env.CHAT_QUOTA_PER_HOUR || 30)
+const QUOTA_PER_DAY = Number(process.env.CHAT_QUOTA_PER_DAY || 150)
+
+// TODO(owner): verify the helpline numbers below are current before release.
+const CRISIS_REPLY = `I'm really concerned about you. If you may be in immediate danger, please reach out now — ${CRISIS_HELPLINE}, or NACADA at 1192. You can also use the crisis resources inside LossLens. You matter and you are not alone.`
 
 const BASE_SYSTEM_PROMPT = `You are Oloo, a warm, perceptive gambling-recovery companion built into LossLens in Kenya.
 
@@ -101,12 +108,49 @@ async function saveHistory(auth, role, message) {
   if (!response.ok) throw new Error('CHAT_HISTORY_WRITE_FAILED')
 }
 
-function isCrisisMessage(message) {
-  const normalized = message.toLowerCase()
-  return [
-    'suicide', 'kill myself', 'end it all', 'self-harm', 'want to die',
-    'kujiua', 'nitajiuwa', 'nataka kufa', 'maisha yameniboa',
-  ].some(word => normalized.includes(word))
+async function countRecentMessages(auth, sinceIso) {
+  const headers = {
+    apikey: auth.supabaseKey,
+    Authorization: `Bearer ${auth.token}`,
+    Prefer: 'count=exact',
+    Range: '0-0',
+  }
+  const response = await fetchWithTimeout(
+    `${auth.supabaseUrl}/rest/v1/chat_history?user_id=eq.${auth.user.id}&created_at=gte.${encodeURIComponent(sinceIso)}&select=id`,
+    { headers }, REQUEST_TIMEOUT_MS)
+  if (!response.ok) return null
+  const range = response.headers.get('content-range') || ''
+  const total = Number(range.split('/')[1])
+  return Number.isFinite(total) ? total : null
+}
+
+// Best-effort crisis alert write; never blocks the user reply.
+async function recordCrisisAlert(auth, message, keywords) {
+  try {
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const key = serviceKey || auth.supabaseKey
+    const token = serviceKey ? serviceKey : auth.token
+    await fetchWithTimeout(`${auth.supabaseUrl}/rest/v1/crisis_alerts`, {
+      method: 'POST',
+      headers: {
+        apikey: auth.supabaseKey,
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify({
+        user_id: auth.user.id,
+        keywords,
+        message_context: String(message).slice(0, 500),
+        severity: 'high',
+        source: 'chat',
+        keyword: keywords[0] || null,
+        message: String(message).slice(0, 500),
+      }),
+    }, REQUEST_TIMEOUT_MS)
+  } catch (error) {
+    console.error('crisis_alert write failed:', error?.message || error)
+  }
 }
 
 export default async function handler(request, response) {
@@ -144,6 +188,21 @@ export default async function handler(request, response) {
   const lastUserMessage = [...cleaned].reverse().find(message => message.role === 'user')
   if (!lastUserMessage) return json(response, 400, { error: 'A user message is required' })
 
+  // ── Quota: per-user rolling limits on stored history ──
+  try {
+    const now = Date.now()
+    const [hourCount, dayCount] = await Promise.all([
+      countRecentMessages(auth, new Date(now - 3600_000).toISOString()),
+      countRecentMessages(auth, new Date(now - 86400_000).toISOString()),
+    ])
+    if ((hourCount != null && hourCount >= QUOTA_PER_HOUR) ||
+        (dayCount != null && dayCount >= QUOTA_PER_DAY)) {
+      return json(response, 429, { error: 'Message limit reached. Please take a break and try again later.' })
+    }
+  } catch {
+    // Quota check failure must not block the user; fail open.
+  }
+
   try {
     await saveHistory(auth, 'user', lastUserMessage.content)
   } catch {
@@ -151,8 +210,10 @@ export default async function handler(request, response) {
   }
 
   let reply
-  if (isCrisisMessage(lastUserMessage.content)) {
-    reply = "I'm really concerned about you. If you may be in immediate danger, use LossLens crisis resources and contact trusted emergency support now. You can also reach Befrienders Kenya at +254 722 178 177 or NACADA at 1192. You matter and do not have to face this alone."
+  const crisis = detectCrisis(lastUserMessage.content)
+  if (crisis.crisis) {
+    reply = CRISIS_REPLY
+    await recordCrisisAlert(auth, lastUserMessage.content, crisis.keywords)
   } else {
     if (!process.env.GROQ_API_KEY) {
       return json(response, 503, { error: 'AI service is temporarily unavailable' })
