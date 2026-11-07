@@ -6,7 +6,7 @@ import PageLoader from './PageLoader'
 
 export default function RequireAuth({ role }) {
   const location = useLocation()
-  const { authStatus, isAdmin, isSuperAdmin, status, retryProfile } = useAuthProfile()
+  const { authStatus, isAdmin, isSuperAdmin, role: currentRole, status, retryProfile } = useAuthProfile()
 
   useEffect(() => {
     if (authStatus === 'ready' && status === 'suspended') {
@@ -41,6 +41,8 @@ export default function RequireAuth({ role }) {
   if (authStatus !== 'ready') return <PageLoader />
   if (role === 'admin' && !isAdmin) return <Navigate to="/dashboard" replace />
   if (role === 'super_admin' && !isSuperAdmin) return <Navigate to="/admin" replace />
+  if (role === 'therapist' && currentRole !== 'therapist' && !isSuperAdmin) return <Navigate to="/dashboard" replace />
+  if (role === 'insurer' && currentRole !== 'insurer' && !isSuperAdmin) return <Navigate to="/dashboard" replace />
 
   return <Outlet />
 }

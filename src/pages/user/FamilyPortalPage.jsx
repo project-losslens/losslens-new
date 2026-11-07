@@ -29,6 +29,7 @@ function FamilyPortalPage() {
   const [profile, setProfile] = useState(null)
   const [invitations, setInvitations] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState('supporters')
@@ -47,12 +48,25 @@ function FamilyPortalPage() {
 
   const fetchData = async () => {
     const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return
+    if (!session) {
+      setError('Your session expired. Please sign in again.')
+      setLoading(false)
+      return
+    }
     setUserId(session.user.id)
-    const { data: profileData } = await supabase.from('profiles').select('*').eq('id', session.user.id).single()
+    const [{ data: profileData, error: profileError }, { data: invs, error: invitationsError }] = await Promise.all([
+      supabase.from('profiles').select('full_name').eq('id', session.user.id).single(),
+      supabase.rpc('supporter_owner_list_invitations'),
+    ])
+    if (profileError || invitationsError) {
+      console.error('Family portal load failed:', profileError || invitationsError)
+      setError('Could not load your supporter portal.')
+      setLoading(false)
+      return
+    }
     setProfile(profileData)
-    const { data: invs } = await supabase.from('supporter_invitations').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false })
     setInvitations(invs || [])
+    setError('')
     setLoading(false)
   }
 
@@ -72,9 +86,15 @@ function FamilyPortalPage() {
     }
 
     setSaving(true)
-    const { data, error } = await supabase.from('supporter_invitations').insert({
-      user_id: userId, ...form, status: 'pending'
-    }).select().single()
+    const { data, error } = await supabase.rpc('create_supporter_invitation', {
+      p_supporter_name: form.supporter_name,
+      p_supporter_email: form.supporter_email || null,
+      p_supporter_phone: form.supporter_phone || null,
+      p_supporter_relation: form.supporter_relation || null,
+      p_permissions: form.permissions,
+      p_anonymous_mode: form.anonymous_mode,
+      p_crisis_contact: form.crisis_contact,
+    })
 
     if (!error && data) {
       setInvitations(prev => [data, ...prev])
@@ -82,54 +102,101 @@ function FamilyPortalPage() {
       setForm({ supporter_name: '', supporter_email: '', supporter_phone: '', supporter_relation: '', permissions: ['Streak status', 'Goal progress', 'General mood'], anonymous_mode: false, crisis_contact: false, language: 'en' })
       showToast(' Invitation created! Share the link with them.', 3000)
     } else {
+      console.error('Supporter invitation creation failed:', error)
       showToast('Failed to create invitation. Try again.', 3000)
     }
     setSaving(false)
   }
 
   const handleResend = async (inv) => {
-    await supabase.from('supporter_invitations').update({
-      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      status: 'pending', responded_at: null
-    }).eq('id', inv.id)
+    const { error: renewError } = await supabase.rpc('supporter_owner_manage', {
+      p_invitation_id: inv.id, p_action: 'renew', p_value: {},
+    })
+    if (renewError) {
+      console.error('Supporter invitation renewal failed:', renewError)
+      showToast('Could not renew invitation.')
+      return
+    }
     showToast(' Invitation renewed! Share the link again.', 3000)
     fetchData()
   }
 
   const handleRemove = async (invId) => {
     if (!confirm('Remove this supporter?')) return
-    await supabase.from('supporter_invitations').delete().eq('id', invId)
+    const { error: removeError } = await supabase.rpc('supporter_owner_manage', {
+      p_invitation_id: invId, p_action: 'remove', p_value: {},
+    })
+    if (removeError) {
+      console.error('Supporter removal failed:', removeError)
+      showToast('Could not remove supporter.')
+      return
+    }
     setInvitations(prev => prev.filter(i => i.id !== invId))
     showToast('Removed.', 2000)
   }
 
   const handleTogglePause = async (inv) => {
     const newStatus = inv.status === 'paused' ? 'active' : 'paused'
-    await supabase.from('supporter_invitations').update({ status: newStatus }).eq('id', inv.id)
+    const { error: toggleError } = await supabase.rpc('supporter_owner_manage', {
+      p_invitation_id: inv.id, p_action: inv.status === 'paused' ? 'resume' : 'pause', p_value: {},
+    })
+    if (toggleError) {
+      console.error('Supporter pause update failed:', toggleError)
+      showToast('Could not update supporter status.')
+      return
+    }
     setInvitations(prev => prev.map(i => i.id === inv.id ? { ...i, status: newStatus } : i))
     showToast(newStatus === 'paused' ? '⏸ Paused' : '▶ Resumed', 2000)
   }
 
   const handleToggleCrisis = async (inv) => {
-    await supabase.from('supporter_invitations').update({ crisis_contact: !inv.crisis_contact }).eq('id', inv.id)
+    const { error: crisisError } = await supabase.rpc('supporter_owner_manage', {
+      p_invitation_id: inv.id, p_action: 'toggle_crisis', p_value: { crisis_contact: !inv.crisis_contact },
+    })
+    if (crisisError) {
+      console.error('Supporter crisis setting update failed:', crisisError)
+      showToast('Could not update crisis contact setting.')
+      return
+    }
     setInvitations(prev => prev.map(i => i.id === inv.id ? { ...i, crisis_contact: !i.crisis_contact } : i))
   }
 
   const loadMessages = async (inv) => {
     setSelectedInvitation(inv)
-    const { data } = await supabase.from('supporter_messages').select('*').eq('invitation_id', inv.id).order('created_at', { ascending: true })
+    const { data, error: messageError } = await supabase.rpc('supporter_owner_list_messages', { p_invitation_id: inv.id })
+    if (messageError) {
+      console.error('Supporter message load failed:', messageError)
+      showToast('Could not load messages.')
+      setMessages([])
+      return
+    }
     setMessages(data || [])
   }
 
   const sendMessage = async () => {
     if (!messageInput.trim() || !selectedInvitation) return
-    await supabase.from('supporter_messages').insert({ invitation_id: selectedInvitation.id, sender: 'user', content: messageInput.trim() })
-    setMessages(prev => [...prev, { id: Date.now().toString(), invitation_id: selectedInvitation.id, sender: 'user', content: messageInput.trim(), created_at: new Date().toISOString() }])
+    const content = messageInput.trim()
+    const { error: sendError } = await supabase.rpc('supporter_owner_post_message', {
+      p_invitation_id: selectedInvitation.id, p_content: content,
+    })
+    if (sendError) {
+      console.error('Supporter message send failed:', sendError)
+      showToast('Could not send message.')
+      return
+    }
+    setMessages(prev => [...prev, { id: Date.now().toString(), invitation_id: selectedInvitation.id, sender: 'user', content, created_at: new Date().toISOString() }])
     setMessageInput('')
   }
 
   const giveFeedback = async (invId, felt) => {
-    await supabase.from('supporter_feedback').insert({ user_id: userId, invitation_id: invId, felt_supported: felt })
+    const { error: feedbackError } = await supabase.rpc('supporter_owner_feedback', {
+      p_invitation_id: invId, p_felt_supported: felt,
+    })
+    if (feedbackError) {
+      console.error('Supporter feedback save failed:', feedbackError)
+      showToast('Could not save feedback.')
+      return
+    }
     setFeedbackGiven(prev => ({ ...prev, [invId]: felt }))
     showToast('Feedback saved ', 2000)
   }

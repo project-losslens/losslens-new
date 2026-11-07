@@ -130,26 +130,27 @@ async function recordCrisisAlert(auth, message, keywords) {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     const key = serviceKey || auth.supabaseKey
     const token = serviceKey ? serviceKey : auth.token
-    await fetchWithTimeout(`${auth.supabaseUrl}/rest/v1/crisis_alerts`, {
+    const headers = {
+      apikey: key,
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    }
+    const alertResponse = await fetchWithTimeout(`${auth.supabaseUrl}/rest/v1/rpc/record_crisis_event`, {
       method: 'POST',
-      headers: {
-        apikey: auth.supabaseKey,
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=minimal',
-      },
+      headers,
       body: JSON.stringify({
-        user_id: auth.user.id,
-        keywords,
-        message_context: String(message).slice(0, 500),
-        severity: 'high',
-        source: 'chat',
-        keyword: keywords[0] || null,
-        message: String(message).slice(0, 500),
+        p_user_id: auth.user.id,
+        p_keywords: keywords,
+        p_context: String(message).slice(0, 500),
+        p_source: 'chat',
+        p_max_sessions: 1,
       }),
     }, REQUEST_TIMEOUT_MS)
+    if (!alertResponse.ok) {
+      console.error('crisis event recording failed:', alertResponse.status, await alertResponse.text())
+    }
   } catch (error) {
-    console.error('crisis_alert write failed:', error?.message || error)
+    console.error('crisis event recording failed:', error?.message || error)
   }
 }
 

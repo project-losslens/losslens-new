@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 
 //  Constants
 const LOG_LIMIT = 300
-const TABLES = ['all', 'profiles', 'diary_entries', 'events', 'crisis_alerts', 'broadcasts', 'resources', 'groups']
+const TABLES = ['all', 'profiles', 'diary_entries', 'events', 'crisis_alerts', 'broadcasts', 'resources', 'groups', 'provider_vouchers', 'provider_claims']
 const ACTIONS = ['all', 'INSERT', 'UPDATE', 'DELETE']
 
 const fmtDateTime = (d) => d ? new Date(d).toLocaleString('en-KE') : '—'
@@ -21,13 +21,13 @@ function escapeCSV(value) {
 }
 
 function exportToCSV(logs, filename) {
-  const headers = ['Timestamp', 'Action', 'Table', 'Record ID', 'Performed By', 'Metadata']
+  const headers = ['Timestamp', 'Action', 'Table', 'Record ID', 'Actor ID', 'Metadata']
   const rows = logs.map(l => [
     fmtDateTime(l.created_at),
     l.action,
-    l.table_name,
-    l.record_id || '',
-    l.performed_by || '',
+    l.target_table,
+    l.target_id || '',
+    l.actor_id || '',
     l.metadata ? JSON.stringify(l.metadata) : '',
   ].map(escapeCSV).join(','))
 
@@ -60,7 +60,7 @@ export default function AuditLogs() {
       let query = supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(LOG_LIMIT)
 
       //  Server-side filters
-      if (filter !== 'all') query = query.eq('table_name', filter)
+      if (filter !== 'all') query = query.eq('target_table', filter)
       if (actionFilter !== 'all') query = query.eq('action', actionFilter)
 
       // Date range
@@ -121,9 +121,9 @@ export default function AuditLogs() {
     if (!search) return logs
     const q = search.toLowerCase()
     return logs.filter(l =>
-      (l.performed_by || '').toLowerCase().includes(q) ||
-      (l.table_name || '').toLowerCase().includes(q) ||
-      (l.record_id || '').toLowerCase().includes(q) ||
+      (l.actor_id || '').toLowerCase().includes(q) ||
+      (l.target_table || '').toLowerCase().includes(q) ||
+      (l.target_id || '').toLowerCase().includes(q) ||
       (l.action || '').toLowerCase().includes(q)
     )
   }, [logs, search])
@@ -250,8 +250,8 @@ export default function AuditLogs() {
                         <span style={{ background: 'var(--bg)', color: ac.color, border: `1px solid ${ac.color}33`, padding: '2px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: 600 }}>
                           {log.action}
                         </span>
-                        <span style={{ color: 'var(--primary)', fontSize: '12px', fontWeight: 500 }}>{log.table_name?.replace(/_/g, ' ')}</span>
-                        {log.record_id && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontFamily: 'monospace' }}>ID: {log.record_id.slice(0, 12)}</span>}
+                        <span style={{ color: 'var(--primary)', fontSize: '12px', fontWeight: 500 }}>{log.target_table?.replace(/_/g, ' ')}</span>
+                        {log.target_id && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontFamily: 'monospace' }}>ID: {log.target_id.slice(0, 12)}</span>}
                         <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{fmtDateTime(log.created_at)}</span>
                       </div>
                       <button onClick={() => toggleExpand(log.id)} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
@@ -260,7 +260,7 @@ export default function AuditLogs() {
                     </div>
                     {isExpanded && (
                       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.12)' }}>
-                        {log.performed_by && <span style={{ color: 'var(--primary)', fontSize: '11px' }}> {log.performed_by}</span>}
+                        {log.actor_id && <span style={{ color: 'var(--primary)', fontSize: '11px' }}> {log.actor_id}</span>}
                         {log.metadata && (
                           <div style={{ flex: 1, minWidth: '200px' }}>
                             <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 500 }}> Metadata:</span>

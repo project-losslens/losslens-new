@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCrisisAlertCount } from '../../context/CrisisAlertCountContext'
+import { useAuthProfile } from '../../context/AuthProfileContext'
 import { supabase } from '../../lib/supabase'
 
 //  Constants
 const ROUTES = {
   EVENTS: '/admin/events', GROUPS: '/admin/groups', RESOURCES: '/admin/resources',
   BROADCAST: '/admin/broadcast', ANALYTICS: '/admin/analytics', CRISIS: '/admin/crisis',
-  USERS: '/admin/users', ADMIN: '/admin',
+  USERS: '/admin/users', ADMIN: '/admin', FLOAT: '/admin/float',
 }
 
 const fmtTime = (d) => d ? new Date(d).toLocaleString('en-KE') : '—'
@@ -15,6 +16,7 @@ const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-KE') : '—'
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
+  const { isSuperAdmin } = useAuthProfile()
   const openCrisisAlerts = useCrisisAlertCount()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -32,6 +34,29 @@ export default function AdminDashboard() {
   const [alertPolling, setAlertPolling] = useState(true)
   const [revealedEmails, setRevealedEmails] = useState({})
   const [revealedPhones, setRevealedPhones] = useState({})
+  const [floatSummary, setFloatSummary] = useState(null)
+
+  useEffect(() => {
+    if (!isSuperAdmin) return undefined
+    let active = true
+    const loadFloatSummary = async () => {
+      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+      const [floatResult, transactionsResult] = await Promise.all([
+        supabase.from('claims_float').select('balance').eq('id', 1).maybeSingle(),
+        supabase.from('claims_float_transactions').select('amount').eq('type', 'outflow').gte('created_at', since),
+      ])
+      if (!active) return
+      if (floatResult.error || transactionsResult.error) {
+        console.error('Admin dashboard float summary failed:', floatResult.error || transactionsResult.error)
+        return
+      }
+      const burn = (transactionsResult.data || []).reduce((total, transaction) => total + Number(transaction.amount), 0)
+      const balance = Number(floatResult.data?.balance || 0)
+      setFloatSummary({ balance, days: burn > 0 ? Math.floor(balance / (burn / 30)) : null })
+    }
+    void loadFloatSummary()
+    return () => { active = false }
+  }, [isSuperAdmin])
 
   //  Auto-poll crisis alerts every 30s
   useEffect(() => {
@@ -136,7 +161,8 @@ export default function AdminDashboard() {
     { label: 'Resources', value: stats.resources, icon: '', color: 'var(--info)', path: ROUTES.RESOURCES },
     { label: 'CBT Done', value: stats.cbtCompletions, icon: '', color: 'var(--primary)' },
     { label: 'Diary Today', value: stats.diaryEntriesToday, icon: '', color: 'var(--primary)' },
-  ], [stats])
+    ...(isSuperAdmin && floatSummary ? [{ label: 'Claims Float', value: `KES ${floatSummary.balance.toLocaleString()} · ${floatSummary.days == null ? 'No recent burn' : `${floatSummary.days} days`}`, icon: '', color: 'var(--info)', path: ROUTES.FLOAT }] : []),
+  ], [stats, openCrisisAlerts, floatSummary, isSuperAdmin])
 
   const quickActions = [
     { emoji: '', label: 'Manage Events', path: ROUTES.EVENTS, desc: 'Create, edit, view RSVPs' },

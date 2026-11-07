@@ -43,6 +43,18 @@ const InsurancePartners = lazy(() => import('./pages/admin/InsurancePartners'))
 const GrantApplications = lazy(() => import('./pages/admin/GrantApplications'))
 const ChatViewer = lazy(() => import('./pages/admin/ChatViewer'))
 const SystemSettings = lazy(() => import('./pages/admin/SystemSettings'))
+const TherapistManagement = lazy(() => import('./pages/admin/TherapistManagement'))
+const InsurerManagement = lazy(() => import('./pages/admin/InsurerManagement'))
+const FloatManagement = lazy(() => import('./pages/admin/FloatManagement'))
+const TherapistDashboard = lazy(() => import('./pages/therapist/TherapistDashboard'))
+const TherapistOnboarding = lazy(() => import('./pages/therapist/TherapistOnboarding'))
+const TherapistClaimForm = lazy(() => import('./pages/therapist/TherapistClaimForm'))
+const TherapistPayouts = lazy(() => import('./pages/therapist/TherapistPayouts'))
+const InsurerLogin = lazy(() => import('./pages/insurer/InsurerLogin'))
+const InsurerDashboard = lazy(() => import('./pages/insurer/InsurerDashboard'))
+const InsurerClaims = lazy(() => import('./pages/insurer/InsurerClaims'))
+const InsurerInvoices = lazy(() => import('./pages/insurer/InsurerInvoices'))
+const InsurerAnalytics = lazy(() => import('./pages/insurer/InsurerAnalytics'))
 
 function App() {
   return (
@@ -55,6 +67,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/family-join" element={<FamilyJoin />} />
+        <Route path="/insurer/login" element={<InsurerLogin />} />
 
         <Route element={<RequireAuth />}>
           <Route path="/onboarding" element={<Onboarding />} />
@@ -73,7 +86,23 @@ function App() {
             <Route path="/family-portal" element={<FamilyPortalPage />} />
             <Route path="/subscription" element={<SubscriptionPage />} />
           </Route>
-          <Route element={<RequireAuth role="admin" />}>
+            <Route element={<RequireAuth role="therapist" />}>
+              <Route element={<AppShell />}>
+                <Route path="/therapist" element={<TherapistDashboard />} />
+                <Route path="/therapist/onboarding" element={<TherapistOnboarding />} />
+                <Route path="/therapist/claims/new" element={<TherapistClaimForm />} />
+                <Route path="/therapist/payouts" element={<TherapistPayouts />} />
+              </Route>
+            </Route>
+            <Route element={<RequireAuth role="insurer" />}>
+              <Route element={<AppShell />}>
+                <Route path="/insurer" element={<InsurerDashboard />} />
+                <Route path="/insurer/claims" element={<InsurerClaims />} />
+                <Route path="/insurer/invoices" element={<InsurerInvoices />} />
+                <Route path="/insurer/analytics" element={<InsurerAnalytics />} />
+              </Route>
+            </Route>
+            <Route element={<RequireAuth role="admin" />}>
             <Route element={<CrisisAlertCountProvider><AppShell admin /></CrisisAlertCountProvider>}>
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/events" element={<ManageEvents />} />
@@ -90,6 +119,9 @@ function App() {
                 <Route path="/admin/chats" element={<ChatViewer />} />
                 <Route path="/admin/logs" element={<AuditLogs />} />
                 <Route path="/admin/settings" element={<SystemSettings />} />
+                <Route path="/admin/therapists" element={<TherapistManagement />} />
+                <Route path="/admin/insurers" element={<InsurerManagement />} />
+                <Route path="/admin/float" element={<FloatManagement />} />
               </Route>
             </Route>
           </Route>

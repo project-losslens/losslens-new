@@ -34,8 +34,6 @@ export default function UserManagement() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null)
   const [showSuspendConfirm, setShowSuspendConfirm] = useState(null)
   const [showPasswordReset, setShowPasswordReset] = useState(null)
-  const [newPassword, setNewPassword] = useState('')
-  const [showNewPassword, setShowNewPassword] = useState(false)
   const [resetLoading, setResetLoading] = useState(false)
   const [editingRole, setEditingRole] = useState(null)
   const [newRole, setNewRole] = useState('')
@@ -90,7 +88,9 @@ export default function UserManagement() {
   const deleteUser = async (userId) => {
     setActionLoading(userId)
     try {
-      const { error: delError } = await supabase.from('profiles').delete().eq('id', userId)
+      const { error: delError } = await supabase.functions.invoke('delete-account', {
+        body: { action: 'admin-delete', userId },
+      })
       if (delError) throw delError
       setUsers(prev => prev.filter(u => u.id !== userId))
       showToast('User deleted permanently.')
@@ -100,24 +100,33 @@ export default function UserManagement() {
   }
 
   const handleAdminResetPassword = async () => {
-    if (!showPasswordReset || !newPassword || newPassword.length < 8) {
-      showToast('Password must be at least 8 characters.')
-      return
-    }
+    if (!showPasswordReset) return
     setResetLoading(true)
     try {
-      const { data, error: resetError } = await supabase.functions.invoke('admin-reset-password', {
-        body: { action: 'reset-password', userId: showPasswordReset.id, newPassword }
+      const { data, error: resetError } = await supabase.functions.invoke('send-invite', {
+        body: { action: 'reset-password', userId: showPasswordReset.id }
       })
       if (resetError || data?.error) throw new Error(data?.error || resetError?.message)
-      showToast(`Password updated for ${showPasswordReset.full_name || 'user'}.`)
+      showToast(`Reset link sent for ${showPasswordReset.full_name || 'user'}.`)
       setShowPasswordReset(null)
-      setNewPassword('')
-      setShowNewPassword(false)
     } catch (err) {
+      console.error('Password reset link failed:', err)
       showToast('Failed: ' + (err.message || 'Unknown error'))
     }
     setResetLoading(false)
+  }
+
+  const promoteToTherapist = async (userId) => {
+    setActionLoading(userId)
+    const { error: promotionError } = await supabase.rpc('admin_promote_therapist', { p_user_id: userId })
+    if (promotionError) {
+      console.error('Therapist promotion failed:', promotionError)
+      showToast('Failed to promote therapist.')
+    } else {
+      setUsers(prev => prev.map(user => user.id === userId ? { ...user, role: 'therapist' } : user))
+      showToast('Therapist account created; profile is pending verification.')
+    }
+    setActionLoading(null)
   }
 
   const grantPremium = async (userId) => {
@@ -324,7 +333,7 @@ export default function UserManagement() {
                               <span style={{ background: plan.bg, color: plan.color, border: '1px solid ' + plan.border, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{plan.label}</span>
                               {u.role !== 'user' && (
                                 <span style={{ background: 'rgba(45,212,191,0.15)', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>
-                                  {u.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+                                  {{ super_admin: 'Super Admin', admin: 'Admin', therapist: 'Therapist', insurer: 'Insurer' }[u.role] || u.role}
                                 </span>
                               )}
                               {isSuspended && (
@@ -354,13 +363,6 @@ export default function UserManagement() {
                               </div>
                             )}
 
-                            {u.report_password && (
-                              <div style={{ background: 'var(--bg)', border: '1px solid rgba(45,212,191,0.2)', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                <span style={{ color: 'var(--primary)', fontSize: '11px', fontWeight: 600 }}>{'\u{1F510}'} Report Password:</span>
-                                <code style={{ background: 'var(--bg)', padding: '4px 10px', borderRadius: '4px', color: 'var(--primary)', fontSize: '12px', fontFamily: 'monospace', letterSpacing: '1px', userSelect: 'all' }}>{u.report_password}</code>
-                                <button onClick={() => { navigator.clipboard.writeText(u.report_password); showToast('Password copied!') }} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontSize: '12px', cursor: 'pointer' }}>Copy</button>
-                              </div>
-                            )}
                           </div>
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
                             <button onClick={() => setExpandedUser(isExpanded ? null : u.id)} style={btn('transparent', 'var(--primary)', 'rgba(255,255,255,0.12)')}>{isExpanded ? 'Collapse' : 'Expand'}</button>
@@ -373,8 +375,10 @@ export default function UserManagement() {
                               style={btn('transparent', isSuspended ? 'var(--primary)' : 'var(--info)', isSuspended ? 'var(--primary)' : 'var(--info)')}>
                               {actionLoading === u.id ? '...' : isSuspended ? 'Reactivate' : 'Suspend'}
                             </button>
-                            <button onClick={() => { setShowPasswordReset(u); setNewPassword(''); setShowNewPassword(false) }}
-                              style={btn('transparent', 'var(--primary)', 'var(--primary)')}>Set Password</button>
+                            <button onClick={() => setShowPasswordReset(u)}
+                              style={btn('transparent', 'var(--primary)', 'var(--primary)')}>Send Reset Link</button>
+                            {u.role === 'user' && <button onClick={() => promoteToTherapist(u.id)} disabled={actionLoading === u.id}
+                              style={btn('transparent', 'var(--info)', 'var(--info)')}>Promote to Therapist</button>}
                             {editingRole === u.id ? (
                               <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                                 <select value={newRole} onChange={e => setNewRole(e.target.value)}
@@ -383,6 +387,7 @@ export default function UserManagement() {
                                   <option value="user">User</option>
                                   <option value="admin">Admin</option>
                                   <option value="super_admin">Super Admin</option>
+                                  <option value="insurer">Insurer</option>
                                 </select>
                                 <button onClick={() => handleRoleChange(u.id)} disabled={savingRole || !newRole} style={btn('var(--primary)', 'var(--bg)', 'var(--primary)')}>{savingRole ? '...' : 'Save'}</button>
                                 <button onClick={() => setEditingRole(null)} style={btn('transparent', 'rgba(255,255,255,0.4)', 'rgba(255,255,255,0.12)')}>Cancel</button>
@@ -527,30 +532,21 @@ export default function UserManagement() {
         </div>
       )}
 
-      {/* Set Password Modal */}
+      {/* Password reset link confirmation */}
       {showPasswordReset && (
-        <div onClick={() => { setShowPasswordReset(null); setNewPassword(''); setShowNewPassword(false) }} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+        <div onClick={() => setShowPasswordReset(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--primary)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{'\u{1F511}'}</span>
-            <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 4px' }}>Set New Password</h3>
+            <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 4px' }}>Send Password Reset Link</h3>
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '16px' }}>
               For <strong style={{ color: 'var(--primary)' }}>{showPasswordReset.full_name || showPasswordReset.username || 'User'}</strong>
               {showPasswordReset.email && <span style={{ display: 'block', color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '4px' }}>{showPasswordReset.email}</span>}
             </p>
-            <div style={{ position: 'relative', marginBottom: '16px' }}>
-              <input type={showNewPassword ? 'text' : 'password'} placeholder="Enter new password (min 8 chars)" value={newPassword} onChange={e => setNewPassword(e.target.value)}
-                style={{ width: '100%', padding: '10px 80px 10px 14px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '13px', outline: 'none', fontFamily: "'Inter', sans-serif", boxSizing: 'border-box' }}
-                onKeyDown={e => e.key === 'Enter' && handleAdminResetPassword()} autoFocus />
-              <button onClick={() => setShowNewPassword(!showNewPassword)}
-                style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '18px', cursor: 'pointer', padding: '4px 8px' }}
-                title={showNewPassword ? 'Hide password' : 'Show password'}>
-                {showNewPassword ? '' : ''}
-              </button>
-            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '12px' }}>The user will receive a secure reset link by email.</p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => { setShowPasswordReset(null); setNewPassword(''); setShowNewPassword(false) }} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={handleAdminResetPassword} disabled={resetLoading || newPassword.length < 8} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: newPassword.length >= 8 ? 'var(--primary)' : 'rgba(255,255,255,0.12)', border: 'none', color: newPassword.length >= 8 ? 'var(--bg)' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: 600, cursor: newPassword.length >= 8 ? 'pointer' : 'not-allowed', fontFamily: "'Inter', sans-serif" }}>
-                {resetLoading ? '...' : 'Set Password'}
+              <button onClick={() => setShowPasswordReset(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
+              <button onClick={handleAdminResetPassword} disabled={resetLoading} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', fontSize: '13px', fontWeight: 600, cursor: resetLoading ? 'not-allowed' : 'pointer', fontFamily: "'Inter', sans-serif" }}>
+                {resetLoading ? 'Sending...' : 'Send reset link'}
               </button>
             </div>
           </div>

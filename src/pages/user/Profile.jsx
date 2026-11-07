@@ -1,11 +1,13 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 
 //  Constants
 const TABS = { PROFILE: 'profile', SETTINGS: 'settings', SECURITY: 'security', DATA: 'data' }
 const AVATAR_OPTIONS = ['', '', '', '', '', '', '', '', '', '']
-const REPORT_PASSWORD_WORDS = ['River', 'Mountain', 'Forest', 'Ocean', 'Sunset', 'Dawn', 'Star', 'Moon', 'Cloud', 'Lake']
+const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+}[character]))
 
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
@@ -13,13 +15,6 @@ function showToast(message, duration = 3000) {
   toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
   document.body.appendChild(toast)
   setTimeout(() => toast.remove(), duration)
-}
-
-//  Cryptographically secure password generator
-function generatePassword() {
-  const word = REPORT_PASSWORD_WORDS[Math.floor(Math.random() * REPORT_PASSWORD_WORDS.length)]
-  const num = Math.floor(Math.random() * 99) + 1
-  return `${word}${num}`
 }
 
 export default function Profile() {
@@ -43,13 +38,7 @@ export default function Profile() {
   const [sessionExpired, setSessionExpired] = useState(false)
 
   // Report
-  const [reportUnlocked, setReportUnlocked] = useState(() => sessionStorage.getItem('report_unlocked') === 'true')
-  const [passwordInput, setPasswordInput] = useState('')
-  const [passwordError, setPasswordError] = useState('')
-  const [reportPassword, setReportPassword] = useState('')
   const [generatingReport, setGeneratingReport] = useState(false)
-  const [sendingEmail, setSendingEmail] = useState(false)
-  const [emailSent, setEmailSent] = useState(false)
 
   // Stats
   const [stats, setStats] = useState({ totalEntries: 0, cleanDays: 0, gambleDays: 0, cbtCompleted: 0, cbtTotal: 8, eventsAttended: 0, topTriggers: [], topCoping: [], recentEntries: [], badges: [] })
@@ -103,7 +92,6 @@ export default function Profile() {
         setAvatarUrl(profile.avatar_url || '')
         setJoinedDate(profile.created_at || null)
         if (profile.preferences) setPrefs(prev => ({ ...prev, ...profile.preferences }))
-        if (profile.report_password) setReportPassword(profile.report_password)
       }
 
       const allEntries = entriesRes.data || []
@@ -130,35 +118,20 @@ export default function Profile() {
     finally { setLoadingProfile(false) }
   }
 
-  const getOrCreatePassword = useCallback(async () => {
-    if (reportPassword) return reportPassword
-    const pw = generatePassword()
-    setReportPassword(pw)
-    await supabase.from('profiles').update({ report_password: pw }).eq('id', userId)
-    return pw
-  }, [reportPassword, userId])
-
-  const handlePasswordSubmit = async () => {
-    const pw = await getOrCreatePassword()
-    if (passwordInput === pw) {
-      setReportUnlocked(true)
-      setPasswordError('')
-      sessionStorage.setItem('report_unlocked', 'true')
-    } else {
-      setPasswordError('Incorrect password.')
-      setPasswordInput('')
-    }
-  }
-
   //  Generate report as downloadable HTML (rename to make purpose clear)
   const downloadRecoveryReport = async () => {
     setGeneratingReport(true)
-    const pw = await getOrCreatePassword()
     const today = new Date().toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' })
     const cleanRate = stats.totalEntries > 0 ? Math.round((stats.cleanDays / stats.totalEntries) * 100) : 0
+    const reportName = escapeHtml(fullName || 'N/A')
+    const reportEmail = escapeHtml(email)
+    const reportPhone = escapeHtml(phone ? `+254${phone}` : 'N/A')
+    const reportGoal = escapeHtml(goal)
+    const reportRisk = escapeHtml(riskLevel.toUpperCase())
+    const reportTriggers = stats.topTriggers.map(([trigger, count]) => `<tr><td>${escapeHtml(trigger)}</td><td>${count} times</td></tr>`).join('')
 
     const reportHTML = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>LossLens Recovery Report - ${fullName}</title>
+<html><head><meta charset="utf-8"><title>LossLens Recovery Report - ${reportName}</title>
 <style>
   @page { margin: 2cm; }
   body { font-family: 'Georgia', serif; background: #0B1220; color: #FFFFFF; line-height: 1.8; max-width: 750px; margin: auto; padding: 1.5rem; }
@@ -187,11 +160,11 @@ export default function Profile() {
 <div class="header"><h1>LossLens Recovery Report</h1><p class="subtitle">Generated on ${today}</p><p class="confidential">CONFIDENTIAL — For Therapeutic Use Only</p></div>
 <h2>Client Information</h2>
 <div class="info-grid">
-  <div class="info-item"><strong>Full Name:</strong> ${fullName || 'N/A'}</div>
-  <div class="info-item"><strong>Email:</strong> ${email}</div>
-  <div class="info-item"><strong>Phone:</strong> +254${phone || 'N/A'}</div>
-  <div class="info-item"><strong>Goal:</strong> ${goal}</div>
-  <div class="info-item"><strong>Risk Level:</strong> ${riskLevel.toUpperCase()}</div>
+  <div class="info-item"><strong>Full Name:</strong> ${reportName}</div>
+  <div class="info-item"><strong>Email:</strong> ${reportEmail}</div>
+  <div class="info-item"><strong>Phone:</strong> ${reportPhone}</div>
+  <div class="info-item"><strong>Goal:</strong> ${reportGoal}</div>
+  <div class="info-item"><strong>Risk Level:</strong> ${reportRisk}</div>
   <div class="info-item"><strong>Member Since:</strong> ${joinedDate ? new Date(joinedDate).toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</div>
   <div class="info-item"><strong>Clean Since:</strong> ${cleanSince ? new Date(cleanSince).toLocaleDateString('en-KE') : 'N/A'}</div>
   <div class="info-item"><strong>App Usage:</strong> ${totalSessions} active days  · ${stats.totalEntries} diary entries</div>
@@ -203,7 +176,7 @@ export default function Profile() {
   <div class="stat-card"><span class="value">KES ${moneySaved.toLocaleString()}</span><span class="label">Money Saved</span></div>
   <div class="stat-card"><span class="value">${streakDays}</span><span class="label">Current Streak</span></div>
 </div>
-${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</th><th>Frequency</th></tr>${stats.topTriggers.map(([t,c]) => `<tr><td>${t}</td><td>${c} times</td></tr>`).join('')}</table>` : ''}
+${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</th><th>Frequency</th></tr>${reportTriggers}</table>` : ''}
 <div class="footer"><p>Generated by LossLens — Gambling Harm Recovery Platform</p><p>Confidential — For therapeutic use only</p></div>
 </body></html>`
 
@@ -218,23 +191,6 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
     URL.revokeObjectURL(url)
     setGeneratingReport(false)
     showToast(' Report downloaded! Open it in your browser.', 5000)
-  }
-
-  const sendPasswordEmail = async () => {
-    if (!email) { showToast('No email on file.', 3000); return }
-    setSendingEmail(true)
-    setEmailSent(false)
-    const pw = await getOrCreatePassword()
-    try {
-      const res = await fetch('https://kepsxjmolzurvdnxgcby.supabase.co/functions/v1/send-invite', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to: email, supporterName: fullName || 'User', userName: 'LossLens', inviteLink: pw, type: 'report' })
-      })
-      if (res.ok) { setEmailSent(true); showToast(' Password sent! Check your inbox.', 5000) }
-      else showToast('⚠️ Failed to send.', 4000)
-    } catch { showToast('⚠️ Network error.', 4000) }
-    setSendingEmail(false)
   }
 
   const handleProfileSave = async () => {
@@ -301,17 +257,27 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
     if (deleteInput !== 'DELETE') { showToast('Type DELETE to confirm', 2000); return }
     setDeletingAccount(true)
     try {
-      await supabase.from('profiles').delete().eq('id', userId)
+      const { error: deleteError } = await supabase.functions.invoke('delete-account', { body: { action: 'self-delete' } })
+      if (deleteError) throw deleteError
       await supabase.auth.signOut()
-      sessionStorage.clear()
-      navigate('/')
-    } catch (err) { showToast('Delete failed. Try again.', 2000); setDeletingAccount(false) }
+      sessionStorage.removeItem('elevated_unlocked_at')
+      navigate('/', { replace: true })
+    } catch (err) {
+      console.error('Account deletion failed:', err)
+      showToast('Delete failed. Try again.', 2000)
+      setDeletingAccount(false)
+    }
   }
 
   const handleSignOut = async () => {
-    sessionStorage.clear()
-    await supabase.auth.signOut()
-    navigate('/login')
+    const { error: signOutError } = await supabase.auth.signOut()
+    if (signOutError) {
+      console.error('Sign-out failed:', signOutError)
+      showToast('Could not sign out. Please try again.')
+      return
+    }
+    sessionStorage.removeItem('elevated_unlocked_at')
+    navigate('/login', { replace: true })
   }
 
   const handleBadgeClick = (badge) => {
@@ -398,32 +364,10 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
           <div className="dash-section" style={{ marginBottom: '0.75rem', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06))', borderColor: '#2DD4BF' }}>
             <h3 style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '0.75rem' }}> Recovery Report</h3>
 
-            {!reportUnlocked ? (
-              <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-                <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
-                <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '4px' }}>This report is password protected</p>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '16px' }}>Enter your report password to view and download</p>
-                <div style={{ maxWidth: '280px', margin: '0 auto 12px' }}>
-                  <input type="password" placeholder="Enter password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handlePasswordSubmit()}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#0B1220', border: `2px solid ${passwordError ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.12)'}`, color: '#FFFFFF', fontSize: '13px', textAlign: 'center', letterSpacing: '3px', outline: 'none', fontFamily: "'Inter', sans-serif", boxSizing: 'border-box' }}
-                    autoFocus aria-label="Report password" />
-                </div>
-                {passwordError && <p style={{ color: '#FFFFFF', fontSize: '11px', marginBottom: '12px' }}>{passwordError}</p>}
-                <button onClick={handlePasswordSubmit} disabled={!passwordInput} style={{ padding: '10px 28px', borderRadius: '100px', background: passwordInput ? '#2DD4BF' : 'rgba(255,255,255,0.12)', border: 'none', color: passwordInput ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: 600, cursor: passwordInput ? 'pointer' : 'not-allowed', fontFamily: "'Inter', sans-serif" }}>Unlock Report </button>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '12px' }}>Don't know your password? We'll email it to you.</p>
-                <button onClick={sendPasswordEmail} disabled={sendingEmail || !email} style={{ marginTop: '8px', padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{sendingEmail ? 'Sending...' : emailSent ? ' Sent!' : ' Email me the password'}</button>
-              </div>
-            ) : (
-              <>
-                <p style={{ color: '#7DBDEE', fontSize: '11px', lineHeight: '1.5', marginBottom: '12px' }}>Your professional recovery report is ready. Download it to share with your therapist or counselor.</p>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={downloadRecoveryReport} disabled={generatingReport} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
-                    {generatingReport ? <span className="spinner"></span> : ' Download Report'}
-                  </button>
-                </div>
-                <button onClick={() => { setReportUnlocked(false); sessionStorage.removeItem('report_unlocked') }} style={{ marginTop: '8px', width: '100%', padding: '6px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Lock report again</button>
-              </>
-            )}
+            <p style={{ color: '#7DBDEE', fontSize: '11px', lineHeight: '1.5', marginBottom: '12px' }}>Your professional recovery report is ready. Download it to share with your therapist or counselor.</p>
+            <button onClick={downloadRecoveryReport} disabled={generatingReport} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+              {generatingReport ? <span className="spinner"></span> : 'Download Report'}
+            </button>
           </div>
 
           {/* Tabs */}

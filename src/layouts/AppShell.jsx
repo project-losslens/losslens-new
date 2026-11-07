@@ -32,6 +32,7 @@ export default function AppShell({ admin = false }) {
   const activeNav = admin ? adminNav : portalNav || userNav
   const items = activeNav
     .filter((item) => !item.section || isSuperAdmin)
+    .filter((item) => !item.superAdminOnly || isSuperAdmin)
     .map((item) => item.to === '/admin/crisis'
       ? { ...item, badge: openCrisisAlerts > 0 ? openCrisisAlerts : null }
       : item)

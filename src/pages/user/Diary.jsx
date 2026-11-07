@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { detectCrisis } from '../../lib/crisisDetection'
 
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
@@ -198,6 +199,22 @@ function Diary() {
       setLoading(false)
       showToast(' Failed to save. Try again.', 3000)
       return
+    }
+
+    const crisis = detectCrisis(notes)
+    if (crisis.crisis) {
+      void (async () => {
+        const { error: crisisEventError } = await supabase.rpc('record_crisis_event', {
+          p_user_id: userId,
+          p_context: notes.slice(0, 500),
+          p_keywords: crisis.keywords,
+          p_source: 'diary',
+          p_max_sessions: 1,
+        })
+        if (crisisEventError) console.error('Diary crisis event recording failed:', crisisEventError)
+      })().catch((crisisEventError) => {
+        console.error('Diary crisis event recording failed:', crisisEventError)
+      })
     }
 
     // Recompute streak/money/badges server-side (privileged fields).

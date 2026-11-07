@@ -48,9 +48,11 @@ export default function RequireElevated() {
       return
     }
 
-    const { error: auditError } = await supabase.from('audit_logs').insert({
-      admin_id: user.id,
-      action: 'ELEVATED_ACCESS_UNLOCK',
+    const { error: auditError } = await supabase.rpc('log_admin_action', {
+      p_action: 'elevated_access_unlocked',
+      p_target_table: null,
+      p_target_id: null,
+      p_metadata: { duration_minutes: 15 },
     })
     if (auditError) console.error('Failed to log elevated access unlock:', auditError)
 

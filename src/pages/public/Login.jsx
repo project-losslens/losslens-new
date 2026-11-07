@@ -42,6 +42,8 @@ function Login() {
           const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single()
           if (profile?.role === 'super_admin') navigate('/admin', { replace: true })
           else if (profile?.role === 'admin') navigate('/admin', { replace: true })
+          else if (profile?.role === 'insurer') navigate('/insurer', { replace: true })
+          else if (profile?.role === 'therapist') navigate('/therapist', { replace: true })
           else navigate('/dashboard', { replace: true })
         }
       } catch (err) {
@@ -115,6 +117,8 @@ function Login() {
     if (!profile) { navigate('/dashboard', { replace: true }); return }
     if (profile.role === 'super_admin') navigate('/admin', { replace: true })
     else if (profile.role === 'admin') navigate('/admin', { replace: true })
+    else if (profile.role === 'insurer') navigate('/insurer', { replace: true })
+    else if (profile.role === 'therapist') navigate('/therapist', { replace: true })
     else navigate('/dashboard', { replace: true })
   }
 
@@ -219,6 +223,7 @@ function Login() {
           </form>
 
           <p className="auth-switch">Don't have an account? <span onClick={() => navigate('/signup')}>Sign up free</span></p>
+          <p className="auth-switch">Insurance partner? <span onClick={() => navigate('/insurer/login')}>Insurer sign in</span></p>
 
           <div style={{ marginTop: '1.25rem', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', borderRadius: 8, padding: '10px 14px', textAlign: 'center' }}>
             <p style={{ fontSize: 12, color: '#2DD4BF' }}>🆘 In crisis? Call NACADA: <strong>1192</strong> (24/7 free)</p>

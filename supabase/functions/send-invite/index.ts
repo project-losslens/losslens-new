@@ -34,11 +34,24 @@ Deno.serve(async (req) => {
     const { data: { user }, error: userError } = await caller.auth.getUser()
     if (userError || !user) return json(req, 401, { error: 'Invalid token' })
 
-    const { data: callerProfile } = await caller
-      .from('profiles').select('role').eq('id', user.id).single()
+    const { data: callerProfile, error: callerProfileError } = await caller
+      .from('profiles').select('role, is_super_admin').eq('id', user.id).single()
+    if (callerProfileError || !callerProfile) return json(req, 403, { error: 'Unable to verify caller role' })
     // All privileged actions require super_admin.
-    if (callerProfile?.role !== 'super_admin' && callerProfile?.is_super_admin !== true) {
+    const callerIsSuperAdmin = callerProfile.role === 'super_admin' || callerProfile.is_super_admin === true
+    if (!callerIsSuperAdmin) {
       return json(req, 403, { error: 'Forbidden - Super admin only' })
+    }
+    const roleRank: Record<string, number> = { user: 0, therapist: 1, insurer: 1, admin: 2, super_admin: 3 }
+    const mayViewTarget = async (targetId: string) => {
+      const { data: targetProfile, error } = await caller
+        .from('profiles').select('role, is_super_admin').eq('id', targetId).single()
+      if (error || !targetProfile) return false
+      const targetRole = targetProfile.is_super_admin ? 'super_admin' : targetProfile.role
+      const targetRank = roleRank[targetRole]
+      const callerRole = callerProfile.is_super_admin ? 'super_admin' : callerProfile.role
+      const callerRank = roleRank[callerRole]
+      return targetRank !== undefined && callerRank !== undefined && targetRank < callerRank
     }
 
     const supabaseAdmin = createClient(supabaseUrl, serviceKey)
@@ -48,10 +61,35 @@ Deno.serve(async (req) => {
     // ── invite ──
     if (action === 'invite' || (!action && email)) {
       if (!email) return json(req, 400, { error: 'Email required' })
+      const inviteRole = body.role || 'user'
+      if (!['user', 'therapist', 'insurer'].includes(inviteRole)) {
+        return json(req, 400, { error: 'Invite role must be user, therapist, or insurer' })
+      }
       const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-        data: { role: body.role || 'user' },
+        data: { role: inviteRole },
       })
       if (error) return json(req, 400, { error: error.message })
+      if (data.user?.id && inviteRole === 'therapist') {
+        const { error: promotionError } = await caller.rpc('admin_promote_therapist', { p_user_id: data.user.id })
+        if (promotionError) {
+          return json(req, 500, { error: 'Invite sent but therapist profile provisioning failed' })
+        }
+      } else if (data.user?.id && inviteRole === 'insurer') {
+        const { error: profileError } = await supabaseAdmin.from('profiles')
+          .update({ role: 'insurer' }).eq('id', data.user.id)
+        if (profileError) {
+          return json(req, 500, { error: 'Invite sent but insurer profile provisioning failed' })
+        }
+      }
+      if (data.user?.id) {
+        const { error: auditError } = await caller.rpc('log_admin_action', {
+          p_action: 'user_invited',
+          p_target_table: 'profiles',
+          p_target_id: data.user.id,
+          p_metadata: { role: inviteRole },
+        })
+        if (auditError) console.error('Invite audit log failed:', auditError)
+      }
       return json(req, 200, { success: true, message: `Invite sent to ${email}`, userId: data.user?.id })
     }
 
@@ -60,13 +98,7 @@ Deno.serve(async (req) => {
       if (!userId) return json(req, 400, { error: 'userId required' })
       const { data: target, error: targetError } = await supabaseAdmin.auth.admin.getUserById(userId)
       if (targetError || !target?.user?.email) return json(req, 400, { error: 'User not found' })
-      // Refuse to reset a peer-or-higher-privileged account.
-      const { data: targetProfile } = await supabaseAdmin
-        .from('profiles').select('role').eq('id', userId).single()
-      const rank = { user: 0, admin: 1, super_admin: 2 }
-      if ((rank[targetProfile?.role] ?? 0) >= (rank[callerProfile.role] ?? 0) && callerProfile.role !== 'super_admin') {
-        return json(req, 403, { error: 'Cannot reset a peer or higher-privileged account' })
-      }
+      if (!await mayViewTarget(userId)) return json(req, 403, { error: 'Cannot reset a peer or higher-privileged account' })
       const { error } = await supabaseAdmin.auth.resetPasswordForEmail(target.user.email, {
         redirectTo: `${Deno.env.get('ALLOWED_ORIGIN') || ''}/reset-password`,
       })
@@ -81,6 +113,7 @@ Deno.serve(async (req) => {
     // ── get-email ──
     if (action === 'get-email') {
       if (!userId) return json(req, 400, { error: 'userId required' })
+      if (!await mayViewTarget(userId)) return json(req, 403, { error: 'Cannot view a peer or higher-privileged account' })
       const { data, error } = await supabaseAdmin.auth.admin.getUserById(userId)
       if (error) return json(req, 400, { error: error.message })
       await caller.rpc('log_admin_action', {

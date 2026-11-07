@@ -22,6 +22,8 @@ export const adminNav = [
   { to: '/admin/analytics', label: 'Analytics', icon: 'analytics' },
   { to: '/admin/broadcast', label: 'Broadcast', icon: 'broadcast' },
   { to: '/admin/crisis', label: 'Crisis Alerts', icon: 'alert' },
+  { to: '/admin/therapists', label: 'Therapist Management', icon: 'medical', superAdminOnly: true },
+  { to: '/admin/float', label: 'Float Management', icon: 'analytics', superAdminOnly: true },
   { to: '/admin/users', label: 'User Management', icon: 'users', section: 'elevated' },
   { to: '/admin/insurance', label: 'Insurance Partners', icon: 'medical', section: 'elevated' },
   { to: '/admin/b2b', label: 'B2B Clients', icon: 'building', section: 'elevated' },
@@ -29,6 +31,7 @@ export const adminNav = [
   { to: '/admin/chats', label: 'Chat Viewer', icon: 'chat', section: 'elevated' },
   { to: '/admin/logs', label: 'Audit Logs', icon: 'document', section: 'elevated' },
   { to: '/admin/settings', label: 'System Settings', icon: 'settings', section: 'elevated' },
+  { to: '/admin/insurers', label: 'Insurer Management', icon: 'building', section: 'elevated' },
 ]
 
 export const therapistNav = [
@@ -47,6 +50,7 @@ export const insurerNav = [
 export function getPageTitle(pathname) {
   const pageTitles = {
     '/admin': 'Admin Dashboard',
+    '/admin/float': 'Claims Float',
     '/dashboard': 'Dashboard',
     '/diary': "Today's Diary",
     '/precious-pact': 'The LossLens Pact',

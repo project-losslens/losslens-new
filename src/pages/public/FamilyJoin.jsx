@@ -55,8 +55,9 @@ export default function FamilyJoin() {
 
   const validateToken = async () => {
     try {
-      const { data, error: fetchError } = await supabase.from('supporter_invitations').select('*').eq('token', token).single()
-      if (fetchError || !data) { setError('This invitation link is invalid or has expired.'); setStatus('invalid'); setLoading(false); return }
+      const { data, error: fetchError } = await supabase.rpc('supporter_lookup', { p_token: token })
+      if (fetchError) throw fetchError
+      if (!data) { setError('This invitation link is invalid or has expired.'); setStatus('invalid'); setLoading(false); return }
       setInvitation(data)
       if (data.status === 'active') { await loadUserData(data); setStatus('view') }
       else if (data.status === 'declined') { setStatus('declined') }
@@ -69,49 +70,29 @@ export default function FamilyJoin() {
     } finally { setLoading(false) }
   }
 
-  //  Parallelized data loading
+  // The token RPC returns only invitation fields; summary and message RPCs
+  // enforce the invitation's permissions on the server.
   const loadUserData = async (inv) => {
-    const permissions = inv.permissions || []
-    const isAnonymous = inv.anonymous_mode
-
     try {
-      const promises = []
-
-      // Profile
-      promises.push(supabase.from('profiles').select('*').eq('id', inv.user_id).single())
-
-      // Diary entries
-      if (permissions.includes(PERMISSIONS.MOOD)) {
-        promises.push(supabase.from('diary_entries').select('mood, date, gambled').eq('user_id', inv.user_id).order('date', { ascending: false }).limit(7))
-      } else { promises.push(Promise.resolve({ data: null })) }
-
-      // CBT progress
-      if (permissions.includes(PERMISSIONS.MODULES)) {
-        promises.push(supabase.from('cbt_progress').select('*', { count: 'exact', head: true }).eq('user_id', inv.user_id).eq('completed', true))
-      } else { promises.push(Promise.resolve({ count: 0 })) }
-
-      // Messages
-      promises.push(supabase.from('supporter_messages').select('*').eq('invitation_id', inv.id).order('created_at', { ascending: true }))
-
-      const [profileRes, diaryRes, cbtRes, msgsRes] = await Promise.all(promises)
-
-      if (!isAnonymous && profileRes.data) setUserProfile(profileRes.data)
-
-      const stats = {}
-      if (profileRes.data) {
-        if (permissions.includes(PERMISSIONS.STREAK)) {
-          stats.streak = profileRes.data.streak_days || 0
-          stats.moneySaved = profileRes.data.money_saved || 0
-        }
-        if (permissions.includes(PERMISSIONS.GOAL)) stats.goal = profileRes.data.goal || 'Abstinence'
-        if (permissions.includes(PERMISSIONS.MOOD)) stats.recentMoods = diaryRes.data || []
-        if (permissions.includes(PERMISSIONS.MODULES)) stats.cbtCompleted = cbtRes.count || 0
-        if (permissions.includes(PERMISSIONS.RISK)) stats.riskLevel = profileRes.data.risk_level || 'low'
-      }
-      setUserStats(stats)
-      setMessages(msgsRes.data || [])
+      const [{ data: summary, error: summaryError }, { data: messageRows, error: messagesError }] = await Promise.all([
+        supabase.rpc('supporter_get_summary', { p_token: token }),
+        supabase.rpc('supporter_list_messages', { p_token: token }),
+      ])
+      if (summaryError) throw summaryError
+      if (messagesError) throw messagesError
+      setUserProfile({ full_name: inv.anonymous_mode ? null : inv.user_name })
+      setUserStats({
+        streak: summary?.streak_days,
+        moneySaved: summary?.money_saved,
+        goal: summary?.goal,
+        recentMoods: summary?.recent_moods || [],
+        cbtCompleted: summary?.cbt_completed,
+        riskLevel: summary?.risk_level,
+      })
+      setMessages(messageRows || [])
     } catch (err) {
       console.error('Error loading user data:', err)
+      setActError('Could not load the information shared with you.')
     }
   }
 
@@ -119,7 +100,7 @@ export default function FamilyJoin() {
   const handleAccept = async () => {
     setActing(true); setActError('')
     try {
-      const { error: acceptError } = await supabase.from('supporter_invitations').update({ status: 'active', responded_at: new Date().toISOString() }).eq('id', invitation.id)
+      const { error: acceptError } = await supabase.rpc('supporter_respond', { p_token: token, p_accept: true })
       if (acceptError) throw acceptError
       setInvitation(prev => ({ ...prev, status: 'active' }))
       await loadUserData({ ...invitation, status: 'active' })
@@ -132,7 +113,8 @@ export default function FamilyJoin() {
   const handleDecline = async () => {
     setActing(true); setActError('')
     try {
-      await supabase.from('supporter_invitations').update({ status: 'declined', responded_at: new Date().toISOString() }).eq('id', invitation.id)
+      const { error: declineError } = await supabase.rpc('supporter_respond', { p_token: token, p_accept: false })
+      if (declineError) throw declineError
       setStatus('declined')
     } catch (err) { setActError('Failed. Please try again.') }
     finally { setActing(false) }
@@ -142,7 +124,8 @@ export default function FamilyJoin() {
   const handleStopSupporting = async () => {
     setShowStopModal(false); setActing(true); setActError('')
     try {
-      await supabase.from('supporter_invitations').update({ status: 'declined', responded_at: new Date().toISOString() }).eq('id', invitation.id)
+      const { error: stopError } = await supabase.rpc('supporter_respond', { p_token: token, p_accept: false })
+      if (stopError) throw stopError
       setStatus('declined')
     } catch (err) { setActError('Failed. Please try again.') }
     finally { setActing(false) }
@@ -158,8 +141,11 @@ export default function FamilyJoin() {
     setMessageInput('')
 
     try {
-      const { error: msgError } = await supabase.from('supporter_messages').insert({ invitation_id: invitation.id, sender: 'supporter', content })
+      const { error: msgError } = await supabase.rpc('supporter_post_message', { p_token: token, p_content: content })
       if (msgError) { setMessages(prev => prev.filter(m => m.id !== tempId)); return }
+      const { data: messageRows, error: messagesError } = await supabase.rpc('supporter_list_messages', { p_token: token })
+      if (messagesError) throw messagesError
+      setMessages(messageRows || [])
       setMessageSent(true)
       if (messageTimer.current) clearTimeout(messageTimer.current)
       messageTimer.current = setTimeout(() => setMessageSent(false), 3000)
