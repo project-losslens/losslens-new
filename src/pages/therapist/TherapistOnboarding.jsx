@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuthProfile } from '../../context/AuthProfileContext'
 
-const MAX_LICENSE_FILE_SIZE = 10 * 1024 * 1024
-const ALLOWED_LICENSE_TYPES = ['application/pdf', 'image/jpeg', 'image/png']
+const MAX_LICENSE_FILE_SIZE = 5 * 1024 * 1024
+const ALLOWED_LICENSE_TYPES = ['application/pdf']
 
 export default function TherapistOnboarding() {
   const { user } = useAuthProfile()
@@ -18,7 +18,7 @@ export default function TherapistOnboarding() {
 
   const load = useCallback(async () => {
     if (!userId) return
-    const { data, error: loadError } = await supabase.from('therapists').select('*').eq('id', userId).maybeSingle()
+    const { data, error: loadError } = await supabase.rpc('therapist_get_self_profile')
     if (loadError) {
       console.error('Therapist profile load failed:', loadError)
       setError('Could not load your verification profile.')
@@ -44,7 +44,7 @@ export default function TherapistOnboarding() {
     event.preventDefault()
     if (!user?.id) return
     if (file && (!ALLOWED_LICENSE_TYPES.includes(file.type) || file.size > MAX_LICENSE_FILE_SIZE)) {
-      setError('Upload a PDF, JPEG, or PNG file no larger than 10 MB.')
+      setError('Upload a PDF no larger than 5 MB.')
       return
     }
     setSaving(true)
@@ -93,7 +93,7 @@ export default function TherapistOnboarding() {
         <label>Specialty<input value={form.specialty} onChange={(event) => setForm({ ...form, specialty: event.target.value })} required maxLength={120} /></label>
         <label>Languages (comma-separated)<input value={form.languages} onChange={(event) => setForm({ ...form, languages: event.target.value })} maxLength={200} /></label>
         <label>Professional bio<textarea value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} rows={5} maxLength={2000} /></label>
-        <label>License document (PDF, JPEG, PNG; up to 10 MB)<input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(event) => setFile(event.target.files?.[0] || null)} /></label>
+        <label>License document (PDF; up to 5 MB)<input type="file" accept=".pdf,application/pdf" onChange={(event) => setFile(event.target.files?.[0] || null)} /></label>
         {form.license_document_path && <p>License document uploaded.</p>}
         <button className="btn-primary" disabled={saving}>{saving ? 'Saving...' : 'Save for verification'}</button>
       </form>

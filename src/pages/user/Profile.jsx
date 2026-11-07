@@ -50,6 +50,11 @@ export default function Profile() {
   // Password change
   const [passwords, setPasswords] = useState({ current: '', next: '', confirm: '' })
   const [savingPassword, setSavingPassword] = useState(false)
+  const [mfaEnrollment, setMfaEnrollment] = useState(null)
+  const [mfaCode, setMfaCode] = useState('')
+  const [mfaError, setMfaError] = useState('')
+  const [mfaLoading, setMfaLoading] = useState(false)
+  const [mfaEnabled, setMfaEnabled] = useState(false)
 
   // Delete account
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -89,7 +94,33 @@ export default function Profile() {
         setStreakDays(profile.streak_days || 0)
         setMoneySaved(profile.money_saved || 0)
         setCleanSince(profile.clean_since || null)
-        setAvatarUrl(profile.avatar_url || '')
+        const storedAvatar = profile.avatar_url || ''
+        if (storedAvatar.startsWith('http')) {
+          try {
+            const parsedUrl = new URL(storedAvatar)
+            const marker = '/storage/v1/object/public/avatars/'
+            const markerIndex = parsedUrl.pathname.indexOf(marker)
+            if (markerIndex >= 0) {
+              const path = decodeURIComponent(parsedUrl.pathname.slice(markerIndex + marker.length))
+              const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+                .from('avatars').createSignedUrl(path, 3600)
+              if (signedUrlError) throw signedUrlError
+              setAvatarUrl(signedUrlData.signedUrl)
+            } else {
+              setAvatarUrl('')
+            }
+          } catch (avatarError) {
+            console.error('Profile avatar could not be loaded:', avatarError)
+            setAvatarUrl('')
+          }
+        } else if (storedAvatar) {
+          const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+            .from('avatars').createSignedUrl(storedAvatar, 3600)
+          if (signedUrlError) {
+            console.error('Profile avatar could not be loaded:', signedUrlError)
+            setAvatarUrl('')
+          } else setAvatarUrl(signedUrlData.signedUrl)
+        } else setAvatarUrl('')
         setJoinedDate(profile.created_at || null)
         if (profile.preferences) setPrefs(prev => ({ ...prev, ...profile.preferences }))
       }
@@ -211,9 +242,11 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
       const fileName = `${userId}/${Date.now()}.jpg`
       const { error } = await supabase.storage.from('avatars').upload(fileName, file, { upsert: true })
       if (error) throw error
-      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName)
-      setAvatarUrl(publicUrl)
-      await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', userId)
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage.from('avatars').createSignedUrl(fileName, 3600)
+      if (signedUrlError) throw signedUrlError
+      setAvatarUrl(signedUrlData.signedUrl)
+      const { error: profileError } = await supabase.from('profiles').update({ avatar_url: fileName }).eq('id', userId)
+      if (profileError) throw profileError
       showToast(' Photo updated!')
     } catch (err) { showToast('Upload failed.', 2000) }
     setUploadingAvatar(false)
@@ -250,6 +283,53 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
       setPasswords({ current: '', next: '', confirm: '' })
     } catch (err) { showToast('Failed.', 2000) }
     setSavingPassword(false)
+  }
+
+  const startMfaEnrollment = async () => {
+    setMfaLoading(true)
+    setMfaError('')
+    const { data, error } = await supabase.auth.mfa.enroll({
+      factorType: 'totp',
+      friendlyName: 'LossLens authenticator',
+    })
+    if (error) {
+      console.error('MFA enrollment failed:', error)
+      setMfaError('Could not start authenticator setup. Please try again.')
+    } else {
+      setMfaEnrollment(data)
+      setMfaCode('')
+    }
+    setMfaLoading(false)
+  }
+
+  const verifyMfaEnrollment = async () => {
+    if (!mfaEnrollment?.id || !mfaCode.trim()) return
+    setMfaLoading(true)
+    setMfaError('')
+    const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
+      factorId: mfaEnrollment.id,
+    })
+    if (challengeError) {
+      console.error('MFA challenge failed:', challengeError)
+      setMfaError('Could not verify the authenticator code. Please try again.')
+      setMfaLoading(false)
+      return
+    }
+    const { error: verifyError } = await supabase.auth.mfa.verify({
+      factorId: mfaEnrollment.id,
+      challengeId: challenge.id,
+      code: mfaCode.trim(),
+    })
+    if (verifyError) {
+      console.error('MFA verification failed:', verifyError)
+      setMfaError('That code could not be verified. Check it and try again.')
+    } else {
+      setMfaEnabled(true)
+      setMfaEnrollment(null)
+      setMfaCode('')
+      showToast('Authenticator enabled.', 2500)
+    }
+    setMfaLoading(false)
   }
 
   const handleDeleteAccount = async () => {
@@ -439,6 +519,21 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
                 <div className="form-group" key={field}><label>{field === 'current' ? 'Current' : field === 'next' ? 'New (min 8 chars)' : 'Confirm'}</label><input type="password" placeholder="Enter password" value={passwords[field]} onChange={e => setPasswords({ ...passwords, [field]: e.target.value })} /></div>
               ))}
               <button className="btn-primary full" onClick={updatePassword} disabled={savingPassword} style={{ fontSize: '12px', padding: '10px', minHeight: '44px' }}>{savingPassword ? 'Updating...' : 'Update password'}</button>
+              <hr style={{ borderColor: 'rgba(255,255,255,0.12)', margin: '1rem 0' }} />
+              <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.5rem' }}>Two-factor authentication</h3>
+              {mfaEnabled ? (
+                <p role="status" style={{ color: '#2DD4BF', fontSize: '11px' }}>An authenticator app is enabled for this account.</p>
+              ) : mfaEnrollment ? (
+                <div>
+                  {mfaEnrollment.totp?.qr_code && <img src={mfaEnrollment.totp.qr_code} alt="Scan this QR code with your authenticator app" style={{ display: 'block', width: '160px', maxWidth: '100%', margin: '12px auto', background: '#FFFFFF', padding: '8px', borderRadius: '8px' }} />}
+                  <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '10px', wordBreak: 'break-all' }}>Manual setup key: {mfaEnrollment.totp?.secret}</p>
+                  <div className="form-group"><label htmlFor="mfa-code">6-digit authenticator code</label><input id="mfa-code" inputMode="numeric" autoComplete="one-time-code" value={mfaCode} onChange={event => setMfaCode(event.target.value)} /></div>
+                  <button className="btn-primary full" type="button" onClick={verifyMfaEnrollment} disabled={mfaLoading || !mfaCode.trim()}>{mfaLoading ? 'Verifying...' : 'Verify and enable'}</button>
+                </div>
+              ) : (
+                <button className="btn-ghost full" type="button" onClick={startMfaEnrollment} disabled={mfaLoading}>{mfaLoading ? 'Starting setup...' : 'Set up an authenticator app'}</button>
+              )}
+              {mfaError && <p role="alert" style={{ color: '#ff9b9b', fontSize: '11px', marginTop: '8px' }}>{mfaError}</p>}
             </div>
           )}
 

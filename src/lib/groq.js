@@ -1,13 +1,9 @@
 import { supabase } from './supabase'
 
 // Browser calls the authenticated server endpoint; Groq credentials remain server-side.
-export const askGroq = async (messages) => {
-  const cleanMessages = messages
-    .filter(message => ['user', 'assistant'].includes(message.role) && typeof message.content === 'string' && message.content.trim())
-    .map(message => ({ role: message.role, content: message.content.trim() }))
-    .slice(-20)
-
-  if (!cleanMessages.length) return "I'm here for you. What's on your mind?"
+export const askGroq = async (message) => {
+  const content = typeof message === 'string' ? message.trim() : ''
+  if (!content) return "I'm here for you. What's on your mind?"
 
   const { data: { session }, error } = await supabase.auth.getSession()
   if (error || !session?.access_token) return 'Please sign in to chat.'
@@ -23,7 +19,7 @@ export const askGroq = async (messages) => {
           Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ messages: cleanMessages }),
+        body: JSON.stringify({ message: content }),
         signal: controller.signal,
       })
     } finally {

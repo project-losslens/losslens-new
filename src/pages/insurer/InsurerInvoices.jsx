@@ -10,7 +10,7 @@ export default function InsurerInvoices() {
 
   const load = useCallback(async () => {
     const { data, error: loadError } = await supabase.from('bulk_invoices')
-      .select('id, invoice_period_start, invoice_period_end, total_claims, total_amount, status, sent_at, paid_at, mpesa_or_ach_ref')
+      .select('id, invoice_period_start, invoice_period_end, total_claims, total_amount, status, sent_at, paid_at, mpesa_or_ach_ref, payment_reference, payment_reported_at')
       .order('invoice_period_end', { ascending: false })
     if (loadError) {
       console.error('Insurer invoice load failed:', loadError)
@@ -63,7 +63,7 @@ export default function InsurerInvoices() {
       p_ref: ref,
     })
     if (paymentError) {
-      console.error('Invoice payment confirmation failed:', paymentError)
+      console.error('Invoice payment report failed:', paymentError)
       setError('Could not record this payment.')
     } else await load()
     setWorking('')
@@ -74,7 +74,7 @@ export default function InsurerInvoices() {
     <section className="portal-page">
       <p className="portal-page__eyebrow">Insurer portal</p>
       <h2>Bulk invoices</h2>
-      <p>Reporting payment records the insurer-to-LossLens settlement and replenishes the claims float.</p>
+      <p>Reporting a payment records its reference for super-admin verification. It does not replenish the claims float until confirmed.</p>
       {error && <p className="portal-error" role="alert">{error} <button type="button" onClick={load}>Retry</button></p>}
       {invoices.length === 0 ? <p>No invoices are available.</p> : (
         <div className="portal-list">
@@ -84,7 +84,7 @@ export default function InsurerInvoices() {
                 <div><strong>{invoice.invoice_period_start} – {invoice.invoice_period_end}</strong><p>{invoice.total_claims} claims · KES {Number(invoice.total_amount).toLocaleString()}</p></div>
                 <span className={`portal-status portal-status--${invoice.status}`}>{invoice.status}</span>
               </div>
-              {invoice.mpesa_or_ach_ref && <p>Payment reference: {invoice.mpesa_or_ach_ref}</p>}
+              {(invoice.payment_reference || invoice.mpesa_or_ach_ref) && <p>Payment reference: {invoice.payment_reference || invoice.mpesa_or_ach_ref}</p>}
               <div className="portal-form__actions">
                 <button className="btn-ghost" disabled={working === invoice.id} onClick={() => exportInvoice(invoice)}>Download CSV</button>
                 {invoice.status === 'sent' && (

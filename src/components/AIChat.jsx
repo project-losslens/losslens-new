@@ -95,6 +95,9 @@ function AIChat({ profile }) {
   const [loading, setLoading] = useState(false);
   const [proactive, setProactive] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
+  const [aiConsent, setAiConsent] = useState(null);
+  const [aiConsentSaving, setAiConsentSaving] = useState(false);
+  const [aiConsentError, setAiConsentError] = useState('');
   const [olooEmotion, setOlooEmotion] = useState('neutral');
   const [userContext, setUserContext] = useState(null);
 
@@ -130,6 +133,7 @@ function AIChat({ profile }) {
         .select('*')
         .eq('id', userId)
         .single();
+      setAiConsent(Boolean(profileData?.ai_data_consent_at));
 
       const { data: recentDiary } = await supabase
         .from('diary_entries')
@@ -156,7 +160,26 @@ function AIChat({ profile }) {
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
+      setAiConsent(false);
     }
+  };
+
+  const acceptAiConsent = async () => {
+    if (!userId || aiConsentSaving) return;
+    setAiConsentSaving(true);
+    setAiConsentError('');
+    const { error } = await supabase
+      .from('profiles')
+      .update({ ai_data_consent_at: new Date().toISOString() })
+      .eq('id', userId);
+    if (error) {
+      console.error('AI data consent could not be saved:', error);
+      setAiConsentError('Your consent could not be saved. Please try again.');
+      setAiConsentSaving(false);
+      return;
+    }
+    setAiConsent(true);
+    setAiConsentSaving(false);
   };
 
   // Auto-scroll
@@ -282,6 +305,10 @@ function AIChat({ profile }) {
   const sendMessage = async (text) => {
     const content = (text || input).trim();
     if (!content || loading) return;
+    if (aiConsent !== true) {
+      setAiConsentError(aiConsent === null ? 'Checking consent status. Please try again.' : '');
+      return;
+    }
 
     stopListening();
     setProactive(null);
@@ -296,12 +323,7 @@ function AIChat({ profile }) {
     setOlooEmotion('thinking');
 
     try {
-      const cleanMessages = updatedMessages.map(m => ({
-        role: m.role,
-        content: m.content
-      }));
-
-      const reply = await askGroq(cleanMessages, userId);
+      const reply = await askGroq(content);
       const replyId = (Date.now() + 1).toString();
       const replyMsg = { role: 'assistant', content: reply, id: replyId };
 
@@ -459,6 +481,17 @@ function AIChat({ profile }) {
 
           {/* Messages Area */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {aiConsent !== true ? (
+              <div role="dialog" aria-labelledby="ai-consent-title" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '16px', color: '#FFFFFF' }}>
+                <h3 id="ai-consent-title" style={{ fontSize: '14px', color: '#2DD4BF', marginBottom: '8px' }}>Before you chat with Oloo</h3>
+                <p style={{ fontSize: '12px', lineHeight: '1.6', color: 'rgba(255,255,255,0.7)' }}>Your messages will be saved in your chat history and sent to our AI provider to generate responses. Oloo is not a substitute for professional care.</p>
+                {aiConsentError && <p role="alert" style={{ fontSize: '12px', color: '#ff9b9b' }}>{aiConsentError}</p>}
+                <button className="btn-primary full" type="button" onClick={acceptAiConsent} disabled={aiConsentSaving || aiConsent === null} style={{ marginTop: '12px' }}>
+                  {aiConsentSaving ? 'Saving...' : aiConsent === null ? 'Checking...' : 'I agree and continue'}
+                </button>
+              </div>
+            ) : (
+            <>
             {userContext?.profile && (
               <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: '12px', padding: '12px', marginBottom: '4px', display: 'flex', gap: '16px', fontSize: '12px', color: '#2DD4BF', flexWrap: 'wrap' }}>
                 {userContext.profile.streak_days > 0 && <span> {userContext.profile.streak_days} days clean</span>}
@@ -503,6 +536,8 @@ function AIChat({ profile }) {
                 </div>
               </div>
             )}
+            </>
+            )}
             <div ref={messagesEndRef} />
           </div>
 
@@ -512,6 +547,7 @@ function AIChat({ profile }) {
             {voiceSupported && (
               <button
                 onClick={() => setVoiceEnabled(!voiceEnabled)}
+                disabled={aiConsent !== true}
                 title={voiceEnabled ? 'Voice replies ON' : 'Voice replies OFF'}
                 style={{
                   width: '36px', height: '36px', borderRadius: '50%',
@@ -542,13 +578,14 @@ function AIChat({ profile }) {
               }}
               onFocus={(e) => e.target.style.borderColor = '#2DD4BF'}
               onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.12)'}
-              disabled={isListening}
+              disabled={isListening || aiConsent !== true}
             />
 
             {/* Voice input button */}
             {voiceSupported && (
               <button
                 onClick={() => isListening ? stopListening() : startListening()}
+                disabled={aiConsent !== true}
                 style={{
                   width: '40px', height: '40px', borderRadius: '50%',
                   border: 'none',
@@ -563,7 +600,7 @@ function AIChat({ profile }) {
 
             <button
               onClick={() => sendMessage()}
-              disabled={loading || (!input.trim() && !isListening)}
+              disabled={aiConsent !== true || loading || (!input.trim() && !isListening)}
               style={{
                 width: '40px', height: '40px', borderRadius: '50%',
                 background: loading || (!input.trim() && !isListening) ? 'rgba(255,255,255,0.12)' : '#2DD4BF',

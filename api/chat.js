@@ -116,7 +116,7 @@ async function countRecentMessages(auth, sinceIso) {
     Range: '0-0',
   }
   const response = await fetchWithTimeout(
-    `${auth.supabaseUrl}/rest/v1/chat_history?user_id=eq.${auth.user.id}&created_at=gte.${encodeURIComponent(sinceIso)}&select=id`,
+    `${auth.supabaseUrl}/rest/v1/chat_history?user_id=eq.${auth.user.id}&role=eq.user&created_at=gte.${encodeURIComponent(sinceIso)}&select=id`,
     { headers }, REQUEST_TIMEOUT_MS)
   if (!response.ok) return null
   const range = response.headers.get('content-range') || ''
@@ -124,12 +124,30 @@ async function countRecentMessages(auth, sinceIso) {
   return Number.isFinite(total) ? total : null
 }
 
-// Best-effort crisis alert write; never blocks the user reply.
+async function fetchChatHistory(auth) {
+  const response = await fetchWithTimeout(
+    `${auth.supabaseUrl}/rest/v1/chat_history?user_id=eq.${auth.user.id}&role=in.(user,assistant)&select=role,message&order=created_at.desc&limit=${MAX_MESSAGES}`,
+    {
+      headers: {
+        apikey: auth.supabaseKey,
+        Authorization: `Bearer ${auth.token}`,
+      },
+    },
+    REQUEST_TIMEOUT_MS)
+  if (!response.ok) throw new Error('CHAT_HISTORY_READ_FAILED')
+  const rows = await response.json()
+  return rows.reverse()
+    .filter(row => ['user', 'assistant'].includes(row.role) && typeof row.message === 'string')
+    .map(row => ({ role: row.role, content: row.message.slice(0, MAX_MESSAGE_LENGTH) }))
+}
+
+// Crisis responses are returned only after the alert and voucher pipeline succeeds.
 async function recordCrisisAlert(auth, message, keywords) {
   try {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    const key = serviceKey || auth.supabaseKey
-    const token = serviceKey ? serviceKey : auth.token
+    if (!serviceKey) throw new Error('CRISIS_PIPELINE_NOT_CONFIGURED')
+    const key = serviceKey
+    const token = serviceKey
     const headers = {
       apikey: key,
       Authorization: `Bearer ${token}`,
@@ -148,9 +166,11 @@ async function recordCrisisAlert(auth, message, keywords) {
     }, REQUEST_TIMEOUT_MS)
     if (!alertResponse.ok) {
       console.error('crisis event recording failed:', alertResponse.status, await alertResponse.text())
+      throw new Error('CRISIS_EVENT_RECORDING_FAILED')
     }
   } catch (error) {
     console.error('crisis event recording failed:', error?.message || error)
+    throw error
   }
 }
 
@@ -161,6 +181,10 @@ export default async function handler(request, response) {
   }
 
   try {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return json(response, 500, { error: 'crisis pipeline not configured' })
+    }
+
     const authorization = request.headers.authorization || ''
     const token = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : ''
     if (!token.startsWith('eyJ')) {
@@ -178,16 +202,20 @@ export default async function handler(request, response) {
         return json(response, 400, { error: 'invalid_body' })
       }
     }
-  const messages = Array.isArray(body.messages) ? body.messages.slice(-MAX_MESSAGES) : []
-  if (!messages.length) return json(response, 400, { error: 'A message is required' })
+  if (!body || typeof body !== 'object' || Array.isArray(body)
+      || Object.keys(body).some(key => key !== 'message')
+      || typeof body.message !== 'string') {
+    return json(response, 400, { error: 'A message is required' })
+  }
+  const message = body.message.trim().slice(0, MAX_MESSAGE_LENGTH)
+  if (!message) return json(response, 400, { error: 'A message is required' })
 
-  const cleaned = messages
-    .filter(message => message && ['user', 'assistant'].includes(message.role) && typeof message.content === 'string')
-    .map(message => ({ role: message.role, content: message.content.trim().slice(0, MAX_MESSAGE_LENGTH) }))
-    .filter(message => message.content)
-
-  const lastUserMessage = [...cleaned].reverse().find(message => message.role === 'user')
-  if (!lastUserMessage) return json(response, 400, { error: 'A user message is required' })
+  let history
+  try {
+    history = await fetchChatHistory(auth)
+  } catch {
+    return json(response, 503, { error: 'Conversation history is temporarily unavailable' })
+  }
 
   // ── Quota: per-user rolling limits on stored history ──
   try {
@@ -196,25 +224,36 @@ export default async function handler(request, response) {
       countRecentMessages(auth, new Date(now - 3600_000).toISOString()),
       countRecentMessages(auth, new Date(now - 86400_000).toISOString()),
     ])
-    if ((hourCount != null && hourCount >= QUOTA_PER_HOUR) ||
-        (dayCount != null && dayCount >= QUOTA_PER_DAY)) {
+    if (hourCount == null || dayCount == null) {
+      return json(response, 500, { error: 'Chat quota could not be verified' })
+    }
+    if (hourCount >= QUOTA_PER_HOUR || dayCount >= QUOTA_PER_DAY) {
       return json(response, 429, { error: 'Message limit reached. Please take a break and try again later.' })
     }
-  } catch {
-    // Quota check failure must not block the user; fail open.
+  } catch (error) {
+    console.error('Chat quota check failed:', error?.message || error)
+    return json(response, 500, { error: 'Chat quota could not be verified' })
   }
 
   try {
-    await saveHistory(auth, 'user', lastUserMessage.content)
+    await saveHistory(auth, 'user', message)
   } catch {
     return json(response, 503, { error: 'Conversation history is temporarily unavailable' })
   }
 
   let reply
-  const crisis = detectCrisis(lastUserMessage.content)
+  const crisis = detectCrisis(message)
   if (crisis.crisis) {
     reply = CRISIS_REPLY
-    await recordCrisisAlert(auth, lastUserMessage.content, crisis.keywords)
+    try {
+      await recordCrisisAlert(auth, message, crisis.keywords)
+    } catch (error) {
+      return json(response, 500, {
+        error: error.message === 'CRISIS_PIPELINE_NOT_CONFIGURED'
+          ? 'crisis pipeline not configured'
+          : 'Crisis support could not be activated',
+      })
+    }
   } else {
     if (!process.env.GROQ_API_KEY) {
       return json(response, 503, { error: 'AI service is temporarily unavailable' })
@@ -238,7 +277,8 @@ export default async function handler(request, response) {
           model: GROQ_MODEL,
           messages: [
             { role: 'system', content: `${BASE_SYSTEM_PROMPT}${context ? `\n\nPrivate user context from LossLens: ${context}` : ''}` },
-            ...cleaned,
+            ...history,
+            { role: 'user', content: message },
           ],
           max_tokens: 300,
           temperature: 0.8,

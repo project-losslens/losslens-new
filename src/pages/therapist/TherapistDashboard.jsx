@@ -18,7 +18,7 @@ export default function TherapistDashboard() {
   const load = useCallback(async () => {
     if (!userId) return
     const [therapistResult, voucherResult, claimResult] = await Promise.all([
-      supabase.from('therapists').select('status, specialty').eq('id', userId).maybeSingle(),
+      supabase.rpc('therapist_get_self_profile'),
       supabase.from('provider_vouchers').select('id, pre_auth_voucher_id, status, max_sessions, fee_per_session, expires_at, created_at')
         .eq('therapist_id', userId).order('created_at', { ascending: false }),
       supabase.from('provider_claims').select('id, voucher_id, session_date, claim_amount, status, paid_at, insurer_reimbursed_at')

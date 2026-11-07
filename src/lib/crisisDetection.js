@@ -8,10 +8,11 @@ const CRISIS_KEYWORDS = [
   // English
   'suicide', 'kill myself', 'end it all', 'self-harm', 'self harm', 'want to die',
   'end my life', 'no reason to live', 'better off dead', 'hurt myself',
-  'hopeless', 'can\'t go on', "can't go on", 'don\'t want to be here',
+  'can\'t go on', "can't go on", 'don\'t want to be here',
   // Kiswahili
   'kujiua', 'nitajiuwa', 'nataka kufa', 'nataka kujiua', 'maisha yameniboa',
-  'siwezi tena', 'nimechoka na maisha', 'kufa better',
+  'sina sababu ya kuishi', 'nimechoka kabisa', 'nimechoka na maisha', 'kufa better',
+  "i don't want to be here anymore",
   // Sheng / Kenyan slang
   'niacha dunia', 'niko tayari kufa', 'njoo kifo', 'tumia dawa nyingi',
   // misspellings / variants

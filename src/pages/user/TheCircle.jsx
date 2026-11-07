@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { createNotification } from '../../lib/notifications'
 import { ensureCircleHash } from '../../lib/circleHash'
+import { detectCrisis } from '../../lib/crisisDetection'
 
 //  Constants
 const ROOMS = [
@@ -34,7 +35,6 @@ const CHECK_IN_TEMPLATES = [
   "One thing that helped today...",
 ]
 
-const CRISIS_KEYWORDS = ['suicide', 'kill myself', 'end it all', 'self-harm', 'want to die', 'kujiua', 'nataka kufa']
 const BLOCKED_PATTERNS = [/\b[\w.-]+@[\w.-]+\.\w+\b/g, /(?<!\d)(07\d{8}|\+254\d{9})(?!\d)/g]
 const MENTION_REGEX = /@([A-Z][a-z]+ [A-Z][a-z]+)/g
 
@@ -56,7 +56,7 @@ function generateIdentity(userId) {
 }
 
 function containsBlockedContent(message) { return BLOCKED_PATTERNS.some(p => p.test(message)) }
-function containsCrisisContent(message) { return CRISIS_KEYWORDS.some(w => message.toLowerCase().includes(w)) }
+function containsCrisisContent(message) { return detectCrisis(message).crisis }
 function extractMentions(text) {
   const mentions = []
   let match
@@ -194,7 +194,7 @@ export default function TheCircle() {
     //  Fallback polling every 10s as backup for Realtime
     pollRef.current = setInterval(async () => {
       try {
-        const { data } = await supabase.from('circle_messages').select('*').eq('room', room).order('created_at', { ascending: true }).limit(150)
+        const { data } = await supabase.from('circle_messages').select('id, room, user_hash, display_name, avatar_animal, avatar_prefix, message, message_type, expires_at, reply_to_id, reply_to_name, created_at').eq('room', room).order('created_at', { ascending: true }).limit(150)
         if (data) {
           setMessages(data)
           setMessageIds(new Set(data.map(m => m.id)))
@@ -205,7 +205,7 @@ export default function TheCircle() {
 
   const fetchMessages = async (room) => {
     try {
-      const { data } = await supabase.from('circle_messages').select('*').eq('room', room).order('created_at', { ascending: true }).limit(150)
+      const { data } = await supabase.from('circle_messages').select('id, room, user_hash, display_name, avatar_animal, avatar_prefix, message, message_type, expires_at, reply_to_id, reply_to_name, created_at').eq('room', room).order('created_at', { ascending: true }).limit(150)
       if (data) {
         setMessages(data)
         setMessageIds(new Set(data.map(m => m.id)))

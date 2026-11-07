@@ -14,7 +14,7 @@ export default function TherapistManagement() {
 
   const load = useCallback(async () => {
     const [therapistResult, voucherResult, claimResult] = await Promise.all([
-      supabase.from('therapists').select('id, license_number, specialty, status, created_at').order('created_at', { ascending: false }),
+      supabase.rpc('admin_list_therapists'),
       supabase.from('provider_vouchers').select('id, pre_auth_voucher_id, status, created_at, expires_at').not('pre_auth_voucher_id', 'is', null).is('therapist_id', null).eq('status', 'pending').order('created_at', { ascending: false }),
       supabase.from('provider_claims').select('id, voucher_id, therapist_id, session_date, claim_amount, status, paid_at, insurer_reimbursed_at').order('created_at', { ascending: false }).limit(100),
     ])

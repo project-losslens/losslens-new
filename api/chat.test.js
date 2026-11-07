@@ -46,7 +46,7 @@ test('a crisis chat records an alert and pre-authorizes a voucher before replyin
     await handler({
       method: 'POST',
       headers: { authorization: 'Bearer eyJ-test-token' },
-      body: { messages: [{ role: 'user', content: 'I want to kill myself' }] },
+      body: { message: 'I want to kill myself' },
     }, response)
   } finally {
     globalThis.fetch = originalFetch

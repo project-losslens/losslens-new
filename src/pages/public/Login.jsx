@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { createSupabaseClient } from '../../lib/supabaseClient'
 
 // Shared Google Icon
 const GoogleIcon = () => (
@@ -85,10 +86,12 @@ function Login() {
     if (!email.trim() || !password) { setError('Please enter your email and password.'); return }
 
     setLoading(true)
-    const { data, error: loginError } = await supabase.auth.signInWithPassword({
+    localStorage.setItem('losslens_remember_me', String(rememberMe))
+    const loginClient = createSupabaseClient(rememberMe)
+    const { data, error: loginError } = await loginClient.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password,
-    }, { persistSession: rememberMe }) //  Remember me now works
+    })
 
     if (loginError) {
       const newAttempts = attempts + 1
@@ -112,21 +115,22 @@ function Login() {
     sessionStorage.removeItem('login_cooldown_until')
     setAttempts(0)
 
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
+    const { data: profile } = await loginClient.from('profiles').select('role').eq('id', data.user.id).single()
     setLoading(false)
-    if (!profile) { navigate('/dashboard', { replace: true }); return }
-    if (profile.role === 'super_admin') navigate('/admin', { replace: true })
-    else if (profile.role === 'admin') navigate('/admin', { replace: true })
-    else if (profile.role === 'insurer') navigate('/insurer', { replace: true })
-    else if (profile.role === 'therapist') navigate('/therapist', { replace: true })
-    else navigate('/dashboard', { replace: true })
+    if (!profile) { window.location.assign('/dashboard'); return }
+    if (profile.role === 'super_admin' || profile.role === 'admin') window.location.assign('/admin')
+    else if (profile.role === 'insurer') window.location.assign('/insurer')
+    else if (profile.role === 'therapist') window.location.assign('/therapist')
+    else window.location.assign('/dashboard')
   }
 
   const handleGoogleLogin = async () => {
     setError('')
     setGoogleLoading(true)
     try {
-      const { error: googleError } = await supabase.auth.signInWithOAuth({
+      localStorage.setItem('losslens_remember_me', String(rememberMe))
+      const loginClient = createSupabaseClient(rememberMe)
+      const { error: googleError } = await loginClient.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo: `${window.location.origin}/dashboard` },
       })
@@ -134,7 +138,9 @@ function Login() {
         setError('Google sign-in failed. Please try again.')
         setGoogleLoading(false)
       }
-    } catch {
+    } catch (loginError) {
+      console.error('Google sign-in failed:', loginError)
+      setError('Google sign-in failed. Please try again.')
       setGoogleLoading(false)
     }
   }
