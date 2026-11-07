@@ -7,7 +7,7 @@ function getContainer() {
   toastContainer.id = 'toast-container'
   toastContainer.style.cssText = `
     position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
-    z-index: 9999; display: flex; flex-direction: column; align-items: center;
+    z-index: var(--z-toast); display: flex; flex-direction: column; align-items: center;
     gap: 8px; pointer-events: none;
   `
   document.body.appendChild(toastContainer)

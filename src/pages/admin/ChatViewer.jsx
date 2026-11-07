@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import '../../styles/globals.css'
 
 function ChatViewer() {
   const navigate = useNavigate()
@@ -110,24 +109,24 @@ function ChatViewer() {
   }, {})
 
   return (
-    <div className="root" style={{ display: 'flex', minHeight: '100vh' }}>
+    <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
 
 
-      <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
-        <nav style={{
+      <div style={{ flex: 1, minWidth: 0 }} className="page-content">
+        <div className="page-toolbar" style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '1rem 1.5rem', background: '#0B1220', borderBottom: '2px solid #2DD4BF',
-          position: 'sticky', top: 0, zIndex: 100,
+          padding: '1rem 1.5rem',
+
         }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#2DD4BF', fontFamily: "'Inter', sans-serif", margin: 0 }}>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: "'Inter', sans-serif", margin: 0 }}>
               Chat Viewer
             </h1>
-            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>
+            <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>
               {users.length} users with chat history
             </p>
           </div>
-        </nav>
+        </div>
 
         <div style={{ display: 'flex', height: 'calc(100vh - 60px)' }}>
           {/* User List */}
@@ -145,7 +144,7 @@ function ChatViewer() {
                 aria-label="Search users"
                 style={{
                   width: '100%', padding: '8px 12px', borderRadius: '8px',
-                  background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF',
+                  background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)',
                   fontSize: '12px', outline: 'none', fontFamily: "'Inter', sans-serif",
                 }}
               />
@@ -172,10 +171,10 @@ function ChatViewer() {
                     borderBottom: '1px solid rgba(255,255,255,0.12)',
                     transition: 'background 0.15s',
                   }}
-                  onMouseEnter={e => { if (selectedUser !== u.id) e.currentTarget.style.background = '#0B1220' }}
+                  onMouseEnter={e => { if (selectedUser !== u.id) e.currentTarget.style.background = 'var(--bg)' }}
                   onMouseLeave={e => { if (selectedUser !== u.id) e.currentTarget.style.background = 'transparent' }}
                 >
-                  <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 500, margin: 0 }}>
+                  <p style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500, margin: 0 }}>
                     {u.full_name}
                   </p>
                   <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '2px 0 0' }}>
@@ -199,7 +198,7 @@ function ChatViewer() {
               <button
                 onClick={handleBackToUsers}
                 style={{
-                  background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF',
+                  background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--primary)',
                   padding: '8px 16px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer',
                   fontFamily: "'Inter', sans-serif", marginBottom: '12px', alignSelf: 'flex-start',
                   display: 'flex', alignItems: 'center', gap: '6px',
@@ -213,7 +212,7 @@ function ChatViewer() {
             {!selectedUser ? (
               <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'rgba(255,255,255,0.4)' }}>
                 <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }} aria-hidden="true"></span>
-                <p style={{ color: '#2DD4BF', fontSize: '14px' }}>Select a user to view their conversations</p>
+                <p style={{ color: 'var(--primary)', fontSize: '14px' }}>Select a user to view their conversations</p>
                 <p style={{ fontSize: '12px' }}>All chats are read-only</p>
               </div>
             ) : chatLoading ? (
@@ -228,10 +227,10 @@ function ChatViewer() {
                   <div key={date} style={{ marginBottom: '24px' }}>
                     <div style={{
                       textAlign: 'center', marginBottom: '12px',
-                      position: 'sticky', top: 0, zIndex: 10,
+                      position: 'sticky', top: 0, zIndex: 'var(--z-content)',
                     }}>
                       <span style={{
-                        background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '4px 14px',
+                        background: 'rgba(255,255,255,0.12)', color: 'var(--primary)', padding: '4px 14px',
                         borderRadius: '100px', fontSize: '11px',
                       }}>
                         {date}
@@ -245,8 +244,8 @@ function ChatViewer() {
                       }}>
                         <div style={{
                           width: '28px', height: '28px', borderRadius: '50%',
-                          background: msg.role === 'user' ? '#7DBDEE' : 'rgba(255,255,255,0.12)',
-                          border: `2px solid ${msg.role === 'user' ? 'rgba(255,255,255,0.4)' : '#2DD4BF'}`,
+                          background: msg.role === 'user' ? 'var(--info)' : 'rgba(255,255,255,0.12)',
+                          border: `2px solid ${msg.role === 'user' ? 'rgba(255,255,255,0.4)' : 'var(--primary)'}`,
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: '12px', flexShrink: 0,
                         }} aria-hidden="true">
@@ -255,8 +254,8 @@ function ChatViewer() {
                         <div style={{ maxWidth: '80%' }}>
                           <div style={{
                             padding: '10px 14px', borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                            background: msg.role === 'user' ? '#0B1220' : 'rgba(255,255,255,0.12)',
-                            color: '#7DBDEE',
+                            background: msg.role === 'user' ? 'var(--bg)' : 'rgba(255,255,255,0.12)',
+                            color: 'var(--info)',
                             fontSize: '13px', lineHeight: '1.6',
                             wordBreak: 'break-word',
                           }}>
@@ -284,7 +283,7 @@ function ChatViewer() {
           .main-content { margin-left: 0 !important; }
           .chat-user-list {
             position: absolute !important;
-            z-index: 200 !important;
+            z-index: var(--z-modal) !important;
             width: 100% !important;
             height: 100% !important;
           }

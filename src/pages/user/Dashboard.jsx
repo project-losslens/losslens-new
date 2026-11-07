@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import '../../styles/globals.css'
 import AIChat from '../../components/AIChat'
-import Sidebar from '../../components/Sidebar'
 import NotificationBell from '../../components/NotificationBell'
 import { getRiskLevel, getRiskColor } from '../../lib/relapsePrediction'
 
@@ -25,7 +23,7 @@ function triggerConfetti() {
       piece.style.cssText = `
         position: fixed; width: ${Math.random() * 8 + 6}px; height: ${Math.random() * 8 + 6}px;
         background: ${colors[Math.floor(Math.random() * colors.length)]};
-        left: ${Math.random() * 100}%; top: -20px; z-index: 9999; pointer-events: none;
+        left: ${Math.random() * 100}%; top: -20px; z-index: var(--z-toast); pointer-events: none;
         border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
         animation: confettiFall ${Math.random() * 2 + 2}s ease-out forwards;
       `
@@ -41,7 +39,7 @@ function showToast(message, duration = 3000) {
   toast.style.cssText = `
     position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
     background: #7DBDEE; color: #2DD4BF; padding: 10px 20px; border-radius: 100px;
-    font-size: 13px; font-weight: 500; z-index: 3000;
+    font-size: 13px; font-weight: 500; z-index: var(--z-toast);
     box-shadow: 0 4px 16px rgba(11,18,32,0.4); border: 1px solid rgba(255,255,255,0.4);
     animation: slideInRight 0.3s ease-out; white-space: nowrap;
   `
@@ -91,7 +89,7 @@ function UsernamePrompt({ userId, onComplete }) {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.97)', zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.97)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
       <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '400px' }}>
         <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px', textAlign: 'center' }}></span>
         <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#FFFFFF', marginBottom: '8px', textAlign: 'center' }}>One last thing</h2>
@@ -252,14 +250,13 @@ function Dashboard() {
   }
 
   return (
-    <div className="root" style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
+    <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
       {showUsernamePrompt && userId && (
         <UsernamePrompt userId={userId} onComplete={(newUsername) => { setProfile(prev => ({ ...prev, username: newUsername })); setShowUsernamePrompt(false); showToast(`Welcome to LossLens, @${newUsername}! `, 3000); }} />
       )}
 
-      <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 100 }}>
+      <div style={{ flex: 1, minWidth: 0 }} className="page-content">
+        <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}>
               {new Date().getHours() < 12 ? '' : new Date().getHours() < 17 ? '' : ''} {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}, <span style={{ color: '#2DD4BF' }}>{firstName}</span>
@@ -270,7 +267,7 @@ function Dashboard() {
             <NotificationBell />
             <span className={`risk-badge ${profile?.risk_level || 'low'}`}>{(profile?.risk_level || 'Low').charAt(0).toUpperCase() + (profile?.risk_level || 'low').slice(1)} Risk</span>
           </div>
-        </nav>
+        </div>
 
         {showInstallPrompt && (
           <div style={{ background: '#171E2B', border: '2px solid #2DD4BF', borderRadius: '16px', padding: '16px 20px', margin: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', animation: 'slideDown 0.4s ease-out', boxShadow: '0 4px 20px rgba(45,212,191,0.2)' }}>
@@ -285,7 +282,7 @@ function Dashboard() {
 
         <div onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} style={{ position: 'relative' }}>
           {pullDistance > 0 && (
-            <div style={{ position: 'fixed', top: 0, left: '50%', zIndex: 2000, transform: 'translateX(-50%)', paddingTop: Math.max(pullDistance - 40, 4), pointerEvents: 'none' }}>
+            <div style={{ position: 'fixed', top: 0, left: '50%', zIndex: 'var(--z-modal)', transform: 'translateX(-50%)', paddingTop: Math.max(pullDistance - 40, 4), pointerEvents: 'none' }}>
               <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '2px solid #2DD4BF', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `rotate(${Math.min(pullDistance * 3, 360)}deg)`, opacity: Math.min(pullDistance / pullThreshold, 1) }}>
                 {refreshing ? <div style={{ width: '16px', height: '16px', border: '2px solid #2DD4BF', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> : <span style={{ fontSize: '16px', color: '#2DD4BF' }}>{pullDistance >= pullThreshold ? '' : '↓'}</span>}
               </div>
@@ -375,7 +372,7 @@ function Dashboard() {
 
       {/* Crisis Support Modal */}
       {showCrisisModal && (
-        <div onClick={() => setShowCrisisModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.95)', zIndex: 5000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+        <div onClick={() => setShowCrisisModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.95)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '2px solid #FFFFFF', maxWidth: '450px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
               <span style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>🆘</span>
@@ -396,7 +393,7 @@ function Dashboard() {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <span style={{ color: contact.priority ? '#FFFFFF' : '#FFFFFF', fontSize: contact.priority ? '15px' : '13px', fontWeight: 600 }}>{contact.name}</span>
-                      {contact.priority && <span style={{ background: '#FFFFFF', color: 'rgba(255,255,255,0.08)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 600 }}>First Call</span>}
+                      {contact.priority && <span style={{ background: 'var(--surface-2)', color: 'var(--text-muted)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 600 }}>First Call</span>}
                     </div>
                     <p style={{ color: '#2DD4BF', fontSize: '12px', margin: '2px 0 0' }}>{contact.phone}  · {contact.hours}</p>
                   </div>

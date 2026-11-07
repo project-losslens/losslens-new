@@ -19,6 +19,8 @@ const paths = {
   building: 'M3 21h18V8l-9-5-9 5v13Zm6-13h6v13H9V8Zm3 4v8',
   medical: 'M12 21S4 16 4 9a4 4 0 0 1 7-2.65A4 4 0 0 1 18 9c0 7-6 12-6 12ZM12 7v8m-4-4h8',
   mail: 'M3 5h18v14H3V5Zm0 1 9 7 9-7',
+  menu: 'M3 6h18M3 12h18M3 18h18',
+  close: 'm6 6 12 12M18 6 6 18',
 }
 
 export default function AppIcon({ name, size = 18, strokeWidth = 1.8, ...props }) {

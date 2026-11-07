@@ -1,50 +1,53 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import ProtectedRoute from './components/ProtectedRoute'
-import ElevatedRoute from './components/ElevatedRoute'
+import { lazy, Suspense } from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import AppShell from './layouts/AppShell'
+import PageLoader from './components/PageLoader'
+import RequireAuth from './components/RequireAuth'
+import RequireElevated from './components/RequireElevated'
+import { CrisisAlertCountProvider } from './context/CrisisAlertCountContext'
 
-import Landing from './pages/public/Landing'
-import Login from './pages/public/Login'
-import Signup from './pages/public/Signup'
-import ForgotPassword from './pages/public/ForgotPassword'
-import ResetPassword from './pages/public/ResetPassword'
-import Pricing from './pages/public/Pricing'
-import FamilyJoin from './pages/public/FamilyJoin'
+const Landing = lazy(() => import('./pages/public/Landing'))
+const Login = lazy(() => import('./pages/public/Login'))
+const Signup = lazy(() => import('./pages/public/Signup'))
+const ForgotPassword = lazy(() => import('./pages/public/ForgotPassword'))
+const ResetPassword = lazy(() => import('./pages/public/ResetPassword'))
+const Pricing = lazy(() => import('./pages/public/Pricing'))
+const FamilyJoin = lazy(() => import('./pages/public/FamilyJoin'))
 
-import Dashboard from './pages/user/Dashboard'
-import Diary from './pages/user/Diary'
-import CBTModules from './pages/user/CBTModules'
-import UrgeToolkitPage from './pages/user/UrgeToolkitPage'
-import TheCircle from './pages/user/TheCircle'
-import Whispers from './pages/user/Whispers'
-import Events from './pages/user/Events'
-import Resources from './pages/user/Resources'
-import Profile from './pages/user/Profile'
-import PreciousPactPage from './pages/user/PreciousPactPage'
-import MonthlyMirrorPage from './pages/user/MonthlyMirrorPage'
-import FamilyPortalPage from './pages/user/FamilyPortalPage'
-import Onboarding from './pages/user/Onboarding'
-import SubscriptionPage from './pages/user/SubscriptionPage'
+const Dashboard = lazy(() => import('./pages/user/Dashboard'))
+const Diary = lazy(() => import('./pages/user/Diary'))
+const CBTModules = lazy(() => import('./pages/user/CBTModules'))
+const UrgeToolkitPage = lazy(() => import('./pages/user/UrgeToolkitPage'))
+const TheCircle = lazy(() => import('./pages/user/TheCircle'))
+const Whispers = lazy(() => import('./pages/user/Whispers'))
+const Events = lazy(() => import('./pages/user/Events'))
+const Resources = lazy(() => import('./pages/user/Resources'))
+const Profile = lazy(() => import('./pages/user/Profile'))
+const PreciousPactPage = lazy(() => import('./pages/user/PreciousPactPage'))
+const MonthlyMirrorPage = lazy(() => import('./pages/user/MonthlyMirrorPage'))
+const FamilyPortalPage = lazy(() => import('./pages/user/FamilyPortalPage'))
+const Onboarding = lazy(() => import('./pages/user/Onboarding'))
+const SubscriptionPage = lazy(() => import('./pages/user/SubscriptionPage'))
 
-import AdminDashboard from './pages/admin/AdminDashboard'
-import ManageEvents from './pages/admin/ManageEvents'
-import ManageGroups from './pages/admin/ManageGroups'
-import ManageResources from './pages/admin/ManageResources'
-import UserAnalytics from './pages/admin/UserAnalytics'
-import Broadcast from './pages/admin/Broadcast'
-import CrisisAlerts from './pages/admin/CrisisAlerts'
-import AdminLayout from './pages/admin/AdminLayout'
-import UserManagement from './pages/admin/UserManagement'
-import AuditLogs from './pages/admin/AuditLogs'
-import B2BClients from './pages/admin/B2BClients'
-import InsurancePartners from './pages/admin/InsurancePartners'
-import GrantApplications from './pages/admin/GrantApplications'
-import ChatViewer from './pages/admin/ChatViewer'
-import SystemSettings from './pages/admin/SystemSettings'
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
+const ManageEvents = lazy(() => import('./pages/admin/ManageEvents'))
+const ManageGroups = lazy(() => import('./pages/admin/ManageGroups'))
+const ManageResources = lazy(() => import('./pages/admin/ManageResources'))
+const UserAnalytics = lazy(() => import('./pages/admin/UserAnalytics'))
+const Broadcast = lazy(() => import('./pages/admin/Broadcast'))
+const CrisisAlerts = lazy(() => import('./pages/admin/CrisisAlerts'))
+const UserManagement = lazy(() => import('./pages/admin/UserManagement'))
+const AuditLogs = lazy(() => import('./pages/admin/AuditLogs'))
+const B2BClients = lazy(() => import('./pages/admin/B2BClients'))
+const InsurancePartners = lazy(() => import('./pages/admin/InsurancePartners'))
+const GrantApplications = lazy(() => import('./pages/admin/GrantApplications'))
+const ChatViewer = lazy(() => import('./pages/admin/ChatViewer'))
+const SystemSettings = lazy(() => import('./pages/admin/SystemSettings'))
 
 function App() {
   return (
+    <Suspense fallback={<PageLoader />}>
       <Routes>
-        {/* Public */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
@@ -53,43 +56,48 @@ function App() {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/family-join" element={<FamilyJoin />} />
 
-        {/* User */}
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/diary" element={<ProtectedRoute><Diary /></ProtectedRoute>} />
-        <Route path="/cbt" element={<ProtectedRoute><CBTModules /></ProtectedRoute>} />
-        <Route path="/urge-toolkit" element={<ProtectedRoute><UrgeToolkitPage /></ProtectedRoute>} />
-        <Route path="/circle" element={<ProtectedRoute><TheCircle /></ProtectedRoute>} />
-        <Route path="/whispers" element={<ProtectedRoute><Whispers /></ProtectedRoute>} />
-        <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
-        <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/precious-pact" element={<ProtectedRoute><PreciousPactPage /></ProtectedRoute>} />
-        <Route path="/monthly-mirror" element={<ProtectedRoute><MonthlyMirrorPage /></ProtectedRoute>} />
-        <Route path="/family-portal" element={<ProtectedRoute><FamilyPortalPage /></ProtectedRoute>} />
-        <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-        <Route path="/subscription" element={<ProtectedRoute><SubscriptionPage /></ProtectedRoute>} />
-
-        {/* Admin */}
-        <Route path="/admin" element={<ProtectedRoute adminOnly><AdminLayout /></ProtectedRoute>}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="events" element={<ManageEvents />} />
-          <Route path="groups" element={<ManageGroups />} />
-          <Route path="resources" element={<ManageResources />} />
-          <Route path="analytics" element={<UserAnalytics />} />
-          <Route path="broadcast" element={<Broadcast />} />
-          <Route path="crisis" element={<CrisisAlerts />} />
-          <Route path="users" element={<ElevatedRoute><UserManagement /></ElevatedRoute>} />
-          <Route path="insurance" element={<ElevatedRoute><InsurancePartners /></ElevatedRoute>} />
-          <Route path="b2b" element={<ElevatedRoute><B2BClients /></ElevatedRoute>} />
-          <Route path="grants" element={<ElevatedRoute><GrantApplications /></ElevatedRoute>} />
-          <Route path="chats" element={<ElevatedRoute><ChatViewer /></ElevatedRoute>} />
-          <Route path="logs" element={<ElevatedRoute><AuditLogs /></ElevatedRoute>} />
-          <Route path="settings" element={<ElevatedRoute><SystemSettings /></ElevatedRoute>} />
+        <Route element={<RequireAuth />}>
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route element={<AppShell />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/diary" element={<Diary />} />
+            <Route path="/cbt" element={<CBTModules />} />
+            <Route path="/urge-toolkit" element={<UrgeToolkitPage />} />
+            <Route path="/circle" element={<TheCircle />} />
+            <Route path="/whispers" element={<Whispers />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/precious-pact" element={<PreciousPactPage />} />
+            <Route path="/monthly-mirror" element={<MonthlyMirrorPage />} />
+            <Route path="/family-portal" element={<FamilyPortalPage />} />
+            <Route path="/subscription" element={<SubscriptionPage />} />
+          </Route>
+          <Route element={<RequireAuth role="admin" />}>
+            <Route element={<CrisisAlertCountProvider><AppShell admin /></CrisisAlertCountProvider>}>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/events" element={<ManageEvents />} />
+              <Route path="/admin/groups" element={<ManageGroups />} />
+              <Route path="/admin/resources" element={<ManageResources />} />
+              <Route path="/admin/analytics" element={<UserAnalytics />} />
+              <Route path="/admin/broadcast" element={<Broadcast />} />
+              <Route path="/admin/crisis" element={<CrisisAlerts />} />
+              <Route element={<RequireElevated />}>
+                <Route path="/admin/users" element={<UserManagement />} />
+                <Route path="/admin/insurance" element={<InsurancePartners />} />
+                <Route path="/admin/b2b" element={<B2BClients />} />
+                <Route path="/admin/grants" element={<GrantApplications />} />
+                <Route path="/admin/chats" element={<ChatViewer />} />
+                <Route path="/admin/logs" element={<AuditLogs />} />
+                <Route path="/admin/settings" element={<SystemSettings />} />
+              </Route>
+            </Route>
+          </Route>
         </Route>
 
-        {/* Catch-all */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
+    </Suspense>
   )
 }
 

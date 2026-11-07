@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import '../../styles/globals.css'
 
 const PLANS = {
   FREE: 'free',
@@ -11,7 +10,7 @@ const PLANS = {
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
   toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
+  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
   document.body.appendChild(toast)
   setTimeout(() => toast.remove(), duration)
 }
@@ -160,19 +159,14 @@ export default function SubscriptionPage() {
 
   if (pageLoading) {
     return (
-      <div className="root" style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="page-root" style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ width: '32px', height: '32px', border: '3px solid rgba(255,255,255,0.12)', borderTopColor: '#2DD4BF', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }}></div>
       </div>
     )
   }
 
   return (
-    <div className="root">
-      <nav className="navbar">
-        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>LossLens</span>
-        <button className="nav-ghost" onClick={() => navigate('/dashboard')} aria-label="Back to dashboard">â"   Dashboard</button>
-      </nav>
-
+    <div className="page-root">
       <div className="dashboard" style={{ padding: '2rem 1.5rem', maxWidth: '600px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div className="pill" style={{ marginBottom: '1rem' }}>
@@ -375,7 +369,7 @@ export default function SubscriptionPage() {
 
       {/* Coming Soon Modal */}
       {showComingSoon && (
-        <div onClick={handleCloseComingSoon} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+        <div onClick={handleCloseComingSoon} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '2px solid #2DD4BF', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
             <h3 style={{ color: '#2DD4BF', fontSize: '18px', fontFamily: "'Playfair Display', serif", marginBottom: '12px' }}>Premium Coming Soon!</h3>
@@ -391,14 +385,6 @@ export default function SubscriptionPage() {
           </div>
         </div>
       )}
-
-      <nav className="bottom-nav">
-        <button onClick={() => navigate('/dashboard')} className="bottom-nav-item"><span></span><span>Home</span></button>
-        <button onClick={() => navigate('/diary')} className="bottom-nav-item"><span></span><span>Diary</span></button>
-        <button onClick={() => navigate('/cbt')} className="bottom-nav-item"><span></span><span>Learn</span></button>
-        <button onClick={() => navigate('/urge-toolkit')} className="bottom-nav-item"><span></span><span>Toolkit</span></button>
-        <button onClick={() => navigate('/profile')} className="bottom-nav-item"><span></span><span>Profile</span></button>
-      </nav>
     </div>
   )
 }

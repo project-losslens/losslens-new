@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import '../../styles/globals.css'
-import Sidebar from '../../components/Sidebar'
 
 //  Toast helper using React state instead of DOM manipulation
 function showToast(message, duration = 3000) {
@@ -11,7 +9,7 @@ function showToast(message, duration = 3000) {
   toast.style.cssText = `
     position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
     background: #7DBDEE; color: #2DD4BF; padding: 10px 20px; border-radius: 100px;
-    font-size: 13px; font-weight: 500; z-index: 3000;
+    font-size: 13px; font-weight: 500; z-index: var(--z-toast);
     box-shadow: 0 4px 16px rgba(11,18,32,0.4); border: 1px solid rgba(255,255,255,0.4);
     animation: slideInRight 0.3s ease-out; white-space: nowrap;
   `
@@ -34,7 +32,7 @@ function triggerConfetti() {
       piece.style.cssText = `
         position: fixed; width: ${Math.random() * 10 + 6}px; height: ${Math.random() * 10 + 6}px;
         background: ${colors[Math.floor(Math.random() * colors.length)]};
-        left: ${Math.random() * 100}%; top: -20px; z-index: 9999; pointer-events: none;
+        left: ${Math.random() * 100}%; top: -20px; z-index: var(--z-toast); pointer-events: none;
         border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
         animation: confettiFall ${Math.random() * 2 + 2}s ease-out forwards;
       `
@@ -238,9 +236,8 @@ function CBTModules() {
   const allCompleted = completedCount === modules.length
 
   return (
-    <div className="root" style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
+    <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
+      <div style={{ flex: 1, minWidth: 0 }} className="page-content">
 
         {/* Celebration overlay — dismissable with aria */}
         {showCelebration && (
@@ -249,7 +246,7 @@ function CBTModules() {
             role="dialog"
             aria-modal="true"
             aria-label="Module completed"
-            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(11,18,32,0.9)', zIndex: 2000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
           >
             <div style={{ fontSize: '60px', animation: 'checkmarkPop 0.5s ease-out' }}></div>
             <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif", marginTop: '16px' }}>Module Complete!</h2>
@@ -264,10 +261,10 @@ function CBTModules() {
           </div>
         )}
 
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 100 }}>
+        <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
           <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> CBT Modules</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{allCompleted ? 'All complete! ' : `${completedCount} of ${modules.length} completed`}</p></div>
           <span style={{ fontSize: '14px', color: '#2DD4BF', fontWeight: 600 }}>{Math.round((completedCount / modules.length) * 100)}%</span>
-        </nav>
+        </div>
 
         <div style={{ padding: '1.5rem' }}>
           <div className="dash-section" style={{ marginBottom: '1rem' }}><div className="progress-bar-wrap"><div className="progress-bar"><div className="progress-fill" style={{ width: `${(completedCount / modules.length) * 100}%`, transition: 'width 0.8s ease' }} /></div><span className="progress-label">{Math.round((completedCount / modules.length) * 100)}%</span></div></div>
