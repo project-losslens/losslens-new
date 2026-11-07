@@ -35,10 +35,11 @@ function Sidebar({ items, brand, isMobile, drawerOpen, desktopOpen, onNavigate, 
       >
         <NavLink className="sidebar__brand" to={items[0]?.to || '/'} onClick={onNavigate}>{brand}</NavLink>
         <nav className="sidebar__nav" aria-label="Primary">
+          {brand.includes('Admin') && <h2 className="sidebar__section-title">Operations</h2>}
           <ul>{normalItems.map((item) => <li key={item.to}>{renderLink(item)}</li>)}</ul>
           {isSuperAdmin && elevatedItems.length > 0 && (
             <section className="sidebar__section" aria-label="Elevated">
-              <h2>Elevated</h2>
+              <h2>Elevated Access</h2>
               <ul>{elevatedItems.map((item) => <li key={item.to}>{renderLink(item)}</li>)}</ul>
             </section>
           )}

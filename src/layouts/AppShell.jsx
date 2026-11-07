@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import AppIcon from '../components/AppIcon'
+import CrisisAccessButton from '../components/CrisisAccessButton'
 import { useAuthProfile } from '../context/AuthProfileContext'
 import useMediaQuery from '../hooks/useMediaQuery'
-import { adminNav, getPageTitle, userNav } from '../config/nav.config'
+import { adminNav, getPageTitle, insurerNav, therapistNav, userNav } from '../config/nav.config'
 import { useCrisisAlertCount } from '../context/CrisisAlertCountContext'
 import { supabase } from '../lib/supabase'
 
@@ -20,13 +22,15 @@ export default function AppShell({ admin = false }) {
   const navigate = useNavigate()
   const mainRef = useRef(null)
   const isMobile = useMediaQuery('(max-width: 768px)')
-  const { isSuperAdmin } = useAuthProfile()
+  const { isSuperAdmin, role, user } = useAuthProfile()
   const openCrisisAlerts = useCrisisAlertCount()
   const [desktopOpen, setDesktopOpen] = useState(() => localStorage.getItem('losslens:sidebar') !== 'closed')
   const [drawerForLocation, setDrawerForLocation] = useState(null)
   const [elevatedUnlocked, setElevatedUnlocked] = useState(isElevatedUnlocked)
   const drawerOpen = isMobile && drawerForLocation === location.key
-  const items = (admin ? adminNav : userNav)
+  const portalNav = role === 'therapist' ? therapistNav : role === 'insurer' ? insurerNav : null
+  const activeNav = admin ? adminNav : portalNav || userNav
+  const items = activeNav
     .filter((item) => !item.section || isSuperAdmin)
     .map((item) => item.to === '/admin/crisis'
       ? { ...item, badge: openCrisisAlerts > 0 ? openCrisisAlerts : null }
@@ -80,7 +84,7 @@ export default function AppShell({ admin = false }) {
   }
 
   return (
-    <div className={`shell${admin ? ' shell--admin' : ''}`} style={{ '--sidebar-w': !isMobile && desktopOpen ? '260px' : '0px' }}>
+    <div className={`shell${admin ? ' shell--admin' : ''}`} style={{ '--sidebar-w': !isMobile && desktopOpen ? '240px' : '0px' }}>
       <a className="shell__skip" href="#main-content">Skip to content</a>
       <Sidebar
         items={items}
@@ -109,11 +113,22 @@ export default function AppShell({ admin = false }) {
       <main className="shell__main" id="main-content" ref={mainRef} tabIndex={-1}>
         <header className="shell__header">
           <h1>{getPageTitle(location.pathname)}</h1>
+          <div className="shell__header-actions">
+            {admin && <Link className="shell__back-link" to="/dashboard">Back to app</Link>}
+            <details className="shell__account">
+              <summary>{user?.email || 'Account'}</summary>
+              <div className="shell__account-menu">
+                <Link to="/profile">Profile</Link>
+                <button type="button" onClick={handleSignOut}>Sign out</button>
+              </div>
+            </details>
+          </div>
         </header>
         <div className="shell__content">
           <Outlet />
         </div>
       </main>
+      <CrisisAccessButton />
     </div>
   )
 }

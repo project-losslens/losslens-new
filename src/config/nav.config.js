@@ -31,6 +31,19 @@ export const adminNav = [
   { to: '/admin/settings', label: 'System Settings', icon: 'settings', section: 'elevated' },
 ]
 
+export const therapistNav = [
+  { to: '/therapist', label: 'Therapist', icon: 'medical', end: true },
+  { to: '/therapist/onboarding', label: 'Verification', icon: 'profile' },
+  { to: '/therapist/payouts', label: 'Payouts', icon: 'document' },
+]
+
+export const insurerNav = [
+  { to: '/insurer', label: 'Insurer', icon: 'building', end: true },
+  { to: '/insurer/claims', label: 'Claims', icon: 'document' },
+  { to: '/insurer/invoices', label: 'Invoices', icon: 'document' },
+  { to: '/insurer/analytics', label: 'Analytics', icon: 'analytics' },
+]
+
 export function getPageTitle(pathname) {
   const pageTitles = {
     '/admin': 'Admin Dashboard',
@@ -38,6 +51,8 @@ export function getPageTitle(pathname) {
     '/diary': "Today's Diary",
     '/precious-pact': 'The LossLens Pact',
     '/profile': 'My Profile',
+    '/therapist': 'Therapist Portal',
+    '/insurer': 'Insurer Portal',
   }
   if (pageTitles[pathname]) return pageTitles[pathname]
 
