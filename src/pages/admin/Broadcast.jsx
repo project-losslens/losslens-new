@@ -8,12 +8,12 @@ const HISTORY_LIMIT = 30
 const SEND_COOLDOWN_MS = 5000
 
 const TARGET_CONFIG = {
-  all: { label: 'All Users', query: () => supabase.from('profiles').select('*', { count: 'exact', head: true }) },
-  active: { label: 'Active This Week', query: () => { const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString(); return supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('last_active', weekAgo) } },
-  inactive: { label: 'Inactive 7+ Days', query: () => { const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString(); return supabase.from('profiles').select('*', { count: 'exact', head: true }).lt('last_active', weekAgo) } },
-  high_risk: { label: 'High Risk Users', query: () => supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('risk_level', 'high') },
-  medium_risk: { label: 'Medium Risk Users', query: () => supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('risk_level', 'medium') },
-  new_users: { label: 'New Users (30 Days)', query: () => { const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString(); return supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', monthAgo) } },
+  all: { label: 'All Users', query: () => supabase.from('admin_profiles_safe').select('id', { count: 'exact', head: true }) },
+  active: { label: 'Active This Week', query: () => { const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString(); return supabase.from('admin_profiles_safe').select('id', { count: 'exact', head: true }).gte('last_active', weekAgo) } },
+  inactive: { label: 'Inactive 7+ Days', query: () => { const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString(); return supabase.from('admin_profiles_safe').select('id', { count: 'exact', head: true }).or(`last_active.is.null,last_active.lt.${weekAgo}`) } },
+  high_risk: { label: 'High Risk Users', query: () => supabase.from('admin_profiles_safe').select('id', { count: 'exact', head: true }).eq('risk_level', 'high') },
+  medium_risk: { label: 'Medium Risk Users', query: () => supabase.from('admin_profiles_safe').select('id', { count: 'exact', head: true }).eq('risk_level', 'medium') },
+  new_users: { label: 'New Users (30 Days)', query: () => { const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString(); return supabase.from('admin_profiles_safe').select('id', { count: 'exact', head: true }).gte('created_at', monthAgo) } },
 }
 
 const TEMPLATES = [
@@ -90,40 +90,21 @@ export default function Broadcast() {
     setSending(true)
 
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const { error: sendError } = await supabase.from('broadcasts').insert({
-        title: form.title.trim(),
-        body: form.body.trim(),
-        target: form.target,
-        target_label: targetLabel,
-        sent_at: new Date().toISOString(),
-        sent_to_count: userCount,
-        sent_by: session?.user?.id || null,
-        channel: 'in_app',
-        status: 'sent',
+      const { data, error: sendError } = await supabase.rpc('send_broadcast', {
+        p_title: form.title.trim(),
+        p_message: form.body.trim(),
+        p_audience: form.target,
       })
       if (sendError) throw sendError
+      const recipientCount = data?.recipient_count ?? userCount
 
-      //  Also insert into notifications for in-app delivery
-      if (form.target === 'all') {
-        // For "all users" — batch notification insertion
-        await supabase.from('notifications').insert({
-          type: 'broadcast',
-          title: form.title.trim(),
-          message: form.body.trim().substring(0, 200),
-          icon: '',
-          link: '/dashboard',
-          broadcast_id: null, // will be set by trigger
-        })
-      }
-
-      showToast(` Broadcast sent to ~${userCount} ${targetLabel.toLowerCase()}!`)
+      showToast(` Broadcast sent to ${recipientCount.toLocaleString()} ${targetLabel.toLowerCase()}!`)
       setForm({ title: '', body: '', target: 'all' })
       setPreview(false)
       fetchAll()
       fetchUserCount('all')
     } catch (err) {
-      showToast('Send failed: ' + err.message, 'error')
+      showToast('Send failed: ' + (err.message || 'Unknown error'), 'error')
     } finally { setSending(false) }
   }
 
@@ -277,15 +258,14 @@ export default function Broadcast() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <span style={{ color: 'var(--text)', fontSize: '14px', fontWeight: 600 }}>{b.title}</span>
-                      <span style={{ background: 'rgba(255,255,255,0.12)', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{b.target_label || b.target || 'all'}</span>
+                      <span style={{ background: 'rgba(255,255,255,0.12)', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{b.audience || 'all'}</span>
                     </div>
                     <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', whiteSpace: 'nowrap' }}>{fmtTime(b.sent_at)}</span>
                   </div>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 8px', lineHeight: '1.5' }}>{b.body?.substring(0, 200)}{b.body?.length > 200 ? '"¦' : ''}</p>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 8px', lineHeight: '1.5' }}>{b.message?.substring(0, 200)}{b.message?.length > 200 ? '…' : ''}</p>
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                    <span style={{ color: 'var(--primary)', fontSize: '11px' }}> {b.sent_to_count?.toLocaleString() || '0'} recipients</span>
-                    <span style={{ color: 'var(--info)', fontSize: '11px' }}>{b.channel || 'in-app'}</span>
-                    <span style={{ color: b.status === 'sent' ? 'var(--primary)' : 'var(--info)', fontSize: '11px' }}>{b.status}</span>
+                    <span style={{ color: 'var(--primary)', fontSize: '11px' }}> {b.recipient_count?.toLocaleString() || '0'} recipients</span>
+                    <span style={{ color: 'var(--info)', fontSize: '11px' }}>in-app</span>
                   </div>
                 </div>
               ))}

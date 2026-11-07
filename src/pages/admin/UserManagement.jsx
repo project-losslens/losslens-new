@@ -43,16 +43,6 @@ export default function UserManagement() {
   const [showGrantPremium, setShowGrantPremium] = useState(null)
   const [showRevokePremium, setShowRevokePremium] = useState(null)
 
-  const fetchEmail = async (userId) => {
-    try {
-      const { data, error } = await supabase.rpc('get_user_email', { user_id: userId })
-      if (error) throw error
-      return data || null
-    } catch (err) {
-      return null
-    }
-  }
-
   const fetchUsers = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -63,20 +53,7 @@ export default function UserManagement() {
         .order('created_at', { ascending: false })
 
       if (fetchError) throw fetchError
-
-      const userList = data || []
-
-      if (userList.length > 0) {
-        const usersWithEmails = await Promise.all(
-          userList.map(async (user) => {
-            const email = await fetchEmail(user.id)
-            return { ...user, email }
-          })
-        )
-        setUsers(usersWithEmails)
-      } else {
-        setUsers([])
-      }
+      setUsers(data || [])
     } catch (err) {
       setError('Failed to load users.')
     } finally { setLoading(false) }

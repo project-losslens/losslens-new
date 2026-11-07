@@ -41,11 +41,10 @@ export default function CrisisAlerts() {
 
   const resolveAlert = async (id) => {
     setResolvingId(id)
-    const { error: resolveError } = await supabase.from('crisis_alerts').update({
-      resolved: true,
-      resolved_at: new Date().toISOString(),
-      admin_notes: notes[id] || null
-    }).eq('id', id)
+    const { error: resolveError } = await supabase.rpc('crisis_resolve', {
+      p_alert_id: id,
+      p_notes: notes[id] || null,
+    })
     if (resolveError) {
       showToast('Failed to resolve.', 'error')
     } else {
@@ -59,9 +58,10 @@ export default function CrisisAlerts() {
 
   const escalate = async (alert) => {
     setEscalatingId(alert.id)
-    const { error: escError } = await supabase.from('crisis_alerts').update({
-      admin_notes: ` ESCALATED: ${new Date().toLocaleString('en-KE')} — Requires immediate counselor intervention.`
-    }).eq('id', alert.id)
+    const { error: escError } = await supabase.rpc('crisis_escalate', {
+      p_alert_id: alert.id,
+      p_notes: null,
+    })
     if (escError) {
       showToast('Escalation failed.', 'error')
     } else {

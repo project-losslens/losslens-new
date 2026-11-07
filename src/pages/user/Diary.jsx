@@ -200,27 +200,24 @@ function Diary() {
       return
     }
 
-    // Update profile
-    await updateProfile(gambled, moneySpent)
-    fetchHistory(userId)
-
-    // Check for badges
-    let earnedBadges = []
+    // Recompute streak/money/badges server-side (privileged fields).
+    let recomputed = null
     try {
-      const { checkBadges, checkStreakFreeze } = await import('../../lib/gamification')
-      earnedBadges = await checkBadges(userId) || []
+      const { recomputeProgress, checkBadges } = await import('../../lib/gamification')
+      recomputed = await recomputeProgress()
+      if (recomputed?.freeze_activated) {
+        showToast(' Streak freeze activated! Your streak is safe.', 4000)
+      }
+      const earnedBadges = await checkBadges(userId) || []
       if (earnedBadges.length > 0) {
         triggerConfetti()
         earnedBadges.forEach(b => showToast(`${b.emoji} ${b.name} badge earned!`, 4000))
       }
-
-      const freezeAvailable = await checkStreakFreeze(userId)
-      if (freezeAvailable && profile?.streak_freeze_used) {
-        showToast(' Streak freeze renewed!', 3000)
-      }
     } catch (err) {
       console.error('Gamification error:', err)
     }
+    fetchHistory(userId)
+    if (recomputed) fetchProfile(userId)
 
     setLoading(false)
     setSaved(true)
@@ -233,29 +230,7 @@ function Diary() {
     setTimeout(() => { setSaved(false); setShowCheckmark(false) }, 2000)
   }
 
-  const updateProfile = async (didGamble, spent) => {
-    const { data: prof } = await supabase.from('profiles').select('streak_days, money_saved, clean_since, streak_freeze_used').eq('id', userId).single()
-    if (!prof) return
-
-    let newStreak = didGamble ? 0 : (prof.streak_days || 0) + 1
-
-    if (didGamble && !prof.streak_freeze_used) {
-      try {
-        const { checkStreakFreeze, useStreakFreeze } = await import('../../lib/gamification')
-        const available = await checkStreakFreeze(userId)
-        if (available) {
-          await useStreakFreeze(userId)
-          newStreak = (prof.streak_days || 0) + 1
-          showToast(' Streak freeze activated! Your streak is safe.', 4000)
-        }
-      } catch (err) {}
-    }
-
-    const newSaved = didGamble ? prof.money_saved : (prof.money_saved || 0) + (spent ? parseFloat(spent) : 0)
-    const cleanSince = didGamble ? null : (prof.clean_since || new Date().toISOString().split('T')[0])
-
-    await supabase.from('profiles').update({ streak_days: newStreak, money_saved: newSaved, clean_since: cleanSince }).eq('id', userId)
-  }
+  // Profile progress fields are recomputed server-side via recompute_progress().
 
   return (
     <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>

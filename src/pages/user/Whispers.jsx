@@ -154,13 +154,14 @@ export default function Whispers() {
     if (matches.filter(m => m.status === 'active' && m.user2_hash).length >= MAX_ACTIVE_CHATS) { showToast('Maximum active chats reached. End one first.'); return }
     setSendingRequest(true)
     try {
-      const userHash = await ensureCircleHash(identity.uid)
-      const { data, error } = await supabase.from('whispers_matches').insert({
-        user1_hash: userHash, user1_role: 'flexible', status: 'pending',
-        request_message: requestMessage.substring(0, 140), request_type: 'request',
-      }).select().single()
+      await ensureCircleHash()
+      const { data, error } = await supabase.rpc('whispers_request', {
+        p_peer_hash: null,
+        p_message: requestMessage.substring(0, 140),
+      })
       if (error) throw error
-      setMatches(prev => [data, ...prev])
+      const match = Array.isArray(data) ? data[0] : data
+      setMatches(prev => [match, ...prev])
       showToast(' Request sent!', 3000)
       setActiveTab('sent')
     } catch (err) { showToast('Failed to send.', 2000) }
@@ -170,15 +171,17 @@ export default function Whispers() {
   const acceptRequest = async (matchId) => {
     if (!identity) return
     try {
-      const { data, error } = await supabase.from('whispers_matches').update({
-        user2_hash: identity.hash, user2_role: 'flexible', status: 'active',
-      }).eq('id', matchId).is('user2_hash', null).select().single()
+      const { data, error } = await supabase.rpc('whispers_respond', {
+        p_match_id: matchId,
+        p_accept: true,
+      })
       if (error) {
-        if (error.code === 'PGRST116') { showToast('This request was already taken.'); fetchMatches(identity.hash); return }
+        if (/already taken/i.test(error.message || '')) { showToast('This request was already taken.'); fetchMatches(identity.hash); return }
         throw error
       }
-      setMatches(prev => prev.map(m => m.id === matchId ? data : m))
-      setActiveMatch(data)
+      const match = Array.isArray(data) ? data[0] : data
+      setMatches(prev => prev.map(m => m.id === matchId ? match : m))
+      setActiveMatch(match)
       showToast(' Chat opened!', 3000)
     } catch (err) { showToast('Failed to accept.', 2000) }
   }
@@ -186,10 +189,11 @@ export default function Whispers() {
   const rejectRequest = async (matchId) => {
     if (!identity) return
     try {
-      await supabase.from('whispers_matches').update({
-        status: 'rejected', rejected_at: new Date().toISOString(),
-        rejected_by: identity.hash,
-      }).eq('id', matchId).is('user2_hash', null)
+      const { error } = await supabase.rpc('whispers_respond', {
+        p_match_id: matchId,
+        p_accept: false,
+      })
+      if (error) throw error
       showToast('Declined.', 2000)
       fetchMatches(identity.hash)
     } catch (err) { showToast('Failed.', 2000) }
@@ -200,7 +204,11 @@ export default function Whispers() {
     const match = matches.find(m => m.id === matchId)
     if (match?.status !== 'pending') { showToast('Cannot cancel this request.'); return }
     try {
-      await supabase.from('whispers_matches').update({ status: 'cancelled' }).eq('id', matchId).eq('user1_hash', identity.hash)
+      const { error } = await supabase.rpc('whispers_respond', {
+        p_match_id: matchId,
+        p_accept: false,
+      })
+      if (error) throw error
       showToast('Cancelled.', 2000)
       fetchMatches(identity.hash)
     } catch (err) { showToast('Failed.', 2000) }
@@ -268,12 +276,12 @@ export default function Whispers() {
   const submitFeedback = async () => {
     if (!activeMatch || !identity) return
     try {
-      const isU1 = activeMatch.user1_hash === identity.hash
-      await supabase.from('whispers_matches').update({
-        status: 'ended', ended_at: new Date().toISOString(),
-        [isU1 ? 'user1_feedback' : 'user2_feedback']: feedback || null,
-        [isU1 ? 'user1_rating' : 'user2_rating']: rating,
-      }).eq('id', activeMatch.id)
+      const { error } = await supabase.rpc('whispers_rate', {
+        p_match_id: activeMatch.id,
+        p_rating: rating || 3,
+        p_feedback: feedback || null,
+      })
+      if (error) throw error
       showToast('Thank you ', 3000)
       fetchMatches(identity.hash)
     } catch (err) { showToast('Failed to submit.', 2000) }
