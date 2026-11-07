@@ -1,105 +1,228 @@
--- ============================================================================
--- LossLens Security Hardening — weak circle-hash remap
--- ============================================================================
--- Replaces legacy weak hashes (length <= 13 and prefixed 'user_') with
--- cryptographically random 32-char hex hashes, consistently across every
--- table that stores them, including profiles.circle_user_hash.
---
--- Runs inside a single transaction. The whispers identity triggers and the
--- profile privilege trigger are disabled for the duration because they
--- legitimately forbid identity-field mutation; they are re-enabled before
--- COMMIT. The migration role (postgres / supabase_admin) performs the writes.
---
--- ROLLBACK: this migration is not auto-reversible. Before applying, take a
--- backup/snapshot of the affected tables. To roll back manually, restore
--- circle_user_hash / user_hash / user1_hash / user2_hash / sender_hash /
--- reporter_hash values from that backup.
--- ============================================================================
+DO $migration$
+DECLARE
+    mapped_count BIGINT;
+    remaining_count BIGINT;
+BEGIN
 
-begin;
+    -- =========================================================
+    -- 1. Create the temporary mapping table
+    -- =========================================================
 
--- Snapshot the weak -> strong mapping once so every table stays consistent.
-create temporary table if not exists pg_temp.weak_hash_map (
-  old_hash text primary key,
-  new_hash text not null
-) on commit drop;
+    CREATE TEMP TABLE weak_hash_map (
+        old_hash TEXT PRIMARY KEY,
+        new_hash TEXT NOT NULL UNIQUE
+    ) ON COMMIT DROP;
 
-truncate pg_temp.weak_hash_map;
+    -- =========================================================
+    -- 2. Collect all weak hashes from the affected tables
+    -- =========================================================
 
-insert into pg_temp.weak_hash_map (old_hash, new_hash)
-select h, encode(gen_random_bytes(16), 'hex')
-from (
-  select circle_user_hash as h from public.profiles
-    where circle_user_hash is not null
-  union
-  select user_hash from public.circle_room_members
-  union
-  select user_hash from public.circle_messages
-  union
-  select user1_hash from public.whispers_matches where user1_hash is not null
-  union
-  select user2_hash from public.whispers_matches where user2_hash is not null
-  union
-  select sender_hash from public.whispers_messages
-  union
-  select reporter_hash from public.whispers_reports
-) src
-where h like 'user\_%' escape '\'
-  and length(h) <= 13
-group by h;
+    INSERT INTO weak_hash_map (old_hash, new_hash)
+    SELECT
+        h,
+        encode(gen_random_bytes(16), 'hex')
+    FROM (
+        SELECT circle_user_hash AS h
+        FROM public.profiles
+        WHERE circle_user_hash IS NOT NULL
 
-alter table public.whispers_matches disable trigger enforce_whispers_match_identity;
-alter table public.whispers_messages disable trigger enforce_whispers_message_identity;
-alter table public.profiles disable trigger enforce_profile_privilege_updates;
-alter table public.profiles disable trigger sync_is_super_admin_flag;
-alter table public.profiles disable trigger audit_profile_privileged_change;
+        UNION
 
-update public.profiles p
-set circle_user_hash = m.new_hash
-from pg_temp.weak_hash_map m
-where p.circle_user_hash = m.old_hash;
+        SELECT user_hash
+        FROM public.circle_room_members
+        WHERE user_hash IS NOT NULL
 
-update public.circle_room_members m
-set user_hash = map.new_hash
-from pg_temp.weak_hash_map map
-where m.user_hash = map.old_hash;
+        UNION
 
-update public.circle_messages c
-set user_hash = map.new_hash
-from pg_temp.weak_hash_map map
-where c.user_hash = map.old_hash;
+        SELECT user_hash
+        FROM public.circle_messages
+        WHERE user_hash IS NOT NULL
 
-update public.circle_messages c
-set user_id = null
-where c.user_id is not null
-  and not exists (select 1 from public.profiles p where p.id = c.user_id);
+        UNION
 
-update public.whispers_matches w
-set user1_hash = map.new_hash
-from pg_temp.weak_hash_map map
-where w.user1_hash = map.old_hash;
+        SELECT user1_hash
+        FROM public.whispers_matches
+        WHERE user1_hash IS NOT NULL
 
-update public.whispers_matches w
-set user2_hash = map.new_hash
-from pg_temp.weak_hash_map map
-where w.user2_hash = map.old_hash;
+        UNION
 
-update public.whispers_messages msg
-set sender_hash = map.new_hash
-from pg_temp.weak_hash_map map
-where msg.sender_hash = map.old_hash;
+        SELECT user2_hash
+        FROM public.whispers_matches
+        WHERE user2_hash IS NOT NULL
 
-update public.whispers_reports r
-set reporter_hash = map.new_hash
-from pg_temp.weak_hash_map map
-where r.reporter_hash = map.old_hash;
+        UNION
 
-alter table public.whispers_matches enable trigger enforce_whispers_match_identity;
-alter table public.whispers_messages enable trigger enforce_whispers_message_identity;
-alter table public.profiles enable trigger enforce_profile_privilege_updates;
-alter table public.profiles enable trigger sync_is_super_admin_flag;
-alter table public.profiles enable trigger audit_profile_privileged_change;
+        SELECT sender_hash
+        FROM public.whispers_messages
+        WHERE sender_hash IS NOT NULL
 
-commit;
+        UNION
 
-notify pgrst, 'reload schema';
+        SELECT reporter_hash
+        FROM public.whispers_reports
+        WHERE reporter_hash IS NOT NULL
+    ) AS source_hashes
+    WHERE LEFT(h, 5) = 'user_'
+      AND LENGTH(h) <= 13
+    GROUP BY h;
+
+    SELECT COUNT(*)
+    INTO mapped_count
+    FROM weak_hash_map;
+
+    RAISE NOTICE 'Weak hashes identified: %', mapped_count;
+
+    -- =========================================================
+    -- 3. Disable the identity and profile privilege triggers
+    -- =========================================================
+
+    EXECUTE 'ALTER TABLE public.whispers_matches
+             DISABLE TRIGGER enforce_whispers_match_identity';
+
+    EXECUTE 'ALTER TABLE public.whispers_messages
+             DISABLE TRIGGER enforce_whispers_message_identity';
+
+    EXECUTE 'ALTER TABLE public.profiles
+             DISABLE TRIGGER enforce_profile_privilege_updates';
+
+    EXECUTE 'ALTER TABLE public.profiles
+             DISABLE TRIGGER sync_is_super_admin_flag';
+
+    EXECUTE 'ALTER TABLE public.profiles
+             DISABLE TRIGGER audit_profile_privileged_change';
+
+    -- =========================================================
+    -- 4. Update profiles
+    -- =========================================================
+
+    UPDATE public.profiles AS p
+    SET circle_user_hash = m.new_hash
+    FROM weak_hash_map AS m
+    WHERE p.circle_user_hash = m.old_hash;
+
+    -- =========================================================
+    -- 5. Update Circle room memberships
+    -- =========================================================
+
+    UPDATE public.circle_room_members AS crm
+    SET user_hash = m.new_hash
+    FROM weak_hash_map AS m
+    WHERE crm.user_hash = m.old_hash;
+
+    -- =========================================================
+    -- 6. Update Circle messages
+    -- =========================================================
+
+    UPDATE public.circle_messages AS cm
+    SET user_hash = m.new_hash
+    FROM weak_hash_map AS m
+    WHERE cm.user_hash = m.old_hash;
+
+    -- =========================================================
+    -- 7. Update Whispers matches
+    -- =========================================================
+
+    UPDATE public.whispers_matches AS wm
+    SET user1_hash = m.new_hash
+    FROM weak_hash_map AS m
+    WHERE wm.user1_hash = m.old_hash;
+
+    UPDATE public.whispers_matches AS wm
+    SET user2_hash = m.new_hash
+    FROM weak_hash_map AS m
+    WHERE wm.user2_hash = m.old_hash;
+
+    -- =========================================================
+    -- 8. Update Whispers messages
+    -- =========================================================
+
+    UPDATE public.whispers_messages AS msg
+    SET sender_hash = m.new_hash
+    FROM weak_hash_map AS m
+    WHERE msg.sender_hash = m.old_hash;
+
+    -- =========================================================
+    -- 9. Update Whispers reports
+    -- =========================================================
+
+    UPDATE public.whispers_reports AS wr
+    SET reporter_hash = m.new_hash
+    FROM weak_hash_map AS m
+    WHERE wr.reporter_hash = m.old_hash;
+
+    -- =========================================================
+    -- 10. Re-enable triggers
+    -- =========================================================
+
+    EXECUTE 'ALTER TABLE public.whispers_matches
+             ENABLE TRIGGER enforce_whispers_match_identity';
+
+    EXECUTE 'ALTER TABLE public.whispers_messages
+             ENABLE TRIGGER enforce_whispers_message_identity';
+
+    EXECUTE 'ALTER TABLE public.profiles
+             ENABLE TRIGGER enforce_profile_privilege_updates';
+
+    EXECUTE 'ALTER TABLE public.profiles
+             ENABLE TRIGGER sync_is_super_admin_flag';
+
+    EXECUTE 'ALTER TABLE public.profiles
+             ENABLE TRIGGER audit_profile_privileged_change';
+
+    -- =========================================================
+    -- 11. Verify that no weak hashes remain
+    -- =========================================================
+
+    SELECT COUNT(*)
+    INTO remaining_count
+    FROM (
+        SELECT circle_user_hash AS h
+        FROM public.profiles
+
+        UNION ALL
+
+        SELECT user_hash
+        FROM public.circle_room_members
+
+        UNION ALL
+
+        SELECT user_hash
+        FROM public.circle_messages
+
+        UNION ALL
+
+        SELECT user1_hash
+        FROM public.whispers_matches
+
+        UNION ALL
+
+        SELECT user2_hash
+        FROM public.whispers_matches
+
+        UNION ALL
+
+        SELECT sender_hash
+        FROM public.whispers_messages
+
+        UNION ALL
+
+        SELECT reporter_hash
+        FROM public.whispers_reports
+    ) AS all_hashes
+    WHERE LEFT(h, 5) = 'user_'
+      AND LENGTH(h) <= 13;
+
+    IF remaining_count > 0 THEN
+        RAISE EXCEPTION
+            'Verification failed: % weak hashes remain.',
+            remaining_count;
+    END IF;
+
+    RAISE NOTICE '===========================================';
+    RAISE NOTICE 'LossLens hash migration completed.';
+    RAISE NOTICE 'Weak hashes mapped: %', mapped_count;
+    RAISE NOTICE 'Weak hashes remaining: %', remaining_count;
+    RAISE NOTICE '===========================================';
+
+END;
+$migration$;
