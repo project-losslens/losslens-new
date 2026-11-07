@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import '../../styles/globals.css'
-import Sidebar from '../../components/Sidebar'
 
 const MAX_SUPPORTERS = 5
 const ALL_PERMISSIONS = [
@@ -20,7 +18,7 @@ const SUPPORTER_RESOURCES = [
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
   toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
+  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
   document.body.appendChild(toast)
   setTimeout(() => toast.remove(), duration)
 }
@@ -179,12 +177,11 @@ function FamilyPortalPage() {
   )
 
   return (
-    <div className="root" style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 100 }}>
+    <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
+      <div style={{ flex: 1, minWidth: 0 }} className="page-content">
+        <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
           <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Family Portal</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{activeSupporters.length} active  · {invitations.length} total</p></div>
-        </nav>
+        </div>
         <div style={{ padding: '1.5rem' }}>
           <div className="dash-section" style={{ marginBottom: '1rem', borderColor: '#2DD4BF' }}>
             <div style={{ display: 'flex', gap: '12px' }}><span style={{ fontSize: '28px' }}></span><div><h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '6px' }}>Why invite a supporter?</h3><p style={{ color: '#7DBDEE', fontSize: '13px', lineHeight: '1.6', fontWeight: 300, margin: 0 }}>Recovery is easier with support. Invite trusted family or friends to follow your journey. They see only what you choose — no account needed.</p></div></div>

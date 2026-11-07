@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import '../../styles/globals.css'
-import Sidebar from '../../components/Sidebar'
 import { createNotification } from '../../lib/notifications'
 
 //  Constants
@@ -12,7 +10,7 @@ const EXPANDED_TABS = { DISCUSSION: 'discussion', MESSAGE: 'message' }
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
   toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;z-index:3000;box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
+  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
   document.body.appendChild(toast)
   setTimeout(() => toast.remove(), duration)
 }
@@ -209,16 +207,15 @@ export default function Events() {
   }
 
   return (
-    <div className="root" style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
+    <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
+      <div style={{ flex: 1, minWidth: 0 }} className="page-content">
 
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 100 }}>
+        <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Events</h1>
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{events.length} events  · {Object.keys(rsvps).length} responded</p>
           </div>
-        </nav>
+        </div>
 
         <div style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)' }}>
@@ -257,8 +254,8 @@ export default function Events() {
 
                   <div style={{ width: '100%', height: '170px', background: e.image_url ? `url(${e.image_url}) center/cover` : 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '10px', position: 'relative' }}>
                     {!e.image_url && <span style={{ fontSize: '48px', opacity: 0.3, position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} aria-hidden="true"></span>}
-                    <span style={{ background: 'rgba(255,255,255,0.9)', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', color: '#2DD4BF', position: 'relative', zIndex: 1 }}>{e.type || 'Event'}</span>
-                    <span style={{ background: 'rgba(255,255,255,0.9)', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', color: daysUntil === 'Today' ? '#FFFFFF' : isPast ? 'rgba(255,255,255,0.4)' : '#2DD4BF', position: 'relative', zIndex: 1 }}>{daysUntil}</span>
+                    <span style={{ background: 'rgba(255,255,255,0.9)', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', color: '#2DD4BF', position: 'relative', zIndex: 'var(--z-base)' }}>{e.type || 'Event'}</span>
+                    <span style={{ background: 'rgba(255,255,255,0.9)', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', color: daysUntil === 'Today' ? '#FFFFFF' : isPast ? 'rgba(255,255,255,0.4)' : '#2DD4BF', position: 'relative', zIndex: 'var(--z-base)' }}>{daysUntil}</span>
                   </div>
 
                   <div style={{ padding: '16px' }}>

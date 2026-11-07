@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import '../../styles/globals.css'
-import Sidebar from '../../components/Sidebar'
 
 //  Constants
 const TABS = { PROFILE: 'profile', SETTINGS: 'settings', SECURITY: 'security', DATA: 'data' }
@@ -12,7 +10,7 @@ const REPORT_PASSWORD_WORDS = ['River', 'Mountain', 'Forest', 'Ocean', 'Sunset',
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
   toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
+  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
   document.body.appendChild(toast)
   setTimeout(() => toast.remove(), duration)
 }
@@ -349,16 +347,15 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
   }
 
   return (
-    <div className="root" style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <div style={{ flex: 1, marginLeft: '48px', minWidth: 0, overflowX: 'hidden' }} className="main-content">
+    <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
+      <div style={{ flex: 1, minWidth: 0, overflowX: 'hidden' }} className="page-content">
 
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 100 }}>
+        <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem',  }}>
           <div>
             <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> My Profile</h1>
             <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{fullName || 'Complete your profile'}</p>
           </div>
-        </nav>
+        </div>
 
         <div style={{ padding: '1rem', maxWidth: '650px', margin: '0 auto' }}>
 

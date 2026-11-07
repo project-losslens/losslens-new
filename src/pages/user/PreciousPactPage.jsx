@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import '../../styles/globals.css'
-import Sidebar from '../../components/Sidebar'
 
 //  Constants
 const MAX_RECORDING_DURATION = 600 // 10 minutes
@@ -13,7 +11,7 @@ const STORAGE_PATH_WRITTEN = 'written'
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
   toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
+  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
   document.body.appendChild(toast)
   setTimeout(() => toast.remove(), duration)
 }
@@ -320,16 +318,15 @@ export default function LossLensPactPage() {
   )
 
   return (
-    <div className="root" style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <div style={{ flex: 1, marginLeft: '48px', minWidth: 0, overflowX: 'hidden' }} className="main-content">
+    <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
+      <div style={{ flex: 1, minWidth: 0, overflowX: 'hidden' }} className="page-content">
 
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
+        <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> The LossLens Pact</h1>
             <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{totalPacts} pacts  · A promise to your future self</p>
           </div>
-        </nav>
+        </div>
 
         <div style={{ padding: '1rem', maxWidth: '650px', margin: '0 auto' }}>
 
@@ -505,7 +502,7 @@ export default function LossLensPactPage() {
 
         {/* Delete Confirmation Modal */}
         {deleteConfirm && (
-          <div onClick={() => setDeleteConfirm(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(11,18,32,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+          <div onClick={() => setDeleteConfirm(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
             <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '14px', padding: '1.5rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '340px', width: '100%', textAlign: 'center' }}>
               <span style={{ fontSize: '32px', display: 'block', marginBottom: '8px' }}></span>
               <h3 style={{ color: '#FFFFFF', fontSize: '15px', marginBottom: '6px' }}>Delete this pact?</h3>

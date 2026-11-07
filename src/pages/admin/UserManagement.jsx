@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import '../../styles/globals.css'
 
 const fmt = (d) => d ? new Date(d).toLocaleDateString('en-KE') : '—'
 
@@ -16,7 +15,7 @@ const TABS = [
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
   toast.textContent = message
-  toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap'
+  toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--info);color:var(--primary);padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap'
   document.body.appendChild(toast)
   setTimeout(() => toast.remove(), duration)
 }
@@ -229,14 +228,14 @@ export default function UserManagement() {
   const suspendedCount = users.filter(u => u.status === 'suspended').length
 
   const riskBadge = (risk) => {
-    if (risk === 'high') return { bg: 'rgba(255,255,255,0.08)', color: '#FFFFFF', border: '#FFFFFF', label: 'High' }
-    if (risk === 'medium') return { bg: 'rgba(45,212,191,0.15)', color: '#7DBDEE', border: '#7DBDEE', label: 'Medium' }
-    return { bg: 'rgba(255,255,255,0.12)', color: '#2DD4BF', border: '#2DD4BF', label: 'Low' }
+    if (risk === 'high') return { bg: 'rgba(255,255,255,0.08)', color: 'var(--text)', border: 'var(--text)', label: 'High' }
+    if (risk === 'medium') return { bg: 'rgba(45,212,191,0.15)', color: 'var(--info)', border: 'var(--info)', label: 'Medium' }
+    return { bg: 'rgba(255,255,255,0.12)', color: 'var(--primary)', border: 'var(--primary)', label: 'Low' }
   }
 
   const planBadge = (plan, planType) => {
-    if (planType === 'company') return { bg: 'rgba(45,212,191,0.15)', color: '#2DD4BF', border: '#2DD4BF', label: 'Company' }
-    if (plan === 'premium') return { bg: 'rgba(255,255,255,0.12)', color: '#2DD4BF', border: '#2DD4BF', label: 'Premium' }
+    if (planType === 'company') return { bg: 'rgba(45,212,191,0.15)', color: 'var(--primary)', border: 'var(--primary)', label: 'Company' }
+    if (plan === 'premium') return { bg: 'rgba(255,255,255,0.12)', color: 'var(--primary)', border: 'var(--primary)', label: 'Premium' }
     return { bg: 'transparent', color: 'rgba(255,255,255,0.4)', border: 'rgba(255,255,255,0.12)', label: 'Free' }
   }
 
@@ -248,10 +247,10 @@ export default function UserManagement() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#0B1220' }}>
+      <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
   
-        <div style={{ flex: 1, marginLeft: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="main-content">
-          <p style={{ color: '#7DBDEE' }}>Loading users...</p>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
+          <p style={{ color: 'var(--info)' }}>Loading users...</p>
         </div>
       </div>
     )
@@ -259,12 +258,12 @@ export default function UserManagement() {
 
   if (error) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#0B1220' }}>
+      <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
   
-        <div style={{ flex: 1, marginLeft: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="main-content">
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
-            <p style={{ color: '#FFFFFF', marginBottom: '12px' }}>{error}</p>
-            <button onClick={fetchUsers} style={btn('transparent', '#FFFFFF', '#FFFFFF')}>Retry</button>
+            <p style={{ color: 'var(--text)', marginBottom: '12px' }}>{error}</p>
+            <button onClick={fetchUsers} style={btn('transparent', 'var(--text)', 'var(--text)')}>Retry</button>
           </div>
         </div>
       </div>
@@ -272,35 +271,35 @@ export default function UserManagement() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#0B1220' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
 
-      <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid #2DD4BF', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
+      <div style={{ flex: 1, minWidth: 0 }} className="page-content">
+        <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#2DD4BF', fontFamily: "'Inter', sans-serif", margin: 0 }}>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: "'Inter', sans-serif", margin: 0 }}>
               {activeTab === 'users' ? 'User Management' : 'Payment Management'}
             </h1>
-            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>
+            <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>
               {activeTab === 'users'
                 ? `${users.length} total  ${highRiskCount} high risk  ${suspendedCount} suspended`
                 : `${paymentStats.premium} premium  ${paymentStats.company} company  ${paymentStats.free} free  ${paymentStats.pending} pending`}
             </p>
           </div>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            <button onClick={handleExportCSV} style={btn('transparent', '#2DD4BF', '#2DD4BF')}>Export CSV</button>
-            <button onClick={fetchUsers} style={btn('transparent', '#7DBDEE', '#7DBDEE')}>Refresh</button>
+            <button onClick={handleExportCSV} style={btn('transparent', 'var(--primary)', 'var(--primary)')}>Export CSV</button>
+            <button onClick={fetchUsers} style={btn('transparent', 'var(--info)', 'var(--info)')}>Refresh</button>
           </div>
-        </nav>
+        </div>
 
         <div style={{ padding: '1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
           {/* Main Tabs: Users | Payments */}
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)', overflowX: 'auto' }}>
             <button onClick={() => { setActiveTab('users'); setSearch(''); setFilter('all') }}
-              style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'users' ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeTab === 'users' ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === 'users' ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>
+              style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'users' ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeTab === 'users' ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === 'users' ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>
               Users
             </button>
             <button onClick={() => { setActiveTab('payments'); setSearch(''); setPaymentFilter('all') }}
-              style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'payments' ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeTab === 'payments' ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === 'payments' ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>
+              style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'payments' ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeTab === 'payments' ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === 'payments' ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>
               Payments
             </button>
           </div>
@@ -310,11 +309,11 @@ export default function UserManagement() {
             <>
               <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <input type="text" placeholder="Search by name, email, username, or phone..." value={search} onChange={e => setSearch(e.target.value)}
-                  style={{ flex: 1, minWidth: '250px', padding: '10px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '13px', outline: 'none', fontFamily: "'Inter', sans-serif" }} />
+                  style={{ flex: 1, minWidth: '250px', padding: '10px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '13px', outline: 'none', fontFamily: "'Inter', sans-serif" }} />
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {['all', 'high', 'medium', 'low'].map(f => (
                     <button key={f} onClick={() => setFilter(f)}
-                      style={{ padding: '6px 14px', borderRadius: '100px', border: '1px solid ' + (filter === f ? '#2DD4BF' : 'rgba(255,255,255,0.12)'), background: filter === f ? 'rgba(45,212,191,0.15)' : 'transparent', color: filter === f ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: filter === f ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>
+                      style={{ padding: '6px 14px', borderRadius: '100px', border: '1px solid ' + (filter === f ? 'var(--primary)' : 'rgba(255,255,255,0.12)'), background: filter === f ? 'rgba(45,212,191,0.15)' : 'transparent', color: filter === f ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: filter === f ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>
                       {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1) + ' Risk'}
                     </button>
                   ))}
@@ -324,7 +323,7 @@ export default function UserManagement() {
               {filtered.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
                   <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>{'\u{1F465}'}</span>
-                  <p style={{ color: '#2DD4BF', fontSize: '14px' }}>{search ? 'No users match your search.' : 'No users found.'}</p>
+                  <p style={{ color: 'var(--primary)', fontSize: '14px' }}>{search ? 'No users match your search.' : 'No users found.'}</p>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -340,35 +339,35 @@ export default function UserManagement() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
                           <div style={{ flex: 1, minWidth: '200px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
-                              <span style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 600 }}>
+                              <span style={{ color: 'var(--text)', fontSize: '14px', fontWeight: 600 }}>
                                 {u.full_name || 'Unnamed'}
                                 {u.username && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: 400 }}> @{u.username}</span>}
                               </span>
                               <span style={{ background: risk.bg, color: risk.color, border: '1px solid ' + risk.border, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{risk.label} Risk</span>
                               <span style={{ background: plan.bg, color: plan.color, border: '1px solid ' + plan.border, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{plan.label}</span>
                               {u.role !== 'user' && (
-                                <span style={{ background: 'rgba(45,212,191,0.15)', color: '#2DD4BF', border: '1px solid #2DD4BF', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>
+                                <span style={{ background: 'rgba(45,212,191,0.15)', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>
                                   {u.role === 'super_admin' ? 'Super Admin' : 'Admin'}
                                 </span>
                               )}
                               {isSuspended && (
-                                <span style={{ background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', border: '1px solid #FFFFFF', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>Suspended</span>
+                                <span style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text)', border: '1px solid var(--text)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>Suspended</span>
                               )}
                             </div>
                             <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '4px' }}>
-                              <span style={{ color: '#2DD4BF', fontSize: '11px' }}>
+                              <span style={{ color: 'var(--primary)', fontSize: '11px' }}>
                                 {'\u{2709}'} {u.email || 'No email'}
                                 {u.email && <button onClick={() => { navigator.clipboard.writeText(u.email); showToast('Email copied!') }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', marginLeft: '4px' }} title="Copy email"></button>}
                               </span>
-                              <span style={{ color: '#2DD4BF', fontSize: '11px' }}>{'\u{1F4DE}'} {u.phone || 'No phone'}</span>
-                              <span style={{ color: '#2DD4BF', fontSize: '11px' }}>{'\u{1F525}'} {u.streak_days || 0}d streak</span>
+                              <span style={{ color: 'var(--primary)', fontSize: '11px' }}>{'\u{1F4DE}'} {u.phone || 'No phone'}</span>
+                              <span style={{ color: 'var(--primary)', fontSize: '11px' }}>{'\u{1F525}'} {u.streak_days || 0}d streak</span>
                               <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Joined {fmt(u.created_at)}</span>
                             </div>
 
                             {hasPartner && (
-                              <div style={{ background: '#0B1220', border: '1px solid rgba(45,212,191,0.2)', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                                <span style={{ color: '#2DD4BF', fontSize: '11px', fontWeight: 600 }}>{'\u{1F91D}'} Partner:</span>
-                                {u.accountability_partner_name && <span style={{ color: '#FFFFFF', fontSize: '12px' }}>{u.accountability_partner_name}</span>}
+                              <div style={{ background: 'var(--bg)', border: '1px solid rgba(45,212,191,0.2)', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                                <span style={{ color: 'var(--primary)', fontSize: '11px', fontWeight: 600 }}>{'\u{1F91D}'} Partner:</span>
+                                {u.accountability_partner_name && <span style={{ color: 'var(--text)', fontSize: '12px' }}>{u.accountability_partner_name}</span>}
                                 {u.accountability_partner_phone && (
                                   <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>
                                     {'\u{1F4DE}'} {u.accountability_partner_phone}
@@ -379,42 +378,42 @@ export default function UserManagement() {
                             )}
 
                             {u.report_password && (
-                              <div style={{ background: '#0B1220', border: '1px solid rgba(45,212,191,0.2)', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                <span style={{ color: '#2DD4BF', fontSize: '11px', fontWeight: 600 }}>{'\u{1F510}'} Report Password:</span>
-                                <code style={{ background: '#0B1220', padding: '4px 10px', borderRadius: '4px', color: '#2DD4BF', fontSize: '12px', fontFamily: 'monospace', letterSpacing: '1px', userSelect: 'all' }}>{u.report_password}</code>
-                                <button onClick={() => { navigator.clipboard.writeText(u.report_password); showToast('Password copied!') }} style={{ background: 'transparent', border: 'none', color: '#2DD4BF', fontSize: '12px', cursor: 'pointer' }}>Copy</button>
+                              <div style={{ background: 'var(--bg)', border: '1px solid rgba(45,212,191,0.2)', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                <span style={{ color: 'var(--primary)', fontSize: '11px', fontWeight: 600 }}>{'\u{1F510}'} Report Password:</span>
+                                <code style={{ background: 'var(--bg)', padding: '4px 10px', borderRadius: '4px', color: 'var(--primary)', fontSize: '12px', fontFamily: 'monospace', letterSpacing: '1px', userSelect: 'all' }}>{u.report_password}</code>
+                                <button onClick={() => { navigator.clipboard.writeText(u.report_password); showToast('Password copied!') }} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontSize: '12px', cursor: 'pointer' }}>Copy</button>
                               </div>
                             )}
                           </div>
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                            <button onClick={() => setExpandedUser(isExpanded ? null : u.id)} style={btn('transparent', '#2DD4BF', 'rgba(255,255,255,0.12)')}>{isExpanded ? 'Collapse' : 'Expand'}</button>
+                            <button onClick={() => setExpandedUser(isExpanded ? null : u.id)} style={btn('transparent', 'var(--primary)', 'rgba(255,255,255,0.12)')}>{isExpanded ? 'Collapse' : 'Expand'}</button>
                           </div>
                         </div>
 
                         {isExpanded && (
                           <div style={{ marginTop: '14px', borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: '14px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                             <button onClick={() => setShowSuspendConfirm(u)} disabled={actionLoading === u.id}
-                              style={btn('transparent', isSuspended ? '#2DD4BF' : '#7DBDEE', isSuspended ? '#2DD4BF' : '#7DBDEE')}>
+                              style={btn('transparent', isSuspended ? 'var(--primary)' : 'var(--info)', isSuspended ? 'var(--primary)' : 'var(--info)')}>
                               {actionLoading === u.id ? '...' : isSuspended ? 'Reactivate' : 'Suspend'}
                             </button>
                             <button onClick={() => { setShowPasswordReset(u); setNewPassword(''); setShowNewPassword(false) }}
-                              style={btn('transparent', '#2DD4BF', '#2DD4BF')}>Set Password</button>
+                              style={btn('transparent', 'var(--primary)', 'var(--primary)')}>Set Password</button>
                             {editingRole === u.id ? (
                               <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                                 <select value={newRole} onChange={e => setNewRole(e.target.value)}
-                                  style={{ padding: '6px 10px', borderRadius: '8px', background: '#0B1220', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '12px', fontFamily: "'Inter', sans-serif", cursor: 'pointer' }}>
+                                  style={{ padding: '6px 10px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '12px', fontFamily: "'Inter', sans-serif", cursor: 'pointer' }}>
                                   <option value="">Select...</option>
                                   <option value="user">User</option>
                                   <option value="admin">Admin</option>
                                   <option value="super_admin">Super Admin</option>
                                 </select>
-                                <button onClick={() => handleRoleChange(u.id)} disabled={savingRole || !newRole} style={btn('#2DD4BF', '#0B1220', '#2DD4BF')}>{savingRole ? '...' : 'Save'}</button>
+                                <button onClick={() => handleRoleChange(u.id)} disabled={savingRole || !newRole} style={btn('var(--primary)', 'var(--bg)', 'var(--primary)')}>{savingRole ? '...' : 'Save'}</button>
                                 <button onClick={() => setEditingRole(null)} style={btn('transparent', 'rgba(255,255,255,0.4)', 'rgba(255,255,255,0.12)')}>Cancel</button>
                               </div>
                             ) : (
-                              <button onClick={() => { setEditingRole(u.id); setNewRole(u.role || 'user') }} style={btn('transparent', '#7DBDEE', '#7DBDEE')}>Change Role</button>
+                              <button onClick={() => { setEditingRole(u.id); setNewRole(u.role || 'user') }} style={btn('transparent', 'var(--info)', 'var(--info)')}>Change Role</button>
                             )}
-                            <button onClick={() => setShowDeleteConfirm(u)} style={btn('transparent', '#FFFFFF', 'rgba(255,255,255,0.08)')}>Delete</button>
+                            <button onClick={() => setShowDeleteConfirm(u)} style={btn('transparent', 'var(--text)', 'rgba(255,255,255,0.08)')}>Delete</button>
                           </div>
                         )}
                       </div>
@@ -430,16 +429,16 @@ export default function UserManagement() {
             <>
               <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <input type="text" placeholder="Search by name or email..." value={search} onChange={e => setSearch(e.target.value)}
-                  style={{ flex: 1, minWidth: '250px', padding: '10px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '13px', outline: 'none', fontFamily: "'Inter', sans-serif" }} />
+                  style={{ flex: 1, minWidth: '250px', padding: '10px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '13px', outline: 'none', fontFamily: "'Inter', sans-serif" }} />
               </div>
 
               <div style={{ display: 'flex', gap: '6px', marginBottom: '1rem', flexWrap: 'wrap' }}>
                 {TABS.map(tab => (
                   <button key={tab.id} onClick={() => setPaymentFilter(tab.id)}
                     style={{
-                      padding: '8px 16px', borderRadius: '100px', border: '1px solid ' + (paymentFilter === tab.id ? '#2DD4BF' : 'rgba(255,255,255,0.12)'),
+                      padding: '8px 16px', borderRadius: '100px', border: '1px solid ' + (paymentFilter === tab.id ? 'var(--primary)' : 'rgba(255,255,255,0.12)'),
                       background: paymentFilter === tab.id ? 'rgba(45,212,191,0.15)' : 'transparent',
-                      color: paymentFilter === tab.id ? '#2DD4BF' : 'rgba(255,255,255,0.4)',
+                      color: paymentFilter === tab.id ? 'var(--primary)' : 'rgba(255,255,255,0.4)',
                       fontSize: '12px', fontWeight: paymentFilter === tab.id ? 600 : 400,
                       cursor: 'pointer', fontFamily: "'Inter', sans-serif"
                     }}>
@@ -450,10 +449,10 @@ export default function UserManagement() {
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '8px', marginBottom: '1rem' }}>
                 {[
-                  { label: 'Premium Users', value: paymentStats.premium, icon: '', color: '#2DD4BF' },
-                  { label: 'Company Users', value: paymentStats.company, icon: '', color: '#2DD4BF' },
-                  { label: 'Free Users', value: paymentStats.free, icon: '', color: '#2DD4BF' },
-                  { label: 'Pending', value: paymentStats.pending, icon: '⏳', color: '#7DBDEE' },
+                  { label: 'Premium Users', value: paymentStats.premium, icon: '', color: 'var(--primary)' },
+                  { label: 'Company Users', value: paymentStats.company, icon: '', color: 'var(--primary)' },
+                  { label: 'Free Users', value: paymentStats.free, icon: '', color: 'var(--primary)' },
+                  { label: 'Pending', value: paymentStats.pending, icon: '⏳', color: 'var(--info)' },
                 ].map((s, i) => (
                   <div key={i} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
                     <span style={{ fontSize: '20px', display: 'block', marginBottom: '4px' }}>{s.icon}</span>
@@ -466,7 +465,7 @@ export default function UserManagement() {
               {filtered.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
                   <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
-                  <p style={{ color: '#2DD4BF', fontSize: '14px' }}>No users match this filter.</p>
+                  <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No users match this filter.</p>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -475,25 +474,25 @@ export default function UserManagement() {
                     return (
                       <div key={u.id} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                          <span style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 500 }}>
+                          <span style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500 }}>
                             {u.full_name || 'Unnamed'}
                             <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginLeft: '4px' }}>{u.email || ''}</span>
                           </span>
                           <span style={{ background: plan.bg, color: plan.color, border: '1px solid ' + plan.border, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{plan.label}</span>
                           {u.subscription_status === 'pending' && (
-                            <span style={{ background: 'rgba(45,212,191,0.15)', color: '#7DBDEE', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', border: '1px solid #7DBDEE' }}>Pending</span>
+                            <span style={{ background: 'rgba(45,212,191,0.15)', color: 'var(--info)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', border: '1px solid var(--info)' }}>Pending</span>
                           )}
                         </div>
                         <div style={{ display: 'flex', gap: '6px' }}>
                           {(!u.subscription_plan || u.subscription_plan === 'free') && u.plan_type !== 'company' && (
                             <button onClick={() => setShowGrantPremium(u)} disabled={actionLoading === u.id}
-                              style={btn('transparent', '#2DD4BF', '#2DD4BF')}>
+                              style={btn('transparent', 'var(--primary)', 'var(--primary)')}>
                               {actionLoading === u.id ? '...' : 'Grant Premium'}
                             </button>
                           )}
                           {(u.subscription_plan === 'premium' && u.plan_type !== 'company') && (
                             <button onClick={() => setShowRevokePremium(u)} disabled={actionLoading === u.id}
-                              style={btn('transparent', '#7DBDEE', '#7DBDEE')}>
+                              style={btn('transparent', 'var(--info)', 'var(--info)')}>
                               {actionLoading === u.id ? '...' : 'Revoke'}
                             </button>
                           )}
@@ -513,18 +512,18 @@ export default function UserManagement() {
 
       {/* Suspend Modal */}
       {showSuspendConfirm && (
-        <div onClick={() => setShowSuspendConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid ' + (showSuspendConfirm.status === 'suspended' ? '#2DD4BF' : '#7DBDEE'), maxWidth: '380px', width: '100%', textAlign: 'center' }}>
+        <div onClick={() => setShowSuspendConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid ' + (showSuspendConfirm.status === 'suspended' ? 'var(--primary)' : 'var(--info)'), maxWidth: '380px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{showSuspendConfirm.status === 'suspended' ? '\u{25B6}' : '\u{23F8}'}</span>
-            <h3 style={{ color: showSuspendConfirm.status === 'suspended' ? '#2DD4BF' : '#7DBDEE', fontSize: '16px', margin: '0 0 8px' }}>
+            <h3 style={{ color: showSuspendConfirm.status === 'suspended' ? 'var(--primary)' : 'var(--info)', fontSize: '16px', margin: '0 0 8px' }}>
               {showSuspendConfirm.status === 'suspended' ? 'Reactivate User?' : 'Suspend User?'}
             </h3>
-            <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '20px' }}>
-              <strong style={{ color: '#2DD4BF' }}>"{showSuspendConfirm.full_name || showSuspendConfirm.username || 'User'}"</strong> will be {showSuspendConfirm.status === 'suspended' ? 'reactivated' : 'suspended'}.
+            <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px' }}>
+              <strong style={{ color: 'var(--primary)' }}>"{showSuspendConfirm.full_name || showSuspendConfirm.username || 'User'}"</strong> will be {showSuspendConfirm.status === 'suspended' ? 'reactivated' : 'suspended'}.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setShowSuspendConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={() => toggleStatus(showSuspendConfirm.id, showSuspendConfirm.status || 'active')} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: showSuspendConfirm.status === 'suspended' ? 'rgba(255,255,255,0.12)' : 'rgba(45,212,191,0.15)', border: 'none', color: showSuspendConfirm.status === 'suspended' ? '#2DD4BF' : '#2DD4BF', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+              <button onClick={() => toggleStatus(showSuspendConfirm.id, showSuspendConfirm.status || 'active')} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: showSuspendConfirm.status === 'suspended' ? 'rgba(255,255,255,0.12)' : 'rgba(45,212,191,0.15)', border: 'none', color: showSuspendConfirm.status === 'suspended' ? 'var(--primary)' : 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
                 {showSuspendConfirm.status === 'suspended' ? 'Reactivate' : 'Suspend'}
               </button>
             </div>
@@ -534,16 +533,16 @@ export default function UserManagement() {
 
       {/* Delete Modal */}
       {showDeleteConfirm && (
-        <div onClick={() => setShowDeleteConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+        <div onClick={() => setShowDeleteConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{'\u{1F5D1}'}</span>
-            <h3 style={{ color: '#FFFFFF', fontSize: '16px', margin: '0 0 8px' }}>Delete User?</h3>
-            <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '20px' }}>
-              Permanently delete <strong style={{ color: '#2DD4BF' }}>"{showDeleteConfirm.full_name || 'User'}"</strong>? This cannot be undone.
+            <h3 style={{ color: 'var(--text)', fontSize: '16px', margin: '0 0 8px' }}>Delete User?</h3>
+            <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px' }}>
+              Permanently delete <strong style={{ color: 'var(--primary)' }}>"{showDeleteConfirm.full_name || 'User'}"</strong>? This cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={() => deleteUser(showDeleteConfirm.id)} disabled={actionLoading === showDeleteConfirm.id} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: '#FFFFFF', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+              <button onClick={() => deleteUser(showDeleteConfirm.id)} disabled={actionLoading === showDeleteConfirm.id} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
                 {actionLoading === showDeleteConfirm.id ? 'Deleting...' : 'Delete'}
               </button>
             </div>
@@ -553,17 +552,17 @@ export default function UserManagement() {
 
       {/* Set Password Modal */}
       {showPasswordReset && (
-        <div onClick={() => { setShowPasswordReset(null); setNewPassword(''); setShowNewPassword(false) }} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid #2DD4BF', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
+        <div onClick={() => { setShowPasswordReset(null); setNewPassword(''); setShowNewPassword(false) }} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--primary)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{'\u{1F511}'}</span>
-            <h3 style={{ color: '#2DD4BF', fontSize: '16px', margin: '0 0 4px' }}>Set New Password</h3>
-            <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '16px' }}>
-              For <strong style={{ color: '#2DD4BF' }}>{showPasswordReset.full_name || showPasswordReset.username || 'User'}</strong>
+            <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 4px' }}>Set New Password</h3>
+            <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '16px' }}>
+              For <strong style={{ color: 'var(--primary)' }}>{showPasswordReset.full_name || showPasswordReset.username || 'User'}</strong>
               {showPasswordReset.email && <span style={{ display: 'block', color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '4px' }}>{showPasswordReset.email}</span>}
             </p>
             <div style={{ position: 'relative', marginBottom: '16px' }}>
               <input type={showNewPassword ? 'text' : 'password'} placeholder="Enter new password (min 8 chars)" value={newPassword} onChange={e => setNewPassword(e.target.value)}
-                style={{ width: '100%', padding: '10px 80px 10px 14px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '13px', outline: 'none', fontFamily: "'Inter', sans-serif", boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '10px 80px 10px 14px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '13px', outline: 'none', fontFamily: "'Inter', sans-serif", boxSizing: 'border-box' }}
                 onKeyDown={e => e.key === 'Enter' && handleAdminResetPassword()} autoFocus />
               <button onClick={() => setShowNewPassword(!showNewPassword)}
                 style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '18px', cursor: 'pointer', padding: '4px 8px' }}
@@ -573,7 +572,7 @@ export default function UserManagement() {
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => { setShowPasswordReset(null); setNewPassword(''); setShowNewPassword(false) }} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={handleAdminResetPassword} disabled={resetLoading || newPassword.length < 8} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: newPassword.length >= 8 ? '#2DD4BF' : 'rgba(255,255,255,0.12)', border: 'none', color: newPassword.length >= 8 ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: 600, cursor: newPassword.length >= 8 ? 'pointer' : 'not-allowed', fontFamily: "'Inter', sans-serif" }}>
+              <button onClick={handleAdminResetPassword} disabled={resetLoading || newPassword.length < 8} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: newPassword.length >= 8 ? 'var(--primary)' : 'rgba(255,255,255,0.12)', border: 'none', color: newPassword.length >= 8 ? 'var(--bg)' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: 600, cursor: newPassword.length >= 8 ? 'pointer' : 'not-allowed', fontFamily: "'Inter', sans-serif" }}>
                 {resetLoading ? '...' : 'Set Password'}
               </button>
             </div>
@@ -583,16 +582,16 @@ export default function UserManagement() {
 
       {/* Grant Premium Modal */}
       {showGrantPremium && (
-        <div onClick={() => setShowGrantPremium(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid #2DD4BF', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
+        <div onClick={() => setShowGrantPremium(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--primary)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}></span>
-            <h3 style={{ color: '#2DD4BF', fontSize: '16px', margin: '0 0 8px' }}>Grant Premium Access?</h3>
-            <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '20px' }}>
-              Give <strong style={{ color: '#2DD4BF' }}>"{showGrantPremium.full_name || 'User'}"</strong> free Premium access? This can be revoked later.
+            <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 8px' }}>Grant Premium Access?</h3>
+            <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px' }}>
+              Give <strong style={{ color: 'var(--primary)' }}>"{showGrantPremium.full_name || 'User'}"</strong> free Premium access? This can be revoked later.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setShowGrantPremium(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={() => grantPremium(showGrantPremium.id)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Grant Premium</button>
+              <button onClick={() => grantPremium(showGrantPremium.id)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Grant Premium</button>
             </div>
           </div>
         </div>
@@ -600,16 +599,16 @@ export default function UserManagement() {
 
       {/* Revoke Premium Modal */}
       {showRevokePremium && (
-        <div onClick={() => setShowRevokePremium(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid #7DBDEE', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
+        <div onClick={() => setShowRevokePremium(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--info)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>⬇</span>
-            <h3 style={{ color: '#7DBDEE', fontSize: '16px', margin: '0 0 8px' }}>Revoke Premium Access?</h3>
-            <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '20px' }}>
-              <strong style={{ color: '#2DD4BF' }}>"{showRevokePremium.full_name || 'User'}"</strong> will be moved back to the Free plan.
+            <h3 style={{ color: 'var(--info)', fontSize: '16px', margin: '0 0 8px' }}>Revoke Premium Access?</h3>
+            <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px' }}>
+              <strong style={{ color: 'var(--primary)' }}>"{showRevokePremium.full_name || 'User'}"</strong> will be moved back to the Free plan.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setShowRevokePremium(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={() => revokePremium(showRevokePremium.id)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(45,212,191,0.15)', border: 'none', color: '#2DD4BF', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Revoke</button>
+              <button onClick={() => revokePremium(showRevokePremium.id)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(45,212,191,0.15)', border: 'none', color: 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Revoke</button>
             </div>
           </div>
         </div>

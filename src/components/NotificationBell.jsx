@@ -126,7 +126,7 @@ function NotificationBell() {
             position: 'absolute', top: '40px', right: '-10px',
             width: '340px', maxHeight: '420px',
             background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px',
-            boxShadow: '0 8px 32px rgba(11,18,32,0.5)', zIndex: 500,
+            boxShadow: '0 8px 32px rgba(11,18,32,0.5)', zIndex: 'var(--z-modal)',
             overflowY: 'auto', animation: 'fadeIn 0.2s ease-out',
           }}
         >
@@ -134,7 +134,7 @@ function NotificationBell() {
           <div style={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.12)',
-            position: 'sticky', top: 0, background: 'rgba(255,255,255,0.06)', zIndex: 1,
+            position: 'sticky', top: 0, background: 'rgba(255,255,255,0.06)', zIndex: 'var(--z-base)',
           }}>
             <h3 style={{ color: '#FFFFFF', fontSize: '14px', margin: 0 }}>Notifications</h3>
             {unreadCount > 0 && (

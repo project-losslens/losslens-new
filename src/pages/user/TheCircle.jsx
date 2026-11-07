@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import '../../styles/globals.css'
-import Sidebar from '../../components/Sidebar'
 import { createNotification } from '../../lib/notifications'
 import { ensureCircleHash } from '../../lib/circleHash'
 
@@ -71,7 +69,7 @@ function extractMentions(text) {
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
   toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);animation:slideInRight 0.3s ease-out;white-space:nowrap`
+  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);animation:slideInRight 0.3s ease-out;white-space:nowrap`
   document.body.appendChild(toast)
   setTimeout(() => { toast.style.animation = 'slideOutRight 0.3s ease-in forwards'; setTimeout(() => toast.remove(), 300) }, duration)
 }
@@ -348,15 +346,14 @@ export default function TheCircle() {
   )
 
   return (
-    <div className="root" style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <div style={{ flex: 1, marginLeft: '48px', minWidth: 0, display: 'flex', flexDirection: 'column', height: '100vh' }} className="main-content">
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)', flexShrink: 0 }}>
+    <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', height: '100vh' }} className="page-content">
+        <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', flexShrink: 0 }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> The Circle</h1>
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{onlineCount} online  · You: {getAvatarEmoji(identity.animal)} {identity.displayName}</p>
           </div>
-        </nav>
+        </div>
 
         {showCrisisBanner && (
           <div style={{ background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '12px 1.5rem', fontSize: '13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -379,7 +376,7 @@ export default function TheCircle() {
         <div ref={messagesContainerRef} style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.5rem', position: 'relative' }}>
           {/* Scroll to bottom button */}
           {showScrollButton && (
-            <button onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })} style={{ position: 'sticky', bottom: '12px', left: '50%', transform: 'translateX(-50%)', zIndex: 50, background: 'rgba(255,255,255,0.12)', border: '1px solid #2DD4BF', borderRadius: '100px', padding: '6px 16px', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", boxShadow: '0 2px 12px rgba(11,18,32,0.4)' }}>↓ New messages</button>
+            <button onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })} style={{ position: 'sticky', bottom: '12px', left: '50%', transform: 'translateX(-50%)', zIndex: 'var(--z-content)', background: 'rgba(255,255,255,0.12)', border: '1px solid #2DD4BF', borderRadius: '100px', padding: '6px 16px', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", boxShadow: '0 2px 12px rgba(11,18,32,0.4)' }}>↓ New messages</button>
           )}
 
           {messages.length === 0 && (

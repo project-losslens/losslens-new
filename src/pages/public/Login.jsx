@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import '../../styles/globals.css'
 
 // Shared Google Icon
 const GoogleIcon = () => (
@@ -41,7 +40,7 @@ function Login() {
         const { data: { session } } = await supabase.auth.getSession()
         if (session) {
           const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single()
-          if (profile?.role === 'super_admin') navigate('/super-admin', { replace: true })
+          if (profile?.role === 'super_admin') navigate('/admin', { replace: true })
           else if (profile?.role === 'admin') navigate('/admin', { replace: true })
           else navigate('/dashboard', { replace: true })
         }
@@ -114,7 +113,7 @@ function Login() {
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
     setLoading(false)
     if (!profile) { navigate('/dashboard', { replace: true }); return }
-    if (profile.role === 'super_admin') navigate('/super-admin', { replace: true })
+    if (profile.role === 'super_admin') navigate('/admin', { replace: true })
     else if (profile.role === 'admin') navigate('/admin', { replace: true })
     else navigate('/dashboard', { replace: true })
   }

@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import '../../styles/globals.css'
-import Sidebar from '../../components/Sidebar'
 
 //  Constants
 const CATEGORY_ICONS = {
@@ -30,7 +28,7 @@ const EMERGENCY_CONTACTS = [
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
   toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
+  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
   document.body.appendChild(toast)
   setTimeout(() => toast.remove(), duration)
 }
@@ -222,19 +220,18 @@ export default function Resources() {
   }
 
   return (
-    <div className="root" style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
+    <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
+      <div style={{ flex: 1, minWidth: 0 }} className="page-content">
 
         {/* Crisis Banner */}
-        <div style={{ background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '10px 1.5rem', fontSize: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 101, flexWrap: 'wrap', gap: '4px' }}>
+        <div style={{ background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '10px 1.5rem', fontSize: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 'var(--z-content)', flexWrap: 'wrap', gap: '4px' }}>
           <span>🆘 In crisis? Call <a href={`tel:${EMERGENCY_CONTACTS[0].number}`} style={{ color: '#7DBDEE', fontWeight: 700, textDecoration: 'none' }}>{EMERGENCY_CONTACTS[0].name} {EMERGENCY_CONTACTS[0].number}</a> — free, 24/7</span>
           <span style={{ fontSize: '11px', opacity: 0.7 }}>You're not alone</span>
         </div>
 
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
+        <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
           <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Resources</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{resources.length} resources available</p></div>
-        </nav>
+        </div>
 
         <div style={{ padding: '1.5rem' }}>
           {/* Daily Affirmation */}
@@ -387,7 +384,7 @@ export default function Resources() {
       </div>
 
       {/* Floating Emergency Button */}
-      <a href={`tel:${EMERGENCY_CONTACTS[0].number}`} style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 500, background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '12px 18px', borderRadius: '100px', fontSize: '14px', fontWeight: 600, textDecoration: 'none', boxShadow: '0 4px 16px rgba(11,18,32,0.4)', border: '2px solid #FFFFFF', display: 'flex', alignItems: 'center', gap: '6px', paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }} className="mobile-only" aria-label={`Call ${EMERGENCY_CONTACTS[0].name} at ${EMERGENCY_CONTACTS[0].number}`}>🆘 Call {EMERGENCY_CONTACTS[0].number}</a>
+      <a href={`tel:${EMERGENCY_CONTACTS[0].number}`} style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 'var(--z-modal)', background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '12px 18px', borderRadius: '100px', fontSize: '14px', fontWeight: 600, textDecoration: 'none', boxShadow: '0 4px 16px rgba(11,18,32,0.4)', border: '2px solid #FFFFFF', display: 'flex', alignItems: 'center', gap: '6px', paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }} className="mobile-only" aria-label={`Call ${EMERGENCY_CONTACTS[0].name} at ${EMERGENCY_CONTACTS[0].number}`}>🆘 Call {EMERGENCY_CONTACTS[0].number}</a>
 
       <style>{`
         @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:0.6} }

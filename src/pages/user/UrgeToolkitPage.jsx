@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import '../../styles/globals.css'
-import Sidebar from '../../components/Sidebar'
 
 //  Constants
 const TIMER_DURATION = 900 // 15 minutes
@@ -13,7 +11,7 @@ const BREATH_EXHALE = 8000
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
   toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;z-index:3000;box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);animation:slideInRight 0.3s ease-out;white-space:nowrap`
+  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);animation:slideInRight 0.3s ease-out;white-space:nowrap`
   document.body.appendChild(toast)
   setTimeout(() => { toast.style.animation = 'slideOutRight 0.3s ease-in forwards'; setTimeout(() => toast.remove(), 300) }, duration)
 }
@@ -26,7 +24,7 @@ function triggerConfetti() {
   for (let i = 0; i < count; i++) {
     setTimeout(() => {
       const piece = document.createElement('div')
-      piece.style.cssText = `position:fixed;width:${Math.random()*10+6}px;height:${Math.random()*10+6}px;background:${colors[Math.floor(Math.random()*colors.length)]};left:${Math.random()*100}%;top:-20px;z-index:9999;pointer-events:none;border-radius:${Math.random()>0.5?'50%':'2px'};animation:confettiFall ${Math.random()*2+2}s ease-out forwards`
+      piece.style.cssText = `position:fixed;width:${Math.random()*10+6}px;height:${Math.random()*10+6}px;background:${colors[Math.floor(Math.random()*colors.length)]};left:${Math.random()*100}%;top:-20px;z-index: var(--z-toast);pointer-events:none;border-radius:${Math.random()>0.5?'50%':'2px'};animation:confettiFall ${Math.random()*2+2}s ease-out forwards`
       document.body.appendChild(piece)
       setTimeout(() => piece.remove(), 3500)
     }, i * 20)
@@ -226,12 +224,11 @@ export default function UrgeToolkitPage() {
   }
 
   return (
-    <div className="root" style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#0B1220', borderBottom: '1px solid rgba(255,255,255,0.12)', position: 'sticky', top: 0, zIndex: 100 }}>
+    <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
+      <div style={{ flex: 1, minWidth: 0 }} className="page-content">
+        <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
           <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Urge Toolkit</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>Every urge is beatable</p></div>
-        </nav>
+        </div>
         <div style={{ padding: '1.5rem' }}>
           <div className="tools-grid" style={{ marginBottom: '1rem' }}>
             {TOOLS.map(t => (

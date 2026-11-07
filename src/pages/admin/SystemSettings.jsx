@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import '../../styles/globals.css'
 
 //  Constants
 const SETTINGS_KEYS = {
@@ -67,7 +66,7 @@ const SECTION_TABS = [
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div')
   toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
+  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--info);color:var(--primary);padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
   document.body.appendChild(toast)
   setTimeout(() => toast.remove(), duration)
 }
@@ -185,29 +184,29 @@ export default function SystemSettings() {
     }
   }
 
-  const inputStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '13px', fontFamily: "'Inter', sans-serif", outline: 'none', boxSizing: 'border-box' }
+  const inputStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '13px', fontFamily: "'Inter', sans-serif", outline: 'none', boxSizing: 'border-box' }
 
   const ToggleRow = ({ label, desc, value, onChange }) => (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
       <div>
-        <span style={{ color: '#7DBDEE', fontSize: '13px' }}>{label}</span>
+        <span style={{ color: 'var(--info)', fontSize: '13px' }}>{label}</span>
         {desc && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '2px 0 0' }}>{desc}</p>}
       </div>
       <input type="checkbox" checked={value} onChange={e => onChange(e.target.checked)}
-        style={{ width: '18px', height: '18px', accentColor: '#2DD4BF', cursor: 'pointer', flexShrink: 0 }} />
+        style={{ width: '18px', height: '18px', accentColor: 'var(--primary)', cursor: 'pointer', flexShrink: 0 }} />
     </div>
   )
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#0B1220' }}>
+      <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
   
-        <div style={{ flex: 1, marginLeft: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="main-content">
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
-              {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
+              {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
             </div>
-            <p style={{ color: '#7DBDEE', fontSize: '13px' }}>Loading settings...</p>
+            <p style={{ color: 'var(--info)', fontSize: '13px' }}>Loading settings...</p>
           </div>
         </div>
         <style>{`@keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }`}</style>
@@ -217,12 +216,12 @@ export default function SystemSettings() {
 
   if (error) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#0B1220' }}>
+      <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
   
-        <div style={{ flex: 1, marginLeft: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="main-content">
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
-            <p style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
-            <button onClick={fetchSettings} style={{ padding: '8px 16px', borderRadius: '8px', background: 'transparent', border: '1px solid #FFFFFF', color: '#FFFFFF', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Retry</button>
+            <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
+            <button onClick={fetchSettings} style={{ padding: '8px 16px', borderRadius: '8px', background: 'transparent', border: '1px solid var(--text)', color: 'var(--text)', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Retry</button>
           </div>
         </div>
       </div>
@@ -230,24 +229,24 @@ export default function SystemSettings() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#0B1220' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
 
-      <div style={{ flex: 1, marginLeft: '48px', minWidth: 0 }} className="main-content">
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', background: '#0B1220', borderBottom: '2px solid #2DD4BF', position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '8px' }}>
+      <div style={{ flex: 1, minWidth: 0 }} className="page-content">
+        <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#2DD4BF', fontFamily: "'Inter', sans-serif", margin: 0 }}>System Settings</h1>
-            <p style={{ fontSize: '12px', color: '#7DBDEE', margin: '2px 0 0' }}>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: "'Inter', sans-serif", margin: 0 }}>System Settings</h1>
+            <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>
               Platform configuration{hasUnsavedChanges ? '  · Unsaved changes' : ''}
             </p>
           </div>
           <button onClick={saveSettings} disabled={saving || !hasUnsavedChanges}
-            style={{ padding: '10px 24px', borderRadius: '100px', border: 'none', background: hasUnsavedChanges ? '#2DD4BF' : 'rgba(255,255,255,0.12)', color: hasUnsavedChanges ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: 600, cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed', fontFamily: "'Inter', sans-serif" }}>
+            style={{ padding: '10px 24px', borderRadius: '100px', border: 'none', background: hasUnsavedChanges ? 'var(--primary)' : 'rgba(255,255,255,0.12)', color: hasUnsavedChanges ? 'var(--bg)' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: 600, cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed', fontFamily: "'Inter', sans-serif" }}>
             {saving ? 'Saving...' : 'Save All Settings'}
           </button>
-        </nav>
+        </div>
 
         {toast && (
-          <div style={{ position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', background: toast.type === 'error' ? 'rgba(255,255,255,0.08)' : '#7DBDEE', color: toast.type === 'error' ? '#FFFFFF' : '#2DD4BF', padding: '10px 20px', borderRadius: '100px', fontSize: '13px', zIndex: 3000, whiteSpace: 'nowrap' }}>{toast.msg}</div>
+          <div style={{ position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', background: toast.type === 'error' ? 'rgba(255,255,255,0.08)' : 'var(--info)', color: toast.type === 'error' ? 'var(--text)' : 'var(--primary)', padding: '10px 20px', borderRadius: '100px', fontSize: '13px', zIndex: 'var(--z-toast)', whiteSpace: 'nowrap' }}>{toast.msg}</div>
         )}
 
         <div style={{ padding: '1.5rem', maxWidth: '900px', margin: '0 auto' }}>
@@ -255,7 +254,7 @@ export default function SystemSettings() {
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)', overflowX: 'auto' }}>
             {SECTION_TABS.map(s => (
               <button key={s.id} onClick={() => setActiveSection(s.id)}
-                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeSection === s.id ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeSection === s.id ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeSection === s.id ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', minWidth: '80px', transition: 'background 0.2s, color 0.2s' }}>{s.label}</button>
+                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeSection === s.id ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeSection === s.id ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeSection === s.id ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', minWidth: '80px', transition: 'background 0.2s, color 0.2s' }}>{s.label}</button>
             ))}
           </div>
 
@@ -263,21 +262,21 @@ export default function SystemSettings() {
             {/* GENERAL */}
             {activeSection === 'general' && (
               <div>
-                <h3 style={{ color: '#2DD4BF', fontSize: '15px', margin: '0 0 1rem' }}>General Settings</h3>
+                <h3 style={{ color: 'var(--primary)', fontSize: '15px', margin: '0 0 1rem' }}>General Settings</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
                     <div style={{ flex: 1 }}>
-                      <label style={{ color: '#2DD4BF', fontSize: '12px', display: 'block', marginBottom: '4px' }}>App Name</label>
+                      <label style={{ color: 'var(--primary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>App Name</label>
                       <input type="text" value={settings.app_name} onChange={e => update(SETTINGS_KEYS.APP_NAME, e.target.value)} style={inputStyle} />
                     </div>
                     <button onClick={() => resetToDefault(SETTINGS_KEYS.APP_NAME)} style={{ padding: '10px 12px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '11px', cursor: 'pointer', whiteSpace: 'nowrap' }}>Reset</button>
                   </div>
                   <div>
-                    <label style={{ color: '#2DD4BF', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Support Email</label>
+                    <label style={{ color: 'var(--primary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Support Email</label>
                     <input type="email" value={settings.support_email} onChange={e => update(SETTINGS_KEYS.SUPPORT_EMAIL, e.target.value)} style={inputStyle} placeholder="support@precious.app" />
                   </div>
                   <div>
-                    <label style={{ color: '#2DD4BF', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Crisis Alert Email</label>
+                    <label style={{ color: 'var(--primary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Crisis Alert Email</label>
                     <input type="email" value={settings.crisis_email} onChange={e => update(SETTINGS_KEYS.CRISIS_EMAIL, e.target.value)} style={inputStyle} placeholder="alerts@precious.app" />
                   </div>
                   <ToggleRow label="Maintenance Mode" desc="Blocks all non-admin access" value={settings.maintenance_mode} onChange={v => update(SETTINGS_KEYS.MAINTENANCE_MODE, v)} />
@@ -289,7 +288,7 @@ export default function SystemSettings() {
             {/* SECURITY */}
             {activeSection === 'security' && (
               <div>
-                <h3 style={{ color: '#2DD4BF', fontSize: '15px', margin: '0 0 1rem' }}>Security & Access</h3>
+                <h3 style={{ color: 'var(--primary)', fontSize: '15px', margin: '0 0 1rem' }}>Security & Access</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
                     {[
@@ -299,11 +298,11 @@ export default function SystemSettings() {
                       [SETTINGS_KEYS.COOLDOWN_MINUTES, 'Cooldown (minutes)'],
                     ].map(([key, label]) => (
                       <div key={key}>
-                        <label style={{ color: '#2DD4BF', fontSize: '12px', display: 'block', marginBottom: '4px' }}>{label}</label>
+                        <label style={{ color: 'var(--primary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>{label}</label>
                         <input type="number" value={settings[key]} onChange={e => update(key, parseInt(e.target.value) || DEFAULTS[key])}
-                          style={{ ...inputStyle, borderColor: validationErrors[key] ? '#FFFFFF' : 'rgba(255,255,255,0.12)' }}
+                          style={{ ...inputStyle, borderColor: validationErrors[key] ? 'var(--text)' : 'rgba(255,255,255,0.12)' }}
                           min={VALIDATION[key]?.min} max={VALIDATION[key]?.max} />
-                        {validationErrors[key] && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{validationErrors[key]}</span>}
+                        {validationErrors[key] && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{validationErrors[key]}</span>}
                       </div>
                     ))}
                   </div>
@@ -317,7 +316,7 @@ export default function SystemSettings() {
             {/* FEATURES */}
             {activeSection === 'features' && (
               <div>
-                <h3 style={{ color: '#2DD4BF', fontSize: '15px', margin: '0 0 1rem' }}>Feature Toggles</h3>
+                <h3 style={{ color: 'var(--primary)', fontSize: '15px', margin: '0 0 1rem' }}>Feature Toggles</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <ToggleRow label="The Circle (Anonymous Chat)" desc="Peer support rooms" value={settings.circle_enabled} onChange={v => update(SETTINGS_KEYS.CIRCLE_ENABLED, v)} />
                   <ToggleRow label="Whispers (Peer Matching)" desc="1-on-1 anonymous chats" value={settings.whispers_enabled} onChange={v => update(SETTINGS_KEYS.WHISPERS_ENABLED, v)} />
@@ -327,16 +326,16 @@ export default function SystemSettings() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginTop: '14px' }}>
                   <div>
-                    <label style={{ color: '#2DD4BF', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Max Supporters Per User</label>
+                    <label style={{ color: 'var(--primary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Max Supporters Per User</label>
                     <input type="number" value={settings.max_supporters_per_user} onChange={e => update(SETTINGS_KEYS.MAX_SUPPORTERS_PER_USER, parseInt(e.target.value) || DEFAULTS[SETTINGS_KEYS.MAX_SUPPORTERS_PER_USER])}
-                      style={{ ...inputStyle, borderColor: validationErrors[SETTINGS_KEYS.MAX_SUPPORTERS_PER_USER] ? '#FFFFFF' : 'rgba(255,255,255,0.12)' }} min="1" max="10" />
-                    {validationErrors[SETTINGS_KEYS.MAX_SUPPORTERS_PER_USER] && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{validationErrors[SETTINGS_KEYS.MAX_SUPPORTERS_PER_USER]}</span>}
+                      style={{ ...inputStyle, borderColor: validationErrors[SETTINGS_KEYS.MAX_SUPPORTERS_PER_USER] ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} min="1" max="10" />
+                    {validationErrors[SETTINGS_KEYS.MAX_SUPPORTERS_PER_USER] && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{validationErrors[SETTINGS_KEYS.MAX_SUPPORTERS_PER_USER]}</span>}
                   </div>
                   <div>
-                    <label style={{ color: '#2DD4BF', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Message Retention (days)</label>
+                    <label style={{ color: 'var(--primary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Message Retention (days)</label>
                     <input type="number" value={settings.message_retention_days} onChange={e => update(SETTINGS_KEYS.MESSAGE_RETENTION_DAYS, parseInt(e.target.value) || DEFAULTS[SETTINGS_KEYS.MESSAGE_RETENTION_DAYS])}
-                      style={{ ...inputStyle, borderColor: validationErrors[SETTINGS_KEYS.MESSAGE_RETENTION_DAYS] ? '#FFFFFF' : 'rgba(255,255,255,0.12)' }} min="7" max="365" />
-                    {validationErrors[SETTINGS_KEYS.MESSAGE_RETENTION_DAYS] && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{validationErrors[SETTINGS_KEYS.MESSAGE_RETENTION_DAYS]}</span>}
+                      style={{ ...inputStyle, borderColor: validationErrors[SETTINGS_KEYS.MESSAGE_RETENTION_DAYS] ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} min="7" max="365" />
+                    {validationErrors[SETTINGS_KEYS.MESSAGE_RETENTION_DAYS] && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{validationErrors[SETTINGS_KEYS.MESSAGE_RETENTION_DAYS]}</span>}
                     <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '4px' }}>Messages older than this are automatically deleted.</p>
                   </div>
                 </div>
@@ -346,19 +345,19 @@ export default function SystemSettings() {
             {/* PRICING */}
             {activeSection === 'pricing' && (
               <div>
-                <h3 style={{ color: '#2DD4BF', fontSize: '15px', margin: '0 0 1rem' }}>Pricing</h3>
+                <h3 style={{ color: 'var(--primary)', fontSize: '15px', margin: '0 0 1rem' }}>Pricing</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
                   <div>
-                    <label style={{ color: '#2DD4BF', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Premium Price (KES/month)</label>
+                    <label style={{ color: 'var(--primary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Premium Price (KES/month)</label>
                     <input type="number" value={settings.premium_price_kes} onChange={e => update(SETTINGS_KEYS.PREMIUM_PRICE_KES, parseInt(e.target.value) || DEFAULTS[SETTINGS_KEYS.PREMIUM_PRICE_KES])}
-                      style={{ ...inputStyle, borderColor: validationErrors[SETTINGS_KEYS.PREMIUM_PRICE_KES] ? '#FFFFFF' : 'rgba(255,255,255,0.12)' }} min="100" />
-                    {validationErrors[SETTINGS_KEYS.PREMIUM_PRICE_KES] && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{validationErrors[SETTINGS_KEYS.PREMIUM_PRICE_KES]}</span>}
+                      style={{ ...inputStyle, borderColor: validationErrors[SETTINGS_KEYS.PREMIUM_PRICE_KES] ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} min="100" />
+                    {validationErrors[SETTINGS_KEYS.PREMIUM_PRICE_KES] && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{validationErrors[SETTINGS_KEYS.PREMIUM_PRICE_KES]}</span>}
                   </div>
                   <div>
-                    <label style={{ color: '#2DD4BF', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Free Plan Diary Limit</label>
+                    <label style={{ color: 'var(--primary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Free Plan Diary Limit</label>
                     <input type="number" value={settings.free_plan_diary_limit} onChange={e => update(SETTINGS_KEYS.FREE_PLAN_DIARY_LIMIT, parseInt(e.target.value) || DEFAULTS[SETTINGS_KEYS.FREE_PLAN_DIARY_LIMIT])}
-                      style={{ ...inputStyle, borderColor: validationErrors[SETTINGS_KEYS.FREE_PLAN_DIARY_LIMIT] ? '#FFFFFF' : 'rgba(255,255,255,0.12)' }} min="1" max="30" />
-                    {validationErrors[SETTINGS_KEYS.FREE_PLAN_DIARY_LIMIT] && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{validationErrors[SETTINGS_KEYS.FREE_PLAN_DIARY_LIMIT]}</span>}
+                      style={{ ...inputStyle, borderColor: validationErrors[SETTINGS_KEYS.FREE_PLAN_DIARY_LIMIT] ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} min="1" max="30" />
+                    {validationErrors[SETTINGS_KEYS.FREE_PLAN_DIARY_LIMIT] && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{validationErrors[SETTINGS_KEYS.FREE_PLAN_DIARY_LIMIT]}</span>}
                   </div>
                 </div>
               </div>
@@ -367,7 +366,7 @@ export default function SystemSettings() {
             {/* INTEGRATIONS */}
             {activeSection === 'integrations' && (
               <div>
-                <h3 style={{ color: '#2DD4BF', fontSize: '15px', margin: '0 0 1rem' }}>Integrations</h3>
+                <h3 style={{ color: 'var(--primary)', fontSize: '15px', margin: '0 0 1rem' }}>Integrations</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <ToggleRow label="M-Pesa Payments" desc="Mobile money for premium subscriptions" value={settings.mpesa_enabled} onChange={v => update(SETTINGS_KEYS.MPESA_ENABLED, v)} />
                   <ToggleRow label="SMS Crisis Alerts" desc="Send SMS via Twilio for urgent escalations" value={settings.sms_alerts_enabled} onChange={v => update(SETTINGS_KEYS.SMS_ALERTS_ENABLED, v)} />
@@ -380,32 +379,32 @@ export default function SystemSettings() {
 
       {/* Confirmation Modals */}
       {showConfirm === 'maintenance' && (
-        <div onClick={() => setShowConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid #FFFFFF', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
+        <div onClick={() => setShowConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--text)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>{'\u{26A0}'}</span>
-            <h3 style={{ color: '#FFFFFF', fontSize: '16px', margin: '0 0 8px' }}>Enable Maintenance Mode?</h3>
-            <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
+            <h3 style={{ color: 'var(--text)', fontSize: '16px', margin: '0 0 8px' }}>Enable Maintenance Mode?</h3>
+            <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
               All non-admin users will be locked out of the platform immediately.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setShowConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={doSave} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: '#FFFFFF', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Enable</button>
+              <button onClick={doSave} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Enable</button>
             </div>
           </div>
         </div>
       )}
 
       {showConfirm === 'signups' && (
-        <div onClick={() => setShowConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid #7DBDEE', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
+        <div onClick={() => setShowConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--info)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>{'\u{1F6AB}'}</span>
-            <h3 style={{ color: '#7DBDEE', fontSize: '16px', margin: '0 0 8px' }}>Disable New Signups?</h3>
-            <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
+            <h3 style={{ color: 'var(--info)', fontSize: '16px', margin: '0 0 8px' }}>Disable New Signups?</h3>
+            <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
               New users will not be able to create accounts. Existing users can still log in.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setShowConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={doSave} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(45,212,191,0.15)', border: 'none', color: '#2DD4BF', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Disable</button>
+              <button onClick={doSave} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(45,212,191,0.15)', border: 'none', color: 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Disable</button>
             </div>
           </div>
         </div>

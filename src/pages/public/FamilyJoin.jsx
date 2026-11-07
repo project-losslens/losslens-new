@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import '../../styles/globals.css'
 
 //  Constants for permissions
 const PERMISSIONS = {
@@ -361,7 +360,7 @@ export default function FamilyJoin() {
 
       {/* Stop Supporting Modal */}
       {showStopModal && (
-        <div onClick={() => setShowStopModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+        <div onClick={() => setShowStopModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '360px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
             <h3 style={{ color: '#FFFFFF', fontSize: '16px', margin: '0 0 8px' }}>Stop supporting?</h3>

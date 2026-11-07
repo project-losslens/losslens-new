@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from "../../lib/supabase";
-import '../../styles/globals.css'
 
 // Crisis Contacts
 const CRISIS_CONTACTS = [
@@ -123,7 +122,7 @@ function Landing() {
           throw signInError
         }
         const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
-        if (profile?.role === 'super_admin') navigate('/super-admin', { replace: true })
+        if (profile?.role === 'super_admin') navigate('/admin', { replace: true })
         else if (profile?.role === 'admin') navigate('/admin', { replace: true })
         else navigate('/dashboard', { replace: true })
       }
@@ -136,7 +135,7 @@ function Landing() {
   return (
     <div className="root" style={{ overflowX: 'hidden', maxWidth: '100vw' }}>
       {showInstallPrompt && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 500, background: 'rgba(255,255,255,0.12)', borderBottom: '2px solid #2DD4BF', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', animation: 'slideDown 0.3s ease-out' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 'var(--z-modal)', background: 'rgba(255,255,255,0.12)', borderBottom: '2px solid #2DD4BF', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', animation: 'slideDown 0.3s ease-out' }}>
           <span style={{ color: '#2DD4BF', fontSize: '13px' }}> Add LossLens to your home screen for quick access</span>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={() => setShowInstallPrompt(false)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.4)', padding: '6px 14px', borderRadius: '100px', fontSize: '12px', cursor: 'pointer' }}>Not now</button>
@@ -238,7 +237,7 @@ function Landing() {
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <h3 style={{ color: contact.priority ? '#FFFFFF' : '#FFFFFF', fontSize: contact.priority ? '16px' : '14px', margin: 0 }}>{contact.name}</h3>
-                  {contact.priority && <span style={{ background: '#FFFFFF', color: 'rgba(255,255,255,0.08)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 600 }}>First Call</span>}
+                  {contact.priority && <span style={{ background: 'var(--surface-2)', color: 'var(--text-muted)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 600 }}>First Call</span>}
                 </div>
                 <p style={{ color: '#2DD4BF', fontSize: '13px', margin: '4px 0 0' }}>{contact.phone}  · {contact.hours}</p>
               </div>
@@ -323,13 +322,13 @@ function Landing() {
       )}
 
       <style>{`
-        .hamburger-btn{display:none;background:none;border:1px solid rgba(255,255,255,0.12);color:#2DD4BF;font-size:22px;padding:6px 12px;border-radius:8px;cursor:pointer;z-index:300}
+        .hamburger-btn{display:none;background:none;border:1px solid rgba(255,255,255,0.12);color:#2DD4BF;font-size:22px;padding:6px 12px;border-radius:8px;cursor:pointer;z-index: var(--z-toggle)}
         .desktop-nav{display:flex}
-        .mobile-menu{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(255,255,255,0.06);border-bottom:2px solid rgba(255,255,255,0.12);padding:1rem;z-index:200;flex-direction:column;gap:12px}
+        .mobile-menu{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(255,255,255,0.06);border-bottom:2px solid rgba(255,255,255,0.12);padding:1rem;z-index: var(--z-modal);flex-direction:column;gap:12px}
         .mobile-menu a{color:#2DD4BF;font-size:14px;text-decoration:none;cursor:pointer;padding:8px 0}
         .mobile-menu button{width:100%}
-        .mobile-overlay{display:none;position:fixed;inset:0;z-index:150}
-        .modal-overlay{position:fixed;inset:0;background:rgba(11,18,32,0.85);backdropFilter:blur(6px);z-index:200;display:flex;align-items:center;justifyContent:center;padding:20px}
+        .mobile-overlay{display:none;position:fixed;inset:0;z-index: var(--z-scrim)}
+        .modal-overlay{position:fixed;inset:0;background:rgba(11,18,32,0.85);backdropFilter:blur(6px);z-index: var(--z-modal);display:flex;align-items:center;justifyContent:center;padding:20px}
         @keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
         @media(max-width:768px){.hamburger-btn{display:block}.desktop-nav{display:none!important}.mobile-menu{display:flex}.mobile-overlay{display:block}.navbar{justify-content:space-between}.features{grid-template-columns:1fr!important}.stats{grid-template-columns:1fr 1fr!important}.hero{padding:2rem 1rem!important}.hero h1{font-size:1.5rem!important}}
       `}</style>

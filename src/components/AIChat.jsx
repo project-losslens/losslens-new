@@ -331,7 +331,7 @@ function AIChat({ profile }) {
         position: 'fixed',
         bottom: '5rem',
         right: '1.5rem',
-        zIndex: 1000,
+        zIndex: 'var(--z-modal)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-end',
@@ -430,7 +430,7 @@ function AIChat({ profile }) {
           height: '520px', maxHeight: 'calc(100vh - 10rem)',
           background: '#171E2B', border: '1px solid rgba(255,255,255,0.12)',
           borderRadius: '16px', boxShadow: '0 12px 48px rgba(11,18,32,0.5)',
-          display: 'flex', flexDirection: 'column', zIndex: 999,
+          display: 'flex', flexDirection: 'column', zIndex: 'var(--z-modal)',
           animation: 'chatSlideUp 0.3s ease-out', overflow: 'hidden',
         }}>
 
