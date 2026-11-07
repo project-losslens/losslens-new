@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { readAndMigrateStorageItem } from '../../lib/storageKeys'
 
 //  Constants
 const CATEGORY_ICONS = {
@@ -84,14 +85,14 @@ export default function Resources() {
 
   const loadSaved = () => {
     try {
-      const saved = localStorage.getItem('precious_saved_resources')
+      const saved = readAndMigrateStorageItem('losslens_saved_resources', 'precious_saved_resources')
       if (saved) setSavedIds(JSON.parse(saved))
     } catch {}
   }
 
   const loadRecent = () => {
     try {
-      const recent = localStorage.getItem('precious_recent_resources')
+      const recent = readAndMigrateStorageItem('losslens_recent_resources', 'precious_recent_resources')
       if (recent) setRecentlyViewed(JSON.parse(recent))
     } catch {}
   }
@@ -99,13 +100,13 @@ export default function Resources() {
   const toggleSave = (id) => {
     const updated = savedIds.includes(id) ? savedIds.filter(s => s !== id) : [...savedIds, id]
     setSavedIds(updated)
-    try { localStorage.setItem('precious_saved_resources', JSON.stringify(updated)) } catch {}
+    try { localStorage.setItem('losslens_saved_resources', JSON.stringify(updated)) } catch {}
   }
 
   const markViewed = (resource) => {
     const updated = [resource, ...recentlyViewed.filter(r => r.id !== resource.id)].slice(0, 5)
     setRecentlyViewed(updated)
-    try { localStorage.setItem('precious_recent_resources', JSON.stringify(updated)) } catch {}
+    try { localStorage.setItem('losslens_recent_resources', JSON.stringify(updated)) } catch {}
   }
 
   //  Open with noopener for security

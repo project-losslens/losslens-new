@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { readAndMigrateStorageItem } from '../../lib/storageKeys'
 
 //  Constants
 const MAX_RECORDING_DURATION = 600 // 10 minutes
@@ -92,10 +93,11 @@ export default function LossLensPactPage() {
       const syncedPacts = (data || []).map(p => ({ ...p, _synced: true }))
 
       //  User-specific localStorage key
-      const localKey = `precious_pacts_${uid}`
+      const localKey = `losslens_pacts_${uid}`
+      const legacyKey = `precious_pacts_${uid}`
       let localPacts = []
       try {
-        const stored = localStorage.getItem(localKey)
+        const stored = readAndMigrateStorageItem(localKey, legacyKey)
         if (stored) localPacts = JSON.parse(stored)
       } catch { localPacts = [] }
 
@@ -199,8 +201,9 @@ export default function LossLensPactPage() {
         const reader = new FileReader()
         reader.readAsDataURL(blob)
         reader.onloadend = () => {
-          const localKey = `precious_pacts_${session.user.id}`
-          const localPacts = JSON.parse(localStorage.getItem(localKey) || '[]')
+          const localKey = `losslens_pacts_${session.user.id}`
+          const legacyKey = `precious_pacts_${session.user.id}`
+          const localPacts = JSON.parse(readAndMigrateStorageItem(localKey, legacyKey) || '[]')
           localPacts.push({
             url: reader.result,
             title: pactTitle || `Pact ${new Date().toLocaleDateString('en-KE')}`,
@@ -238,8 +241,10 @@ export default function LossLensPactPage() {
   const handleDelete = async (pactId, storagePath, isLocal, localIndex) => {
     if (isLocal) {
       const { data: { session } } = await supabase.auth.getSession()
-      const localKey = `precious_pacts_${session?.user?.id || 'unknown'}`
-      const localPacts = JSON.parse(localStorage.getItem(localKey) || '[]')
+      const userId = session?.user?.id || 'unknown'
+      const localKey = `losslens_pacts_${userId}`
+      const legacyKey = `precious_pacts_${userId}`
+      const localPacts = JSON.parse(readAndMigrateStorageItem(localKey, legacyKey) || '[]')
       localPacts.splice(localIndex, 1)
       if (localPacts.length === 0) localStorage.removeItem(localKey)
       else localStorage.setItem(localKey, JSON.stringify(localPacts))

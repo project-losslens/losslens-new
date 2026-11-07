@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { readAndMigrateStorageItem } from '../../lib/storageKeys'
 
 //  Constants
 const TIMER_DURATION = 900 // 15 minutes
@@ -146,7 +147,7 @@ export default function UrgeToolkitPage() {
 
   const loadCopingCards = () => {
     try {
-      const saved = localStorage.getItem('precious_coping_cards')
+      const saved = readAndMigrateStorageItem('losslens_coping_cards', 'precious_coping_cards')
       if (saved) setCopingCards(JSON.parse(saved))
     } catch {}
   }
@@ -359,7 +360,7 @@ export default function UrgeToolkitPage() {
                         const newCard = { id: Date.now(), date: new Date().toISOString(), ...thoughtRecord }
                         const updated = [newCard, ...copingCards].slice(0, 20)
                         setCopingCards(updated)
-                        try { localStorage.setItem('precious_coping_cards', JSON.stringify(updated)) } catch {}
+                        try { localStorage.setItem('losslens_coping_cards', JSON.stringify(updated)) } catch {}
                         showToast(' Coping card saved!', 3000)
                         setThoughtStep(0)
                         setThoughtRecord({ situation: '', automaticThought: '', emotion: '', evidenceFor: '', evidenceAgainst: '', balancedThought: '', newEmotion: '' })
@@ -377,7 +378,7 @@ export default function UrgeToolkitPage() {
                       <div key={card.id} style={{ background: '#0B1220', borderRadius: '8px', padding: '10px', border: '1px solid rgba(255,255,255,0.12)', fontSize: '12px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                           <span style={{ color: '#2DD4BF', fontWeight: 500 }}>{new Date(card.date).toLocaleDateString('en-KE')}</span>
-                          <button onClick={() => { const updated = copingCards.filter(c => c.id !== card.id); setCopingCards(updated); try { localStorage.setItem('precious_coping_cards', JSON.stringify(updated)) } catch {} }} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Delete coping card"></button>
+                          <button onClick={() => { const updated = copingCards.filter(c => c.id !== card.id); setCopingCards(updated); try { localStorage.setItem('losslens_coping_cards', JSON.stringify(updated)) } catch {} }} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Delete coping card"></button>
                         </div>
                         <p style={{ color: '#FFFFFF', margin: '0 0 2px', textDecoration: 'line-through' }}>"{card.automaticThought}"</p>
                         <p style={{ color: '#2DD4BF', margin: 0 }}>→ "{card.balancedThought}"</p>

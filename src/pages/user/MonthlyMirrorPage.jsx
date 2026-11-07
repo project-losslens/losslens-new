@@ -419,7 +419,7 @@ export default function MonthlyMirrorPage() {
   const handleDownload = (url, fileName) => {
     const a = document.createElement('a')
     a.href = url
-    a.download = fileName || `precious-reflection-${Date.now()}.webm`
+    a.download = fileName || `losslens-reflection-${Date.now()}.webm`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
