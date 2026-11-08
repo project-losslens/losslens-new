@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { createNotification } from '../../lib/notifications'
-import { ensureCircleHash } from '../../lib/circleHash'
+import { ensureCircleHash } from '../../lib/storage'
 import { detectCrisis } from '../../lib/crisisDetection'
 
 //  Constants

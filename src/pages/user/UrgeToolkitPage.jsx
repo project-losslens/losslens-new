@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { readAndMigrateStorageItem } from '../../lib/storageKeys'
+import { readAndMigrateStorageItem } from '../../lib/storage'
 
 //  Constants
 const TIMER_DURATION = 900 // 15 minutes

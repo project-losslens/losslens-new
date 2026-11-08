@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Link } from 'react-router-dom'
-import { SHOW_PROTECTION } from './protectionFlag'
+import { SHOW_PROTECTION } from './protectionContent'
 import { supabase } from '../../lib/supabase'
 import { PROTECTION_CONTENT as C } from './protectionContent'
 import ContactIcons from '../../components/ContactIcons'
-import useDocumentTitle from '../../hooks/useDocumentTitle'
+import { useDocumentTitle } from '../../hooks'
 import '../../styles/landing.css'
 
 function Section({ title, children }) {

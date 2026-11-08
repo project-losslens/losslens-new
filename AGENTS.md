@@ -1,42 +1,70 @@
 # AGENTS.md
 
-LossLens is a plain-JS React 19 + Vite 8 SPA backed by Supabase, plus one Vercel serverless function for AI chat. There is no TypeScript and no test suite.
+LossLens is a plain-JS React 19 + Vite 8 SPA backed by Supabase, plus Vercel
+serverless routes in `api/` and Deno edge functions in `supabase/functions/`.
+No TypeScript.
 
 ## Commands
-- Dev (frontend only): `npm run dev`
-- Primary verification: `npm run build`
-- Lint a single file: `npx eslint path/to/file.jsx`
-- Repo-wide `npm run lint` already fails on pre-existing hook/unused-var issues; don't treat those as regressions you caused (see `LOSSLENS_FINAL_RELEASE_REPORT.md`).
-- No test or typecheck command exists. Do not invent one.
-- `npm run dev` does NOT serve `api/chat.js`. Use `vercel dev` (Vercel CLI is not a dependency) to exercise the Oloo endpoint locally; otherwise chat fails locally.
 
-## Environment
-- Client: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` in `.env` (gitignored; see `.env.example`). `src/lib/supabase.js` throws at import if either is missing.
-- Server (`api/chat.js`): `GROQ_API_KEY` (NO `VITE_` prefix) and `VITE_SUPABASE_URL` plus `SUPABASE_ANON_KEY` or `VITE_SUPABASE_ANON_KEY`.
-- Never expose `GROQ_API_KEY` under `src/` or with a `VITE_` prefix.
-- Supabase project id is `kingsly`, not `losslens` (`supabase/config.toml`).
+- `npm run dev` — Vite dev server (frontend only; does NOT serve `api/`)
+- `npm run build` — primary verification; must pass
+- `npm test` — `node --test` unit tests (SiteGate, loaderTiming, api/chat)
+- `npm run lint` — eslint; ~200 pre-existing errors/17 warnings is the
+  baseline, do not treat as regressions
+- `vercel dev` — serves `api/` routes locally
+- CLI: `npx supabase` (devDependency)
 
 ## Architecture
-- Entry: `index.html` -> `src/main.jsx` -> `src/App.jsx`. All routes are declared in `src/App.jsx`; pages live in `src/pages/{public,user,admin,super-admin}`.
-- Roles are `user | admin | super_admin` on `profiles.role`. `src/components/ProtectedRoute.jsx` enforces `adminOnly` / `superAdminOnly`.
-- Use the singleton client from `src/lib/supabase.js`. No path aliases; relative imports.
-- AI flow: `src/lib/groq.js#askGroq` POSTs to `/api/chat` with the Supabase JWT; `api/chat.js` validates the JWT, reads user context, calls Groq, writes `chat_history`. The prompt that actually runs is `BASE_SYSTEM_PROMPT` in `api/chat.js`; the copy in `src/lib/groq.js` is currently unused.
-- `supabase/functions/send-invite/index.ts` (Deno) handles admin invite, password reset, and email lookup using the service-role key.
-- Deployment is Vercel; `vercel.json` has an SPA catch-all. Put new serverless routes in `api/`.
 
-## Database / migrations
-- Migrations live in `supabase/migrations`, timestamp-ordered. The `20261104_0000xx_*` set is headed "DRAFT ONLY"; do not assume it matches the live database without checking.
-- RLS is enabled on every application table. Reuse `public.is_admin()`, `public.is_super_admin()`, `public.current_user_role()` (migration `..._000008`).
-- Trigger `enforce_profile_privilege_updates` (migration `..._000007`) blocks non-super-admins from changing `role`, `status`, `streak_days`, `money_saved`, subscription, risk, and other privileged profile fields. Client update code for those fields will fail.
-- New users get a `profiles` row from the `on_auth_user_created` trigger; don't create it manually.
-- CLI is the dev dependency `supabase`: use `npx supabase`.
+- Entry: `index.html` → `src/main.jsx` → `src/App.jsx` (all routes).
+- Roles on `profiles.role`: `user | admin | super_admin | therapist | insurer`.
+  Guards: `RequireAuth` / `RequireElevated` in `src/components/RouteGuards.jsx`.
+- Supabase singleton: `src/lib/supabase.js` (remember-me aware;
+  `createSupabaseClient(persist)` exported for Login's session-only mode).
+- AI flow: `src/lib/groq.js#askGroq` → `POST /api/chat` (JWT) → Groq →
+  `chat_history`. Real prompt: `BASE_SYSTEM_PROMPT` in `api/chat.js`.
+  Consent gate: `profiles.ai_data_consent_at`, enforced server-side.
+- Shared configs: `src/config/site.js` (contact + FACTS),
+  `src/config/helplines.js` (crisis lines — single source),
+  `src/config/nav.config.js` (feature names — do not rename).
+- PWA: `registerSW()` once in `main.jsx` via `src/lib/pwa.js`.
+
+## Node-importable files rule
+
+Files reachable from `api/**` or from `node --test` via plain Node must stay
+plain JS: no JSX, no `import.meta.env`, no CSS imports, no `import.meta.glob`.
+Currently: `src/lib/crisisDetection.js` → `src/config/helplines.js`,
+`src/lib/loaderTiming.js`, `api/*.js`. Do not merge them into Vite-only files.
+
+## Database
+
+Exactly four migrations in `supabase/migrations/` (`20261110000001`–`04`),
+idempotent, applied in order. Full reference + verify queries:
+`docs/DATABASE.md`. RLS on every table; helpers `is_admin()`,
+`is_super_admin()`, `is_active_user()`, `is_recently_authenticated()`.
+`enforce_profile_privilege_updates` trigger blocks non-super-admin writes to
+privileged profile fields. New users get a `profiles` row from trigger —
+don't create it manually.
 
 ## UI conventions
-- Tailwind is installed but not used as utility classes. Styling is mostly inline style objects plus `src/index.css` (tokens/reset) and `src/styles/globals.css` (`.btn-primary`, `.form-group`, `.card`).
-- Brand: bg `#0B1220`, teal `#2DD4BF`, secondary `#7DBDEE`, opaque panel `#171E2B`. Keep Oloo/chat surfaces opaque (`--color-surface-solid`).
-- Use `src/components/AppIcon.jsx` for icons. Do not paste emoji/symbol characters; this repo has a recurring mojibake/encoding problem, so keep files UTF-8.
-- PWA service worker is registered exactly once via `registerSW()` in `src/main.jsx` (`src/lib/pwa.js`) against `public/service-worker.js`. Do not re-register it in `index.html`.
+
+- Styling: tokens in `src/styles/base.css` (`--*` vars), `globals.css`
+  (`.btn-primary`, `.card`, `.form-group`), `landing.css` (`ll-` public pages),
+  inline style objects elsewhere. No Tailwind utilities.
+- Brand: bg `#0B1220`, teal `#2DD4BF`, blue `#7DBDEE`, warm accent `#F2C879`.
+- Fonts: `--font-display` (Bricolage Grotesque), `--font-body` (Instrument
+  Sans) — self-hosted via fontsource packages.
+- Icons: `src/components/AppIcon.jsx`; never emoji (mojibake history).
+  Keep files UTF-8 without BOM.
+- One `<h1>` per page; sentence-case headings; no banned marketing words
+  (see homepage-redesign brief: no "empower/journey/unlock/seamless/…").
 
 ## Cautions
-- `src/lib/groq.js` logs the first 10 chars of the session JWT. Remove debug logging; don't extend it.
-- `README.md` is the stock Vite template. Real notes are the root `LOSSLENS_*_REPORT.md` files.
+
+- `src/lib/groq.js` logs the first 10 chars of the session JWT — do not
+  extend it.
+- Site gate is temporary: `src/components/SiteGate.jsx` + wrapper in
+  `main.jsx` + robots meta + `VITE_SITE_GATE`. Removal steps in README.
+- `upgrade_interest.interested_plan='protection'` is used by `/protection`.
+- Real contact details live ONLY in `src/config/site.js`; render via
+  `ContactIcons` (icon-only links) — never as visible text.

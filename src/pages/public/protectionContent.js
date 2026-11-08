@@ -65,3 +65,7 @@ export const PROTECTION_CONTENT = {
   },
   disclaimer: 'LossLens Protection is a concept, not insurance advice, not an offer, and not a promise of cover.',
 }
+
+// Feature flag for the LossLens Protection concept pages.
+// Default on; set VITE_SHOW_PROTECTION=off to hide teaser, nav link and page.
+export const SHOW_PROTECTION = import.meta.env?.VITE_SHOW_PROTECTION !== 'off'

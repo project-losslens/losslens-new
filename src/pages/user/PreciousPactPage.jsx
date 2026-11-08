@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { readAndMigrateStorageItem } from '../../lib/storageKeys'
+import { readAndMigrateStorageItem } from '../../lib/storage'
 
 //  Constants
 const MAX_RECORDING_DURATION = 600 // 10 minutes
