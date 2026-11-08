@@ -52,7 +52,7 @@ const DISTRACTION_CHALLENGES = [
 
 const HELPLINES = [
   { name: 'NACADA Helpline', number: '1192', hours: '24/7', free: true, desc: 'National substance abuse helpline' },
-  { name: 'Befrienders Kenya', number: '+254 722 178 177', hours: '24/7', free: true, desc: 'Emotional support for anyone' },
+  { name: 'Befrienders Kenya', number: '0800 722 030', hours: '24/7', free: true, desc: 'Emotional support for anyone' },
   { name: 'Chiromo Hospital', number: '+254 709 667 000', hours: '24/7', free: false, desc: 'Mental health emergency' },
   { name: 'Kenya Red Cross', number: '1199', hours: '24/7', free: true, desc: 'Emergency psychosocial support' },
 ]

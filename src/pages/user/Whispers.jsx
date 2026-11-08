@@ -220,7 +220,7 @@ export default function Whispers() {
 
     //  Content moderation
     if (containsCrisisContent(text)) {
-      showToast('🆘 If you or someone is in crisis, please call Befrienders Kenya: +254 722 178 177', 5000)
+      showToast('🆘 If you or someone is in crisis, please call Befrienders Kenya: 0800 722 030', 5000)
     }
     if (containsBlockedContent(text)) { showToast(' Please don\'t share personal info.', 4000); return }
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { HeartHandshake, Phone, Wind, X } from 'lucide-react'
+import { HELPLINES } from '../config/helplines'
 
 const EXERCISE_SECONDS = 60
 
@@ -52,8 +53,9 @@ export default function CrisisAccessButton() {
               </button>
             </header>
             <div className="crisis-access__contacts">
-              <a href="tel:+254722178177"><Phone size={17} aria-hidden="true" /><span><strong>Befrienders Kenya</strong><small>+254 722 178 177</small></span></a>
-              <a href="tel:1192"><Phone size={17} aria-hidden="true" /><span><strong>NACADA</strong><small>1192</small></span></a>
+              {HELPLINES.map((line) => (
+                <a key={line.id} href={`tel:${line.tel}`}><Phone size={17} aria-hidden="true" /><span><strong>{line.name}</strong><small>{line.phone} · {line.hours}</small></span></a>
+              ))}
             </div>
             <div className="crisis-access__breathing">
               <Wind size={20} aria-hidden="true" />

@@ -23,7 +23,7 @@ const DAILY_AFFIRMATIONS = [
 
 const EMERGENCY_CONTACTS = [
   { name: 'NACADA Helpline', number: '1192', desc: 'Free, confidential. 24/7.' },
-  { name: 'Befrienders Kenya', number: '+254 722 178 177', desc: 'Emotional support 24/7.' },
+  { name: 'Befrienders Kenya', number: '0800 722 030', desc: 'Emotional support 24/7.' },
 ]
 
 function showToast(message, duration = 3000) {

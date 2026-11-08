@@ -357,7 +357,7 @@ export default function TheCircle() {
 
         {showCrisisBanner && (
           <div style={{ background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '12px 1.5rem', fontSize: '13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>🆘 If you're in crisis: call Befrienders Kenya <strong>0722 178 177</strong></span>
+            <span>🆘 If you're in crisis: call Befrienders Kenya <strong>0800 722 030</strong></span>
             <button onClick={() => { setShowCrisisBanner(false); if (crisisTimerRef.current) clearTimeout(crisisTimerRef.current) }} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '20px', cursor: 'pointer', padding: '4px 10px', minWidth: '44px', minHeight: '44px' }} aria-label="Dismiss crisis banner">×</button>
           </div>
         )}

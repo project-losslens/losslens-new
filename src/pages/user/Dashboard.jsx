@@ -4,13 +4,12 @@ import { supabase } from '../../lib/supabase'
 import AIChat from '../../components/AIChat'
 import NotificationBell from '../../components/NotificationBell'
 import { getRiskLevel, getRiskColor } from '../../lib/relapsePrediction'
+import { HELPLINES } from '../../config/helplines'
 
-// Crisis Contacts
-const CRISIS_CONTACTS = [
-  { name: 'Befrienders Kenya', phone: '0800 722 030', hours: '24/7 free', priority: true },
-  { name: 'NACADA', phone: '1192', hours: '24/7 free', priority: false },
-  { name: 'ODPC Kenya', phone: '0800 724 000', hours: 'Mon-Fri 8am-5pm', priority: false },
-]
+// Crisis Contacts (single source: src/config/helplines.js)
+const CRISIS_CONTACTS = HELPLINES.map((h) => ({
+  name: h.name, phone: h.phone, hours: `${h.hours} free`, priority: h.priority,
+}))
 
 function triggerConfetti() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
