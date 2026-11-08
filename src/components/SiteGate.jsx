@@ -6,7 +6,6 @@ import { useRef, useState } from 'react'
 import { LogoMark } from './Brand.jsx'
 import ContactIcons from './ContactIcons.jsx'
 import { primaryHelpline } from '../config/helplines'
-import '../styles/site-gate.css'
 
 export const SITE_GATE_EXPECTED_HASH = 'f91ff1d36becc41df298e7b9944c033146e14688dea6933050a86030a0b33454'
 const UNLOCK_KEY = 'll_site_unlocked'

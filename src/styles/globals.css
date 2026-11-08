@@ -2675,3 +2675,148 @@ button:active {
   color: var(--accent-warm);
   border-color: rgba(242, 200, 121, 0.4);
 }
+
+/* Temporary site gate — remove together with SiteGate.jsx. */
+.sg-root {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  background: var(--bg, #0B1220);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5, 1.5rem);
+  z-index: 99999;
+  overflow-y: auto;
+}
+.sg-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+}
+.sg-glow--teal { width: 34rem; height: 34rem; background: rgba(45, 212, 191, 0.13); top: -12rem; right: -10rem; }
+.sg-glow--blue { width: 30rem; height: 30rem; background: rgba(125, 189, 238, 0.11); bottom: -12rem; left: -10rem; }
+.sg-motif {
+  position: absolute;
+  width: 30rem;
+  height: 30rem;
+  opacity: 0.05;
+  pointer-events: none;
+}
+.sg-card {
+  position: relative;
+  width: 100%;
+  max-width: 24rem;
+  background: var(--surface-2, #171E2B);
+  border: 1px solid var(--border, rgba(255,255,255,0.14));
+  border-radius: var(--radius-lg, 18px);
+  padding: var(--space-7, 3rem) var(--space-6, 2rem) var(--space-6, 2rem);
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.sg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted, #B8C2D1);
+  background: var(--surface, #111B2E);
+  border: 1px solid var(--border, rgba(255,255,255,0.14));
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  margin-bottom: var(--space-5, 1.5rem);
+}
+.sg-chip::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-warm, #F2C879);
+}
+.sg-logo { display: flex; justify-content: center; margin-bottom: var(--space-4, 1rem); }
+.sg-title {
+  font-family: var(--font-display, 'Bricolage Grotesque Variable', sans-serif);
+  font-size: var(--step-2, 1.6rem);
+  font-weight: 700;
+  letter-spacing: var(--ls-display, -0.01em);
+  color: var(--text, #fff);
+  margin: 0 0 var(--space-3, 0.75rem);
+}
+.sg-title .sg-lens { color: var(--primary, #2DD4BF); }
+.sg-sub {
+  font-size: var(--step--1, 0.88rem);
+  color: var(--text-secondary, #D1D8E2);
+  line-height: 1.55;
+  margin: 0 0 var(--space-5, 1.5rem);
+}
+.sg-field { position: relative; margin-bottom: var(--space-3, 0.75rem); }
+.sg-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.75rem 1rem;
+  padding-right: 4.5rem;
+  border-radius: var(--radius-sm, 8px);
+  border: 1px solid var(--border, rgba(255,255,255,0.14));
+  background: var(--bg, #0B1220);
+  color: var(--text, #fff);
+  font-family: var(--font-body, sans-serif);
+  font-size: 1rem;
+}
+.sg-input:focus-visible { outline: 2px solid var(--primary, #2DD4BF); outline-offset: 2px; }
+.sg-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #B8C2D1);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 8px;
+  min-width: 44px;
+  min-height: 44px;
+}
+.sg-toggle:hover { color: var(--text, #fff); }
+.sg-submit {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  border: none;
+  background: var(--primary, #2DD4BF);
+  color: var(--bg, #0B1220);
+  font-family: var(--font-body, sans-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sg-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.sg-error {
+  min-height: 1.4rem;
+  margin: var(--space-3, 0.75rem) 0 0;
+  color: var(--danger, #EF4444);
+  font-size: 0.85rem;
+}
+.sg-access {
+  margin-top: var(--space-5, 1.5rem);
+  font-size: var(--step--1, 0.88rem);
+  color: var(--text-muted, #B8C2D1);
+}
+.sg-access .contact-icons { display: inline-flex; vertical-align: middle; margin-left: var(--space-2, 0.5rem); }
+.sg-crisis {
+  margin-top: var(--space-5, 1.5rem);
+  padding-top: var(--space-4, 1rem);
+  border-top: 1px solid var(--border, rgba(255,255,255,0.14));
+  font-size: 0.85rem;
+  color: var(--text-muted, #B8C2D1);
+}
+.sg-crisis a { color: var(--danger, #EF4444); font-weight: 600; }
+@media (prefers-reduced-motion: no-preference) {
+  .sg-card { animation: sg-fade 0.5s ease-out both; }
+}
+@keyframes sg-fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
