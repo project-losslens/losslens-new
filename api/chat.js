@@ -94,6 +94,33 @@ async function fetchUserContext(auth) {
   return context
 }
 
+async function fetchConsentState(auth) {
+  const headers = {
+    apikey: auth.supabaseKey,
+    Authorization: `Bearer ${auth.token}`,
+  }
+  const response = await fetchWithTimeout(
+    `${auth.supabaseUrl}/rest/v1/profiles?id=eq.${auth.user.id}&select=ai_data_consent_at&limit=1`,
+    { headers }, REQUEST_TIMEOUT_MS)
+  if (!response.ok) return null
+  const rows = await response.json()
+  return rows?.[0] ?? null
+}
+
+async function recordConsent(auth) {
+  const response = await fetchWithTimeout(`${auth.supabaseUrl}/rest/v1/profiles?id=eq.${auth.user.id}`, {
+    method: 'PATCH',
+    headers: {
+      apikey: auth.supabaseKey,
+      Authorization: `Bearer ${auth.token}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify({ ai_data_consent_at: new Date().toISOString() }),
+  }, REQUEST_TIMEOUT_MS)
+  if (!response.ok) throw new Error('CONSENT_WRITE_FAILED')
+}
+
 async function saveHistory(auth, role, message) {
   const response = await fetchWithTimeout(`${auth.supabaseUrl}/rest/v1/chat_history`, {
     method: 'POST',
@@ -210,6 +237,17 @@ export default async function handler(request, response) {
   const message = body.message.trim().slice(0, MAX_MESSAGE_LENGTH)
   if (!message) return json(response, 400, { error: 'A message is required' })
 
+  // Consent gate: AI chat sends user context to Groq (US). Require explicit opt-in.
+  try {
+    const profile = await fetchConsentState(auth)
+    if (!profile) return json(response, 500, { error: 'Profile could not be loaded' })
+    if (!profile.ai_data_consent_at) {
+      return json(response, 403, { needsConsent: true })
+    }
+  } catch {
+    return json(response, 500, { error: 'Consent state could not be verified' })
+  }
+
   let history
   try {
     history = await fetchChatHistory(auth)
@@ -309,5 +347,29 @@ export default async function handler(request, response) {
   } catch (error) {
     console.error(error)
     return json(response, 500, { error: 'internal' })
+  }
+}
+
+// POST /api/consent — records explicit AI-data consent on the caller's profile.
+export async function consentHandler(request, response) {
+  if (request.method !== 'POST') {
+    response.setHeader('Allow', 'POST')
+    return json(response, 405, { error: 'Method not allowed' })
+  }
+  try {
+    const auth = await getAuthenticatedUser(request)
+    if (!auth) return json(response, 401, { error: 'unauthorized' })
+    let body = request.body || {}
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body) } catch { return json(response, 400, { error: 'invalid_body' }) }
+    }
+    if (!body || typeof body !== 'object' || body.consent !== true) {
+      return json(response, 400, { error: 'Explicit consent is required' })
+    }
+    await recordConsent(auth)
+    return json(response, 200, { ok: true })
+  } catch (error) {
+    console.error('Consent recording failed:', error?.message || error)
+    return json(response, 500, { error: 'Consent could not be recorded' })
   }
 }
