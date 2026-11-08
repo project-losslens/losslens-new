@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AppShell from './layouts/AppShell'
-import PageLoader from './components/PageLoader'
+import BrandLoader from './components/BrandLoader'
 import RequireAuth from './components/RequireAuth'
 import RequireElevated from './components/RequireElevated'
 import { CrisisAlertCountProvider } from './context/CrisisAlertCountContext'
@@ -59,7 +59,7 @@ const InsurerAnalytics = lazy(() => import('./pages/insurer/InsurerAnalytics'))
 
 function App() {
   return (
-    <Suspense fallback={<PageLoader />}>
+    <Suspense fallback={<BrandLoader />}>
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />

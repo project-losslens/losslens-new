@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuthProfile } from '../context/AuthProfileContext'
 import AppIcon from './AppIcon'
-import PageLoader from './PageLoader'
+import BrandLoader from './BrandLoader'
 
 const UNLOCK_DURATION_MS = 15 * 60 * 1000
 
@@ -31,9 +31,9 @@ export default function RequireElevated() {
     return () => window.clearTimeout(timeout)
   }, [authorized])
 
-  if (authStatus === 'loading') return <PageLoader />
+  if (authStatus === 'loading') return <BrandLoader />
   if (authStatus === 'no-session') return <Navigate to="/login" replace />
-  if (authStatus !== 'ready') return <PageLoader />
+  if (authStatus !== 'ready') return <BrandLoader />
   if (!isSuperAdmin) return <Navigate to="/admin" replace />
   if (authorized) return <Outlet />
 

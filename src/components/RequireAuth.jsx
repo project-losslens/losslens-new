@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuthProfile } from '../context/AuthProfileContext'
-import PageLoader from './PageLoader'
+import BrandLoader from './BrandLoader'
 
 export default function RequireAuth({ role }) {
   const location = useLocation()
@@ -25,7 +25,7 @@ export default function RequireAuth({ role }) {
       </section>
     )
   }
-  if (authStatus === 'loading') return <PageLoader />
+  if (authStatus === 'loading') return <BrandLoader />
   if (authStatus === 'no-session') {
     return <Navigate to="/login" replace state={{ from: `${location.pathname}${location.search}` }} />
   }
@@ -38,7 +38,7 @@ export default function RequireAuth({ role }) {
       </section>
     )
   }
-  if (authStatus !== 'ready') return <PageLoader />
+  if (authStatus !== 'ready') return <BrandLoader />
   if (role === 'admin' && !isAdmin) return <Navigate to="/dashboard" replace />
   if (role === 'super_admin' && !isSuperAdmin) return <Navigate to="/admin" replace />
   if (role === 'therapist' && currentRole !== 'therapist' && !isSuperAdmin) return <Navigate to="/dashboard" replace />
