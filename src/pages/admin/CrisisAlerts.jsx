@@ -73,7 +73,7 @@ export default function CrisisAlerts() {
   const btn = (bg, color, border) => ({
     padding: '7px 14px', borderRadius: '8px', border: `1px solid ${border || bg}`,
     background: bg, color, fontSize: '12px', cursor: 'pointer',
-    fontFamily: "'Inter', sans-serif", fontWeight: 500,
+    fontFamily: 'var(--font-body)', fontWeight: 500,
   })
 
   if (loading) {
@@ -107,11 +107,11 @@ export default function CrisisAlerts() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: "'Inter', sans-serif", margin: 0 }}>🆘 Crisis Alerts</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}>🆘 Crisis Alerts</h1>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{alerts.length} open  · {resolved.length} resolved</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
+            <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Refresh</button>
           </div>
         </div>
 
@@ -128,7 +128,7 @@ export default function CrisisAlerts() {
         <div style={{ padding: '1.5rem', maxWidth: '900px', margin: '0 auto' }}>
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)' }}>
             {[{ id: 'open', label: ` Open (${alerts.length})` }, { id: 'resolved', label: ` Resolved (${resolved.length})` }].map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? (tab.id === 'open' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.12)') : 'transparent', color: activeTab === tab.id ? (tab.id === 'open' ? 'var(--text)' : 'var(--primary)') : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{tab.label}</button>
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? (tab.id === 'open' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.12)') : 'transparent', color: activeTab === tab.id ? (tab.id === 'open' ? 'var(--text)' : 'var(--primary)') : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{tab.label}</button>
             ))}
           </div>
 
@@ -185,7 +185,7 @@ export default function CrisisAlerts() {
                       onChange={e => setNotes(p => ({ ...p, [a.id]: e.target.value }))}
                       placeholder="Add follow-up notes..."
                       rows={3}
-                      style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '12px', fontFamily: "'Inter', sans-serif", resize: 'vertical', boxSizing: 'border-box', outline: 'none' }}
+                      style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '12px', fontFamily: 'var(--font-body)', resize: 'vertical', boxSizing: 'border-box', outline: 'none' }}
                     />
                   </div>
                 )}

@@ -189,7 +189,7 @@ function Login() {
             border: '2px solid rgba(255,255,255,0.12)', background: '#FFFFFF',
             color: '#0B1220', fontSize: '14px', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            gap: '10px', marginBottom: '1.25rem', fontFamily: "'Inter', sans-serif",
+            gap: '10px', marginBottom: '1.25rem', fontFamily: 'var(--font-body)',
             fontWeight: 500, opacity: (googleLoading || cooldown) ? 0.7 : 1
           }}>
             {googleLoading ? <span className="spinner" /> : <><GoogleIcon /> Continue with Google</>}
@@ -220,7 +220,7 @@ function Login() {
                 <input type="checkbox" id="remember" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} style={{ accentColor: '#2DD4BF', width: '15px', height: '15px', cursor: 'pointer' }} />
                 <label htmlFor="remember" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>Remember me</label>
               </div>
-              <button type="button" className="forgot" onClick={() => navigate('/forgot-password')} style={{ background: 'none', border: 'none', fontSize: '12px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: "'Inter', sans-serif", margin: 0, padding: 0 }}>Forgot password?</button>
+              <button type="button" className="forgot" onClick={() => navigate('/forgot-password')} style={{ background: 'none', border: 'none', fontSize: '12px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'var(--font-body)', margin: 0, padding: 0 }}>Forgot password?</button>
             </div>
 
             <button className="btn-primary full" type="submit" disabled={loading || cooldown} style={{ opacity: cooldown ? 0.5 : 1 }}>

@@ -4,13 +4,12 @@ import { supabase } from '../../lib/supabase'
 import AIChat from '../../components/AIChat'
 import NotificationBell from '../../components/NotificationBell'
 import { getRiskLevel, getRiskColor } from '../../lib/relapsePrediction'
+import { HELPLINES } from '../../config/helplines'
 
-// Crisis Contacts
-const CRISIS_CONTACTS = [
-  { name: 'Befrienders Kenya', phone: '0800 722 030', hours: '24/7 free', priority: true },
-  { name: 'NACADA', phone: '1192', hours: '24/7 free', priority: false },
-  { name: 'ODPC Kenya', phone: '0800 724 000', hours: 'Mon-Fri 8am-5pm', priority: false },
-]
+// Crisis Contacts (single source: src/config/helplines.js)
+const CRISIS_CONTACTS = HELPLINES.map((h) => ({
+  name: h.name, phone: h.phone, hours: `${h.hours} free`, priority: h.priority,
+}))
 
 function triggerConfetti() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -92,7 +91,7 @@ function UsernamePrompt({ userId, onComplete }) {
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.97)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
       <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '400px' }}>
         <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px', textAlign: 'center' }}></span>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#FFFFFF', marginBottom: '8px', textAlign: 'center' }}>One last thing</h2>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: '#FFFFFF', marginBottom: '8px', textAlign: 'center' }}>One last thing</h2>
         <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem', textAlign: 'center', lineHeight: 1.6 }}>Choose a username for The Circle, Whispers, and your profile. This is how others will see you — anonymously.</p>
         {error && <div style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
         <div className="form-group">
@@ -230,7 +229,7 @@ function Dashboard() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
-        <div style={{ animation: 'logoBreathe 2s ease-in-out infinite' }}><span style={{ fontFamily: "'Playfair Display', serif", fontSize: '36px', color: '#2DD4BF', fontWeight: 700 }}>LossLens</span></div>
+        <div style={{ animation: 'logoBreathe 2s ease-in-out infinite' }}><span style={{ fontFamily: 'var(--font-display)', fontSize: '36px', color: '#2DD4BF', fontWeight: 700 }}>LossLens</span></div>
         <div style={{ display: 'flex', gap: '10px' }}>{[0, 1, 2].map(i => (<div key={i} style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i * 0.2}s ease-in-out infinite` }} />))}</div>
       </div>
     )
@@ -241,9 +240,9 @@ function Dashboard() {
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
           <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
-          <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif", fontSize: '22px', marginBottom: '8px' }}>Please log in</h2>
+          <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', marginBottom: '8px' }}>Please log in</h2>
           <p style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '24px' }}>Your session has expired.</p>
-          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%' }}>Go to Login →</button>
+          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%' }}>Go to Login →</button>
         </div>
       </div>
     )
@@ -258,7 +257,7 @@ function Dashboard() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}>
               {new Date().getHours() < 12 ? '' : new Date().getHours() < 17 ? '' : ''} {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}, <span style={{ color: '#2DD4BF' }}>{firstName}</span>
             </h1>
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{profile?.streak_days ? `${profile.streak_days}-day streak ` : 'Start your streak today'}</p>
@@ -274,8 +273,8 @@ function Dashboard() {
             <span style={{ fontSize: '36px', flexShrink: 0 }} aria-hidden="true"></span>
             <div style={{ flex: 1, minWidth: '200px' }}><p style={{ color: '#2DD4BF', fontSize: '14px', fontWeight: 600, margin: '0 0 4px' }}>Add LossLens to your home screen</p><p style={{ color: '#FFFFFF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Install for quick access — works offline, no app store needed.</p></div>
             <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-              <button onClick={() => { setShowInstallPrompt(false); sessionStorage.setItem('pwa_install_dismissed', 'true') }} style={{ padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>Not now</button>
-              <button onClick={installPWA} style={{ padding: '8px 20px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>Install </button>
+              <button onClick={() => { setShowInstallPrompt(false); sessionStorage.setItem('pwa_install_dismissed', 'true') }} style={{ padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>Not now</button>
+              <button onClick={installPWA} style={{ padding: '8px 20px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>Install </button>
             </div>
           </div>
         )}
@@ -330,7 +329,7 @@ function Dashboard() {
               <h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '0.75rem' }}>Explore LossLens</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '8px' }}>
                 {[{ emoji: '', label: 'Diary', path: '/diary' }, { emoji: '', label: 'CBT Modules', path: '/cbt' }, { emoji: '', label: 'Urge Toolkit', path: '/urge-toolkit' }, { emoji: '', label: 'Events', path: '/events' }, { emoji: '', label: 'Resources', path: '/resources' }, { emoji: '', label: 'Family Portal', path: '/family-portal' }, { emoji: '', label: 'Monthly Mirror', path: '/monthly-mirror' }, { emoji: '', label: 'LossLens Pact', path: '/precious-pact' }].map(item => (
-                  <button key={item.path} onClick={() => navigate(item.path)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '12px', color: '#7DBDEE', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
+                  <button key={item.path} onClick={() => navigate(item.path)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '12px', color: '#7DBDEE', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = '#2DD4BF'; e.currentTarget.style.transform = 'translateY(-2px)' }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'translateY(0)' }}>
                     <span style={{ fontSize: '22px' }} aria-hidden="true">{item.emoji}</span><span>{item.label}</span>
                   </button>
@@ -376,7 +375,7 @@ function Dashboard() {
           <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '2px solid #FFFFFF', maxWidth: '450px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
               <span style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>🆘</span>
-              <h2 style={{ color: '#FFFFFF', fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', margin: '0 0 8px' }}>You're Not Alone</h2>
+              <h2 style={{ color: '#FFFFFF', fontFamily: 'var(--font-display)', fontSize: '1.5rem', margin: '0 0 8px' }}>You're Not Alone</h2>
               <p style={{ color: '#2DD4BF', fontSize: '13px', lineHeight: '1.6', margin: 0 }}>These services are free, confidential, and available to anyone in Kenya. Reach out anytime.</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '1.5rem' }}>

@@ -282,7 +282,7 @@ function Signup() {
               <p style={{ color: '#2DD4BF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Check your <strong>spam/junk folder</strong>. Some email providers filter automated messages.</p>
             </div>
             <button className="btn-primary full" onClick={() => navigate('/login')}>Go to login →</button>
-            <button onClick={handleResendEmail} disabled={resending || resendSent} style={{ width: '100%', marginTop: '10px', padding: '10px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: resendSent ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+            <button onClick={handleResendEmail} disabled={resending || resendSent} style={{ width: '100%', marginTop: '10px', padding: '10px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: resendSent ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
               {resendSent ? ' Sent!' : resending ? 'Sending...' : 'Resend email'}
             </button>
           </div>
@@ -318,7 +318,7 @@ function Signup() {
                 background: signupType === 'individual' ? 'rgba(45,212,191,0.15)' : 'transparent',
                 color: signupType === 'individual' ? '#2DD4BF' : 'rgba(255,255,255,0.4)',
                 fontSize: '12px', fontWeight: signupType === 'individual' ? 600 : 400,
-                cursor: 'pointer', fontFamily: "'Inter', sans-serif", transition: 'all 0.2s'
+                cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.2s'
               }}>
                Individual
             </button>
@@ -329,7 +329,7 @@ function Signup() {
                 background: signupType === 'company' ? 'rgba(45,212,191,0.15)' : 'transparent',
                 color: signupType === 'company' ? '#2DD4BF' : 'rgba(255,255,255,0.4)',
                 fontSize: '12px', fontWeight: signupType === 'company' ? 600 : 400,
-                cursor: 'pointer', fontFamily: "'Inter', sans-serif", transition: 'all 0.2s'
+                cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.2s'
               }}>
                Company
             </button>
@@ -341,7 +341,7 @@ function Signup() {
             border: '2px solid rgba(255,255,255,0.12)', background: '#FFFFFF',
             color: '#0B1220', fontSize: '14px', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            gap: '10px', marginBottom: '1.25rem', fontFamily: "'Inter', sans-serif",
+            gap: '10px', marginBottom: '1.25rem', fontFamily: 'var(--font-body)',
             fontWeight: 500, opacity: googleLoading ? 0.7 : 1
           }}>
             {googleLoading ? <span className="spinner" /> : <><GoogleIcon /> Continue with Google</>}

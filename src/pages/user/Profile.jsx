@@ -377,8 +377,8 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
           <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}></span>
-          <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif" }}>Please log in</h2>
-          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%', marginTop: '16px' }}>Go to Login →</button>
+          <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>Please log in</h2>
+          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%', marginTop: '16px' }}>Go to Login →</button>
         </div>
       </div>
     )
@@ -398,7 +398,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
 
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem',  }}>
           <div>
-            <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> My Profile</h1>
+            <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> My Profile</h1>
             <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{fullName || 'Complete your profile'}</p>
           </div>
         </div>
@@ -415,7 +415,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
             ].map((s, i) => (
               <div className="stat-card" key={i} style={{ padding: '10px 8px', textAlign: 'center', minHeight: '70px' }}>
                 <span style={{ fontSize: '16px' }}>{s.icon}</span>
-                <span style={{ display: 'block', fontSize: '14px', fontWeight: 700, color: '#2DD4BF', fontFamily: "'Playfair Display', serif" }}>{s.value}</span>
+                <span style={{ display: 'block', fontSize: '14px', fontWeight: 700, color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>{s.value}</span>
                 <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)' }}>{s.label}</span>
               </div>
             ))}
@@ -445,7 +445,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
             <h3 style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '0.75rem' }}> Recovery Report</h3>
 
             <p style={{ color: '#7DBDEE', fontSize: '11px', lineHeight: '1.5', marginBottom: '12px' }}>Your professional recovery report is ready. Download it to share with your therapist or counselor.</p>
-            <button onClick={downloadRecoveryReport} disabled={generatingReport} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+            <button onClick={downloadRecoveryReport} disabled={generatingReport} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
               {generatingReport ? <span className="spinner"></span> : 'Download Report'}
             </button>
           </div>
@@ -453,7 +453,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
           {/* Tabs */}
           <div style={{ display: 'flex', gap: '4px', marginBottom: '0.75rem', background: 'rgba(255,255,255,0.06)', borderRadius: '10px', padding: '3px', border: '1px solid rgba(255,255,255,0.12)' }}>
             {[{ id: TABS.PROFILE, label: ' Profile' }, { id: TABS.SETTINGS, label: ' Prefs' }, { id: TABS.SECURITY, label: ' Security' }, { id: TABS.DATA, label: ' Data' }].map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px 6px', borderRadius: '8px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", minHeight: '44px' }}>{tab.label}</button>
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px 6px', borderRadius: '8px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '44px' }}>{tab.label}</button>
             ))}
           </div>
 
@@ -464,7 +464,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
                 <div style={{ position: 'relative', display: 'inline-block', cursor: 'pointer' }} onClick={() => setShowAvatarPicker(!showAvatarPicker)}>
                   {avatarUrl && avatarUrl.startsWith('http') ? <img src={avatarUrl} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #2DD4BF' }} />
                   : avatarUrl ? <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #2DD4BF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>{avatarUrl}</div>
-                  : <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #7DBDEE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', fontWeight: 700, color: '#2DD4BF', fontFamily: "'Playfair Display', serif" }}>{initials}</div>}
+                  : <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #7DBDEE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', fontWeight: 700, color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>{initials}</div>}
                   <div style={{ position: 'absolute', bottom: '0', right: '0', background: '#2DD4BF', color: '#0B1220', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', border: '2px solid #0B1220' }}></div>
                 </div>
                 {showAvatarPicker && (
@@ -474,7 +474,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
                         <button key={emoji} onClick={() => handleAvatarSelect(emoji)} style={{ width: '40px', height: '40px', borderRadius: '50%', background: avatarUrl === emoji ? 'rgba(255,255,255,0.12)' : '#0B1220', border: avatarUrl === emoji ? '2px solid #2DD4BF' : '1px solid rgba(255,255,255,0.12)', fontSize: '20px', cursor: 'pointer' }} aria-label={`Select ${emoji} avatar`}>{emoji}</button>
                       ))}
                     </div>
-                    <button onClick={() => fileInputRef.current?.click()} disabled={uploadingAvatar} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", minHeight: '44px' }}>{uploadingAvatar ? 'Uploading...' : ' Upload photo'}</button>
+                    <button onClick={() => fileInputRef.current?.click()} disabled={uploadingAvatar} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '44px' }}>{uploadingAvatar ? 'Uploading...' : ' Upload photo'}</button>
                     <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarUpload} style={{ display: 'none' }} />
                   </div>
                 )}
@@ -565,7 +565,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
                   {deleteStep === 2 && (
                     <div style={{ textAlign: 'center' }}>
                       <p style={{ color: '#FFFFFF', fontSize: '11px', marginBottom: '0.5rem' }}>Type <strong>DELETE</strong></p>
-                      <input type="text" value={deleteInput} onChange={e => setDeleteInput(e.target.value)} placeholder="Type DELETE here" style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#0B1220', border: '2px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', textAlign: 'center', fontFamily: "'Inter', sans-serif", outline: 'none', marginBottom: '0.5rem', boxSizing: 'border-box' }} />
+                      <input type="text" value={deleteInput} onChange={e => setDeleteInput(e.target.value)} placeholder="Type DELETE here" style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#0B1220', border: '2px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', textAlign: 'center', fontFamily: 'var(--font-body)', outline: 'none', marginBottom: '0.5rem', boxSizing: 'border-box' }} />
                       <button className="btn-danger full" onClick={handleDeleteAccount} disabled={deletingAccount || deleteInput !== 'DELETE'} style={{ fontSize: '12px', padding: '10px', minHeight: '44px', opacity: deleteInput === 'DELETE' ? 1 : 0.5 }}>{deletingAccount ? 'Deleting...' : 'Permanently delete'}</button>
                     </div>
                   )}

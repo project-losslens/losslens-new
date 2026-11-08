@@ -129,8 +129,8 @@ export default function ManageResources() {
 
   const activeCount = useMemo(() => resources.filter(r => r.active).length, [resources])
 
-  const inputStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '13px', fontFamily: "'Inter', sans-serif", boxSizing: 'border-box', outline: 'none' }
-  const btnStyle = (bg, color, border) => ({ padding: '8px 16px', borderRadius: '8px', border: `1px solid ${border || bg}`, background: bg, color, fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontWeight: 500 })
+  const inputStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '13px', fontFamily: 'var(--font-body)', boxSizing: 'border-box', outline: 'none' }
+  const btnStyle = (bg, color, border) => ({ padding: '8px 16px', borderRadius: '8px', border: `1px solid ${border || bg}`, background: bg, color, fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 500 })
 
   if (loading) {
     return (
@@ -169,11 +169,11 @@ export default function ManageResources() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: "'Inter', sans-serif", margin: 0 }}> Manage Resources</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}> Manage Resources</h1>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{resources.length} total  · {activeCount} active</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
+            <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Refresh</button>
           </div>
         </div>
 
@@ -240,7 +240,7 @@ export default function ManageResources() {
             </div>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', flex: 1 }}>
               {['All', ...CATEGORIES].map(c => (
-                <button key={c} onClick={() => setFilter(c)} style={{ padding: '6px 12px', borderRadius: '100px', border: `1px solid ${filter === c ? 'var(--primary)' : 'rgba(255,255,255,0.12)'}`, background: filter === c ? 'rgba(255,255,255,0.12)' : 'transparent', color: filter === c ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', transition: 'all 0.2s' }}>{c}</button>
+                <button key={c} onClick={() => setFilter(c)} style={{ padding: '6px 12px', borderRadius: '100px', border: `1px solid ${filter === c ? 'var(--primary)' : 'rgba(255,255,255,0.12)'}`, background: filter === c ? 'rgba(255,255,255,0.12)' : 'transparent', color: filter === c ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>{c}</button>
               ))}
             </div>
             <button onClick={openCreate} style={btnStyle('var(--primary)', 'var(--bg)', 'var(--primary)')}> Add</button>
@@ -250,7 +250,7 @@ export default function ManageResources() {
             <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
               <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
               <p style={{ color: 'var(--primary)', fontSize: '14px' }}>{debouncedSearch || filter !== 'All' ? 'No resources match your search.' : 'No resources yet.'}</p>
-              {(debouncedSearch || filter !== 'All') && <button onClick={() => { setSearch(''); setFilter('All') }} style={{ marginTop: '10px', padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Clear filters</button>}
+              {(debouncedSearch || filter !== 'All') && <button onClick={() => { setSearch(''); setFilter('All') }} style={{ marginTop: '10px', padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Clear filters</button>}
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -301,8 +301,8 @@ export default function ManageResources() {
               Permanently delete <strong style={{ color: 'var(--primary)' }}>"{showDeleteConfirm.name}"</strong>? This cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={() => deleteResource(showDeleteConfirm.id)} disabled={deleting} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{deleting ? 'Deleting...' : 'Delete'}</button>
+              <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={() => deleteResource(showDeleteConfirm.id)} disabled={deleting} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{deleting ? 'Deleting...' : 'Delete'}</button>
             </div>
           </div>
         </div>

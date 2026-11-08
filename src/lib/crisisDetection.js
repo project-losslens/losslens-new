@@ -2,7 +2,9 @@
 // Keep CRISIS_KEYWORDS and normalisation in sync with the server copy —
 // the authoritative detection runs server-side before the model is called.
 
-export const CRISIS_HELPLINE = 'Befrienders Kenya: +254 722 178 177 (free, confidential)'
+import { primaryHelpline } from '../config/helplines.js'
+
+export const CRISIS_HELPLINE = `${primaryHelpline.name}: ${primaryHelpline.phone} (free, confidential)`
 
 const CRISIS_KEYWORDS = [
   // English

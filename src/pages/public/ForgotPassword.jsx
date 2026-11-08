@@ -117,11 +117,11 @@ function ForgotPassword() {
 
             {error && <div role="alert" aria-live="polite" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
 
-            <button onClick={handleResend} disabled={countdown > 0 || resending} style={{ width: '100%', padding: '13px', borderRadius: '100px', background: countdown > 0 ? 'rgba(255,255,255,0.12)' : '#2DD4BF', border: 'none', color: countdown > 0 ? 'rgba(255,255,255,0.4)' : '#0B1220', fontSize: '14px', fontWeight: 600, cursor: countdown > 0 ? 'not-allowed' : 'pointer', fontFamily: "'Inter', sans-serif", marginBottom: '10px' }}>
+            <button onClick={handleResend} disabled={countdown > 0 || resending} style={{ width: '100%', padding: '13px', borderRadius: '100px', background: countdown > 0 ? 'rgba(255,255,255,0.12)' : '#2DD4BF', border: 'none', color: countdown > 0 ? 'rgba(255,255,255,0.4)' : '#0B1220', fontSize: '14px', fontWeight: 600, cursor: countdown > 0 ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-body)', marginBottom: '10px' }}>
               {resending ? 'Sending...' : countdown > 0 ? `Resend in ${formatCountdown()}` : 'Resend email'}
             </button>
 
-            <button onClick={handleDifferentEmail} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", textDecoration: 'underline' }}>
+            <button onClick={handleDifferentEmail} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)', textDecoration: 'underline' }}>
               Entered wrong email? Try again
             </button>
           </div>

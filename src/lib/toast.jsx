@@ -49,7 +49,7 @@ export function showToast(message, options = {}) {
     box-shadow: 0 4px 16px rgba(11,18,32,0.4); border: 1px solid ${border};
     animation: toastSlideIn 0.3s ease-out; white-space: nowrap;
     pointer-events: auto; cursor: pointer;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
   `
 
   container.appendChild(toast)

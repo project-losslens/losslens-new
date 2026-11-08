@@ -172,7 +172,7 @@ export default function SubscriptionPage() {
           <div className="pill" style={{ marginBottom: '1rem' }}>
             {isCompanyPlan ? 'Company Plan' : currentPlan === PLANS.FREE ? 'Free Plan' : 'Premium Member'}
           </div>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', color: '#FFFFFF', marginBottom: '0.5rem' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#FFFFFF', marginBottom: '0.5rem' }}>
             {isCompanyPlan
               ? 'Company-Subsidized Access'
               : currentPlan === PLANS.FREE
@@ -219,7 +219,7 @@ export default function SubscriptionPage() {
             }}>
               <span style={{ fontSize: '28px', display: 'block', marginBottom: '8px' }}></span>
               <h3 style={{ color: '#FFFFFF', fontSize: '15px', marginBottom: '4px' }}>Free</h3>
-              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#2DD4BF', margin: '0 0 4px' }}>KES 0</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: '#2DD4BF', margin: '0 0 4px' }}>KES 0</p>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Forever</p>
               {currentPlan === PLANS.FREE && (
                 <span style={{ display: 'inline-block', marginTop: '8px', background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '3px 10px', borderRadius: '100px', fontSize: '10px', border: '1px solid #2DD4BF' }}>Current Plan</span>
@@ -235,7 +235,7 @@ export default function SubscriptionPage() {
               <span style={{ position: 'absolute', top: '-10px', right: '16px', background: '#2DD4BF', color: '#0B1220', fontSize: '10px', fontWeight: 600, padding: '3px 10px', borderRadius: '100px' }}>Premium</span>
               <span style={{ fontSize: '28px', display: 'block', marginBottom: '8px' }}></span>
               <h3 style={{ color: '#FFFFFF', fontSize: '15px', marginBottom: '4px' }}>Premium</h3>
-              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#2DD4BF', margin: '0 0 4px' }}>KES 499</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: '#2DD4BF', margin: '0 0 4px' }}>KES 499</p>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>/month</p>
               {currentPlan === PLANS.PREMIUM && (
                 <span style={{ display: 'inline-block', marginTop: '8px', background: '#2DD4BF', color: '#0B1220', padding: '3px 10px', borderRadius: '100px', fontSize: '10px', fontWeight: 600 }}>Current Plan</span>
@@ -284,7 +284,7 @@ export default function SubscriptionPage() {
               <button onClick={() => setShowJoinCompany(true)} style={{
                 padding: '10px 20px', borderRadius: '100px', background: 'transparent',
                 border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '13px',
-                cursor: 'pointer', fontFamily: "'Inter', sans-serif"
+                cursor: 'pointer', fontFamily: 'var(--font-body)'
               }}>
                 Enter Company Code
               </button>
@@ -299,7 +299,7 @@ export default function SubscriptionPage() {
                     style={{
                       flex: 1, padding: '10px 14px', borderRadius: '8px',
                       background: '#0B1220', border: `1px solid ${joinError ? '#FFFFFF' : 'rgba(255,255,255,0.12)'}`,
-                      color: '#FFFFFF', fontSize: '13px', fontFamily: "'Inter', sans-serif", outline: 'none'
+                      color: '#FFFFFF', fontSize: '13px', fontFamily: 'var(--font-body)', outline: 'none'
                     }}
                     onKeyDown={e => e.key === 'Enter' && handleJoinCompany()}
                   />
@@ -309,7 +309,7 @@ export default function SubscriptionPage() {
                     style={{
                       padding: '10px 18px', borderRadius: '8px', background: '#2DD4BF',
                       border: 'none', color: '#0B1220', fontSize: '13px', fontWeight: 600,
-                      cursor: 'pointer', fontFamily: "'Inter', sans-serif"
+                      cursor: 'pointer', fontFamily: 'var(--font-body)'
                     }}
                   >
                     {joinLoading ? '...' : 'Join'}
@@ -372,7 +372,7 @@ export default function SubscriptionPage() {
         <div onClick={handleCloseComingSoon} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '2px solid #2DD4BF', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
-            <h3 style={{ color: '#2DD4BF', fontSize: '18px', fontFamily: "'Playfair Display', serif", marginBottom: '12px' }}>Premium Coming Soon!</h3>
+            <h3 style={{ color: '#2DD4BF', fontSize: '18px', fontFamily: 'var(--font-display)', marginBottom: '12px' }}>Premium Coming Soon!</h3>
             <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
               M-Pesa payments are being set up. During testing, <strong style={{ color: '#2DD4BF' }}>all features are free</strong>.
             </p>

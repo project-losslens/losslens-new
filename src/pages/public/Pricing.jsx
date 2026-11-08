@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import ContactIcons from '../../components/ContactIcons'
+import { mailtoHref } from '../../config/site'
 
 const FAQS = [
   { q: 'Is LossLens really free?', a: 'Yes — forever. The Free plan includes all core features: diary, CBT modules, AI companion Oloo, The Circle community, and more. No credit card needed.' },
@@ -24,7 +26,7 @@ export default function Pricing() {
     loadingTimer.current = setTimeout(() => {
       setLoading(null)
       if (plan === 'clinic') {
-        window.location.href = 'mailto:projectkingsly@gmail.com?subject=Company Plan Inquiry'
+        window.location.href = mailtoHref('Company Plan Inquiry')
       } else {
         navigate(`/signup?plan=${plan}&type=${type}`)
       }
@@ -115,7 +117,7 @@ export default function Pricing() {
       <main>
         <div className="pricing-hero" style={{ padding: '3rem 2rem 1.5rem', textAlign: 'center' }}>
           <div className="pill">Pricing</div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', marginBottom: '0.75rem' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', marginBottom: '0.75rem' }}>
             {planType === 'individual' ? (
               <>Free for individuals.<br /><em style={{ color: '#2DD4BF' }}>Premium when you're ready.</em></>
             ) : (
@@ -137,7 +139,7 @@ export default function Pricing() {
                 background: planType === 'individual' ? '#2DD4BF' : 'transparent',
                 color: planType === 'individual' ? '#0B1220' : 'rgba(255,255,255,0.4)',
                 fontSize: '13px', fontWeight: planType === 'individual' ? 600 : 400,
-                cursor: 'pointer', fontFamily: "'Inter', sans-serif", transition: 'all 0.2s'
+                cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.2s'
               }}>
                Individual
             </button>
@@ -148,7 +150,7 @@ export default function Pricing() {
                 background: planType === 'company' ? '#2DD4BF' : 'transparent',
                 color: planType === 'company' ? '#0B1220' : 'rgba(255,255,255,0.4)',
                 fontSize: '13px', fontWeight: planType === 'company' ? 600 : 400,
-                cursor: 'pointer', fontFamily: "'Inter', sans-serif", transition: 'all 0.2s'
+                cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.2s'
               }}>
                Company
             </button>
@@ -193,7 +195,7 @@ export default function Pricing() {
                 </div>
 
                 <div className="plan-price" style={{ marginBottom: '0.5rem' }}>
-                  <span className="price-num" style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', color: '#FFFFFF' }}>{plan.price}</span>
+                  <span className="price-num" style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: '#FFFFFF' }}>{plan.price}</span>
                   <span className="price-period" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginLeft: '4px' }}>{plan.period}</span>
                 </div>
 
@@ -252,7 +254,7 @@ export default function Pricing() {
               </div>
 
               <div className="plan-price" style={{ marginBottom: '0.5rem' }}>
-                <span className="price-num" style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', color: '#FFFFFF' }}>{companyPlan.price}</span>
+                <span className="price-num" style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: '#FFFFFF' }}>{companyPlan.price}</span>
                 <span className="price-period" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginLeft: '4px' }}>{companyPlan.period}</span>
               </div>
 
@@ -289,13 +291,13 @@ export default function Pricing() {
 
         {/* FAQ Section */}
         <section style={{ padding: '2rem', maxWidth: '700px', margin: '0 auto' }} aria-label="Frequently asked questions">
-          <h2 style={{ textAlign: 'center', color: '#2DD4BF', fontFamily: "'Playfair Display', serif", fontSize: '1.6rem', marginBottom: '1.5rem' }}>Frequently Asked Questions</h2>
+          <h2 style={{ textAlign: 'center', color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '1.6rem', marginBottom: '1.5rem' }}>Frequently Asked Questions</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {FAQS.map((faq, i) => (
               <div key={i} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', overflow: 'hidden' }}>
                 <button
                   onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
-                  style={{ width: '100%', padding: '16px', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '14px', fontWeight: 500, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', sans-serif", textAlign: 'left' }}
+                  style={{ width: '100%', padding: '16px', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '14px', fontWeight: 500, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'var(--font-body)', textAlign: 'left' }}
                   aria-expanded={expandedFaq === i}
                 >
                   {faq.q}
@@ -316,13 +318,12 @@ export default function Pricing() {
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Built with trust & transparency</p>
           <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', flexWrap: 'wrap' }}>
             {[
-              { icon: '', label: 'End-to-end encrypted' },
-              { icon: '🇰🇪', label: 'Kenya-based & compliant' },
-              { icon: 'ï ¸ ', label: 'Delete data anytime' },
-              { icon: '', label: 'Free forever for individuals' },
+              { label: 'End-to-end encrypted' },
+              { label: 'Built in Kenya' },
+              { label: 'Delete data anytime' },
+              { label: 'Free forever for individuals' },
             ].map((t, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#2DD4BF', fontSize: '12px' }}>
-                <span aria-hidden="true">{t.icon}</span>
                 <span>{t.label}</span>
               </div>
             ))}
@@ -334,14 +335,13 @@ export default function Pricing() {
       <footer className="footer" style={{ flexDirection: 'column', gap: '12px', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.12)', padding: '1.5rem 2rem' }}>
         <div>
           <p>LossLens  · Gambling Harm Reduction  · Kenya  · 2026</p>
-          <p style={{ fontSize: '11px', marginTop: '4px' }}>
-            <a href="mailto:projectkingsly@gmail.com" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>projectkingsly@gmail.com</a>
-          </p>
+          <div style={{ marginTop: '0.75rem', display: 'flex', justifyContent: 'center' }}>
+            <ContactIcons tone="on-dark" subject="Pricing question" />
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
           <a onClick={() => navigate('/privacy')} style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', textDecoration: 'none' }}>Privacy Policy</a>
           <a onClick={() => navigate('/terms')} style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', textDecoration: 'none' }}>Terms of Service</a>
-          <a href="mailto:projectkingsly@gmail.com" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', textDecoration: 'none' }}>Contact</a>
         </div>
         <p>Crisis? Call NACADA <strong style={{ color: '#2DD4BF' }}>1192</strong> (24/7 free)</p>
       </footer>

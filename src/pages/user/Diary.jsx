@@ -257,14 +257,14 @@ function Diary() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Today's Diary</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Today's Diary</h1>
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{new Date().toLocaleDateString('en-KE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
           </div>
         </div>
         <div style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)' }}>
-            <button onClick={() => setActiveView('today')} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeView === 'today' ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeView === 'today' ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: activeView === 'today' ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Today's Entry</button>
-            <button onClick={() => setActiveView('history')} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeView === 'history' ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeView === 'history' ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: activeView === 'history' ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> History {stats.totalEntries > 0 ? `(${stats.totalEntries})` : ''}</button>
+            <button onClick={() => setActiveView('today')} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeView === 'today' ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeView === 'today' ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: activeView === 'today' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Today's Entry</button>
+            <button onClick={() => setActiveView('history')} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeView === 'history' ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeView === 'history' ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: activeView === 'history' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> History {stats.totalEntries > 0 ? `(${stats.totalEntries})` : ''}</button>
           </div>
 
           {activeView === 'today' && (

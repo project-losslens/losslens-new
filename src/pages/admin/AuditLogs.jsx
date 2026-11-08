@@ -141,7 +141,7 @@ export default function AuditLogs() {
     background: isActive ? 'var(--bg)' : 'transparent',
     color: isActive ? color : 'rgba(255,255,255,0.4)',
     fontSize: '11px', cursor: 'pointer',
-    fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap',
+    fontFamily: 'var(--font-body)', whiteSpace: 'nowrap',
     transition: 'all 0.2s',
   })
 
@@ -169,7 +169,7 @@ export default function AuditLogs() {
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
-            <button onClick={fetchLogs} style={{ padding: '8px 16px', borderRadius: '8px', background: 'transparent', border: '1px solid var(--text)', color: 'var(--text)', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Retry</button>
+            <button onClick={fetchLogs} style={{ padding: '8px 16px', borderRadius: '8px', background: 'transparent', border: '1px solid var(--text)', color: 'var(--text)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Retry</button>
           </div>
         </div>
       </div>
@@ -182,12 +182,12 @@ export default function AuditLogs() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: "'Inter', sans-serif", margin: 0 }}> Audit Logs</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}> Audit Logs</h1>
             <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>{logs.length} events  · Live monitoring</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={handleExport} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Export CSV</button>
-            <button onClick={fetchLogs} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--info)', color: 'var(--info)', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
+            <button onClick={handleExport} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Export CSV</button>
+            <button onClick={fetchLogs} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--info)', color: 'var(--info)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Refresh</button>
           </div>
         </div>
 
@@ -195,18 +195,18 @@ export default function AuditLogs() {
           {/* Filters */}
           <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <input type="text" placeholder=" Search logs..." value={search} onChange={e => setSearch(e.target.value)}
-              style={{ flex: 1, minWidth: '200px', maxWidth: '280px', padding: '8px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '12px', outline: 'none', fontFamily: "'Inter', sans-serif" }} />
+              style={{ flex: 1, minWidth: '200px', maxWidth: '280px', padding: '8px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)' }} />
 
             {/* Date Range */}
             <select value={dateRange} onChange={e => setDateRange(e.target.value)}
-              style={{ padding: '8px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '12px', fontFamily: "'Inter', sans-serif", cursor: 'pointer', outline: 'none' }}>
+              style={{ padding: '8px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '12px', fontFamily: 'var(--font-body)', cursor: 'pointer', outline: 'none' }}>
               <option value="all">All Time</option>
               <option value="today">Today</option>
               <option value="week">This Week</option>
               <option value="month">This Month</option>
             </select>
 
-            <button onClick={toggleExpandAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--primary)', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>
+            <button onClick={toggleExpandAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--primary)', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
               {expandedAll ? ' Collapse all' : ' Expand all'}
             </button>
           </div>
@@ -254,7 +254,7 @@ export default function AuditLogs() {
                         {log.target_id && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontFamily: 'monospace' }}>ID: {log.target_id.slice(0, 12)}</span>}
                         <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{fmtDateTime(log.created_at)}</span>
                       </div>
-                      <button onClick={() => toggleExpand(log.id)} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+                      <button onClick={() => toggleExpand(log.id)} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
                         {isExpanded ? '▲ Hide' : '▼ Details'}
                       </button>
                     </div>

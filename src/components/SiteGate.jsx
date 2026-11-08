@@ -1,9 +1,12 @@
-// TEMPORARY site gate — delete this file, the <SiteGate> wrapper in
-// src/main.jsx, the robots meta tag in index.html and VITE_SITE_GATE to remove.
-// See docs/SITE_GATE.md.
+// TEMPORARY site gate — delete this file, its css import, the <SiteGate>
+// wrapper in src/main.jsx, the robots meta tag in index.html and
+// VITE_SITE_GATE to remove. See docs/SITE_GATE.md.
 /* eslint-disable react-refresh/only-export-components -- temp gate helpers are exported for tests */
 import { useRef, useState } from 'react'
 import LogoMark from './LogoMark.jsx'
+import ContactIcons from './ContactIcons.jsx'
+import { primaryHelpline } from '../config/helplines'
+import '../styles/site-gate.css'
 
 export const SITE_GATE_EXPECTED_HASH = 'f91ff1d36becc41df298e7b9944c033146e14688dea6933050a86030a0b33454'
 const UNLOCK_KEY = 'll_site_unlocked'
@@ -30,6 +33,7 @@ function isUnlocked() {
 export default function SiteGate({ children }) {
   const [unlocked, setUnlocked] = useState(isUnlocked)
   const [error, setError] = useState('')
+  const [showPw, setShowPw] = useState(false)
   const [cooldown, setCooldown] = useState(false)
   const attempts = useRef(0)
 
@@ -48,7 +52,7 @@ export default function SiteGate({ children }) {
       return
     }
     attempts.current += 1
-    setError('Incorrect password')
+    setError('That password is not right.')
     form.reset()
     if (attempts.current >= 3) {
       setCooldown(true)
@@ -58,67 +62,44 @@ export default function SiteGate({ children }) {
   }
 
   return (
-    <div
-      style={{
-        position: 'fixed', inset: 0, background: '#0B1220',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '1.5rem', zIndex: 99999,
-      }}
-    >
-      <form
-        onSubmit={onSubmit}
-        style={{
-          width: '100%', maxWidth: '360px', background: '#171E2B',
-          borderRadius: '16px', padding: '2.5rem 2rem', textAlign: 'center',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-          <LogoMark size={72} />
-        </div>
-        <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 700, color: '#fff', letterSpacing: '0.5px' }}>
-          Loss<span style={{ color: '#2DD4BF' }}>Lens</span>
-        </h1>
-        <p style={{ margin: '0.5rem 0 1.75rem', color: '#9AA7BD', fontSize: '0.9rem' }}>
-          Private preview - enter the access password
+    <div className="sg-root">
+      <div className="sg-glow sg-glow--teal" aria-hidden="true" />
+      <div className="sg-glow sg-glow--blue" aria-hidden="true" />
+      <LogoMark size={480} className="sg-motif" petalClass="" aria-hidden="true" />
+      <form className="sg-card" onSubmit={onSubmit}>
+        <span className="sg-chip">Under development</span>
+        <div className="sg-logo"><LogoMark size={64} /></div>
+        <h1 className="sg-title">We&rsquo;re still building <span className="sg-lens">LossLens</span></h1>
+        <p className="sg-sub">
+          LossLens is a free, private recovery companion for people affected by betting in Kenya.
+          The site is not open to the public yet. If you were given access, enter the password below.
         </p>
-        <label htmlFor="site-gate-password" style={{ position: 'absolute', left: '-9999px' }}>
-          Access password
-        </label>
-        <input
-          id="site-gate-password"
-          name="password"
-          type="password"
-          autoFocus
-          autoComplete="off"
-          disabled={cooldown}
-          aria-describedby="site-gate-error"
-          style={{
-            width: '100%', boxSizing: 'border-box', padding: '0.75rem 1rem',
-            borderRadius: '10px', border: '1px solid #2A3550', background: '#0B1220',
-            color: '#fff', fontSize: '1rem', marginBottom: '0.75rem',
-          }}
-        />
-        <button
-          type="submit"
-          disabled={cooldown}
-          style={{
-            width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: 'none',
-            background: '#2DD4BF', color: '#0B1220', fontSize: '1rem', fontWeight: 600,
-            cursor: cooldown ? 'not-allowed' : 'pointer', opacity: cooldown ? 0.6 : 1,
-          }}
-        >
-          Enter
-        </button>
-        <p
-          id="site-gate-error"
-          aria-live="polite"
-          style={{
-            minHeight: '1.25rem', margin: '0.75rem 0 0', color: '#F87171',
-            fontSize: '0.875rem',
-          }}
-        >
-          {error}
+        <div className="sg-field">
+          <label htmlFor="site-gate-password" style={{ position: 'absolute', left: '-9999px' }}>Access password</label>
+          <input
+            id="site-gate-password"
+            name="password"
+            type={showPw ? 'text' : 'password'}
+            className="sg-input"
+            autoFocus
+            autoComplete="off"
+            disabled={cooldown}
+            aria-describedby="site-gate-error"
+          />
+          <button type="button" className="sg-toggle" onClick={() => setShowPw((v) => !v)} aria-label={showPw ? 'Hide password' : 'Show password'}>
+            {showPw ? 'Hide' : 'Show'}
+          </button>
+        </div>
+        <button type="submit" className="sg-submit" disabled={cooldown}>Enter</button>
+        <p id="site-gate-error" aria-live="polite" className="sg-error">{error}</p>
+        <p className="sg-access">
+          Need access?
+          <ContactIcons subject="Access request" size={18} tone="on-dark" />
+        </p>
+        <p className="sg-crisis">
+          In crisis? Call{' '}
+          <a href={`tel:${primaryHelpline.tel}`}>{primaryHelpline.name} {primaryHelpline.phone}</a>{' '}
+          — free, 24/7.
         </p>
       </form>
     </div>

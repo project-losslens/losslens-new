@@ -13,6 +13,7 @@ const ForgotPassword = lazy(() => import('./pages/public/ForgotPassword'))
 const ResetPassword = lazy(() => import('./pages/public/ResetPassword'))
 const Pricing = lazy(() => import('./pages/public/Pricing'))
 const FamilyJoin = lazy(() => import('./pages/public/FamilyJoin'))
+const Protection = lazy(() => import('./pages/public/Protection'))
 
 const Dashboard = lazy(() => import('./pages/user/Dashboard'))
 const Diary = lazy(() => import('./pages/user/Diary'))
@@ -67,6 +68,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/family-join" element={<FamilyJoin />} />
+        <Route path="/protection" element={<Protection />} />
         <Route path="/insurer/login" element={<InsurerLogin />} />
 
         <Route element={<RequireAuth />}>
