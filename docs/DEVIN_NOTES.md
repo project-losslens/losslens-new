@@ -64,3 +64,11 @@ Owner has NOT replied "SQL applied" — do NOT merge to main or deploy until the
 ## Open questions for owner (if needed)
 - VERCEL_PROJECT name + production URL missing.
 - Whether SUPABASE_ACCESS_TOKEN/PROJECT_REF secrets exist.
+
+## CHECKPOINT 1 (Stage 1 / Part A) — committed 8ff2557
+- Four files exist: 20261110000001_core_schema.sql, _02_rls_grants_storage.sql, _03_rpc_functions.sql, _04_portals_claims.sql. `git ls-files '*.sql'` = exactly 4.
+- File 04 assembled by concatenating 20261109* portal sources + overrides from 00009/00010/00011 + re-asserted crisis writers + guarded weak-hash remap. Newest defs appended last so they win.
+- KNOWN GAPS in file 04: concatenated sources may contain a few non-final duplicate defs where an older file's version sits between newer ones (later wins, so final state is correct); `notify pgrst` appears multiple times inside file 04 (harmless). The `circle_message_authors` update in remap block is a deliberate no-op (`where false`) — authors reference profiles.id not hash.
+- VALIDATION BLOCKED: no docker, no psql/postgres on this Windows box. Could not run scratch-PG apply-twice or smoke tests. SQL correctness reviewed statically only — OWNER MUST apply carefully; DB_SETUP.md has VERIFY queries. This is the biggest risk.
+- scripts/check-queries.mjs NOT yet created; "check:queries" not added to package.json.
+- config.toml project_id = "losslens" done. CURRENT_SCHEMA_NOTES.md + docs/DB_SETUP.md written.
