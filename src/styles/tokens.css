@@ -64,3 +64,9 @@
   --ll-shadow-sm: 0 4px 14px rgba(11, 18, 32, 0.18);
   --ll-shadow-md: 0 14px 38px rgba(11, 18, 32, 0.28);
 }
+
+/* Brand mark colors sampled from public/losslens-logo.png */
+:root {
+  --brand-teal: #2DD4BF;
+  --brand-blue: #7DBDEE;
+}

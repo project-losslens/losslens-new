@@ -1,4 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <circle cx="50" cy="50" r="48" fill="#0B1220" stroke="#2DD4BF" stroke-width="4"/>
-  <text x="50" y="62" text-anchor="middle" font-size="40" fill="#2DD4BF" font-family="serif">💎</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <g>
+    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#2DD4BF" opacity="0.9" transform="rotate(0 50 50)"/>
+    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#7DBDEE" opacity="0.9" transform="rotate(45 50 50)"/>
+    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#2DD4BF" opacity="0.9" transform="rotate(90 50 50)"/>
+    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#7DBDEE" opacity="0.9" transform="rotate(135 50 50)"/>
+    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#2DD4BF" opacity="0.9" transform="rotate(180 50 50)"/>
+    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#7DBDEE" opacity="0.9" transform="rotate(225 50 50)"/>
+    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#2DD4BF" opacity="0.9" transform="rotate(270 50 50)"/>
+    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#7DBDEE" opacity="0.9" transform="rotate(315 50 50)"/>
+    <circle cx="50" cy="50" r="12" stroke="#7DBDEE" stroke-width="3" fill="none"/>
+    <circle cx="50" cy="50" r="4" fill="#2DD4BF"/>
+  </g>
 </svg>
