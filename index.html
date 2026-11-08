@@ -2,10 +2,25 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/losslens-icon-192.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>LossLens - Your Path Beyond Gambling</title>
-    
+    <style>
+      html, body { margin: 0; background: #0B1220; }
+      #boot-loader {
+        position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+        background: #0B1220; z-index: 9999;
+      }
+      #boot-loader .boot-spin { animation: boot-spin 6s linear infinite; transform-origin: 50px 50px; }
+      @keyframes boot-spin { to { transform: rotate(360deg); } }
+      #boot-loader .boot-petal { animation: boot-pulse 2.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+      @keyframes boot-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+      @media (prefers-reduced-motion: reduce) {
+        #boot-loader .boot-spin { animation: none; }
+        #boot-loader .boot-petal { animation: none; opacity: .85; }
+      }
+    </style>
+
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0B1220" />
@@ -14,12 +29,29 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="LossLens" />
     <link rel="apple-touch-icon" href="/losslens-icon-192.png" />
-    
+
     <!-- SEO -->
     <meta name="description" content="LossLens - CBT-based gambling harm reduction platform for Kenya. AI companion, anonymous peer support, and practical recovery tools." />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="boot-loader" role="status" aria-label="Loading LossLens">
+        <svg width="72" height="72" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+          <g class="boot-spin">
+            <ellipse class="boot-petal" cx="50" cy="26" rx="9" ry="20" fill="#2DD4BF" opacity="0.9" transform="rotate(0 50 50)" />
+            <ellipse class="boot-petal" cx="50" cy="26" rx="9" ry="20" fill="#7DBDEE" opacity="0.9" transform="rotate(45 50 50)" style="animation-delay:.35s" />
+            <ellipse class="boot-petal" cx="50" cy="26" rx="9" ry="20" fill="#2DD4BF" opacity="0.9" transform="rotate(90 50 50)" style="animation-delay:.7s" />
+            <ellipse class="boot-petal" cx="50" cy="26" rx="9" ry="20" fill="#7DBDEE" opacity="0.9" transform="rotate(135 50 50)" style="animation-delay:1.05s" />
+            <ellipse class="boot-petal" cx="50" cy="26" rx="9" ry="20" fill="#2DD4BF" opacity="0.9" transform="rotate(180 50 50)" style="animation-delay:1.4s" />
+            <ellipse class="boot-petal" cx="50" cy="26" rx="9" ry="20" fill="#7DBDEE" opacity="0.9" transform="rotate(225 50 50)" style="animation-delay:1.75s" />
+            <ellipse class="boot-petal" cx="50" cy="26" rx="9" ry="20" fill="#2DD4BF" opacity="0.9" transform="rotate(270 50 50)" style="animation-delay:2.1s" />
+            <ellipse class="boot-petal" cx="50" cy="26" rx="9" ry="20" fill="#7DBDEE" opacity="0.9" transform="rotate(315 50 50)" style="animation-delay:2.45s" />
+            <circle cx="50" cy="50" r="12" stroke="#7DBDEE" stroke-width="3" fill="none" />
+            <circle cx="50" cy="50" r="4" fill="#2DD4BF" />
+          </g>
+        </svg>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

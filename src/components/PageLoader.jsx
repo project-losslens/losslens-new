@@ -1,8 +1,2 @@
-export default function PageLoader() {
-  return (
-    <div className="page-loader" role="status" aria-live="polite">
-      <span className="page-loader__spinner" aria-hidden="true" />
-      <span>Loading...</span>
-    </div>
-  )
-}
+// Backwards-compatible re-export: PageLoader now renders the animated brand loader.
+export { default } from './BrandLoader'

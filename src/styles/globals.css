@@ -2460,18 +2460,70 @@ button:active {
   text-align: center;
 }
 
-.page-loader__spinner {
-  width: 32px;
-  height: 32px;
-  margin: auto;
-  border: 3px solid var(--border);
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  animation: shell-spin 0.7s linear infinite;
+/* BrandLoader — animated LossLens mark */
+.brand-loader__mark {
+  display: block;
 }
 
-@keyframes shell-spin {
+.brand-mark-spin {
+  animation: brand-spin 6s linear infinite;
+}
+
+@keyframes brand-spin {
   to { transform: rotate(360deg); }
+}
+
+.brand-loader .brand-petal {
+  animation: brand-petal-pulse 2.4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes brand-petal-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.brand-loader__wordmark {
+  margin-top: 18px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0.5px;
+  animation: brand-fade-in 0.8s ease-out both;
+}
+
+.brand-loader__wordmark-accent {
+  color: var(--brand-teal);
+}
+
+.brand-loader__label {
+  margin-top: 10px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.brand-loader__still {
+  margin-top: 14px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.45);
+  animation: brand-fade-in 0.6s ease-out both;
+}
+
+@keyframes brand-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-mark-spin { animation: none; }
+  .brand-loader .brand-petal {
+    animation: brand-petal-pulse-soft 2.4s ease-in-out infinite;
+  }
+  @keyframes brand-petal-pulse-soft {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
 }
 
 .elevated-gate {
