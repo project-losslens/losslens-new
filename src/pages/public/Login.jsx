@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { roleHome } from '../../config/roleHome'
 import { supabase } from '../../lib/supabase'
 import { createSupabaseClient } from '../../lib/supabase'
 
@@ -41,11 +42,7 @@ function Login() {
         const { data: { session } } = await supabase.auth.getSession()
         if (session) {
           const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single()
-          if (profile?.role === 'super_admin') navigate('/admin', { replace: true })
-          else if (profile?.role === 'admin') navigate('/admin', { replace: true })
-          else if (profile?.role === 'insurer') navigate('/insurer', { replace: true })
-          else if (profile?.role === 'therapist') navigate('/therapist', { replace: true })
-          else navigate('/dashboard', { replace: true })
+          navigate(roleHome(profile?.role), { replace: true })
         }
       } catch (err) {
         console.error('Session check failed:', err)
@@ -117,11 +114,8 @@ function Login() {
 
     const { data: profile } = await loginClient.from('profiles').select('role').eq('id', data.user.id).single()
     setLoading(false)
-    if (!profile) { window.location.assign('/dashboard'); return }
-    if (profile.role === 'super_admin' || profile.role === 'admin') window.location.assign('/admin')
-    else if (profile.role === 'insurer') window.location.assign('/insurer')
-    else if (profile.role === 'therapist') window.location.assign('/therapist')
-    else window.location.assign('/dashboard')
+    const destination = roleHome(profile?.role)
+    window.location.assign(destination)
   }
 
   const handleGoogleLogin = async () => {

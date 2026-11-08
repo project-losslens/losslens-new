@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { roleHome } from '../../config/roleHome'
 import { supabase } from "../../lib/supabase";
 import '../../styles/landing.css'
 import { Header, Hero, Numbers, TheGap, WhatItDoes, HowItWorks, BehindTheApp, ProtectionTeaser, Partners, Privacy, PricingPreview, Origin, Crisis, Contact, Footer } from './landing/Sections'
@@ -135,9 +136,7 @@ function Landing() {
           throw signInError
         }
         const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
-        if (profile?.role === 'super_admin') navigate('/admin', { replace: true })
-        else if (profile?.role === 'admin') navigate('/admin', { replace: true })
-        else navigate('/dashboard', { replace: true })
+        navigate(roleHome(profile?.role), { replace: true })
       }
     } catch (err) { setError(err.message) }
     finally { setLoading(false) }

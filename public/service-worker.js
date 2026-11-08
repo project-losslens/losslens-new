@@ -3,7 +3,7 @@
 // - Never caches /api/, Supabase, or auth endpoints.
 // - Offline fallback page lists crisis helplines (works with no network).
 
-const CACHE_VERSION = 'losslens-v3'
+const CACHE_VERSION = 'losslens-v4'
 const CACHE_NAME = `${CACHE_VERSION}-precache`
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`
 
@@ -40,6 +40,8 @@ function shouldBypass(url) {
   return (
     !url.protocol.startsWith('http') ||
     url.pathname.startsWith('/api/') ||
+    url.pathname === '/__gate' ||
+    url.pathname === '/__gate/lock' ||
     url.hostname.includes('supabase.co') ||
     url.hostname.includes('groq.com') ||
     url.pathname.includes('/auth/')
@@ -56,7 +58,8 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(request)
       .then((response) => {
-        if (response && response.status === 200 && response.type !== 'opaque') {
+        const cacheControl = response.headers.get('Cache-Control') || ''
+        if (response && response.status === 200 && response.type !== 'opaque' && !cacheControl.includes('no-store')) {
           const clone = response.clone()
           caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, clone)).catch(() => {})
         }

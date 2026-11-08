@@ -46,13 +46,15 @@ Client (`.env`, see `.env.example`):
 | --- | --- |
 | `VITE_SUPABASE_URL` | Supabase project URL |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anon key |
-| `VITE_SITE_GATE` | `on` (default) shows the temporary password gate; `off` disables |
 | `VITE_SHOW_PROTECTION` | `on` (default) shows the Protection concept teaser + `/protection`; `off` hides |
 
 Server (Vercel / `vercel dev`):
 
 | Name | Purpose |
 | --- | --- |
+| `SITE_GATE` | `on` (default) enables the server-side private-site gate; `off` disables it |
+| `SITE_GATE_PASSWORD` | Private access password used for the gate |
+| `SITE_GATE_SECRET` | Secret used to sign the gate cookie |
 | `GROQ_API_KEY` | Groq API key for Oloo — server-side only |
 | `SUPABASE_SERVICE_ROLE_KEY` | Required by `api/chat.js` / `api/crisis.js` — fails closed if missing |
 | `VITE_SUPABASE_URL` + `SUPABASE_ANON_KEY` or `VITE_SUPABASE_ANON_KEY` | Server-side Supabase access |
@@ -93,22 +95,20 @@ Production: https://losslens-new.vercel.app
 
 ## Temporary site gate
 
-While the site is private, `src/components/SiteGate.jsx` wraps the whole app
-outside the router: visitors must enter a password (SHA-256 compared via Web
-Crypto) before anything mounts — no Supabase calls happen behind it. Unlock
-is remembered per device in `localStorage.ll_site_unlocked`. The gate also
-keeps `noindex, nofollow` in `index.html` and a `tel:` crisis link that works
-without unlocking.
+While the site is private, the app is protected by a server-side gate in
+`middleware.js` and `lib/gate.js`. When `SITE_GATE=on`, every request is checked
+before the app loads, including `/api/*` and static assets. Visitors must enter
+the password once; a secure HttpOnly cookie is set for 7 days. Requests without a
+valid cookie receive the gate page, and `/api/*` returns a 401 JSON response.
 
-- **Change the password**: hash the new value and replace
-  `SITE_GATE_EXPECTED_HASH` in `SiteGate.jsx`:
-  `printf 'newpassword' | sha256sum` (input is trimmed + lowercased before
-  hashing, so case does not matter). Never commit the plaintext.
-- **Remove the gate** (when the site goes public): delete
-  `src/components/SiteGate.jsx`, `src/styles/site-gate.css` rules in
-  `globals.css`, the `<SiteGate>` wrapper + import in `src/main.jsx`, the
-  `noindex` meta in `index.html`, `VITE_SITE_GATE` from `.env.example`/Vercel,
-  and `docs/SITE_GATE.md` if still present.
+- **Set the password**: add `SITE_GATE_PASSWORD` and `SITE_GATE_SECRET` to the
+  Vercel environment, then generate a secret with:
+  `openssl rand -hex 32`
+- **Rotate the password**: update `SITE_GATE_PASSWORD` in Vercel, then rotate the
+  old one because the previous hash may have been exposed in the public bundle.
+- **Remove the gate** (when the site goes public): set `SITE_GATE=off`, remove
+  the private access cookie handling, and drop the `X-Robots-Tag: noindex, nofollow`
+  heading from the middleware when the site is ready to be indexed.
 
 
 ## Docs
