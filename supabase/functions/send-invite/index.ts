@@ -40,6 +40,17 @@ Deno.serve(async (req) => {
     const { data: { user }, error: userError } = await caller.auth.getUser()
     if (userError || !user) return json(401, { error: 'Invalid token' })
 
+    // Privileged actions require a fresh sign-in (JWT iat within 15 minutes).
+    try {
+      const payload = JSON.parse(atob(authHeader.replace(/^Bearer\s+/i, '').split('.')[1] || ''))
+      const iat = Number(payload?.iat)
+      if (!Number.isFinite(iat) || Date.now() / 1000 - iat > 900) {
+        return json(403, { error: 'Recent sign-in required. Please sign out and back in.' })
+      }
+    } catch {
+      return json(403, { error: 'Recent sign-in required. Please sign out and back in.' })
+    }
+
     const { data: callerProfile, error: callerProfileError } = await caller
       .from('profiles').select('role, is_super_admin').eq('id', user.id).single()
     if (callerProfileError || !callerProfile) {
