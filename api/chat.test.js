@@ -22,6 +22,9 @@ test('a crisis chat records an alert and pre-authorizes a voucher before replyin
     if (url.endsWith('/auth/v1/user')) {
       return new Response(JSON.stringify({ id: 'user-123' }), { status: 200 })
     }
+    if (url.includes('/rest/v1/profiles?') && url.includes('ai_data_consent_at')) {
+      return new Response(JSON.stringify([{ ai_data_consent_at: '2026-01-01T00:00:00Z' }]), { status: 200 })
+    }
     if (url.includes('/chat_history?')) {
       return new Response('[]', { status: 200, headers: { 'content-range': '0-0/0' } })
     }

@@ -17,7 +17,8 @@ export default function RequireElevated() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  // This client-side timer is a UX step-up only, NOT security. Enforce access server-side with RLS or a short-lived claim.
+  // Server enforces via is_recently_authenticated() on elevated RPCs; this
+  // client-side timer is a UX step-up only, NOT security.
   useEffect(() => {
     if (!authorized) return undefined
     const unlockedAt = Number(sessionStorage.getItem('elevated_unlocked_at'))

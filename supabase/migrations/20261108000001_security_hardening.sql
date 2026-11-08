@@ -467,7 +467,10 @@ drop policy if exists lossless_whispers_match_participant_delete on public.whisp
 alter table public.audit_logs add column if not exists actor_id uuid;
 alter table public.audit_logs add column if not exists target_id_text text;
 
--- Backfill (guarded so re-runs are harmless).
+-- Backfill (guarded so re-runs are harmless). The immutability trigger blocks
+-- UPDATE, so disable it for the migration window and re-enable after.
+alter table public.audit_logs disable trigger prevent_direct_audit_writes;
+
 do $$
 begin
   if exists (select 1 from information_schema.columns
@@ -509,6 +512,8 @@ begin
       where performed_by is not null;
   end if;
 end $$;
+
+alter table public.audit_logs enable trigger prevent_direct_audit_writes;
 
 alter table public.audit_logs
   drop column if exists admin_id,
@@ -691,6 +696,7 @@ revoke all on public.admin_profiles_safe from anon;
 
 -- Standard admins no longer read raw profiles (email/phone live there too).
 drop policy if exists lossless_profiles_admin_select on public.profiles;
+drop policy if exists losslens_profiles_super_admin_select on public.profiles;
 create policy losslens_profiles_super_admin_select on public.profiles
   for select to authenticated using (public.is_super_admin());
 
