@@ -4,6 +4,7 @@ import { SHOW_PROTECTION } from './protectionFlag'
 import { supabase } from '../../lib/supabase'
 import { PROTECTION_CONTENT as C } from './protectionContent'
 import ContactIcons from '../../components/ContactIcons'
+import useDocumentTitle from '../../hooks/useDocumentTitle'
 import '../../styles/landing.css'
 
 function Section({ title, children }) {
@@ -16,6 +17,7 @@ function Section({ title, children }) {
 }
 
 function ProtectionInner() {
+  useDocumentTitle('LossLens Protection concept')
   const [user, setUser] = useState(undefined)
   const [state, setState] = useState('idle') // idle | saving | done | error
 

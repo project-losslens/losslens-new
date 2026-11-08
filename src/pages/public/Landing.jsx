@@ -18,6 +18,7 @@ import Crisis from './landing/Crisis'
 import Contact from './landing/Contact'
 import Footer from './landing/Footer'
 import { primaryHelpline } from '../../config/helplines'
+import useDocumentTitle from '../../hooks/useDocumentTitle'
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 48 48">
@@ -29,6 +30,7 @@ const GoogleIcon = () => (
 );
 
 function Landing() {
+  useDocumentTitle('Free, private gambling support for Kenya')
   const navigate = useNavigate()
   const [authMode, setAuthMode] = useState(null)
   const [showPw, setShowPw] = useState(false)
