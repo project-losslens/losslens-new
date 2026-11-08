@@ -2628,3 +2628,50 @@ button:active {
     transform: translateX(-105%);
   }
 }
+
+/* Icon-only contact links (email/phone live in src/config/site.js) */
+.contact-icons {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.contact-icons__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.contact-icons__link:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.contact-icons__link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.contact-icons--on-dark .contact-icons__link {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.contact-icons--on-dark .contact-icons__link:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.contact-icons--warm .contact-icons__link {
+  color: var(--accent-warm);
+  border-color: rgba(242, 200, 121, 0.4);
+}

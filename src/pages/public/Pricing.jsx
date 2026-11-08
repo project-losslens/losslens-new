@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import ContactIcons from '../../components/ContactIcons'
+import { mailtoHref } from '../../config/site'
 
 const FAQS = [
   { q: 'Is LossLens really free?', a: 'Yes — forever. The Free plan includes all core features: diary, CBT modules, AI companion Oloo, The Circle community, and more. No credit card needed.' },
@@ -24,7 +26,7 @@ export default function Pricing() {
     loadingTimer.current = setTimeout(() => {
       setLoading(null)
       if (plan === 'clinic') {
-        window.location.href = 'mailto:projectkingsly@gmail.com?subject=Company Plan Inquiry'
+        window.location.href = mailtoHref('Company Plan Inquiry')
       } else {
         navigate(`/signup?plan=${plan}&type=${type}`)
       }
@@ -316,13 +318,12 @@ export default function Pricing() {
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Built with trust & transparency</p>
           <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', flexWrap: 'wrap' }}>
             {[
-              { icon: '', label: 'End-to-end encrypted' },
-              { icon: '🇰🇪', label: 'Kenya-based & compliant' },
-              { icon: 'ï ¸ ', label: 'Delete data anytime' },
-              { icon: '', label: 'Free forever for individuals' },
+              { label: 'End-to-end encrypted' },
+              { label: 'Built in Kenya' },
+              { label: 'Delete data anytime' },
+              { label: 'Free forever for individuals' },
             ].map((t, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#2DD4BF', fontSize: '12px' }}>
-                <span aria-hidden="true">{t.icon}</span>
                 <span>{t.label}</span>
               </div>
             ))}
@@ -334,14 +335,13 @@ export default function Pricing() {
       <footer className="footer" style={{ flexDirection: 'column', gap: '12px', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.12)', padding: '1.5rem 2rem' }}>
         <div>
           <p>LossLens  · Gambling Harm Reduction  · Kenya  · 2026</p>
-          <p style={{ fontSize: '11px', marginTop: '4px' }}>
-            <a href="mailto:projectkingsly@gmail.com" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>projectkingsly@gmail.com</a>
-          </p>
+          <div style={{ marginTop: '0.75rem', display: 'flex', justifyContent: 'center' }}>
+            <ContactIcons tone="on-dark" subject="Pricing question" />
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
           <a onClick={() => navigate('/privacy')} style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', textDecoration: 'none' }}>Privacy Policy</a>
           <a onClick={() => navigate('/terms')} style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', textDecoration: 'none' }}>Terms of Service</a>
-          <a href="mailto:projectkingsly@gmail.com" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', textDecoration: 'none' }}>Contact</a>
         </div>
         <p>Crisis? Call NACADA <strong style={{ color: '#2DD4BF' }}>1192</strong> (24/7 free)</p>
       </footer>
