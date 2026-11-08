@@ -121,8 +121,8 @@ export default function Broadcast() {
     return desc[form.target] || ''
   }, [form.target])
 
-  const inputStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '13px', fontFamily: "'Inter', sans-serif", boxSizing: 'border-box', outline: 'none' }
-  const btn = (bg, color, border) => ({ padding: '8px 18px', borderRadius: '8px', border: `1px solid ${border || bg}`, background: bg, color, fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontWeight: 500 })
+  const inputStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '13px', fontFamily: 'var(--font-body)', boxSizing: 'border-box', outline: 'none' }
+  const btn = (bg, color, border) => ({ padding: '8px 18px', borderRadius: '8px', border: `1px solid ${border || bg}`, background: bg, color, fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 500 })
 
   if (loading) {
     return (
@@ -161,11 +161,11 @@ export default function Broadcast() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: "'Inter', sans-serif", margin: 0 }}> Broadcast</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}> Broadcast</h1>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{userCount.toLocaleString()} {targetLabel.toLowerCase()} reachable</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
+            <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Refresh</button>
           </div>
         </div>
 
@@ -183,7 +183,7 @@ export default function Broadcast() {
               <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', display: 'block', marginBottom: '6px' }}>Quick Templates</label>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                 {TEMPLATES.map(t => (
-                  <button key={t.label} onClick={() => applyTemplate(t)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(45,212,191,0.15)', color: 'var(--info)', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{t.label}</button>
+                  <button key={t.label} onClick={() => applyTemplate(t)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(45,212,191,0.15)', color: 'var(--info)', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{t.label}</button>
                 ))}
               </div>
             </div>
@@ -219,7 +219,7 @@ export default function Broadcast() {
                     <span style={{ color: 'var(--primary)', fontSize: '13px', fontWeight: 500 }}>Estimated Recipients</span>
                     <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '2px 0 0' }}>{targetLabel}</p>
                   </div>
-                  <span style={{ color: 'var(--primary)', fontSize: '22px', fontWeight: 700, fontFamily: "'Playfair Display', serif" }}>{userCount.toLocaleString()}</span>
+                  <span style={{ color: 'var(--primary)', fontSize: '22px', fontWeight: 700, fontFamily: 'var(--font-display)' }}>{userCount.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -285,8 +285,8 @@ export default function Broadcast() {
             </p>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '20px' }}>{targetDescription}</p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowConfirm(false)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={send} style={{ flex: 2, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Send Broadcast</button>
+              <button onClick={() => setShowConfirm(false)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={send} style={{ flex: 2, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Send Broadcast</button>
             </div>
           </div>
         </div>

@@ -263,7 +263,7 @@ export default function Onboarding() {
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2.5rem 2rem', maxWidth: '500px', width: '100%', textAlign: 'center', animation: 'fadeIn 0.5s ease-out' }}>
           <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
-          <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif", fontSize: '22px', marginBottom: '8px' }}>Your journey begins</h2>
+          <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', marginBottom: '8px' }}>Your journey begins</h2>
 
           <div style={{ background: '#0B1220', borderRadius: '12px', padding: '16px', margin: '16px 0', border: `2px solid ${risk.color}` }}>
             <span style={{ fontSize: '32px' }}>{risk.emoji}</span>
@@ -299,7 +299,7 @@ export default function Onboarding() {
           </button>
           {saveError && <p role="alert" style={{ color: '#FFFFFF', fontSize: '13px', marginTop: '12px' }}>{saveError}</p>}
 
-          <button onClick={() => { setStep(QUESTIONS.length - 1); triggerAnimate() }} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+          <button onClick={() => { setStep(QUESTIONS.length - 1); triggerAnimate() }} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
             â"   Change my answers
           </button>
         </div>
@@ -338,7 +338,7 @@ export default function Onboarding() {
         {/* Question */}
         <div style={{ marginBottom: '24px', animation: animate ? 'fadeIn 0.3s ease-out' : 'none' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-            <h2 style={{ color: '#FFFFFF', fontSize: '18px', fontWeight: 600, fontFamily: "'Inter', sans-serif", margin: 0 }}>{q.title}</h2>
+            <h2 style={{ color: '#FFFFFF', fontSize: '18px', fontWeight: 600, fontFamily: 'var(--font-body)', margin: 0 }}>{q.title}</h2>
             {q.multi && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', background: '#0B1220', padding: '2px 8px', borderRadius: '100px' }}>{(answers[q.id] || []).length} selected</span>}
           </div>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginBottom: '20px' }}>{q.subtitle}</p>
@@ -359,7 +359,7 @@ export default function Onboarding() {
                     background: selected ? 'rgba(255,255,255,0.12)' : '#0B1220',
                     cursor: 'pointer', textAlign: 'left',
                     display: 'flex', alignItems: 'center', gap: '12px',
-                    transition: 'all 0.2s', fontFamily: "'Inter', sans-serif",
+                    transition: 'all 0.2s', fontFamily: 'var(--font-body)',
                     minHeight: '56px',
                   }}
                   onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSelect(q.id, option.value) } }}
@@ -398,7 +398,7 @@ export default function Onboarding() {
         </div>
 
         {/* Skip */}
-        <button onClick={handleSkip} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+        <button onClick={handleSkip} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
           Skip for now
         </button>
 

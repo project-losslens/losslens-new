@@ -1,5 +1,5 @@
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   background: var(--bg);
 }
 
@@ -243,7 +243,7 @@ body {
 }
 
 .logo {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 22px;
   color: var(--primary);
 }
@@ -295,7 +295,7 @@ body {
 }
 
 h1 {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: clamp(2rem, 5vw, 3rem);
   line-height: 1.2;
   margin-bottom: 1.25rem;
@@ -406,7 +406,7 @@ h1 em {
 
 .stat-num {
   display: block;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 2.5rem;
   color: var(--primary);
   margin-bottom: 8px;
@@ -428,7 +428,7 @@ h1 em {
 }
 
 .cta-block h2 {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 1.6rem;
   color: var(--primary);
   margin-bottom: 0.75rem;
@@ -475,7 +475,7 @@ h1 em {
 }
 
 .auth-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 1.8rem;
   color: var(--text);
   margin-bottom: 0.5rem;
@@ -508,7 +508,7 @@ h1 em {
   padding: 12px 14px;
   color: var(--text);
   font-size: 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   outline: none;
 }
 
@@ -706,7 +706,7 @@ h1 em {
 }
 
 .price-num {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 2rem;
   color: var(--text);
 }
@@ -781,7 +781,7 @@ h1 em {
 }
 
 .dash-welcome {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 1.4rem;
   color: var(--text);
   margin-bottom: 4px;
@@ -837,7 +837,7 @@ h1 em {
 }
 
 .stat-value {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 1.4rem;
   color: var(--primary);
 }
@@ -987,7 +987,7 @@ h1 em {
   font-size: 13px;
   color: var(--info);
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .action-btn span:first-child {
@@ -1085,7 +1085,7 @@ h1 em {
   font-size: 10px;
   color: rgba(255,255,255,0.4);
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   padding: 0 1rem;
 }
 
@@ -1111,7 +1111,7 @@ h1 em {
   color: rgba(255,255,255,0.4);
   font-size: 14px;
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .toggle-btn.active-primary {
@@ -1140,7 +1140,7 @@ h1 em {
   border-radius: 100px;
   font-size: 13px;
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .chip-active {
@@ -1163,7 +1163,7 @@ h1 em {
   padding: 12px 14px;
   color: var(--text);
   font-size: 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   outline: none;
   resize: vertical;
   line-height: 1.6;
@@ -1381,7 +1381,7 @@ h1 em {
 }
 
 .timer-num {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 2rem;
   color: var(--primary);
 }
@@ -1457,7 +1457,7 @@ h1 em {
 }
 
 .helpline-num {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 1.5rem;
   color: var(--primary);
   margin-bottom: 4px;
@@ -1502,7 +1502,7 @@ h1 em {
   border-radius: 100px;
   font-size: 12px;
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -1529,7 +1529,7 @@ h1 em {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 1.4rem;
   color: var(--primary);
 }
@@ -1540,7 +1540,7 @@ h1 em {
   color: var(--primary);
   font-size: 13px;
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .toggle-row {
@@ -1576,7 +1576,7 @@ h1 em {
   padding: 12px 14px;
   color: var(--text);
   font-size: 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   outline: none;
   width: 100%;
   cursor: pointer;
@@ -1595,7 +1595,7 @@ h1 em {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .btn-danger:hover {
@@ -1721,7 +1721,7 @@ h1 em {
   padding: 1rem;
   color: var(--info);
   font-size: 13px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   cursor: pointer;
   text-align: left;
   transition: border-color 0.2s;
@@ -1810,7 +1810,7 @@ h1 em {
   border-radius: 10px;
   padding: 12px 14px;
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   transition: border-color 0.2s;
 }
 
@@ -1831,7 +1831,7 @@ h1 em {
 .broadcast-audience-count {
   font-size: 12px;
   color: var(--primary);
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
 }
 
 /* ── Crisis Alerts ── */

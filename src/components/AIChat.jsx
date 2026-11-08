@@ -400,7 +400,7 @@ function AIChat({ profile }) {
                     borderRadius: '100px',
                     fontSize: '12px',
                     cursor: 'pointer',
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: 'var(--font-body)',
                     transition: 'all 0.2s',
                   }}
                   onMouseEnter={(e) => { e.target.style.background = '#7DBDEE'; e.target.style.borderColor = '#2DD4BF'; }}
@@ -512,9 +512,9 @@ function AIChat({ profile }) {
                 {msg.role === 'assistant' && (
                   <div style={{ paddingLeft: '32px', marginTop: '2px', display: 'flex', gap: '6px' }}>
                     {speakingId === msg.id ? (
-                      <button onClick={stopSpeaking} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Stop</button>
+                      <button onClick={stopSpeaking} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Stop</button>
                     ) : (
-                      <button onClick={() => speakText(msg.content, msg.id)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Listen</button>
+                      <button onClick={() => speakText(msg.content, msg.id)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Listen</button>
                     )}
                   </div>
                 )}
@@ -574,7 +574,7 @@ function AIChat({ profile }) {
               style={{
                 flex: 1, background: '#171E2B', border: `1px solid ${isListening ? '#FFFFFF' : 'rgba(255,255,255,0.12)'}`,
                 borderRadius: '100px', padding: '10px 16px', color: '#FFFFFF', fontSize: '13px',
-                outline: 'none', fontFamily: "'Inter', sans-serif", transition: 'border-color 0.2s',
+                outline: 'none', fontFamily: 'var(--font-body)', transition: 'border-color 0.2s',
               }}
               onFocus={(e) => e.target.style.borderColor = '#2DD4BF'}
               onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.12)'}

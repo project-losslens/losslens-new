@@ -146,7 +146,7 @@ export default function UserAnalytics() {
       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(11,18,32,0.3)' }}
       onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
       {icon && <span style={{ fontSize: '20px', display: 'block', marginBottom: '4px' }}>{icon}</span>}
-      <span style={{ display: 'block', fontSize: '24px', fontWeight: 700, color, fontFamily: "'Playfair Display', serif", marginBottom: '4px' }}>{value}</span>
+      <span style={{ display: 'block', fontSize: '24px', fontWeight: 700, color, fontFamily: 'var(--font-display)', marginBottom: '4px' }}>{value}</span>
       <span style={{ display: 'block', fontSize: '11px', color: 'var(--primary)' }}>{label}</span>
       {sub && <span style={{ display: 'block', fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>{sub}</span>}
     </div>
@@ -176,7 +176,7 @@ export default function UserAnalytics() {
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
-            <button onClick={() => fetchAll()} style={{ padding: '8px 16px', borderRadius: '8px', background: 'transparent', border: '1px solid var(--text)', color: 'var(--text)', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Retry</button>
+            <button onClick={() => fetchAll()} style={{ padding: '8px 16px', borderRadius: '8px', background: 'transparent', border: '1px solid var(--text)', color: 'var(--text)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Retry</button>
           </div>
         </div>
       </div>
@@ -189,11 +189,11 @@ export default function UserAnalytics() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: "'Inter', sans-serif", margin: 0 }}> Analytics</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}> Analytics</h1>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>Platform insights  · {stats.totalUsers} total users</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={() => fetchAll(true)} disabled={refreshing} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+            <button onClick={() => fetchAll(true)} disabled={refreshing} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
               {refreshing ? '⏳ Refreshing...' : ' Refresh'}
             </button>
           </div>
@@ -222,7 +222,7 @@ export default function UserAnalytics() {
                 {riskBreakdown.map(r => (
                   <div key={r.label} style={{ background: 'var(--bg)', border: `1px solid ${r.color}33`, borderRadius: '12px', padding: '18px', textAlign: 'center' }}>
                     <span style={{ fontSize: '24px', display: 'block', marginBottom: '6px' }}>{r.icon}</span>
-                    <span style={{ display: 'block', fontSize: '28px', fontWeight: 700, color: r.color, fontFamily: "'Playfair Display', serif" }}>{r.count.toLocaleString()}</span>
+                    <span style={{ display: 'block', fontSize: '28px', fontWeight: 700, color: r.color, fontFamily: 'var(--font-display)' }}>{r.count.toLocaleString()}</span>
                     <span style={{ color: r.color, fontSize: '13px', fontWeight: 500 }}>{r.label}</span>
                     <div style={{ marginTop: '10px', height: '6px', background: 'rgba(255,255,255,0.12)', borderRadius: '3px', overflow: 'hidden' }}>
                       <div style={{ width: `${stats.totalUsers ? (r.count / stats.totalUsers) * 100 : 0}%`, height: '100%', background: r.color, borderRadius: '3px', transition: 'width 0.6s' }} />

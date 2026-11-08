@@ -328,7 +328,7 @@ export default function LossLensPactPage() {
 
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> The LossLens Pact</h1>
+            <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> The LossLens Pact</h1>
             <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{totalPacts} pacts  · A promise to your future self</p>
           </div>
         </div>
@@ -375,7 +375,7 @@ export default function LossLensPactPage() {
                 <button key={i} onClick={() => setActivePrompt(i)} role="radio" aria-checked={activePrompt === i}
                   style={{ background: activePrompt === i ? 'rgba(45,212,191,0.08)' : '#0B1220', border: `1px solid ${activePrompt === i ? '#2DD4BF' : 'rgba(255,255,255,0.12)'}`, borderRadius: '8px', padding: '10px 12px', cursor: 'pointer', textAlign: 'left' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ color: activePrompt === i ? '#2DD4BF' : '#7DBDEE', fontSize: '12px', fontFamily: "'Inter', sans-serif" }}>{p.q}</span>
+                    <span style={{ color: activePrompt === i ? '#2DD4BF' : '#7DBDEE', fontSize: '12px', fontFamily: 'var(--font-body)' }}>{p.q}</span>
                     {activePrompt === i && <span style={{ color: '#2DD4BF', fontSize: '9px', fontWeight: 600 }}>SELECTED</span>}
                   </div>
                   <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', margin: '3px 0 0', lineHeight: '1.3' }}>{p.hint}</p>
@@ -387,7 +387,7 @@ export default function LossLensPactPage() {
           {/* Title Input */}
           <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
             <label style={{ color: '#2DD4BF', fontSize: '11px', marginBottom: '6px', display: 'block' }}>Give your pact a title (optional)</label>
-            <input value={pactTitle} onChange={e => setPactTitle(e.target.value)} placeholder="e.g. My reason to stay strong" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: "'Inter', sans-serif", boxSizing: 'border-box' }} />
+            <input value={pactTitle} onChange={e => setPactTitle(e.target.value)} placeholder="e.g. My reason to stay strong" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} />
           </div>
 
           {/* Record Section */}
@@ -408,7 +408,7 @@ export default function LossLensPactPage() {
                     <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'pulse 1s infinite' }}>
                       <span style={{ fontSize: '24px' }} aria-hidden="true"></span>
                     </div>
-                    <p style={{ color: '#FFFFFF', fontSize: '18px', fontWeight: 600, fontFamily: "'Playfair Display', serif", margin: '0 0 4px' }} aria-label={`Recording time: ${formatTime(recordingTime)}`}>{formatTime(recordingTime)}</p>
+                    <p style={{ color: '#FFFFFF', fontSize: '18px', fontWeight: 600, fontFamily: 'var(--font-display)', margin: '0 0 4px' }} aria-label={`Recording time: ${formatTime(recordingTime)}`}>{formatTime(recordingTime)}</p>
                     <p style={{ color: '#FFFFFF', fontSize: '13px', margin: 0 }} aria-label="Recording in progress"> Recording... Speak from the heart.</p>
                     <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '3px', height: '40px', marginTop: '16px' }}>
                       {[1,2,3,4,5,6,7,8].map((_, i) => (
@@ -430,7 +430,7 @@ export default function LossLensPactPage() {
             <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
               <h3 style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '0.75rem' }}>✍️ Write your pact</h3>
               <textarea value={writtenPact} onChange={e => setWrittenPact(e.target.value.slice(0, MAX_WRITTEN_LENGTH))} placeholder="Dear future me, when you read this, remember..." rows={5}
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: "'Inter', sans-serif", resize: 'vertical', lineHeight: '1.6', boxSizing: 'border-box' }} />
+                style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', resize: 'vertical', lineHeight: '1.6', boxSizing: 'border-box' }} />
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '4px' }}>{writtenPact.length}/{MAX_WRITTEN_LENGTH}</p>
               <button className="btn-primary full" style={{ marginTop: '8px', padding: '10px', fontSize: '12px' }} onClick={saveWrittenPact} disabled={!writtenPact.trim()}>Save written pact </button>
             </div>

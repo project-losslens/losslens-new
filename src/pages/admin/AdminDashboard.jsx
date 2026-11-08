@@ -203,7 +203,7 @@ export default function AdminDashboard() {
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
-            <button onClick={fetchAllData} style={{ padding: '8px 16px', borderRadius: '8px', background: 'transparent', border: '1px solid var(--text)', color: 'var(--text)', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Retry</button>
+            <button onClick={fetchAllData} style={{ padding: '8px 16px', borderRadius: '8px', background: 'transparent', border: '1px solid var(--text)', color: 'var(--text)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Retry</button>
           </div>
         </div>
       </div>
@@ -216,11 +216,11 @@ export default function AdminDashboard() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: "'Inter', sans-serif", margin: 0 }}> Admin Dashboard</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}> Admin Dashboard</h1>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{stats.totalUsers} users  · {stats.activeToday} active today</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchAllData} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Refresh</button>
+            <button onClick={fetchAllData} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Refresh</button>
           </div>
         </div>
 
@@ -233,7 +233,7 @@ export default function AdminDashboard() {
               { id: 'alerts', label: `🆘 Alerts (${openCrisisAlerts})` },
               { id: 'messages', label: ` Messages (${contactRequests.length})` },
             ].map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', minWidth: '100px', transition: 'background 0.2s, color 0.2s' }}>{tab.label}</button>
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', minWidth: '100px', transition: 'background 0.2s, color 0.2s' }}>{tab.label}</button>
             ))}
           </div>
 
@@ -247,7 +247,7 @@ export default function AdminDashboard() {
                     onMouseEnter={e => { if (s.path) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(11,18,32,0.3)' } }}
                     onMouseLeave={e => { if (s.path) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = s.urgent ? '0 0 16px rgba(255,255,255,0.3)' : 'none' } }}>
                     <span style={{ fontSize: '24px', display: 'block', marginBottom: '6px' }}>{s.icon}</span>
-                    <span style={{ display: 'block', fontSize: '22px', fontWeight: 700, color: s.color, fontFamily: "'Playfair Display', serif" }}>{s.value.toLocaleString()}</span>
+                    <span style={{ display: 'block', fontSize: '22px', fontWeight: 700, color: s.color, fontFamily: 'var(--font-display)' }}>{s.value.toLocaleString()}</span>
                     <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>{s.label}</span>
                   </div>
                 ))}
@@ -257,7 +257,7 @@ export default function AdminDashboard() {
                 <h3 style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '0.75rem' }}> Quick Actions</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '8px' }}>
                   {quickActions.map(a => (
-                    <button key={a.path} onClick={() => navigate(a.path)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '16px', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', fontFamily: "'Inter', sans-serif", transition: 'all 0.2s' }}
+                    <button key={a.path} onClick={() => navigate(a.path)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '16px', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', fontFamily: 'var(--font-body)', transition: 'all 0.2s' }}
                       onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
                       onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'translateY(0)' }}>
                       <span style={{ fontSize: '24px', flexShrink: 0 }}>{a.emoji}</span>
@@ -291,7 +291,7 @@ export default function AdminDashboard() {
             <div className="dash-section">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h3 style={{ color: 'var(--text)', fontSize: '14px', margin: 0 }}> Recent Users</h3>
-                <button onClick={() => navigate(ROUTES.USERS)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Manage Users →</button>
+                <button onClick={() => navigate(ROUTES.USERS)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Manage Users →</button>
               </div>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
@@ -337,8 +337,8 @@ export default function AdminDashboard() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h3 style={{ color: 'var(--text)', fontSize: '14px', margin: 0 }}>🆘 Crisis Alerts {openCrisisAlerts > 0 && `(${openCrisisAlerts} open)`}</h3>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => setAlertPolling(!alertPolling)} style={{ padding: '4px 10px', borderRadius: '100px', background: 'transparent', border: `1px solid ${alertPolling ? 'var(--primary)' : 'rgba(255,255,255,0.4)'}`, color: alertPolling ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{alertPolling ? ' Live' : '⏸ Paused'}</button>
-                  <button onClick={() => navigate(ROUTES.CRISIS)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--text)', color: 'var(--text)', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Manage →</button>
+                  <button onClick={() => setAlertPolling(!alertPolling)} style={{ padding: '4px 10px', borderRadius: '100px', background: 'transparent', border: `1px solid ${alertPolling ? 'var(--primary)' : 'rgba(255,255,255,0.4)'}`, color: alertPolling ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{alertPolling ? ' Live' : '⏸ Paused'}</button>
+                  <button onClick={() => navigate(ROUTES.CRISIS)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--text)', color: 'var(--text)', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Manage →</button>
                 </div>
               </div>
               {alerts.length === 0 ? (

@@ -350,7 +350,7 @@ export default function TheCircle() {
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', height: '100vh' }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', flexShrink: 0 }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> The Circle</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> The Circle</h1>
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{onlineCount} online  · You: {getAvatarEmoji(identity.animal)} {identity.displayName}</p>
           </div>
         </div>
@@ -365,7 +365,7 @@ export default function TheCircle() {
         {/* Room Tabs */}
         <div style={{ display: 'flex', gap: '4px', padding: '0.75rem 1rem', overflowX: 'auto', background: 'rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.12)', flexShrink: 0, WebkitOverflowScrolling: 'touch' }}>
           {ROOMS.map(room => (
-            <button key={room.id} onClick={() => setActiveRoom(room.id)} style={{ padding: '8px 14px', borderRadius: '100px', border: 'none', background: activeRoom === room.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeRoom === room.id ? '#2DD4BF' : '#2DD4BF', fontSize: '12px', fontWeight: activeRoom === room.id ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }} role="tab" aria-selected={activeRoom === room.id}>
+            <button key={room.id} onClick={() => setActiveRoom(room.id)} style={{ padding: '8px 14px', borderRadius: '100px', border: 'none', background: activeRoom === room.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeRoom === room.id ? '#2DD4BF' : '#2DD4BF', fontSize: '12px', fontWeight: activeRoom === room.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }} role="tab" aria-selected={activeRoom === room.id}>
               <span>{room.icon}</span><span>{room.name}</span>
               {memberCounts[room.id] > 0 && <span style={{ fontSize: '10px', background: '#2DD4BF', color: '#0B1220', padding: '1px 6px', borderRadius: '100px', fontWeight: 600 }}>{memberCounts[room.id]}</span>}
             </button>
@@ -376,7 +376,7 @@ export default function TheCircle() {
         <div ref={messagesContainerRef} style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.5rem', position: 'relative' }}>
           {/* Scroll to bottom button */}
           {showScrollButton && (
-            <button onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })} style={{ position: 'sticky', bottom: '12px', left: '50%', transform: 'translateX(-50%)', zIndex: 'var(--z-content)', background: 'rgba(255,255,255,0.12)', border: '1px solid #2DD4BF', borderRadius: '100px', padding: '6px 16px', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", boxShadow: '0 2px 12px rgba(11,18,32,0.4)' }}>↓ New messages</button>
+            <button onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })} style={{ position: 'sticky', bottom: '12px', left: '50%', transform: 'translateX(-50%)', zIndex: 'var(--z-content)', background: 'rgba(255,255,255,0.12)', border: '1px solid #2DD4BF', borderRadius: '100px', padding: '6px 16px', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)', boxShadow: '0 2px 12px rgba(11,18,32,0.4)' }}>↓ New messages</button>
           )}
 
           {messages.length === 0 && (
@@ -410,9 +410,9 @@ export default function TheCircle() {
                   </div>
                   {!msg._sending && !msg._failed && (
                     <div style={{ display: 'flex', gap: '4px', marginTop: '4px', flexDirection: isOwn ? 'row-reverse' : 'row', flexWrap: 'wrap', opacity: 0.7 }}>
-                      <button onClick={() => handleReply(msg)} style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '2px 8px', fontSize: '10px', color: '#2DD4BF', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }} aria-label="Reply">↩</button>
+                      <button onClick={() => handleReply(msg)} style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '2px 8px', fontSize: '10px', color: '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-label="Reply">↩</button>
                       {REACTIONS.filter(r => (msg[r.key] || 0) > 0).map(r => (
-                        <button key={r.key} onClick={() => handleReaction(msg.id, r.key)} style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '2px 8px', fontSize: '11px', color: '#2DD4BF', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }} aria-label={`${r.label} (${msg[r.key]})`}>{r.emoji} {msg[r.key]}</button>
+                        <button key={r.key} onClick={() => handleReaction(msg.id, r.key)} style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '2px 8px', fontSize: '11px', color: '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-label={`${r.label} (${msg[r.key]})`}>{r.emoji} {msg[r.key]}</button>
                       ))}
                       {isOwn && <button onClick={() => handleDeleteMessage(msg.id)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', padding: '2px 4px' }} aria-label="Delete message"></button>}
                     </div>
@@ -434,12 +434,12 @@ export default function TheCircle() {
           )}
           {showTemplates && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
-              {CHECK_IN_TEMPLATES.map(t => <button key={t} onClick={() => handleTemplate(t)} style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '6px 12px', borderRadius: '100px', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{t}</button>)}
+              {CHECK_IN_TEMPLATES.map(t => <button key={t} onClick={() => handleTemplate(t)} style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '6px 12px', borderRadius: '100px', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{t}</button>)}
             </div>
           )}
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={() => setShowTemplates(!showTemplates)} style={{ width: '36px', height: '36px', borderRadius: '8px', background: showTemplates ? 'rgba(255,255,255,0.12)' : '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '14px', cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Message templates"></button>
-            <input ref={inputRef} value={input} onChange={e => setInput(e.target.value.substring(0, MAX_MESSAGE_LENGTH))} onKeyDown={e => e.key === 'Enter' && handleSend()} placeholder={replyTo ? `Reply to ${replyTo.name}...` : `Share... (${MAX_MESSAGE_LENGTH - input.length})`} style={{ flex: 1, background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '10px 16px', color: '#FFFFFF', fontSize: '16px', outline: 'none', fontFamily: "'Inter', sans-serif" }} aria-label="Type a message" />
+            <input ref={inputRef} value={input} onChange={e => setInput(e.target.value.substring(0, MAX_MESSAGE_LENGTH))} onKeyDown={e => e.key === 'Enter' && handleSend()} placeholder={replyTo ? `Reply to ${replyTo.name}...` : `Share... (${MAX_MESSAGE_LENGTH - input.length})`} style={{ flex: 1, background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '10px 16px', color: '#FFFFFF', fontSize: '16px', outline: 'none', fontFamily: 'var(--font-body)' }} aria-label="Type a message" />
             <button onClick={handleSend} disabled={!input.trim() || sending} style={{ width: '40px', height: '40px', borderRadius: '50%', background: input.trim() && !sending ? '#2DD4BF' : 'rgba(255,255,255,0.12)', border: 'none', color: input.trim() && !sending ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '18px', cursor: input.trim() && !sending ? 'pointer' : 'not-allowed', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Send message">→</button>
           </div>
           <p style={{ fontSize: '10px', color: '#7DBDEE', textAlign: 'center', marginTop: '6px', marginBottom: 0 }}>Anonymous  · Use @Name to tag  · Be kind </p>

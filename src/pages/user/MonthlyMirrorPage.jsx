@@ -458,7 +458,7 @@ export default function MonthlyMirrorPage() {
       <div style={{ flex: 1, minWidth: 0, overflowX: 'hidden' }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Monthly Mirror</h1>
+            <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Monthly Mirror</h1>
             <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{syncedRecordings.length + pendingRecordings.length} recordings</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -587,7 +587,7 @@ export default function MonthlyMirrorPage() {
                         </p>
                       </div>
                       <button onClick={() => retryUpload(r._localIndex)} disabled={uploading}
-                        style={{ padding: '8px 14px', borderRadius: '100px', background: '#7DBDEE', border: 'none', color: '#0B1220', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', minWidth: '60px', minHeight: '44px' }}>
+                        style={{ padding: '8px 14px', borderRadius: '100px', background: '#7DBDEE', border: 'none', color: '#0B1220', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', minWidth: '60px', minHeight: '44px' }}>
                         {uploading ? '...' : 'Sync'}
                       </button>
                     </div>

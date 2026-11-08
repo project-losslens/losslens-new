@@ -184,7 +184,7 @@ export default function SystemSettings() {
     }
   }
 
-  const inputStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '13px', fontFamily: "'Inter', sans-serif", outline: 'none', boxSizing: 'border-box' }
+  const inputStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '13px', fontFamily: 'var(--font-body)', outline: 'none', boxSizing: 'border-box' }
 
   const ToggleRow = ({ label, desc, value, onChange }) => (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
@@ -221,7 +221,7 @@ export default function SystemSettings() {
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
-            <button onClick={fetchSettings} style={{ padding: '8px 16px', borderRadius: '8px', background: 'transparent', border: '1px solid var(--text)', color: 'var(--text)', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Retry</button>
+            <button onClick={fetchSettings} style={{ padding: '8px 16px', borderRadius: '8px', background: 'transparent', border: '1px solid var(--text)', color: 'var(--text)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Retry</button>
           </div>
         </div>
       </div>
@@ -234,13 +234,13 @@ export default function SystemSettings() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: "'Inter', sans-serif", margin: 0 }}>System Settings</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}>System Settings</h1>
             <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>
               Platform configuration{hasUnsavedChanges ? '  · Unsaved changes' : ''}
             </p>
           </div>
           <button onClick={saveSettings} disabled={saving || !hasUnsavedChanges}
-            style={{ padding: '10px 24px', borderRadius: '100px', border: 'none', background: hasUnsavedChanges ? 'var(--primary)' : 'rgba(255,255,255,0.12)', color: hasUnsavedChanges ? 'var(--bg)' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: 600, cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed', fontFamily: "'Inter', sans-serif" }}>
+            style={{ padding: '10px 24px', borderRadius: '100px', border: 'none', background: hasUnsavedChanges ? 'var(--primary)' : 'rgba(255,255,255,0.12)', color: hasUnsavedChanges ? 'var(--bg)' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: 600, cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed', fontFamily: 'var(--font-body)' }}>
             {saving ? 'Saving...' : 'Save All Settings'}
           </button>
         </div>
@@ -254,7 +254,7 @@ export default function SystemSettings() {
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)', overflowX: 'auto' }}>
             {SECTION_TABS.map(s => (
               <button key={s.id} onClick={() => setActiveSection(s.id)}
-                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeSection === s.id ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeSection === s.id ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeSection === s.id ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', minWidth: '80px', transition: 'background 0.2s, color 0.2s' }}>{s.label}</button>
+                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeSection === s.id ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeSection === s.id ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeSection === s.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', minWidth: '80px', transition: 'background 0.2s, color 0.2s' }}>{s.label}</button>
             ))}
           </div>
 
@@ -387,8 +387,8 @@ export default function SystemSettings() {
               All non-admin users will be locked out of the platform immediately.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={doSave} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Enable</button>
+              <button onClick={() => setShowConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={doSave} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Enable</button>
             </div>
           </div>
         </div>
@@ -403,8 +403,8 @@ export default function SystemSettings() {
               New users will not be able to create accounts. Existing users can still log in.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={doSave} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(45,212,191,0.15)', border: 'none', color: 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Disable</button>
+              <button onClick={() => setShowConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={doSave} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(45,212,191,0.15)', border: 'none', color: 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Disable</button>
             </div>
           </div>
         </div>

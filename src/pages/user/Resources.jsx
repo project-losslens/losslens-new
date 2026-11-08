@@ -213,8 +213,8 @@ export default function Resources() {
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
           <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}></span>
-          <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif" }}>Please log in</h2>
-          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", width: '100%', marginTop: '16px' }}>Go to Login →</button>
+          <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>Please log in</h2>
+          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%', marginTop: '16px' }}>Go to Login →</button>
         </div>
       </div>
     )
@@ -231,7 +231,7 @@ export default function Resources() {
         </div>
 
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
-          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Resources</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{resources.length} resources available</p></div>
+          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Resources</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{resources.length} resources available</p></div>
         </div>
 
         <div style={{ padding: '1.5rem' }}>
@@ -247,7 +247,7 @@ export default function Resources() {
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>Recently viewed</p>
               <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {recentlyViewed.map(r => (
-                  <button key={r.id} onClick={() => handleVisit(r)} style={{ padding: '6px 12px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '11px', whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: "'Inter', sans-serif", flexShrink: 0 }}>{CATEGORY_ICONS[r.category] || ''} {r.name}</button>
+                  <button key={r.id} onClick={() => handleVisit(r)} style={{ padding: '6px 12px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '11px', whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: 'var(--font-body)', flexShrink: 0 }}>{CATEGORY_ICONS[r.category] || ''} {r.name}</button>
                 ))}
               </div>
             </div>
@@ -259,7 +259,7 @@ export default function Resources() {
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>Recommended for you</p>
               <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {recommendedCats.map(cat => (
-                  <button key={cat} onClick={() => setActiveCategory(cat)} style={{ padding: '6px 12px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '11px', whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: "'Inter', sans-serif", flexShrink: 0 }}>{CATEGORY_ICONS[cat] || ''} {cat}</button>
+                  <button key={cat} onClick={() => setActiveCategory(cat)} style={{ padding: '6px 12px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '11px', whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: 'var(--font-body)', flexShrink: 0 }}>{CATEGORY_ICONS[cat] || ''} {cat}</button>
                 ))}
               </div>
             </div>
@@ -268,7 +268,7 @@ export default function Resources() {
           {/* Search */}
           <div style={{ position: 'relative', marginBottom: '1rem' }}>
             <input type="text" placeholder=" Search resources..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-              style={{ width: '100%', padding: '10px 40px 10px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '13px', outline: 'none', fontFamily: "'Inter', sans-serif", boxSizing: 'border-box' }} />
+              style={{ width: '100%', padding: '10px 40px 10px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '13px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} />
             {searchQuery && (
               <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '16px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Clear search"></button>
             )}
@@ -276,9 +276,9 @@ export default function Resources() {
 
           {/* Category Tabs */}
           <div style={{ display: 'flex', gap: '6px', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }}>
-            <button onClick={() => setActiveCategory('all')} style={{ padding: '6px 14px', borderRadius: '100px', border: `1px solid ${activeCategory === 'all' ? '#7DBDEE' : 'rgba(255,255,255,0.12)'}`, background: activeCategory === 'all' ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeCategory === 'all' ? '#2DD4BF' : '#2DD4BF', fontSize: '12px', fontWeight: activeCategory === 'all' ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>All</button>
+            <button onClick={() => setActiveCategory('all')} style={{ padding: '6px 14px', borderRadius: '100px', border: `1px solid ${activeCategory === 'all' ? '#7DBDEE' : 'rgba(255,255,255,0.12)'}`, background: activeCategory === 'all' ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeCategory === 'all' ? '#2DD4BF' : '#2DD4BF', fontSize: '12px', fontWeight: activeCategory === 'all' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>All</button>
             {ALL_CATEGORIES.map(cat => (
-              <button key={cat} onClick={() => setActiveCategory(cat)} style={{ padding: '6px 14px', borderRadius: '100px', border: `1px solid ${activeCategory === cat ? '#7DBDEE' : 'rgba(255,255,255,0.12)'}`, background: activeCategory === cat ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeCategory === cat ? '#2DD4BF' : '#2DD4BF', fontSize: '12px', fontWeight: activeCategory === cat ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>{CATEGORY_ICONS[cat]} {cat}</button>
+              <button key={cat} onClick={() => setActiveCategory(cat)} style={{ padding: '6px 14px', borderRadius: '100px', border: `1px solid ${activeCategory === cat ? '#7DBDEE' : 'rgba(255,255,255,0.12)'}`, background: activeCategory === cat ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeCategory === cat ? '#2DD4BF' : '#2DD4BF', fontSize: '12px', fontWeight: activeCategory === cat ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>{CATEGORY_ICONS[cat]} {cat}</button>
             ))}
           </div>
 
@@ -295,7 +295,7 @@ export default function Resources() {
                   </div>
                   <div style={{ display: 'flex', gap: '4px' }}>
                     <button onClick={() => handleRate(r.id, true)} style={{ background: 'transparent', border: 'none', fontSize: '14px', cursor: 'pointer', padding: '4px' }} title="Helpful"></button>
-                    <button onClick={() => handleVisit(r)} style={{ padding: '6px 12px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '11px', fontWeight: 500, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{r.link ? 'Visit' : 'View'}</button>
+                    <button onClick={() => handleVisit(r)} style={{ padding: '6px 12px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '11px', fontWeight: 500, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{r.link ? 'Visit' : 'View'}</button>
                   </div>
                 </div>
               ))}
@@ -313,7 +313,7 @@ export default function Resources() {
             <div className="dash-section" style={{ textAlign: 'center', padding: '2rem' }}>
               <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
               <p style={{ color: '#2DD4BF', fontSize: '14px' }}>{debouncedSearch || activeCategory !== 'all' ? 'No resources match your search.' : 'No resources yet.'}</p>
-              {(debouncedSearch || activeCategory !== 'all') && <button onClick={() => { setSearchQuery(''); setActiveCategory('all') }} style={{ marginTop: '10px', padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Clear filters</button>}
+              {(debouncedSearch || activeCategory !== 'all') && <button onClick={() => { setSearchQuery(''); setActiveCategory('all') }} style={{ marginTop: '10px', padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Clear filters</button>}
             </div>
           ) : (
             Object.entries(grouped).map(([category, items]) => (
@@ -334,7 +334,7 @@ export default function Resources() {
                       <button onClick={() => handleRate(r.id, true)} style={{ background: 'transparent', border: 'none', fontSize: '13px', cursor: 'pointer', padding: '4px' }} title="Helpful"></button>
                       <button onClick={() => toggleSave(r.id)} style={{ background: 'transparent', border: 'none', fontSize: '13px', cursor: 'pointer', padding: '4px', color: savedIds.includes(r.id) ? '#2DD4BF' : 'rgba(255,255,255,0.4)' }} title={savedIds.includes(r.id) ? 'Saved' : 'Save'}>{savedIds.includes(r.id) ? '⭐' : ''}</button>
                       <button onClick={() => handleShare(r)} style={{ background: 'transparent', border: 'none', fontSize: '12px', cursor: 'pointer', padding: '4px', color: 'rgba(255,255,255,0.4)' }} title="Share"></button>
-                      <button onClick={() => handleVisit(r)} style={{ padding: '6px 12px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>{r.link ? 'Visit' : 'View'}</button>
+                      <button onClick={() => handleVisit(r)} style={{ padding: '6px 12px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>{r.link ? 'Visit' : 'View'}</button>
                     </div>
                   </div>
                 ))}
@@ -350,7 +350,7 @@ export default function Resources() {
                 <div key={r.id} style={{ padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span>{CATEGORY_ICONS[r.category] || ''}</span>
                   <span style={{ color: '#FFFFFF', fontSize: '12px', flex: 1 }}>{r.name}</span>
-                  <button onClick={() => handleVisit(r)} style={{ padding: '4px 10px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Visit</button>
+                  <button onClick={() => handleVisit(r)} style={{ padding: '4px 10px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Visit</button>
                   <button onClick={() => toggleSave(r.id)} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '11px', cursor: 'pointer' }}></button>
                 </div>
               ))}
@@ -360,23 +360,23 @@ export default function Resources() {
           {/* Suggestion Form */}
           <div className="dash-section" style={{ marginTop: '1.5rem', textAlign: 'center' }}>
             {!showSuggestionForm ? (
-              <button onClick={() => setShowSuggestionForm(true)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '10px 20px', borderRadius: '100px', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Know a resource we're missing?</button>
+              <button onClick={() => setShowSuggestionForm(true)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '10px 20px', borderRadius: '100px', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Know a resource we're missing?</button>
             ) : suggestionSent ? (
               <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.12)', borderRadius: '10px', border: '1px solid #2DD4BF' }}>
                 <p style={{ color: '#2DD4BF', fontSize: '14px', margin: 0 }}> Suggestion submitted! Thank you!</p>
               </div>
             ) : (
               <div>
-                <input type="text" placeholder="Resource name *" value={suggestion.name} onChange={e => setSuggestion({ ...suggestion, name: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '13px', marginBottom: '8px', fontFamily: "'Inter', sans-serif", boxSizing: 'border-box' }} />
-                <input type="text" placeholder="Link (optional)" value={suggestion.link} onChange={e => setSuggestion({ ...suggestion, link: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '13px', marginBottom: '8px', fontFamily: "'Inter', sans-serif", boxSizing: 'border-box' }} />
-                <select value={suggestion.category} onChange={e => setSuggestion({ ...suggestion, category: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '13px', marginBottom: '8px', fontFamily: "'Inter', sans-serif", boxSizing: 'border-box', cursor: 'pointer' }}>
+                <input type="text" placeholder="Resource name *" value={suggestion.name} onChange={e => setSuggestion({ ...suggestion, name: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '13px', marginBottom: '8px', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} />
+                <input type="text" placeholder="Link (optional)" value={suggestion.link} onChange={e => setSuggestion({ ...suggestion, link: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '13px', marginBottom: '8px', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} />
+                <select value={suggestion.category} onChange={e => setSuggestion({ ...suggestion, category: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '13px', marginBottom: '8px', fontFamily: 'var(--font-body)', boxSizing: 'border-box', cursor: 'pointer' }}>
                   {ALL_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button onClick={submitSuggestion} disabled={!suggestion.name.trim() || submittingSuggestion} className="btn-primary" style={{ flex: 1, padding: '10px', fontSize: '13px' }}>
                     {submittingSuggestion ? 'Submitting...' : 'Submit'}
                   </button>
-                  <button onClick={() => setShowSuggestionForm(false)} style={{ padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
+                  <button onClick={() => setShowSuggestionForm(false)} style={{ padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
                 </div>
               </div>
             )}

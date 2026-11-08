@@ -247,7 +247,7 @@ function FamilyPortalPage() {
     <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
-          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Family Portal</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{activeSupporters.length} active  · {invitations.length} total</p></div>
+          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Family Portal</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{activeSupporters.length} active  · {invitations.length} total</p></div>
         </div>
         <div style={{ padding: '1.5rem' }}>
           <div className="dash-section" style={{ marginBottom: '1rem', borderColor: '#2DD4BF' }}>
@@ -255,7 +255,7 @@ function FamilyPortalPage() {
           </div>
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)' }}>
             {[{ id: 'supporters', label: ` Supporters` }, { id: 'resources', label: ' Resources' }, { id: 'privacy', label: ' Privacy' }].map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{tab.label}</button>
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{tab.label}</button>
             ))}
           </div>
 
@@ -301,11 +301,11 @@ function FamilyPortalPage() {
                     </div>
                     <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '6px' }}>{(inv.permissions || []).slice(0, 3).map(p => <span key={p} style={{ fontSize: '9px', background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '1px 6px', borderRadius: '100px' }}>{p}</span>)}</div>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                      {inv.status === 'active' && <button onClick={() => loadMessages(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}></button>}
-                      <button onClick={() => handleShare(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}> Share</button>
-                      {(inv.status === 'pending' || inv.status === 'expired') && <button onClick={() => handleResend(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Renew</button>}
-                      {inv.status === 'active' && <button onClick={() => handleTogglePause(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#7DBDEE', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Pause</button>}
-                      <button onClick={() => handleRemove(inv.id)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Remove</button>
+                      {inv.status === 'active' && <button onClick={() => loadMessages(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}></button>}
+                      <button onClick={() => handleShare(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Share</button>
+                      {(inv.status === 'pending' || inv.status === 'expired') && <button onClick={() => handleResend(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Renew</button>}
+                      {inv.status === 'active' && <button onClick={() => handleTogglePause(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#7DBDEE', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Pause</button>}
+                      <button onClick={() => handleRemove(inv.id)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Remove</button>
                     </div>
                   </div>
                 )

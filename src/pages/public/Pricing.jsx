@@ -115,7 +115,7 @@ export default function Pricing() {
       <main>
         <div className="pricing-hero" style={{ padding: '3rem 2rem 1.5rem', textAlign: 'center' }}>
           <div className="pill">Pricing</div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', marginBottom: '0.75rem' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', marginBottom: '0.75rem' }}>
             {planType === 'individual' ? (
               <>Free for individuals.<br /><em style={{ color: '#2DD4BF' }}>Premium when you're ready.</em></>
             ) : (
@@ -137,7 +137,7 @@ export default function Pricing() {
                 background: planType === 'individual' ? '#2DD4BF' : 'transparent',
                 color: planType === 'individual' ? '#0B1220' : 'rgba(255,255,255,0.4)',
                 fontSize: '13px', fontWeight: planType === 'individual' ? 600 : 400,
-                cursor: 'pointer', fontFamily: "'Inter', sans-serif", transition: 'all 0.2s'
+                cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.2s'
               }}>
                Individual
             </button>
@@ -148,7 +148,7 @@ export default function Pricing() {
                 background: planType === 'company' ? '#2DD4BF' : 'transparent',
                 color: planType === 'company' ? '#0B1220' : 'rgba(255,255,255,0.4)',
                 fontSize: '13px', fontWeight: planType === 'company' ? 600 : 400,
-                cursor: 'pointer', fontFamily: "'Inter', sans-serif", transition: 'all 0.2s'
+                cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.2s'
               }}>
                Company
             </button>
@@ -193,7 +193,7 @@ export default function Pricing() {
                 </div>
 
                 <div className="plan-price" style={{ marginBottom: '0.5rem' }}>
-                  <span className="price-num" style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', color: '#FFFFFF' }}>{plan.price}</span>
+                  <span className="price-num" style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: '#FFFFFF' }}>{plan.price}</span>
                   <span className="price-period" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginLeft: '4px' }}>{plan.period}</span>
                 </div>
 
@@ -252,7 +252,7 @@ export default function Pricing() {
               </div>
 
               <div className="plan-price" style={{ marginBottom: '0.5rem' }}>
-                <span className="price-num" style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', color: '#FFFFFF' }}>{companyPlan.price}</span>
+                <span className="price-num" style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: '#FFFFFF' }}>{companyPlan.price}</span>
                 <span className="price-period" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginLeft: '4px' }}>{companyPlan.period}</span>
               </div>
 
@@ -289,13 +289,13 @@ export default function Pricing() {
 
         {/* FAQ Section */}
         <section style={{ padding: '2rem', maxWidth: '700px', margin: '0 auto' }} aria-label="Frequently asked questions">
-          <h2 style={{ textAlign: 'center', color: '#2DD4BF', fontFamily: "'Playfair Display', serif", fontSize: '1.6rem', marginBottom: '1.5rem' }}>Frequently Asked Questions</h2>
+          <h2 style={{ textAlign: 'center', color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '1.6rem', marginBottom: '1.5rem' }}>Frequently Asked Questions</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {FAQS.map((faq, i) => (
               <div key={i} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', overflow: 'hidden' }}>
                 <button
                   onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
-                  style={{ width: '100%', padding: '16px', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '14px', fontWeight: 500, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', sans-serif", textAlign: 'left' }}
+                  style={{ width: '100%', padding: '16px', background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '14px', fontWeight: 500, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'var(--font-body)', textAlign: 'left' }}
                   aria-expanded={expandedFaq === i}
                 >
                   {faq.q}

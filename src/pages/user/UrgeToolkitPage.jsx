@@ -81,7 +81,7 @@ const BreathingHuman = ({ phase, size = 200 }) => {
         <div style={{ position: 'absolute', top: '10%', left: '-25%', width: '25%', height: '50%', background: 'rgba(255,255,255,0.12)', borderRadius: '30%', border: '1px solid #7DBDEE' }} />
         <div style={{ position: 'absolute', top: '10%', right: '-25%', width: '25%', height: '50%', background: 'rgba(255,255,255,0.12)', borderRadius: '30%', border: '1px solid #7DBDEE' }} />
       </div>
-      <div style={{ position: 'absolute', top: '45%', left: '50%', transform: 'translate(-50%,-50%)', color: '#2DD4BF', fontSize: size*0.1, fontWeight: 600, fontFamily: "'Playfair Display', serif", textShadow: '0 0 10px rgba(11,18,32,0.8)' }}>
+      <div style={{ position: 'absolute', top: '45%', left: '50%', transform: 'translate(-50%,-50%)', color: '#2DD4BF', fontSize: size*0.1, fontWeight: 600, fontFamily: 'var(--font-display)', textShadow: '0 0 10px rgba(11,18,32,0.8)' }}>
         {phase === 'inhale' ? 'Breathe In...' : phase === 'hold' ? 'Hold...' : 'Breathe Out...'}
       </div>
     </div>
@@ -228,7 +228,7 @@ export default function UrgeToolkitPage() {
     <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
-          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> Urge Toolkit</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>Every urge is beatable</p></div>
+          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Urge Toolkit</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>Every urge is beatable</p></div>
         </div>
         <div style={{ padding: '1.5rem' }}>
           <div className="tools-grid" style={{ marginBottom: '1rem' }}>
@@ -280,7 +280,7 @@ export default function UrgeToolkitPage() {
                     style={{ transition: 'stroke-dashoffset 1s linear', filter: timerRunning ? 'drop-shadow(0 0 8px rgba(45,212,191,0.5))' : 'none' }} />
                 </svg>
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', textAlign: 'center' }}>
-                  <div style={{ fontFamily: "'Playfair Display', serif", fontSize: timerComplete ? '1rem' : '2.5rem', color: timerComplete ? '#2DD4BF' : '#2DD4BF', fontWeight: 700 }}>{timerComplete ? ' Done!' : formatTime(timer)}</div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: timerComplete ? '1rem' : '2.5rem', color: timerComplete ? '#2DD4BF' : '#2DD4BF', fontWeight: 700 }}>{timerComplete ? ' Done!' : formatTime(timer)}</div>
                   {!timerComplete && <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>{timerRunning ? 'Hang in there...' : 'Press start'}</div>}
                 </div>
               </div>

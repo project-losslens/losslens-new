@@ -119,7 +119,7 @@ function ChatViewer() {
 
         }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: "'Inter', sans-serif", margin: 0 }}>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}>
               Chat Viewer
             </h1>
             <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>
@@ -145,7 +145,7 @@ function ChatViewer() {
                 style={{
                   width: '100%', padding: '8px 12px', borderRadius: '8px',
                   background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)',
-                  fontSize: '12px', outline: 'none', fontFamily: "'Inter', sans-serif",
+                  fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)',
                 }}
               />
             </div>
@@ -200,7 +200,7 @@ function ChatViewer() {
                 style={{
                   background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--primary)',
                   padding: '8px 16px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer',
-                  fontFamily: "'Inter', sans-serif", marginBottom: '12px', alignSelf: 'flex-start',
+                  fontFamily: 'var(--font-body)', marginBottom: '12px', alignSelf: 'flex-start',
                   display: 'flex', alignItems: 'center', gap: '6px',
                 }}
                 className="mobile-back-btn"

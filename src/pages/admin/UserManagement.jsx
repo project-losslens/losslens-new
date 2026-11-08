@@ -228,7 +228,7 @@ export default function UserManagement() {
   const btn = (bg, color, border) => ({
     padding: '7px 14px', borderRadius: '8px', border: '1px solid ' + (border || bg),
     background: bg, color, fontSize: '12px', cursor: 'pointer',
-    fontFamily: "'Inter', sans-serif", fontWeight: 500,
+    fontFamily: 'var(--font-body)', fontWeight: 500,
   })
 
   if (loading) {
@@ -262,7 +262,7 @@ export default function UserManagement() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: "'Inter', sans-serif", margin: 0 }}>
+            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}>
               {activeTab === 'users' ? 'User Management' : 'Payment Management'}
             </h1>
             <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>
@@ -281,11 +281,11 @@ export default function UserManagement() {
           {/* Main Tabs: Users | Payments */}
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)', overflowX: 'auto' }}>
             <button onClick={() => { setActiveTab('users'); setSearch(''); setFilter('all') }}
-              style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'users' ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeTab === 'users' ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === 'users' ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>
+              style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'users' ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeTab === 'users' ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === 'users' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
               Users
             </button>
             <button onClick={() => { setActiveTab('payments'); setSearch(''); setPaymentFilter('all') }}
-              style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'payments' ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeTab === 'payments' ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === 'payments' ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>
+              style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'payments' ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeTab === 'payments' ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === 'payments' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
               Payments
             </button>
           </div>
@@ -295,11 +295,11 @@ export default function UserManagement() {
             <>
               <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <input type="text" placeholder="Search by name, email, username, or phone..." value={search} onChange={e => setSearch(e.target.value)}
-                  style={{ flex: 1, minWidth: '250px', padding: '10px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '13px', outline: 'none', fontFamily: "'Inter', sans-serif" }} />
+                  style={{ flex: 1, minWidth: '250px', padding: '10px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '13px', outline: 'none', fontFamily: 'var(--font-body)' }} />
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {['all', 'high', 'medium', 'low'].map(f => (
                     <button key={f} onClick={() => setFilter(f)}
-                      style={{ padding: '6px 14px', borderRadius: '100px', border: '1px solid ' + (filter === f ? 'var(--primary)' : 'rgba(255,255,255,0.12)'), background: filter === f ? 'rgba(45,212,191,0.15)' : 'transparent', color: filter === f ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: filter === f ? 600 : 400, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>
+                      style={{ padding: '6px 14px', borderRadius: '100px', border: '1px solid ' + (filter === f ? 'var(--primary)' : 'rgba(255,255,255,0.12)'), background: filter === f ? 'rgba(45,212,191,0.15)' : 'transparent', color: filter === f ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: filter === f ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
                       {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1) + ' Risk'}
                     </button>
                   ))}
@@ -382,7 +382,7 @@ export default function UserManagement() {
                             {editingRole === u.id ? (
                               <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                                 <select value={newRole} onChange={e => setNewRole(e.target.value)}
-                                  style={{ padding: '6px 10px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '12px', fontFamily: "'Inter', sans-serif", cursor: 'pointer' }}>
+                                  style={{ padding: '6px 10px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '12px', fontFamily: 'var(--font-body)', cursor: 'pointer' }}>
                                   <option value="">Select...</option>
                                   <option value="user">User</option>
                                   <option value="admin">Admin</option>
@@ -411,7 +411,7 @@ export default function UserManagement() {
             <>
               <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <input type="text" placeholder="Search by name or email..." value={search} onChange={e => setSearch(e.target.value)}
-                  style={{ flex: 1, minWidth: '250px', padding: '10px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '13px', outline: 'none', fontFamily: "'Inter', sans-serif" }} />
+                  style={{ flex: 1, minWidth: '250px', padding: '10px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '13px', outline: 'none', fontFamily: 'var(--font-body)' }} />
               </div>
 
               <div style={{ display: 'flex', gap: '6px', marginBottom: '1rem', flexWrap: 'wrap' }}>
@@ -422,7 +422,7 @@ export default function UserManagement() {
                       background: paymentFilter === tab.id ? 'rgba(45,212,191,0.15)' : 'transparent',
                       color: paymentFilter === tab.id ? 'var(--primary)' : 'rgba(255,255,255,0.4)',
                       fontSize: '12px', fontWeight: paymentFilter === tab.id ? 600 : 400,
-                      cursor: 'pointer', fontFamily: "'Inter', sans-serif"
+                      cursor: 'pointer', fontFamily: 'var(--font-body)'
                     }}>
                     {tab.icon} {tab.label} ({paymentStats[tab.id] || 0})
                   </button>
@@ -504,8 +504,8 @@ export default function UserManagement() {
               <strong style={{ color: 'var(--primary)' }}>"{showSuspendConfirm.full_name || showSuspendConfirm.username || 'User'}"</strong> will be {showSuspendConfirm.status === 'suspended' ? 'reactivated' : 'suspended'}.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowSuspendConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={() => toggleStatus(showSuspendConfirm.id, showSuspendConfirm.status || 'active')} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: showSuspendConfirm.status === 'suspended' ? 'rgba(255,255,255,0.12)' : 'rgba(45,212,191,0.15)', border: 'none', color: showSuspendConfirm.status === 'suspended' ? 'var(--primary)' : 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+              <button onClick={() => setShowSuspendConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={() => toggleStatus(showSuspendConfirm.id, showSuspendConfirm.status || 'active')} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: showSuspendConfirm.status === 'suspended' ? 'rgba(255,255,255,0.12)' : 'rgba(45,212,191,0.15)', border: 'none', color: showSuspendConfirm.status === 'suspended' ? 'var(--primary)' : 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
                 {showSuspendConfirm.status === 'suspended' ? 'Reactivate' : 'Suspend'}
               </button>
             </div>
@@ -523,8 +523,8 @@ export default function UserManagement() {
               Permanently delete <strong style={{ color: 'var(--primary)' }}>"{showDeleteConfirm.full_name || 'User'}"</strong>? This cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={() => deleteUser(showDeleteConfirm.id)} disabled={actionLoading === showDeleteConfirm.id} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+              <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={() => deleteUser(showDeleteConfirm.id)} disabled={actionLoading === showDeleteConfirm.id} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
                 {actionLoading === showDeleteConfirm.id ? 'Deleting...' : 'Delete'}
               </button>
             </div>
@@ -544,8 +544,8 @@ export default function UserManagement() {
             </p>
             <p style={{ color: 'var(--text-muted)', fontSize: '12px' }}>The user will receive a secure reset link by email.</p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowPasswordReset(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={handleAdminResetPassword} disabled={resetLoading} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', fontSize: '13px', fontWeight: 600, cursor: resetLoading ? 'not-allowed' : 'pointer', fontFamily: "'Inter', sans-serif" }}>
+              <button onClick={() => setShowPasswordReset(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={handleAdminResetPassword} disabled={resetLoading} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', fontSize: '13px', fontWeight: 600, cursor: resetLoading ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-body)' }}>
                 {resetLoading ? 'Sending...' : 'Send reset link'}
               </button>
             </div>
@@ -563,8 +563,8 @@ export default function UserManagement() {
               Give <strong style={{ color: 'var(--primary)' }}>"{showGrantPremium.full_name || 'User'}"</strong> free Premium access? This can be revoked later.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowGrantPremium(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={() => grantPremium(showGrantPremium.id)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Grant Premium</button>
+              <button onClick={() => setShowGrantPremium(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={() => grantPremium(showGrantPremium.id)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Grant Premium</button>
             </div>
           </div>
         </div>
@@ -580,8 +580,8 @@ export default function UserManagement() {
               <strong style={{ color: 'var(--primary)' }}>"{showRevokePremium.full_name || 'User'}"</strong> will be moved back to the Free plan.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowRevokePremium(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={() => revokePremium(showRevokePremium.id)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(45,212,191,0.15)', border: 'none', color: 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Revoke</button>
+              <button onClick={() => setShowRevokePremium(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={() => revokePremium(showRevokePremium.id)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(45,212,191,0.15)', border: 'none', color: 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Revoke</button>
             </div>
           </div>
         </div>

@@ -249,7 +249,7 @@ function CBTModules() {
             style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
           >
             <div style={{ fontSize: '60px', animation: 'checkmarkPop 0.5s ease-out' }}></div>
-            <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif", marginTop: '16px' }}>Module Complete!</h2>
+            <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', marginTop: '16px' }}>Module Complete!</h2>
             <p style={{ color: '#2DD4BF', fontSize: '14px', marginTop: '8px' }}>{celebratingModule}</p>
             {badgeEarned && (
               <div style={{ marginTop: '16px', background: 'rgba(255,255,255,0.12)', padding: '12px 24px', borderRadius: '12px', border: `2px solid ${badgeEarned.color}`, display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -262,7 +262,7 @@ function CBTModules() {
         )}
 
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
-          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: "'Inter', sans-serif", margin: 0 }}> CBT Modules</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{allCompleted ? 'All complete! ' : `${completedCount} of ${modules.length} completed`}</p></div>
+          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> CBT Modules</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{allCompleted ? 'All complete! ' : `${completedCount} of ${modules.length} completed`}</p></div>
           <span style={{ fontSize: '14px', color: '#2DD4BF', fontWeight: 600 }}>{Math.round((completedCount / modules.length) * 100)}%</span>
         </div>
 
@@ -339,16 +339,16 @@ function CBTModules() {
                         <button onClick={() => setActiveLesson(null)} style={{ background: 'transparent', border: 'none', color: '#2DD4BF', fontSize: '13px', cursor: 'pointer' }}>← Back</button>
                         <div style={{ background: '#0B1220', borderRadius: '12px', padding: '20px', border: '1px solid rgba(255,255,255,0.12)', margin: '12px 0' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}><span style={{ fontSize: '11px', color: '#2DD4BF' }}>Lesson {activeLesson.lessonIndex + 1}/{m.lessons.length}</span><span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>{m.lessons[activeLesson.lessonIndex].readTime}</span></div>
-                          <h3 style={{ color: '#FFFFFF', fontSize: '16px', marginBottom: '16px', fontFamily: "'Playfair Display', serif" }}>{m.lessons[activeLesson.lessonIndex].title}</h3>
+                          <h3 style={{ color: '#FFFFFF', fontSize: '16px', marginBottom: '16px', fontFamily: 'var(--font-display)' }}>{m.lessons[activeLesson.lessonIndex].title}</h3>
                           <div style={{ color: '#7DBDEE', fontSize: '13px', lineHeight: '1.8', fontWeight: 300, whiteSpace: 'pre-line' }}>{m.lessons[activeLesson.lessonIndex].content}</div>
                           <div style={{ marginTop: '20px', padding: '14px', background: 'rgba(255,255,255,0.12)', borderRadius: '8px', border: '1px dashed #7DBDEE' }}><p style={{ fontSize: '11px', color: '#2DD4BF', marginBottom: '6px' }}> Reflection</p><p style={{ fontSize: '13px', color: '#2DD4BF', lineHeight: '1.6', fontStyle: 'italic', margin: 0 }}>{m.lessons[activeLesson.lessonIndex].reflection}</p></div>
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
-                          {activeLesson.lessonIndex > 0 && <button onClick={() => setActiveLesson({ moduleId: m.id, lessonIndex: activeLesson.lessonIndex - 1 })} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>← Previous</button>}
+                          {activeLesson.lessonIndex > 0 && <button onClick={() => setActiveLesson({ moduleId: m.id, lessonIndex: activeLesson.lessonIndex - 1 })} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>← Previous</button>}
                           {activeLesson.lessonIndex < m.lessons.length - 1 ? (
-                            <button onClick={() => setActiveLesson({ moduleId: m.id, lessonIndex: activeLesson.lessonIndex + 1 })} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Next →</button>
+                            <button onClick={() => setActiveLesson({ moduleId: m.id, lessonIndex: activeLesson.lessonIndex + 1 })} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Next →</button>
                           ) : (
-                            <button onClick={() => { setActiveLesson(null); if (!completed) handleComplete(m.id, m.title) }} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: completed ? 'rgba(255,255,255,0.12)' : '#2DD4BF', border: 'none', color: completed ? '#2DD4BF' : '#0B1220', fontSize: '13px', fontWeight: 500, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{completed ? ' Complete' : 'Complete '}</button>
+                            <button onClick={() => { setActiveLesson(null); if (!completed) handleComplete(m.id, m.title) }} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: completed ? 'rgba(255,255,255,0.12)' : '#2DD4BF', border: 'none', color: completed ? '#2DD4BF' : '#0B1220', fontSize: '13px', fontWeight: 500, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{completed ? ' Complete' : 'Complete '}</button>
                           )}
                         </div>
                       </div>

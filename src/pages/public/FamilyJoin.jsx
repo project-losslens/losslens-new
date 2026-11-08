@@ -171,7 +171,7 @@ export default function FamilyJoin() {
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }} aria-hidden="true"></span>
-          <p style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif", fontSize: '18px' }}>Loading...</p>
+          <p style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '18px' }}>Loading...</p>
         </div>
       </div>
     )
@@ -183,9 +183,9 @@ export default function FamilyJoin() {
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ maxWidth: '440px', width: '100%', textAlign: 'center' }}>
           <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
-          <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif", fontSize: '22px', marginBottom: '12px' }}>Invalid Link</h2>
+          <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', marginBottom: '12px' }}>Invalid Link</h2>
           <p style={{ color: '#2DD4BF', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px' }}>{error}</p>
-          <button onClick={() => navigate('/')} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Go to LossLens →</button>
+          <button onClick={() => navigate('/')} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Go to LossLens →</button>
         </div>
       </div>
     )
@@ -197,9 +197,9 @@ export default function FamilyJoin() {
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ maxWidth: '440px', width: '100%', textAlign: 'center', background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2.5rem', border: '1px solid rgba(255,255,255,0.12)' }}>
           <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
-          <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif", fontSize: '22px', marginBottom: '12px' }}>You've Declined</h2>
+          <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', marginBottom: '12px' }}>You've Declined</h2>
           <p style={{ color: '#2DD4BF', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px' }}>That's okay. If you change your mind, ask {invitation?.supporter_name || 'your friend'} to send you a new invitation.</p>
-          <button onClick={() => navigate('/')} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Go to LossLens →</button>
+          <button onClick={() => navigate('/')} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Go to LossLens →</button>
         </div>
       </div>
     )
@@ -212,7 +212,7 @@ export default function FamilyJoin() {
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ maxWidth: '480px', width: '100%', background: 'rgba(255,255,255,0.06)', borderRadius: '20px', padding: '2.5rem 2rem', border: '2px solid #2DD4BF', textAlign: 'center' }}>
           <span style={{ fontSize: '48px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
-          <h2 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif", fontSize: '24px', marginBottom: '8px' }}>{invitation.supporter_name},</h2>
+          <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '8px' }}>{invitation.supporter_name},</h2>
           <p style={{ color: '#7DBDEE', fontSize: '15px', lineHeight: '1.6', marginBottom: '24px' }}>
             <strong style={{ color: '#2DD4BF' }}>{invitation.anonymous_mode ? 'A loved one' : (userProfile?.full_name || 'Someone')}</strong> has invited you to support their recovery journey on <strong>LossLens</strong>.
           </p>
@@ -225,8 +225,8 @@ export default function FamilyJoin() {
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '24px', lineHeight: '1.5' }}> No account needed. Your access is private and secure.</p>
           {actError && <div role="alert" aria-live="polite" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px', color: '#FFFFFF', fontSize: '13px', marginBottom: '16px' }}>{actError}</div>}
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button onClick={handleDecline} disabled={acting} style={{ flex: 1, padding: '14px', borderRadius: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '14px', fontWeight: 500, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{acting ? '...' : 'Decline'}</button>
-            <button onClick={handleAccept} disabled={acting} style={{ flex: 2, padding: '14px', borderRadius: '12px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>{acting ? 'Processing...' : ' Accept & View Progress'}</button>
+            <button onClick={handleDecline} disabled={acting} style={{ flex: 1, padding: '14px', borderRadius: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '14px', fontWeight: 500, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{acting ? '...' : 'Decline'}</button>
+            <button onClick={handleAccept} disabled={acting} style={{ flex: 2, padding: '14px', borderRadius: '12px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{acting ? 'Processing...' : ' Accept & View Progress'}</button>
           </div>
         </div>
       </div>
@@ -241,7 +241,7 @@ export default function FamilyJoin() {
     <div style={{ minHeight: '100vh', background: '#0B1220' }}>
       <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', padding: '2rem 1.5rem', textAlign: 'center', borderBottom: '2px solid #2DD4BF' }}>
         <span style={{ fontSize: '40px', display: 'block', marginBottom: '8px' }} aria-hidden="true"></span>
-        <h1 style={{ color: '#2DD4BF', fontFamily: "'Playfair Display', serif", fontSize: '22px', margin: '0 0 4px' }}>
+        <h1 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', margin: '0 0 4px' }}>
           {invitation.anonymous_mode ? 'Supporting a Loved One' : `Supporting ${userProfile?.full_name || 'Someone'}`}
         </h1>
         <p style={{ color: '#2DD4BF', fontSize: '13px', margin: 0 }}>Here's how they're doing. What you see is what they've chosen to share.</p>
@@ -253,14 +253,14 @@ export default function FamilyJoin() {
           {permissions.includes(PERMISSIONS.STREAK) && (
             <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '16px', textAlign: 'center' }}>
               <span style={{ fontSize: '24px', display: 'block', marginBottom: '6px' }} aria-hidden="true"></span>
-              <span style={{ display: 'block', fontSize: '28px', fontWeight: 700, color: '#2DD4BF', fontFamily: "'Playfair Display', serif" }}>{userStats?.streak || 0}</span>
+              <span style={{ display: 'block', fontSize: '28px', fontWeight: 700, color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>{userStats?.streak || 0}</span>
               <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>Days gamble-free</span>
             </div>
           )}
           {permissions.includes(PERMISSIONS.STREAK) && (
             <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '16px', textAlign: 'center' }}>
               <span style={{ fontSize: '24px', display: 'block', marginBottom: '6px' }} aria-hidden="true"></span>
-              <span style={{ display: 'block', fontSize: '20px', fontWeight: 700, color: '#2DD4BF', fontFamily: "'Playfair Display', serif" }}>KES {(userStats?.moneySaved || 0).toLocaleString()}</span>
+              <span style={{ display: 'block', fontSize: '20px', fontWeight: 700, color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>KES {(userStats?.moneySaved || 0).toLocaleString()}</span>
               <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>Money saved</span>
             </div>
           )}
@@ -274,7 +274,7 @@ export default function FamilyJoin() {
           {permissions.includes(PERMISSIONS.MODULES) && (
             <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '16px', textAlign: 'center' }}>
               <span style={{ fontSize: '24px', display: 'block', marginBottom: '6px' }} aria-hidden="true"></span>
-              <span style={{ display: 'block', fontSize: '28px', fontWeight: 700, color: '#2DD4BF', fontFamily: "'Playfair Display', serif" }}>{userStats?.cbtCompleted || 0}/8</span>
+              <span style={{ display: 'block', fontSize: '28px', fontWeight: 700, color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>{userStats?.cbtCompleted || 0}/8</span>
               <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>CBT modules done</span>
             </div>
           )}
@@ -327,9 +327,9 @@ export default function FamilyJoin() {
               onKeyDown={e => e.key === 'Enter' && sendMessage()}
               placeholder="Write a supportive message..."
               aria-label="Type your message"
-              style={{ flex: 1, padding: '10px 14px', borderRadius: '100px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: "'Inter', sans-serif" }}
+              style={{ flex: 1, padding: '10px 14px', borderRadius: '100px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)' }}
             />
-            <button onClick={sendMessage} disabled={sendingMessage || !messageInput.trim()} style={{ padding: '10px 18px', borderRadius: '100px', background: messageInput.trim() ? '#2DD4BF' : 'rgba(255,255,255,0.12)', border: 'none', color: messageInput.trim() ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: 600, cursor: messageInput.trim() ? 'pointer' : 'not-allowed', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>
+            <button onClick={sendMessage} disabled={sendingMessage || !messageInput.trim()} style={{ padding: '10px 18px', borderRadius: '100px', background: messageInput.trim() ? '#2DD4BF' : 'rgba(255,255,255,0.12)', border: 'none', color: messageInput.trim() ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: 600, cursor: messageInput.trim() ? 'pointer' : 'not-allowed', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
               {sendingMessage ? '...' : messageSent ? '' : 'Send '}
             </button>
           </div>
@@ -337,7 +337,7 @@ export default function FamilyJoin() {
 
         {/* Stop Supporting */}
         <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-          <button onClick={() => setShowStopModal(true)} disabled={acting} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '10px 24px', borderRadius: '100px', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+          <button onClick={() => setShowStopModal(true)} disabled={acting} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '10px 24px', borderRadius: '100px', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
             {acting ? 'Processing...' : 'Stop Supporting'}
           </button>
           <p style={{ color: '#7DBDEE', fontSize: '11px', marginTop: '8px' }}> Private & secure  · No account created  · You can leave anytime</p>
@@ -352,8 +352,8 @@ export default function FamilyJoin() {
             <h3 style={{ color: '#FFFFFF', fontSize: '16px', margin: '0 0 8px' }}>Stop supporting?</h3>
             <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>You can always ask them for a new invitation link if you change your mind.</p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowStopModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Cancel</button>
-              <button onClick={handleStopSupporting} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: '#FFFFFF', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Stop</button>
+              <button onClick={() => setShowStopModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={handleStopSupporting} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: '#FFFFFF', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Stop</button>
             </div>
           </div>
         </div>
