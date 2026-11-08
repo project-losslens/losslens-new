@@ -316,14 +316,6 @@ h1 em {
   margin: 0 auto 2rem;
 }
 
-.btns {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-}
-
 .btn-primary {
   background: var(--primary);
   color: var(--bg);
@@ -349,12 +341,6 @@ h1 em {
   color: var(--info);
   font-size: 12px;
   letter-spacing: 1px;
-}
-
-.divider {
-  height: 1px;
-  background: rgba(255,255,255,0.12);
-  margin: 0 2rem;
 }
 
 /* ─── FEATURES ─── */
@@ -416,30 +402,6 @@ h1 em {
   font-size: 13px;
   color: rgba(255,255,255,0.4);
   line-height: 1.4;
-}
-
-/* ─── CTA BLOCK ─── */
-.cta-block {
-  background: rgba(255,255,255,0.12);
-  margin: 0 2rem 2rem;
-  border-radius: 16px;
-  padding: 2.5rem 2rem;
-  text-align: center;
-}
-
-.cta-block h2 {
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-  color: var(--primary);
-  margin-bottom: 0.75rem;
-}
-
-.cta-block p {
-  color: var(--primary);
-  font-size: 14px;
-  font-weight: 300;
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
 }
 
 /* ─── FOOTER ─── */
@@ -625,17 +587,6 @@ h1 em {
   cursor: not-allowed;
 }
 
-.success-msg {
-  background: rgba(255,255,255,0.12);
-  border: 1px solid var(--info);
-  border-radius: 8px;
-  padding: 1rem;
-  color: var(--primary);
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
 /* ─── PRICING ─── */
 .pricing-hero {
   padding: 3.5rem 2rem 2rem;
@@ -752,11 +703,6 @@ h1 em {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.spinner-primary {
-  border-color: var(--primary);
-  border-top-color: transparent;
 }
 
 .pricing-note {
@@ -958,42 +904,6 @@ h1 em {
   background: rgba(255,255,255,0.08);
 }
 
-.quick-actions {
-  margin-bottom: 1rem;
-}
-
-.quick-actions h3 {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text);
-  margin-bottom: 0.75rem;
-}
-
-.actions-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-.action-btn {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 12px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--info);
-  cursor: pointer;
-  font-family: var(--font-body);
-}
-
-.action-btn span:first-child {
-  font-size: 24px;
-}
-
 .entries-list {
   display: flex;
   flex-direction: column;
@@ -1062,39 +972,8 @@ h1 em {
   margin-bottom: 1rem;
 }
 
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(255,255,255,0.06);
-  border-top: 1px solid rgba(255,255,255,0.12);
-  display: flex;
-  justify-content: space-around;
-  padding: 0.75rem 0;
-  z-index: var(--z-content);
-}
-
-.bottom-nav-item {
-  background: transparent;
-  border: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  color: rgba(255,255,255,0.4);
-  cursor: pointer;
-  font-family: var(--font-body);
-  padding: 0 1rem;
-}
-
 .bottom-nav-item.active {
   color: var(--primary);
-}
-
-.bottom-nav-item span:first-child {
-  font-size: 20px;
 }
 
 .toggle-group {
@@ -1367,43 +1246,6 @@ h1 em {
   line-height: 1.4;
 }
 
-.timer-circle {
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  border: 3px solid rgba(255,255,255,0.12);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-  background: rgba(255,255,255,0.06);
-}
-
-.timer-num {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  color: var(--primary);
-}
-
-.timer-label {
-  font-size: 11px;
-  color: rgba(255,255,255,0.4);
-}
-
-.breath-circle {
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-  transition: all 4s ease-in-out;
-  background: rgba(255,255,255,0.12);
-  border: 3px solid var(--info);
-}
-
 .breath-circle.inhale {
   transform: scale(1.2);
   background: var(--info);
@@ -1420,26 +1262,6 @@ h1 em {
   transform: scale(1);
   background: rgba(255,255,255,0.12);
   border-color: rgba(255,255,255,0.4);
-}
-
-.breath-text {
-  font-size: 14px;
-  color: var(--primary);
-  font-weight: 500;
-}
-
-.thought-prompts {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 0.75rem;
-}
-
-.prompt-item {
-  font-size: 13px;
-  color: var(--info);
-  font-weight: 300;
-  line-height: 1.4;
 }
 
 .helpline-card {
@@ -1468,81 +1290,6 @@ h1 em {
   color: rgba(255,255,255,0.4);
 }
 
-/* ── Resources ── */
-.resource-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(255,255,255,0.12);
-}
-
-.resource-item:last-child {
-  border-bottom: none;
-}
-
-.resource-name {
-  font-size: 13px;
-  color: var(--text);
-  font-weight: 500;
-  margin-bottom: 2px;
-}
-
-.resource-detail {
-  font-size: 12px;
-  color: rgba(255,255,255,0.4);
-  font-weight: 300;
-}
-
-.resource-btn {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.12);
-  color: var(--primary);
-  padding: 6px 14px;
-  border-radius: 100px;
-  font-size: 12px;
-  cursor: pointer;
-  font-family: var(--font-body);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.resource-btn:hover {
-  border-color: var(--primary);
-}
-
-/* ── Profile ── */
-.profile-avatar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 1.5rem;
-}
-
-.avatar-circle {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.12);
-  border: 2px solid var(--info);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  color: var(--primary);
-}
-
-.avatar-edit {
-  background: transparent;
-  border: none;
-  color: var(--primary);
-  font-size: 13px;
-  cursor: pointer;
-  font-family: var(--font-body);
-}
-
 .toggle-row {
   display: flex;
   justify-content: space-between;
@@ -1568,24 +1315,6 @@ h1 em {
   cursor: pointer;
 }
 
-/* ── Settings ── */
-.select-input {
-  background: var(--bg);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 8px;
-  padding: 12px 14px;
-  color: var(--text);
-  font-size: 14px;
-  font-family: var(--font-body);
-  outline: none;
-  width: 100%;
-  cursor: pointer;
-}
-
-.select-input:focus {
-  border-color: var(--primary);
-}
-
 .btn-danger {
   background: rgba(255,255,255,0.08);
   color: var(--text);
@@ -1600,60 +1329,6 @@ h1 em {
 
 .btn-danger:hover {
   background: rgba(255,255,255,0.12);
-}
-
-/* ── Events ── */
-.events-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.event-card {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 12px;
-  padding: 1.25rem;
-}
-
-.event-type-badge {
-  display: inline-block;
-  background: rgba(255,255,255,0.12);
-  color: var(--primary);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  padding: 4px 12px;
-  border-radius: 100px;
-  margin-bottom: 0.75rem;
-}
-
-.event-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text);
-  margin-bottom: 0.75rem;
-}
-
-.event-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: rgba(255,255,255,0.4);
-  font-weight: 300;
-}
-
-/* ── Precious Pact ── */
-.video-placeholder {
-  background: var(--bg);
-  border: 2px dashed rgba(255,255,255,0.12);
-  border-radius: 12px;
-  padding: 3rem 1rem;
-  font-size: 14px;
-  color: rgba(255,255,255,0.4);
-  margin-bottom: 1.25rem;
 }
 
 /* ── Monthly Mirror ── */
@@ -1691,19 +1366,6 @@ h1 em {
   font-size: 12px;
   color: rgba(255,255,255,0.4);
   font-weight: 300;
-}
-
-/* ── Family Portal ── */
-.supporter-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(255,255,255,0.12);
-}
-
-.supporter-item:last-child {
-  border-bottom: none;
 }
 
 /* ── Admin ── */
@@ -1746,35 +1408,6 @@ h1 em {
   margin-top: 1rem;
 }
 
-/* ── Analytics ── */
-.analytics-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.analytics-label {
-  font-size: 12px;
-  color: var(--info);
-  min-width: 140px;
-  font-weight: 300;
-}
-
-.analytics-bar-wrap {
-  flex: 1;
-  height: 8px;
-  background: rgba(255,255,255,0.12);
-  border-radius: 100px;
-  overflow: hidden;
-}
-
-.analytics-bar {
-  height: 100%;
-  border-radius: 100px;
-  transition: width 0.3s ease;
-}
-
 .analytics-bar.clean {
   background: var(--info);
 }
@@ -1785,53 +1418,6 @@ h1 em {
 
 .analytics-bar.gambled {
   background: rgba(255,255,255,0.08);
-}
-
-.analytics-pct {
-  font-size: 12px;
-  color: rgba(255,255,255,0.4);
-  min-width: 36px;
-  text-align: right;
-}
-
-/* ── Broadcast ── */
-.broadcast-audience {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.broadcast-audience-btn {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--bg);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 10px;
-  padding: 12px 14px;
-  cursor: pointer;
-  font-family: var(--font-body);
-  transition: border-color 0.2s;
-}
-
-.broadcast-audience-btn:hover {
-  border-color: var(--primary);
-}
-
-.broadcast-active {
-  border-color: var(--primary);
-  background: rgba(255,255,255,0.12);
-}
-
-.broadcast-audience-label {
-  font-size: 13px;
-  color: var(--info);
-}
-
-.broadcast-audience-count {
-  font-size: 12px;
-  color: var(--primary);
-  font-family: var(--font-display);
 }
 
 /* ── Crisis Alerts ── */
@@ -1880,22 +1466,9 @@ button:active {
   100% { transform: scale(1); opacity: 1; }
 }
 
-.checkmark-animate {
-  animation: checkmarkPop 0.5s ease-out;
-}
-
 @keyframes confettiFall {
   0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
   100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-}
-
-.confetti-piece {
-  position: fixed;
-  width: 10px;
-  height: 10px;
-  z-index: var(--z-toast);
-  pointer-events: none;
-  animation: confettiFall 2s ease-in-out forwards;
 }
 
 @keyframes flameFlicker {
@@ -1943,10 +1516,6 @@ button:active {
   animation: slideInRight 0.3s ease-out;
   box-shadow: 0 4px 16px rgba(11,18,32,0.4);
   border: 1px solid rgba(255,255,255,0.4);
-}
-
-.toast-exit {
-  animation: slideOutRight 0.3s ease-in forwards;
 }
 
 @keyframes badgeUnlock {
