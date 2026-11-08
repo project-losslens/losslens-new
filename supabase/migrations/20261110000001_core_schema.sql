@@ -601,8 +601,11 @@ create table if not exists public.company_code_validation_attempts (
   attempted_at timestamptz not null default now()
 );
 alter table public.company_code_validation_attempts add column if not exists ip_hash text;
+alter table public.company_code_validation_attempts add column if not exists actor_key text;
 create index if not exists company_code_attempts_ip_time_idx
   on public.company_code_validation_attempts(ip_hash, attempted_at desc);
+create index if not exists company_code_attempts_actor_time_idx
+  on public.company_code_validation_attempts(actor_key, attempted_at desc);
 
 create table if not exists public.account_deletion_log (
   id uuid primary key default gen_random_uuid(),
