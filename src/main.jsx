@@ -6,6 +6,7 @@ import './styles/tokens.css'
 import './index.css'
 import './styles/globals.css'
 import App from './App.jsx'
+import SiteGate from './components/SiteGate.jsx'
 
 import { registerSW } from './lib/pwa'
 
@@ -18,10 +19,12 @@ setupInstallPrompt()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
-      <AuthProfileProvider>
-        <App />
-      </AuthProfileProvider>
-    </BrowserRouter>
+    <SiteGate>
+      <BrowserRouter>
+        <AuthProfileProvider>
+          <App />
+        </AuthProfileProvider>
+      </BrowserRouter>
+    </SiteGate>
   </StrictMode>,
 )
