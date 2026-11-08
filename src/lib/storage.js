@@ -1,5 +1,20 @@
 import { supabase } from './supabase'
 
+/* ---- storageKeys.js ---- */
+export function readAndMigrateStorageItem(key, legacyKey) {
+  const currentValue = localStorage.getItem(key)
+  if (currentValue !== null) return currentValue
+
+  const legacyValue = localStorage.getItem(legacyKey)
+  if (legacyValue !== null) {
+    localStorage.setItem(key, legacyValue)
+    localStorage.removeItem(legacyKey)
+  }
+  return legacyValue
+}
+
+/* ---- circleHash.js ---- */
+
 const ADJECTIVES = ['Brave', 'Calm', 'Kind', 'Bright', 'Steady', 'Quiet', 'Clear', 'Bold']
 const ANIMALS = ['Otter', 'Falcon', 'Lion', 'Dolphin', 'Eagle', 'Panda', 'Fox', 'Wolf']
 

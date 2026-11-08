@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 
-export default function useMediaQuery(query) {
+/* ---- useMediaQuery.js ---- */
+
+export function useMediaQuery(query) {
   const [matches, setMatches] = useState(() => window.matchMedia(query).matches)
 
   useEffect(() => {
@@ -12,4 +14,14 @@ export default function useMediaQuery(query) {
   }, [query])
 
   return matches
+}
+
+/* ---- useDocumentTitle.js ---- */
+
+export function useDocumentTitle(title) {
+  useEffect(() => {
+    const prev = document.title
+    if (title) document.title = `${title} — LossLens`
+    return () => { document.title = prev }
+  }, [title])
 }

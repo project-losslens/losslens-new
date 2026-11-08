@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { readAndMigrateStorageItem } from '../../lib/storageKeys'
+import { readAndMigrateStorageItem } from '../../lib/storage'
 
 //  Constants
 const CATEGORY_ICONS = {

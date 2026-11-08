@@ -3,7 +3,7 @@
 // VITE_SITE_GATE to remove. See docs/SITE_GATE.md.
 /* eslint-disable react-refresh/only-export-components -- temp gate helpers are exported for tests */
 import { useRef, useState } from 'react'
-import LogoMark from './LogoMark.jsx'
+import { LogoMark } from './Brand.jsx'
 import ContactIcons from './ContactIcons.jsx'
 import { primaryHelpline } from '../config/helplines'
 import '../styles/site-gate.css'

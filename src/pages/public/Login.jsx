@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { createSupabaseClient } from '../../lib/supabaseClient'
+import { createSupabaseClient } from '../../lib/supabase'
 
 // Shared Google Icon
 const GoogleIcon = () => (

@@ -2,23 +2,26 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from "../../lib/supabase";
 import '../../styles/landing.css'
-import Header from './landing/Header'
-import Hero from './landing/Hero'
-import Numbers from './landing/Numbers'
-import TheGap from './landing/TheGap'
-import WhatItDoes from './landing/WhatItDoes'
-import HowItWorks from './landing/HowItWorks'
-import BehindTheApp from './landing/BehindTheApp'
-import ProtectionTeaser from './landing/ProtectionTeaser'
-import Partners from './landing/Partners'
-import Privacy from './landing/Privacy'
-import PricingPreview from './landing/PricingPreview'
-import Origin from './landing/Origin'
-import Crisis from './landing/Crisis'
-import Contact from './landing/Contact'
-import Footer from './landing/Footer'
+import { Header, Hero, Numbers, TheGap, WhatItDoes, HowItWorks, BehindTheApp, ProtectionTeaser, Partners, Privacy, PricingPreview, Origin, Crisis, Contact, Footer } from './landing/Sections'
 import { primaryHelpline } from '../../config/helplines'
-import useDocumentTitle from '../../hooks/useDocumentTitle'
+import { useDocumentTitle } from '../../hooks'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 48 48">

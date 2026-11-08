@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { supabase } from '../../lib/supabase'
-import { ensureCircleHash } from '../../lib/circleHash'
+import { ensureCircleHash } from '../../lib/storage'
 
 //  Constants
 const MAX_ACTIVE_CHATS = 3

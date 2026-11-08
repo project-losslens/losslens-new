@@ -1,9 +1,8 @@
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AppShell from './layouts/AppShell'
-import BrandLoader from './components/BrandLoader'
-import RequireAuth from './components/RequireAuth'
-import RequireElevated from './components/RequireElevated'
+import { BrandLoader } from './components/Brand'
+import { RequireAuth, RequireElevated } from './components/RouteGuards'
 import { CrisisAlertCountProvider } from './context/CrisisAlertCountContext'
 
 const Landing = lazy(() => import('./pages/public/Landing'))
