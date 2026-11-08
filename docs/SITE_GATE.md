@@ -49,3 +49,8 @@ redeploy. The gate then renders the app immediately.
 3. Remove `<meta name="robots" content="noindex, nofollow">` from `index.html`.
 4. Remove `VITE_SITE_GATE` from `.env.example` and the Vercel env vars.
 5. Optionally bump the service-worker `CACHE_VERSION` again.
+
+## Notes
+
+- `index.html` carries `<meta name="robots" content="noindex, nofollow">` while the gate exists — remove it together with the gate.
+- The gate screen is styled by `src/styles/site-gate.css` (imported by `SiteGate.jsx`).
