@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { PublicLayout } from './landing/Sections'
+import { PublicLayout } from '../../layouts/PublicLayout'
 
 function ResetPassword() {
   const navigate = useNavigate()

@@ -13,11 +13,16 @@ The application separates ordinary users, administrators, and Super Administrato
 ## 2. Public website
 
 ### Landing page
-The landing page is a six-section, mobile-first overview: hero, tools, steps,
-privacy, signup call-to-action, and crisis support. It uses landing-scoped
-type and layout rules, with a shared responsive header/footer and no overlapping
-copy at narrow widths. A dismissible install prompt appears as a bottom toast
-when the browser supports PWA installation.
+The landing page is a six-block, mobile-first overview in a dark "secure tech"
+system: sticky header (transparent over the hero, solid after scroll), banner
+hero with an inline SVG lens visual, a two-column about block, a 3x2 glass
+tool-card grid (Diary, Oloo, Urge Toolkit, The Circle, CBT Modules, Family
+Portal), numbered how-it-works steps with privacy promises, a closing call to
+action, and a crisis helpline strip. It uses landing-scoped design tokens
+(`.ll-landing`), a self-hosted geometric sans (Jost 300/500 woff2 in
+`public/fonts`), and shared `PublicLayout` header/footer styles. A dismissible
+install prompt appears as a bottom toast when the browser supports PWA
+installation.
 
 The public routes include Pricing, Protection, Privacy, Terms, About, Partners,
 and a branded Not Found page. Privacy and Terms are clearly identified as

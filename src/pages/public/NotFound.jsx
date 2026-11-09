@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useDocumentTitle } from '../../hooks'
-import { PublicLayout } from './landing/Sections'
+import { PublicLayout } from '../../layouts/PublicLayout'
 import '../../styles/landing.css'
 
 export default function NotFound() {

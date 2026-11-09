@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { roleHome, safeInternalPath } from '../../config/roleHome'
 import { createSupabaseClient } from '../../lib/supabase'
 import { primaryHelpline } from '../../config/helplines'
-import { PublicLayout } from './landing/Sections'
+import { PublicLayout } from '../../layouts/PublicLayout'
 
 // Shared Google Icon
 const GoogleIcon = () => (

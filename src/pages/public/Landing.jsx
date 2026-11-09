@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { canShowInstall, showInstallPrompt } from '../../lib/pwa'
 import { useDocumentTitle } from '../../hooks'
-import { CallToAction, Crisis, HowItWorks, Privacy, PublicLayout, WhatYouGet, Hero } from './landing/Sections'
+import { PublicLayout } from '../../layouts/PublicLayout'
+import { About, ClosingCTA, CrisisStrip, Features, Hero, HowItWorks } from './landing/Sections'
 
 const INSTALL_DISMISSED_UNTIL = 'll_install_dismissed_until'
 const FOURTEEN_DAYS = 14 * 24 * 60 * 60 * 1000
@@ -30,7 +31,7 @@ function InstallToast() {
   }, [])
 
   useEffect(() => {
-    const crisis = document.getElementById('crisis')
+    const crisis = document.getElementById('crisis-help')
     if (!crisis || !('IntersectionObserver' in window)) return undefined
     const observer = new IntersectionObserver(([entry]) => setCrisisVisible(entry.isIntersecting))
     observer.observe(crisis)
@@ -72,11 +73,11 @@ export default function Landing() {
     <PublicLayout>
       <main>
         <Hero />
-        <WhatYouGet />
+        <About />
+        <Features />
         <HowItWorks />
-        <Privacy />
-        <CallToAction />
-        <Crisis />
+        <ClosingCTA />
+        <CrisisStrip />
       </main>
       <InstallToast />
     </PublicLayout>

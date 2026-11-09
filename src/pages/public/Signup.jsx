@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { primaryHelpline } from '../../config/helplines'
-import { PublicLayout } from './landing/Sections'
+import { PublicLayout } from '../../layouts/PublicLayout'
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 48 48">

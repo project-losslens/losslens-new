@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { PublicLayout } from '../public/landing/Sections'
+import { PublicLayout } from '../../layouts/PublicLayout'
 
 export default function InsurerLogin() {
   const navigate = useNavigate()

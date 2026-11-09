@@ -53,7 +53,8 @@ don't create it manually.
   inline style objects elsewhere. No Tailwind utilities.
 - Brand: bg `#0B1220`, teal `#2DD4BF`, blue `#7DBDEE`, warm accent `#F2C879`.
 - Fonts: `--font-display` (Bricolage Grotesque), `--font-body` (Instrument
-  Sans) — self-hosted via fontsource packages.
+  Sans) — self-hosted via fontsource packages. Public pages (`.ll-landing`)
+  use Jost 300/500 woff2 from `public/fonts` for headings; body is system-ui.
 - Icons: `src/components/AppIcon.jsx`; never emoji (mojibake history).
   Keep files UTF-8 without BOM.
 - One `<h1>` per page; sentence-case headings; no banned marketing words

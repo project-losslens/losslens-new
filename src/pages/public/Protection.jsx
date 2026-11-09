@@ -38,7 +38,7 @@ function ProtectionInner() {
   }
 
   return (
-    <div className="ll-page">
+    <div className="ll-landing">
       <main className="ll-band" style={{ paddingTop: 'var(--space-7)' }}>
         <div className="ll-container ll-narrow">
           <p className="ll-eyebrow">LossLens Protection</p>
