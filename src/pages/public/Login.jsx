@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { roleHome } from '../../config/roleHome'
-import { supabase } from '../../lib/supabase'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { roleHome, safeInternalPath } from '../../config/roleHome'
 import { createSupabaseClient } from '../../lib/supabase'
+import { primaryHelpline } from '../../config/helplines'
+import { PublicLayout } from './landing/Sections'
 
 // Shared Google Icon
 const GoogleIcon = () => (
@@ -16,6 +17,7 @@ const GoogleIcon = () => (
 
 function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
   const emailRef = useRef(null)
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
@@ -24,34 +26,14 @@ function Login() {
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
-  const [checking, setChecking] = useState(true)
   const [attempts, setAttempts] = useState(() => parseInt(sessionStorage.getItem('login_attempts') || '0'))
   const [cooldown, setCooldown] = useState(() => sessionStorage.getItem('login_cooldown_until') !== null)
   const [cooldownUntil, setCooldownUntil] = useState(() => parseInt(sessionStorage.getItem('login_cooldown_until') || '0'))
   const [cooldownTimer, setCooldownTimer] = useState(0)
 
-  //  Auto-focus email on mount
   useEffect(() => {
-    if (!checking && emailRef.current) emailRef.current.focus()
-  }, [checking])
-
-  //  Session check with error handling
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session) {
-          const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single()
-          navigate(roleHome(profile?.role), { replace: true })
-        }
-      } catch (err) {
-        console.error('Session check failed:', err)
-      } finally {
-        setChecking(false)
-      }
-    }
-    checkSession()
-  }, [navigate])
+    emailRef.current?.focus()
+  }, [])
 
   //  Cooldown timer with localStorage persistence
   useEffect(() => {
@@ -112,9 +94,15 @@ function Login() {
     sessionStorage.removeItem('login_cooldown_until')
     setAttempts(0)
 
-    const { data: profile } = await loginClient.from('profiles').select('role').eq('id', data.user.id).single()
+    const { data: profile, error: profileError } = await loginClient.from('profiles').select('role').eq('id', data.user.id).single()
+    if (profileError) {
+      console.error('Could not load profile after sign-in:', profileError)
+      setError('Signed in, but we could not load your profile. Please retry.')
+      setLoading(false)
+      return
+    }
     setLoading(false)
-    const destination = roleHome(profile?.role)
+    const destination = safeInternalPath(location.state?.from) || roleHome(profile?.role)
     window.location.assign(destination)
   }
 
@@ -126,7 +114,7 @@ function Login() {
       const loginClient = createSupabaseClient(rememberMe)
       const { error: googleError } = await loginClient.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: `${window.location.origin}/dashboard` },
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
       })
       if (googleError) {
         setError('Google sign-in failed. Please try again.')
@@ -145,25 +133,12 @@ function Login() {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }, [cooldownTimer])
 
-  if (checking) {
-    return (
-      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: '32px', height: '32px', border: '3px solid rgba(255,255,255,0.12)', borderTopColor: '#2DD4BF', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }}></div>
-      </div>
-    )
-  }
-
   return (
-    <div className="root">
-      <nav className="navbar">
-        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
-        <button className="nav-ghost" onClick={() => navigate('/signup')}>Sign up</button>
-      </nav>
-
+    <PublicLayout>
       <div className="auth-container">
         <div className="auth-card">
-          <h2 className="auth-title">Welcome back</h2>
-          <p className="auth-sub">Sign in to continue your journey.</p>
+          <h1 className="auth-title">Welcome back</h1>
+          <p className="auth-sub">Sign in to continue.</p>
 
           {error && (
             <div role="alert" aria-live="polite" style={{
@@ -205,7 +180,7 @@ function Login() {
               <label htmlFor="password">Password</label>
               <div style={{ position: 'relative' }}>
                 <input id="password" type={showPw ? 'text' : 'password'} autoComplete="current-password" placeholder="Enter password" value={password} onChange={handlePasswordChange} style={{ paddingRight: 44 }} disabled={cooldown} />
-                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? '' : ''}</button>
+                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: 12, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? 'Hide' : 'Show'}</button>
               </div>
             </div>
 
@@ -222,15 +197,15 @@ function Login() {
             </button>
           </form>
 
-          <p className="auth-switch">Don't have an account? <span onClick={() => navigate('/signup')}>Sign up free</span></p>
-          <p className="auth-switch">Insurance partner? <span onClick={() => navigate('/insurer/login')}>Insurer sign in</span></p>
+          <p className="auth-switch">Don’t have an account? <Link to="/signup">Sign up free</Link></p>
+          <p className="auth-switch">Insurance partner? <Link to="/insurer/login">Insurer sign in</Link></p>
 
           <div style={{ marginTop: '1.25rem', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', borderRadius: 8, padding: '10px 14px', textAlign: 'center' }}>
-            <p style={{ fontSize: 12, color: '#2DD4BF' }}>🆘 In crisis? Call NACADA: <strong>1192</strong> (24/7 free)</p>
+            <p style={{ fontSize: 12, color: '#2DD4BF' }}>In crisis? Call {primaryHelpline.name}: <a href={`tel:${primaryHelpline.tel}`}>{primaryHelpline.phone}</a> ({primaryHelpline.hours})</p>
           </div>
         </div>
       </div>
-    </div>
+    </PublicLayout>
   )
 }
 

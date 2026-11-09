@@ -13,10 +13,31 @@ The application separates ordinary users, administrators, and Super Administrato
 ## 2. Public website
 
 ### Landing page
-The landing page presents product entry points and navigation to signup, login, pricing, and related public content. The implementation is confirmed by `src/pages/public/Landing.jsx`.
+The landing page is a six-section, mobile-first overview: hero, tools, steps,
+privacy, signup call-to-action, and crisis support. It uses landing-scoped
+type and layout rules, with a shared responsive header/footer and no overlapping
+copy at narrow widths. A dismissible install prompt appears as a bottom toast
+when the browser supports PWA installation.
+
+The public routes include Pricing, Protection, Privacy, Terms, About, Partners,
+and a branded Not Found page. Privacy and Terms are clearly identified as
+drafts pending legal review; their presence does not imply legal approval.
 
 ### Authentication entry pages
-Login supports email/password and Google OAuth. Password reset requests a Supabase recovery email and the reset page applies the returned recovery session. Signup collects profile identity, performs Supabase signup, creates or updates the profile, and configures an email confirmation redirect.
+Login supports email/password and Google OAuth, restores a protected destination
+after sign-in, and routes by profile role when no destination was requested.
+Signup collects profile identity and uses the database auth trigger to create
+the profile; confirmation and OAuth links return through `/auth/callback`.
+Password reset requests a Supabase recovery email and the reset page applies
+the returned recovery session. The insurer portal checks the profile role
+before granting access. Authenticated users are redirected away from public
+login/signup pages, and unknown routes render Not Found rather than redirecting
+to login.
+
+Production and Preview must each have the Vercel `SITE_GATE_PASSWORD` and
+`SITE_GATE_SECRET` values configured and redeployed. The matching Supabase Auth
+URL allow-list must include the deployed origins and `/auth/callback` and
+`/reset-password` paths. Never put the gate password in the repository.
 
 ### Pricing and family join
 Pricing is implemented as a frontend pricing presentation. Family join accepts supporter invitation context and is documented as partially implemented because the anonymous acceptance path and exact session model require database and migration decisions.

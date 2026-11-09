@@ -92,6 +92,13 @@ Order matters:
    and set `ALLOWED_ORIGIN`.
 3. Set the Vercel env vars above for **both Production and Preview**, then
    redeploy. Pushes to `main` trigger a Production deployment.
+4. In Supabase Auth URL Configuration, allow the deployed app origins and the
+   `/auth/callback` and `/reset-password` redirect paths for Production and
+   Preview. Set `SITE_GATE_PASSWORD` and `SITE_GATE_SECRET` independently for
+   both Vercel environments, then redeploy each environment.
+5. Before making the site public, verify the helplines in
+   `src/config/helplines.js`, complete legal review for the Privacy and Terms
+   drafts, and rotate any previously exposed gate credential.
 
 Production: https://losslens-new.vercel.app
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import ContactIcons from '../../components/ContactIcons'
 import { mailtoHref } from '../../config/site'
+import { PublicLayout } from './landing/Sections'
 
 const FAQS = [
   { q: 'Is LossLens really free?', a: 'Yes — forever. The Free plan includes all core features: diary, CBT modules, AI companion Oloo, The Circle community, and more. No credit card needed.' },
@@ -103,16 +103,7 @@ export default function Pricing() {
   }
 
   return (
-    <div className="root">
-      {/* Nav */}
-      <nav className="navbar">
-        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
-        <div className="nav-links" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <button className="nav-ghost" onClick={() => navigate('/login')}>Log in</button>
-          <button className="nav-btn" onClick={() => navigate('/signup')}>Sign up free</button>
-        </div>
-      </nav>
-
+    <PublicLayout>
       {/* Hero */}
       <main>
         <div className="pricing-hero" style={{ padding: '3rem 2rem 1.5rem', textAlign: 'center' }}>
@@ -331,20 +322,6 @@ export default function Pricing() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="footer" style={{ flexDirection: 'column', gap: '12px', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.12)', padding: '1.5rem 2rem' }}>
-        <div>
-          <p>LossLens  · Gambling Harm Reduction  · Kenya  · 2026</p>
-          <div style={{ marginTop: '0.75rem', display: 'flex', justifyContent: 'center' }}>
-            <ContactIcons tone="on-dark" subject="Pricing question" />
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <a onClick={() => navigate('/privacy')} style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', textDecoration: 'none' }}>Privacy Policy</a>
-          <a onClick={() => navigate('/terms')} style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', textDecoration: 'none' }}>Terms of Service</a>
-        </div>
-        <p>Crisis? Call NACADA <strong style={{ color: '#2DD4BF' }}>1192</strong> (24/7 free)</p>
-      </footer>
-    </div>
+    </PublicLayout>
   )
 }

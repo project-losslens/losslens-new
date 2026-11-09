@@ -1,8 +1,8 @@
 import { lazy, Suspense } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import AppShell from './layouts/AppShell'
 import { BrandLoader } from './components/Brand'
-import { RequireAuth, RequireElevated } from './components/RouteGuards'
+import { PublicOnly, RequireAuth, RequireElevated } from './components/RouteGuards'
 import { CrisisAlertCountProvider } from './context/CrisisAlertCountContext'
 
 const Landing = lazy(() => import('./pages/public/Landing'))
@@ -13,6 +13,12 @@ const ResetPassword = lazy(() => import('./pages/public/ResetPassword'))
 const Pricing = lazy(() => import('./pages/public/Pricing'))
 const FamilyJoin = lazy(() => import('./pages/public/FamilyJoin'))
 const Protection = lazy(() => import('./pages/public/Protection'))
+const Privacy = lazy(() => import('./pages/public/Privacy'))
+const Terms = lazy(() => import('./pages/public/Terms'))
+const About = lazy(() => import('./pages/public/About'))
+const Partners = lazy(() => import('./pages/public/Partners'))
+const AuthCallback = lazy(() => import('./pages/public/AuthCallback'))
+const NotFound = lazy(() => import('./pages/public/NotFound'))
 
 const Dashboard = lazy(() => import('./pages/user/Dashboard'))
 const Diary = lazy(() => import('./pages/user/Diary'))
@@ -61,14 +67,21 @@ function App() {
     <Suspense fallback={<BrandLoader />}>
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route element={<PublicOnly />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+        </Route>
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/family-join" element={<FamilyJoin />} />
         <Route path="/protection" element={<Protection />} />
         <Route path="/insurer/login" element={<InsurerLogin />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/partners" element={<Partners />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
 
         <Route element={<RequireAuth />}>
           <Route path="/onboarding" element={<Onboarding />} />
@@ -87,48 +100,48 @@ function App() {
             <Route path="/family-portal" element={<FamilyPortalPage />} />
             <Route path="/subscription" element={<SubscriptionPage />} />
           </Route>
-            <Route element={<RequireAuth role="therapist" />}>
-              <Route element={<AppShell />}>
-                <Route path="/therapist" element={<TherapistDashboard />} />
-                <Route path="/therapist/onboarding" element={<TherapistOnboarding />} />
-                <Route path="/therapist/claims/new" element={<TherapistClaimForm />} />
-                <Route path="/therapist/payouts" element={<TherapistPayouts />} />
-              </Route>
-            </Route>
-            <Route element={<RequireAuth role="insurer" />}>
-              <Route element={<AppShell />}>
-                <Route path="/insurer" element={<InsurerDashboard />} />
-                <Route path="/insurer/claims" element={<InsurerClaims />} />
-                <Route path="/insurer/invoices" element={<InsurerInvoices />} />
-                <Route path="/insurer/analytics" element={<InsurerAnalytics />} />
-              </Route>
-            </Route>
-            <Route element={<RequireAuth role="admin" />}>
-            <Route element={<CrisisAlertCountProvider><AppShell admin /></CrisisAlertCountProvider>}>
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/events" element={<ManageEvents />} />
-              <Route path="/admin/groups" element={<ManageGroups />} />
-              <Route path="/admin/resources" element={<ManageResources />} />
-              <Route path="/admin/analytics" element={<UserAnalytics />} />
-              <Route path="/admin/broadcast" element={<Broadcast />} />
-              <Route path="/admin/crisis" element={<CrisisAlerts />} />
-              <Route element={<RequireElevated />}>
-                <Route path="/admin/users" element={<UserManagement />} />
-                <Route path="/admin/insurance" element={<InsurancePartners />} />
-                <Route path="/admin/b2b" element={<B2BClients />} />
-                <Route path="/admin/grants" element={<GrantApplications />} />
-                <Route path="/admin/chats" element={<ChatViewer />} />
-                <Route path="/admin/logs" element={<AuditLogs />} />
-                <Route path="/admin/settings" element={<SystemSettings />} />
-                <Route path="/admin/therapists" element={<TherapistManagement />} />
-                <Route path="/admin/insurers" element={<InsurerManagement />} />
-                <Route path="/admin/float" element={<FloatManagement />} />
-              </Route>
+        </Route>
+        <Route element={<RequireAuth role="therapist" />}>
+          <Route element={<AppShell />}>
+            <Route path="/therapist" element={<TherapistDashboard />} />
+            <Route path="/therapist/onboarding" element={<TherapistOnboarding />} />
+            <Route path="/therapist/claims/new" element={<TherapistClaimForm />} />
+            <Route path="/therapist/payouts" element={<TherapistPayouts />} />
+          </Route>
+        </Route>
+        <Route element={<RequireAuth role="insurer" />}>
+          <Route element={<AppShell />}>
+            <Route path="/insurer" element={<InsurerDashboard />} />
+            <Route path="/insurer/claims" element={<InsurerClaims />} />
+            <Route path="/insurer/invoices" element={<InsurerInvoices />} />
+            <Route path="/insurer/analytics" element={<InsurerAnalytics />} />
+          </Route>
+        </Route>
+        <Route element={<RequireAuth role="admin" />}>
+          <Route element={<CrisisAlertCountProvider><AppShell admin /></CrisisAlertCountProvider>}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/events" element={<ManageEvents />} />
+            <Route path="/admin/groups" element={<ManageGroups />} />
+            <Route path="/admin/resources" element={<ManageResources />} />
+            <Route path="/admin/analytics" element={<UserAnalytics />} />
+            <Route path="/admin/broadcast" element={<Broadcast />} />
+            <Route path="/admin/crisis" element={<CrisisAlerts />} />
+            <Route element={<RequireElevated />}>
+              <Route path="/admin/users" element={<UserManagement />} />
+              <Route path="/admin/insurance" element={<InsurancePartners />} />
+              <Route path="/admin/b2b" element={<B2BClients />} />
+              <Route path="/admin/grants" element={<GrantApplications />} />
+              <Route path="/admin/chats" element={<ChatViewer />} />
+              <Route path="/admin/logs" element={<AuditLogs />} />
+              <Route path="/admin/settings" element={<SystemSettings />} />
+              <Route path="/admin/therapists" element={<TherapistManagement />} />
+              <Route path="/admin/insurers" element={<InsurerManagement />} />
+              <Route path="/admin/float" element={<FloatManagement />} />
             </Route>
           </Route>
         </Route>
 
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
   )

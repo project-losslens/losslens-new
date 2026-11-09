@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuthProfile } from '../context/AuthProfileContext'
+import { roleHome } from '../config/roleHome'
 import AppIcon from './AppIcon'
 import { BrandLoader } from './Brand'
 
@@ -42,11 +43,31 @@ export function RequireAuth({ role }) {
     )
   }
   if (authStatus !== 'ready') return <BrandLoader />
+  if (!role && (currentRole === 'therapist' || currentRole === 'insurer')) {
+    return <Navigate to={roleHome(currentRole)} replace />
+  }
   if (role === 'admin' && !isAdmin) return <Navigate to="/dashboard" replace />
   if (role === 'super_admin' && !isSuperAdmin) return <Navigate to="/admin" replace />
   if (role === 'therapist' && currentRole !== 'therapist' && !isSuperAdmin) return <Navigate to="/dashboard" replace />
   if (role === 'insurer' && currentRole !== 'insurer' && !isSuperAdmin) return <Navigate to="/dashboard" replace />
 
+  return <Outlet />
+}
+
+export function PublicOnly() {
+  const { authStatus, user, role, retryProfile } = useAuthProfile()
+
+  if (authStatus === 'loading') return <BrandLoader />
+  if (authStatus === 'error') {
+    return (
+      <section className="auth-retry" role="alert">
+        <h1>We could not load your profile</h1>
+        <p>Your sign-in is still active. Check your connection and try again.</p>
+        <button type="button" className="btn-primary" onClick={retryProfile}>Retry</button>
+      </section>
+    )
+  }
+  if (user) return <Navigate to={roleHome(role)} replace />
   return <Outlet />
 }
 

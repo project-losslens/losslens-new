@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { primaryHelpline } from '../../config/helplines'
+import { PublicLayout } from './landing/Sections'
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 48 48">
@@ -12,9 +14,7 @@ const GoogleIcon = () => (
 );
 
 function Signup() {
-  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const planFromUrl = searchParams.get('plan') || 'free'
   const typeFromUrl = searchParams.get('type') || 'individual'
 
   const emailRef = useRef(null)
@@ -24,8 +24,9 @@ function Signup() {
   const [fieldErrors, setFieldErrors] = useState({})
   const [signupType, setSignupType] = useState(typeFromUrl === 'company' ? 'company' : 'individual')
   const [companyCode, setCompanyCode] = useState('')
-  const [companyValidation, setCompanyValidation] = useState(null) // { valid: true, company_name: '...' } or null
+  const [companyValidation, setCompanyValidation] = useState(null)
   const [validatingCode, setValidatingCode] = useState(false)
+  const companyValidationRequestRef = useRef(0)
   const [form, setForm] = useState({
     name: '', username: '', phone: '', email: '',
     password: '', confirmPassword: ''
@@ -36,6 +37,7 @@ function Signup() {
   const [signedUpEmail, setSignedUpEmail] = useState(() => sessionStorage.getItem('signup_email') || '')
   const [usernameStatus, setUsernameStatus] = useState('')
   const [ageConfirmed, setAgeConfirmed] = useState(false)
+  const [consent, setConsent] = useState(false)
   const [passwordStrength, setPasswordStrength] = useState(0)
   const [resending, setResending] = useState(false)
   const [resendSent, setResendSent] = useState(false)
@@ -63,44 +65,34 @@ function Signup() {
       setCompanyValidation(null)
       return
     }
+    const requestId = ++companyValidationRequestRef.current
     setValidatingCode(true)
     try {
-      const { data, error: codeError } = await supabase
-        .from('b2b_clients')
-        .select('company_name, seats, plan, status')
-        .eq('company_code', code.toUpperCase().trim())
-        .eq('status', 'active')
-        .maybeSingle()
-
+      const { data, error: codeError } = await supabase.rpc('validate_company_code', {
+        p_code: code.toUpperCase().trim(),
+      })
       if (codeError) throw codeError
-
-      if (data) {
-        // Check seat availability
-        const { count } = await supabase
-          .from('profiles')
-          .select('*', { count: 'exact', head: true })
-          .eq('b2b_client_id', data.id)
-
-        const seatsAvailable = !data.seats || count < data.seats
-
-        setCompanyValidation({
-          valid: seatsAvailable,
-          company_name: data.company_name,
-          plan: data.plan,
-          seats_full: !seatsAvailable
-        })
-      } else {
-        setCompanyValidation({ valid: false, company_name: null })
-      }
+      if (requestId !== companyValidationRequestRef.current) return
+      setCompanyValidation({
+        valid: data?.valid === true,
+        company_name: data?.company_name || null,
+        seats_remaining: data?.seats_remaining ?? null,
+      })
     } catch (err) {
       console.error('Code validation error:', err)
-      setCompanyValidation(null)
+      if (requestId === companyValidationRequestRef.current) {
+        setCompanyValidation({ valid: false, validation_error: true })
+      }
+    } finally {
+      if (requestId === companyValidationRequestRef.current) setValidatingCode(false)
     }
-    setValidatingCode(false)
   }, [])
 
   const handleCodeChange = (val) => {
+    companyValidationRequestRef.current += 1
     setCompanyCode(val.toUpperCase())
+    setCompanyValidation(null)
+    setValidatingCode(false)
     if (codeDebounceRef.current) clearTimeout(codeDebounceRef.current)
     if (val.length >= 3) {
       codeDebounceRef.current = setTimeout(() => validateCompanyCode(val), 500)
@@ -152,7 +144,7 @@ function Signup() {
     setError('')
     setGoogleLoading(true)
     try {
-      const options = { redirectTo: `${window.location.origin}/dashboard` }
+      const options = { redirectTo: `${window.location.origin}/auth/callback` }
       if (signupType === 'company' && companyValidation?.valid) {
         options.data = { plan_type: 'company', company_code: companyCode }
       }
@@ -177,6 +169,7 @@ function Signup() {
     else if (!/[a-zA-Z]/.test(form.password) || !/[0-9]/.test(form.password)) errors.password = 'Include a letter and a number'
     if (form.password !== form.confirmPassword) errors.confirmPassword = "Passwords don't match"
     if (!ageConfirmed) errors.age = 'You must confirm you are 18 or older'
+    if (!consent) errors.consent = 'You must agree to continue'
     if (signupType === 'company' && (!companyCode || !companyValidation?.valid)) {
       errors.company_code = 'A valid company code is required'
     }
@@ -205,39 +198,13 @@ function Signup() {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: form.email.trim().toLowerCase(),
         password: form.password,
-        options: { data: userData }
+        options: {
+          data: userData,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        }
       })
       if (signUpError) throw signUpError
       if (!data.user) throw new Error('Signup failed. Please try again.')
-
-      // Create profile with company link if applicable
-      const profileData = {
-        id: data.user.id,
-        full_name: form.name.trim(),
-        username: form.username.toLowerCase().trim(),
-        email: form.email.trim().toLowerCase(),
-        phone: form.phone.trim(),
-        plan_type: signupType,
-        streak_days: 0,
-        risk_level: 'low',
-      }
-
-      // If company signup, find and link the b2b client
-      if (signupType === 'company' && companyValidation?.valid) {
-        const { data: clientData } = await supabase
-          .from('b2b_clients')
-          .select('id')
-          .eq('company_code', companyCode.toUpperCase().trim())
-          .single()
-        if (clientData) {
-          profileData.b2b_client_id = clientData.id
-        }
-      }
-
-      const { error: upsertError } = await supabase.from('profiles').upsert(profileData, { onConflict: 'id' })
-      if (upsertError) {
-        console.error('Profile upsert failed:', upsertError)
-      }
 
       sessionStorage.setItem('signup_email', form.email)
       if (data.user && data.session) sessionStorage.setItem('losslens_new_signup', data.user.id)
@@ -259,17 +226,16 @@ function Signup() {
     setResending(false)
   }
 
-  const canSubmit = form.name.trim() && form.username.trim().length >= 3 && form.email.trim() && form.password.length >= 8 && form.password === form.confirmPassword && ageConfirmed && usernameStatus !== 'taken' && usernameStatus !== 'checking' && !loading && (signupType === 'individual' || (signupType === 'company' && companyValidation?.valid))
+  const canSubmit = form.name.trim() && form.username.trim().length >= 3 && form.email.trim() && form.password.length >= 8 && form.password === form.confirmPassword && ageConfirmed && consent && usernameStatus !== 'taken' && usernameStatus !== 'checking' && !loading && (signupType === 'individual' || (signupType === 'company' && companyValidation?.valid))
 
   // Success screen
   if (signedUp) {
     return (
-      <div className="root">
-        <nav className="navbar"><span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span></nav>
+      <PublicLayout>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
             <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}></span>
-            <h2 className="auth-title">Check your email</h2>
+            <h1 className="auth-title">Check your email</h1>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>We've sent a confirmation link to <strong style={{ color: '#2DD4BF' }}>{signedUpEmail}</strong></p>
             {signupType === 'company' && companyValidation?.company_name && (
               <p style={{ color: '#2DD4BF', fontSize: '13px', marginTop: '8px' }}>
@@ -281,26 +247,21 @@ function Signup() {
               <p style={{ color: '#2DD4BF', fontSize: '13px', fontWeight: 600, margin: '0 0 4px' }}> Didn't receive it?</p>
               <p style={{ color: '#2DD4BF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Check your <strong>spam/junk folder</strong>. Some email providers filter automated messages.</p>
             </div>
-            <button className="btn-primary full" onClick={() => navigate('/login')}>Go to login →</button>
+            <Link className="btn-primary full" to="/login">Go to login</Link>
             <button onClick={handleResendEmail} disabled={resending || resendSent} style={{ width: '100%', marginTop: '10px', padding: '10px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: resendSent ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
               {resendSent ? ' Sent!' : resending ? 'Sending...' : 'Resend email'}
             </button>
           </div>
         </div>
-      </div>
+      </PublicLayout>
     )
   }
 
   return (
-    <div className="root">
-      <nav className="navbar">
-        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
-        <button className="nav-ghost" onClick={() => navigate('/login')}>Log in</button>
-      </nav>
-
+    <PublicLayout>
       <div className="auth-container">
         <div className="auth-card">
-          <h2 className="auth-title">Begin your journey</h2>
+          <h1 className="auth-title">Create your account</h1>
           <p className="auth-sub">
             {signupType === 'company'
               ? 'Create your account with your company code for subsidized access.'
@@ -376,21 +337,18 @@ function Signup() {
                   {!validatingCode && companyValidation?.valid && (
                     <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#2DD4BF', fontSize: '12px', fontWeight: 500 }}> Valid</span>
                   )}
-                  {!validatingCode && companyValidation && !companyValidation.valid && !companyValidation.seats_full && (
-                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FFFFFF', fontSize: '12px' }}>⠝Œ Invalid</span>
-                  )}
-                  {!validatingCode && companyValidation?.seats_full && (
-                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#7DBDEE', fontSize: '10px' }}>⚠️ Full</span>
+                  {!validatingCode && companyValidation && !companyValidation.valid && !companyValidation.validation_error && (
+                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FFFFFF', fontSize: '12px' }}>Invalid</span>
                   )}
                 </div>
                 {companyValidation?.valid && (
-                  <span style={{ fontSize: '11px', color: '#2DD4BF' }}> {companyValidation.company_name} — {companyValidation.plan?.charAt(0).toUpperCase() + companyValidation.plan?.slice(1)} Plan</span>
+                  <span style={{ fontSize: '11px', color: '#2DD4BF' }}>
+                    {companyValidation.company_name} — {companyValidation.seats_remaining === null ? 'Unlimited seats' : `${companyValidation.seats_remaining} seats available`}
+                  </span>
                 )}
-                {companyValidation && !companyValidation.valid && !companyValidation.seats_full && (
+                {companyValidation?.validation_error && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Could not verify this code. Please try again.</span>}
+                {companyValidation && !companyValidation.valid && !companyValidation.validation_error && (
                   <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Invalid company code. Check with your employer.</span>
-                )}
-                {companyValidation?.seats_full && (
-                  <span style={{ fontSize: '11px', color: '#7DBDEE' }}>All seats are currently full. Contact your company admin.</span>
                 )}
                 {fieldErrors.company_code && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.company_code}</span>}
               </div>
@@ -434,7 +392,7 @@ function Signup() {
               <label htmlFor="password">PASSWORD *</label>
               <div style={{ position: 'relative' }}>
                 <input id="password" type={showPw ? 'text' : 'password'} autoComplete="new-password" required placeholder="Min 8 chars, 1 letter + 1 number" value={form.password} onChange={e => { setForm(p => ({ ...p, password: e.target.value })); setPasswordStrength(calculateStrength(e.target.value)); setFieldErrors(p => ({ ...p, password: '' })) }} style={{ paddingRight: 44, ...(fieldErrors.password ? { borderColor: '#FFFFFF' } : {}) }} />
-                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? '' : ''}</button>
+                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: 12, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? 'Hide' : 'Show'}</button>
               </div>
               {form.password.length > 0 && (
                 <div style={{ marginTop: '6px' }}>
@@ -453,7 +411,7 @@ function Signup() {
               <label htmlFor="confirmPassword">CONFIRM PASSWORD *</label>
               <div style={{ position: 'relative' }}>
                 <input id="confirmPassword" type={showConfirmPw ? 'text' : 'password'} autoComplete="new-password" required placeholder="Re-enter your password" value={form.confirmPassword} onChange={e => { setForm(p => ({ ...p, confirmPassword: e.target.value })); setFieldErrors(p => ({ ...p, confirmPassword: '' })) }} style={{ paddingRight: 44, ...(fieldErrors.confirmPassword ? { borderColor: '#FFFFFF' } : {}) }} />
-                <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} aria-label={showConfirmPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showConfirmPw ? '' : ''}</button>
+                <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} aria-label={showConfirmPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: 12, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showConfirmPw ? 'Hide' : 'Show'}</button>
               </div>
               {form.confirmPassword && form.password !== form.confirmPassword && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Passwords don't match</span>}
               {form.confirmPassword && form.password === form.confirmPassword && <span style={{ fontSize: '11px', color: '#2DD4BF' }}>Passwords match </span>}
@@ -467,8 +425,9 @@ function Signup() {
             </div>
 
             <div className="checkbox-group" style={{ marginBottom: '1rem' }}>
-              <input type="checkbox" id="consent" defaultChecked />
-              <label htmlFor="consent">I understand this app supports my wellbeing and is not a replacement for professional therapy. <span className="link" onClick={() => navigate('/privacy')}>Privacy Policy</span></label>
+              <input type="checkbox" id="consent" checked={consent} onChange={(event) => setConsent(event.target.checked)} required />
+              <label htmlFor="consent">I understand this app supports my wellbeing and is not a replacement for professional therapy. <Link to="/privacy">Privacy Policy</Link></label>
+              {fieldErrors.consent && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.consent}</span>}
             </div>
 
             <button className="btn-primary full" type="submit" disabled={!canSubmit}>
@@ -476,18 +435,18 @@ function Signup() {
             </button>
           </form>
 
-          <p className="auth-switch">Already have an account? <span onClick={() => navigate('/login')}>Sign in</span></p>
+          <p className="auth-switch">Already have an account? <Link to="/login">Sign in</Link></p>
 
           <p style={{ color: '#7DBDEE', fontSize: '11px', textAlign: 'center', marginTop: '0.75rem' }}>
              Your data is private and never sold. You can delete everything anytime.
           </p>
 
           <div style={{ marginTop: '1.25rem', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', borderRadius: 8, padding: '10px 14px', textAlign: 'center' }}>
-            <p style={{ fontSize: 12, color: '#2DD4BF' }}>🆘 In crisis? Call NACADA: <strong>1192</strong> (24/7 free)</p>
+            <p style={{ fontSize: 12, color: '#2DD4BF' }}>In crisis? Call {primaryHelpline.name}: <a href={`tel:${primaryHelpline.tel}`}>{primaryHelpline.phone}</a> ({primaryHelpline.hours})</p>
           </div>
         </div>
       </div>
-    </div>
+    </PublicLayout>
   )
 }
 

@@ -29,7 +29,7 @@ export function AuthProfileProvider({ children }) {
       if (active) setAuthState({ status: 'loading', user, profile: null, error: null })
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('role, is_super_admin, status')
+        .select('role, is_super_admin, status, onboarding_completed, onboarding_skipped')
         .eq('id', user.id)
         .single()
 

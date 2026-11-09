@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { PublicLayout } from './landing/Sections'
 
 function ForgotPassword() {
-  const navigate = useNavigate()
   const emailRef = useRef(null)
   const countdownRef = useRef(null)
   const [email, setEmail] = useState('')
@@ -72,7 +72,7 @@ function ForgotPassword() {
       })
       if (resendError) throw resendError
       setCountdown(60)
-    } catch (err) {
+    } catch {
       setError('Failed to resend. Please try again.')
     } finally {
       setResending(false)
@@ -95,15 +95,11 @@ function ForgotPassword() {
 
   if (sent) {
     return (
-      <div className="root">
-        <nav className="navbar">
-          <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
-          <button className="nav-ghost" onClick={() => navigate('/login')}>â"   Back to login</button>
-        </nav>
+      <PublicLayout>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
             <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-label="Email sent"></span>
-            <h2 className="auth-title">Check your inbox</h2>
+            <h1 className="auth-title">Check your inbox</h1>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>
               We've sent password reset instructions to <strong style={{ color: '#2DD4BF' }}>{email}</strong>
             </p>
@@ -126,20 +122,15 @@ function ForgotPassword() {
             </button>
           </div>
         </div>
-      </div>
+      </PublicLayout>
     )
   }
 
   return (
-    <div className="root">
-      <nav className="navbar">
-        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
-        <button className="nav-ghost" onClick={() => navigate('/login')}>â"   Log in</button>
-      </nav>
-
+    <PublicLayout>
       <div className="auth-container">
         <div className="auth-card">
-          <h2 className="auth-title">Forgot password?</h2>
+          <h1 className="auth-title">Forgot password?</h1>
           <p className="auth-sub">Enter your email and we'll send you a reset link.</p>
 
           {error && <div role="alert" aria-live="polite" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
@@ -166,11 +157,11 @@ function ForgotPassword() {
 
           <p className="auth-switch" style={{ marginTop: '1.25rem' }}>
             Remember your password?{' '}
-            <span onClick={() => navigate('/login')}>Log in</span>
+            <Link to="/login">Log in</Link>
           </p>
         </div>
       </div>
-    </div>
+    </PublicLayout>
   )
 }
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { PublicLayout } from './landing/Sections'
 
 function ResetPassword() {
   const navigate = useNavigate()
@@ -29,7 +30,7 @@ function ResetPassword() {
         } else {
           setTokenValid(true)
         }
-      } catch (err) {
+      } catch {
         setTokenError('This password reset link is invalid or has expired. Please request a new one.')
         setTokenValid(false)
       } finally {
@@ -106,52 +107,41 @@ function ResetPassword() {
   //  Invalid/expired token
   if (!tokenValid) {
     return (
-      <div className="root">
-        <nav className="navbar">
-          <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
-        </nav>
+      <PublicLayout>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
             <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}>⏰</span>
-            <h2 className="auth-title">Link expired</h2>
+            <h1 className="auth-title">Link expired</h1>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>{tokenError}</p>
-            <button className="btn-primary full" onClick={() => navigate('/forgot-password')}>Request a new link →</button>
+            <Link className="btn-primary full" to="/forgot-password">Request a new link</Link>
           </div>
         </div>
-      </div>
+      </PublicLayout>
     )
   }
 
   //  Success screen
   if (success) {
     return (
-      <div className="root">
-        <nav className="navbar">
-          <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
-        </nav>
+      <PublicLayout>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
             <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} role="img" aria-label="Success"></span>
-            <h2 className="auth-title">Password updated!</h2>
+            <h1 className="auth-title">Password updated!</h1>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>Your password has been changed. You'll be redirected to the login page.</p>
-            <button className="btn-primary full" onClick={() => { if (redirectTimer.current) clearTimeout(redirectTimer.current); navigate('/login') }}>Go to login now →</button>
+            <button className="btn-primary full" onClick={() => { if (redirectTimer.current) clearTimeout(redirectTimer.current); navigate('/login') }}>Go to login now</button>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginTop: '12px' }}>Redirecting automatically...</p>
           </div>
         </div>
-      </div>
+      </PublicLayout>
     )
   }
 
   return (
-    <div className="root">
-      <nav className="navbar">
-        <span className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate('/')}>LossLens</span>
-        <button className="nav-ghost" onClick={() => navigate('/login')}>â"   Log in</button>
-      </nav>
-
+    <PublicLayout>
       <div className="auth-container">
         <div className="auth-card">
-          <h2 className="auth-title">Reset your password</h2>
+          <h1 className="auth-title">Reset your password</h1>
           <p className="auth-sub">Choose a strong password you haven't used before.</p>
 
           {error && <div role="alert" aria-live="polite" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
@@ -177,7 +167,7 @@ function ResetPassword() {
                   aria-label={showPw ? 'Hide password' : 'Show password'}
                   style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  {showPw ? '' : ''}
+                  {showPw ? 'Hide' : 'Show'}
                 </button>
               </div>
               {password.length > 0 && (
@@ -209,7 +199,7 @@ function ResetPassword() {
                   aria-label={showConfirmPw ? 'Hide password' : 'Show password'}
                   style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  {showConfirmPw ? '' : ''}
+                  {showConfirmPw ? 'Hide' : 'Show'}
                 </button>
               </div>
               {confirmPassword && password !== confirmPassword && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Passwords do not match</span>}
@@ -234,11 +224,11 @@ function ResetPassword() {
 
           <p className="auth-switch" style={{ marginTop: '1.25rem' }}>
             Remember your password?{' '}
-            <span onClick={() => navigate('/login')}>Log in</span>
+            <Link to="/login">Log in</Link>
           </p>
         </div>
       </div>
-    </div>
+    </PublicLayout>
   )
 }
 
