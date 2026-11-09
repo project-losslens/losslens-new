@@ -8,7 +8,7 @@ No TypeScript.
 
 - `npm run dev` — Vite dev server (frontend only; does NOT serve `api/`)
 - `npm run build` — primary verification; must pass
-- `npm test` — `node --test` unit tests (SiteGate, loaderTiming, api/chat)
+- `npm test` — `node --test` unit tests (middleware gate, loaderTiming, api/chat)
 - `npm run lint` — eslint; ~200 pre-existing errors/17 warnings is the
   baseline, do not treat as regressions
 - `vercel dev` — serves `api/` routes locally
@@ -63,8 +63,8 @@ don't create it manually.
 
 - `src/lib/groq.js` logs the first 10 chars of the session JWT — do not
   extend it.
-- Site gate is temporary: `src/components/SiteGate.jsx` + wrapper in
-  `main.jsx` + robots meta + `VITE_SITE_GATE`. Removal steps in README.
+- Site gate is server-side in root `middleware.js` and `lib/gate.js`;
+  credentials use server-only `SITE_GATE_*` variables.
 - `upgrade_interest.interested_plan='protection'` is used by `/protection`.
 - Real contact details live ONLY in `src/config/site.js`; render via
   `ContactIcons` (icon-only links) — never as visible text.

@@ -20,21 +20,22 @@ on Supabase, deployed on Vercel, installable as a PWA.
 ```
 src/
   App.jsx               all routes
-  main.jsx              entry; registers SW once, wraps app in SiteGate
+  main.jsx              entry; registers the service worker and mounts the app
   api/ (repo root)      Vercel serverless routes — one file per route
-  components/           shared UI (Brand, AppIcon, ContactIcons, SiteGate…)
+  components/           shared UI (Brand, AppIcon, ContactIcons…)
   components/RouteGuards.jsx   RequireAuth + RequireElevated
   config/               site.js (contact + FACTS), helplines.js, nav.config.js
   context/              AuthProfile + CrisisAlertCount providers
   hooks/                index.js (useMediaQuery, useDocumentTitle)
   layouts/              AppShell
-  lib/                  supabase.js, storage.js, crisisDetection.js, …
+  lib/                  supabase.js, storage.js, crisisDetection.js, gate.js…
+middleware.js            Vercel Routing Middleware site gate
   pages/{public,user,admin,insurer,therapist}
   styles/               base.css (tokens+reset), globals.css, landing.css
 supabase/
   migrations/           exactly four .sql files — see docs/DATABASE.md
   functions/            edge functions (separate deploy units)
-docs/                   DATABASE.md, FEATURES.md, HISTORY.md, SITE_GATE.md
+docs/                   DATABASE.md, FEATURES.md, HISTORY.md
 public/                 manifest, icons, service-worker.js
 ```
 
@@ -89,7 +90,8 @@ Order matters:
    (idempotent; also safe to re-run). See `docs/DATABASE.md` for verify queries.
 2. Deploy edge functions: `supabase functions deploy send-invite delete-account`
    and set `ALLOWED_ORIGIN`.
-3. Set the Vercel env vars above, then deploy (push to `main` auto-deploys).
+3. Set the Vercel env vars above for **both Production and Preview**, then
+   redeploy. Pushes to `main` trigger a Production deployment.
 
 Production: https://losslens-new.vercel.app
 
@@ -102,13 +104,15 @@ the password once; a secure HttpOnly cookie is set for 7 days. Requests without 
 valid cookie receive the gate page, and `/api/*` returns a 401 JSON response.
 
 - **Set the password**: add `SITE_GATE_PASSWORD` and `SITE_GATE_SECRET` to the
-  Vercel environment, then generate a secret with:
-  `openssl rand -hex 32`
+  Vercel environment for **Production and Preview**, then redeploy. Generate
+  `SITE_GATE_SECRET` with `openssl rand -hex 32`. Never put either value in the
+  repository.
 - **Rotate the password**: update `SITE_GATE_PASSWORD` in Vercel, then rotate the
   old one because the previous hash may have been exposed in the public bundle.
-- **Remove the gate** (when the site goes public): set `SITE_GATE=off`, remove
-  the private access cookie handling, and drop the `X-Robots-Tag: noindex, nofollow`
-  heading from the middleware when the site is ready to be indexed.
+- **Remove the gate** (when the site goes public): set `SITE_GATE=off` in Vercel
+  and redeploy. The middleware stops gating requests and stops adding noindex
+  headers. Vercel Deployment Protection is an alternative for restricting
+  preview or production deployments without an application password form.
 
 
 ## Docs
