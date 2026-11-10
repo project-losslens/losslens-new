@@ -6,6 +6,7 @@ import { primaryHelpline } from '../../config/helplines'
 import { PublicLayout } from '../../layouts/PublicLayout'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
 import { useI18n } from '../../i18n'
+import { isDemoEnabled } from '../../lib/demoMode'
 
 // Shared Google Icon
 const GoogleIcon = () => (
@@ -205,6 +206,7 @@ function Login() {
 
           <p className="auth-switch">{t('login.noAccount')} <Link to="/signup">{t('login.signUp')}</Link></p>
           <p className="auth-switch">{t('login.insurer')} <Link to="/insurer/login">{t('login.insurerLogin')}</Link></p>
+          {isDemoEnabled() && <p className="auth-switch"><Link to="/demo">{t('login.demo')}</Link></p>}
 
           <div style={{ marginTop: '1.25rem', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', borderRadius: 8, padding: '10px 14px', textAlign: 'center' }}>
             <p style={{ fontSize: 12, color: '#2DD4BF' }}>{t('login.crisis', { name: primaryHelpline.name, phone: primaryHelpline.phone, hours: primaryHelpline.hours })}</p>

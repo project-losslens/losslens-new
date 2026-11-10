@@ -25,6 +25,7 @@ export default {
   'login.signUp': 'Sign up free',
   'login.insurer': 'Insurance partner?',
   'login.insurerLogin': 'Insurer sign in',
+  'login.demo': 'Try the demo',
   'login.crisis': 'In crisis? Call {name}: {phone} ({hours})',
   'login.errorCredentials': 'Invalid credentials. Please try again.',
   'login.errorCooldown': 'Too many attempts. Please try again later.',

@@ -62,6 +62,7 @@ const InsurerDashboard = lazy(() => import('./pages/insurer/InsurerDashboard'))
 const InsurerClaims = lazy(() => import('./pages/insurer/InsurerClaims'))
 const InsurerInvoices = lazy(() => import('./pages/insurer/InsurerInvoices'))
 const InsurerAnalytics = lazy(() => import('./pages/insurer/InsurerAnalytics'))
+const Demo = lazy(() => import('./pages/Demo'))
 
 function App() {
   return (
@@ -84,6 +85,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/partners" element={<Partners />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/demo" element={<Demo />} />
 
         <Route element={<RequireAuth />}>
           <Route path="/onboarding" element={<Onboarding />} />

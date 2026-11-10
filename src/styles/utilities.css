@@ -162,3 +162,38 @@ html[data-low-data='true'] canvas:not([data-low-data-keep]) {
 html[data-low-data='true'] .skeleton {
   animation: none !important;
 }
+
+/* Guided tour overlay */
+.tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal, 1000);
+  background: rgba(11, 18, 32, 0.72);
+}
+.tour-highlight {
+  position: fixed;
+  border: 2px solid #2DD4BF;
+  border-radius: 12px;
+  pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(11, 18, 32, 0.72);
+  transition: top 0.2s, left 0.2s, width 0.2s, height 0.2s;
+}
+.tour-card {
+  position: fixed;
+  left: 50%;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(92vw, 420px);
+  background: var(--surface-secondary, #141d33);
+  border: 1px solid var(--border, rgba(255,255,255,0.12));
+  border-radius: 14px;
+  padding: 1.25rem;
+  color: var(--text, #fff);
+}
+.tour-card h3 { margin: 0.25rem 0 0.5rem; }
+.tour-card p { color: var(--text-secondary, rgba(255,255,255,0.7)); margin: 0 0 1rem; }
+.tour-actions { display: flex; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap; }
+
+/* Demo page */
+.demo-check { display: flex; align-items: center; gap: 0.5rem; min-height: 44px; }
+.demo-timer { font-size: 1.5rem; font-weight: 600; color: #2DD4BF; font-variant-numeric: tabular-nums; }
