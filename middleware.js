@@ -1,4 +1,3 @@
-import process from 'node:process'
 import { next } from '@vercel/functions'
 import { primaryHelpline } from './src/config/helplines.js'
 import {
@@ -78,19 +77,6 @@ function unauthorizedJson() {
   })
 }
 
-function misconfiguredResponse(env) {
-  const missing = ['SITE_GATE_PASSWORD', 'SITE_GATE_SECRET']
-    .filter((name) => !env[name])
-  return new Response(`Gate misconfigured. Missing required environment variable${missing.length > 1 ? 's' : ''}: ${missing.join(', ')}.`, {
-    status: 503,
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'no-store',
-      'X-Robots-Tag': 'noindex, nofollow',
-    },
-  })
-}
-
 function isAllowlisted(pathname) {
   return ALLOWLIST.some((entry) => {
     if (entry === '/losslens-icon-*.png') {
@@ -112,14 +98,8 @@ function passThrough() {
 export default async function middleware(request) {
   const url = new URL(request.url)
   const pathname = url.pathname
-  const env = {
-    SITE_GATE: process.env.SITE_GATE ?? 'on',
-    SITE_GATE_PASSWORD: process.env.SITE_GATE_PASSWORD,
-    SITE_GATE_SECRET: process.env.SITE_GATE_SECRET,
-  }
 
-  if (!isGateEnabled(env)) return next()
-  if (!env.SITE_GATE_PASSWORD || !env.SITE_GATE_SECRET) return misconfiguredResponse(env)
+  if (!isGateEnabled()) return next()
 
   if (pathname === '/__gate' && request.method === 'GET') {
     return gatePageResponse('/', '')
@@ -133,9 +113,9 @@ export default async function middleware(request) {
       ? requestedNext
       : '/'
 
-    if (matchesGatePassword(password, env.SITE_GATE_PASSWORD)) {
+    if (matchesGatePassword(password)) {
       const expiry = Date.now() + GATE_COOKIE_TTL_MS
-      const cookie = buildGateCookieValue(expiry, env.SITE_GATE_SECRET)
+      const cookie = buildGateCookieValue(expiry)
       return new Response(null, {
         status: 303,
         headers: {
@@ -165,10 +145,7 @@ export default async function middleware(request) {
 
   if (isAllowlisted(pathname)) return passThrough()
 
-  const validCookie = verifyGateCookieValue(
-    getGateCookieFromRequest(request),
-    env.SITE_GATE_SECRET,
-  ).ok
+  const validCookie = verifyGateCookieValue(getGateCookieFromRequest(request)).ok
   if (validCookie) return passThrough()
   if (pathname.startsWith('/api/')) return unauthorizedJson()
 

@@ -65,7 +65,8 @@ don't create it manually.
 - `src/lib/groq.js` logs the first 10 chars of the session JWT — do not
   extend it.
 - Site gate is server-side in root `middleware.js` and `lib/gate.js`;
-  credentials use server-only `SITE_GATE_*` variables.
+  temporary config is hardcoded as `GATE_ENABLED` / `GATE_PASSWORD` /
+  `GATE_SECRET` constants in `lib/gate.js` — no env vars.
 - `upgrade_interest.interested_plan='protection'` is used by `/protection`.
 - Real contact details live ONLY in `src/config/site.js`; render via
   `ContactIcons` (icon-only links) — never as visible text.

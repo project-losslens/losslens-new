@@ -53,9 +53,6 @@ Server (Vercel / `vercel dev`):
 
 | Name | Purpose |
 | --- | --- |
-| `SITE_GATE` | `on` (default) enables the server-side private-site gate; `off` disables it |
-| `SITE_GATE_PASSWORD` | Private access password used for the gate |
-| `SITE_GATE_SECRET` | Secret used to sign the gate cookie |
 | `GROQ_API_KEY` | Groq API key for Oloo — server-side only |
 | `SUPABASE_SERVICE_ROLE_KEY` | Required by `api/chat.js` / `api/crisis.js` — fails closed if missing |
 | `VITE_SUPABASE_URL` + `SUPABASE_ANON_KEY` or `VITE_SUPABASE_ANON_KEY` | Server-side Supabase access |
@@ -94,32 +91,30 @@ Order matters:
    redeploy. Pushes to `main` trigger a Production deployment.
 4. In Supabase Auth URL Configuration, allow the deployed app origins and the
    `/auth/callback` and `/reset-password` redirect paths for Production and
-   Preview. Set `SITE_GATE_PASSWORD` and `SITE_GATE_SECRET` independently for
-   both Vercel environments, then redeploy each environment.
+   Preview.
 5. Before making the site public, verify the helplines in
    `src/config/helplines.js`, complete legal review for the Privacy and Terms
-   drafts, and rotate any previously exposed gate credential.
+   drafts.
 
 Production: https://losslens-new.vercel.app
 
 ## Temporary site gate
 
 While the site is private, the app is protected by a server-side gate in
-`middleware.js` and `lib/gate.js`. When `SITE_GATE=on`, every request is checked
-before the app loads, including `/api/*` and static assets. Visitors must enter
-the password once; a secure HttpOnly cookie is set for 7 days. Requests without a
-valid cookie receive the gate page, and `/api/*` returns a 401 JSON response.
+`middleware.js` and `lib/gate.js`. Every request is checked before the app
+loads, including `/api/*` and static assets. Visitors must enter the password
+once; a secure HttpOnly cookie is set for 7 days. Requests without a valid
+cookie receive the gate page, and `/api/*` returns a 401 JSON response.
 
-- **Set the password**: add `SITE_GATE_PASSWORD` and `SITE_GATE_SECRET` to the
-  Vercel environment for **Production and Preview**, then redeploy. Generate
-  `SITE_GATE_SECRET` with `openssl rand -hex 32`. Never put either value in the
-  repository.
-- **Rotate the password**: update `SITE_GATE_PASSWORD` in Vercel, then rotate the
-  old one because the previous hash may have been exposed in the public bundle.
-- **Remove the gate** (when the site goes public): set `SITE_GATE=off` in Vercel
-  and redeploy. The middleware stops gating requests and stops adding noindex
-  headers. Vercel Deployment Protection is an alternative for restricting
-  preview or production deployments without an application password form.
+The gate needs no environment variables — its configuration is hardcoded in
+`lib/gate.js` as three constants:
+
+- `GATE_ENABLED` — set to `false` and redeploy to open the site.
+- `GATE_PASSWORD` — the access password (compared trimmed and
+  case-insensitive, in constant time).
+- `GATE_SECRET` — random string used only to sign the gate cookie.
+
+`/__gate/lock` logs the visitor out by expiring the cookie.
 
 
 ## Docs
