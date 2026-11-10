@@ -171,7 +171,7 @@ export default function SubscriptionPage() {
   if (pageError) {
     return (
       <div className="page-root" style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-        <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', marginBottom: '12px' }}>Could not load your subscription.</p>
+        <p className="fs-14" style={{ color: 'rgba(255,255,255,0.55)', marginBottom: '12px' }}>Could not load your subscription.</p>
         <button type="button" className="btn-primary" onClick={() => { setPageLoading(true); fetchProfile() }}>Try again</button>
       </div>
     )
@@ -191,7 +191,7 @@ export default function SubscriptionPage() {
                 ? 'Upgrade to Premium'
                 : 'Your Premium Benefits'}
           </h2>
-          <p style={{ color: '#2DD4BF', fontSize: '14px', fontWeight: 300 }}>
+          <p className="fs-14" style={{ color: '#2DD4BF', fontWeight: 300 }}>
             {isCompanyPlan
               ? `You're covered by ${companyInfo?.company_name || 'your employer'}. All Premium features are included.`
               : currentPlan === PLANS.FREE
@@ -211,11 +211,11 @@ export default function SubscriptionPage() {
             textAlign: 'center'
           }}>
             <AppIcon name="building" size={32} style={{ display: 'block', margin: '0 auto 8px', color: '#2DD4BF' }} />
-            <h3 style={{ color: '#2DD4BF', fontSize: '16px', margin: '0 0 4px' }}>{companyInfo.company_name}</h3>
-            <p style={{ color: '#2DD4BF', fontSize: '12px', margin: 0 }}>
+            <h3 className="fs-16" style={{ color: '#2DD4BF', margin: '0 0 4px' }}>{companyInfo.company_name}</h3>
+            <p className="fs-12" style={{ color: '#2DD4BF', margin: 0 }}>
               {companyInfo.plan?.charAt(0).toUpperCase() + companyInfo.plan?.slice(1)} Plan  · Subsidized Access
             </p>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '8px' }}>
+            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', marginTop: '8px' }}>
                Your employer covers most of the cost. You get all Premium features while your personal data stays private.
             </p>
           </div>
@@ -230,11 +230,11 @@ export default function SubscriptionPage() {
               opacity: currentPlan === PLANS.PREMIUM ? 0.6 : 1,
             }}>
               <AppIcon name="coin" size={28} style={{ display: 'block', margin: '0 auto 8px', color: '#7DBDEE' }} />
-              <h3 style={{ color: '#FFFFFF', fontSize: '15px', marginBottom: '4px' }}>Free</h3>
+              <h3 className="fs-15" style={{ color: '#FFFFFF', marginBottom: '4px' }}>Free</h3>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: '#2DD4BF', margin: '0 0 4px' }}>KES 0</p>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Forever</p>
+              <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>Forever</p>
               {currentPlan === PLANS.FREE && (
-                <span style={{ display: 'inline-block', marginTop: '8px', background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '3px 10px', borderRadius: '100px', fontSize: '10px', border: '1px solid #2DD4BF' }}>Current Plan</span>
+                <span className="fs-12" style={{ display: 'inline-block', marginTop: '8px', background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '3px 10px', borderRadius: '100px', border: '1px solid #2DD4BF' }}>Current Plan</span>
               )}
             </div>
 
@@ -244,13 +244,13 @@ export default function SubscriptionPage() {
               borderRadius: '14px', padding: '1.5rem', textAlign: 'center',
               position: 'relative',
             }}>
-              <span style={{ position: 'absolute', top: '-10px', right: '16px', background: '#2DD4BF', color: '#0B1220', fontSize: '10px', fontWeight: 600, padding: '3px 10px', borderRadius: '100px' }}>Premium</span>
+              <span className="fs-12" style={{ position: 'absolute', top: '-10px', right: '16px', background: '#2DD4BF', color: '#0B1220', fontWeight: 600, padding: '3px 10px', borderRadius: '100px' }}>Premium</span>
               <AppIcon name="star" size={28} style={{ display: 'block', margin: '0 auto 8px', color: '#F2C879' }} />
-              <h3 style={{ color: '#FFFFFF', fontSize: '15px', marginBottom: '4px' }}>Premium</h3>
+              <h3 className="fs-15" style={{ color: '#FFFFFF', marginBottom: '4px' }}>Premium</h3>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: '#2DD4BF', margin: '0 0 4px' }}>KES 499</p>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>/month</p>
+              <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>/month</p>
               {currentPlan === PLANS.PREMIUM && (
-                <span style={{ display: 'inline-block', marginTop: '8px', background: '#2DD4BF', color: '#0B1220', padding: '3px 10px', borderRadius: '100px', fontSize: '10px', fontWeight: 600 }}>Current Plan</span>
+                <span className="fs-12" style={{ display: 'inline-block', marginTop: '8px', background: '#2DD4BF', color: '#0B1220', padding: '3px 10px', borderRadius: '100px', fontWeight: 600 }}>Current Plan</span>
               )}
             </div>
           </div>
@@ -258,7 +258,7 @@ export default function SubscriptionPage() {
 
         {/* Premium Features */}
         <div className="dash-section" style={{ marginBottom: '1.5rem', borderColor: '#2DD4BF' }}>
-          <h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '1rem' }}>
+          <h3 className="fs-14" style={{ color: '#2DD4BF', marginBottom: '1rem' }}>
             {isCompanyPlan ? ' Your Company Plan Includes:' : ' Premium Includes Everything in Free, Plus:'}
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -276,8 +276,8 @@ export default function SubscriptionPage() {
                 { emoji: '', text: 'Your data stays private from employer' },
               ] : []),
             ].map((f, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#7DBDEE', fontSize: '13px' }}>
-                <span style={{ fontSize: '16px' }}>{f.emoji}</span>
+              <div key={i} className="fs-13" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#7DBDEE' }}>
+                <span className="fs-16">{f.emoji}</span>
                 <span>{f.text}</span>
               </div>
             ))}
@@ -288,14 +288,14 @@ export default function SubscriptionPage() {
         {!isCompanyPlan && (
           <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '1.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>
             <AppIcon name="building" size={24} style={{ display: 'block', margin: '0 auto 8px', color: '#7DBDEE' }} />
-            <h4 style={{ color: '#FFFFFF', fontSize: '14px', margin: '0 0 6px' }}>Have a company code?</h4>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 12px' }}>
+            <h4 className="fs-14" style={{ color: '#FFFFFF', margin: '0 0 6px' }}>Have a company code?</h4>
+            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '0 0 12px' }}>
               If your employer offers LossLens, enter your code for subsidized Premium access.
             </p>
             {!showJoinCompany ? (
-              <button onClick={() => setShowJoinCompany(true)} style={{
+              <button onClick={() => setShowJoinCompany(true)} className="fs-13" style={{
                 padding: '10px 20px', borderRadius: '100px', background: 'transparent',
-                border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '13px',
+                border: '1px solid #2DD4BF', color: '#2DD4BF',
                 cursor: 'pointer', fontFamily: 'var(--font-body)'
               }}>
                 Enter Company Code
@@ -308,28 +308,28 @@ export default function SubscriptionPage() {
                     placeholder="e.g. AARXYZ"
                     value={companyCode}
                     onChange={e => { setCompanyCode(e.target.value.toUpperCase()); setJoinError('') }}
-                    style={{
+                    className="fs-13" style={{
                       flex: 1, padding: '10px 14px', borderRadius: '8px',
                       background: '#0B1220', border: `1px solid ${joinError ? '#FFFFFF' : 'rgba(255,255,255,0.12)'}`,
-                      color: '#FFFFFF', fontSize: '13px', fontFamily: 'var(--font-body)', outline: 'none'
+                      color: '#FFFFFF', fontFamily: 'var(--font-body)', outline: 'none'
                     }}
                     onKeyDown={e => e.key === 'Enter' && handleJoinCompany()}
                   />
                   <button
                     onClick={handleJoinCompany}
                     disabled={joinLoading}
-                    style={{
+                    className="fs-13" style={{
                       padding: '10px 18px', borderRadius: '8px', background: '#2DD4BF',
-                      border: 'none', color: '#0B1220', fontSize: '13px', fontWeight: 600,
+                      border: 'none', color: '#0B1220', fontWeight: 600,
                       cursor: 'pointer', fontFamily: 'var(--font-body)'
                     }}
                   >
                     {joinLoading ? '...' : 'Join'}
                   </button>
                 </div>
-                {joinError && <p style={{ color: '#FFFFFF', fontSize: '11px', margin: 0 }}>{joinError}</p>}
+                {joinError && <p className="fs-12" style={{ color: '#FFFFFF', margin: 0 }}>{joinError}</p>}
                 <button onClick={() => { setShowJoinCompany(false); setJoinError(''); setCompanyCode('') }}
-                  style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '11px', cursor: 'pointer', marginTop: '4px' }}>
+                  className="fs-12" style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', marginTop: '4px' }}>
                   Cancel
                 </button>
               </div>
@@ -340,10 +340,10 @@ export default function SubscriptionPage() {
         {/* Action Button — only for free individual users */}
         {!isCompanyPlan && currentPlan === PLANS.FREE && !interestRegistered && (
           <button
-            className="btn-primary full"
+            className="btn-primary full fs-15"
             onClick={() => handleUpgrade(PLANS.PREMIUM)}
             disabled={loading === PLANS.PREMIUM}
-            style={{ padding: '14px', fontSize: '15px', marginBottom: '1rem' }}
+            style={{ padding: '14px', marginBottom: '1rem' }}
           >
             {loading === PLANS.PREMIUM ? <span className="spinner"></span> : ' Upgrade to Premium'}
           </button>
@@ -352,14 +352,14 @@ export default function SubscriptionPage() {
         {interestRegistered && (
           <div style={{ textAlign: 'center', padding: '1rem', background: 'rgba(255,255,255,0.12)', borderRadius: '12px', border: '1px solid #2DD4BF', marginBottom: '1rem' }}>
             <AppIcon name="check" size={24} style={{ display: 'block', margin: '0 auto 8px', color: '#2DD4BF' }} />
-            <p style={{ color: '#2DD4BF', fontSize: '14px', fontWeight: 500, margin: 0 }}>Thanks for your interest!</p>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginTop: '4px' }}>We'll notify you when Premium launches.</p>
+            <p className="fs-14" style={{ color: '#2DD4BF', fontWeight: 500, margin: 0 }}>Thanks for your interest!</p>
+            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>We'll notify you when Premium launches.</p>
           </div>
         )}
 
         {/* FAQ */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1.5rem' }}>
-          <h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '4px' }}> FAQ</h3>
+          <h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '4px' }}> FAQ</h3>
           {[
             { q: 'Can I switch back to Free?', a: 'Yes, anytime. You keep Premium access until the end of your billing period.' },
             { q: 'How do I pay?', a: 'Premium will use M-Pesa — Kenya\'s most trusted mobile payment. No credit card needed.' },
@@ -368,13 +368,13 @@ export default function SubscriptionPage() {
             { q: 'What if my company stops offering LossLens?', a: 'Your account stays active. You can switch to an individual Free or Premium plan anytime.' },
           ].map((faq, i) => (
             <div key={i} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '12px 14px' }}>
-              <p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: '0 0 4px' }}>{faq.q}</p>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>{faq.a}</p>
+              <p className="fs-12" style={{ color: '#FFFFFF', fontWeight: 500, margin: '0 0 4px' }}>{faq.q}</p>
+              <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: '1.5' }}>{faq.a}</p>
             </div>
           ))}
         </div>
 
-        <p style={{ color: '#7DBDEE', fontSize: '11px', textAlign: 'center' }}>
+        <p className="fs-12" style={{ color: '#7DBDEE', textAlign: 'center' }}>
            LossLens Premium launches soon. All features are free during testing.
         </p>
       </div>
@@ -385,14 +385,14 @@ export default function SubscriptionPage() {
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={handleCloseComingSoon} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '2px solid #2DD4BF', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
             <AppIcon name="clock" size={48} style={{ display: 'block', margin: '0 auto 12px', color: '#2DD4BF' }} />
-            <h3 style={{ color: '#2DD4BF', fontSize: '18px', fontFamily: 'var(--font-display)', marginBottom: '12px' }}>Premium Coming Soon!</h3>
-            <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
+            <h3 className="fs-18" style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', marginBottom: '12px' }}>Premium Coming Soon!</h3>
+            <p className="fs-13" style={{ color: '#2DD4BF', marginBottom: '20px', lineHeight: '1.6' }}>
               M-Pesa payments are being set up. During testing, <strong style={{ color: '#2DD4BF' }}>all features are free</strong>.
             </p>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '16px' }}>
+            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '16px' }}>
               We've noted your interest — you'll be the first to know when Premium launches!
             </p>
-            <button onClick={handleCloseComingSoon} className="btn-primary full" style={{ padding: '12px', fontSize: '14px' }}>
+            <button onClick={handleCloseComingSoon} className="btn-primary full fs-14" style={{ padding: '12px' }}>
               Got it — keep exploring!
             </button>
           </div>

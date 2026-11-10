@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { AuthProfileProvider } from './context/AuthProfileContext'
 import './styles/base.css'
 import './styles/globals.css'
+import './styles/utilities.css'
 import App from './App.jsx'
 
 import { registerSW } from './lib/pwa'

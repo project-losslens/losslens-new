@@ -228,7 +228,7 @@ export default function UrgeToolkitPage() {
     <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
-          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Urge Toolkit</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>Every urge is beatable</p></div>
+          <div><h1 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Urge Toolkit</h1><p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>Every urge is beatable</p></div>
         </div>
         <div style={{ padding: '1.5rem' }}>
           <div className="tools-grid" style={{ marginBottom: '1rem' }}>
@@ -255,7 +255,7 @@ export default function UrgeToolkitPage() {
                   else { setActiveTool(t.id); if (t.id === 'timer') { setTimerComplete(false); setTimer(TIMER_DURATION); setTimerRunning(false) }; if (t.id === 'breathing') { setBreathPhase('inhale'); setBreathRounds(0); setBreathingActive(true) }; if (t.id === 'thought') setThoughtStep(0); if (t.id === 'distraction') { setRandomChallenge(null); setChallengeAccepted(false); setChallengeDone(false); setSpinning(false) } }
                 }}}
               >
-                <span className="tool-icon" style={{ fontSize: '28px' }} aria-hidden="true">{t.icon}</span>
+                <span className="tool-icon fs-28" aria-hidden="true">{t.icon}</span>
                 <h3 className="tool-title">{t.title}</h3>
                 <p className="tool-desc">{t.desc}</p>
               </div>
@@ -265,8 +265,8 @@ export default function UrgeToolkitPage() {
           {/* ─── TIMER ─── */}
           {activeTool === 'timer' && (
             <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out' }}>
-              <h3 style={{ color: '#FFFFFF', fontSize: '16px', marginBottom: '0.5rem' }}>Urge Timer</h3>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginBottom: '1.5rem' }}>Urges feel permanent but they ALWAYS pass</p>
+              <h3 className="fs-16" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Urge Timer</h3>
+              <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem' }}>Urges feel permanent but they ALWAYS pass</p>
               <div style={{ position: 'relative', width: '200px', height: '200px', margin: '0 auto' }} role="timer" aria-label={`Countdown timer: ${formatTime(timer)} remaining`}>
                 <svg width="200" height="200" viewBox="0 0 200 200" style={{ transform: 'rotate(-90deg)' }}>
                   <defs>
@@ -281,7 +281,7 @@ export default function UrgeToolkitPage() {
                 </svg>
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', textAlign: 'center' }}>
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: timerComplete ? '1rem' : '2.5rem', color: timerComplete ? '#2DD4BF' : '#2DD4BF', fontWeight: 700 }}>{timerComplete ? ' Done!' : formatTime(timer)}</div>
-                  {!timerComplete && <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>{timerRunning ? 'Hang in there...' : 'Press start'}</div>}
+                  {!timerComplete && <div className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>{timerRunning ? 'Hang in there...' : 'Press start'}</div>}
                 </div>
               </div>
               <div className="toggle-group" style={{ marginTop: '1.5rem', justifyContent: 'center' }}>
@@ -292,7 +292,7 @@ export default function UrgeToolkitPage() {
                   </>
                 ) : (
                   <div style={{ width: '100%' }}>
-                    <p style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '1rem' }}> You proved it — urges DO pass!</p>
+                    <p className="fs-14" style={{ color: '#2DD4BF', marginBottom: '1rem' }}> You proved it — urges DO pass!</p>
                     <button className="btn-primary" onClick={() => { setTimer(TIMER_DURATION); setTimerRunning(false); setTimerComplete(false) }} style={{ width: '100%' }}>Start a new timer</button>
                   </div>
                 )}
@@ -303,12 +303,12 @@ export default function UrgeToolkitPage() {
           {/* ─── BREATHING ─── */}
           {activeTool === 'breathing' && (
             <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out' }}>
-              <h3 style={{ color: '#FFFFFF', fontSize: '16px', marginBottom: '0.5rem' }}>4-7-8 Breathing</h3>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginBottom: '1.5rem' }}>Inhale 4s  · Hold 7s  · Exhale 8s</p>
+              <h3 className="fs-16" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>4-7-8 Breathing</h3>
+              <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem' }}>Inhale 4s  · Hold 7s  · Exhale 8s</p>
               <BreathingHuman phase={breathPhase} size={180} />
               <div style={{ marginTop: '1rem' }}>
-                <p style={{ color: '#2DD4BF', fontSize: '14px', fontWeight: 500 }} aria-live="polite">Round {breathRounds + 1}</p>
-                {breathRounds >= 3 && <p style={{ color: '#2DD4BF', fontSize: '14px', marginTop: '0.5rem' }}> {breathRounds} rounds complete! How does your body feel?</p>}
+                <p className="fs-14" style={{ color: '#2DD4BF', fontWeight: 500 }} aria-live="polite">Round {breathRounds + 1}</p>
+                {breathRounds >= 3 && <p className="fs-14" style={{ color: '#2DD4BF', marginTop: '0.5rem' }}> {breathRounds} rounds complete! How does your body feel?</p>}
               </div>
               <button className="toggle-btn active-primary" onClick={() => setBreathingActive(!breathingActive)} style={{ marginTop: '1rem', minWidth: '120px' }}>
                 {breathingActive ? 'Pause ⏸' : 'Start ▶'}
@@ -319,8 +319,8 @@ export default function UrgeToolkitPage() {
           {/* ─── THOUGHT CHALLENGER ─── */}
           {activeTool === 'thought' && (
             <div className="dash-section" style={{ animation: 'fadeIn 0.3s ease-out' }}>
-              <h3 style={{ color: '#FFFFFF', fontSize: '16px', marginBottom: '0.5rem' }}>Thought Record</h3>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginBottom: '1rem' }}>From CBT Module 2 — Challenge the thought, break the urge</p>
+              <h3 className="fs-16" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Thought Record</h3>
+              <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1rem' }}>From CBT Module 2 — Challenge the thought, break the urge</p>
               <div style={{ display: 'flex', gap: '4px', marginBottom: '1.5rem' }}>
                 {['Situation', 'Thought', 'Evidence', 'Balance'].map((step, i) => (
                   <div key={i} style={{ flex: 1, height: '6px', borderRadius: '3px', background: thoughtStep >= i ? '#2DD4BF' : 'rgba(255,255,255,0.12)', transition: 'background 0.3s' }} />
@@ -352,10 +352,10 @@ export default function UrgeToolkitPage() {
                   <div className="form-group" style={{marginTop:'12px'}}><label>How do you feel now?</label><div className="chip-group">{['Calmer','In control','Still struggling','Relieved','Empowered','Hopeful'].map(e => <button key={e} className={`chip ${thoughtRecord.newEmotion===e?'chip-active':''}`} onClick={()=>setThoughtRecord({...thoughtRecord,newEmotion:e})}>{e}</button>)}</div></div>
                   {thoughtRecord.balancedThought && (
                     <div style={{marginTop:'1rem',padding:'16px',background:'rgba(255,255,255,0.12)',borderRadius:'12px',border:'1px solid #7DBDEE'}}>
-                      <p style={{fontSize:'11px',color:'#2DD4BF',marginBottom:'8px',textTransform:'uppercase'}}> Your Coping Card</p>
-                      <p style={{fontSize:'12px',color:'rgba(255,255,255,0.4)'}}><strong>Old:</strong> "{thoughtRecord.automaticThought}"</p>
-                      <p style={{fontSize:'12px',color:'#2DD4BF'}}><strong>New:</strong> "{thoughtRecord.balancedThought}"</p>
-                      <p style={{fontSize:'12px',color:'rgba(255,255,255,0.4)',marginTop:'4px'}}><strong>Feeling:</strong> {thoughtRecord.emotion || '...'} → {thoughtRecord.newEmotion || '...'}</p>
+                      <p className="fs-12" style={{color:'#2DD4BF',marginBottom:'8px',textTransform:'uppercase'}}> Your Coping Card</p>
+                      <p className="fs-12" style={{color:'rgba(255,255,255,0.4)'}}><strong>Old:</strong> "{thoughtRecord.automaticThought}"</p>
+                      <p className="fs-12" style={{color:'#2DD4BF'}}><strong>New:</strong> "{thoughtRecord.balancedThought}"</p>
+                      <p className="fs-12" style={{color:'rgba(255,255,255,0.4)',marginTop:'4px'}}><strong>Feeling:</strong> {thoughtRecord.emotion || '...'} → {thoughtRecord.newEmotion || '...'}</p>
                       <button className="btn-primary" style={{width:'100%',marginTop:'12px'}} onClick={()=>{
                         const newCard = { id: Date.now(), date: new Date().toISOString(), ...thoughtRecord }
                         const updated = [newCard, ...copingCards].slice(0, 20)
@@ -372,13 +372,13 @@ export default function UrgeToolkitPage() {
               )}
               {copingCards.length > 0 && (
                 <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: '1rem' }}>
-                  <h4 style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '8px' }}> Your Coping Cards ({copingCards.length})</h4>
+                  <h4 className="fs-13" style={{ color: '#FFFFFF', marginBottom: '8px' }}> Your Coping Cards ({copingCards.length})</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {copingCards.slice(0, 5).map(card => (
-                      <div key={card.id} style={{ background: '#0B1220', borderRadius: '8px', padding: '10px', border: '1px solid rgba(255,255,255,0.12)', fontSize: '12px' }}>
+                      <div key={card.id} className="fs-12" style={{ background: '#0B1220', borderRadius: '8px', padding: '10px', border: '1px solid rgba(255,255,255,0.12)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                           <span style={{ color: '#2DD4BF', fontWeight: 500 }}>{new Date(card.date).toLocaleDateString('en-KE')}</span>
-                          <button onClick={() => { const updated = copingCards.filter(c => c.id !== card.id); setCopingCards(updated); try { localStorage.setItem('losslens_coping_cards', JSON.stringify(updated)) } catch {} }} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Delete coping card"></button>
+                          <button onClick={() => { const updated = copingCards.filter(c => c.id !== card.id); setCopingCards(updated); try { localStorage.setItem('losslens_coping_cards', JSON.stringify(updated)) } catch {} }} className="fs-12" style={{ background: 'transparent', border: 'none', color: '#FFFFFF', cursor: 'pointer', padding: '4px 8px' }} aria-label="Delete coping card"></button>
                         </div>
                         <p style={{ color: '#FFFFFF', margin: '0 0 2px', textDecoration: 'line-through' }}>"{card.automaticThought}"</p>
                         <p style={{ color: '#2DD4BF', margin: 0 }}>→ "{card.balancedThought}"</p>
@@ -393,22 +393,22 @@ export default function UrgeToolkitPage() {
           {/* ─── SPINNING WHEEL ─── */}
           {activeTool === 'distraction' && (
             <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out' }}>
-              <h3 style={{ color: '#FFFFFF', fontSize: '16px', marginBottom: '0.5rem' }}>Spin the Wheel </h3>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginBottom: '1.5rem' }}>Let fate decide your distraction</p>
+              <h3 className="fs-16" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Spin the Wheel </h3>
+              <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem' }}>Let fate decide your distraction</p>
               <div style={{ position: 'relative', width: '180px', height: '180px', margin: '0 auto 1.5rem' }}>
                 <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'conic-gradient(#2DD4BF 0deg 60deg, #2DD4BF 60deg 120deg, #7DBDEE 120deg 180deg, #2DD4BF 180deg 240deg, #FFFFFF 240deg 300deg, #7DBDEE 300deg 360deg)', animation: spinning ? 'wheelSpin 1s ease-out' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(45,212,191,0.3)' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '20px' }}>{spinning ? '' : ''}</span></div>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="fs-20">{spinning ? '' : ''}</span></div>
                 </div>
-                <div style={{ position: 'absolute', top: '-8px', left: '50%', transform: 'translateX(-50%)', fontSize: '20px' }}>▼</div>
+                <div className="fs-20" style={{ position: 'absolute', top: '-8px', left: '50%', transform: 'translateX(-50%)' }}>▼</div>
               </div>
               {!randomChallenge ? (
-                <button className="btn-primary" style={{ padding: '16px 32px', fontSize: '16px' }} onClick={spinWheel} disabled={spinning}>{spinning ? ' Spinning...' : ' Spin the wheel'}</button>
+                <button className="btn-primary fs-16" style={{ padding: '16px 32px' }} onClick={spinWheel} disabled={spinning}>{spinning ? ' Spinning...' : ' Spin the wheel'}</button>
               ) : (
                 <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
                   <div style={{ background: '#0B1220', border: `2px solid ${challengeDone ? '#2DD4BF' : '#2DD4BF'}`, borderRadius: '16px', padding: '24px', marginBottom: '1rem', transition: 'border-color 0.3s' }}>
-                    <div style={{ fontSize: '48px', marginBottom: '12px' }}>{randomChallenge.emoji}</div>
-                    <p style={{ color: '#FFFFFF', fontSize: '16px', fontWeight: 500, marginBottom: '8px' }}>{randomChallenge.text}</p>
-                    <span style={{ fontSize: '11px', background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '4px 12px', borderRadius: '100px' }}>{randomChallenge.category}</span>
+                    <div className="fs-48" style={{ marginBottom: '12px' }}>{randomChallenge.emoji}</div>
+                    <p className="fs-16" style={{ color: '#FFFFFF', fontWeight: 500, marginBottom: '8px' }}>{randomChallenge.text}</p>
+                    <span className="fs-12" style={{ background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '4px 12px', borderRadius: '100px' }}>{randomChallenge.category}</span>
                   </div>
                   {!challengeAccepted ? (
                     <div style={{ display: 'flex', gap: '8px' }}>
@@ -418,7 +418,7 @@ export default function UrgeToolkitPage() {
                   ) : !challengeDone ? (
                     <button className="btn-primary" style={{ width: '100%', background: '#2DD4BF', color: '#0B1220' }} onClick={() => { setChallengeDone(true); triggerConfetti(); showToast(' Challenge complete!', 3000) }}> I did it!</button>
                   ) : (
-                    <div><p style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '1rem' }}> Notice how the urge faded while you were busy?</p><button className="btn-primary" style={{ width: '100%' }} onClick={() => { setRandomChallenge(null); setChallengeAccepted(false); setChallengeDone(false) }}> Spin again</button></div>
+                    <div><p className="fs-14" style={{ color: '#2DD4BF', marginBottom: '1rem' }}> Notice how the urge faded while you were busy?</p><button className="btn-primary" style={{ width: '100%' }} onClick={() => { setRandomChallenge(null); setChallengeAccepted(false); setChallengeDone(false) }}> Spin again</button></div>
                   )}
                 </div>
               )}
@@ -428,7 +428,7 @@ export default function UrgeToolkitPage() {
           {/* ─── HELPLINE ─── */}
           {activeTool === 'helpline' && (
             <div className="dash-section" style={{ animation: 'fadeIn 0.3s ease-out' }}>
-              <h3 style={{ color: '#FFFFFF', fontSize: '16px', marginBottom: '1rem' }}>Emergency & Support </h3>
+              <h3 className="fs-16" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>Emergency & Support </h3>
               {HELPLINES.map((h, i) => (
                 <div key={i} className="helpline-card" style={{ marginBottom: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -437,16 +437,16 @@ export default function UrgeToolkitPage() {
                   </div>
                   <p className="helpline-num">{h.number}</p>
                   <p className="helpline-hours">{h.hours}  · {h.free ? '🆓 Free' : ' Charges may apply'}</p>
-                  <a href={`tel:${h.number.replace(/\s/g,'')}`} style={{ display: 'block', textAlign: 'center', background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '10px', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: 500, marginTop: '8px' }}> Call {h.number}</a>
+                  <a href={`tel:${h.number.replace(/\s/g,'')}`} className="fs-13" style={{ display: 'block', textAlign: 'center', background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '10px', borderRadius: '8px', textDecoration: 'none', fontWeight: 500, marginTop: '8px' }}> Call {h.number}</a>
                 </div>
               ))}
               <div style={{ marginTop: '1rem', padding: '16px', background: '#0B1220', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
-                <h4 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '8px' }}> Accountability Partner</h4>
+                <h4 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '8px' }}> Accountability Partner</h4>
                 {accountabilityPartner ? (
                   <div>
-                    <p style={{ color: '#FFFFFF', fontSize: '14px' }}>{accountabilityPartner.name}</p>
-                    {accountabilityPartner.phone && <a href={`tel:${accountabilityPartner.phone}`} style={{ display: 'block', textAlign: 'center', background: '#2DD4BF', color: '#0B1220', padding: '10px', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: 500, marginTop: '8px' }}> Call {accountabilityPartner.name}</a>}
-                    <button className="btn-ghost" style={{ width: '100%', marginTop: '8px', fontSize: '12px' }} onClick={() => setShowAddPartner(true)}> Change</button>
+                    <p className="fs-14" style={{ color: '#FFFFFF' }}>{accountabilityPartner.name}</p>
+                    {accountabilityPartner.phone && <a href={`tel:${accountabilityPartner.phone}`} className="fs-13" style={{ display: 'block', textAlign: 'center', background: '#2DD4BF', color: '#0B1220', padding: '10px', borderRadius: '8px', textDecoration: 'none', fontWeight: 500, marginTop: '8px' }}> Call {accountabilityPartner.name}</a>}
+                    <button className="btn-ghost fs-12" style={{ width: '100%', marginTop: '8px' }} onClick={() => setShowAddPartner(true)}> Change</button>
                   </div>
                 ) : (
                   <button className="btn-primary" style={{ width: '100%' }} onClick={() => setShowAddPartner(true)}>+ Add partner</button>

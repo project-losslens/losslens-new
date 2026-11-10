@@ -314,7 +314,7 @@ export default function Whispers() {
 
   if (initError) return (
     <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-      <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', marginBottom: '12px' }}>Could not connect to Whispers.</p>
+      <p className="fs-14" style={{ color: 'rgba(255,255,255,0.55)', marginBottom: '12px' }}>Could not connect to Whispers.</p>
       <button type="button" className="btn-primary" onClick={initUser}>Try again</button>
     </div>
   )
@@ -329,26 +329,26 @@ export default function Whispers() {
     <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem',  }}>
-          <div><h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Whispers</h1><p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>Anonymous peer support  · {activeChats.length} active</p></div>
+          <div><h1 className="fs-16" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Whispers</h1><p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>Anonymous peer support  · {activeChats.length} active</p></div>
         </div>
 
         <div style={{ height: 'calc(100vh - 60px)', maxHeight: 'calc(100dvh - 60px)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           {activeMatch ? (
             <>
               <div style={{ background: 'rgba(255,255,255,0.12)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #7DBDEE', flexShrink: 0, position: 'sticky', top: 0, zIndex: 'var(--z-content)' }}>
-                <button onClick={() => { setActiveMatch(null); setMessages([]); setMessageInputs({}) }} style={{ background: 'transparent', border: 'none', color: '#2DD4BF', fontSize: '18px', cursor: 'pointer', padding: '6px 10px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Back to chats">←</button>
+                <button onClick={() => { setActiveMatch(null); setMessages([]); setMessageInputs({}) }} className="fs-18" style={{ background: 'transparent', border: 'none', color: '#2DD4BF', cursor: 'pointer', padding: '6px 10px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Back to chats">←</button>
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #7DBDEE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }} aria-hidden="true"></div>
-                  <div><p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 500, margin: 0 }}>{peerAnonName || 'Anonymous Peer'}</p><p style={{ color: '#2DD4BF', fontSize: '10px', margin: 0 }}>Chat active</p></div>
+                  <div className="fs-14" style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #7DBDEE', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-hidden="true"></div>
+                  <div><p className="fs-13" style={{ color: '#FFFFFF', fontWeight: 500, margin: 0 }}>{peerAnonName || 'Anonymous Peer'}</p><p className="fs-12" style={{ color: '#2DD4BF', margin: 0 }}>Chat active</p></div>
                 </div>
-                <button onClick={() => setShowReportModal(true)} style={{ background: 'transparent', border: '1px solid #7DBDEE', color: '#7DBDEE', padding: '6px 10px', borderRadius: '100px', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', minHeight: '32px' }}> Report</button>
-                <button onClick={() => setShowFeedback(true)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '6px 10px', borderRadius: '100px', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', minHeight: '32px' }}>End</button>
+                <button onClick={() => setShowReportModal(true)} className="fs-12" style={{ background: 'transparent', border: '1px solid #7DBDEE', color: '#7DBDEE', padding: '6px 10px', borderRadius: '100px', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', minHeight: '32px' }}> Report</button>
+                <button onClick={() => setShowFeedback(true)} className="fs-12" style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '6px 10px', borderRadius: '100px', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', minHeight: '32px' }}>End</button>
               </div>
 
               <div style={{ flex: 1, overflowY: 'auto', padding: '10px', background: '#0B1220', WebkitOverflowScrolling: 'touch' }}>
                 {showStarters && messages.length === 0 && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center', marginBottom: '1rem' }}>
-                    {CONVERSATION_STARTERS.map(s => <button key={s} onClick={() => { setMessageInputs(prev => ({ ...prev, [activeMatch.id]: s })); setShowStarters(false) }} style={{ padding: '8px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{s}</button>)}
+                    {CONVERSATION_STARTERS.map(s => <button key={s} onClick={() => { setMessageInputs(prev => ({ ...prev, [activeMatch.id]: s })); setShowStarters(false) }} className="fs-12" style={{ padding: '8px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{s}</button>)}
                   </div>
                 )}
                 {messages.map(msg => {
@@ -357,16 +357,16 @@ export default function Whispers() {
                     <div key={msg.id} style={{ display: 'flex', justifyContent: isOwn ? 'flex-end' : 'flex-start', marginBottom: '4px' }}>
                       <div style={{ maxWidth: '82%' }}>
                         {msg.reply_to && (
-                          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginBottom: '2px', padding: '3px 8px', background: 'rgba(255,255,255,0.06)', borderRadius: '6px', borderLeft: '2px solid #2DD4BF' }}>
+                          <div className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '2px', padding: '3px 8px', background: 'rgba(255,255,255,0.06)', borderRadius: '6px', borderLeft: '2px solid #2DD4BF' }}>
                             ↩ Replying to: "{msg.reply_to.message?.substring(0, 40)}..."
                           </div>
                         )}
-                        <div style={{ padding: '8px 12px', borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: isOwn ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)', border: `1px solid ${isOwn ? '#7DBDEE' : 'rgba(255,255,255,0.12)'}`, color: '#7DBDEE', fontSize: '13px', lineHeight: '1.5', wordBreak: 'break-word', opacity: msg.sending ? 0.6 : 1 }}>
+                        <div className="fs-13" style={{ padding: '8px 12px', borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: isOwn ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)', border: `1px solid ${isOwn ? '#7DBDEE' : 'rgba(255,255,255,0.12)'}`, color: '#7DBDEE', lineHeight: '1.5', wordBreak: 'break-word', opacity: msg.sending ? 0.6 : 1 }}>
                           {msg.message}
                         </div>
                         <div style={{ display: 'flex', gap: '4px', marginTop: '2px', justifyContent: isOwn ? 'flex-end' : 'flex-start' }}>
-                          <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)' }}>{msg.sending ? 'Sending...' : formatTime(msg.created_at)}</span>
-                          <button onClick={() => handleReply(msg)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', padding: '2px 6px' }} aria-label="Reply">↩</button>
+                          <span className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>{msg.sending ? 'Sending...' : formatTime(msg.created_at)}</span>
+                          <button onClick={() => handleReply(msg)} className="fs-12" style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', padding: '2px 6px' }} aria-label="Reply">↩</button>
                         </div>
                       </div>
                     </div>
@@ -377,16 +377,16 @@ export default function Whispers() {
 
               {replyTo && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'rgba(255,255,255,0.12)', borderTop: '1px solid #7DBDEE', flexShrink: 0 }}>
-                  <span style={{ color: '#2DD4BF', fontSize: '10px', flex: 1 }}>↩ Replying to: "{replyTo.message.substring(0, 30)}..."</span>
-                  <button onClick={() => setReplyTo(null)} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '14px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Cancel reply"></button>
+                  <span className="fs-12" style={{ color: '#2DD4BF', flex: 1 }}>↩ Replying to: "{replyTo.message.substring(0, 30)}..."</span>
+                  <button onClick={() => setReplyTo(null)} className="fs-14" style={{ background: 'transparent', border: 'none', color: '#FFFFFF', cursor: 'pointer', padding: '4px 8px' }} aria-label="Cancel reply"></button>
                 </div>
               )}
 
               <div style={{ background: 'rgba(255,255,255,0.06)', padding: '8px 10px', borderTop: '1px solid rgba(255,255,255,0.12)', flexShrink: 0 }}>
                 <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                  <button onClick={() => setShowStarters(!showStarters)} style={{ width: '36px', height: '36px', borderRadius: '6px', background: showStarters ? 'rgba(255,255,255,0.12)' : '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '14px', cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Conversation starters"></button>
-                  <input ref={inputRef} value={messageInputs[activeMatch.id] || ''} onChange={e => setMessageInputs(prev => ({ ...prev, [activeMatch.id]: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleSend(activeMatch.id)} placeholder="Message" style={{ flex: 1, background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '10px 12px', color: '#FFFFFF', fontSize: '16px', outline: 'none', fontFamily: 'var(--font-body)' }} aria-label="Type a message" />
-                  <button onClick={() => handleSend(activeMatch.id)} disabled={!messageInputs[activeMatch.id]?.trim() || sending} style={{ width: '40px', height: '40px', borderRadius: '50%', background: messageInputs[activeMatch.id]?.trim() && !sending ? '#2DD4BF' : 'rgba(255,255,255,0.12)', border: 'none', color: messageInputs[activeMatch.id]?.trim() ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '16px', cursor: messageInputs[activeMatch.id]?.trim() ? 'pointer' : 'not-allowed', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Send message">→</button>
+                  <button onClick={() => setShowStarters(!showStarters)} className="fs-14" style={{ width: '36px', height: '36px', borderRadius: '6px', background: showStarters ? 'rgba(255,255,255,0.12)' : '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Conversation starters"></button>
+                  <input ref={inputRef} value={messageInputs[activeMatch.id] || ''} onChange={e => setMessageInputs(prev => ({ ...prev, [activeMatch.id]: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleSend(activeMatch.id)} placeholder="Message" className="fs-16" style={{ flex: 1, background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '10px 12px', color: '#FFFFFF', outline: 'none', fontFamily: 'var(--font-body)' }} aria-label="Type a message" />
+                  <button onClick={() => handleSend(activeMatch.id)} disabled={!messageInputs[activeMatch.id]?.trim() || sending} className="fs-16" style={{ width: '40px', height: '40px', borderRadius: '50%', background: messageInputs[activeMatch.id]?.trim() && !sending ? '#2DD4BF' : 'rgba(255,255,255,0.12)', border: 'none', color: messageInputs[activeMatch.id]?.trim() ? '#0B1220' : 'rgba(255,255,255,0.4)', cursor: messageInputs[activeMatch.id]?.trim() ? 'pointer' : 'not-allowed', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Send message">→</button>
                 </div>
               </div>
             </>
@@ -394,54 +394,54 @@ export default function Whispers() {
             <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', WebkitOverflowScrolling: 'touch' }}>
               <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)' }}>
                 {[{ id: 'requests', label: ' Requests', count: pendingReceived.length }, { id: 'sent', label: ' Sent', count: pendingSent.length }, { id: 'chats', label: ' Chats', count: activeChats.length }].map(tab => (
-                  <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{tab.label}{tab.count > 0 ? ` (${tab.count})` : ''}</button>
+                  <button key={tab.id} onClick={() => setActiveTab(tab.id)} className="fs-12" style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{tab.label}{tab.count > 0 ? ` (${tab.count})` : ''}</button>
                 ))}
               </div>
 
               {activeTab === 'requests' && (
                 <>
                   <div className="dash-section" style={{ padding: '1.25rem', marginBottom: '0.75rem' }}>
-                    <h3 style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '4px' }}>Find a peer</h3>
-                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '0.75rem' }}>Your request goes to a random available peer. Your identity stays anonymous.</p>
+                    <h3 className="fs-13" style={{ color: '#FFFFFF', marginBottom: '4px' }}>Find a peer</h3>
+                    <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '0.75rem' }}>Your request goes to a random available peer. Your identity stays anonymous.</p>
                     {canSend ? (
                       <>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '10px' }}>
-                          {REQUEST_MESSAGES.map(msg => <button key={msg} onClick={() => setRequestMessage(msg)} style={{ padding: '6px 10px', borderRadius: '100px', border: requestMessage === msg ? '2px solid #2DD4BF' : '1px solid rgba(255,255,255,0.12)', background: requestMessage === msg ? 'rgba(255,255,255,0.12)' : '#0B1220', color: requestMessage === msg ? '#2DD4BF' : '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{msg}</button>)}
+                          {REQUEST_MESSAGES.map(msg => <button key={msg} onClick={() => setRequestMessage(msg)} className="fs-12" style={{ padding: '6px 10px', borderRadius: '100px', border: requestMessage === msg ? '2px solid #2DD4BF' : '1px solid rgba(255,255,255,0.12)', background: requestMessage === msg ? 'rgba(255,255,255,0.12)' : '#0B1220', color: requestMessage === msg ? '#2DD4BF' : '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{msg}</button>)}
                         </div>
-                        <button className="btn-primary full" onClick={sendRequest} disabled={sendingRequest} style={{ fontSize: '12px', padding: '10px' }}>{sendingRequest ? '...' : ' Send request'}</button>
+                        <button className="btn-primary full fs-12" onClick={sendRequest} disabled={sendingRequest} style={{ padding: '10px' }}>{sendingRequest ? '...' : ' Send request'}</button>
                       </>
-                    ) : <p style={{ color: '#7DBDEE', fontSize: '12px', textAlign: 'center' }}>You've reached the limit. End an active chat or cancel a pending request first.</p>}
+                    ) : <p className="fs-12" style={{ color: '#7DBDEE', textAlign: 'center' }}>You've reached the limit. End an active chat or cancel a pending request first.</p>}
                   </div>
                   {pendingReceived.length > 0 && (
                     <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-                      <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.75rem' }}> Incoming ({pendingReceived.length})</h3>
+                      <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.75rem' }}> Incoming ({pendingReceived.length})</h3>
                       {pendingReceived.map(req => (
                         <div key={req.id} style={{ padding: '12px', background: '#0B1220', borderRadius: '8px', marginBottom: '6px', border: '1px solid #2DD4BF' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                             <AppIcon name="users" size={20} style={{ color: '#2DD4BF', flexShrink: 0 }} />
-                            <div style={{ flex: 1 }}><p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: 0 }}>Anonymous Peer</p><p style={{ color: '#2DD4BF', fontSize: '10px' }}>"{req.request_message || 'Wants to connect'}"</p></div>
+                            <div style={{ flex: 1 }}><p className="fs-12" style={{ color: '#FFFFFF', fontWeight: 500, margin: 0 }}>Anonymous Peer</p><p className="fs-12" style={{ color: '#2DD4BF' }}>"{req.request_message || 'Wants to connect'}"</p></div>
                           </div>
                           <div style={{ display: 'flex', gap: '6px' }}>
-                            <button onClick={() => acceptRequest(req.id)} style={{ flex: 1, padding: '8px', borderRadius: '6px', border: 'none', background: '#2DD4BF', color: '#0B1220', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Accept</button>
-                            <button onClick={() => rejectRequest(req.id)} style={{ flex: 1, padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', background: 'transparent', color: '#FFFFFF', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Decline</button>
+                            <button onClick={() => acceptRequest(req.id)} className="fs-12" style={{ flex: 1, padding: '8px', borderRadius: '6px', border: 'none', background: '#2DD4BF', color: '#0B1220', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Accept</button>
+                            <button onClick={() => rejectRequest(req.id)} className="fs-12" style={{ flex: 1, padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', background: 'transparent', color: '#FFFFFF', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Decline</button>
                           </div>
                         </div>
                       ))}
                     </div>
                   )}
-                  {pendingReceived.length === 0 && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', textAlign: 'center', padding: '1rem' }}>No incoming requests. Try sending one!</p>}
+                  {pendingReceived.length === 0 && <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '1rem' }}>No incoming requests. Try sending one!</p>}
                 </>
               )}
 
               {activeTab === 'sent' && (
                 <div className="dash-section">
-                  <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.75rem' }}> Sent ({pendingSent.length})</h3>
+                  <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.75rem' }}> Sent ({pendingSent.length})</h3>
                   {pendingSent.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '1.5rem' }}><p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '0.75rem' }}>No pending requests.</p><button className="btn-primary" onClick={() => setActiveTab('requests')} style={{ fontSize: '11px', padding: '8px 16px' }}> Send one</button></div>
+                    <div style={{ textAlign: 'center', padding: '1.5rem' }}><p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '0.75rem' }}>No pending requests.</p><button className="btn-primary fs-12" onClick={() => setActiveTab('requests')} style={{ padding: '8px 16px' }}> Send one</button></div>
                   ) : pendingSent.map(req => (
                     <div key={req.id} style={{ padding: '12px', background: '#0B1220', borderRadius: '8px', marginBottom: '6px', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div><p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: 0 }}>"{req.request_message || 'Request'}"</p><p style={{ color: '#7DBDEE', fontSize: '10px', marginTop: '3px' }}>Waiting...</p></div>
-                      <button onClick={() => cancelRequest(req.id)} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '10px', cursor: 'pointer', flexShrink: 0, padding: '6px 10px' }}>Cancel</button>
+                      <div><p className="fs-12" style={{ color: '#FFFFFF', fontWeight: 500, margin: 0 }}>"{req.request_message || 'Request'}"</p><p className="fs-12" style={{ color: '#7DBDEE', marginTop: '3px' }}>Waiting...</p></div>
+                      <button onClick={() => cancelRequest(req.id)} className="fs-12" style={{ background: 'transparent', border: 'none', color: '#FFFFFF', cursor: 'pointer', flexShrink: 0, padding: '6px 10px' }}>Cancel</button>
                     </div>
                   ))}
                 </div>
@@ -449,21 +449,21 @@ export default function Whispers() {
 
               {activeTab === 'chats' && (
                 <div className="dash-section">
-                  <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.75rem' }}> Active chats ({activeChats.length})</h3>
+                  <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.75rem' }}> Active chats ({activeChats.length})</h3>
                   {activeChats.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '2rem' }}>
                       <AppIcon name="chat" size={40} style={{ display: 'block', margin: '0 auto 8px', color: '#2DD4BF' }} />
-                      <p style={{ color: '#2DD4BF', fontSize: '14px' }}>No active chats.</p>
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Accept an incoming request or send one to start.</p>
+                      <p className="fs-14" style={{ color: '#2DD4BF' }}>No active chats.</p>
+                      <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>Accept an incoming request or send one to start.</p>
                     </div>
                   ) : activeChats.map(m => (
                     <div key={m.id} style={{ position: 'relative', padding: '12px', background: '#0B1220', borderRadius: '8px', marginBottom: '6px', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <button type="button" className="card-action" aria-label="Open chat" onClick={() => setActiveMatch(m)} />
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <AppIcon name="users" size={24} style={{ color: '#2DD4BF', flexShrink: 0 }} />
-                        <div><p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: 0 }}>Peer Match</p><p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{new Date(m.created_at).toLocaleDateString('en-KE')}</p></div>
+                        <div><p className="fs-12" style={{ color: '#FFFFFF', fontWeight: 500, margin: 0 }}>Peer Match</p><p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>{new Date(m.created_at).toLocaleDateString('en-KE')}</p></div>
                       </div>
-                      <span style={{ color: '#2DD4BF', fontSize: '16px' }}>→</span>
+                      <span className="fs-16" style={{ color: '#2DD4BF' }}>→</span>
                     </div>
                   ))}
                 </div>
@@ -476,16 +476,16 @@ export default function Whispers() {
         {showFeedback && (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(11,18,32,0.92)', backdropFilter: 'blur(4px)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
             <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '14px', padding: '1.5rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '360px', width: '100%' }}>
-              <h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '0.75rem' }}>How was this match?</h3>
+              <h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '0.75rem' }}>How was this match?</h3>
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '0.75rem' }}>
                 {[{ value: 'helpful', emoji: '' }, { value: 'okay', emoji: '' }, { value: 'not_helpful', emoji: '' }].map(opt => (
-                  <button key={opt.value} onClick={() => setRating(opt.value)} style={{ padding: '8px', borderRadius: '10px', border: rating === opt.value ? '2px solid #2DD4BF' : '1px solid rgba(255,255,255,0.12)', background: rating === opt.value ? 'rgba(255,255,255,0.12)' : '#0B1220', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>{opt.emoji}</button>
+                  <button key={opt.value} onClick={() => setRating(opt.value)} className="fs-12" style={{ padding: '8px', borderRadius: '10px', border: rating === opt.value ? '2px solid #2DD4BF' : '1px solid rgba(255,255,255,0.12)', background: rating === opt.value ? 'rgba(255,255,255,0.12)' : '#0B1220', color: '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>{opt.emoji}</button>
                 ))}
               </div>
-              <textarea placeholder="Any feedback? (optional)" value={feedback} onChange={e => setFeedback(e.target.value)} rows={2} style={{ width: '100%', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '8px', color: '#FFFFFF', fontSize: '12px', fontFamily: 'var(--font-body)', marginBottom: '0.75rem', resize: 'vertical', boxSizing: 'border-box' }} />
+              <textarea placeholder="Any feedback? (optional)" value={feedback} onChange={e => setFeedback(e.target.value)} rows={2} className="fs-12" style={{ width: '100%', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '8px', color: '#FFFFFF', fontFamily: 'var(--font-body)', marginBottom: '0.75rem', resize: 'vertical', boxSizing: 'border-box' }} />
               <div style={{ display: 'flex', gap: '6px' }}>
-                <button className="btn-primary full" onClick={submitFeedback} style={{ fontSize: '12px', padding: '10px', flex: 2 }}>Submit & end chat</button>
-                <button onClick={() => { setShowFeedback(false); setActiveMatch(null); setMessages([]); fetchMatches(identity?.hash) }} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Skip</button>
+                <button className="btn-primary full fs-12" onClick={submitFeedback} style={{ padding: '10px', flex: 2 }}>Submit & end chat</button>
+                <button onClick={() => { setShowFeedback(false); setActiveMatch(null); setMessages([]); fetchMatches(identity?.hash) }} className="fs-12" style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Skip</button>
               </div>
             </div>
           </div>
@@ -496,12 +496,12 @@ export default function Whispers() {
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(11,18,32,0.92)', backdropFilter: 'blur(4px)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowReportModal(false)} />
             <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '14px', padding: '1.5rem', border: '1px solid #7DBDEE', maxWidth: '360px', width: '100%' }}>
-              <h3 style={{ color: '#7DBDEE', fontSize: '14px', marginBottom: '0.75rem' }}> Report this chat</h3>
-              <p style={{ color: '#2DD4BF', fontSize: '12px', marginBottom: '0.75rem' }}>Your safety matters. Reports are anonymous and reviewed by our team.</p>
-              <textarea placeholder="Briefly describe the issue..." value={reportReason} onChange={e => setReportReason(e.target.value)} rows={3} style={{ width: '100%', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '8px', color: '#FFFFFF', fontSize: '12px', fontFamily: 'var(--font-body)', marginBottom: '0.75rem', resize: 'vertical', boxSizing: 'border-box' }} />
+              <h3 className="fs-14" style={{ color: '#7DBDEE', marginBottom: '0.75rem' }}> Report this chat</h3>
+              <p className="fs-12" style={{ color: '#2DD4BF', marginBottom: '0.75rem' }}>Your safety matters. Reports are anonymous and reviewed by our team.</p>
+              <textarea placeholder="Briefly describe the issue..." value={reportReason} onChange={e => setReportReason(e.target.value)} rows={3} className="fs-12" style={{ width: '100%', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '8px', color: '#FFFFFF', fontFamily: 'var(--font-body)', marginBottom: '0.75rem', resize: 'vertical', boxSizing: 'border-box' }} />
               <div style={{ display: 'flex', gap: '6px' }}>
-                <button onClick={() => setShowReportModal(false)} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
-                <button onClick={handleReport} disabled={!reportReason.trim() || submittingReport} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: reportReason.trim() ? '#7DBDEE' : 'rgba(255,255,255,0.12)', border: 'none', color: reportReason.trim() ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: 600, cursor: reportReason.trim() ? 'pointer' : 'not-allowed', fontFamily: 'var(--font-body)' }}>{submittingReport ? '...' : 'Submit report'}</button>
+                <button onClick={() => setShowReportModal(false)} className="fs-12" style={{ flex: 1, padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+                <button onClick={handleReport} disabled={!reportReason.trim() || submittingReport} className="fs-12" style={{ flex: 1, padding: '10px', borderRadius: '8px', background: reportReason.trim() ? '#7DBDEE' : 'rgba(255,255,255,0.12)', border: 'none', color: reportReason.trim() ? '#0B1220' : 'rgba(255,255,255,0.4)', fontWeight: 600, cursor: reportReason.trim() ? 'pointer' : 'not-allowed', fontFamily: 'var(--font-body)' }}>{submittingReport ? '...' : 'Submit report'}</button>
               </div>
             </div>
           </div>

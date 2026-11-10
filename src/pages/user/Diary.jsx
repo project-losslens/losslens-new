@@ -266,14 +266,14 @@ function Diary() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Today's Diary</h1>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{new Date().toLocaleDateString('en-KE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+            <h1 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Today's Diary</h1>
+            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{new Date().toLocaleDateString('en-KE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
           </div>
         </div>
         <div style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)' }}>
-            <button onClick={() => setActiveView('today')} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeView === 'today' ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeView === 'today' ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: activeView === 'today' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Today's Entry</button>
-            <button onClick={() => setActiveView('history')} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeView === 'history' ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeView === 'history' ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: activeView === 'history' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> History {stats.totalEntries > 0 ? `(${stats.totalEntries})` : ''}</button>
+            <button onClick={() => setActiveView('today')} className="fs-13" style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeView === 'today' ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeView === 'today' ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontWeight: activeView === 'today' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Today's Entry</button>
+            <button onClick={() => setActiveView('history')} className="fs-13" style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeView === 'history' ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeView === 'history' ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontWeight: activeView === 'history' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> History {stats.totalEntries > 0 ? `(${stats.totalEntries})` : ''}</button>
           </div>
 
           {activeView === 'today' && (
@@ -283,18 +283,18 @@ function Diary() {
                   <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(255,255,255,0.12)', border: '3px solid #2DD4BF', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'checkmarkPop 0.5s ease-out' }}>
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2DD4BF" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
                   </div>
-                  <p style={{ color: '#2DD4BF', fontSize: '14px', marginTop: '12px', fontWeight: 500 }}>{gambled ? 'Entry saved ' : 'Great job staying clean! '}</p>
+                  <p className="fs-14" style={{ color: '#2DD4BF', marginTop: '12px', fontWeight: 500 }}>{gambled ? 'Entry saved ' : 'Great job staying clean! '}</p>
                 </div>
               )}
 
               {saveError && (
-                <div style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>
+                <div className="fs-13" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', marginBottom: '1rem' }}>
                   {saveError}
                 </div>
               )}
 
               <div className="dash-section">
-                <h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '1rem' }}>Did you gamble today?</h3>
+                <h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>Did you gamble today?</h3>
                 <div className="toggle-group">
                   <button className={`toggle-btn ${gambled === false ? 'active-primary' : ''}`} onClick={() => { setGambled(false); showToast(' Clean day — proud of you!', 1500) }}>No </button>
                   <button className={`toggle-btn ${gambled === true ? 'active-alert' : ''}`} onClick={() => setGambled(true)}>Yes</button>
@@ -303,7 +303,7 @@ function Diary() {
 
               {gambled && (
                 <div className="dash-section" style={{ animation: 'fadeIn 0.3s ease-out' }}>
-                  <h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '1rem' }}>Gambling details</h3>
+                  <h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>Gambling details</h3>
                   <div className="form-group"><label>Type</label><div className="chip-group">{gamblingTypes.map(t => <button key={t} className={`chip ${gamblingType === t ? 'chip-active' : ''}`} onClick={() => setGamblingType(t)}>{t}</button>)}</div></div>
                   <div className="form-row">
                     <div className="form-group"><label>Time (hrs)</label><input type="number" placeholder="2" value={timeSpent} onChange={e => setTimeSpent(e.target.value)} /></div>
@@ -313,17 +313,17 @@ function Diary() {
                 </div>
               )}
 
-              <div className="dash-section"><h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '1rem' }}>How are you feeling?</h3><div className="chip-group">{moods.map(m => <button key={m} className={`chip ${mood.trim() === m ? 'chip-active' : ''}`} onClick={() => setMood(m)}>{m}</button>)}</div></div>
-              <div className="dash-section"><h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '1rem' }}>Triggers</h3><div className="chip-group">{triggerOptions.map(t => <button key={t} className={`chip ${triggers.includes(t) ? 'chip-active' : ''}`} onClick={() => toggleItem(t, triggers, setTriggers)}>{t}</button>)}</div></div>
-              <div className="dash-section"><h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '1rem' }}>Coping strategies</h3><div className="chip-group">{copingOptions.map(c => <button key={c} className={`chip ${coping.includes(c) ? 'chip-active' : ''}`} onClick={() => toggleItem(c, coping, setCoping)}>{c}</button>)}</div></div>
+              <div className="dash-section"><h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>How are you feeling?</h3><div className="chip-group">{moods.map(m => <button key={m} className={`chip ${mood.trim() === m ? 'chip-active' : ''}`} onClick={() => setMood(m)}>{m}</button>)}</div></div>
+              <div className="dash-section"><h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>Triggers</h3><div className="chip-group">{triggerOptions.map(t => <button key={t} className={`chip ${triggers.includes(t) ? 'chip-active' : ''}`} onClick={() => toggleItem(t, triggers, setTriggers)}>{t}</button>)}</div></div>
+              <div className="dash-section"><h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>Coping strategies</h3><div className="chip-group">{copingOptions.map(c => <button key={c} className={`chip ${coping.includes(c) ? 'chip-active' : ''}`} onClick={() => toggleItem(c, coping, setCoping)}>{c}</button>)}</div></div>
 
               <div className="dash-section">
-                <h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '1rem' }}>Notes</h3>
+                <h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>Notes</h3>
                 {voiceSupported && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', padding: '8px 12px', background: isListening ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.12)', borderRadius: '8px', border: `1px solid ${isListening ? '#FFFFFF' : '#7DBDEE'}` }}>
-                    <button onClick={() => isListening ? stopListening() : startListening()} style={{ width: '36px', height: '36px', borderRadius: '50%', border: 'none', background: isListening ? '#FFFFFF' : '#2DD4BF', color: '#0B1220', fontSize: '16px', cursor: 'pointer', animation: isListening ? 'pulse 1.5s infinite' : 'none' }}></button>
-                    <span style={{ flex: 1, fontSize: '12px', color: isListening ? '#FFFFFF' : '#2DD4BF' }}>{isListening ? ' Listening...' : 'Tap to speak'}</span>
-                    {isListening && <button onClick={stopListening} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '18px', cursor: 'pointer' }}>⏹</button>}
+                    <button onClick={() => isListening ? stopListening() : startListening()} className="fs-16" style={{ width: '36px', height: '36px', borderRadius: '50%', border: 'none', background: isListening ? '#FFFFFF' : '#2DD4BF', color: '#0B1220', cursor: 'pointer', animation: isListening ? 'pulse 1.5s infinite' : 'none' }}></button>
+                    <span className="fs-12" style={{ flex: 1, color: isListening ? '#FFFFFF' : '#2DD4BF' }}>{isListening ? ' Listening...' : 'Tap to speak'}</span>
+                    {isListening && <button onClick={stopListening} className="fs-18" style={{ background: 'transparent', border: 'none', color: '#FFFFFF', cursor: 'pointer' }}>⏹</button>}
                   </div>
                 )}
                 <textarea className="diary-textarea" placeholder="How did today feel?" value={notes} onChange={e => setNotes(e.target.value)} rows={4} />
@@ -345,9 +345,9 @@ function Diary() {
               <div className="dash-section" style={{ marginBottom: '1rem' }}><div className="progress-bar-wrap"><div className="progress-bar"><div className="progress-fill" style={{ width: `${stats.cleanRate}%` }} /></div><span className="progress-label">{stats.cleanRate}%</span></div></div>
               <div className="dash-section">
                 <div className="section-header"><h3>All entries</h3></div>
-                {historyLoading ? <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', textAlign: 'center', padding: '1rem' }}>Loading...</p> :
-                 historyError ? <div style={{ textAlign: 'center', padding: '1.5rem' }}><p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '13px', marginBottom: '10px' }}>Could not load your entries.</p><button type="button" className="btn-primary" onClick={() => fetchHistory(userId)}>Try again</button></div> :
-                 historyEntries.length === 0 ? <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', textAlign: 'center', padding: '1.5rem' }}>No entries yet.</p> :
+                {historyLoading ? <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '1rem' }}>Loading...</p> :
+                 historyError ? <div style={{ textAlign: 'center', padding: '1.5rem' }}><p className="fs-13" style={{ color: 'rgba(255,255,255,0.55)', marginBottom: '10px' }}>Could not load your entries.</p><button type="button" className="btn-primary" onClick={() => fetchHistory(userId)}>Try again</button></div> :
+                 historyEntries.length === 0 ? <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '1.5rem' }}>No entries yet.</p> :
                  <div className="entries-list">{(showAllHistory ? historyEntries : historyEntries.slice(0, 7)).map((e, i) => (
                    <div className="entry-item" key={i} style={{ animation: `fadeIn 0.3s ease-out ${i * 0.05}s both` }}>
                      <div className="entry-top"><span className="entry-date">{new Date(e.date).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric' })}</span><span className={`entry-status ${e.gambled ? 'gambled' : 'clean'}`}>{e.gambled ? 'Gambled' : 'Clean'}</span></div>

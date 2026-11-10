@@ -380,7 +380,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
           <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
           <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>Please log in</h2>
-          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%', marginTop: '16px' }}>Go to Login →</button>
+          <button onClick={() => navigate('/login', { replace: true })} className="fs-14" style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%', marginTop: '16px' }}>Go to Login →</button>
         </div>
       </div>
     )
@@ -397,7 +397,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
   if (profileError) {
     return (
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-        <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', marginBottom: '12px' }}>Could not load your profile.</p>
+        <p className="fs-14" style={{ color: 'rgba(255,255,255,0.55)', marginBottom: '12px' }}>Could not load your profile.</p>
         <button type="button" className="btn-primary" onClick={() => { setLoadingProfile(true); setProfileError(false); fetchAllData() }}>Try again</button>
       </div>
     )
@@ -409,8 +409,8 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
 
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem',  }}>
           <div>
-            <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> My Profile</h1>
-            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{fullName || 'Complete your profile'}</p>
+            <h1 className="fs-16" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> My Profile</h1>
+            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{fullName || 'Complete your profile'}</p>
           </div>
         </div>
 
@@ -425,9 +425,9 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
               { icon: '', value: `${stats.cbtCompleted}/${stats.cbtTotal}`, label: 'CBT' },
             ].map((s, i) => (
               <div className="stat-card" key={i} style={{ padding: '10px 8px', textAlign: 'center', minHeight: '70px' }}>
-                <span style={{ fontSize: '16px' }}>{s.icon}</span>
-                <span style={{ display: 'block', fontSize: '14px', fontWeight: 700, color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>{s.value}</span>
-                <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)' }}>{s.label}</span>
+                <span className="fs-16">{s.icon}</span>
+                <span className="fs-14" style={{ display: 'block', fontWeight: 700, color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>{s.value}</span>
+                <span className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>{s.label}</span>
               </div>
             ))}
           </div>
@@ -435,7 +435,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
           {/* Badges */}
           {stats.badges.length > 0 && (
             <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-              <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.5rem' }}> Badges ({earnedBadges}/{stats.badges.length})</h3>
+              <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}> Badges ({earnedBadges}/{stats.badges.length})</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '6px' }}>
                 {stats.badges.map(b => (
                   <button type="button" key={b.id} className="clickable" onClick={() => handleBadgeClick(b)}
@@ -443,8 +443,8 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
                     onMouseEnter={e => { e.currentTarget.style.borderColor = '#2DD4BF'; e.currentTarget.style.transform = 'translateY(-2px)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = b.earned ? '#2DD4BF' : 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'translateY(0)' }}
                     title={b.earned ? `${b.name} — Click to explore` : `${b.name} (Locked)`}>
-                    <span style={{ fontSize: '20px', display: 'block' }}>{b.earned ? b.emoji : ''}</span>
-                    <span style={{ fontSize: '9px', color: b.earned ? '#2DD4BF' : 'rgba(255,255,255,0.4)', display: 'block', marginTop: '3px' }}>{b.name}</span>
+                    <span className="fs-20" style={{ display: 'block' }}>{b.earned ? b.emoji : ''}</span>
+                    <span className="fs-12" style={{ color: b.earned ? '#2DD4BF' : 'rgba(255,255,255,0.4)', display: 'block', marginTop: '3px' }}>{b.name}</span>
                   </button>
                 ))}
               </div>
@@ -453,10 +453,10 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
 
           {/* Report Section */}
           <div className="dash-section" style={{ marginBottom: '0.75rem', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06))', borderColor: '#2DD4BF' }}>
-            <h3 style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '0.75rem' }}> Recovery Report</h3>
+            <h3 className="fs-13" style={{ color: '#2DD4BF', marginBottom: '0.75rem' }}> Recovery Report</h3>
 
-            <p style={{ color: '#7DBDEE', fontSize: '11px', lineHeight: '1.5', marginBottom: '12px' }}>Your professional recovery report is ready. Download it to share with your therapist or counselor.</p>
-            <button onClick={downloadRecoveryReport} disabled={generatingReport} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+            <p className="fs-12" style={{ color: '#7DBDEE', lineHeight: '1.5', marginBottom: '12px' }}>Your professional recovery report is ready. Download it to share with your therapist or counselor.</p>
+            <button onClick={downloadRecoveryReport} disabled={generatingReport} className="fs-12" style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
               {generatingReport ? <span className="spinner"></span> : 'Download Report'}
             </button>
           </div>
@@ -464,7 +464,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
           {/* Tabs */}
           <div style={{ display: 'flex', gap: '4px', marginBottom: '0.75rem', background: 'rgba(255,255,255,0.06)', borderRadius: '10px', padding: '3px', border: '1px solid rgba(255,255,255,0.12)' }}>
             {[{ id: TABS.PROFILE, label: ' Profile' }, { id: TABS.SETTINGS, label: ' Prefs' }, { id: TABS.SECURITY, label: ' Security' }, { id: TABS.DATA, label: ' Data' }].map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px 6px', borderRadius: '8px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '44px' }}>{tab.label}</button>
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} className="fs-12" style={{ flex: 1, padding: '10px 6px', borderRadius: '8px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '44px' }}>{tab.label}</button>
             ))}
           </div>
 
@@ -475,18 +475,18 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
                 <div style={{ position: 'relative', display: 'inline-block' }}>
                   <button type="button" className="card-action" aria-label="Change avatar" onClick={() => setShowAvatarPicker(!showAvatarPicker)} style={{ borderRadius: '50%' }} />
                   {avatarUrl && avatarUrl.startsWith('http') ? <img src={avatarUrl} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #2DD4BF' }} />
-                  : avatarUrl ? <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #2DD4BF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>{avatarUrl}</div>
-                  : <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #7DBDEE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', fontWeight: 700, color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>{initials}</div>}
-                  <div style={{ position: 'absolute', bottom: '0', right: '0', background: '#2DD4BF', color: '#0B1220', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', border: '2px solid #0B1220' }}></div>
+                  : avatarUrl ? <div className="fs-32" style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #2DD4BF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{avatarUrl}</div>
+                  : <div className="fs-28" style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #7DBDEE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>{initials}</div>}
+                  <div className="fs-12" style={{ position: 'absolute', bottom: '0', right: '0', background: '#2DD4BF', color: '#0B1220', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0B1220' }}></div>
                 </div>
                 {showAvatarPicker && (
                   <div style={{ marginTop: '10px' }}>
                     <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '8px' }}>
                       {AVATAR_OPTIONS.map(emoji => (
-                        <button key={emoji} onClick={() => handleAvatarSelect(emoji)} style={{ width: '40px', height: '40px', borderRadius: '50%', background: avatarUrl === emoji ? 'rgba(255,255,255,0.12)' : '#0B1220', border: avatarUrl === emoji ? '2px solid #2DD4BF' : '1px solid rgba(255,255,255,0.12)', fontSize: '20px', cursor: 'pointer' }} aria-label={`Select ${emoji} avatar`}>{emoji}</button>
+                        <button key={emoji} onClick={() => handleAvatarSelect(emoji)} className="fs-20" style={{ width: '40px', height: '40px', borderRadius: '50%', background: avatarUrl === emoji ? 'rgba(255,255,255,0.12)' : '#0B1220', border: avatarUrl === emoji ? '2px solid #2DD4BF' : '1px solid rgba(255,255,255,0.12)', cursor: 'pointer' }} aria-label={`Select ${emoji} avatar`}>{emoji}</button>
                       ))}
                     </div>
-                    <button onClick={() => fileInputRef.current?.click()} disabled={uploadingAvatar} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '44px' }}>{uploadingAvatar ? 'Uploading...' : ' Upload photo'}</button>
+                    <button onClick={() => fileInputRef.current?.click()} disabled={uploadingAvatar} className="fs-12" style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '44px' }}>{uploadingAvatar ? 'Uploading...' : ' Upload photo'}</button>
                     <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarUpload} style={{ display: 'none' }} />
                   </div>
                 )}
@@ -498,10 +498,10 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
                 <div className="form-group"><label>Phone</label><div className="phone-input"><span className="phone-prefix">🇰🇪 +254</span><input type="tel" value={phone} onChange={e => setPhone(e.target.value.replace('+254', ''))} placeholder="7XX XXX XXX" /></div></div>
               </div>
               <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-                <label style={{ color: '#2DD4BF', fontSize: '12px', marginBottom: '8px', display: 'block' }}>My goal</label>
+                <label className="fs-12" style={{ color: '#2DD4BF', marginBottom: '8px', display: 'block' }}>My goal</label>
                 <div className="chip-group">{['Cut down', 'Abstinence', 'Maintenance'].map(g => <button key={g} className={`chip ${goal === g ? 'chip-active' : ''}`} onClick={() => setGoal(g)}>{g}</button>)}</div>
               </div>
-              <button className="btn-primary full" onClick={handleProfileSave} disabled={savingProfile} style={{ fontSize: '12px', padding: '10px', minHeight: '44px' }}>{savingProfile ? 'Saving...' : 'Save changes'}</button>
+              <button className="btn-primary full fs-12" onClick={handleProfileSave} disabled={savingProfile} style={{ padding: '10px', minHeight: '44px' }}>{savingProfile ? 'Saving...' : 'Save changes'}</button>
             </>
           )}
 
@@ -509,53 +509,53 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
           {activeTab === TABS.SETTINGS && (
             <>
               <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-                <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.5rem' }}>Privacy</h3>
+                <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Privacy</h3>
                 {[{ label: 'Behavioral analytics', key: 'allow_analytics' }, { label: 'Share anonymized data', key: 'share_research_data' }, { label: 'M-Pesa monitoring', key: 'mpesa_monitoring' }].map(item => (
                   <div className="toggle-row" key={item.key}><span className="toggle-label">{item.label}</span><input type="checkbox" className="toggle-check" checked={prefs[item.key]} onChange={e => setPrefs(prev => ({ ...prev, [item.key]: e.target.checked }))} /></div>
                 ))}
               </div>
               <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-                <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.5rem' }}>Appearance</h3>
+                <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Appearance</h3>
                 <div className="toggle-row"><span className="toggle-label">Low-data mode</span><input type="checkbox" className="toggle-check" checked={prefs.low_data_mode} onChange={e => setPrefs(prev => ({ ...prev, low_data_mode: e.target.checked }))} /></div>
               </div>
-              <button className="btn-primary full" onClick={savePrefs} disabled={savingPrefs} style={{ fontSize: '12px', padding: '10px', minHeight: '44px' }}>{savingPrefs ? 'Saving...' : 'Save preferences'}</button>
+              <button className="btn-primary full fs-12" onClick={savePrefs} disabled={savingPrefs} style={{ padding: '10px', minHeight: '44px' }}>{savingPrefs ? 'Saving...' : 'Save preferences'}</button>
             </>
           )}
 
           {/* SECURITY TAB */}
           {activeTab === TABS.SECURITY && (
             <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-              <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.5rem' }}>Change password</h3>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginBottom: '0.75rem' }}>Enter your current password and set a new one.</p>
+              <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Change password</h3>
+              <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '0.75rem' }}>Enter your current password and set a new one.</p>
               {['current','next','confirm'].map(field => (
                 <div className="form-group" key={field}><label>{field === 'current' ? 'Current' : field === 'next' ? 'New (min 8 chars)' : 'Confirm'}</label><input type="password" placeholder="Enter password" value={passwords[field]} onChange={e => setPasswords({ ...passwords, [field]: e.target.value })} /></div>
               ))}
-              <button className="btn-primary full" onClick={updatePassword} disabled={savingPassword} style={{ fontSize: '12px', padding: '10px', minHeight: '44px' }}>{savingPassword ? 'Updating...' : 'Update password'}</button>
+              <button className="btn-primary full fs-12" onClick={updatePassword} disabled={savingPassword} style={{ padding: '10px', minHeight: '44px' }}>{savingPassword ? 'Updating...' : 'Update password'}</button>
               <hr style={{ borderColor: 'rgba(255,255,255,0.12)', margin: '1rem 0' }} />
-              <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.5rem' }}>Two-factor authentication</h3>
+              <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Two-factor authentication</h3>
               {mfaEnabled ? (
-                <p role="status" style={{ color: '#2DD4BF', fontSize: '11px' }}>An authenticator app is enabled for this account.</p>
+                <p role="status" className="fs-12" style={{ color: '#2DD4BF' }}>An authenticator app is enabled for this account.</p>
               ) : mfaEnrollment ? (
                 <div>
                   {mfaEnrollment.totp?.qr_code && <img src={mfaEnrollment.totp.qr_code} alt="Scan this QR code with your authenticator app" style={{ display: 'block', width: '160px', maxWidth: '100%', margin: '12px auto', background: '#FFFFFF', padding: '8px', borderRadius: '8px' }} />}
-                  <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '10px', wordBreak: 'break-all' }}>Manual setup key: {mfaEnrollment.totp?.secret}</p>
+                  <p className="fs-12" style={{ color: 'rgba(255,255,255,0.6)', wordBreak: 'break-all' }}>Manual setup key: {mfaEnrollment.totp?.secret}</p>
                   <div className="form-group"><label htmlFor="mfa-code">6-digit authenticator code</label><input id="mfa-code" inputMode="numeric" autoComplete="one-time-code" value={mfaCode} onChange={event => setMfaCode(event.target.value)} /></div>
                   <button className="btn-primary full" type="button" onClick={verifyMfaEnrollment} disabled={mfaLoading || !mfaCode.trim()}>{mfaLoading ? 'Verifying...' : 'Verify and enable'}</button>
                 </div>
               ) : (
                 <button className="btn-ghost full" type="button" onClick={startMfaEnrollment} disabled={mfaLoading}>{mfaLoading ? 'Starting setup...' : 'Set up an authenticator app'}</button>
               )}
-              {mfaError && <p role="alert" style={{ color: '#ff9b9b', fontSize: '11px', marginTop: '8px' }}>{mfaError}</p>}
+              {mfaError && <p role="alert" className="fs-12" style={{ color: '#ff9b9b', marginTop: '8px' }}>{mfaError}</p>}
             </div>
           )}
 
           {/* DATA TAB */}
           {activeTab === TABS.DATA && (
             <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: 'rgba(255,255,255,0.08)' }}>
-              <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.5rem' }}>Delete my data</h3>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', lineHeight: '1.5', marginBottom: '0.75rem' }}>Permanently delete your profile, diary entries ({stats.totalEntries}), and all data.</p>
+              <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Delete my data</h3>
+              <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', lineHeight: '1.5', marginBottom: '0.75rem' }}>Permanently delete your profile, diary entries ({stats.totalEntries}), and all data.</p>
               {!showDeleteConfirm ? (
-                <button className="btn-danger full" style={{ fontSize: '12px', padding: '10px', minHeight: '44px' }} onClick={() => setShowDeleteConfirm(true)}>I want to delete my data</button>
+                <button className="btn-danger full fs-12" style={{ padding: '10px', minHeight: '44px' }} onClick={() => setShowDeleteConfirm(true)}>I want to delete my data</button>
               ) : (
                 <div>
                   {/* Step indicator */}
@@ -564,21 +564,21 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
                   </div>
                   {deleteStep === 0 && (
                     <div style={{ textAlign: 'center' }}>
-                      <p style={{ color: '#FFFFFF', fontSize: '11px', marginBottom: '0.75rem' }}>Are you sure? This cannot be undone.</p>
-                      <div style={{ display: 'flex', gap: '6px' }}><button className="btn-ghost" style={{ flex: 1, fontSize: '11px', minHeight: '44px' }} onClick={() => setShowDeleteConfirm(false)}>Cancel</button><button className="btn-danger" style={{ flex: 1, fontSize: '11px', minHeight: '44px' }} onClick={() => setDeleteStep(1)}>Continue</button></div>
+                      <p className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.75rem' }}>Are you sure? This cannot be undone.</p>
+                      <div style={{ display: 'flex', gap: '6px' }}><button className="btn-ghost fs-12" style={{ flex: 1, minHeight: '44px' }} onClick={() => setShowDeleteConfirm(false)}>Cancel</button><button className="btn-danger fs-12" style={{ flex: 1, minHeight: '44px' }} onClick={() => setDeleteStep(1)}>Continue</button></div>
                     </div>
                   )}
                   {deleteStep === 1 && (
                     <div style={{ textAlign: 'center' }}>
-                      <p style={{ color: '#FFFFFF', fontSize: '11px', marginBottom: '0.75rem', lineHeight: '1.5' }}>Deletes: account, diary entries ({stats.totalEntries}), CBT progress, all data.</p>
-                      <div style={{ display: 'flex', gap: '6px' }}><button className="btn-ghost" style={{ flex: 1, fontSize: '11px', minHeight: '44px' }} onClick={() => setDeleteStep(0)}>← Back</button><button className="btn-danger" style={{ flex: 1, fontSize: '11px', minHeight: '44px' }} onClick={() => setDeleteStep(2)}>I understand</button></div>
+                      <p className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.75rem', lineHeight: '1.5' }}>Deletes: account, diary entries ({stats.totalEntries}), CBT progress, all data.</p>
+                      <div style={{ display: 'flex', gap: '6px' }}><button className="btn-ghost fs-12" style={{ flex: 1, minHeight: '44px' }} onClick={() => setDeleteStep(0)}>← Back</button><button className="btn-danger fs-12" style={{ flex: 1, minHeight: '44px' }} onClick={() => setDeleteStep(2)}>I understand</button></div>
                     </div>
                   )}
                   {deleteStep === 2 && (
                     <div style={{ textAlign: 'center' }}>
-                      <p style={{ color: '#FFFFFF', fontSize: '11px', marginBottom: '0.5rem' }}>Type <strong>DELETE</strong></p>
-                      <input type="text" value={deleteInput} onChange={e => setDeleteInput(e.target.value)} placeholder="Type DELETE here" style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#0B1220', border: '2px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '12px', textAlign: 'center', fontFamily: 'var(--font-body)', outline: 'none', marginBottom: '0.5rem', boxSizing: 'border-box' }} />
-                      <button className="btn-danger full" onClick={handleDeleteAccount} disabled={deletingAccount || deleteInput !== 'DELETE'} style={{ fontSize: '12px', padding: '10px', minHeight: '44px', opacity: deleteInput === 'DELETE' ? 1 : 0.5 }}>{deletingAccount ? 'Deleting...' : 'Permanently delete'}</button>
+                      <p className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Type <strong>DELETE</strong></p>
+                      <input type="text" value={deleteInput} onChange={e => setDeleteInput(e.target.value)} placeholder="Type DELETE here" className="fs-12" style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#0B1220', border: '2px solid rgba(255,255,255,0.08)', color: '#FFFFFF', textAlign: 'center', fontFamily: 'var(--font-body)', outline: 'none', marginBottom: '0.5rem', boxSizing: 'border-box' }} />
+                      <button className="btn-danger full fs-12" onClick={handleDeleteAccount} disabled={deletingAccount || deleteInput !== 'DELETE'} style={{ padding: '10px', minHeight: '44px', opacity: deleteInput === 'DELETE' ? 1 : 0.5 }}>{deletingAccount ? 'Deleting...' : 'Permanently delete'}</button>
                     </div>
                   )}
                 </div>
@@ -586,7 +586,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
             </div>
           )}
 
-          <button className="btn-ghost full" onClick={handleSignOut} style={{ fontSize: '11px', padding: '10px', marginTop: '0.5rem', minHeight: '44px' }}>Sign out</button>
+          <button className="btn-ghost full fs-12" onClick={handleSignOut} style={{ padding: '10px', marginTop: '0.5rem', minHeight: '44px' }}>Sign out</button>
         </div>
       </div>
       <style>{`
