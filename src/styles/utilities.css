@@ -114,3 +114,51 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Language switcher */
+.language-switcher {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+}
+.language-switcher__option {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.65);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.language-switcher__option--active {
+  background: #2DD4BF;
+  color: #0B1220;
+}
+.language-switcher__option:focus-visible {
+  outline: 2px solid #7DBDEE;
+  outline-offset: 2px;
+}
+
+/* Low-data mode: set by Profile preference (html[data-low-data="true"]) */
+html[data-low-data='true'] *,
+html[data-low-data='true'] *::before,
+html[data-low-data='true'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+html[data-low-data='true'] img:not([data-low-data-keep]),
+html[data-low-data='true'] video:not([data-low-data-keep]),
+html[data-low-data='true'] canvas:not([data-low-data-keep]) {
+  display: none !important;
+}
+html[data-low-data='true'] .skeleton {
+  animation: none !important;
+}

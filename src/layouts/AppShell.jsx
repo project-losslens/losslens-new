@@ -11,6 +11,8 @@ import { useMediaQuery } from '../hooks'
 import { adminNav, communityPaths, getPageTitle, insurerNav, therapistNav, userNav, userNavGroups } from '../config/nav.config'
 import { useCrisisAlertCount } from '../context/CrisisAlertCountContext'
 import { supabase } from '../lib/supabase'
+import { startOfflineSync } from '../lib/offlineSync'
+import { useI18n } from '../i18n'
 
 const ELEVATED_UNLOCK_MS = 15 * 60 * 1000
 
@@ -25,6 +27,7 @@ export default function AppShell({ admin = false }) {
   const mainRef = useRef(null)
   const isMobile = useMediaQuery('(max-width: 768px)')
   const { isSuperAdmin, role, user } = useAuthProfile()
+  const { t } = useI18n()
   const openCrisisAlerts = useCrisisAlertCount()
   const [desktopOpen, setDesktopOpen] = useState(() => localStorage.getItem('losslens:sidebar') !== 'closed')
   const [drawerForLocation, setDrawerForLocation] = useState(null)
@@ -43,6 +46,8 @@ export default function AppShell({ admin = false }) {
   useEffect(() => {
     window.setTimeout(() => mainRef.current?.focus(), 0)
   }, [location.pathname])
+
+  useEffect(() => startOfflineSync(), [])
 
   useEffect(() => {
     if (!isMobile || !drawerOpen) return undefined
@@ -91,7 +96,7 @@ export default function AppShell({ admin = false }) {
 
   return (
     <div className={`shell${admin ? ' shell--admin' : ''}${isUserRole && isMobile ? ' shell--mobile-nav' : ''}`} style={{ '--sidebar-w': !isMobile && desktopOpen ? '240px' : '0px' }}>
-      <a className="shell__skip" href="#main-content">Skip to content</a>
+      <a className="shell__skip" href="#main-content">{t('shell.skipToContent')}</a>
       {!(isUserRole && isMobile) && (
         <Sidebar
           items={items}
@@ -112,25 +117,25 @@ export default function AppShell({ admin = false }) {
         className={`shell__toggle${isMobile ? ' shell__toggle--mobile' : ''}`}
         aria-expanded={isMobile ? drawerOpen : desktopOpen}
         aria-controls="app-sidebar"
-        aria-label={isMobile ? (drawerOpen ? 'Close menu' : 'Open menu') : (desktopOpen ? 'Collapse sidebar' : 'Expand sidebar')}
+        aria-label={isMobile ? (drawerOpen ? t('shell.closeMenu') : t('shell.openMenu')) : (desktopOpen ? t('shell.collapseSidebar') : t('shell.expandSidebar'))}
         onClick={() => isMobile
           ? setDrawerForLocation(drawerOpen ? null : location.key)
           : toggleDesktop()}
       >
         <AppIcon name={isMobile && drawerOpen ? 'close' : 'menu'} size={21} />
-        <span className="visually-hidden">{isMobile ? 'Toggle navigation' : 'Toggle sidebar'}</span>
+        <span className="visually-hidden">{isMobile ? t('shell.toggleNav') : t('shell.toggleSidebar')}</span>
       </button>
       )}
       <main className="shell__main" id="main-content" ref={mainRef} tabIndex={-1}>
         <header className="shell__header">
           <h1>{getPageTitle(location.pathname)}</h1>
           <div className="shell__header-actions">
-            {admin && <Link className="shell__back-link" to="/dashboard">Back to app</Link>}
+            {admin && <Link className="shell__back-link" to="/dashboard">{t('shell.backToApp')}</Link>}
             <details className="shell__account">
-              <summary>{user?.email || 'Account'}</summary>
+              <summary>{user?.email || t('shell.account')}</summary>
               <div className="shell__account-menu">
-                <Link to="/profile">Profile</Link>
-                <button type="button" onClick={handleSignOut}>Sign out</button>
+                <Link to="/profile">{t('shell.profile')}</Link>
+                <button type="button" onClick={handleSignOut}>{t('shell.signOut')}</button>
               </div>
             </details>
           </div>

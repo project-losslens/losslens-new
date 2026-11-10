@@ -4,6 +4,8 @@ import { roleHome, safeInternalPath } from '../../config/roleHome'
 import { createSupabaseClient } from '../../lib/supabase'
 import { primaryHelpline } from '../../config/helplines'
 import { PublicLayout } from '../../layouts/PublicLayout'
+import LanguageSwitcher from '../../components/LanguageSwitcher'
+import { useI18n } from '../../i18n'
 
 // Shared Google Icon
 const GoogleIcon = () => (
@@ -18,6 +20,7 @@ const GoogleIcon = () => (
 function Login() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { t } = useI18n()
   const emailRef = useRef(null)
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
@@ -62,7 +65,7 @@ function Login() {
     if (e) e.preventDefault()
     setError('')
     if (cooldown) return
-    if (!email.trim() || !password) { setError('Please enter your email and password.'); return }
+    if (!email.trim() || !password) { setError(t('login.errorFields')); return }
 
     setLoading(true)
     localStorage.setItem('losslens_remember_me', String(rememberMe))
@@ -81,9 +84,9 @@ function Login() {
         setCooldown(true)
         setCooldownUntil(until)
         sessionStorage.setItem('login_cooldown_until', until.toString())
-        setError('Too many attempts. Please try again later.')
+        setError(t('login.errorCooldown'))
       } else {
-        setError('Invalid credentials. Please try again.')
+        setError(t('login.errorCredentials'))
       }
       setLoading(false)
       return
@@ -97,7 +100,7 @@ function Login() {
     const { data: profile, error: profileError } = await loginClient.from('profiles').select('role').eq('id', data.user.id).single()
     if (profileError) {
       console.error('Could not load profile after sign-in:', profileError)
-      setError('Signed in, but we could not load your profile. Please retry.')
+      setError(t('login.errorProfile'))
       setLoading(false)
       return
     }
@@ -117,12 +120,12 @@ function Login() {
         options: { redirectTo: `${window.location.origin}/auth/callback` },
       })
       if (googleError) {
-        setError('Google sign-in failed. Please try again.')
+        setError(t('login.errorGoogle'))
         setGoogleLoading(false)
       }
     } catch (loginError) {
       console.error('Google sign-in failed:', loginError)
-      setError('Google sign-in failed. Please try again.')
+      setError(t('login.errorGoogle'))
       setGoogleLoading(false)
     }
   }
@@ -137,8 +140,11 @@ function Login() {
     <PublicLayout>
       <div className="auth-container">
         <div className="auth-card">
-          <h1 className="auth-title">Welcome back</h1>
-          <p className="auth-sub">Sign in to continue.</p>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
+            <LanguageSwitcher />
+          </div>
+          <h1 className="auth-title">{t('login.title')}</h1>
+          <p className="auth-sub">{t('login.subtitle')}</p>
 
           {error && (
             <div role="alert" aria-live="polite" style={{
@@ -148,7 +154,7 @@ function Login() {
               color: cooldown ? '#2DD4BF' : '#FFFFFF',
               fontSize: '13px', marginBottom: '1rem'
             }}>
-              {cooldown ? `⏳ ${error} Try again in ${formatCooldown()}.` : error}
+              {cooldown ? `${t('login.errorCooldown')} ${t('common.wait', { time: formatCooldown() })}` : error}
             </div>
           )}
 
@@ -161,47 +167,47 @@ function Login() {
             gap: '10px', marginBottom: '1.25rem', fontFamily: 'var(--font-body)',
             fontWeight: 500, opacity: (googleLoading || cooldown) ? 0.7 : 1
           }}>
-            {googleLoading ? <span className="spinner" /> : <><GoogleIcon /> Continue with Google</>}
+            {googleLoading ? <span className="spinner" /> : <><GoogleIcon /> {t('login.google')}</>}
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.25rem' }}>
             <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.12)' }}></div>
-            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>or sign in with email</span>
+            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>{t('login.orEmail')}</span>
             <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.12)' }}></div>
           </div>
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             <div className="form-group">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="email">{t('login.email')}</label>
               <input ref={emailRef} id="email" type="email" autoComplete="username" placeholder="jane@email.com" value={email} onChange={handleEmailChange} disabled={cooldown} />
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password">{t('login.password')}</label>
               <div style={{ position: 'relative' }}>
-                <input id="password" type={showPw ? 'text' : 'password'} autoComplete="current-password" placeholder="Enter password" value={password} onChange={handlePasswordChange} style={{ paddingRight: 44 }} disabled={cooldown} />
-                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: 12, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? 'Hide' : 'Show'}</button>
+                <input id="password" type={showPw ? 'text' : 'password'} autoComplete="current-password" placeholder={t('login.passwordPlaceholder')} value={password} onChange={handlePasswordChange} style={{ paddingRight: 44 }} disabled={cooldown} />
+                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? t('login.hidePassword') : t('login.showPassword')} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: 12, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? t('login.hidePassword') : t('login.showPassword')}</button>
               </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <input type="checkbox" id="remember" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} style={{ accentColor: '#2DD4BF', width: '15px', height: '15px', cursor: 'pointer' }} />
-                <label htmlFor="remember" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>Remember me</label>
+                <label htmlFor="remember" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>{t('login.remember')}</label>
               </div>
-              <button type="button" className="forgot" onClick={() => navigate('/forgot-password')} style={{ background: 'none', border: 'none', fontSize: '12px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'var(--font-body)', margin: 0, padding: 0 }}>Forgot password?</button>
+              <button type="button" className="forgot" onClick={() => navigate('/forgot-password')} style={{ background: 'none', border: 'none', fontSize: '12px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'var(--font-body)', margin: 0, padding: 0 }}>{t('login.forgot')}</button>
             </div>
 
             <button className="btn-primary full" type="submit" disabled={loading || cooldown} style={{ opacity: cooldown ? 0.5 : 1 }}>
-              {loading ? <span className="spinner"></span> : cooldown ? `Wait ${formatCooldown()}` : 'Log in'}
+              {loading ? <span className="spinner"></span> : cooldown ? t('login.wait', { time: formatCooldown() }) : t('login.submit')}
             </button>
           </form>
 
-          <p className="auth-switch">Don’t have an account? <Link to="/signup">Sign up free</Link></p>
-          <p className="auth-switch">Insurance partner? <Link to="/insurer/login">Insurer sign in</Link></p>
+          <p className="auth-switch">{t('login.noAccount')} <Link to="/signup">{t('login.signUp')}</Link></p>
+          <p className="auth-switch">{t('login.insurer')} <Link to="/insurer/login">{t('login.insurerLogin')}</Link></p>
 
           <div style={{ marginTop: '1.25rem', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', borderRadius: 8, padding: '10px 14px', textAlign: 'center' }}>
-            <p style={{ fontSize: 12, color: '#2DD4BF' }}>In crisis? Call {primaryHelpline.name}: <a href={`tel:${primaryHelpline.tel}`}>{primaryHelpline.phone}</a> ({primaryHelpline.hours})</p>
+            <p style={{ fontSize: 12, color: '#2DD4BF' }}>{t('login.crisis', { name: primaryHelpline.name, phone: primaryHelpline.phone, hours: primaryHelpline.hours })}</p>
           </div>
         </div>
       </div>

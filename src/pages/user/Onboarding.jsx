@@ -2,6 +2,8 @@ import { useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
+import LanguageSwitcher from '../../components/LanguageSwitcher'
+import { useI18n } from '../../i18n'
 
 //  Constants
 const GOAL_MAP = {
@@ -14,55 +16,56 @@ const GOAL_MAP = {
 const QUESTIONS = [
   {
     id: 'frequency',
-    title: 'How often do you gamble?',
-    subtitle: 'Be honest — this helps us personalize your experience',
+    titleKey: 'onboarding.q.frequency.title',
+    subtitleKey: 'onboarding.q.frequency.subtitle',
     options: [
-      { value: 'daily', label: 'Daily', emoji: '', desc: 'Most days of the week' },
-      { value: 'weekly', label: 'Weekly', emoji: '', desc: 'A few times per week' },
-      { value: 'monthly', label: 'Monthly', emoji: '', desc: 'A few times per month' },
-      { value: 'rarely', label: 'Rarely', emoji: '⏰', desc: 'Once in a while' },
+      { value: 'daily', descKey: 'onboarding.q.frequency.dailyDesc' },
+      { value: 'weekly', descKey: 'onboarding.q.frequency.weeklyDesc' },
+      { value: 'monthly', descKey: 'onboarding.q.frequency.monthlyDesc' },
+      { value: 'rarely', descKey: 'onboarding.q.frequency.rarelyDesc' },
     ]
   },
   {
     id: 'spending',
-    title: 'How much do you typically spend?',
-    subtitle: 'Per gambling session',
+    titleKey: 'onboarding.q.spending.title',
+    subtitleKey: 'onboarding.q.spending.subtitle',
     options: [
-      { value: 'high', label: 'KES 5,000+', emoji: '', desc: 'Significant amounts' },
-      { value: 'medium', label: 'KES 500-5,000', emoji: '', desc: 'Moderate amounts' },
-      { value: 'low', label: 'Under KES 500', emoji: '', desc: 'Small amounts' },
-      { value: 'varies', label: 'It varies a lot', emoji: '', desc: 'Depends on the day' },
+      { value: 'high', descKey: 'onboarding.q.spending.highDesc' },
+      { value: 'medium', descKey: 'onboarding.q.spending.mediumDesc' },
+      { value: 'low', descKey: 'onboarding.q.spending.lowDesc' },
+      { value: 'varies', descKey: 'onboarding.q.spending.variesDesc' },
     ]
   },
   {
     id: 'triggers',
-    title: 'What usually triggers you to gamble?',
-    subtitle: 'Select all that apply',
+    titleKey: 'onboarding.q.triggers.title',
+    subtitleKey: 'onboarding.q.triggers.subtitle',
     multi: true,
     options: [
-      { value: 'stress', label: 'Stress or anxiety', emoji: '' },
-      { value: 'boredom', label: 'Boredom', emoji: '' },
-      { value: 'sports', label: 'Sports matches', emoji: '' },
-      { value: 'money', label: 'Financial pressure / Payday', emoji: '' },
-      { value: 'social', label: 'Friends or peer pressure', emoji: '' },
-      { value: 'ads', label: 'Ads and promotions', emoji: '' },
+      { value: 'stress' },
+      { value: 'boredom' },
+      { value: 'sports' },
+      { value: 'money' },
+      { value: 'social' },
+      { value: 'ads' },
     ]
   },
   {
     id: 'goal',
-    title: 'What brings you to LossLens today?',
-    subtitle: 'Choose your primary goal',
+    titleKey: 'onboarding.q.goal.title',
+    subtitleKey: 'onboarding.q.goal.subtitle',
     options: [
-      { value: 'cut_down', label: 'Cut down', emoji: '', desc: 'Gamble less than I do now' },
-      { value: 'abstinence', label: 'Stop completely', emoji: '', desc: 'Quit gambling entirely' },
-      { value: 'maintain', label: 'Stay on track', emoji: '', desc: "I've already cut down, want to maintain" },
-      { value: 'exploring', label: 'Just exploring', emoji: '', desc: 'Learning about my options' },
+      { value: 'cut_down', descKey: 'onboarding.q.goal.cut_downDesc' },
+      { value: 'abstinence', descKey: 'onboarding.q.goal.abstinenceDesc' },
+      { value: 'maintain', descKey: 'onboarding.q.goal.maintainDesc' },
+      { value: 'exploring', descKey: 'onboarding.q.goal.exploringDesc' },
     ]
   },
 ]
 
 export default function Onboarding() {
   const navigate = useNavigate()
+  const { t } = useI18n()
   const [step, setStep] = useState(() => {
     const saved = sessionStorage.getItem('onboarding_step')
     return saved ? parseInt(saved) : 0
@@ -97,9 +100,16 @@ export default function Onboarding() {
     requestAnimationFrame(() => setAnimate(true))
   }, [])
 
+  const canProceed = useCallback(() => {
+    const q = QUESTIONS[step]
+    if (!q) return false
+    if (q.multi) return (answers[q.id] || []).length > 0
+    return !!answers[q.id]
+  }, [step, answers])
+
   const nextStep = useCallback(() => {
     if (!canProceed()) {
-      setValidationWarning('Please select an option before continuing.')
+      setValidationWarning(t('onboarding.validationWarning'))
       return
     }
     if (step >= QUESTIONS.length - 1) return
@@ -107,7 +117,7 @@ export default function Onboarding() {
     const newStep = step + 1
     setStep(newStep)
     saveProgress(newStep, answers)
-  }, [step, answers, triggerAnimate, saveProgress, canProceed])
+  }, [step, answers, triggerAnimate, saveProgress, canProceed, t])
 
   const prevStep = useCallback(() => {
     if (step <= 0) return
@@ -143,13 +153,6 @@ export default function Onboarding() {
     return answers[questionId] === value
   }, [answers, questionMap])
 
-  const canProceed = useCallback(() => {
-    const q = QUESTIONS[step]
-    if (!q) return false
-    if (q.multi) return (answers[q.id] || []).length > 0
-    return !!answers[q.id]
-  }, [step, answers])
-
   //  Memoized scoring
   const { score, risk, recommendations } = useMemo(() => {
     let s = 0
@@ -165,32 +168,32 @@ export default function Onboarding() {
     if (impacts.length >= 3) s += 3
     else if (impacts.length >= 1) s += 2
 
-    let riskLevel, riskColor, riskEmoji, riskLabel
-    if (s >= 7) { riskLevel = 'high'; riskColor = '#FFFFFF'; riskEmoji = ''; riskLabel = 'Significant Risk' }
-    else if (s >= 4) { riskLevel = 'medium'; riskColor = '#7DBDEE'; riskEmoji = ''; riskLabel = 'Moderate Risk' }
-    else { riskLevel = 'low'; riskColor = '#2DD4BF'; riskEmoji = ''; riskLabel = 'Lower Risk' }
+    let riskLevel, riskColor, riskLabel
+    if (s >= 7) { riskLevel = 'high'; riskColor = '#FFFFFF'; riskLabel = t('onboarding.risk.high') }
+    else if (s >= 4) { riskLevel = 'medium'; riskColor = '#7DBDEE'; riskLabel = t('onboarding.risk.medium') }
+    else { riskLevel = 'low'; riskColor = '#2DD4BF'; riskLabel = t('onboarding.risk.low') }
 
     const recs = []
     if (s >= 7) {
-      recs.push({ icon: '', text: 'Start with CBT Module 1: Understanding Your Gambling', action: '/cbt' })
-      recs.push({ icon: '', text: 'Log your first diary entry today — awareness is the first step', action: '/diary' })
-      recs.push({ icon: '🆘', text: 'Save emergency helplines — reaching out is strength', action: '/resources' })
+      recs.push({ textKey: 'onboarding.rec.high1', action: '/cbt' })
+      recs.push({ textKey: 'onboarding.rec.high2', action: '/diary' })
+      recs.push({ textKey: 'onboarding.rec.high3', action: '/resources' })
     } else if (s >= 4) {
-      recs.push({ icon: '', text: 'Track your patterns with the daily diary', action: '/diary' })
-      recs.push({ icon: '', text: 'Explore the Urge Toolkit for coping strategies', action: '/urge-toolkit' })
-      recs.push({ icon: '', text: 'Try CBT Module 1 to understand your triggers', action: '/cbt' })
+      recs.push({ textKey: 'onboarding.rec.med1', action: '/diary' })
+      recs.push({ textKey: 'onboarding.rec.med2', action: '/urge-toolkit' })
+      recs.push({ textKey: 'onboarding.rec.med3', action: '/cbt' })
     } else {
-      recs.push({ icon: '', text: 'Start with a daily diary entry to build awareness', action: '/diary' })
-      recs.push({ icon: '', text: 'Join The Circle to connect with others on this journey', action: '/circle' })
-      recs.push({ icon: '', text: 'Set a small goal — every clean day counts', action: '/dashboard' })
+      recs.push({ textKey: 'onboarding.rec.low1', action: '/diary' })
+      recs.push({ textKey: 'onboarding.rec.low2', action: '/circle' })
+      recs.push({ textKey: 'onboarding.rec.low3', action: '/dashboard' })
     }
 
     return {
       score: s,
-      risk: { level: riskLevel, color: riskColor, emoji: riskEmoji, label: riskLabel },
+      risk: { level: riskLevel, color: riskColor, label: riskLabel },
       recommendations: recs,
     }
-  }, [answers])
+  }, [answers, t])
 
   const progress = useMemo(() => ((step + 1) / QUESTIONS.length) * 100, [step])
 
@@ -212,7 +215,7 @@ export default function Onboarding() {
 
       if (error) {
         console.error('Onboarding save error:', error)
-        setSaveError('We could not save your onboarding answers. Please try again.')
+        setSaveError(t('onboarding.saveError'))
         setLoading(false)
         return
       }
@@ -251,12 +254,11 @@ export default function Onboarding() {
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2.5rem 2rem', maxWidth: '500px', width: '100%', textAlign: 'center', animation: 'fadeIn 0.5s ease-out' }}>
           <AppIcon name="flame" size={48} style={{ display: 'block', margin: '0 auto 12px', color: '#2DD4BF' }} />
-          <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', marginBottom: '8px' }}>Your journey begins</h2>
+          <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', marginBottom: '8px' }}>{t('onboarding.journeyBegins')}</h2>
 
           <div style={{ background: '#0B1220', borderRadius: '12px', padding: '16px', margin: '16px 0', border: `2px solid ${risk.color}` }}>
-            <span style={{ fontSize: '32px' }}>{risk.emoji}</span>
             <p style={{ color: risk.color, fontSize: '14px', fontWeight: 600, margin: '8px 0 4px' }}>{risk.label}</p>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>Based on your answers, we've personalized your experience.</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>{t('onboarding.riskNote')}</p>
           </div>
 
           {validationWarning && (
@@ -266,29 +268,27 @@ export default function Onboarding() {
           )}
 
           <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-            <p style={{ color: '#2DD4BF', fontSize: '13px', fontWeight: 500, marginBottom: '10px' }}> Recommended first steps:</p>
+            <p style={{ color: '#2DD4BF', fontSize: '13px', fontWeight: 500, marginBottom: '10px' }}>{t('onboarding.recommended')}</p>
             {recommendations.map((r, i) => (
-              <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'flex-start', cursor: 'pointer', padding: '8px', borderRadius: '8px', transition: 'background 0.2s' }}
+              <button
+                key={i}
+                type="button"
+                className="card-action"
+                style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'flex-start', padding: '8px', borderRadius: '8px', border: 'none', background: 'transparent', textAlign: 'left', width: '100%', cursor: 'pointer', fontFamily: 'var(--font-body)' }}
                 onClick={() => r.action && navigate(r.action)}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.12)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                role="button"
-                tabIndex={0}
-                onKeyDown={e => { if (e.key === 'Enter' && r.action) navigate(r.action) }}
               >
-                <span style={{ fontSize: '18px', flexShrink: 0 }}>{r.icon}</span>
-                <span style={{ color: '#7DBDEE', fontSize: '13px', lineHeight: '1.5' }}>{r.text}</span>
-              </div>
+                <span style={{ color: '#7DBDEE', fontSize: '13px', lineHeight: '1.5' }}>{t(r.textKey)}</span>
+              </button>
             ))}
           </div>
 
           <button className="btn-primary full" onClick={handleFinish} disabled={loading} style={{ padding: '14px', fontSize: '15px' }}>
-            {loading ? <span className="spinner"></span> : 'Start my journey →'}
+            {loading ? <span className="spinner"></span> : `${t('onboarding.start')} →`}
           </button>
           {saveError && <p role="alert" style={{ color: '#FFFFFF', fontSize: '13px', marginTop: '12px' }}>{saveError}</p>}
 
           <button onClick={() => { setStep(QUESTIONS.length - 1); triggerAnimate() }} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-            ← Change my answers
+            ← {t('onboarding.changeAnswers')}
           </button>
         </div>
       </div>
@@ -301,7 +301,7 @@ export default function Onboarding() {
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ width: '32px', height: '32px', border: '3px solid rgba(255,255,255,0.12)', borderTopColor: '#2DD4BF', borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 16px' }}></div>
-          <p style={{ color: '#2DD4BF', fontSize: '14px' }}>Setting up your account...</p>
+          <p style={{ color: '#2DD4BF', fontSize: '14px' }}>{t('onboarding.setup')}</p>
         </div>
       </div>
     )
@@ -312,10 +312,13 @@ export default function Onboarding() {
   return (
     <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
       <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2rem', maxWidth: '500px', width: '100%', animation: 'fadeIn 0.3s ease-out' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+          <LanguageSwitcher />
+        </div>
         {/* Progress bar */}
         <div style={{ marginBottom: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>Question {step + 1} of {QUESTIONS.length}</span>
+            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>{t('onboarding.progress', { current: step + 1, total: QUESTIONS.length })}</span>
             <span style={{ color: '#2DD4BF', fontSize: '12px' }}>{Math.round(progress)}%</span>
           </div>
           <div className="progress-bar">
@@ -326,10 +329,10 @@ export default function Onboarding() {
         {/* Question */}
         <div style={{ marginBottom: '24px', animation: animate ? 'fadeIn 0.3s ease-out' : 'none' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-            <h2 style={{ color: '#FFFFFF', fontSize: '18px', fontWeight: 600, fontFamily: 'var(--font-body)', margin: 0 }}>{q.title}</h2>
-            {q.multi && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', background: '#0B1220', padding: '2px 8px', borderRadius: '100px' }}>{(answers[q.id] || []).length} selected</span>}
+            <h2 style={{ color: '#FFFFFF', fontSize: '18px', fontWeight: 600, fontFamily: 'var(--font-body)', margin: 0 }}>{t(q.titleKey)}</h2>
+            {q.multi && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', background: '#0B1220', padding: '2px 8px', borderRadius: '100px' }}>{t('onboarding.selected', { count: (answers[q.id] || []).length })}</span>}
           </div>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginBottom: '20px' }}>{q.subtitle}</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginBottom: '20px' }}>{t(q.subtitleKey)}</p>
 
           {/* Options */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -352,10 +355,9 @@ export default function Onboarding() {
                   }}
                   onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSelect(q.id, option.value) } }}
                 >
-                  <span style={{ fontSize: '24px', flexShrink: 0 }}>{option.emoji}</span>
                   <div style={{ flex: 1 }}>
-                    <p style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 500, margin: 0 }}>{option.label}</p>
-                    {option.desc && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '2px 0 0' }}>{option.desc}</p>}
+                    <p style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 500, margin: 0 }}>{t(`onboarding.q.${q.id}.${option.value}`)}</p>
+                    {option.descKey && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '2px 0 0' }}>{t(option.descKey)}</p>}
                   </div>
                   {selected && <AppIcon name="check" size={18} style={{ marginLeft: 'auto', flexShrink: 0, color: '#2DD4BF' }} />}
                 </button>
@@ -365,7 +367,7 @@ export default function Onboarding() {
 
           {/* Multi-select helper */}
           {q.multi && (answers[q.id] || []).length === 0 && (
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '10px', textAlign: 'center' }}>Tap to select — you can choose multiple</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '10px', textAlign: 'center' }}>{t('onboarding.multiHint')}</p>
           )}
         </div>
 
@@ -373,7 +375,7 @@ export default function Onboarding() {
         <div style={{ display: 'flex', gap: '8px' }}>
           {step > 0 && (
             <button onClick={prevStep} className="btn-ghost" style={{ flex: 1, padding: '14px', fontSize: '15px' }}>
-              ← Back
+              ← {t('onboarding.back')}
             </button>
           )}
           <button
@@ -381,17 +383,17 @@ export default function Onboarding() {
             onClick={step < QUESTIONS.length - 1 ? nextStep : () => setStep(QUESTIONS.length)}
             style={{ padding: '14px', fontSize: '15px', flex: step > 0 ? 2 : 1 }}
           >
-            {step < QUESTIONS.length - 1 ? 'Next →' : 'See my results →'}
+            {step < QUESTIONS.length - 1 ? `${t('onboarding.next')} →` : `${t('onboarding.seeResults')} →`}
           </button>
         </div>
 
         {/* Skip */}
         <button onClick={handleSkip} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-          Skip for now
+          {t('onboarding.skip')}
         </button>
 
         <p style={{ color: '#7DBDEE', fontSize: '10px', textAlign: 'center', marginTop: '8px' }}>
-          Your answers help us personalize your experience. You can change them later.
+          {t('onboarding.privacyNote')}
         </p>
       </div>
 

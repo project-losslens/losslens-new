@@ -7,14 +7,18 @@ import './styles/globals.css'
 import './styles/utilities.css'
 import App from './App.jsx'
 
-import { registerSW } from './lib/pwa'
+import { registerSW, setupInstallPrompt } from './lib/pwa'
 
 // Register service worker
 registerSW()
 
 // Handle PWA install prompt
-import { setupInstallPrompt } from './lib/pwa'
 setupInstallPrompt()
+
+// Apply the low-data preference before first paint.
+if (localStorage.getItem('losslens_low_data') === 'true') {
+  document.documentElement.dataset.lowData = 'true'
+}
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

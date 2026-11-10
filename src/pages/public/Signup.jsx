@@ -4,6 +4,8 @@ import { supabase } from '../../lib/supabase'
 import { primaryHelpline } from '../../config/helplines'
 import { PublicLayout } from '../../layouts/PublicLayout'
 import AppIcon from '../../components/AppIcon'
+import LanguageSwitcher from '../../components/LanguageSwitcher'
+import { useI18n } from '../../i18n'
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 48 48">
@@ -15,6 +17,7 @@ const GoogleIcon = () => (
 );
 
 function Signup() {
+  const { t } = useI18n()
   const [searchParams] = useSearchParams()
   const typeFromUrl = searchParams.get('type') || 'individual'
 
@@ -55,10 +58,10 @@ function Signup() {
   }, [])
 
   const strength = useMemo(() => {
-    const labels = ['', 'Weak', 'Fair', 'Good', 'Strong']
+    const labels = ['', t('signup.strength.1'), t('signup.strength.2'), t('signup.strength.3'), t('signup.strength.4')]
     const colors = ['', '#FFFFFF', '#7DBDEE', '#2DD4BF', '#2DD4BF']
     return { label: labels[passwordStrength], color: colors[passwordStrength] }
-  }, [passwordStrength])
+  }, [passwordStrength, t])
 
   // Validate company code
   const validateCompanyCode = useCallback(async (code) => {
@@ -153,26 +156,26 @@ function Signup() {
         provider: 'google',
         options,
       })
-      if (googleError) { setError('Google sign-up failed. Please try again.'); setGoogleLoading(false) }
+      if (googleError) { setError(t('signup.googleError')); setGoogleLoading(false) }
     } catch { setGoogleLoading(false) }
   }
 
   const validateForm = () => {
     const errors = {}
-    if (!form.name.trim()) errors.name = 'Full name is required'
-    if (!form.username.trim()) errors.username = 'Username is required'
-    else if (form.username.length < 3) errors.username = 'At least 3 characters'
-    if (!form.email.trim()) errors.email = 'Email is required'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email)) errors.email = 'Enter a valid email'
-    if (!/^\d{3} \d{3} \d{3}$/.test(form.phone) && form.phone.trim()) errors.phone = 'Format: 7XX XXX XXX'
-    if (!form.password) errors.password = 'Password is required'
-    else if (form.password.length < 8) errors.password = 'At least 8 characters'
-    else if (!/[a-zA-Z]/.test(form.password) || !/[0-9]/.test(form.password)) errors.password = 'Include a letter and a number'
-    if (form.password !== form.confirmPassword) errors.confirmPassword = "Passwords don't match"
-    if (!ageConfirmed) errors.age = 'You must confirm you are 18 or older'
-    if (!consent) errors.consent = 'You must agree to continue'
+    if (!form.name.trim()) errors.name = t('signup.err.name')
+    if (!form.username.trim()) errors.username = t('signup.err.username')
+    else if (form.username.length < 3) errors.username = t('signup.err.usernameMin')
+    if (!form.email.trim()) errors.email = t('signup.err.email')
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email)) errors.email = t('signup.err.emailInvalid')
+    if (!/^\d{3} \d{3} \d{3}$/.test(form.phone) && form.phone.trim()) errors.phone = t('signup.err.phone')
+    if (!form.password) errors.password = t('signup.err.password')
+    else if (form.password.length < 8) errors.password = t('signup.err.passwordMin')
+    else if (!/[a-zA-Z]/.test(form.password) || !/[0-9]/.test(form.password)) errors.password = t('signup.err.passwordWeak')
+    if (form.password !== form.confirmPassword) errors.confirmPassword = t('signup.err.confirm')
+    if (!ageConfirmed) errors.age = t('signup.err.age')
+    if (!consent) errors.consent = t('signup.err.consent')
     if (signupType === 'company' && (!companyCode || !companyValidation?.valid)) {
-      errors.company_code = 'A valid company code is required'
+      errors.company_code = t('signup.err.companyCode')
     }
     setFieldErrors(errors)
     return Object.keys(errors).length === 0
@@ -205,7 +208,7 @@ function Signup() {
         }
       })
       if (signUpError) throw signUpError
-      if (!data.user) throw new Error('Signup failed. Please try again.')
+      if (!data.user) throw new Error(t('signup.failed'))
 
       sessionStorage.setItem('signup_email', form.email)
       if (data.user && data.session) sessionStorage.setItem('losslens_new_signup', data.user.id)
@@ -236,21 +239,21 @@ function Signup() {
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
             <AppIcon name="mail" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#7DBDEE' }} />
-            <h1 className="auth-title">Check your email</h1>
-            <p className="auth-sub" style={{ lineHeight: '1.6' }}>We've sent a confirmation link to <strong style={{ color: '#2DD4BF' }}>{signedUpEmail}</strong></p>
+            <h1 className="auth-title">{t('signup.checkEmail')}</h1>
+            <p className="auth-sub" style={{ lineHeight: '1.6' }}>{t('signup.sentTo')} <strong style={{ color: '#2DD4BF' }}>{signedUpEmail}</strong></p>
             {signupType === 'company' && companyValidation?.company_name && (
               <p style={{ color: '#2DD4BF', fontSize: '13px', marginTop: '8px' }}>
-                 Linked to <strong>{companyValidation.company_name}</strong>
+                 {t('signup.linkedTo')} <strong>{companyValidation.company_name}</strong>
               </p>
             )}
-            <p style={{ color: '#2DD4BF', fontSize: '13px', margin: '16px 0', lineHeight: '1.6' }}>Click the link in the email to activate your account. Then come back here to log in.</p>
+            <p style={{ color: '#2DD4BF', fontSize: '13px', margin: '16px 0', lineHeight: '1.6' }}>{t('signup.activate')}</p>
             <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: '8px', padding: '12px', marginBottom: '20px', border: '1px solid #2DD4BF' }}>
-              <p style={{ color: '#2DD4BF', fontSize: '13px', fontWeight: 600, margin: '0 0 4px' }}> Didn't receive it?</p>
-              <p style={{ color: '#2DD4BF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Check your <strong>spam/junk folder</strong>. Some email providers filter automated messages.</p>
+              <p style={{ color: '#2DD4BF', fontSize: '13px', fontWeight: 600, margin: '0 0 4px' }}> {t('signup.noEmail')}</p>
+              <p style={{ color: '#2DD4BF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>{t('signup.spam')}</p>
             </div>
-            <Link className="btn-primary full" to="/login">Go to login</Link>
+            <Link className="btn-primary full" to="/login">{t('signup.goToLogin')}</Link>
             <button onClick={handleResendEmail} disabled={resending || resendSent} style={{ width: '100%', marginTop: '10px', padding: '10px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: resendSent ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-              {resendSent ? ' Sent!' : resending ? 'Sending...' : 'Resend email'}
+              {resendSent ? ` ${t('signup.resendSent')}` : resending ? t('signup.sending') : ` ${t('signup.resend')}`}
             </button>
           </div>
         </div>
@@ -262,11 +265,12 @@ function Signup() {
     <PublicLayout>
       <div className="auth-container">
         <div className="auth-card">
-          <h1 className="auth-title">Create your account</h1>
+          <h1 className="auth-title">{t('signup.title')}</h1>
+          <LanguageSwitcher />
           <p className="auth-sub">
             {signupType === 'company'
-              ? 'Create your account with your company code for subsidized access.'
-              : 'Create a free account — no credit card needed.'}
+              ? t('signup.subtitleCompany')
+              : t('signup.subtitleIndividual')}
           </p>
 
           {error && <div role="alert" aria-live="polite" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
@@ -282,7 +286,7 @@ function Signup() {
                 fontSize: '12px', fontWeight: signupType === 'individual' ? 600 : 400,
                 cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.2s'
               }}>
-               Individual
+               {t('signup.individual')}
             </button>
             <button
               onClick={() => setSignupType('company')}
@@ -293,7 +297,7 @@ function Signup() {
                 fontSize: '12px', fontWeight: signupType === 'company' ? 600 : 400,
                 cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.2s'
               }}>
-               Company
+               {t('signup.company')}
             </button>
           </div>
 
@@ -306,12 +310,12 @@ function Signup() {
             gap: '10px', marginBottom: '1.25rem', fontFamily: 'var(--font-body)',
             fontWeight: 500, opacity: googleLoading ? 0.7 : 1
           }}>
-            {googleLoading ? <span className="spinner" /> : <><GoogleIcon /> Continue with Google</>}
+            {googleLoading ? <span className="spinner" /> : <><GoogleIcon /> {t('signup.google')}</>}
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.25rem' }}>
             <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.12)' }}></div>
-            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>or sign up with email</span>
+            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>{t('signup.orEmail')}</span>
             <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.12)' }}></div>
           </div>
 
@@ -319,12 +323,12 @@ function Signup() {
             {/* Company Code Field — only for company signup */}
             {signupType === 'company' && (
               <div className="form-group">
-                <label htmlFor="companyCode">COMPANY CODE *</label>
+                <label htmlFor="companyCode">{t('signup.companyCode')} *</label>
                 <div style={{ position: 'relative' }}>
                   <input
                     id="companyCode"
                     type="text"
-                    placeholder="e.g. AARXYZ"
+                    placeholder={t('signup.companyCodePlaceholder')}
                     value={companyCode}
                     onChange={e => handleCodeChange(e.target.value)}
                     style={{
@@ -336,64 +340,64 @@ function Signup() {
                   />
                   {validatingCode && <AppIcon name="clock" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#7DBDEE' }} />}
                   {!validatingCode && companyValidation?.valid && (
-                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#2DD4BF', fontSize: '12px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}><AppIcon name="check" size={14} />Valid</span>
+                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#2DD4BF', fontSize: '12px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}><AppIcon name="check" size={14} />{t('signup.valid')}</span>
                   )}
                   {!validatingCode && companyValidation && !companyValidation.valid && !companyValidation.validation_error && (
-                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FFFFFF', fontSize: '12px' }}>Invalid</span>
+                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FFFFFF', fontSize: '12px' }}>{t('signup.invalid')}</span>
                   )}
                 </div>
                 {companyValidation?.valid && (
                   <span style={{ fontSize: '11px', color: '#2DD4BF' }}>
-                    {companyValidation.company_name} — {companyValidation.seats_remaining === null ? 'Unlimited seats' : `${companyValidation.seats_remaining} seats available`}
+                    {companyValidation.company_name} — {companyValidation.seats_remaining === null ? t('signup.unlimitedSeats') : t('signup.seatsAvailable', { count: companyValidation.seats_remaining })}
                   </span>
                 )}
-                {companyValidation?.validation_error && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Could not verify this code. Please try again.</span>}
+                {companyValidation?.validation_error && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{t('signup.codeError')}</span>}
                 {companyValidation && !companyValidation.valid && !companyValidation.validation_error && (
-                  <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Invalid company code. Check with your employer.</span>
+                  <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{t('signup.invalidCode')}</span>
                 )}
                 {fieldErrors.company_code && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.company_code}</span>}
               </div>
             )}
 
             <div className="form-group">
-              <label htmlFor="name">FULL NAME *</label>
-              <input id="name" type="text" autoComplete="name" required placeholder="e.g. Amina Wanjiru" value={form.name} onChange={e => { setForm(p => ({ ...p, name: e.target.value })); setFieldErrors(p => ({ ...p, name: '' })) }} style={fieldErrors.name ? { borderColor: '#FFFFFF' } : {}} aria-invalid={!!fieldErrors.name} />
+              <label htmlFor="name">{t('signup.fullName')} *</label>
+              <input id="name" type="text" autoComplete="name" required placeholder={t('signup.namePlaceholder')} value={form.name} onChange={e => { setForm(p => ({ ...p, name: e.target.value })); setFieldErrors(p => ({ ...p, name: '' })) }} style={fieldErrors.name ? { borderColor: '#FFFFFF' } : {}} aria-invalid={!!fieldErrors.name} />
               {fieldErrors.name && <span id="name-error" style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.name}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="username">USERNAME *</label>
+              <label htmlFor="username">{t('signup.usernameLabel')} *</label>
               <div style={{ position: 'relative' }}>
                 <input id="username" type="text" autoComplete="username" required placeholder="e.g. amina_w" value={form.username} onChange={e => handleUsernameChange(e.target.value)} style={{ paddingRight: 40, ...(fieldErrors.username ? { borderColor: '#FFFFFF' } : {}) }} />
                 {usernameStatus === 'checking' && <AppIcon name="clock" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#7DBDEE' }} />}
                 {usernameStatus === 'available' && <AppIcon name="check" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#2DD4BF' }} />}
                 {usernameStatus === 'taken' && <AppIcon name="close" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FFFFFF' }} />}
               </div>
-              {usernameStatus === 'taken' && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Username already taken</span>}
-              {usernameStatus === 'available' && <span style={{ fontSize: '11px', color: '#2DD4BF' }}>Username available!</span>}
+              {usernameStatus === 'taken' && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{t('signup.usernameTakenMsg')}</span>}
+              {usernameStatus === 'available' && <span style={{ fontSize: '11px', color: '#2DD4BF' }}>{t('signup.usernameAvailableMsg')}</span>}
               {fieldErrors.username && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.username}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="phone">PHONE NUMBER (optional)</label>
+              <label htmlFor="phone">{t('signup.phoneLabel')}</label>
               <div className="phone-input">
                 <span className="phone-prefix">🇰🇪 +254</span>
-                <input id="phone" type="tel" autoComplete="tel" placeholder="7XX XXX XXX" value={form.phone} onChange={e => { handlePhoneChange(e.target.value); setFieldErrors(p => ({ ...p, phone: '' })) }} style={fieldErrors.phone ? { borderColor: '#FFFFFF' } : {}} />
+                <input id="phone" type="tel" autoComplete="tel" placeholder={t('signup.phonePlaceholder')} value={form.phone} onChange={e => { handlePhoneChange(e.target.value); setFieldErrors(p => ({ ...p, phone: '' })) }} style={fieldErrors.phone ? { borderColor: '#FFFFFF' } : {}} />
               </div>
               {fieldErrors.phone && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.phone}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="email">EMAIL ADDRESS *</label>
+              <label htmlFor="email">{t('signup.emailLabel')} *</label>
               <input id="email" ref={emailRef} type="email" autoComplete="email" required placeholder="you@example.com" value={form.email} onChange={e => { setForm(p => ({ ...p, email: e.target.value })); setFieldErrors(p => ({ ...p, email: '' })) }} style={fieldErrors.email ? { borderColor: '#FFFFFF' } : {}} />
               {fieldErrors.email && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.email}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">PASSWORD *</label>
+              <label htmlFor="password">{t('signup.passwordLabel')} *</label>
               <div style={{ position: 'relative' }}>
-                <input id="password" type={showPw ? 'text' : 'password'} autoComplete="new-password" required placeholder="Min 8 chars, 1 letter + 1 number" value={form.password} onChange={e => { setForm(p => ({ ...p, password: e.target.value })); setPasswordStrength(calculateStrength(e.target.value)); setFieldErrors(p => ({ ...p, password: '' })) }} style={{ paddingRight: 44, ...(fieldErrors.password ? { borderColor: '#FFFFFF' } : {}) }} />
-                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: 12, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? 'Hide' : 'Show'}</button>
+                <input id="password" type={showPw ? 'text' : 'password'} autoComplete="new-password" required placeholder={t('signup.passwordPlaceholder')} value={form.password} onChange={e => { setForm(p => ({ ...p, password: e.target.value })); setPasswordStrength(calculateStrength(e.target.value)); setFieldErrors(p => ({ ...p, password: '' })) }} style={{ paddingRight: 44, ...(fieldErrors.password ? { borderColor: '#FFFFFF' } : {}) }} />
+                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? t('signup.hidePwAria') : t('signup.showPwAria')} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: 12, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? t('signup.hide') : t('signup.show')}</button>
               </div>
               {form.password.length > 0 && (
                 <div style={{ marginTop: '6px' }}>
@@ -402,48 +406,48 @@ function Signup() {
                       <div key={level} style={{ flex: 1, height: '4px', borderRadius: '2px', background: passwordStrength >= level ? (passwordStrength === 4 ? '#2DD4BF' : strength.color) : 'rgba(255,255,255,0.12)', transition: 'background 0.3s ease' }} />
                     ))}
                   </div>
-                  <span style={{ fontSize: '11px', color: passwordStrength === 4 ? '#2DD4BF' : (strength.color || 'rgba(255,255,255,0.4)') }}>{passwordStrength === 4 ? 'Strong ' : (strength.label || 'Type a password')}</span>
+                  <span style={{ fontSize: '11px', color: passwordStrength === 4 ? '#2DD4BF' : (strength.color || 'rgba(255,255,255,0.4)') }}>{passwordStrength === 4 ? `${t('signup.strength.4')} ` : (strength.label || t('signup.typePassword'))}</span>
                 </div>
               )}
               {fieldErrors.password && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.password}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="confirmPassword">CONFIRM PASSWORD *</label>
+              <label htmlFor="confirmPassword">{t('signup.confirmLabel')} *</label>
               <div style={{ position: 'relative' }}>
-                <input id="confirmPassword" type={showConfirmPw ? 'text' : 'password'} autoComplete="new-password" required placeholder="Re-enter your password" value={form.confirmPassword} onChange={e => { setForm(p => ({ ...p, confirmPassword: e.target.value })); setFieldErrors(p => ({ ...p, confirmPassword: '' })) }} style={{ paddingRight: 44, ...(fieldErrors.confirmPassword ? { borderColor: '#FFFFFF' } : {}) }} />
-                <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} aria-label={showConfirmPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: 12, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showConfirmPw ? 'Hide' : 'Show'}</button>
+                <input id="confirmPassword" type={showConfirmPw ? 'text' : 'password'} autoComplete="new-password" required placeholder={t('signup.confirmPlaceholder')} value={form.confirmPassword} onChange={e => { setForm(p => ({ ...p, confirmPassword: e.target.value })); setFieldErrors(p => ({ ...p, confirmPassword: '' })) }} style={{ paddingRight: 44, ...(fieldErrors.confirmPassword ? { borderColor: '#FFFFFF' } : {}) }} />
+                <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} aria-label={showConfirmPw ? t('signup.hidePwAria') : t('signup.showPwAria')} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: 12, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showConfirmPw ? t('signup.hide') : t('signup.show')}</button>
               </div>
-              {form.confirmPassword && form.password !== form.confirmPassword && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Passwords don't match</span>}
-              {form.confirmPassword && form.password === form.confirmPassword && <span style={{ fontSize: '11px', color: '#2DD4BF' }}>Passwords match </span>}
+              {form.confirmPassword && form.password !== form.confirmPassword && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{t('signup.mismatch')}</span>}
+              {form.confirmPassword && form.password === form.confirmPassword && <span style={{ fontSize: '11px', color: '#2DD4BF' }}>{t('signup.match')} </span>}
               {fieldErrors.confirmPassword && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.confirmPassword}</span>}
             </div>
 
             <div className="checkbox-group" style={{ marginBottom: '0.5rem' }}>
               <input type="checkbox" id="age" checked={ageConfirmed} onChange={e => { setAgeConfirmed(e.target.checked); setFieldErrors(p => ({ ...p, age: '' })) }} required />
-              <label htmlFor="age">I confirm I am <strong style={{ color: '#2DD4BF' }}>18 years or older</strong></label>
+              <label htmlFor="age">{t('signup.ageConfirm')}</label>
               {fieldErrors.age && <span style={{ fontSize: '11px', color: '#FFFFFF', display: 'block' }}>{fieldErrors.age}</span>}
             </div>
 
             <div className="checkbox-group" style={{ marginBottom: '1rem' }}>
               <input type="checkbox" id="consent" checked={consent} onChange={(event) => setConsent(event.target.checked)} required />
-              <label htmlFor="consent">I understand this app supports my wellbeing and is not a replacement for professional therapy. <Link to="/privacy">Privacy Policy</Link></label>
+              <label htmlFor="consent">{t('signup.consent')} <Link to="/privacy">{t('signup.privacyPolicy')}</Link></label>
               {fieldErrors.consent && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.consent}</span>}
             </div>
 
             <button className="btn-primary full" type="submit" disabled={!canSubmit}>
-              {loading ? <span className="spinner" /> : signupType === 'company' ? 'Create Company Account' : 'Create My Account'}
+              {loading ? <span className="spinner" /> : signupType === 'company' ? t('signup.submitCompany') : t('signup.submitIndividual')}
             </button>
           </form>
 
-          <p className="auth-switch">Already have an account? <Link to="/login">Sign in</Link></p>
+          <p className="auth-switch">{t('signup.alreadyHave')} <Link to="/login">{t('signup.logIn')}</Link></p>
 
           <p style={{ color: '#7DBDEE', fontSize: '11px', textAlign: 'center', marginTop: '0.75rem' }}>
-             Your data is private and never sold. You can delete everything anytime.
+             {t('signup.privacyNote')}
           </p>
 
           <div style={{ marginTop: '1.25rem', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', borderRadius: 8, padding: '10px 14px', textAlign: 'center' }}>
-            <p style={{ fontSize: 12, color: '#2DD4BF' }}>In crisis? Call {primaryHelpline.name}: <a href={`tel:${primaryHelpline.tel}`}>{primaryHelpline.phone}</a> ({primaryHelpline.hours})</p>
+            <p style={{ fontSize: 12, color: '#2DD4BF' }}>{t('signup.crisis', { name: primaryHelpline.name, phone: primaryHelpline.phone, hours: primaryHelpline.hours })}</p>
           </div>
         </div>
       </div>

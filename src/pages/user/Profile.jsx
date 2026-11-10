@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
+import LanguageSwitcher from '../../components/LanguageSwitcher'
+import { useI18n } from '../../i18n'
 
 //  Constants
 const TABS = { PROFILE: 'profile', SETTINGS: 'settings', SECURITY: 'security', DATA: 'data' }
@@ -20,6 +22,7 @@ function showToast(message, duration = 3000) {
 
 export default function Profile() {
   const navigate = useNavigate()
+  const { t, lang } = useI18n()
   const [userId, setUserId] = useState(null)
   const [email, setEmail] = useState('')
   const [fullName, setFullName] = useState('')
@@ -68,6 +71,23 @@ export default function Profile() {
   const fileInputRef = useRef(null)
 
   useEffect(() => { fetchAllData() }, [])
+
+  // Keep the stored language preference in sync with the active UI language.
+  useEffect(() => {
+    setPrefs(prev => prev.language === (lang === 'sw' ? 'Kiswahili' : 'English')
+      ? prev
+      : { ...prev, language: lang === 'sw' ? 'Kiswahili' : 'English' })
+  }, [lang])
+
+  useEffect(() => {
+    if (prefs.low_data_mode) {
+      document.documentElement.dataset.lowData = 'true'
+      localStorage.setItem('losslens_low_data', 'true')
+    } else {
+      delete document.documentElement.dataset.lowData
+      localStorage.setItem('losslens_low_data', 'false')
+    }
+  }, [prefs.low_data_mode])
 
   const fetchAllData = async () => {
     const { data: { session } } = await supabase.auth.getSession()
@@ -509,14 +529,18 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
           {activeTab === TABS.SETTINGS && (
             <>
               <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-                <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Privacy</h3>
+                <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>{t('profile.language')}</h3>
+                <LanguageSwitcher />
+              </div>
+              <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
+                <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>{t('profile.preferences')}</h3>
                 {[{ label: 'Behavioral analytics', key: 'allow_analytics' }, { label: 'Share anonymized data', key: 'share_research_data' }, { label: 'M-Pesa monitoring', key: 'mpesa_monitoring' }].map(item => (
                   <div className="toggle-row" key={item.key}><span className="toggle-label">{item.label}</span><input type="checkbox" className="toggle-check" checked={prefs[item.key]} onChange={e => setPrefs(prev => ({ ...prev, [item.key]: e.target.checked }))} /></div>
                 ))}
               </div>
               <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
                 <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Appearance</h3>
-                <div className="toggle-row"><span className="toggle-label">Low-data mode</span><input type="checkbox" className="toggle-check" checked={prefs.low_data_mode} onChange={e => setPrefs(prev => ({ ...prev, low_data_mode: e.target.checked }))} /></div>
+                <div className="toggle-row"><span className="toggle-label">{t('profile.lowData')}<br /><span className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('profile.lowDataHint')}</span></span><input type="checkbox" className="toggle-check" checked={prefs.low_data_mode} onChange={e => setPrefs(prev => ({ ...prev, low_data_mode: e.target.checked }))} /></div>
               </div>
               <button className="btn-primary full fs-12" onClick={savePrefs} disabled={savingPrefs} style={{ padding: '10px', minHeight: '44px' }}>{savingPrefs ? 'Saving...' : 'Save preferences'}</button>
             </>

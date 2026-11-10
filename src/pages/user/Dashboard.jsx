@@ -6,6 +6,7 @@ import NotificationBell from '../../components/NotificationBell'
 import AppIcon from '../../components/AppIcon'
 import { getRiskLevel, getRiskColor } from '../../lib/relapsePrediction'
 import { HELPLINES } from '../../config/helplines'
+import { useI18n } from '../../i18n'
 
 // Crisis Contacts (single source: src/config/helplines.js)
 const CRISIS_CONTACTS = HELPLINES.map((h) => ({
@@ -51,6 +52,7 @@ function showToast(message, duration = 3000) {
 }
 
 function UsernamePrompt({ userId, onComplete }) {
+  const { t } = useI18n()
   const [username, setUsername] = useState('')
   const [status, setStatus] = useState('')
   const [loading, setLoading] = useState(false)
@@ -78,12 +80,12 @@ function UsernamePrompt({ userId, onComplete }) {
 
   const handleSave = async () => {
     setError('')
-    if (!username || username.length < 3) { setError('Username must be at least 3 characters.'); return }
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) { setError('Only letters, numbers, and underscores.'); return }
-    if (status === 'taken') { setError('Username already taken.'); return }
+    if (!username || username.length < 3) { setError(t('dashboard.usernameMin')); return }
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) { setError(t('dashboard.usernameChars')); return }
+    if (status === 'taken') { setError(t('dashboard.usernameTakenErr')); return }
     setLoading(true)
     const { error: updateError } = await supabase.from('profiles').update({ username: username.toLowerCase().trim() }).eq('id', userId)
-    if (updateError) { setError('Could not save username. Try again.'); setLoading(false); return }
+    if (updateError) { setError(t('dashboard.usernameSaveErr')); setLoading(false); return }
     setLoading(false)
     onComplete(username.toLowerCase().trim())
   }
@@ -92,28 +94,29 @@ function UsernamePrompt({ userId, onComplete }) {
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.97)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
       <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '400px' }}>
         <AppIcon name="users" size={40} style={{ display: 'block', margin: '0 auto 12px', color: '#7DBDEE' }} />
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: '#FFFFFF', marginBottom: '8px', textAlign: 'center' }}>One last thing</h2>
-        <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem', textAlign: 'center', lineHeight: 1.6 }}>Choose a username for The Circle, Whispers, and your profile. This is how others will see you — anonymously.</p>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: '#FFFFFF', marginBottom: '8px', textAlign: 'center' }}>{t('dashboard.usernameTitle')}</h2>
+        <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem', textAlign: 'center', lineHeight: 1.6 }}>{t('dashboard.usernameSub')}</p>
         {error && <div className="fs-13" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', marginBottom: '1rem' }}>{error}</div>}
         <div className="form-group">
-          <label>USERNAME</label>
+          <label>{t('dashboard.usernameLabel')}</label>
           <div style={{ position: 'relative' }}>
             <input type="text" placeholder="e.g. amina_w" value={username} onChange={e => handleChange(e.target.value)} style={{ paddingRight: 40 }} onKeyDown={e => e.key === 'Enter' && handleSave()} />
             {status === 'checking' && <AppIcon name="clock" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#7DBDEE' }} />}
             {status === 'available' && <AppIcon name="check" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#2DD4BF' }} />}
             {status === 'taken' && <AppIcon name="close" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FFFFFF' }} />}
           </div>
-          {status === 'taken' && <span className="fs-12" style={{ color: '#FFFFFF' }}>Username already taken</span>}
-          {status === 'available' && <span className="fs-12" style={{ color: '#2DD4BF' }}>Username available!</span>}
-          <span className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>Letters, numbers, and underscores only</span>
+          {status === 'taken' && <span className="fs-12" style={{ color: '#FFFFFF' }}>{t('dashboard.usernameTaken')}</span>}
+          {status === 'available' && <span className="fs-12" style={{ color: '#2DD4BF' }}>{t('dashboard.usernameAvailable')}</span>}
+          <span className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('dashboard.usernameRules')}</span>
         </div>
-        <button className="btn-primary full" onClick={handleSave} disabled={loading || status === 'taken' || status === 'checking'}>{loading ? <span className="spinner" /> : 'Save & Continue →'}</button>
+        <button className="btn-primary full" onClick={handleSave} disabled={loading || status === 'taken' || status === 'checking'}>{loading ? <span className="spinner" /> : `${t('dashboard.usernameSave')} →`}</button>
       </div>
     </div>
   )
 }
 
 function Dashboard() {
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
   const [entries, setEntries] = useState([])
@@ -215,17 +218,17 @@ function Dashboard() {
 
   const handleTouchStart = (e) => { if (window.scrollY === 0) touchStartY.current = e.touches[0].clientY }
   const handleTouchMove = (e) => { if (touchStartY.current === 0) return; const distance = e.touches[0].clientY - touchStartY.current; if (distance > 0 && window.scrollY === 0) { setPullDistance(Math.min(distance * 0.4, 120)) } }
-  const handleTouchEnd = async () => { if (pullDistance >= pullThreshold && !refreshing) { setRefreshing(true); await fetchData(); showToast('Dashboard refreshed ', 2000); setRefreshing(false) } touchStartY.current = 0; setPullDistance(0) }
+  const handleTouchEnd = async () => { if (pullDistance >= pullThreshold && !refreshing) { setRefreshing(true); await fetchData(); showToast(t('dashboard.refreshToast'), 2000); setRefreshing(false) } touchStartY.current = 0; setPullDistance(0) }
 
   const [moneyInfoOpen, setMoneyInfoOpen] = useState(false)
   const stats = [
-    { label: 'Days clean', value: profile?.streak_days || 0, icon: 'flame', ariaLabel: 'Streak days', highlight: (profile?.streak_days || 0) >= 7 },
-    { label: 'Money saved', value: profile?.money_saved ? `KES ${profile.money_saved.toLocaleString()}` : 'KES 0', icon: 'coin', ariaLabel: 'Money saved', onClick: () => setMoneyInfoOpen(o => !o) },
-    { label: 'Sessions logged', value: entries.length, icon: 'diary', ariaLabel: 'Sessions logged', emptyMessage: 'First entry coming soon!' },
-    { label: 'CBT modules', value: cbtCount, icon: 'brain', ariaLabel: 'CBT modules completed', highlight: cbtCount >= 3 },
+    { label: t('dashboard.stat.daysClean'), value: profile?.streak_days || 0, icon: 'flame', ariaLabel: t('dashboard.stat.streakAria'), highlight: (profile?.streak_days || 0) >= 7 },
+    { label: t('dashboard.stat.moneySaved'), value: profile?.money_saved ? `KES ${profile.money_saved.toLocaleString()}` : 'KES 0', icon: 'coin', ariaLabel: t('dashboard.stat.moneyAria'), onClick: () => setMoneyInfoOpen(o => !o) },
+    { label: t('dashboard.stat.sessions'), value: entries.length, icon: 'diary', ariaLabel: t('dashboard.stat.sessionsAria'), emptyMessage: t('dashboard.stat.firstEntry') },
+    { label: t('dashboard.stat.cbt'), value: cbtCount, icon: 'brain', ariaLabel: t('dashboard.stat.cbtAria'), highlight: cbtCount >= 3 },
   ]
 
-  const firstName = profile?.full_name?.split(' ')[0] || 'there'
+  const firstName = profile?.full_name?.split(' ')[0] || t('dashboard.there')
 
   if (loading) {
     return (
@@ -241,9 +244,9 @@ function Dashboard() {
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
           <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
-          <h2 className="fs-22" style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>Please log in</h2>
-          <p className="fs-14" style={{ color: '#2DD4BF', marginBottom: '24px' }}>Your session has expired.</p>
-          <button onClick={() => navigate('/login', { replace: true })} className="fs-14" style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%' }}>Go to Login →</button>
+          <h2 className="fs-22" style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>{t('dashboard.sessionExpired')}</h2>
+          <p className="fs-14" style={{ color: '#2DD4BF', marginBottom: '24px' }}>{t('dashboard.sessionExpiredSub')}</p>
+          <button onClick={() => navigate('/login', { replace: true })} className="fs-14" style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%' }}>{t('dashboard.goToLogin')} →</button>
         </div>
       </div>
     )
@@ -252,30 +255,30 @@ function Dashboard() {
   return (
     <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
       {showUsernamePrompt && userId && (
-        <UsernamePrompt userId={userId} onComplete={(newUsername) => { setProfile(prev => ({ ...prev, username: newUsername })); setShowUsernamePrompt(false); showToast(`Welcome to LossLens, @${newUsername}! `, 3000); }} />
+        <UsernamePrompt userId={userId} onComplete={(newUsername) => { setProfile(prev => ({ ...prev, username: newUsername })); setShowUsernamePrompt(false); showToast(t('dashboard.welcomeUsername', { username: newUsername }), 3000); }} />
       )}
 
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
           <div>
             <h1 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}>
-              {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}, <span style={{ color: '#2DD4BF' }}>{firstName}</span>
+              {new Date().getHours() < 12 ? t('dashboard.greeting.morning') : new Date().getHours() < 17 ? t('dashboard.greeting.afternoon') : t('dashboard.greeting.evening')}, <span style={{ color: '#2DD4BF' }}>{firstName}</span>
             </h1>
-            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{profile?.streak_days ? `${profile.streak_days}-day streak ` : 'Start your streak today'}</p>
+            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{profile?.streak_days ? t('dashboard.streakDays', { count: profile.streak_days }) : t('dashboard.startStreak')}</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <NotificationBell />
-            <span className={`risk-badge ${profile?.risk_level || 'low'}`}>{(profile?.risk_level || 'Low').charAt(0).toUpperCase() + (profile?.risk_level || 'low').slice(1)} Risk</span>
+            <span className={`risk-badge ${profile?.risk_level || 'low'}`}>{t('dashboard.riskBadge', { level: (profile?.risk_level || 'low').charAt(0).toUpperCase() + (profile?.risk_level || 'low').slice(1) })}</span>
           </div>
         </div>
 
         {showInstallPrompt && (
           <div style={{ background: '#171E2B', border: '2px solid #2DD4BF', borderRadius: '16px', padding: '16px 20px', margin: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', animation: 'slideDown 0.4s ease-out', boxShadow: '0 4px 20px rgba(45,212,191,0.2)' }}>
             <AppIcon name="download" size={36} style={{ flexShrink: 0, color: '#2DD4BF' }} />
-            <div style={{ flex: 1, minWidth: '200px' }}><p className="fs-14" style={{ color: '#2DD4BF', fontWeight: 600, margin: '0 0 4px' }}>Add LossLens to your home screen</p><p className="fs-12" style={{ color: '#FFFFFF', margin: 0, lineHeight: '1.5' }}>Install for quick access — works offline, no app store needed.</p></div>
+            <div style={{ flex: 1, minWidth: '200px' }}><p className="fs-14" style={{ color: '#2DD4BF', fontWeight: 600, margin: '0 0 4px' }}>{t('dashboard.installTitle')}</p><p className="fs-12" style={{ color: '#FFFFFF', margin: 0, lineHeight: '1.5' }}>{t('dashboard.installSub')}</p></div>
             <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-              <button onClick={() => { setShowInstallPrompt(false); sessionStorage.setItem('pwa_install_dismissed', 'true') }} className="fs-12" style={{ padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>Not now</button>
-              <button onClick={installPWA} className="fs-12" style={{ padding: '8px 20px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>Install </button>
+              <button onClick={() => { setShowInstallPrompt(false); sessionStorage.setItem('pwa_install_dismissed', 'true') }} className="fs-12" style={{ padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>{t('dashboard.installNotNow')}</button>
+              <button onClick={installPWA} className="fs-12" style={{ padding: '8px 20px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>{t('dashboard.install')} </button>
             </div>
           </div>
         )}
@@ -308,7 +311,7 @@ function Dashboard() {
 
             {moneyInfoOpen && (
               <p className="fs-12" style={{ color: 'rgba(255,255,255,0.55)', margin: '-0.5rem 0 1rem', lineHeight: 1.6 }}>
-                Money saved = the total you logged as spent on days marked clean (no gambling), in Kenyan shillings. It updates automatically after each diary entry.
+                {t('dashboard.moneyFormula')}
               </p>
             )}
 
@@ -316,60 +319,60 @@ function Dashboard() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <AppIcon name="diary" size={28} style={{ color: '#2DD4BF', flexShrink: 0 }} />
                 <div style={{ flex: 1 }}>
-                  <h3 className="fs-15" style={{ color: '#FFFFFF', margin: 0 }}>Today's check-in</h3>
-                  <p className="fs-12" style={{ color: 'rgba(255,255,255,0.55)', margin: '2px 0 0' }}>Mood, urge level and whether you gambled — about 20 seconds.</p>
+                  <h3 className="fs-15" style={{ color: '#FFFFFF', margin: 0 }}>{t('dashboard.checkinTitle')}</h3>
+                  <p className="fs-12" style={{ color: 'rgba(255,255,255,0.55)', margin: '2px 0 0' }}>{t('dashboard.checkinSub')}</p>
                 </div>
-                <span className="fs-13" style={{ color: '#2DD4BF', fontWeight: 600, whiteSpace: 'nowrap' }}>Start</span>
+                <span className="fs-13" style={{ color: '#2DD4BF', fontWeight: 600, whiteSpace: 'nowrap' }}>{t('dashboard.checkinStart')}</span>
               </div>
             </Link>
 
             {riskData && (
               <div role="alert" aria-live="polite" style={{ background: getRiskColor(riskData.score).bg, border: `1px solid ${getRiskColor(riskData.score).color}`, borderRadius: '12px', padding: '14px 16px', marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: riskData.factors?.length > 0 ? '8px' : '0' }}>
-                  <h3 className="fs-14" style={{ color: getRiskColor(riskData.score).color, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>{riskData.level !== 'low' && <AppIcon name="alert" size={16} />}{getRiskColor(riskData.score).label} Today</h3>
+                  <h3 className="fs-14" style={{ color: getRiskColor(riskData.score).color, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>{riskData.level !== 'low' && <AppIcon name="alert" size={16} />}{getRiskColor(riskData.score).label} {t('dashboard.riskToday')}</h3>
                 </div>
                 {(riskData.factors || []).map((f, i) => (<p key={i} className="fs-12" style={{ color: getRiskColor(riskData.score).color, opacity: 0.8, margin: '2px 0' }}>• {f}</p>))}
-                <p className="fs-12" style={{ color: getRiskColor(riskData.score).color, opacity: 0.7, margin: '6px 0 0' }}>Suggested: take 10 minutes with the Urge Toolkit before deciding anything.</p>
-                {riskData.level !== 'low' && <button onClick={() => navigate('/urge-toolkit')} className="fs-13" style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#2DD4BF', border: 'none', borderRadius: '8px', color: '#0B1220', fontWeight: 600, cursor: 'pointer' }}> Open Urge Toolkit</button>}
+                <p className="fs-12" style={{ color: getRiskColor(riskData.score).color, opacity: 0.7, margin: '6px 0 0' }}>{t('dashboard.riskSuggested')}</p>
+                {riskData.level !== 'low' && <button onClick={() => navigate('/urge-toolkit')} className="fs-13" style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#2DD4BF', border: 'none', borderRadius: '8px', color: '#0B1220', fontWeight: 600, cursor: 'pointer' }}> {t('dashboard.openToolkit')}</button>}
               </div>
             )}
 
             <Link to="/cbt" className="clickable" style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '16px', marginBottom: '1rem', textDecoration: 'none' }}>
               <AppIcon name="brain" size={28} style={{ color: '#7DBDEE', flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
-                <h3 className="fs-15" style={{ color: '#FFFFFF', margin: 0 }}>Continue</h3>
-                <p className="fs-12" style={{ color: 'rgba(255,255,255,0.55)', margin: '2px 0 0' }}>{cbtCount > 0 ? `${cbtCount} CBT module${cbtCount === 1 ? '' : 's'} completed — pick up where you left off` : 'Start your first CBT module'}</p>
+                <h3 className="fs-15" style={{ color: '#FFFFFF', margin: 0 }}>{t('dashboard.continue')}</h3>
+                <p className="fs-12" style={{ color: 'rgba(255,255,255,0.55)', margin: '2px 0 0' }}>{cbtCount > 0 ? t(cbtCount === 1 ? 'dashboard.continueModule' : 'dashboard.continueModules', { count: cbtCount }) : t('dashboard.continueFirst')}</p>
               </div>
-              <span className="fs-13" style={{ color: '#7DBDEE', fontWeight: 600 }}>Open</span>
+              <span className="fs-13" style={{ color: '#7DBDEE', fontWeight: 600 }}>{t('dashboard.continueOpen')}</span>
             </Link>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '1rem' }}>
               <Link to="/circle" className="clickable" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, #7DBDEE 100%)', border: '1px solid #2DD4BF', borderRadius: '12px', padding: '1rem', display: 'block', textDecoration: 'none' }}>
-                <AppIcon name="users" size={24} style={{ color: '#2DD4BF' }} /><h3 className="fs-13" style={{ color: '#2DD4BF', margin: '6px 0 4px' }}>The Circle</h3><p className="fs-12" style={{ color: '#2DD4BF', fontWeight: 300, margin: 0 }}>{circleOnline > 0 ? `${circleOnline} members online` : 'Join the conversation'}</p>
+                <AppIcon name="users" size={24} style={{ color: '#2DD4BF' }} /><h3 className="fs-13" style={{ color: '#2DD4BF', margin: '6px 0 4px' }}>The Circle</h3><p className="fs-12" style={{ color: '#2DD4BF', fontWeight: 300, margin: 0 }}>{circleOnline > 0 ? t('dashboard.circleOnline', { count: circleOnline }) : t('dashboard.circleJoin')}</p>
               </Link>
               <Link to="/whispers" className="clickable" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '1rem', display: 'block', textDecoration: 'none' }}>
-                <AppIcon name="chat" size={24} style={{ color: '#7DBDEE' }} /><h3 className="fs-13" style={{ color: '#FFFFFF', margin: '6px 0 4px' }}>Whispers</h3><p className="fs-12" style={{ color: '#2DD4BF', fontWeight: 300, margin: 0 }}>{whispersActive > 0 ? `${whispersActive} active chats` : 'Find a peer'}</p>
+                <AppIcon name="chat" size={24} style={{ color: '#7DBDEE' }} /><h3 className="fs-13" style={{ color: '#FFFFFF', margin: '6px 0 4px' }}>Whispers</h3><p className="fs-12" style={{ color: '#2DD4BF', fontWeight: 300, margin: 0 }}>{whispersActive > 0 ? t('dashboard.whispersActive', { count: whispersActive }) : t('dashboard.whispersFind')}</p>
               </Link>
             </div>
 
             <div className="dash-section">
-              <div className="section-header"><h3>This week</h3></div>
+              <div className="section-header"><h3>{t('dashboard.thisWeek')}</h3></div>
               <div className="week-chart">{weekData.map((d, i) => (<div className="week-day" key={i}><div className={`day-bar ${d.gambled ? 'gambled' : 'clean'}`} style={{ height: d.gambled ? '40px' : d.mood ? '60px' : '30px', transition: 'height 0.3s ease' }} /><span className="day-label">{d.day}</span></div>))}</div>
-              <div className="chart-legend"><span className="legend-item"><span className="dot clean"></span> Clean day</span><span className="legend-item"><span className="dot gambled"></span> Gambled</span></div>
+              <div className="chart-legend"><span className="legend-item"><span className="dot clean"></span> {t('dashboard.legendClean')}</span><span className="legend-item"><span className="dot gambled"></span> {t('dashboard.legendGambled')}</span></div>
             </div>
 
             <AIChat profile={profile} />
 
             <div className="dash-section">
-              <div className="section-header"><h3>Recent diary entries</h3><button type="button" className="see-all clickable" onClick={() => navigate('/diary')}>See all</button></div>
+              <div className="section-header"><h3>{t('dashboard.recentEntries')}</h3><button type="button" className="see-all clickable" onClick={() => navigate('/diary')}>{t('dashboard.seeAll')}</button></div>
               <div className="entries-list">
                 {entries.length === 0 ? (
-                  <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '1.5rem' }}>No entries yet. Log your first diary entry!</p>
+                  <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '1.5rem' }}>{t('dashboard.noEntries')}</p>
                 ) : entries.slice(0, 3).map((e) => (
                   <div className="entry-item" key={e.id || e.date}>
-                    <div className="entry-top"><span className="entry-date">{new Date(e.date).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric' })}</span><span className={`entry-status ${e.gambled ? 'gambled' : 'clean'}`}>{e.gambled ? 'Gambled' : 'Clean'}</span></div>
+                    <div className="entry-top"><span className="entry-date">{new Date(e.date).toLocaleDateString(lang === 'sw' ? 'sw-KE' : 'en-KE', { weekday: 'short', month: 'short', day: 'numeric' })}</span><span className={`entry-status ${e.gambled ? 'gambled' : 'clean'}`}>{e.gambled ? t('dashboard.entryGambled') : t('dashboard.entryClean')}</span></div>
                     <div className="entry-mood">{e.mood || '—'}</div>
-                    <p className="entry-note">{e.notes || 'No notes added.'}</p>
+                    <p className="entry-note">{e.notes || t('dashboard.entryNoNotes')}</p>
                   </div>
                 ))}
               </div>
@@ -377,12 +380,12 @@ function Dashboard() {
 
             {/* Crisis Support Bar - Updated with multiple contacts */}
             <div style={{ position: 'relative', background: 'rgba(255,255,255,0.12)', border: '2px solid #FFFFFF', borderRadius: '14px', padding: '16px', marginBottom: '1rem' }}>
-              <button type="button" className="card-action" aria-label="Open crisis support options" onClick={() => setShowCrisisModal(true)} />
+              <button type="button" className="card-action" aria-label={t('dashboard.crisisAria')} onClick={() => setShowCrisisModal(true)} />
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                 <AppIcon name="alert" size={24} style={{ color: '#FFFFFF', flexShrink: 0 }} />
                 <div>
-                  <p className="fs-13" style={{ color: '#FFFFFF', fontWeight: 600, margin: 0 }}>Feeling overwhelmed? You're not alone.</p>
-                  <p className="fs-12" style={{ color: '#2DD4BF', margin: '2px 0 0' }}>Tap here for free 24/7 support options</p>
+                  <p className="fs-13" style={{ color: '#FFFFFF', fontWeight: 600, margin: 0 }}>{t('dashboard.crisisBarTitle')}</p>
+                  <p className="fs-12" style={{ color: '#2DD4BF', margin: '2px 0 0' }}>{t('dashboard.crisisBarSub')}</p>
                 </div>
                 <span className="fs-18" style={{ color: '#FFFFFF', marginLeft: 'auto' }}>→</span>
               </div>
@@ -398,8 +401,8 @@ function Dashboard() {
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '2px solid #FFFFFF', maxWidth: '450px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
               <AppIcon name="alert" size={48} style={{ display: 'block', margin: '0 auto 8px', color: '#FFFFFF' }} />
-              <h2 style={{ color: '#FFFFFF', fontFamily: 'var(--font-display)', fontSize: '1.5rem', margin: '0 0 8px' }}>You're Not Alone</h2>
-              <p className="fs-13" style={{ color: '#2DD4BF', lineHeight: '1.6', margin: 0 }}>These services are free, confidential, and available to anyone in Kenya. Reach out anytime.</p>
+              <h2 style={{ color: '#FFFFFF', fontFamily: 'var(--font-display)', fontSize: '1.5rem', margin: '0 0 8px' }}>{t('dashboard.crisisTitle')}</h2>
+              <p className="fs-13" style={{ color: '#2DD4BF', lineHeight: '1.6', margin: 0 }}>{t('dashboard.crisisSub')}</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '1.5rem' }}>
               {CRISIS_CONTACTS.map((contact, i) => (
@@ -415,7 +418,7 @@ function Dashboard() {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <span style={{ color: contact.priority ? '#FFFFFF' : '#FFFFFF', fontSize: contact.priority ? '15px' : '13px', fontWeight: 600 }}>{contact.name}</span>
-                      {contact.priority && <span className="fs-12" style={{ background: 'var(--surface-2)', color: 'var(--text-muted)', padding: '2px 8px', borderRadius: '100px', fontWeight: 600 }}>First Call</span>}
+                      {contact.priority && <span className="fs-12" style={{ background: 'var(--surface-2)', color: 'var(--text-muted)', padding: '2px 8px', borderRadius: '100px', fontWeight: 600 }}>{t('dashboard.crisisFirstCall')}</span>}
                     </div>
                     <p className="fs-12" style={{ color: '#2DD4BF', margin: '2px 0 0' }}>{contact.phone}  · {contact.hours}</p>
                   </div>
@@ -423,8 +426,8 @@ function Dashboard() {
                 </a>
               ))}
             </div>
-            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', marginBottom: '1rem' }}>All calls are free, confidential, and available 24/7.</p>
-            <button onClick={() => setShowCrisisModal(false)} className="btn-primary full fs-14" style={{ padding: '12px' }}>Close</button>
+            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', marginBottom: '1rem' }}>{t('dashboard.crisisFootnote')}</p>
+            <button onClick={() => setShowCrisisModal(false)} className="btn-primary full fs-14" style={{ padding: '12px' }}>{t('dashboard.crisisClose')}</button>
           </div>
         </div>
       )}

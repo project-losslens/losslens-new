@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { HeartHandshake, Phone, Wind, X } from 'lucide-react'
 import { HELPLINES } from '../config/helplines'
+import { useI18n } from '../i18n'
 
 const EXERCISE_SECONDS = 60
 
 export default function CrisisAccessButton() {
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [secondsLeft, setSecondsLeft] = useState(0)
 
@@ -16,10 +18,10 @@ export default function CrisisAccessButton() {
   }, [secondsLeft])
 
   const breathingPhase = secondsLeft === 0
-    ? 'Ready when you are'
+    ? t('help.breathingReady')
     : Math.floor((EXERCISE_SECONDS - secondsLeft) % 8) < 4
-      ? 'Breathe in'
-      : 'Breathe out'
+      ? t('help.breatheIn')
+      : t('help.breatheOut')
 
   return (
     <>
@@ -31,7 +33,7 @@ export default function CrisisAccessButton() {
         aria-expanded={open}
       >
         <HeartHandshake size={18} aria-hidden="true" />
-        <span>Need help now</span>
+        <span>{t('help.needNow')}</span>
       </button>
       {open && (
         <div className="crisis-access__backdrop" onMouseDown={(event) => {
@@ -45,10 +47,10 @@ export default function CrisisAccessButton() {
           >
             <header className="crisis-access__header">
               <div>
-                <p className="crisis-access__eyebrow">Support is available</p>
-                <h2 id="crisis-access-title">You do not have to face this alone</h2>
+                <p className="crisis-access__eyebrow">{t('help.supportAvailable')}</p>
+                <h2 id="crisis-access-title">{t('help.title')}</h2>
               </div>
-              <button type="button" className="crisis-access__close" onClick={() => setOpen(false)} aria-label="Close support panel">
+              <button type="button" className="crisis-access__close" onClick={() => setOpen(false)} aria-label={t('help.close')}>
                 <X size={20} aria-hidden="true" />
               </button>
             </header>
@@ -61,24 +63,24 @@ export default function CrisisAccessButton() {
               <Wind size={20} aria-hidden="true" />
               <div aria-live="polite">
                 <strong>{breathingPhase}</strong>
-                <small>{secondsLeft ? `${secondsLeft} seconds remaining` : 'Try a gentle one-minute breathing pause.'}</small>
+                <small>{secondsLeft ? t('help.secondsLeft', { count: secondsLeft }) : t('help.breathingHint')}</small>
               </div>
               <button type="button" onClick={() => setSecondsLeft(EXERCISE_SECONDS)}>
-                {secondsLeft ? 'Restart' : 'Start'}
+                {secondsLeft ? t('help.restart') : t('help.start')}
               </button>
             </div>
             <div className="crisis-access__actions">
               <Link className="crisis-access__toolkit" to="/urge-toolkit" onClick={() => setOpen(false)}>
-                Open Urge Toolkit
+                {t('help.toolkit')}
               </Link>
               <Link className="crisis-access__toolkit" to="/family-portal" onClick={() => setOpen(false)}>
-                Message a trusted supporter
+                {t('help.supporter')}
               </Link>
               <Link className="crisis-access__toolkit" to="/dashboard" onClick={() => setOpen(false)}>
-                Talk to LossLens AI
+                {t('help.ai')}
               </Link>
             </div>
-            <p className="crisis-access__emergency">If you are in immediate danger, contact local emergency services or someone you trust.</p>
+            <p className="crisis-access__emergency">{t('help.emergency')}</p>
           </section>
         </div>
       )}
