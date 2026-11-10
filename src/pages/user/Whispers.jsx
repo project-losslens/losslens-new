@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { supabase } from '../../lib/supabase'
 import { ensureCircleHash } from '../../lib/storage'
+import AppIcon from '../../components/AppIcon'
 
 //  Constants
 const MAX_ACTIVE_CHATS = 3
@@ -10,7 +11,6 @@ const MESSAGE_COOLDOWN_MS = 1000
 const POLL_INTERVAL = 3000
 const REQUEST_POLL_INTERVAL = 5000
 
-const ANIMALS = ['', '', '', '', '', '', '', '', '', '']
 const PREFIXES = ['Sage', 'River', 'Cloud', 'Star', 'Pine', 'Luna', 'Wild', 'Calm', 'Dawn', 'Fern']
 
 const CONVERSATION_STARTERS = [
@@ -35,7 +35,7 @@ function generateAnonymousName(userId, roomId) {
   let combined = userId + roomId
   let hash = 0
   for (let i = 0; i < combined.length; i++) { hash = ((hash << 5) - hash) + combined.charCodeAt(i); hash = hash & hash }
-  return `${PREFIXES[Math.abs(hash) % PREFIXES.length]} ${ANIMALS[Math.abs(hash + 1) % ANIMALS.length]}`
+  return PREFIXES[Math.abs(hash) % PREFIXES.length]
 }
 
 function containsBlockedContent(message) { return BLOCKED_PATTERNS.some(p => p.test(message)) }
@@ -51,6 +51,7 @@ function showToast(message, duration = 3000) {
 
 export default function Whispers() {
   const [identity, setIdentity] = useState(null)
+  const [initError, setInitError] = useState(false)
   const [activeMatch, setActiveMatch] = useState(null)
   const [matches, setMatches] = useState([])
   const [messages, setMessages] = useState([])
@@ -94,13 +95,19 @@ export default function Whispers() {
   }
 
   const initUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return
-    const uid = session.user.id
-    const hash = await ensureCircleHash(uid)
-    setIdentity({ hash, uid })
-    identityRef.current = { hash, uid }
-    fetchMatches(hash)
+    try {
+      setInitError(false)
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
+      const uid = session.user.id
+      const hash = await ensureCircleHash(uid)
+      setIdentity({ hash, uid })
+      identityRef.current = { hash, uid }
+      fetchMatches(hash)
+    } catch (err) {
+      console.error('Whispers init error:', err)
+      setInitError(true)
+    }
   }
 
   const generateChatName = useCallback((room) => {
@@ -305,6 +312,13 @@ export default function Whispers() {
   const activeChats = useMemo(() => matches.filter(m => m.status === 'active' && m.user2_hash), [matches])
   const canSend = pendingSent.length < MAX_PENDING_REQUESTS && activeChats.length < MAX_ACTIVE_CHATS
 
+  if (initError) return (
+    <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', marginBottom: '12px' }}>Could not connect to Whispers.</p>
+      <button type="button" className="btn-primary" onClick={initUser}>Try again</button>
+    </div>
+  )
+
   if (!identity) return (
     <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ display: 'flex', gap: '8px' }}>{[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}</div>
@@ -404,7 +418,7 @@ export default function Whispers() {
                       {pendingReceived.map(req => (
                         <div key={req.id} style={{ padding: '12px', background: '#0B1220', borderRadius: '8px', marginBottom: '6px', border: '1px solid #2DD4BF' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                            <span style={{ fontSize: '20px' }} aria-hidden="true"></span>
+                            <AppIcon name="users" size={20} style={{ color: '#2DD4BF', flexShrink: 0 }} />
                             <div style={{ flex: 1 }}><p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: 0 }}>Anonymous Peer</p><p style={{ color: '#2DD4BF', fontSize: '10px' }}>"{req.request_message || 'Wants to connect'}"</p></div>
                           </div>
                           <div style={{ display: 'flex', gap: '6px' }}>
@@ -426,7 +440,7 @@ export default function Whispers() {
                     <div style={{ textAlign: 'center', padding: '1.5rem' }}><p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '0.75rem' }}>No pending requests.</p><button className="btn-primary" onClick={() => setActiveTab('requests')} style={{ fontSize: '11px', padding: '8px 16px' }}> Send one</button></div>
                   ) : pendingSent.map(req => (
                     <div key={req.id} style={{ padding: '12px', background: '#0B1220', borderRadius: '8px', marginBottom: '6px', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div><p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: 0 }}>"{req.request_message || 'Request'}"</p><p style={{ color: '#7DBDEE', fontSize: '10px', marginTop: '3px' }}>⏳ Waiting...</p></div>
+                      <div><p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: 0 }}>"{req.request_message || 'Request'}"</p><p style={{ color: '#7DBDEE', fontSize: '10px', marginTop: '3px' }}>Waiting...</p></div>
                       <button onClick={() => cancelRequest(req.id)} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '10px', cursor: 'pointer', flexShrink: 0, padding: '6px 10px' }}>Cancel</button>
                     </div>
                   ))}
@@ -438,14 +452,15 @@ export default function Whispers() {
                   <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.75rem' }}> Active chats ({activeChats.length})</h3>
                   {activeChats.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '2rem' }}>
-                      <span style={{ fontSize: '40px', display: 'block', marginBottom: '8px' }}></span>
+                      <AppIcon name="chat" size={40} style={{ display: 'block', margin: '0 auto 8px', color: '#2DD4BF' }} />
                       <p style={{ color: '#2DD4BF', fontSize: '14px' }}>No active chats.</p>
                       <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Accept an incoming request or send one to start.</p>
                     </div>
                   ) : activeChats.map(m => (
-                    <div key={m.id} onClick={() => setActiveMatch(m)} style={{ padding: '12px', background: '#0B1220', borderRadius: '8px', marginBottom: '6px', border: '1px solid rgba(255,255,255,0.12)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div key={m.id} style={{ position: 'relative', padding: '12px', background: '#0B1220', borderRadius: '8px', marginBottom: '6px', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <button type="button" className="card-action" aria-label="Open chat" onClick={() => setActiveMatch(m)} />
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '24px' }} aria-hidden="true"></span>
+                        <AppIcon name="users" size={24} style={{ color: '#2DD4BF', flexShrink: 0 }} />
                         <div><p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: 0 }}>Peer Match</p><p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{new Date(m.created_at).toLocaleDateString('en-KE')}</p></div>
                       </div>
                       <span style={{ color: '#2DD4BF', fontSize: '16px' }}>→</span>
@@ -478,8 +493,9 @@ export default function Whispers() {
 
         {/* Report Modal */}
         {showReportModal && (
-          <div onClick={() => setShowReportModal(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(11,18,32,0.92)', backdropFilter: 'blur(4px)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
-            <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '14px', padding: '1.5rem', border: '1px solid #7DBDEE', maxWidth: '360px', width: '100%' }}>
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(11,18,32,0.92)', backdropFilter: 'blur(4px)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowReportModal(false)} />
+            <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '14px', padding: '1.5rem', border: '1px solid #7DBDEE', maxWidth: '360px', width: '100%' }}>
               <h3 style={{ color: '#7DBDEE', fontSize: '14px', marginBottom: '0.75rem' }}> Report this chat</h3>
               <p style={{ color: '#2DD4BF', fontSize: '12px', marginBottom: '0.75rem' }}>Your safety matters. Reports are anonymous and reviewed by our team.</p>
               <textarea placeholder="Briefly describe the issue..." value={reportReason} onChange={e => setReportReason(e.target.value)} rows={3} style={{ width: '100%', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '8px', color: '#FFFFFF', fontSize: '12px', fontFamily: 'var(--font-body)', marginBottom: '0.75rem', resize: 'vertical', boxSizing: 'border-box' }} />

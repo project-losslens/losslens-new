@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import AppIcon from '../../components/AppIcon'
 
 const fmt = (d) => d ? new Date(d).toLocaleDateString('en-KE') : '—'
 
@@ -446,7 +447,7 @@ export default function UserManagement() {
 
               {filtered.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
-                  <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
+                  <AppIcon name="users" size={48} style={{ display: 'block', margin: '0 auto 12px' }} />
                   <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No users match this filter.</p>
                 </div>
               ) : (
@@ -494,8 +495,9 @@ export default function UserManagement() {
 
       {/* Suspend Modal */}
       {showSuspendConfirm && (
-        <div onClick={() => setShowSuspendConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid ' + (showSuspendConfirm.status === 'suspended' ? 'var(--primary)' : 'var(--info)'), maxWidth: '380px', width: '100%', textAlign: 'center' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowSuspendConfirm(null)} />
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid ' + (showSuspendConfirm.status === 'suspended' ? 'var(--primary)' : 'var(--info)'), maxWidth: '380px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{showSuspendConfirm.status === 'suspended' ? '\u{25B6}' : '\u{23F8}'}</span>
             <h3 style={{ color: showSuspendConfirm.status === 'suspended' ? 'var(--primary)' : 'var(--info)', fontSize: '16px', margin: '0 0 8px' }}>
               {showSuspendConfirm.status === 'suspended' ? 'Reactivate User?' : 'Suspend User?'}
@@ -515,8 +517,9 @@ export default function UserManagement() {
 
       {/* Delete Modal */}
       {showDeleteConfirm && (
-        <div onClick={() => setShowDeleteConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowDeleteConfirm(null)} />
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{'\u{1F5D1}'}</span>
             <h3 style={{ color: 'var(--text)', fontSize: '16px', margin: '0 0 8px' }}>Delete User?</h3>
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px' }}>
@@ -534,8 +537,9 @@ export default function UserManagement() {
 
       {/* Password reset link confirmation */}
       {showPasswordReset && (
-        <div onClick={() => setShowPasswordReset(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--primary)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowPasswordReset(null)} />
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--primary)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{'\u{1F511}'}</span>
             <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 4px' }}>Send Password Reset Link</h3>
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '16px' }}>
@@ -555,9 +559,10 @@ export default function UserManagement() {
 
       {/* Grant Premium Modal */}
       {showGrantPremium && (
-        <div onClick={() => setShowGrantPremium(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--primary)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}></span>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowGrantPremium(null)} />
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--primary)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
+            <AppIcon name="diamond" size={36} style={{ display: 'block', margin: '0 auto 12px' }} />
             <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 8px' }}>Grant Premium Access?</h3>
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px' }}>
               Give <strong style={{ color: 'var(--primary)' }}>"{showGrantPremium.full_name || 'User'}"</strong> free Premium access? This can be revoked later.
@@ -572,8 +577,9 @@ export default function UserManagement() {
 
       {/* Revoke Premium Modal */}
       {showRevokePremium && (
-        <div onClick={() => setShowRevokePremium(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--info)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowRevokePremium(null)} />
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--info)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>⬇</span>
             <h3 style={{ color: 'var(--info)', fontSize: '16px', margin: '0 0 8px' }}>Revoke Premium Access?</h3>
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px' }}>

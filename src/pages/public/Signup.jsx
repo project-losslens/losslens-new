@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { primaryHelpline } from '../../config/helplines'
 import { PublicLayout } from '../../layouts/PublicLayout'
+import AppIcon from '../../components/AppIcon'
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 48 48">
@@ -234,7 +235,7 @@ function Signup() {
       <PublicLayout>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}></span>
+            <AppIcon name="mail" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#7DBDEE' }} />
             <h1 className="auth-title">Check your email</h1>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>We've sent a confirmation link to <strong style={{ color: '#2DD4BF' }}>{signedUpEmail}</strong></p>
             {signupType === 'company' && companyValidation?.company_name && (
@@ -333,9 +334,9 @@ function Signup() {
                     }}
                     aria-invalid={!!fieldErrors.company_code}
                   />
-                  {validatingCode && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>⏳</span>}
+                  {validatingCode && <AppIcon name="clock" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#7DBDEE' }} />}
                   {!validatingCode && companyValidation?.valid && (
-                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#2DD4BF', fontSize: '12px', fontWeight: 500 }}> Valid</span>
+                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#2DD4BF', fontSize: '12px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}><AppIcon name="check" size={14} />Valid</span>
                   )}
                   {!validatingCode && companyValidation && !companyValidation.valid && !companyValidation.validation_error && (
                     <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FFFFFF', fontSize: '12px' }}>Invalid</span>
@@ -364,9 +365,9 @@ function Signup() {
               <label htmlFor="username">USERNAME *</label>
               <div style={{ position: 'relative' }}>
                 <input id="username" type="text" autoComplete="username" required placeholder="e.g. amina_w" value={form.username} onChange={e => handleUsernameChange(e.target.value)} style={{ paddingRight: 40, ...(fieldErrors.username ? { borderColor: '#FFFFFF' } : {}) }} />
-                {usernameStatus === 'checking' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>⏳</span>}
-                {usernameStatus === 'available' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}></span>}
-                {usernameStatus === 'taken' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }}>⠝Œ</span>}
+                {usernameStatus === 'checking' && <AppIcon name="clock" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#7DBDEE' }} />}
+                {usernameStatus === 'available' && <AppIcon name="check" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#2DD4BF' }} />}
+                {usernameStatus === 'taken' && <AppIcon name="close" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FFFFFF' }} />}
               </div>
               {usernameStatus === 'taken' && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Username already taken</span>}
               {usernameStatus === 'available' && <span style={{ fontSize: '11px', color: '#2DD4BF' }}>Username available!</span>}

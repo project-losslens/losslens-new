@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import AppIcon from '../../components/AppIcon'
 
 //  Constants
 const GOAL_MAP = {
@@ -262,7 +263,7 @@ export default function Onboarding() {
     return (
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2.5rem 2rem', maxWidth: '500px', width: '100%', textAlign: 'center', animation: 'fadeIn 0.5s ease-out' }}>
-          <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
+          <AppIcon name="flame" size={48} style={{ display: 'block', margin: '0 auto 12px', color: '#2DD4BF' }} />
           <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', marginBottom: '8px' }}>Your journey begins</h2>
 
           <div style={{ background: '#0B1220', borderRadius: '12px', padding: '16px', margin: '16px 0', border: `2px solid ${risk.color}` }}>
@@ -300,7 +301,7 @@ export default function Onboarding() {
           {saveError && <p role="alert" style={{ color: '#FFFFFF', fontSize: '13px', marginTop: '12px' }}>{saveError}</p>}
 
           <button onClick={() => { setStep(QUESTIONS.length - 1); triggerAnimate() }} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-            â"   Change my answers
+            ← Change my answers
           </button>
         </div>
       </div>
@@ -369,7 +370,7 @@ export default function Onboarding() {
                     <p style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 500, margin: 0 }}>{option.label}</p>
                     {option.desc && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '2px 0 0' }}>{option.desc}</p>}
                   </div>
-                  {selected && <span style={{ color: '#2DD4BF', fontSize: '18px', marginLeft: 'auto', flexShrink: 0 }}></span>}
+                  {selected && <AppIcon name="check" size={18} style={{ marginLeft: 'auto', flexShrink: 0, color: '#2DD4BF' }} />}
                 </button>
               )
             })}
@@ -385,7 +386,7 @@ export default function Onboarding() {
         <div style={{ display: 'flex', gap: '8px' }}>
           {step > 0 && (
             <button onClick={prevStep} className="btn-ghost" style={{ flex: 1, padding: '14px', fontSize: '15px' }}>
-              â"   Back
+              ← Back
             </button>
           )}
           <button

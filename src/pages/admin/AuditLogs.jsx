@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import AppIcon from '../../components/AppIcon'
 
 //  Constants
 const LOG_LIMIT = 300
@@ -235,7 +236,7 @@ export default function AuditLogs() {
           {/* Log list */}
           {filteredLogs.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
-              <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
+              <AppIcon name="document" size={48} style={{ display: 'block', margin: '0 auto 12px' }} />
               <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No logs found.</p>
             </div>
           ) : (

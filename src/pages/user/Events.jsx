@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { createNotification } from '../../lib/notifications'
+import AppIcon from '../../components/AppIcon'
 
 //  Constants
 const TABS = { ALL: 'all', MINE: 'mine' }
@@ -21,6 +22,7 @@ export default function Events() {
   const [rsvps, setRsvps] = useState({})
   const [rsvpLoading, setRsvpLoading] = useState(null)
   const [pageLoading, setPageLoading] = useState(true)
+  const [eventsError, setEventsError] = useState(false)
   const [sessionExpired, setSessionExpired] = useState(false)
   const [userId, setUserId] = useState(null)
   const [expandedEvent, setExpandedEvent] = useState(null)
@@ -47,6 +49,7 @@ export default function Events() {
   const fetchEvents = async () => {
     try {
       setPageLoading(true)
+      setEventsError(false)
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { setSessionExpired(true); setPageLoading(false); return }
       setUserId(session.user.id)
@@ -68,7 +71,7 @@ export default function Events() {
       })
       setRsvps(rsvpMap)
       setAttendeeCounts(counts)
-    } catch (err) { console.error('Events fetch error:', err) }
+    } catch (err) { console.error('Events fetch error:', err); setEventsError(true) }
     finally { setPageLoading(false) }
   }
 
@@ -198,7 +201,7 @@ export default function Events() {
     return (
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
-          <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
+          <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
           <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>Please log in</h2>
           <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%', marginTop: '16px' }}>Go to Login →</button>
         </div>
@@ -229,9 +232,16 @@ export default function Events() {
             </div>
           )}
 
-          {!pageLoading && filteredEvents.length === 0 && (
+          {!pageLoading && eventsError && (
             <div className="dash-section" style={{ textAlign: 'center', padding: '3rem' }}>
-              <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
+              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', marginBottom: '12px' }}>Could not load events.</p>
+              <button type="button" className="btn-primary" onClick={fetchEvents}>Try again</button>
+            </div>
+          )}
+
+          {!pageLoading && !eventsError && filteredEvents.length === 0 && (
+            <div className="dash-section" style={{ textAlign: 'center', padding: '3rem' }}>
+              <AppIcon name="calendar" size={48} style={{ display: 'block', margin: '0 auto 12px', color: '#2DD4BF' }} />
               <p style={{ color: '#2DD4BF', fontSize: '14px' }}>
                 {activeTab === TABS.MINE ? 'You have not responded to any events yet.' : 'No upcoming events.'}
               </p>
@@ -253,16 +263,16 @@ export default function Events() {
                 <div key={e.id} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${myRsvp ? '#2DD4BF' : 'rgba(255,255,255,0.12)'}`, borderRadius: '14px', overflow: 'hidden', animation: 'fadeIn 0.3s ease-out', opacity: isPast ? 0.7 : 1 }}>
 
                   <div style={{ width: '100%', height: '170px', background: e.image_url ? `url(${e.image_url}) center/cover` : 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '10px', position: 'relative' }}>
-                    {!e.image_url && <span style={{ fontSize: '48px', opacity: 0.3, position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} aria-hidden="true"></span>}
+                    {!e.image_url && <AppIcon name="calendar" size={48} style={{ opacity: 0.3, position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', color: '#FFFFFF' }} />}
                     <span style={{ background: 'rgba(255,255,255,0.9)', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', color: '#2DD4BF', position: 'relative', zIndex: 'var(--z-base)' }}>{e.type || 'Event'}</span>
                     <span style={{ background: 'rgba(255,255,255,0.9)', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', color: daysUntil === 'Today' ? '#FFFFFF' : isPast ? 'rgba(255,255,255,0.4)' : '#2DD4BF', position: 'relative', zIndex: 'var(--z-base)' }}>{daysUntil}</span>
                   </div>
 
                   <div style={{ padding: '16px' }}>
-                    <h3 style={{ color: '#FFFFFF', fontSize: '15px', fontWeight: 600, margin: '0 0 8px', cursor: 'pointer' }} onClick={() => {
+                    <h3 style={{ color: '#FFFFFF', fontSize: '15px', fontWeight: 600, margin: '0 0 8px' }}><button type="button" className="clickable" style={{ font: 'inherit', color: 'inherit', cursor: 'pointer', padding: 0, textAlign: 'left', width: '100%' }} onClick={() => {
                       if (expandedEvent === e.id) setExpandedEvent(null)
                       else { setExpandedEvent(e.id); loadDiscussions(e.id) }
-                    }}>{e.title}</h3>
+                    }}>{e.title}</button></h3>
 
                     <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '14px' }}>
                       <span> {formatDate(e.date)}</span>

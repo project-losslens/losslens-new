@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AIChat from '../../components/AIChat'
 import NotificationBell from '../../components/NotificationBell'
+import AppIcon from '../../components/AppIcon'
 import { getRiskLevel, getRiskColor } from '../../lib/relapsePrediction'
 import { HELPLINES } from '../../config/helplines'
 
@@ -90,7 +91,7 @@ function UsernamePrompt({ userId, onComplete }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.97)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
       <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '400px' }}>
-        <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px', textAlign: 'center' }}></span>
+        <AppIcon name="users" size={40} style={{ display: 'block', margin: '0 auto 12px', color: '#7DBDEE' }} />
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: '#FFFFFF', marginBottom: '8px', textAlign: 'center' }}>One last thing</h2>
         <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem', textAlign: 'center', lineHeight: 1.6 }}>Choose a username for The Circle, Whispers, and your profile. This is how others will see you — anonymously.</p>
         {error && <div style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
@@ -98,9 +99,9 @@ function UsernamePrompt({ userId, onComplete }) {
           <label>USERNAME</label>
           <div style={{ position: 'relative' }}>
             <input type="text" placeholder="e.g. amina_w" value={username} onChange={e => handleChange(e.target.value)} style={{ paddingRight: 40 }} onKeyDown={e => e.key === 'Enter' && handleSave()} />
-            {status === 'checking' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Checking">⏳</span>}
-            {status === 'available' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Available"></span>}
-            {status === 'taken' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '12px' }} aria-label="Taken">⠝Œ</span>}
+            {status === 'checking' && <AppIcon name="clock" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#7DBDEE' }} />}
+            {status === 'available' && <AppIcon name="check" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#2DD4BF' }} />}
+            {status === 'taken' && <AppIcon name="close" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FFFFFF' }} />}
           </div>
           {status === 'taken' && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Username already taken</span>}
           {status === 'available' && <span style={{ fontSize: '11px', color: '#2DD4BF' }}>Username available!</span>}
@@ -119,7 +120,6 @@ function Dashboard() {
   const [weekData, setWeekData] = useState([])
   const [loading, setLoading] = useState(true)
   const [sessionExpired, setSessionExpired] = useState(false)
-  const [activeTab, setActiveTab] = useState('week')
   const [cbtCount, setCbtCount] = useState(0)
   const [refreshing, setRefreshing] = useState(false)
   const [pullDistance, setPullDistance] = useState(0)
@@ -218,10 +218,10 @@ function Dashboard() {
   const handleTouchEnd = async () => { if (pullDistance >= pullThreshold && !refreshing) { setRefreshing(true); await fetchData(); showToast('Dashboard refreshed ', 2000); setRefreshing(false) } touchStartY.current = 0; setPullDistance(0) }
 
   const stats = [
-    { label: 'Days clean', value: profile?.streak_days || 0, icon: '', ariaLabel: 'Streak days', highlight: (profile?.streak_days || 0) >= 7 },
-    { label: 'Money saved', value: profile?.money_saved ? `KES ${profile.money_saved.toLocaleString()}` : 'KES 0', icon: '', ariaLabel: 'Money saved' },
-    { label: 'Sessions logged', value: entries.length, icon: '', ariaLabel: 'Sessions logged', emptyMessage: 'First entry coming soon!' },
-    { label: 'CBT modules', value: cbtCount, icon: '', ariaLabel: 'CBT modules completed', highlight: cbtCount >= 3 },
+    { label: 'Days clean', value: profile?.streak_days || 0, icon: 'flame', ariaLabel: 'Streak days', highlight: (profile?.streak_days || 0) >= 7 },
+    { label: 'Money saved', value: profile?.money_saved ? `KES ${profile.money_saved.toLocaleString()}` : 'KES 0', icon: 'coin', ariaLabel: 'Money saved' },
+    { label: 'Sessions logged', value: entries.length, icon: 'diary', ariaLabel: 'Sessions logged', emptyMessage: 'First entry coming soon!' },
+    { label: 'CBT modules', value: cbtCount, icon: 'brain', ariaLabel: 'CBT modules completed', highlight: cbtCount >= 3 },
   ]
 
   const firstName = profile?.full_name?.split(' ')[0] || 'there'
@@ -239,7 +239,7 @@ function Dashboard() {
     return (
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
-          <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
+          <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
           <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', marginBottom: '8px' }}>Please log in</h2>
           <p style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '24px' }}>Your session has expired.</p>
           <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%' }}>Go to Login →</button>
@@ -270,7 +270,7 @@ function Dashboard() {
 
         {showInstallPrompt && (
           <div style={{ background: '#171E2B', border: '2px solid #2DD4BF', borderRadius: '16px', padding: '16px 20px', margin: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', animation: 'slideDown 0.4s ease-out', boxShadow: '0 4px 20px rgba(45,212,191,0.2)' }}>
-            <span style={{ fontSize: '36px', flexShrink: 0 }} aria-hidden="true"></span>
+            <AppIcon name="download" size={36} style={{ flexShrink: 0, color: '#2DD4BF' }} />
             <div style={{ flex: 1, minWidth: '200px' }}><p style={{ color: '#2DD4BF', fontSize: '14px', fontWeight: 600, margin: '0 0 4px' }}>Add LossLens to your home screen</p><p style={{ color: '#FFFFFF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Install for quick access — works offline, no app store needed.</p></div>
             <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
               <button onClick={() => { setShowInstallPrompt(false); sessionStorage.setItem('pwa_install_dismissed', 'true') }} style={{ padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>Not now</button>
@@ -292,10 +292,10 @@ function Dashboard() {
             {riskData && (
               <div role="alert" aria-live="polite" style={{ background: getRiskColor(riskData.score).bg, border: `1px solid ${getRiskColor(riskData.score).color}`, borderRadius: '12px', padding: '14px 16px', marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: riskData.factors?.length > 0 ? '8px' : '0' }}>
-                  <h3 style={{ color: getRiskColor(riskData.score).color, fontSize: '14px', margin: 0 }}>{riskData.level === 'high' ? '⚠️ ' : riskData.level === 'medium' ? ' ' : ' '}{getRiskColor(riskData.score).label} Today</h3>
+                  <h3 style={{ color: getRiskColor(riskData.score).color, fontSize: '14px', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>{riskData.level !== 'low' && <AppIcon name="alert" size={16} />}{getRiskColor(riskData.score).label} Today</h3>
                   <span style={{ color: getRiskColor(riskData.score).color, fontSize: '20px', fontWeight: 700 }}>{riskData.score}%</span>
                 </div>
-                {(riskData.factors || []).map((f, i) => (<p key={i} style={{ color: getRiskColor(riskData.score).color, fontSize: '12px', opacity: 0.8, margin: '2px 0' }}>"¢ {f}</p>))}
+                {(riskData.factors || []).map((f, i) => (<p key={i} style={{ color: getRiskColor(riskData.score).color, fontSize: '12px', opacity: 0.8, margin: '2px 0' }}>• {f}</p>))}
                 {riskData.level === 'high' && <button onClick={() => navigate('/urge-toolkit')} style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#2DD4BF', border: 'none', borderRadius: '8px', color: '#0B1220', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}> Open Urge Toolkit</button>}
               </div>
             )}
@@ -303,7 +303,7 @@ function Dashboard() {
             <div className="stats-grid">
               {stats.map((s, i) => (
                 <div className="stat-card" key={i} style={s.highlight ? { borderColor: '#2DD4BF', boxShadow: '0 0 12px rgba(45,212,191,0.3)' } : {}}>
-                  <span className="stat-icon" aria-label={s.ariaLabel}>{s.highlight ? <span className="streak-fire">{s.icon}</span> : s.icon}</span>
+                  <span className="stat-icon" aria-label={s.ariaLabel}>{s.highlight ? <span className="streak-fire"><AppIcon name={s.icon} size={20} /></span> : <AppIcon name={s.icon} size={20} />}</span>
                   <span className="stat-value" style={s.highlight ? { color: '#2DD4BF' } : {}}>{s.value || '—'}</span>
                   <span className="stat-label">{s.value === 0 && s.emptyMessage ? s.emptyMessage : s.label}</span>
                 </div>
@@ -311,16 +311,16 @@ function Dashboard() {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '1rem' }}>
-              <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, #7DBDEE 100%)', border: '1px solid #2DD4BF', borderRadius: '12px', padding: '1rem', cursor: 'pointer' }} onClick={() => navigate('/circle')}>
-                <span style={{ fontSize: '24px' }} aria-hidden="true"></span><h3 style={{ color: '#2DD4BF', fontSize: '13px', margin: '6px 0 4px' }}>The Circle</h3><p style={{ color: '#2DD4BF', fontSize: '11px', fontWeight: 300, margin: 0 }}>{circleOnline > 0 ? `${circleOnline} members online` : 'Join the conversation'}</p>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '1rem', cursor: 'pointer' }} onClick={() => navigate('/whispers')}>
-                <span style={{ fontSize: '24px' }} aria-hidden="true"></span><h3 style={{ color: '#FFFFFF', fontSize: '13px', margin: '6px 0 4px' }}>Whispers</h3><p style={{ color: '#2DD4BF', fontSize: '11px', fontWeight: 300, margin: 0 }}>{whispersActive > 0 ? `${whispersActive} active chats` : 'Find a peer'}</p>
-              </div>
+              <Link to="/circle" className="clickable" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, #7DBDEE 100%)', border: '1px solid #2DD4BF', borderRadius: '12px', padding: '1rem', display: 'block', textDecoration: 'none' }}>
+                <AppIcon name="users" size={24} style={{ color: '#2DD4BF' }} /><h3 style={{ color: '#2DD4BF', fontSize: '13px', margin: '6px 0 4px' }}>The Circle</h3><p style={{ color: '#2DD4BF', fontSize: '11px', fontWeight: 300, margin: 0 }}>{circleOnline > 0 ? `${circleOnline} members online` : 'Join the conversation'}</p>
+              </Link>
+              <Link to="/whispers" className="clickable" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '1rem', display: 'block', textDecoration: 'none' }}>
+                <AppIcon name="chat" size={24} style={{ color: '#7DBDEE' }} /><h3 style={{ color: '#FFFFFF', fontSize: '13px', margin: '6px 0 4px' }}>Whispers</h3><p style={{ color: '#2DD4BF', fontSize: '11px', fontWeight: 300, margin: 0 }}>{whispersActive > 0 ? `${whispersActive} active chats` : 'Find a peer'}</p>
+              </Link>
             </div>
 
             <div className="dash-section">
-              <div className="section-header"><h3>This week</h3><div className="tab-group"><button className={activeTab === 'week' ? 'tab active' : 'tab'} onClick={() => setActiveTab('week')}>Week</button><button className={activeTab === 'month' ? 'tab active' : 'tab'} onClick={() => { setActiveTab('month'); showToast('Monthly view coming soon! ', 2000) }}>Month</button></div></div>
+              <div className="section-header"><h3>This week</h3></div>
               <div className="week-chart">{weekData.map((d, i) => (<div className="week-day" key={i}><div className={`day-bar ${d.gambled ? 'gambled' : 'clean'}`} style={{ height: d.gambled ? '40px' : d.mood ? '60px' : '30px', transition: 'height 0.3s ease' }} /><span className="day-label">{d.day}</span></div>))}</div>
               <div className="chart-legend"><span className="legend-item"><span className="dot clean"></span> Clean day</span><span className="legend-item"><span className="dot gambled"></span> Gambled</span></div>
             </div>
@@ -328,10 +328,10 @@ function Dashboard() {
             <div style={{ marginBottom: '1rem' }}>
               <h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '0.75rem' }}>Explore LossLens</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '8px' }}>
-                {[{ emoji: '', label: 'Diary', path: '/diary' }, { emoji: '', label: 'CBT Modules', path: '/cbt' }, { emoji: '', label: 'Urge Toolkit', path: '/urge-toolkit' }, { emoji: '', label: 'Events', path: '/events' }, { emoji: '', label: 'Resources', path: '/resources' }, { emoji: '', label: 'Family Portal', path: '/family-portal' }, { emoji: '', label: 'Monthly Mirror', path: '/monthly-mirror' }, { emoji: '', label: 'LossLens Pact', path: '/precious-pact' }].map(item => (
+                {[{ icon: 'diary', label: 'Diary', path: '/diary' }, { icon: 'brain', label: 'CBT Modules', path: '/cbt' }, { icon: 'toolkit', label: 'Urge Toolkit', path: '/urge-toolkit' }, { icon: 'calendar', label: 'Events', path: '/events' }, { icon: 'resources', label: 'Resources', path: '/resources' }, { icon: 'users', label: 'Family Portal', path: '/family-portal' }, { icon: 'document', label: 'Monthly Mirror', path: '/monthly-mirror' }, { icon: 'heart', label: 'LossLens Pact', path: '/precious-pact' }].map(item => (
                   <button key={item.path} onClick={() => navigate(item.path)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '12px', color: '#7DBDEE', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = '#2DD4BF'; e.currentTarget.style.transform = 'translateY(-2px)' }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'translateY(0)' }}>
-                    <span style={{ fontSize: '22px' }} aria-hidden="true">{item.emoji}</span><span>{item.label}</span>
+                    <AppIcon name={item.icon} size={22} style={{ color: '#7DBDEE' }} /><span>{item.label}</span>
                   </button>
                 ))}
               </div>
@@ -340,7 +340,7 @@ function Dashboard() {
             <AIChat profile={profile} />
 
             <div className="dash-section">
-              <div className="section-header"><h3>Recent diary entries</h3><span className="see-all" onClick={() => navigate('/diary')}>See all</span></div>
+              <div className="section-header"><h3>Recent diary entries</h3><button type="button" className="see-all clickable" onClick={() => navigate('/diary')}>See all</button></div>
               <div className="entries-list">
                 {entries.length === 0 ? (
                   <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', textAlign: 'center', padding: '1.5rem' }}>No entries yet. Log your first diary entry!</p>
@@ -355,9 +355,10 @@ function Dashboard() {
             </div>
 
             {/* Crisis Support Bar - Updated with multiple contacts */}
-            <div style={{ background: 'rgba(255,255,255,0.12)', border: '2px solid #FFFFFF', borderRadius: '14px', padding: '16px', marginBottom: '1rem', cursor: 'pointer' }} onClick={() => setShowCrisisModal(true)}>
+            <div style={{ position: 'relative', background: 'rgba(255,255,255,0.12)', border: '2px solid #FFFFFF', borderRadius: '14px', padding: '16px', marginBottom: '1rem' }}>
+              <button type="button" className="card-action" aria-label="Open crisis support options" onClick={() => setShowCrisisModal(true)} />
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                <span style={{ fontSize: '24px' }}>🆘</span>
+                <AppIcon name="alert" size={24} style={{ color: '#FFFFFF', flexShrink: 0 }} />
                 <div>
                   <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 600, margin: 0 }}>Feeling overwhelmed? You're not alone.</p>
                   <p style={{ color: '#2DD4BF', fontSize: '11px', margin: '2px 0 0' }}>Tap here for free 24/7 support options</p>
@@ -371,10 +372,11 @@ function Dashboard() {
 
       {/* Crisis Support Modal */}
       {showCrisisModal && (
-        <div onClick={() => setShowCrisisModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.95)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '2px solid #FFFFFF', maxWidth: '450px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.95)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowCrisisModal(false)} />
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '2px solid #FFFFFF', maxWidth: '450px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-              <span style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>🆘</span>
+              <AppIcon name="alert" size={48} style={{ display: 'block', margin: '0 auto 8px', color: '#FFFFFF' }} />
               <h2 style={{ color: '#FFFFFF', fontFamily: 'var(--font-display)', fontSize: '1.5rem', margin: '0 0 8px' }}>You're Not Alone</h2>
               <p style={{ color: '#2DD4BF', fontSize: '13px', lineHeight: '1.6', margin: 0 }}>These services are free, confidential, and available to anyone in Kenya. Reach out anytime.</p>
             </div>
@@ -388,7 +390,7 @@ function Dashboard() {
                 }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#2DD4BF'; e.currentTarget.style.transform = 'scale(1.02)' }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = contact.priority ? '#FFFFFF' : 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'scale(1)' }}>
-                  <span style={{ fontSize: contact.priority ? '28px' : '20px', flexShrink: 0 }}>{contact.priority ? '⭐' : ''}</span>
+                  {contact.priority && <AppIcon name="star" size={20} style={{ flexShrink: 0, color: '#F2C879' }} />}
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <span style={{ color: contact.priority ? '#FFFFFF' : '#FFFFFF', fontSize: contact.priority ? '15px' : '13px', fontWeight: 600 }}>{contact.name}</span>

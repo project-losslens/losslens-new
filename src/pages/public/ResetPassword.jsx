@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { PublicLayout } from '../../layouts/PublicLayout'
+import AppIcon from '../../components/AppIcon'
 
 function ResetPassword() {
   const navigate = useNavigate()
@@ -126,7 +127,7 @@ function ResetPassword() {
       <PublicLayout>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} role="img" aria-label="Success"></span>
+            <AppIcon name="check" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
             <h1 className="auth-title">Password updated!</h1>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>Your password has been changed. You'll be redirected to the login page.</p>
             <button className="btn-primary full" onClick={() => { if (redirectTimer.current) clearTimeout(redirectTimer.current); navigate('/login') }}>Go to login now</button>

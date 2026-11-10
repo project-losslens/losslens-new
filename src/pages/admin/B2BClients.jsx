@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import AppIcon from '../../components/AppIcon'
 
 const PLANS = { STANDARD: 'standard', ENTERPRISE: 'enterprise', CUSTOM: 'custom' }
 const PLAN_COLORS = {
@@ -227,8 +228,9 @@ export default function B2BClients() {
         <div style={{ padding: '1.5rem', maxWidth: '1000px', margin: '0 auto' }}>
           {/* Form Modal */}
           {showForm && (
-            <div onClick={() => setShowForm(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-              <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '560px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowForm(false)} />
+              <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '560px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
                 <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 1.25rem' }}>{editingClient ? ' Edit Client' : ' New B2B Client'}</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div>
@@ -308,7 +310,7 @@ export default function B2BClients() {
 
           {filteredClients.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
-              <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
+              <AppIcon name="building" size={48} style={{ display: 'block', margin: '0 auto 12px' }} />
               <p style={{ color: 'var(--primary)', fontSize: '14px' }}>{searchQuery || planFilter !== 'all' || statusFilter !== 'all' ? 'No clients match your filters.' : 'No B2B clients yet.'}</p>
             </div>
           ) : (
@@ -380,8 +382,9 @@ export default function B2BClients() {
 
       {/* Members Modal */}
       {showMembers && (
-        <div onClick={() => setShowMembers(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '600px', width: '100%', maxHeight: '80vh', overflowY: 'auto' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowMembers(null)} />
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '600px', width: '100%', maxHeight: '80vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: 0 }}> {showMembers.client.company_name} — Members</h3>
               <button onClick={() => setShowMembers(null)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '20px', cursor: 'pointer' }}></button>
@@ -415,8 +418,9 @@ export default function B2BClients() {
 
       {/* Toggle Modal */}
       {showToggleConfirm && (
-        <div onClick={() => setShowToggleConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: `1px solid ${showToggleConfirm.status === 'active' ? 'var(--info)' : 'var(--primary)'}`, maxWidth: '380px', width: '100%', textAlign: 'center' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowToggleConfirm(null)} />
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: `1px solid ${showToggleConfirm.status === 'active' ? 'var(--info)' : 'var(--primary)'}`, maxWidth: '380px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{showToggleConfirm.status === 'active' ? '⏸' : '▶'}</span>
             <h3 style={{ color: showToggleConfirm.status === 'active' ? 'var(--info)' : 'var(--primary)', fontSize: '16px', margin: '0 0 8px' }}>
               {showToggleConfirm.status === 'active' ? 'Deactivate Client?' : 'Activate Client?'}
@@ -436,9 +440,10 @@ export default function B2BClients() {
 
       {/* Delete Modal */}
       {showDeleteConfirm && (
-        <div onClick={() => setShowDeleteConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}></span>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowDeleteConfirm(null)} />
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
+            <AppIcon name="alert" size={36} style={{ display: 'block', margin: '0 auto 12px' }} />
             <h3 style={{ color: 'var(--text)', fontSize: '16px', margin: '0 0 8px' }}>Delete Client?</h3>
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
               Permanently delete <strong style={{ color: 'var(--primary)' }}>"{showDeleteConfirm.company_name}"</strong>? This cannot be undone.

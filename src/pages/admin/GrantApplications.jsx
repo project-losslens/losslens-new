@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import AppIcon from '../../components/AppIcon'
 
 //  Constants
 const STATUS_CONFIG = {
@@ -191,7 +192,7 @@ export default function GrantApplications() {
 
           {filteredApplications.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
-              <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
+              <AppIcon name="document" size={48} style={{ display: 'block', margin: '0 auto 12px' }} />
               <p style={{ color: 'var(--primary)', fontSize: '14px' }}>{searchQuery ? 'No applications match your search.' : 'No applications found.'}</p>
             </div>
           ) : (
@@ -263,8 +264,9 @@ export default function GrantApplications() {
 
       {/* Rejection Reason Modal */}
       {showRejectModal && (
-        <div onClick={() => { setShowRejectModal(null); setRejectReason('') }} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '420px', width: '100%' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => { setShowRejectModal(null); setRejectReason('') }} />
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '420px', width: '100%' }}>
             <h3 style={{ color: 'var(--text)', fontSize: '16px', margin: '0 0 4px' }}> Reject Application</h3>
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '16px' }}>
               <strong style={{ color: 'var(--primary)' }}>"{showRejectModal.organization_name}"</strong>  · {formatCurrency(showRejectModal.amount_requested)}

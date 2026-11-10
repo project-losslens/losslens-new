@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import AppIcon from '../../components/AppIcon'
 
 //  Constants
 const TABS = { PROFILE: 'profile', SETTINGS: 'settings', SECURITY: 'security', DATA: 'data' }
@@ -30,6 +31,7 @@ export default function Profile() {
   const [cleanSince, setCleanSince] = useState(null)
   const [avatarUrl, setAvatarUrl] = useState('')
   const [loadingProfile, setLoadingProfile] = useState(true)
+  const [profileError, setProfileError] = useState(false)
   const [savingProfile, setSavingProfile] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [showAvatarPicker, setShowAvatarPicker] = useState(false)
@@ -145,7 +147,7 @@ export default function Profile() {
         topCoping: Object.entries(copingCount).sort((a, b) => b[1] - a[1]).slice(0, 5),
         recentEntries: allEntries.slice(0, 14), badges: allBadges,
       })
-    } catch (err) { console.error('Profile fetch error:', err) }
+    } catch (err) { console.error('Profile fetch error:', err); setProfileError(true) }
     finally { setLoadingProfile(false) }
   }
 
@@ -376,7 +378,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
     return (
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
-          <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}></span>
+          <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
           <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>Please log in</h2>
           <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%', marginTop: '16px' }}>Go to Login →</button>
         </div>
@@ -388,6 +390,15 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
     return (
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ display: 'flex', gap: '8px' }}>{[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}</div>
+      </div>
+    )
+  }
+
+  if (profileError) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+        <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', marginBottom: '12px' }}>Could not load your profile.</p>
+        <button type="button" className="btn-primary" onClick={() => { setLoadingProfile(true); setProfileError(false); fetchAllData() }}>Try again</button>
       </div>
     )
   }
@@ -427,14 +438,14 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
               <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.5rem' }}> Badges ({earnedBadges}/{stats.badges.length})</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '6px' }}>
                 {stats.badges.map(b => (
-                  <div key={b.id} onClick={() => handleBadgeClick(b)}
-                    style={{ padding: '8px 6px', borderRadius: '8px', cursor: 'pointer', background: b.earned ? 'rgba(255,255,255,0.12)' : '#0B1220', border: `1px solid ${b.earned ? '#2DD4BF' : 'rgba(255,255,255,0.12)'}`, opacity: b.earned ? 1 : 0.4, textAlign: 'center', transition: 'all 0.2s', minHeight: '60px' }}
+                  <button type="button" key={b.id} className="clickable" onClick={() => handleBadgeClick(b)}
+                    style={{ padding: '8px 6px', borderRadius: '8px', cursor: 'pointer', background: b.earned ? 'rgba(255,255,255,0.12)' : '#0B1220', border: `1px solid ${b.earned ? '#2DD4BF' : 'rgba(255,255,255,0.12)'}`, opacity: b.earned ? 1 : 0.4, textAlign: 'center', transition: 'all 0.2s', minHeight: '60px', width: '100%', font: 'inherit', color: 'inherit' }}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = '#2DD4BF'; e.currentTarget.style.transform = 'translateY(-2px)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = b.earned ? '#2DD4BF' : 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'translateY(0)' }}
                     title={b.earned ? `${b.name} — Click to explore` : `${b.name} (Locked)`}>
                     <span style={{ fontSize: '20px', display: 'block' }}>{b.earned ? b.emoji : ''}</span>
                     <span style={{ fontSize: '9px', color: b.earned ? '#2DD4BF' : 'rgba(255,255,255,0.4)', display: 'block', marginTop: '3px' }}>{b.name}</span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -461,7 +472,8 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
           {activeTab === TABS.PROFILE && (
             <>
               <div className="dash-section" style={{ marginBottom: '0.75rem', textAlign: 'center' }}>
-                <div style={{ position: 'relative', display: 'inline-block', cursor: 'pointer' }} onClick={() => setShowAvatarPicker(!showAvatarPicker)}>
+                <div style={{ position: 'relative', display: 'inline-block' }}>
+                  <button type="button" className="card-action" aria-label="Change avatar" onClick={() => setShowAvatarPicker(!showAvatarPicker)} style={{ borderRadius: '50%' }} />
                   {avatarUrl && avatarUrl.startsWith('http') ? <img src={avatarUrl} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #2DD4BF' }} />
                   : avatarUrl ? <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #2DD4BF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>{avatarUrl}</div>
                   : <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #7DBDEE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', fontWeight: 700, color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>{initials}</div>}
@@ -559,7 +571,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
                   {deleteStep === 1 && (
                     <div style={{ textAlign: 'center' }}>
                       <p style={{ color: '#FFFFFF', fontSize: '11px', marginBottom: '0.75rem', lineHeight: '1.5' }}>Deletes: account, diary entries ({stats.totalEntries}), CBT progress, all data.</p>
-                      <div style={{ display: 'flex', gap: '6px' }}><button className="btn-ghost" style={{ flex: 1, fontSize: '11px', minHeight: '44px' }} onClick={() => setDeleteStep(0)}>â"   Back</button><button className="btn-danger" style={{ flex: 1, fontSize: '11px', minHeight: '44px' }} onClick={() => setDeleteStep(2)}>I understand</button></div>
+                      <div style={{ display: 'flex', gap: '6px' }}><button className="btn-ghost" style={{ flex: 1, fontSize: '11px', minHeight: '44px' }} onClick={() => setDeleteStep(0)}>← Back</button><button className="btn-danger" style={{ flex: 1, fontSize: '11px', minHeight: '44px' }} onClick={() => setDeleteStep(2)}>I understand</button></div>
                     </div>
                   )}
                   {deleteStep === 2 && (

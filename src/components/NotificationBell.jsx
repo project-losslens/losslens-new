@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, subscribeToNotifications } from '../lib/notifications'
 import { supabase } from '../lib/supabase'
+import AppIcon from './AppIcon'
 
 function NotificationBell() {
   const navigate = useNavigate()
@@ -100,7 +101,7 @@ function NotificationBell() {
           transition: 'color 0.2s',
         }}
       >
-        <span aria-hidden="true"></span>
+        <AppIcon name="bell" size={20} />
         {unreadCount > 0 && (
           <span
             aria-label={`${unreadCount} unread notifications`}
@@ -153,7 +154,7 @@ function NotificationBell() {
           {/* List */}
           {notifications.length === 0 ? (
             <div style={{ padding: '2rem', textAlign: 'center' }}>
-              <span style={{ fontSize: '32px', display: 'block', marginBottom: '8px' }} aria-hidden="true"></span>
+              <AppIcon name="bell" size={32} style={{ display: 'block', margin: '0 auto 8px', color: 'rgba(255,255,255,0.4)' }} />
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>No notifications yet</p>
             </div>
           ) : (

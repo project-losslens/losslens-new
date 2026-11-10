@@ -242,14 +242,14 @@ export default function AdminDashboard() {
             <>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '8px', marginBottom: '1.5rem' }}>
                 {statsCards.map((s, i) => (
-                  <div key={i} onClick={() => s.path && navigate(s.path)}
-                    style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${s.urgent ? 'var(--text)' : 'rgba(255,255,255,0.12)'}`, borderRadius: '12px', padding: '14px', textAlign: 'center', cursor: s.path ? 'pointer' : 'default', boxShadow: s.urgent ? '0 0 16px rgba(255,255,255,0.3)' : 'none', animation: s.urgent ? 'urgentPulse 2s ease-in-out infinite' : 'none', transition: 'transform 0.2s, box-shadow 0.2s' }}
+                  <button type="button" key={i} className="clickable" onClick={() => s.path && navigate(s.path)}
+                    style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${s.urgent ? 'var(--text)' : 'rgba(255,255,255,0.12)'}`, borderRadius: '12px', padding: '14px', textAlign: 'center', cursor: s.path ? 'pointer' : 'default', boxShadow: s.urgent ? '0 0 16px rgba(255,255,255,0.3)' : 'none', animation: s.urgent ? 'urgentPulse 2s ease-in-out infinite' : 'none', transition: 'transform 0.2s, box-shadow 0.2s', width: '100%', font: 'inherit', color: 'inherit' }}
                     onMouseEnter={e => { if (s.path) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(11,18,32,0.3)' } }}
                     onMouseLeave={e => { if (s.path) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = s.urgent ? '0 0 16px rgba(255,255,255,0.3)' : 'none' } }}>
                     <span style={{ fontSize: '24px', display: 'block', marginBottom: '6px' }}>{s.icon}</span>
                     <span style={{ display: 'block', fontSize: '22px', fontWeight: 700, color: s.color, fontFamily: 'var(--font-display)' }}>{s.value.toLocaleString()}</span>
                     <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>{s.label}</span>
-                  </div>
+                  </button>
                 ))}
               </div>
 
@@ -378,8 +378,8 @@ export default function AdminDashboard() {
                       </div>
                       <p className="entry-note">{c.message?.substring(0, 100)}</p>
                       <div style={{ display: 'flex', gap: '12px', marginTop: '4px' }}>
-                        {c.email && <span style={{ color: 'var(--primary)', fontSize: '11px', cursor: 'pointer' }} onClick={() => toggleReveal('email', c.id)}> {revealedEmails[c.id] ? c.email : maskEmail(c.email)}</span>}
-                        {c.phone && <span style={{ color: 'var(--primary)', fontSize: '11px', cursor: 'pointer' }} onClick={() => toggleReveal('phone', c.id)}> {revealedPhones[c.id] ? c.phone : maskPhone(c.phone)}</span>}
+                        {c.email && <button type="button" className="clickable" style={{ color: 'var(--primary)', fontSize: '11px', padding: 0 }} onClick={() => toggleReveal('email', c.id)}> {revealedEmails[c.id] ? c.email : maskEmail(c.email)}</button>}
+                        {c.phone && <button type="button" className="clickable" style={{ color: 'var(--primary)', fontSize: '11px', padding: 0 }} onClick={() => toggleReveal('phone', c.id)}> {revealedPhones[c.id] ? c.phone : maskPhone(c.phone)}</button>}
                       </div>
                     </div>
                   ))}

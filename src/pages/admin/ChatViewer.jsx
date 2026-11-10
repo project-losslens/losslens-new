@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import AppIcon from '../../components/AppIcon'
 
 function ChatViewer() {
   const navigate = useNavigate()
@@ -211,7 +212,7 @@ function ChatViewer() {
 
             {!selectedUser ? (
               <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'rgba(255,255,255,0.4)' }}>
-                <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }} aria-hidden="true"></span>
+                <AppIcon name="chat" size={48} style={{ display: 'block', margin: '0 auto 12px', color: 'rgba(255,255,255,0.4)' }} />
                 <p style={{ color: 'var(--primary)', fontSize: '14px' }}>Select a user to view their conversations</p>
                 <p style={{ fontSize: '12px' }}>All chats are read-only</p>
               </div>

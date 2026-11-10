@@ -337,6 +337,63 @@ h1 em {
   cursor: pointer;
 }
 
+/* Reset for <button>/<a> used in place of clickable divs/spans.
+   Keeps the element's inline styles and existing appearance. */
+.clickable {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+.clickable:focus-visible,
+.modal-backdrop:focus-visible {
+  outline: 3px solid #7DBDEE;
+  outline-offset: 2px;
+}
+
+/* Full-area dismiss target rendered as the first child of a modal overlay.
+   The overlay keeps its own dimmed background; this button sits underneath
+   the card (which is lifted by the sibling rule) and closes on click. */
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: default;
+}
+
+.modal-backdrop + * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Invisible button stretched over a non-interactive card so the whole card is
+   clickable/keyboard-operable without wrapping flow content in a <button>.
+   The card itself must be position:relative. */
+.card-action {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: inherit;
+}
+
+.card-action:focus-visible {
+  outline: 3px solid #7DBDEE;
+  outline-offset: 2px;
+}
+
 .trust {
   color: var(--info);
   font-size: 12px;
@@ -580,6 +637,40 @@ h1 em {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ─── Shared feedback states (ErrorBoundary / EmptyState / ErrorState / Skeleton) ─── */
+.state-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  min-height: 40vh;
+}
+
+.state-wrap .spinner {
+  width: 28px;
+  height: 28px;
+  border-color: rgba(255, 255, 255, 0.15);
+  border-top-color: #7DBDEE;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 25%, rgba(255, 255, 255, 0.12) 50%, rgba(255, 255, 255, 0.06) 75%);
+  background-size: 200% 100%;
+  border-radius: 8px;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+@keyframes skeleton-shimmer {
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+  .state-wrap .spinner { animation-duration: 1.6s; }
 }
 
 .btn-primary:disabled {

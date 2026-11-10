@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { PublicLayout } from '../../layouts/PublicLayout'
+import AppIcon from '../../components/AppIcon'
 
 function ForgotPassword() {
   const emailRef = useRef(null)
@@ -98,7 +99,7 @@ function ForgotPassword() {
       <PublicLayout>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-label="Email sent"></span>
+            <AppIcon name="mail" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#7DBDEE' }} />
             <h1 className="auth-title">Check your inbox</h1>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>
               We've sent password reset instructions to <strong style={{ color: '#2DD4BF' }}>{email}</strong>

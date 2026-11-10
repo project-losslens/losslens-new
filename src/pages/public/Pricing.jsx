@@ -275,7 +275,7 @@ export default function Pricing() {
             </article>
 
             <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginTop: '1rem' }}>
-              Don't have a company code? <span onClick={() => setPlanType('individual')} style={{ color: '#2DD4BF', cursor: 'pointer', textDecoration: 'underline' }}>View individual plans</span>
+              Don't have a company code? <button type="button" className="clickable" onClick={() => setPlanType('individual')} style={{ color: '#2DD4BF', textDecoration: 'underline', padding: 0, font: 'inherit' }}>View individual plans</button>
             </p>
           </section>
         )}

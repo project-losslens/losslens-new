@@ -46,6 +46,7 @@ function CBTModules() {
   const navigate = useNavigate()
   const [activeModule, setActiveModule] = useState(null)
   const [completedIds, setCompletedIds] = useState([])
+  const [progressError, setProgressError] = useState(false)
   const [userId, setUserId] = useState(null)
   const [showCelebration, setShowCelebration] = useState(false)
   const [celebratingModule, setCelebratingModule] = useState(null)
@@ -166,8 +167,10 @@ function CBTModules() {
       const { data, error } = await supabase.from('cbt_progress').select('module_id').eq('user_id', session.user.id).eq('completed', true)
       if (error) throw error
       setCompletedIds((data || []).map(d => d.module_id))
+      setProgressError(false)
     } catch (err) {
       console.error('Failed to fetch progress:', err)
+      setProgressError(true)
     }
   }
 
@@ -242,12 +245,12 @@ function CBTModules() {
         {/* Celebration overlay — dismissable with aria */}
         {showCelebration && (
           <div
-            onClick={() => { setShowCelebration(false); setBadgeEarned(null) }}
             role="dialog"
             aria-modal="true"
             aria-label="Module completed"
-            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
           >
+            <button type="button" className="modal-backdrop" aria-label="Dismiss" onClick={() => { setShowCelebration(false); setBadgeEarned(null) }} />
             <div style={{ fontSize: '60px', animation: 'checkmarkPop 0.5s ease-out' }}></div>
             <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', marginTop: '16px' }}>Module Complete!</h2>
             <p style={{ color: '#2DD4BF', fontSize: '14px', marginTop: '8px' }}>{celebratingModule}</p>
@@ -267,7 +270,9 @@ function CBTModules() {
         </div>
 
         <div style={{ padding: '1.5rem' }}>
-          <div className="dash-section" style={{ marginBottom: '1rem' }}><div className="progress-bar-wrap"><div className="progress-bar"><div className="progress-fill" style={{ width: `${(completedCount / modules.length) * 100}%`, transition: 'width 0.8s ease' }} /></div><span className="progress-label">{Math.round((completedCount / modules.length) * 100)}%</span></div></div>
+          <div className="dash-section" style={{ marginBottom: '1rem' }}><div className="progress-bar-wrap"><div className="progress-bar"><div className="progress-fill" style={{ width: `${(completedCount / modules.length) * 100}%`, transition: 'width 0.8s ease' }} /></div><span className="progress-label">{Math.round((completedCount / modules.length) * 100)}%</span></div>
+            {progressError && <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', marginTop: '8px', textAlign: 'center' }}>Could not load your progress. <button type="button" className="clickable" onClick={fetchProgress} style={{ color: '#7DBDEE', padding: 0, font: 'inherit' }}>Try again</button></p>}
+          </div>
 
           {allCompleted && (
             <div className="dash-section" style={{ marginBottom: '1rem', textAlign: 'center', borderColor: '#2DD4BF', background: 'rgba(255,255,255,0.12)' }}>

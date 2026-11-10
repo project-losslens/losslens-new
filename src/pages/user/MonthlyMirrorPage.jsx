@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import AppIcon from '../../components/AppIcon'
 
 //  Constants
 const MAX_RECORDING_DURATION = 300 // 5 minutes
@@ -20,6 +21,7 @@ export default function MonthlyMirrorPage() {
   const navigate = useNavigate()
   const [identity, setIdentity] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [activeMonth, setActiveMonth] = useState(() => {
     const now = new Date()
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
@@ -176,7 +178,7 @@ export default function MonthlyMirrorPage() {
         await autoSyncPending(localData, localKey)
         syncInProgressRef.current = false
       }
-    } catch (err) { console.error('Load recordings error:', err) }
+    } catch (err) { console.error('Load recordings error:', err); setLoadError(true) }
   }
 
   //  Fixed autoSyncPending — no infinite loop
@@ -538,7 +540,7 @@ export default function MonthlyMirrorPage() {
               <>
                 {(syncedRecordings.length + pendingRecordings.length) === 0 && (
                   <div style={{ background: '#0B1220', borderRadius: '10px', minHeight: '180px', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '40px' }}></span>
+                    <AppIcon name="camera" size={40} style={{ display: 'block', margin: '0 auto', color: '#7DBDEE' }} />
                     <p style={{ color: '#2DD4BF', fontSize: '12px', marginTop: '6px' }}>Camera preview will appear here</p>
                     <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '4px' }}>Record up to {Math.floor(MAX_RECORDING_DURATION / 60)} minutes</p>
                   </div>
@@ -568,7 +570,14 @@ export default function MonthlyMirrorPage() {
           </div>
 
           {/* Pending Recordings */}
-          {pendingRecordings.length > 0 && (
+          {loadError && (
+            <div className="dash-section" style={{ textAlign: 'center', padding: '2rem' }}>
+              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', marginBottom: '10px' }}>Could not load your recordings.</p>
+              <button type="button" className="btn-primary" onClick={() => { setLoadError(false); loadAllRecordings() }}>Try again</button>
+            </div>
+          )}
+
+          {!loadError && pendingRecordings.length > 0 && (
             <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: '#7DBDEE' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <h3 style={{ color: '#7DBDEE', fontSize: '12px', margin: 0 }}>⏳ Pending sync ({pendingRecordings.length})</h3>
@@ -577,8 +586,9 @@ export default function MonthlyMirrorPage() {
                 {pendingRecordings.map(r => (
                   <div key={r.id} style={{ background: '#0B1220', border: '1px solid #7DBDEE', borderRadius: '8px', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px' }}>
-                      <div style={{ width: '64px', height: '44px', borderRadius: '4px', background: '#0B1220', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)}>
-                        <span style={{ fontSize: '20px' }}>⏳</span>
+                      <div style={{ width: '64px', height: '44px', borderRadius: '4px', background: '#0B1220', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                        <AppIcon name="clock" size={20} style={{ color: '#7DBDEE' }} />
+                        <button type="button" className="card-action" aria-label="Preview recording" onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ color: '#FFFFFF', fontSize: '11px', fontWeight: 500, margin: 0 }}>{new Date(r.created_at).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
@@ -610,11 +620,12 @@ export default function MonthlyMirrorPage() {
                 {syncedRecordings.map(r => (
                   <div key={r.id} style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px' }}>
-                      <div style={{ width: '64px', height: '44px', borderRadius: '4px', background: '#0B1220', flexShrink: 0, position: 'relative', overflow: 'hidden', cursor: 'pointer' }} onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)}>
+                      <div style={{ width: '64px', height: '44px', borderRadius: '4px', background: '#0B1220', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
                         <video src={getPublicUrl(r.storage_path)} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} preload="metadata" muted playsInline />
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(11,18,32,0.3)' }}>
-                          <span style={{ fontSize: '16px' }}>▶</span>
+                          <AppIcon name="camera" size={16} style={{ color: '#FFFFFF' }} />
                         </div>
+                        <button type="button" className="card-action" aria-label="Play recording" onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ color: '#FFFFFF', fontSize: '11px', fontWeight: 500, margin: 0 }}>{new Date(r.created_at).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>

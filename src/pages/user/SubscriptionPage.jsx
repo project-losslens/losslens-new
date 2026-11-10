@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import AppIcon from '../../components/AppIcon'
 
 const PLANS = {
   FREE: 'free',
@@ -21,6 +22,7 @@ export default function SubscriptionPage() {
   const [profile, setProfile] = useState(null)
   const [companyInfo, setCompanyInfo] = useState(null)
   const [pageLoading, setPageLoading] = useState(true)
+  const [pageError, setPageError] = useState(false)
   const [interestRegistered, setInterestRegistered] = useState(false)
   const [showComingSoon, setShowComingSoon] = useState(false)
   const [showJoinCompany, setShowJoinCompany] = useState(false)
@@ -34,6 +36,7 @@ export default function SubscriptionPage() {
 
   const fetchProfile = async () => {
     try {
+      setPageError(false)
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { setPageLoading(false); return }
 
@@ -56,7 +59,7 @@ export default function SubscriptionPage() {
           if (client) setCompanyInfo(client)
         }
       }
-    } catch (err) { console.error('Profile fetch error:', err) }
+    } catch (err) { console.error('Profile fetch error:', err); setPageError(true) }
     finally { setPageLoading(false) }
   }
 
@@ -165,6 +168,15 @@ export default function SubscriptionPage() {
     )
   }
 
+  if (pageError) {
+    return (
+      <div className="page-root" style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+        <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', marginBottom: '12px' }}>Could not load your subscription.</p>
+        <button type="button" className="btn-primary" onClick={() => { setPageLoading(true); fetchProfile() }}>Try again</button>
+      </div>
+    )
+  }
+
   return (
     <div className="page-root">
       <div className="dashboard" style={{ padding: '2rem 1.5rem', maxWidth: '600px', margin: '0 auto' }}>
@@ -198,7 +210,7 @@ export default function SubscriptionPage() {
             marginBottom: '1.5rem',
             textAlign: 'center'
           }}>
-            <span style={{ fontSize: '32px', display: 'block', marginBottom: '8px' }}></span>
+            <AppIcon name="building" size={32} style={{ display: 'block', margin: '0 auto 8px', color: '#2DD4BF' }} />
             <h3 style={{ color: '#2DD4BF', fontSize: '16px', margin: '0 0 4px' }}>{companyInfo.company_name}</h3>
             <p style={{ color: '#2DD4BF', fontSize: '12px', margin: 0 }}>
               {companyInfo.plan?.charAt(0).toUpperCase() + companyInfo.plan?.slice(1)} Plan  · Subsidized Access
@@ -217,7 +229,7 @@ export default function SubscriptionPage() {
               borderRadius: '14px', padding: '1.5rem', textAlign: 'center',
               opacity: currentPlan === PLANS.PREMIUM ? 0.6 : 1,
             }}>
-              <span style={{ fontSize: '28px', display: 'block', marginBottom: '8px' }}></span>
+              <AppIcon name="coin" size={28} style={{ display: 'block', margin: '0 auto 8px', color: '#7DBDEE' }} />
               <h3 style={{ color: '#FFFFFF', fontSize: '15px', marginBottom: '4px' }}>Free</h3>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: '#2DD4BF', margin: '0 0 4px' }}>KES 0</p>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Forever</p>
@@ -233,7 +245,7 @@ export default function SubscriptionPage() {
               position: 'relative',
             }}>
               <span style={{ position: 'absolute', top: '-10px', right: '16px', background: '#2DD4BF', color: '#0B1220', fontSize: '10px', fontWeight: 600, padding: '3px 10px', borderRadius: '100px' }}>Premium</span>
-              <span style={{ fontSize: '28px', display: 'block', marginBottom: '8px' }}></span>
+              <AppIcon name="star" size={28} style={{ display: 'block', margin: '0 auto 8px', color: '#F2C879' }} />
               <h3 style={{ color: '#FFFFFF', fontSize: '15px', marginBottom: '4px' }}>Premium</h3>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: '#2DD4BF', margin: '0 0 4px' }}>KES 499</p>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>/month</p>
@@ -275,7 +287,7 @@ export default function SubscriptionPage() {
         {/* Join Company Section — only for individual users */}
         {!isCompanyPlan && (
           <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '1.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>
-            <span style={{ fontSize: '24px', display: 'block', marginBottom: '8px' }}></span>
+            <AppIcon name="building" size={24} style={{ display: 'block', margin: '0 auto 8px', color: '#7DBDEE' }} />
             <h4 style={{ color: '#FFFFFF', fontSize: '14px', margin: '0 0 6px' }}>Have a company code?</h4>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 12px' }}>
               If your employer offers LossLens, enter your code for subsidized Premium access.
@@ -339,7 +351,7 @@ export default function SubscriptionPage() {
 
         {interestRegistered && (
           <div style={{ textAlign: 'center', padding: '1rem', background: 'rgba(255,255,255,0.12)', borderRadius: '12px', border: '1px solid #2DD4BF', marginBottom: '1rem' }}>
-            <span style={{ fontSize: '24px', display: 'block', marginBottom: '8px' }}></span>
+            <AppIcon name="check" size={24} style={{ display: 'block', margin: '0 auto 8px', color: '#2DD4BF' }} />
             <p style={{ color: '#2DD4BF', fontSize: '14px', fontWeight: 500, margin: 0 }}>Thanks for your interest!</p>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginTop: '4px' }}>We'll notify you when Premium launches.</p>
           </div>
@@ -369,9 +381,10 @@ export default function SubscriptionPage() {
 
       {/* Coming Soon Modal */}
       {showComingSoon && (
-        <div onClick={handleCloseComingSoon} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '2px solid #2DD4BF', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={handleCloseComingSoon} />
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '2px solid #2DD4BF', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
+            <AppIcon name="clock" size={48} style={{ display: 'block', margin: '0 auto 12px', color: '#2DD4BF' }} />
             <h3 style={{ color: '#2DD4BF', fontSize: '18px', fontFamily: 'var(--font-display)', marginBottom: '12px' }}>Premium Coming Soon!</h3>
             <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
               M-Pesa payments are being set up. During testing, <strong style={{ color: '#2DD4BF' }}>all features are free</strong>.

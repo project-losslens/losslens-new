@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '../../lib/supabase'
+import AppIcon from '../../components/AppIcon'
 
 //  Constants
 const EVENT_TYPES = ['Workshop', 'Support Group', 'Seminar', 'Webinar', 'Social Event', 'Training', 'Other']
@@ -273,8 +274,9 @@ export default function ManageEvents() {
 
         {/* Form Modal */}
         {showForm && (
-          <div onClick={() => setShowForm(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-            <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '540px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowForm(false)} />
+            <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '540px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
               <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 1.25rem' }}>{editingEvent ? ' Edit Event' : ' New Event'}</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div>
@@ -336,9 +338,10 @@ export default function ManageEvents() {
 
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && (
-          <div onClick={() => setShowDeleteConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-            <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
-              <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}></span>
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowDeleteConfirm(null)} />
+            <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
+              <AppIcon name="alert" size={36} style={{ display: 'block', margin: '0 auto 12px' }} />
               <h3 style={{ color: 'var(--text)', fontSize: '16px', margin: '0 0 8px' }}>Delete Event?</h3>
               <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
                 Permanently delete <strong style={{ color: 'var(--primary)' }}>"{showDeleteConfirm.title}"</strong> and ALL its RSVPs, discussions, and messages? This cannot be undone.
@@ -377,7 +380,7 @@ export default function ManageEvents() {
 
               {filteredEvents.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
-                  <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
+                  <AppIcon name="calendar" size={40} style={{ display: 'block', margin: '0 auto 12px' }} />
                   <p style={{ color: 'var(--primary)', fontSize: '14px' }}>{searchQuery ? 'No events match your search.' : 'No events yet.'}</p>
                   {searchQuery && <button onClick={() => setSearchQuery('')} style={{ marginTop: '10px', padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Clear search</button>}
                 </div>
@@ -444,7 +447,7 @@ export default function ManageEvents() {
             <div>
               {rsvpEvents.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
-                  <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
+                  <AppIcon name="calendar" size={40} style={{ display: 'block', margin: '0 auto 12px' }} />
                   <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No RSVPs yet.</p>
                 </div>
               ) : rsvpEvents.map(ev => {
@@ -492,7 +495,7 @@ export default function ManageEvents() {
             <div>
               {discussions.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
-                  <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
+                  <AppIcon name="chat" size={40} style={{ display: 'block', margin: '0 auto 12px' }} />
                   <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No discussions yet.</p>
                 </div>
               ) : discussions.map((d, i) => (
@@ -525,7 +528,7 @@ export default function ManageEvents() {
             <div>
               {contacts.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
-                  <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
+                  <AppIcon name="chat" size={40} style={{ display: 'block', margin: '0 auto 12px' }} />
                   <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No messages yet.</p>
                 </div>
               ) : contacts.map((c, i) => (

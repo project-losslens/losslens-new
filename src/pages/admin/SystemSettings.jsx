@@ -379,8 +379,9 @@ export default function SystemSettings() {
 
       {/* Confirmation Modals */}
       {showConfirm === 'maintenance' && (
-        <div onClick={() => setShowConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--text)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowConfirm(null)} />
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--text)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>{'\u{26A0}'}</span>
             <h3 style={{ color: 'var(--text)', fontSize: '16px', margin: '0 0 8px' }}>Enable Maintenance Mode?</h3>
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
@@ -395,8 +396,9 @@ export default function SystemSettings() {
       )}
 
       {showConfirm === 'signups' && (
-        <div onClick={() => setShowConfirm(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--info)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowConfirm(null)} />
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--info)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>{'\u{1F6AB}'}</span>
             <h3 style={{ color: 'var(--info)', fontSize: '16px', margin: '0 0 8px' }}>Disable New Signups?</h3>
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>

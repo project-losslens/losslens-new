@@ -4,6 +4,7 @@ import AppShell from './layouts/AppShell'
 import { BrandLoader } from './components/Brand'
 import { PublicOnly, RequireAuth, RequireElevated } from './components/RouteGuards'
 import { CrisisAlertCountProvider } from './context/CrisisAlertCountContext'
+import { ErrorBoundary } from './components/Feedback'
 
 const Landing = lazy(() => import('./pages/public/Landing'))
 const Login = lazy(() => import('./pages/public/Login'))
@@ -65,6 +66,7 @@ const InsurerAnalytics = lazy(() => import('./pages/insurer/InsurerAnalytics'))
 function App() {
   return (
     <Suspense fallback={<BrandLoader />}>
+      <ErrorBoundary>
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route element={<PublicOnly />}>
@@ -143,6 +145,7 @@ function App() {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </ErrorBoundary>
     </Suspense>
   )
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
+import AppIcon from '../../components/AppIcon'
 
 const fmtTime = (d) => d ? new Date(d).toLocaleString('en-KE') : '—'
 
@@ -135,7 +136,7 @@ export default function CrisisAlerts() {
           {activeTab === 'open' && (
             alerts.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)' }}>
-                <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
+                <AppIcon name="shield" size={48} style={{ display: 'block', margin: '0 auto 12px' }} />
                 <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No open crisis alerts. All clear.</p>
               </div>
             ) : alerts.map(a => (
@@ -205,7 +206,7 @@ export default function CrisisAlerts() {
           {activeTab === 'resolved' && (
             resolved.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)' }}>
-                <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></span>
+                <AppIcon name="shield" size={48} style={{ display: 'block', margin: '0 auto 12px' }} />
                 <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No resolved alerts yet.</p>
               </div>
             ) : resolved.map(a => (

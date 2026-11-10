@@ -62,11 +62,12 @@ function Diary() {
 
   const [historyEntries, setHistoryEntries] = useState([])
   const [historyLoading, setHistoryLoading] = useState(true)
+  const [historyError, setHistoryError] = useState(false)
   const [showAllHistory, setShowAllHistory] = useState(false)
   const [activeView, setActiveView] = useState('today')
   const [stats, setStats] = useState({ totalEntries: 0, cleanDays: 0, gambleDays: 0, cleanRate: 0, topTriggers: [], topCoping: [] })
 
-  const moods = [' Calm', ' Stressed', ' Anxious', ' Depressed', ' Happy']
+  const moods = ['Calm', 'Stressed', 'Anxious', 'Depressed', 'Happy']
   const triggerOptions = ['Boredom', 'Stress', 'Social Pressure', 'Financial Pressure', 'Celebration', 'Ads/Promotions', 'Other']
   const copingOptions = ['Breathing', 'Left Situation', 'Called Someone', 'App Tools', 'Exercise', 'Other']
   const gamblingTypes = ['Sports Betting', 'Casino', 'Lottery', 'Online', 'Other']
@@ -129,7 +130,7 @@ function Diary() {
     if (data) {
       setTodayEntry(data)
       setGambled(data.gambled)
-      setMood(data.mood || '')
+      setMood((data.mood || '').trim())
       setTriggers(data.triggers || [])
       setCoping(data.coping || [])
       setNotes(data.notes || '')
@@ -142,8 +143,11 @@ function Diary() {
 
   const fetchHistory = async (uid) => {
     setHistoryLoading(true)
-    const { data } = await supabase.from('diary_entries').select('*').eq('user_id', uid).order('date', { ascending: false }).limit(30)
-    const entries = data || []
+    setHistoryError(false)
+    try {
+      const { data, error } = await supabase.from('diary_entries').select('*').eq('user_id', uid).order('date', { ascending: false }).limit(30)
+      if (error) throw error
+      const entries = data || []
     setHistoryEntries(entries)
     const total = entries.length
     const clean = entries.filter(e => !e.gambled).length
@@ -152,7 +156,12 @@ function Diary() {
     const tc = {}; entries.forEach(e => { (e.triggers || []).forEach(t => tc[t] = (tc[t] || 0) + 1) })
     const cc = {}; entries.forEach(e => { (e.coping || []).forEach(c => cc[c] = (cc[c] || 0) + 1) })
     setStats({ totalEntries: total, cleanDays: clean, gambleDays: gamble, cleanRate: rate, topTriggers: Object.entries(tc).sort((a, b) => b[1] - a[1]).slice(0, 5), topCoping: Object.entries(cc).sort((a, b) => b[1] - a[1]).slice(0, 5) })
-    setHistoryLoading(false)
+    } catch (err) {
+      console.error('Diary history fetch error:', err)
+      setHistoryError(true)
+    } finally {
+      setHistoryLoading(false)
+    }
   }
 
   const toggleItem = (item, list, setList) => {
@@ -176,7 +185,7 @@ function Diary() {
       time_spent: timeSpent ? parseFloat(timeSpent) : null,
       money_spent: moneySpent ? parseFloat(moneySpent) : null,
       money_won: moneyWon ? parseFloat(moneyWon) : null,
-      mood: mood || null,
+      mood: (mood || '').trim() || null,
       triggers: triggers || [],
       coping: coping || [],
       notes: notes || null,
@@ -304,7 +313,7 @@ function Diary() {
                 </div>
               )}
 
-              <div className="dash-section"><h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '1rem' }}>How are you feeling?</h3><div className="chip-group">{moods.map(m => <button key={m} className={`chip ${mood === m ? 'chip-active' : ''}`} onClick={() => setMood(m)}>{m}</button>)}</div></div>
+              <div className="dash-section"><h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '1rem' }}>How are you feeling?</h3><div className="chip-group">{moods.map(m => <button key={m} className={`chip ${mood.trim() === m ? 'chip-active' : ''}`} onClick={() => setMood(m)}>{m}</button>)}</div></div>
               <div className="dash-section"><h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '1rem' }}>Triggers</h3><div className="chip-group">{triggerOptions.map(t => <button key={t} className={`chip ${triggers.includes(t) ? 'chip-active' : ''}`} onClick={() => toggleItem(t, triggers, setTriggers)}>{t}</button>)}</div></div>
               <div className="dash-section"><h3 style={{ color: '#FFFFFF', fontSize: '14px', marginBottom: '1rem' }}>Coping strategies</h3><div className="chip-group">{copingOptions.map(c => <button key={c} className={`chip ${coping.includes(c) ? 'chip-active' : ''}`} onClick={() => toggleItem(c, coping, setCoping)}>{c}</button>)}</div></div>
 
@@ -337,11 +346,12 @@ function Diary() {
               <div className="dash-section">
                 <div className="section-header"><h3>All entries</h3></div>
                 {historyLoading ? <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', textAlign: 'center', padding: '1rem' }}>Loading...</p> :
+                 historyError ? <div style={{ textAlign: 'center', padding: '1.5rem' }}><p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '13px', marginBottom: '10px' }}>Could not load your entries.</p><button type="button" className="btn-primary" onClick={() => fetchHistory(userId)}>Try again</button></div> :
                  historyEntries.length === 0 ? <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', textAlign: 'center', padding: '1.5rem' }}>No entries yet.</p> :
                  <div className="entries-list">{(showAllHistory ? historyEntries : historyEntries.slice(0, 7)).map((e, i) => (
                    <div className="entry-item" key={i} style={{ animation: `fadeIn 0.3s ease-out ${i * 0.05}s both` }}>
                      <div className="entry-top"><span className="entry-date">{new Date(e.date).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric' })}</span><span className={`entry-status ${e.gambled ? 'gambled' : 'clean'}`}>{e.gambled ? 'Gambled' : 'Clean'}</span></div>
-                     <div className="entry-mood">{e.mood || 'No mood'}</div>
+                     <div className="entry-mood">{(e.mood || '').trim() || 'No mood'}</div>
                      {e.notes && <p className="entry-note">{e.notes}</p>}
                    </div>
                  ))}</div>}

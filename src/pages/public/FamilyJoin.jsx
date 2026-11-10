@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import AppIcon from '../../components/AppIcon'
 
 //  Constants for permissions
 const PERMISSIONS = {
@@ -20,8 +21,13 @@ const RISK_LABELS = {
 }
 
 const MOOD_LABELS = {
-  ' Calm': 'Calm', ' Stressed': 'Stressed', ' Anxious': 'Anxious',
-  ' Depressed': 'Low', ' Happy': 'Happy',
+  Calm: 'Calm', Stressed: 'Stressed', Anxious: 'Anxious',
+  Depressed: 'Low', Happy: 'Happy',
+}
+
+const MOOD_COLORS = {
+  Calm: '#2DD4BF', Happy: '#7DBDEE', Stressed: '#F2C879',
+  Anxious: '#F2C879', Depressed: '#FFFFFF',
 }
 
 export default function FamilyJoin() {
@@ -153,15 +159,7 @@ export default function FamilyJoin() {
     finally { setSendingMessage(false) }
   }
 
-  const getMoodEmoji = (mood) => {
-    if (!mood) return '⠝"'
-    if (mood.includes('Calm')) return ''
-    if (mood.includes('Stressed')) return ''
-    if (mood.includes('Anxious')) return ''
-    if (mood.includes('Happy')) return ''
-    if (mood.includes('Depressed')) return ''
-    return ''
-  }
+  const getMoodColor = (mood) => MOOD_COLORS[(mood || '').trim()] || 'rgba(255,255,255,0.4)'
 
   const getRisk = (level) => RISK_LABELS[level] || RISK_LABELS.low
 
@@ -170,7 +168,7 @@ export default function FamilyJoin() {
     return (
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
-          <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }} aria-hidden="true"></span>
+          <AppIcon name="clock" size={40} style={{ display: 'block', margin: '0 auto 12px', color: '#7DBDEE' }} />
           <p style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '18px' }}>Loading...</p>
         </div>
       </div>
@@ -182,7 +180,7 @@ export default function FamilyJoin() {
     return (
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ maxWidth: '440px', width: '100%', textAlign: 'center' }}>
-          <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
+          <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#FFFFFF' }} />
           <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', marginBottom: '12px' }}>Invalid Link</h2>
           <p style={{ color: '#2DD4BF', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px' }}>{error}</p>
           <button onClick={() => navigate('/')} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Go to LossLens →</button>
@@ -196,7 +194,7 @@ export default function FamilyJoin() {
     return (
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ maxWidth: '440px', width: '100%', textAlign: 'center', background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2.5rem', border: '1px solid rgba(255,255,255,0.12)' }}>
-          <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
+          <AppIcon name="heart" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
           <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', marginBottom: '12px' }}>You've Declined</h2>
           <p style={{ color: '#2DD4BF', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px' }}>That's okay. If you change your mind, ask {invitation?.supporter_name || 'your friend'} to send you a new invitation.</p>
           <button onClick={() => navigate('/')} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Go to LossLens →</button>
@@ -211,7 +209,7 @@ export default function FamilyJoin() {
     return (
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ maxWidth: '480px', width: '100%', background: 'rgba(255,255,255,0.06)', borderRadius: '20px', padding: '2.5rem 2rem', border: '2px solid #2DD4BF', textAlign: 'center' }}>
-          <span style={{ fontSize: '48px', display: 'block', marginBottom: '16px' }} aria-hidden="true"></span>
+          <AppIcon name="users" size={48} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
           <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '8px' }}>{invitation.supporter_name},</h2>
           <p style={{ color: '#7DBDEE', fontSize: '15px', lineHeight: '1.6', marginBottom: '24px' }}>
             <strong style={{ color: '#2DD4BF' }}>{invitation.anonymous_mode ? 'A loved one' : (userProfile?.full_name || 'Someone')}</strong> has invited you to support their recovery journey on <strong>LossLens</strong>.
@@ -240,7 +238,7 @@ export default function FamilyJoin() {
   return (
     <div style={{ minHeight: '100vh', background: '#0B1220' }}>
       <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', padding: '2rem 1.5rem', textAlign: 'center', borderBottom: '2px solid #2DD4BF' }}>
-        <span style={{ fontSize: '40px', display: 'block', marginBottom: '8px' }} aria-hidden="true"></span>
+        <AppIcon name="users" size={40} style={{ display: 'block', margin: '0 auto 8px', color: '#2DD4BF' }} />
         <h1 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', margin: '0 0 4px' }}>
           {invitation.anonymous_mode ? 'Supporting a Loved One' : `Supporting ${userProfile?.full_name || 'Someone'}`}
         </h1>
@@ -252,35 +250,35 @@ export default function FamilyJoin() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', marginBottom: '1.5rem' }}>
           {permissions.includes(PERMISSIONS.STREAK) && (
             <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '16px', textAlign: 'center' }}>
-              <span style={{ fontSize: '24px', display: 'block', marginBottom: '6px' }} aria-hidden="true"></span>
+              <AppIcon name="flame" size={24} style={{ display: 'block', margin: '0 auto 6px', color: '#2DD4BF' }} />
               <span style={{ display: 'block', fontSize: '28px', fontWeight: 700, color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>{userStats?.streak || 0}</span>
               <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>Days gamble-free</span>
             </div>
           )}
           {permissions.includes(PERMISSIONS.STREAK) && (
             <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '16px', textAlign: 'center' }}>
-              <span style={{ fontSize: '24px', display: 'block', marginBottom: '6px' }} aria-hidden="true"></span>
+              <AppIcon name="coin" size={24} style={{ display: 'block', margin: '0 auto 6px', color: '#2DD4BF' }} />
               <span style={{ display: 'block', fontSize: '20px', fontWeight: 700, color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>KES {(userStats?.moneySaved || 0).toLocaleString()}</span>
               <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>Money saved</span>
             </div>
           )}
           {permissions.includes(PERMISSIONS.GOAL) && (
             <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '16px', textAlign: 'center' }}>
-              <span style={{ fontSize: '24px', display: 'block', marginBottom: '6px' }} aria-hidden="true"></span>
+              <AppIcon name="target" size={24} style={{ display: 'block', margin: '0 auto 6px', color: '#2DD4BF' }} />
               <span style={{ display: 'block', fontSize: '16px', fontWeight: 600, color: '#2DD4BF' }}>{userStats?.goal || 'Abstinence'}</span>
               <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>Their goal</span>
             </div>
           )}
           {permissions.includes(PERMISSIONS.MODULES) && (
             <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '16px', textAlign: 'center' }}>
-              <span style={{ fontSize: '24px', display: 'block', marginBottom: '6px' }} aria-hidden="true"></span>
+              <AppIcon name="brain" size={24} style={{ display: 'block', margin: '0 auto 6px', color: '#2DD4BF' }} />
               <span style={{ display: 'block', fontSize: '28px', fontWeight: 700, color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>{userStats?.cbtCompleted || 0}/8</span>
               <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>CBT modules done</span>
             </div>
           )}
           {permissions.includes(PERMISSIONS.RISK) && risk && (
             <div style={{ background: risk.bg, border: `1px solid ${risk.color}33`, borderRadius: '14px', padding: '16px', textAlign: 'center' }}>
-              <span style={{ fontSize: '24px', display: 'block', marginBottom: '6px' }} aria-hidden="true"></span>
+              <AppIcon name="shield" size={24} style={{ display: 'block', margin: '0 auto 6px', color: risk.color }} />
               <span style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: risk.color }}>{risk.label}</span>
               <span style={{ fontSize: '11px', color: risk.color, opacity: 0.7 }}>Current status</span>
             </div>
@@ -297,7 +295,7 @@ export default function FamilyJoin() {
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
               {userStats.recentMoods.slice(0, 7).map((entry, i) => (
                 <div key={i} style={{ textAlign: 'center', minWidth: '40px' }}>
-                  <span style={{ fontSize: '22px', display: 'block' }} role="img" aria-label={MOOD_LABELS[entry.mood] || 'Unknown mood'}>{getMoodEmoji(entry.mood)}</span>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: getMoodColor(entry.mood), display: 'block', margin: '0 auto' }} role="img" aria-label={MOOD_LABELS[(entry.mood || '').trim()] || 'Unknown mood'} />
                   <span style={{ fontSize: '9px', color: entry.gambled ? '#FFFFFF' : 'rgba(255,255,255,0.4)' }}>{new Date(entry.date).toLocaleDateString('en-KE', { weekday: 'short' })}</span>
                 </div>
               ))}
@@ -346,9 +344,10 @@ export default function FamilyJoin() {
 
       {/* Stop Supporting Modal */}
       {showStopModal && (
-        <div onClick={() => setShowStopModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '360px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowStopModal(false)} />
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '360px', width: '100%', textAlign: 'center' }}>
+            <AppIcon name="alert" size={40} style={{ display: 'block', margin: '0 auto 12px', color: '#FFFFFF' }} />
             <h3 style={{ color: '#FFFFFF', fontSize: '16px', margin: '0 0 8px' }}>Stop supporting?</h3>
             <p style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>You can always ask them for a new invitation link if you change your mind.</p>
             <div style={{ display: 'flex', gap: '8px' }}>

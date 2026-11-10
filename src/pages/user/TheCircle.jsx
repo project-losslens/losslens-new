@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { createNotification } from '../../lib/notifications'
 import { ensureCircleHash } from '../../lib/storage'
 import { detectCrisis } from '../../lib/crisisDetection'
+import AppIcon from '../../components/AppIcon'
 
 //  Constants
 const ROOMS = [
@@ -78,6 +79,7 @@ export default function TheCircle() {
   const navigate = useNavigate()
   const [userId, setUserId] = useState(null)
   const [identity, setIdentity] = useState(null)
+  const [initError, setInitError] = useState(false)
   const [activeRoom, setActiveRoom] = useState(ROOMS[0].id)
   const [messages, setMessages] = useState([])
   const [messageIds, setMessageIds] = useState(new Set())
@@ -134,17 +136,24 @@ export default function TheCircle() {
   }
 
   const initUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return
-    const uid = session.user.id; setUserId(uid)
-    const { data: profile } = await supabase.from('profiles').select('circle_user_hash, circle_display_name').eq('id', uid).single()
-    const userHash = profile?.circle_user_hash || await ensureCircleHash(uid)
-    const generatedIdentity = generateIdentity(uid)
-    setIdentity({
-      ...generatedIdentity,
-      hash: userHash,
-      displayName: profile?.circle_display_name || generatedIdentity.displayName,
-    })
+    try {
+      setInitError(false)
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
+      const uid = session.user.id; setUserId(uid)
+      const { data: profile, error: profileError } = await supabase.from('profiles').select('circle_user_hash, circle_display_name').eq('id', uid).single()
+      if (profileError) throw profileError
+      const userHash = profile?.circle_user_hash || await ensureCircleHash(uid)
+      const generatedIdentity = generateIdentity(uid)
+      setIdentity({
+        ...generatedIdentity,
+        hash: userHash,
+        displayName: profile?.circle_display_name || generatedIdentity.displayName,
+      })
+    } catch (err) {
+      console.error('Circle init error:', err)
+      setInitError(true)
+    }
   }
 
   const scrollToBottom = () => {
@@ -339,6 +348,13 @@ export default function TheCircle() {
   const getAvatarEmoji = (a) => ANIMAL_EMOJI[a] || ''
   const activeRoomData = useMemo(() => ROOMS.find(r => r.id === activeRoom), [activeRoom])
 
+  if (initError) return (
+    <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', marginBottom: '12px' }}>Could not connect to The Circle.</p>
+      <button type="button" className="btn-primary" onClick={initUser}>Try again</button>
+    </div>
+  )
+
   if (!identity) return (
     <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ display: 'flex', gap: '8px' }}>{[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}</div>
@@ -397,8 +413,8 @@ export default function TheCircle() {
                     <span style={{ fontSize: '11px', color: isOwn ? '#2DD4BF' : '#2DD4BF', fontWeight: 500 }}>{msg.display_name}</span>
                     <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }} title={new Date(msg.created_at).toLocaleString('en-KE')}>{formatTime(msg.created_at)}</span>
                     {msg._sending && <span style={{ fontSize: '10px', color: '#7DBDEE' }}>sending...</span>}
-                    {msg._delivered && <span style={{ fontSize: '10px', color: '#2DD4BF' }}></span>}
-                    {msg._failed && <span onClick={() => retryMessage(msg)} style={{ fontSize: '10px', color: '#FFFFFF', cursor: 'pointer', textDecoration: 'underline' }}> Retry</span>}
+                    {msg._delivered && <AppIcon name="check" size={12} style={{ color: '#2DD4BF' }} />}
+                    {msg._failed && <button type="button" className="clickable" onClick={() => retryMessage(msg)} style={{ fontSize: '10px', color: '#FFFFFF', padding: 0 }}> Retry</button>}
                   </div>
                   {msg.reply_to && (
                     <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginBottom: '2px', padding: '4px 8px', background: '#0B1220', borderRadius: '6px', borderLeft: '2px solid #2DD4BF' }}>

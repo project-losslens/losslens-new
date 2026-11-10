@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import AppIcon from '../../components/AppIcon'
 
 const MAX_SUPPORTERS = 5
 const ALL_PERMISSIONS = [
@@ -225,11 +226,11 @@ function FamilyPortalPage() {
 
   const getStatusBadge = (status) => {
     const map = {
-      pending: { color: '#7DBDEE', bg: 'rgba(45,212,191,0.15)', label: '⏳ Pending' },
-      active: { color: '#2DD4BF', bg: 'rgba(255,255,255,0.12)', label: ' Active' },
-      declined: { color: '#FFFFFF', bg: 'rgba(255,255,255,0.08)', label: '⠝Œ Declined' },
-      expired: { color: 'rgba(255,255,255,0.4)', bg: '#0B1220', label: '⏰ Expired' },
-      paused: { color: 'rgba(255,255,255,0.4)', bg: '#0B1220', label: '⏸ Paused' },
+      pending: { color: '#7DBDEE', bg: 'rgba(45,212,191,0.15)', label: 'Pending' },
+      active: { color: '#2DD4BF', bg: 'rgba(255,255,255,0.12)', label: 'Active' },
+      declined: { color: '#FFFFFF', bg: 'rgba(255,255,255,0.08)', label: 'Declined' },
+      expired: { color: 'rgba(255,255,255,0.4)', bg: '#0B1220', label: 'Expired' },
+      paused: { color: 'rgba(255,255,255,0.4)', bg: '#0B1220', label: 'Paused' },
     }
     return map[status] || map.pending
   }
@@ -251,7 +252,7 @@ function FamilyPortalPage() {
         </div>
         <div style={{ padding: '1.5rem' }}>
           <div className="dash-section" style={{ marginBottom: '1rem', borderColor: '#2DD4BF' }}>
-            <div style={{ display: 'flex', gap: '12px' }}><span style={{ fontSize: '28px' }}></span><div><h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '6px' }}>Why invite a supporter?</h3><p style={{ color: '#7DBDEE', fontSize: '13px', lineHeight: '1.6', fontWeight: 300, margin: 0 }}>Recovery is easier with support. Invite trusted family or friends to follow your journey. They see only what you choose — no account needed.</p></div></div>
+            <div style={{ display: 'flex', gap: '12px' }}><AppIcon name="heart" size={28} style={{ flexShrink: 0, color: '#2DD4BF' }} /><div><h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '6px' }}>Why invite a supporter?</h3><p style={{ color: '#7DBDEE', fontSize: '13px', lineHeight: '1.6', fontWeight: 300, margin: 0 }}>Recovery is easier with support. Invite trusted family or friends to follow your journey. They see only what you choose — no account needed.</p></div></div>
           </div>
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)' }}>
             {[{ id: 'supporters', label: ` Supporters` }, { id: 'resources', label: ' Resources' }, { id: 'privacy', label: ' Privacy' }].map(tab => (
@@ -311,7 +312,7 @@ function FamilyPortalPage() {
                 )
               })}
               {invitations.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)' }}><span style={{ fontSize: '48px' }}></span><p style={{ color: '#2DD4BF', fontSize: '14px' }}>No supporters yet.</p></div>
+                <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)' }}><AppIcon name="users" size={48} style={{ display: 'block', margin: '0 auto 8px', color: '#2DD4BF' }} /><p style={{ color: '#2DD4BF', fontSize: '14px' }}>No supporters yet.</p></div>
               )}
             </>
           )}

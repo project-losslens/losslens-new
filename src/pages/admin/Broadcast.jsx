@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '../../lib/supabase'
+import AppIcon from '../../components/AppIcon'
 
 //  Constants
 const MAX_BODY_LENGTH = 500
@@ -246,7 +247,7 @@ export default function Broadcast() {
           <h3 style={{ color: 'var(--text)', fontSize: '15px', margin: '0 0 0.75rem' }}> Broadcast History</h3>
           {history.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
-              <span style={{ fontSize: '40px', display: 'block', marginBottom: '8px' }}></span>
+              <AppIcon name="broadcast" size={40} style={{ display: 'block', margin: '0 auto 8px' }} />
               <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No broadcasts sent yet.</p>
             </div>
           ) : (
@@ -276,9 +277,10 @@ export default function Broadcast() {
 
       {/* Confirmation Modal */}
       {showConfirm && (
-        <div onClick={() => setShowConfirm(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--primary)', maxWidth: '450px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowConfirm(false)} />
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--primary)', maxWidth: '450px', width: '100%', textAlign: 'center' }}>
+            <AppIcon name="alert" size={40} style={{ display: 'block', margin: '0 auto 12px' }} />
             <h3 style={{ color: 'var(--primary)', fontSize: '16px', marginBottom: '8px' }}>Confirm Broadcast</h3>
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '16px', lineHeight: '1.6' }}>
               Send <strong style={{ color: 'var(--primary)' }}>"{form.title}"</strong> to <strong style={{ color: 'var(--primary)' }}>{userCount.toLocaleString()} {targetLabel.toLowerCase()}</strong>?

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { readAndMigrateStorageItem } from '../../lib/storage'
+import AppIcon from '../../components/AppIcon'
 
 //  Constants
 const CATEGORY_ICONS = {
@@ -212,7 +213,7 @@ export default function Resources() {
     return (
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
-          <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}></span>
+          <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
           <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>Please log in</h2>
           <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%', marginTop: '16px' }}>Go to Login →</button>
         </div>
@@ -311,7 +312,7 @@ export default function Resources() {
             <div className="dash-section" style={{ textAlign: 'center', padding: '2rem' }}><p style={{ color: '#FFFFFF' }}>{error}</p><button className="btn-ghost" onClick={fetchResources}>Retry</button></div>
           ) : filteredResources.length === 0 ? (
             <div className="dash-section" style={{ textAlign: 'center', padding: '2rem' }}>
-              <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}></span>
+              <AppIcon name="resources" size={40} style={{ display: 'block', margin: '0 auto 12px', color: '#2DD4BF' }} />
               <p style={{ color: '#2DD4BF', fontSize: '14px' }}>{debouncedSearch || activeCategory !== 'all' ? 'No resources match your search.' : 'No resources yet.'}</p>
               {(debouncedSearch || activeCategory !== 'all') && <button onClick={() => { setSearchQuery(''); setActiveCategory('all') }} style={{ marginTop: '10px', padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Clear filters</button>}
             </div>
