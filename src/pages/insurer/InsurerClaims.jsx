@@ -1,5 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { toCsv, downloadCsv } from '../../lib/csv'
+
+const CLAIM_CSV_COLUMNS = [
+  { key: 'claim_id', label: 'Claim ID' },
+  { key: 'session_date', label: 'Session Date' },
+  { key: 'claim_amount', label: 'Amount (KES)' },
+  { key: 'claim_status', label: 'Claim Status' },
+  { key: 'insurer_status', label: 'Insurer Status' },
+  { key: 'submitted_at', label: 'Submitted At' },
+]
 
 export default function InsurerClaims() {
   const [claims, setClaims] = useState([])
@@ -44,11 +54,30 @@ export default function InsurerClaims() {
     setWorking('')
   }
 
+  const exportCsv = () => {
+    const rows = claims.map((c) => ({
+      claim_id: c.claim_id,
+      session_date: c.session_date,
+      claim_amount: c.claim_amount,
+      claim_status: c.claim_status,
+      insurer_status: c.insurer_status,
+      submitted_at: c.submitted_at,
+    }))
+    downloadCsv('losslens-claims.csv', toCsv(rows, CLAIM_CSV_COLUMNS))
+  }
+
   if (loading) return <p role="status">Loading claims...</p>
   return (
     <section className="portal-page">
-      <p className="portal-page__eyebrow">Insurer portal</p>
-      <h2>Claim adjudication</h2>
+      <header className="portal-page__heading">
+        <div>
+          <p className="portal-page__eyebrow">Insurer portal</p>
+          <h2>Claim adjudication</h2>
+        </div>
+        <div className="portal-page__actions">
+          <button type="button" className="btn-secondary" onClick={exportCsv} disabled={claims.length === 0}>Export CSV</button>
+        </div>
+      </header>
       <p>Claim details are limited to session date, amount, and adjudication status. Clinical notes and member recovery data are not available here.</p>
       {error && <p className="portal-error" role="alert">{error} <button type="button" onClick={load}>Retry</button></p>}
       {claims.length === 0 ? <p>No submitted claims are available.</p> : (

@@ -1,5 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { METRIC_DEFINITIONS } from '../../lib/metrics'
+
+function FloatStat({ label, value, definition }) {
+  return (
+    <article className="portal-card">
+      <span>{label}</span>
+      <strong>{value}</strong>
+      {definition && <details className="metric-def"><summary>Definition</summary><p>{definition}</p></details>}
+    </article>
+  )
+}
 
 export default function FloatManagement() {
   const [balance, setBalance] = useState(0)
@@ -95,11 +106,11 @@ export default function FloatManagement() {
       <p>The float pays approved therapist claims before insurer reimbursement. Insurer-reported payments are credited only after recent-auth super-admin confirmation.</p>
       {error && <p className="portal-error" role="alert">{error} <button type="button" onClick={load}>Retry</button></p>}
       <div className="portal-stats">
-        <article className="portal-card"><span>Current balance</span><strong>KES {balance.toLocaleString()}</strong></article>
-        <article className="portal-card"><span>30-day outflow</span><strong>KES {burnRate.toLocaleString()}</strong></article>
-        <article className="portal-card"><span>Days until depleted</span><strong>{daysUntilDepleted == null ? 'No recent burn' : daysUntilDepleted}</strong></article>
-        <article className="portal-card"><span>Pending insurer invoices</span><strong>KES {pendingReimbursement.toLocaleString()}</strong></article>
-        <article className="portal-card"><span>Paid therapist claims awaiting reimbursement</span><strong>KES {outstandingTherapistClaims.toLocaleString()}</strong></article>
+        <FloatStat label="Current balance" value={`KES ${balance.toLocaleString()}`} definition={METRIC_DEFINITIONS.floatBalance} />
+        <FloatStat label="30-day outflow" value={`KES ${burnRate.toLocaleString()}`} definition={METRIC_DEFINITIONS.burnRate30d} />
+        <FloatStat label="Days until depleted" value={daysUntilDepleted == null ? 'No recent burn' : daysUntilDepleted} definition={METRIC_DEFINITIONS.daysUntilDepleted} />
+        <FloatStat label="Pending insurer invoices" value={`KES ${pendingReimbursement.toLocaleString()}`} definition={METRIC_DEFINITIONS.pendingReimbursement} />
+        <FloatStat label="Paid therapist claims awaiting reimbursement" value={`KES ${outstandingTherapistClaims.toLocaleString()}`} definition={METRIC_DEFINITIONS.outstandingClaims} />
       </div>
       <form className="portal-card portal-form" onSubmit={submit}>
         <h3>Record float adjustment</h3>

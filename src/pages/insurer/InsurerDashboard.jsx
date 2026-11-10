@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuthProfile } from '../../context/AuthProfileContext'
+import { METRIC_DEFINITIONS } from '../../lib/metrics'
 
 export default function InsurerDashboard() {
   const { user } = useAuthProfile()
@@ -51,7 +52,7 @@ export default function InsurerDashboard() {
           <article className="portal-card"><span>Eligible cohort</span><strong>{stats.cohort_size}</strong></article>
           <article className="portal-card"><span>Active members</span><strong>{stats.active_members}</strong></article>
           <article className="portal-card"><span>Claims, 30 days</span><strong>{stats.claims_last_30d}</strong></article>
-          <article className="portal-card"><span>Average claim</span><strong>KES {Number(stats.avg_claim_amount).toLocaleString()}</strong></article>
+          <article className="portal-card"><span>Average claim</span><strong>KES {Number(stats.avg_claim_amount).toLocaleString()}</strong><details className="metric-def"><summary>Definition</summary><p>{METRIC_DEFINITIONS.avgCostPerClaim}</p></details></article>
         </div>
       )}
       <section className="portal-card">

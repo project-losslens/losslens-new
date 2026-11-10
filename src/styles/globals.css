@@ -146,6 +146,41 @@ body {
   background: var(--surface-secondary);
 }
 
+.metric-def {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.metric-def summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.metric-def p {
+  margin: 0 0 0.5rem;
+}
+
+.portal-json {
+  margin: 0;
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: var(--surface-primary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.portal-page__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
 .portal-notice {
   border: 1px solid var(--warning);
 }
