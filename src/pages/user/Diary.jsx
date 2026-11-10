@@ -45,6 +45,7 @@ function Diary() {
   const [todayEntry, setTodayEntry] = useState(null)
   const [gambled, setGambled] = useState(null)
   const [mood, setMood] = useState('')
+  const [urgeLevel, setUrgeLevel] = useState(null)
   const [triggers, setTriggers] = useState([])
   const [coping, setCoping] = useState([])
   const [notes, setNotes] = useState('')
@@ -186,6 +187,7 @@ function Diary() {
       money_spent: moneySpent ? parseFloat(moneySpent) : null,
       money_won: moneyWon ? parseFloat(moneyWon) : null,
       mood: (mood || '').trim() || null,
+      ...(urgeLevel !== null ? { urge_level: urgeLevel } : {}),
       triggers: triggers || [],
       coping: coping || [],
       notes: notes || null,
@@ -241,6 +243,17 @@ function Diary() {
       if (earnedBadges.length > 0) {
         triggerConfetti()
         earnedBadges.forEach(b => showToast(`${b.emoji} ${b.name} badge earned!`, 4000))
+      }
+      // Streak milestone celebration — once per milestone per user.
+      const MILESTONES = [1, 7, 14, 30, 60, 90]
+      const newStreak = recomputed?.streak_days
+      if (newStreak && MILESTONES.includes(newStreak)) {
+        const key = `ll_streak_milestone_${userId}_${newStreak}`
+        if (!localStorage.getItem(key)) {
+          localStorage.setItem(key, '1')
+          if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) triggerConfetti()
+          showToast(` ${newStreak} days clean — milestone reached!`, 5000)
+        }
       }
     } catch (err) {
       console.error('Gamification error:', err)
@@ -313,6 +326,7 @@ function Diary() {
                 </div>
               )}
 
+              <div className="dash-section"><h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>How strong was the urge? <span className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>(0 = none, 10 = strongest)</span></h3><div className="chip-group">{Array.from({ length: 11 }, (_, i) => <button key={i} type="button" className={`chip ${urgeLevel === i ? 'chip-active' : ''}`} onClick={() => setUrgeLevel(urgeLevel === i ? null : i)}>{i}</button>)}</div></div>
               <div className="dash-section"><h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>How are you feeling?</h3><div className="chip-group">{moods.map(m => <button key={m} className={`chip ${mood.trim() === m ? 'chip-active' : ''}`} onClick={() => setMood(m)}>{m}</button>)}</div></div>
               <div className="dash-section"><h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>Triggers</h3><div className="chip-group">{triggerOptions.map(t => <button key={t} className={`chip ${triggers.includes(t) ? 'chip-active' : ''}`} onClick={() => toggleItem(t, triggers, setTriggers)}>{t}</button>)}</div></div>
               <div className="dash-section"><h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>Coping strategies</h3><div className="chip-group">{copingOptions.map(c => <button key={c} className={`chip ${coping.includes(c) ? 'chip-active' : ''}`} onClick={() => toggleItem(c, coping, setCoping)}>{c}</button>)}</div></div>

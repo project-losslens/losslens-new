@@ -2,9 +2,11 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { readAndMigrateStorageItem } from '../../lib/storage'
+import AppIcon from '../../components/AppIcon'
+import { HELPLINES as CONFIG_HELPLINES } from '../../config/helplines'
 
 //  Constants
-const TIMER_DURATION = 900 // 15 minutes
+const TIMER_DURATION = 600 // 10 minutes
 const BREATH_INHALE = 4000
 const BREATH_HOLD = 7000
 const BREATH_EXHALE = 8000
@@ -50,19 +52,21 @@ const DISTRACTION_CHALLENGES = [
   { emoji: '', text: 'Take a cold shower — resets you', category: 'Physical' },
 ]
 
-const HELPLINES = [
-  { name: 'NACADA Helpline', number: '1192', hours: '24/7', free: true, desc: 'National substance abuse helpline' },
-  { name: 'Befrienders Kenya', number: '0800 722 030', hours: '24/7', free: true, desc: 'Emotional support for anyone' },
-  { name: 'Chiromo Hospital', number: '+254 709 667 000', hours: '24/7', free: false, desc: 'Mental health emergency' },
-  { name: 'Kenya Red Cross', number: '1199', hours: '24/7', free: true, desc: 'Emergency psychosocial support' },
-]
+// Crisis numbers come only from src/config/helplines.js.
+const HELPLINES = CONFIG_HELPLINES.map(h => ({
+  name: h.name,
+  number: h.phone,
+  tel: h.tel,
+  hours: h.hours,
+  free: true,
+}))
 
 const TOOLS = [
-  { id: 'timer', icon: '⏱', title: '15-Minute Urge Timer', desc: 'Urges pass. Prove it.', color: '#2DD4BF' },
-  { id: 'breathing', icon: '', title: '4-7-8 Breathing', desc: 'Calm your body', color: '#2DD4BF' },
-  { id: 'thought', icon: '', title: 'Thought Challenger', desc: 'Challenge the urge', color: '#7DBDEE' },
-  { id: 'distraction', icon: '', title: 'Spin the Wheel', desc: 'Random challenge', color: '#2DD4BF' },
-  { id: 'helpline', icon: '🆘', title: 'Emergency & Support', desc: 'Get help now', color: '#FFFFFF' },
+  { id: 'timer', icon: 'clock', title: '10-Minute Urge Timer', desc: 'Urges pass. Prove it.', color: '#2DD4BF' },
+  { id: 'breathing', icon: 'heart', title: '4-7-8 Breathing', desc: 'Calm your body', color: '#2DD4BF' },
+  { id: 'thought', icon: 'brain', title: 'Thought Challenger', desc: 'Challenge the urge', color: '#7DBDEE' },
+  { id: 'distraction', icon: 'star', title: 'Spin the Wheel', desc: 'Random challenge', color: '#2DD4BF' },
+  { id: 'helpline', icon: 'phone', title: 'Emergency & Support', desc: 'Get help now', color: '#FFFFFF' },
 ]
 
 //  Breathing Human — React.memo for performance
@@ -231,6 +235,19 @@ export default function UrgeToolkitPage() {
           <div><h1 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Urge Toolkit</h1><p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>Every urge is beatable</p></div>
         </div>
         <div style={{ padding: '1.5rem' }}>
+          {!activeTool && (
+            <div className="urge-hero" style={{ marginBottom: '1.25rem' }}>
+              <button type="button" className="btn-primary urge-hero__start" onClick={() => { setActiveTool('timer'); setTimerComplete(false); setTimer(TIMER_DURATION); setTimerRunning(true) }}>
+                Start 10-minute delay
+              </button>
+              <p className="fs-13" style={{ color: 'rgba(255,255,255,0.55)', textAlign: 'center', margin: '10px 0 0' }}>Urges fade. Ride this one out — everything here works offline.</p>
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '14px', flexWrap: 'wrap' }}>
+                <button type="button" className="btn-secondary" onClick={() => { setActiveTool('breathing'); setBreathPhase('inhale'); setBreathRounds(0); setBreathingActive(true) }}>Breathe</button>
+                <button type="button" className="btn-secondary" onClick={() => { setActiveTool('helpline') }}>Call support</button>
+                <button type="button" className="btn-secondary" onClick={() => { setActiveTool('thought'); setThoughtStep(0) }}>Ground yourself</button>
+              </div>
+            </div>
+          )}
           <div className="tools-grid" style={{ marginBottom: '1rem' }}>
             {TOOLS.map(t => (
               <div key={t.id} className={`tool-card ${activeTool === t.id ? 'tool-active' : ''}`}
@@ -255,7 +272,7 @@ export default function UrgeToolkitPage() {
                   else { setActiveTool(t.id); if (t.id === 'timer') { setTimerComplete(false); setTimer(TIMER_DURATION); setTimerRunning(false) }; if (t.id === 'breathing') { setBreathPhase('inhale'); setBreathRounds(0); setBreathingActive(true) }; if (t.id === 'thought') setThoughtStep(0); if (t.id === 'distraction') { setRandomChallenge(null); setChallengeAccepted(false); setChallengeDone(false); setSpinning(false) } }
                 }}}
               >
-                <span className="tool-icon fs-28" aria-hidden="true">{t.icon}</span>
+                <AppIcon name={t.icon} size={28} className="tool-icon" />
                 <h3 className="tool-title">{t.title}</h3>
                 <p className="tool-desc">{t.desc}</p>
               </div>
@@ -436,8 +453,8 @@ export default function UrgeToolkitPage() {
                     <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isOpenNow(h.hours) ? '#2DD4BF' : 'rgba(255,255,255,0.4)', flexShrink: 0 }} title={isOpenNow(h.hours) ? 'Available now' : 'May be closed'} />
                   </div>
                   <p className="helpline-num">{h.number}</p>
-                  <p className="helpline-hours">{h.hours}  · {h.free ? '🆓 Free' : ' Charges may apply'}</p>
-                  <a href={`tel:${h.number.replace(/\s/g,'')}`} className="fs-13" style={{ display: 'block', textAlign: 'center', background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '10px', borderRadius: '8px', textDecoration: 'none', fontWeight: 500, marginTop: '8px' }}> Call {h.number}</a>
+                  <p className="helpline-hours">{h.hours}  · {h.free ? 'Free' : ' Charges may apply'}</p>
+                  <a href={`tel:${h.tel || h.number.replace(/\s/g,'')}`} className="fs-13" style={{ display: 'block', textAlign: 'center', background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '10px', borderRadius: '8px', textDecoration: 'none', fontWeight: 500, marginTop: '8px' }}> Call {h.number}</a>
                 </div>
               ))}
               <div style={{ marginTop: '1rem', padding: '16px', background: '#0B1220', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>

@@ -35,19 +35,6 @@ const QUESTIONS = [
     ]
   },
   {
-    id: 'impact',
-    title: 'How has gambling affected your life?',
-    subtitle: 'Select all that apply',
-    multi: true,
-    options: [
-      { value: 'financial', label: 'Financial stress', emoji: '' },
-      { value: 'relationships', label: 'Relationship problems', emoji: '' },
-      { value: 'mental', label: 'Mental health (anxiety, guilt)', emoji: '' },
-      { value: 'work', label: 'Work or study performance', emoji: '' },
-      { value: 'minimal', label: 'Minimal impact so far', emoji: '' },
-    ]
-  },
-  {
     id: 'triggers',
     title: 'What usually triggers you to gamble?',
     subtitle: 'Select all that apply',

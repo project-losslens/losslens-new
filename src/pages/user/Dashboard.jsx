@@ -217,9 +217,10 @@ function Dashboard() {
   const handleTouchMove = (e) => { if (touchStartY.current === 0) return; const distance = e.touches[0].clientY - touchStartY.current; if (distance > 0 && window.scrollY === 0) { setPullDistance(Math.min(distance * 0.4, 120)) } }
   const handleTouchEnd = async () => { if (pullDistance >= pullThreshold && !refreshing) { setRefreshing(true); await fetchData(); showToast('Dashboard refreshed ', 2000); setRefreshing(false) } touchStartY.current = 0; setPullDistance(0) }
 
+  const [moneyInfoOpen, setMoneyInfoOpen] = useState(false)
   const stats = [
     { label: 'Days clean', value: profile?.streak_days || 0, icon: 'flame', ariaLabel: 'Streak days', highlight: (profile?.streak_days || 0) >= 7 },
-    { label: 'Money saved', value: profile?.money_saved ? `KES ${profile.money_saved.toLocaleString()}` : 'KES 0', icon: 'coin', ariaLabel: 'Money saved' },
+    { label: 'Money saved', value: profile?.money_saved ? `KES ${profile.money_saved.toLocaleString()}` : 'KES 0', icon: 'coin', ariaLabel: 'Money saved', onClick: () => setMoneyInfoOpen(o => !o) },
     { label: 'Sessions logged', value: entries.length, icon: 'diary', ariaLabel: 'Sessions logged', emptyMessage: 'First entry coming soon!' },
     { label: 'CBT modules', value: cbtCount, icon: 'brain', ariaLabel: 'CBT modules completed', highlight: cbtCount >= 3 },
   ]
@@ -290,14 +291,26 @@ function Dashboard() {
 
           <div className="dashboard" style={{ padding: '1.5rem' }}>
             <div className="stats-grid">
-              {stats.map((s, i) => (
-                <div className="stat-card" key={i} style={s.highlight ? { borderColor: '#2DD4BF', boxShadow: '0 0 12px rgba(45,212,191,0.3)' } : {}}>
+              {stats.map((s, i) => {
+                const inner = (<>
                   <span className="stat-icon" aria-label={s.ariaLabel}>{s.highlight ? <span className="streak-fire"><AppIcon name={s.icon} size={20} /></span> : <AppIcon name={s.icon} size={20} />}</span>
                   <span className="stat-value" style={s.highlight ? { color: '#2DD4BF' } : {}}>{s.value || '—'}</span>
                   <span className="stat-label">{s.value === 0 && s.emptyMessage ? s.emptyMessage : s.label}</span>
-                </div>
-              ))}
+                </>)
+                const cardStyle = s.highlight ? { borderColor: '#2DD4BF', boxShadow: '0 0 12px rgba(45,212,191,0.3)' } : {}
+                return s.onClick ? (
+                  <button type="button" key={i} className="stat-card clickable" onClick={s.onClick} aria-expanded={moneyInfoOpen} aria-label={`${s.ariaLabel} — show calculation`} style={{ ...cardStyle, width: '100%', font: 'inherit', color: 'inherit', textAlign: 'inherit' }}>{inner}</button>
+                ) : (
+                  <div className="stat-card" key={i} style={cardStyle}>{inner}</div>
+                )
+              })}
             </div>
+
+            {moneyInfoOpen && (
+              <p className="fs-12" style={{ color: 'rgba(255,255,255,0.55)', margin: '-0.5rem 0 1rem', lineHeight: 1.6 }}>
+                Money saved = the total you logged as spent on days marked clean (no gambling), in Kenyan shillings. It updates automatically after each diary entry.
+              </p>
+            )}
 
             <Link to="/diary" className="clickable" style={{ display: 'block', background: 'linear-gradient(135deg, rgba(45,212,191,0.18), rgba(125,189,238,0.12))', border: '1px solid #2DD4BF', borderRadius: '14px', padding: '16px', marginBottom: '1rem', textDecoration: 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

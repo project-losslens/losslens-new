@@ -2483,3 +2483,20 @@ button:active {
 .crisis-access__actions .crisis-access__toolkit {
   width: 100%;
 }
+
+/* ─── Urge Toolkit hero ─── */
+.urge-hero {
+  background: linear-gradient(160deg, rgba(45, 212, 191, 0.14), rgba(125, 189, 238, 0.08));
+  border: 1px solid rgba(45, 212, 191, 0.35);
+  border-radius: var(--radius-lg, 18px);
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.urge-hero__start {
+  width: 100%;
+  max-width: 340px;
+  min-height: 56px;
+  font-size: 17px;
+  border-radius: 14px;
+}
