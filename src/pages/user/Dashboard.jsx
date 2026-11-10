@@ -258,7 +258,7 @@ function Dashboard() {
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
           <div>
             <h1 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}>
-              {new Date().getHours() < 12 ? '' : new Date().getHours() < 17 ? '' : ''} {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}, <span style={{ color: '#2DD4BF' }}>{firstName}</span>
+              {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}, <span style={{ color: '#2DD4BF' }}>{firstName}</span>
             </h1>
             <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{profile?.streak_days ? `${profile.streak_days}-day streak ` : 'Start your streak today'}</p>
           </div>
@@ -289,17 +289,6 @@ function Dashboard() {
           )}
 
           <div className="dashboard" style={{ padding: '1.5rem' }}>
-            {riskData && (
-              <div role="alert" aria-live="polite" style={{ background: getRiskColor(riskData.score).bg, border: `1px solid ${getRiskColor(riskData.score).color}`, borderRadius: '12px', padding: '14px 16px', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: riskData.factors?.length > 0 ? '8px' : '0' }}>
-                  <h3 className="fs-14" style={{ color: getRiskColor(riskData.score).color, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>{riskData.level !== 'low' && <AppIcon name="alert" size={16} />}{getRiskColor(riskData.score).label} Today</h3>
-                  <span className="fs-20" style={{ color: getRiskColor(riskData.score).color, fontWeight: 700 }}>{riskData.score}%</span>
-                </div>
-                {(riskData.factors || []).map((f, i) => (<p key={i} className="fs-12" style={{ color: getRiskColor(riskData.score).color, opacity: 0.8, margin: '2px 0' }}>• {f}</p>))}
-                {riskData.level === 'high' && <button onClick={() => navigate('/urge-toolkit')} className="fs-13" style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#2DD4BF', border: 'none', borderRadius: '8px', color: '#0B1220', fontWeight: 600, cursor: 'pointer' }}> Open Urge Toolkit</button>}
-              </div>
-            )}
-
             <div className="stats-grid">
               {stats.map((s, i) => (
                 <div className="stat-card" key={i} style={s.highlight ? { borderColor: '#2DD4BF', boxShadow: '0 0 12px rgba(45,212,191,0.3)' } : {}}>
@@ -309,6 +298,37 @@ function Dashboard() {
                 </div>
               ))}
             </div>
+
+            <Link to="/diary" className="clickable" style={{ display: 'block', background: 'linear-gradient(135deg, rgba(45,212,191,0.18), rgba(125,189,238,0.12))', border: '1px solid #2DD4BF', borderRadius: '14px', padding: '16px', marginBottom: '1rem', textDecoration: 'none' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <AppIcon name="diary" size={28} style={{ color: '#2DD4BF', flexShrink: 0 }} />
+                <div style={{ flex: 1 }}>
+                  <h3 className="fs-15" style={{ color: '#FFFFFF', margin: 0 }}>Today's check-in</h3>
+                  <p className="fs-12" style={{ color: 'rgba(255,255,255,0.55)', margin: '2px 0 0' }}>Mood, urge level and whether you gambled — about 20 seconds.</p>
+                </div>
+                <span className="fs-13" style={{ color: '#2DD4BF', fontWeight: 600, whiteSpace: 'nowrap' }}>Start</span>
+              </div>
+            </Link>
+
+            {riskData && (
+              <div role="alert" aria-live="polite" style={{ background: getRiskColor(riskData.score).bg, border: `1px solid ${getRiskColor(riskData.score).color}`, borderRadius: '12px', padding: '14px 16px', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: riskData.factors?.length > 0 ? '8px' : '0' }}>
+                  <h3 className="fs-14" style={{ color: getRiskColor(riskData.score).color, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>{riskData.level !== 'low' && <AppIcon name="alert" size={16} />}{getRiskColor(riskData.score).label} Today</h3>
+                </div>
+                {(riskData.factors || []).map((f, i) => (<p key={i} className="fs-12" style={{ color: getRiskColor(riskData.score).color, opacity: 0.8, margin: '2px 0' }}>• {f}</p>))}
+                <p className="fs-12" style={{ color: getRiskColor(riskData.score).color, opacity: 0.7, margin: '6px 0 0' }}>Suggested: take 10 minutes with the Urge Toolkit before deciding anything.</p>
+                {riskData.level !== 'low' && <button onClick={() => navigate('/urge-toolkit')} className="fs-13" style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#2DD4BF', border: 'none', borderRadius: '8px', color: '#0B1220', fontWeight: 600, cursor: 'pointer' }}> Open Urge Toolkit</button>}
+              </div>
+            )}
+
+            <Link to="/cbt" className="clickable" style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '16px', marginBottom: '1rem', textDecoration: 'none' }}>
+              <AppIcon name="brain" size={28} style={{ color: '#7DBDEE', flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <h3 className="fs-15" style={{ color: '#FFFFFF', margin: 0 }}>Continue</h3>
+                <p className="fs-12" style={{ color: 'rgba(255,255,255,0.55)', margin: '2px 0 0' }}>{cbtCount > 0 ? `${cbtCount} CBT module${cbtCount === 1 ? '' : 's'} completed — pick up where you left off` : 'Start your first CBT module'}</p>
+              </div>
+              <span className="fs-13" style={{ color: '#7DBDEE', fontWeight: 600 }}>Open</span>
+            </Link>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '1rem' }}>
               <Link to="/circle" className="clickable" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, #7DBDEE 100%)', border: '1px solid #2DD4BF', borderRadius: '12px', padding: '1rem', display: 'block', textDecoration: 'none' }}>
@@ -323,18 +343,6 @@ function Dashboard() {
               <div className="section-header"><h3>This week</h3></div>
               <div className="week-chart">{weekData.map((d, i) => (<div className="week-day" key={i}><div className={`day-bar ${d.gambled ? 'gambled' : 'clean'}`} style={{ height: d.gambled ? '40px' : d.mood ? '60px' : '30px', transition: 'height 0.3s ease' }} /><span className="day-label">{d.day}</span></div>))}</div>
               <div className="chart-legend"><span className="legend-item"><span className="dot clean"></span> Clean day</span><span className="legend-item"><span className="dot gambled"></span> Gambled</span></div>
-            </div>
-
-            <div style={{ marginBottom: '1rem' }}>
-              <h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '0.75rem' }}>Explore LossLens</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '8px' }}>
-                {[{ icon: 'diary', label: 'Diary', path: '/diary' }, { icon: 'brain', label: 'CBT Modules', path: '/cbt' }, { icon: 'toolkit', label: 'Urge Toolkit', path: '/urge-toolkit' }, { icon: 'calendar', label: 'Events', path: '/events' }, { icon: 'resources', label: 'Resources', path: '/resources' }, { icon: 'users', label: 'Family Portal', path: '/family-portal' }, { icon: 'document', label: 'Monthly Mirror', path: '/monthly-mirror' }, { icon: 'heart', label: 'LossLens Pact', path: '/precious-pact' }].map(item => (
-                  <button key={item.path} onClick={() => navigate(item.path)} className="fs-12" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '12px', color: '#7DBDEE', cursor: 'pointer', fontFamily: 'var(--font-body)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#2DD4BF'; e.currentTarget.style.transform = 'translateY(-2px)' }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'translateY(0)' }}>
-                    <AppIcon name={item.icon} size={22} style={{ color: '#7DBDEE' }} /><span>{item.label}</span>
-                  </button>
-                ))}
-              </div>
             </div>
 
             <AIChat profile={profile} />

@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
+import MobileNav from '../components/MobileNav'
+import CommunityTabs from '../components/CommunityTabs'
 import AppIcon from '../components/AppIcon'
 import CrisisAccessButton from '../components/CrisisAccessButton'
 import { useAuthProfile } from '../context/AuthProfileContext'
 import { useMediaQuery } from '../hooks'
-import { adminNav, getPageTitle, insurerNav, therapistNav, userNav } from '../config/nav.config'
+import { adminNav, communityPaths, getPageTitle, insurerNav, therapistNav, userNav, userNavGroups } from '../config/nav.config'
 import { useCrisisAlertCount } from '../context/CrisisAlertCountContext'
 import { supabase } from '../lib/supabase'
 
@@ -29,6 +31,7 @@ export default function AppShell({ admin = false }) {
   const [elevatedUnlocked, setElevatedUnlocked] = useState(isElevatedUnlocked)
   const drawerOpen = isMobile && drawerForLocation === location.key
   const portalNav = role === 'therapist' ? therapistNav : role === 'insurer' ? insurerNav : null
+  const isUserRole = !admin && !portalNav
   const activeNav = admin ? adminNav : portalNav || userNav
   const items = activeNav
     .filter((item) => !item.section || isSuperAdmin)
@@ -84,20 +87,26 @@ export default function AppShell({ admin = false }) {
     navigate('/login', { replace: true })
   }
 
+  const showCommunityTabs = isUserRole && communityPaths.some((p) => location.pathname === p || location.pathname.startsWith(`${p}/`))
+
   return (
-    <div className={`shell${admin ? ' shell--admin' : ''}`} style={{ '--sidebar-w': !isMobile && desktopOpen ? '240px' : '0px' }}>
+    <div className={`shell${admin ? ' shell--admin' : ''}${isUserRole && isMobile ? ' shell--mobile-nav' : ''}`} style={{ '--sidebar-w': !isMobile && desktopOpen ? '240px' : '0px' }}>
       <a className="shell__skip" href="#main-content">Skip to content</a>
-      <Sidebar
-        items={items}
-        brand={admin ? 'LossLens Admin' : 'LossLens'}
-        isMobile={isMobile}
-        drawerOpen={drawerOpen}
-        desktopOpen={desktopOpen}
-        onNavigate={() => setDrawerForLocation(null)}
-        onSignOut={handleSignOut}
-        isSuperAdmin={isSuperAdmin}
-        elevatedUnlocked={elevatedUnlocked}
-      />
+      {!(isUserRole && isMobile) && (
+        <Sidebar
+          items={items}
+          groups={isUserRole && !isMobile ? userNavGroups : null}
+          brand={admin ? 'LossLens Admin' : 'LossLens'}
+          isMobile={isMobile}
+          drawerOpen={drawerOpen}
+          desktopOpen={desktopOpen}
+          onNavigate={() => setDrawerForLocation(null)}
+          onSignOut={handleSignOut}
+          isSuperAdmin={isSuperAdmin}
+          elevatedUnlocked={elevatedUnlocked}
+        />
+      )}
+      {!(isUserRole && isMobile) && (
       <button
         type="button"
         className={`shell__toggle${isMobile ? ' shell__toggle--mobile' : ''}`}
@@ -111,6 +120,7 @@ export default function AppShell({ admin = false }) {
         <AppIcon name={isMobile && drawerOpen ? 'close' : 'menu'} size={21} />
         <span className="visually-hidden">{isMobile ? 'Toggle navigation' : 'Toggle sidebar'}</span>
       </button>
+      )}
       <main className="shell__main" id="main-content" ref={mainRef} tabIndex={-1}>
         <header className="shell__header">
           <h1>{getPageTitle(location.pathname)}</h1>
@@ -126,9 +136,11 @@ export default function AppShell({ admin = false }) {
           </div>
         </header>
         <div className="shell__content">
+          {showCommunityTabs && <CommunityTabs />}
           <Outlet />
         </div>
       </main>
+      {isUserRole && isMobile && <MobileNav onSignOut={handleSignOut} />}
       <CrisisAccessButton />
     </div>
   )

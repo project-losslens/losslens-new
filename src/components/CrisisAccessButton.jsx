@@ -67,9 +67,17 @@ export default function CrisisAccessButton() {
                 {secondsLeft ? 'Restart' : 'Start'}
               </button>
             </div>
-            <Link className="crisis-access__toolkit" to="/urge-toolkit" onClick={() => setOpen(false)}>
-              Open Urge Toolkit
-            </Link>
+            <div className="crisis-access__actions">
+              <Link className="crisis-access__toolkit" to="/urge-toolkit" onClick={() => setOpen(false)}>
+                Open Urge Toolkit
+              </Link>
+              <Link className="crisis-access__toolkit" to="/family-portal" onClick={() => setOpen(false)}>
+                Message a trusted supporter
+              </Link>
+              <Link className="crisis-access__toolkit" to="/dashboard" onClick={() => setOpen(false)}>
+                Talk to LossLens AI
+              </Link>
+            </div>
             <p className="crisis-access__emergency">If you are in immediate danger, contact local emergency services or someone you trust.</p>
           </section>
         </div>

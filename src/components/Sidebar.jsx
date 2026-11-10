@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import AppIcon from './AppIcon'
 
-function Sidebar({ items, brand, isMobile, drawerOpen, desktopOpen, onNavigate, onSignOut, isSuperAdmin, elevatedUnlocked }) {
+function Sidebar({ items, groups, brand, isMobile, drawerOpen, desktopOpen, onNavigate, onSignOut, isSuperAdmin, elevatedUnlocked }) {
   const expanded = isMobile ? drawerOpen : desktopOpen
   const normalItems = items.filter((item) => !item.section)
   const elevatedItems = items.filter((item) => item.section === 'elevated')
@@ -35,13 +35,24 @@ function Sidebar({ items, brand, isMobile, drawerOpen, desktopOpen, onNavigate, 
       >
         <NavLink className="sidebar__brand" to={items[0]?.to || '/'} onClick={onNavigate}>{brand}</NavLink>
         <nav className="sidebar__nav" aria-label="Primary">
-          {brand.includes('Admin') && <h2 className="sidebar__section-title">Operations</h2>}
-          <ul>{normalItems.map((item) => <li key={item.to}>{renderLink(item)}</li>)}</ul>
-          {isSuperAdmin && elevatedItems.length > 0 && (
-            <section className="sidebar__section" aria-label="Elevated">
-              <h2>Elevated Access</h2>
-              <ul>{elevatedItems.map((item) => <li key={item.to}>{renderLink(item)}</li>)}</ul>
-            </section>
+          {groups ? (
+            groups.map((group) => (
+              <section key={group.title} className="sidebar__section" aria-label={group.title}>
+                <h2>{group.title}</h2>
+                <ul>{group.items.map((item) => <li key={item.to}>{renderLink(item)}</li>)}</ul>
+              </section>
+            ))
+          ) : (
+            <>
+              {brand.includes('Admin') && <h2 className="sidebar__section-title">Operations</h2>}
+              <ul>{normalItems.map((item) => <li key={item.to}>{renderLink(item)}</li>)}</ul>
+              {isSuperAdmin && elevatedItems.length > 0 && (
+                <section className="sidebar__section" aria-label="Elevated">
+                  <h2>Elevated Access</h2>
+                  <ul>{elevatedItems.map((item) => <li key={item.to}>{renderLink(item)}</li>)}</ul>
+                </section>
+              )}
+            </>
           )}
         </nav>
         <button className="sidebar__logout" type="button" onClick={onSignOut}>

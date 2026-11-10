@@ -14,6 +14,50 @@ export const userNav = [
   { to: '/subscription', label: 'Subscription', icon: 'diamond' },
 ]
 
+// Grouped navigation for the user role (mobile bottom bar + desktop sidebar).
+// Paths and feature names are unchanged — grouping only.
+export const userNavGroups = [
+  {
+    title: 'Main',
+    items: [
+      { to: '/dashboard', label: 'Home', icon: 'home', end: true },
+      { to: '/diary', label: 'Diary', icon: 'diary' },
+      { to: '/urge-toolkit', label: 'Help', icon: 'toolkit' },
+    ],
+  },
+  {
+    title: 'Community',
+    items: [
+      { to: '/circle', label: 'The Circle', icon: 'chat' },
+      { to: '/whispers', label: 'Whispers', icon: 'users' },
+      { to: '/events', label: 'Events', icon: 'calendar' },
+    ],
+  },
+  {
+    title: 'More',
+    items: [
+      { to: '/cbt', label: 'CBT Modules', icon: 'brain' },
+      { to: '/resources', label: 'Resources', icon: 'resources' },
+      { to: '/family-portal', label: 'Family Portal', icon: 'users' },
+      { to: '/monthly-mirror', label: 'Monthly Mirror', icon: 'profile' },
+      { to: '/precious-pact', label: 'LossLens Pact', icon: 'document' },
+      { to: '/profile', label: 'Profile', icon: 'profile' },
+      { to: '/subscription', label: 'Subscription', icon: 'diamond' },
+    ],
+  },
+]
+
+// Mobile bottom bar: Home, Diary, Help, Community, More
+export const mobileTabs = [
+  { to: '/dashboard', label: 'Home', icon: 'home', end: true },
+  { to: '/diary', label: 'Diary', icon: 'diary' },
+  { to: '/urge-toolkit', label: 'Help', icon: 'toolkit' },
+  { to: '/circle', label: 'Community', icon: 'users', match: ['/circle', '/whispers', '/events'] },
+  { to: null, label: 'More', icon: 'menu' },
+]
+
+export const communityPaths = ['/circle', '/whispers', '/events']
+
 export const adminNav = [
   { to: '/admin', label: 'Dashboard', icon: 'home', end: true },
   { to: '/admin/events', label: 'Events', icon: 'calendar' },
