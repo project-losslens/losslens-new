@@ -8,7 +8,9 @@ No TypeScript.
 
 - `npm run dev` — Vite dev server (frontend only; does NOT serve `api/`)
 - `npm run build` — primary verification; must pass
-- `npm test` — `node --test` unit tests (middleware gate, loaderTiming, api/chat)
+- `npm test` — `node --test` unit tests + encoding check
+- `npm run test:e2e` — Playwright smoke tests (needs `npx playwright install chromium` once)
+- `npm run lighthouse` — Lighthouse a11y/perf report against `vite preview` on :4173
 - `npm run lint` — eslint; ~200 pre-existing errors/17 warnings is the
   baseline, do not treat as regressions
 - `vercel dev` — serves `api/` routes locally
@@ -38,7 +40,7 @@ Currently: `src/lib/crisisDetection.js` → `src/config/helplines.js`,
 
 ## Database
 
-Exactly four migrations in `supabase/migrations/` (`20261110000001`–`04`),
+Six migrations in `supabase/migrations/` (`20261110000001`–`06`),
 idempotent, applied in order. Full reference + verify queries:
 `docs/DATABASE.md`. RLS on every table; helpers `is_admin()`,
 `is_super_admin()`, `is_active_user()`, `is_recently_authenticated()`.

@@ -1,6 +1,5 @@
 import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
-import AppShell from './layouts/AppShell'
 import { BrandLoader } from './components/Brand'
 import { PublicOnly, RequireAuth, RequireElevated } from './components/RouteGuards'
 import { CrisisAlertCountProvider } from './context/CrisisAlertCountContext'
@@ -63,6 +62,7 @@ const InsurerClaims = lazy(() => import('./pages/insurer/InsurerClaims'))
 const InsurerInvoices = lazy(() => import('./pages/insurer/InsurerInvoices'))
 const InsurerAnalytics = lazy(() => import('./pages/insurer/InsurerAnalytics'))
 const Demo = lazy(() => import('./pages/Demo'))
+const AppShell = lazy(() => import('./layouts/AppShell'))
 
 function App() {
   return (

@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuthProfile } from '../context/AuthProfileContext'
 import { roleHome } from '../config/roleHome'
+import { requireAuthDecision, publicOnlyDecision } from '../config/routeAccess'
 import AppIcon from './AppIcon'
 import { BrandLoader } from './Brand'
 
@@ -29,11 +30,12 @@ export function RequireAuth({ role }) {
       </section>
     )
   }
-  if (authStatus === 'loading') return <BrandLoader />
-  if (authStatus === 'no-session') {
+  const decision = requireAuthDecision({ authStatus, role, currentRole, isAdmin, isSuperAdmin, status })
+  if (decision === 'loading') return <BrandLoader />
+  if (decision === 'no-session') {
     return <Navigate to="/login" replace state={{ from: `${location.pathname}${location.search}` }} />
   }
-  if (authStatus === 'error') {
+  if (decision === 'error') {
     return (
       <section className="auth-retry" role="alert">
         <h1>We could not load your profile</h1>
@@ -42,14 +44,10 @@ export function RequireAuth({ role }) {
       </section>
     )
   }
-  if (authStatus !== 'ready') return <BrandLoader />
-  if (!role && (currentRole === 'therapist' || currentRole === 'insurer')) {
+  if (decision === 'ready-other-role') {
     return <Navigate to={roleHome(currentRole)} replace />
   }
-  if (role === 'admin' && !isAdmin) return <Navigate to="/dashboard" replace />
-  if (role === 'super_admin' && !isSuperAdmin) return <Navigate to="/admin" replace />
-  if (role === 'therapist' && currentRole !== 'therapist' && !isSuperAdmin) return <Navigate to="/dashboard" replace />
-  if (role === 'insurer' && currentRole !== 'insurer' && !isSuperAdmin) return <Navigate to="/dashboard" replace />
+  if (decision === 'redirect') return <Navigate to="/dashboard" replace />
 
   return <Outlet />
 }
@@ -57,8 +55,9 @@ export function RequireAuth({ role }) {
 export function PublicOnly() {
   const { authStatus, user, role, retryProfile } = useAuthProfile()
 
-  if (authStatus === 'loading') return <BrandLoader />
-  if (authStatus === 'error') {
+  const decision = publicOnlyDecision({ authStatus, user })
+  if (decision === 'loading') return <BrandLoader />
+  if (decision === 'error') {
     return (
       <section className="auth-retry" role="alert">
         <h1>We could not load your profile</h1>
@@ -67,7 +66,7 @@ export function PublicOnly() {
       </section>
     )
   }
-  if (user) return <Navigate to={roleHome(role)} replace />
+  if (decision === 'redirect') return <Navigate to={roleHome(role)} replace />
   return <Outlet />
 }
 

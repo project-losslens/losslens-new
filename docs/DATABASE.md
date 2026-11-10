@@ -2,7 +2,7 @@
 
 # LossLens Schema Notes
 
-The schema is consolidated into exactly four migrations in `supabase/migrations/`,
+The schema is consolidated into six migrations in `supabase/migrations/`,
 applied in filename order. They are the final state of the schema — idempotent
 (`create table if not exists`, `create or replace function`, `drop policy if
 exists` before every `create policy`) and safe to re-run.
@@ -13,6 +13,8 @@ exists` before every `create policy`) and safe to re-run.
 | `20261110000002_rls_grants_storage.sql` | `enable row level security` on every table, the single final policy set (owner policies, admin policies, restrictive `is_active_user` policies, hashed-identity circle/whispers policies), table grants/revokes, audit_logs actor FK, storage.objects policies for avatars/mirror-recordings/precious-pacts/therapist-documents. Portal/claims RLS lives in file 04. |
 | `20261110000003_rpc_functions.sql` | All user-domain security-definer RPCs: circle identity/reactions/notify/counts/purge, whispers (request, list open, respond, rate, report), supporter token + owner RPCs, company codes (validate rate-limited, redeem), `recompute_progress` (Nairobi-anchored, idempotent freeze), crisis (`record_crisis_event`/`pre_authorize_voucher` service-role only, resolve/escalate/contact), `send_broadcast`, `admin_get_user_contact`, `admin_dashboard_stats`, `increment_pact_play_count`. |
 | `20261110000004_portals_claims.sql` | Therapists, insurers, partnerships, provider_vouchers + pre_auth_vouchers (kept separate), provider_claims/payouts, claim_submissions, bulk invoices + claims, claims float + ledger; their RLS/grants; views `therapists_public` (active only) and `insurer_aggregate_stats` (cohort ≥ 25, banded risk); all portal/claims RPCs with elevated-access (`is_recently_authenticated`) guards on admin functions; insurer reports payment, only super-admin confirmation credits the float; ends with a guarded legacy weak-hash (`user_%`) remap that is a no-op on fresh databases. |
+| `20261110000005_diary_urge_level.sql` | Adds `diary_entries.urge_level smallint` with a 0–10 check constraint for the quick check-in. |
+| `20261110000006_urge_toolkit_sessions.sql` | `urge_toolkit_sessions` (user_id, tool, duration_seconds, completed, metadata, created_at) with owner-only select/insert RLS for offline-synced toolkit logs. |
 
 ## Notes
 
@@ -32,12 +34,14 @@ exists` before every `create policy`) and safe to re-run.
 
 ## Applying the schema
 
-The schema is exactly four idempotent migrations in `supabase/migrations/`:
+The schema is six idempotent migrations in `supabase/migrations/`:
 
 1. `20261110000001_core_schema.sql` — tables, helpers, triggers, views, seeds, storage buckets
 2. `20261110000002_rls_grants_storage.sql` — RLS policies, grants, storage policies
 3. `20261110000003_rpc_functions.sql` — user-domain RPCs
 4. `20261110000004_portals_claims.sql` — therapist/insurer/claims schema, RLS, RPCs
+5. `20261110000005_diary_urge_level.sql` — `diary_entries.urge_level` (0–10 check)
+6. `20261110000006_urge_toolkit_sessions.sql` — `urge_toolkit_sessions` table, owner-only RLS
 
 Apply **in order, once each** (they are also safe to re-run).
 
@@ -117,7 +121,7 @@ from pg_proc p join pg_namespace n on n.oid = p.pronamespace
 where n.nspname = 'public'
   and proname in ('record_crisis_event','pre_authorize_voucher');
 
--- 6. Exactly four migration files were applied (supabase_migrations if CLI used).
+-- 6. Exactly six migration files were applied (supabase_migrations if CLI used).
 select version from supabase_migrations.schema_migrations
 order by version;
 ```

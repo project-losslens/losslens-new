@@ -7,6 +7,7 @@ import AppIcon from '../../components/AppIcon'
 import { getRiskLevel, getRiskColor } from '../../lib/relapsePrediction'
 import { HELPLINES } from '../../config/helplines'
 import { useI18n } from '../../i18n'
+import { explainRiskFactor } from '../../lib/riskExplanations'
 
 // Crisis Contacts (single source: src/config/helplines.js)
 const CRISIS_CONTACTS = HELPLINES.map((h) => ({
@@ -331,7 +332,13 @@ function Dashboard() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: riskData.factors?.length > 0 ? '8px' : '0' }}>
                   <h3 className="fs-14" style={{ color: getRiskColor(riskData.score).color, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>{riskData.level !== 'low' && <AppIcon name="alert" size={16} />}{getRiskColor(riskData.score).label} {t('dashboard.riskToday')}</h3>
                 </div>
-                {(riskData.factors || []).map((f, i) => (<p key={i} className="fs-12" style={{ color: getRiskColor(riskData.score).color, opacity: 0.8, margin: '2px 0' }}>• {f}</p>))}
+                {(riskData.factors || []).map((f, i) => {
+                  const explained = explainRiskFactor(f)
+                  const text = explained
+                    ? t(explained.key, explained.params.day ? { ...explained.params, day: t(explained.params.day) } : explained.params)
+                    : f
+                  return <p key={i} className="fs-12" style={{ color: getRiskColor(riskData.score).color, opacity: 0.8, margin: '2px 0' }}>• {text}</p>
+                })}
                 <p className="fs-12" style={{ color: getRiskColor(riskData.score).color, opacity: 0.7, margin: '6px 0 0' }}>{t('dashboard.riskSuggested')}</p>
                 {riskData.level !== 'low' && <button onClick={() => navigate('/urge-toolkit')} className="fs-13" style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#2DD4BF', border: 'none', borderRadius: '8px', color: '#0B1220', fontWeight: 600, cursor: 'pointer' }}> {t('dashboard.openToolkit')}</button>}
               </div>

@@ -23,7 +23,12 @@ function daysBetween(a, b) {
 }
 
 function monthKey(dateStr) {
-  const d = new Date(`${dateStr}T00:00:00`)
+  if (typeof dateStr !== 'string') return null
+  // ISO dates (YYYY-MM-DD) bucket by their literal month — avoids timezone
+  // shifts that a Date parse would cause near midnight in EAT.
+  const iso = dateStr.match(/^(\d{4})-(\d{2})/)
+  if (iso) return `${iso[1]}-${iso[2]}`
+  const d = new Date(dateStr)
   if (Number.isNaN(d.getTime())) return null
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`
 }
