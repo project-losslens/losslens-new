@@ -41,10 +41,10 @@ Plan authority: docs/UPGRADE_PLAN.md (delete only when ALL phases done)
 ### Recovery report
 - [x] AES-GCM (PBKDF2 100k) encrypt in browser → self-contained HTML decryptor page; opens only after passphrase
 - [x] Random 8-char passphrase shown above Download + Copy + required share-separately line + Generate new passphrase; never emailed/stored
-- [ ] "Generate new passphrase" action; never emailed/stored server-side
+- [x] "Generate new passphrase" action; never emailed/stored server-side
 ### Oloo
-- [ ] Remove glow/halo; flat hand-drawn inline SVG, teal+blue, 4 expressions (calm/happy/concerned/celebrating) context-driven
-- [ ] Time-aware greeting EN/SW with name; thought-for-today; 3 quick-reply chips; idle blink/breathe (reduced-motion off); typing indicator; avatar beside replies; high-risk keeps help button; keep crisisDetection + language matching
+- [x] Removed glow/halo; flat hand-drawn inline SVG OlooCharacter (teal blob + blue belly + leaf), 6 expressions (calm/happy/concerned/celebrating/thinking/speaking); context-driven: high risk/low mood → concerned, streak%7 → celebrating, streak>=3 → happy
+- [x] Time-aware greeting EN/SW (oloo.greet.*), rotating thought-for-today (oloo.thought.0-4), 3 quick chips (urge/log/talk) on welcome card; CSS breathe+blink idle disabled under reduced-motion; typing dots kept; avatar beside replies; detectCrisis → tel: help link on assistant msgs; crisisDetection untouched; send/volume/mic/close icons added to AppIcon
 
 ## Phase 5 — subscriptions/entitlements/payments
 - [ ] subscription_events table + RLS; plans check constraint/table
