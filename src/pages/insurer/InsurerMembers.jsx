@@ -4,6 +4,7 @@ import { useAuthProfile } from '../../context/AuthProfileContext'
 import { BrandLoader } from '../../components/Brand'
 import { toast } from '../../components/ToastProvider'
 import AppIcon from '../../components/AppIcon'
+import { toCsv, downloadCsv } from '../../lib/csv'
 
 //  Insurer portal — Protection members: roster upload + membership
 //  verification. Only whitelisted columns are read; clinical data is never
@@ -84,6 +85,22 @@ export default function InsurerMembers() {
     setCsvRows(null)
   }
 
+  const exportCsv = () => {
+    const rows = memberships.map(m => ({
+      member_reference: m.member_reference || '',
+      status: m.status,
+      created_at: m.created_at,
+      verified_at: m.verified_at || '',
+    }))
+    downloadCsv('losslens-protection-members.csv', toCsv(rows, [
+      { key: 'member_reference', label: 'Member reference' },
+      { key: 'status', label: 'Status' },
+      { key: 'created_at', label: 'Enrolled at' },
+      { key: 'verified_at', label: 'Verified at' },
+    ]))
+    toast.success('Members exported.')
+  }
+
   const verify = async (m) => {
     const ref = verifyRef[m.id] ?? m.member_reference ?? ''
     const { error: rpcError } = await supabase.rpc('insurer_verify_membership', {
@@ -120,7 +137,10 @@ export default function InsurerMembers() {
       </section>
 
       <section className="portal-card">
-        <h3>Memberships ({memberships.length})</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <h3 style={{ margin: 0 }}>Memberships ({memberships.length})</h3>
+          {memberships.length > 0 && <button type="button" className="btn-ghost fs-12" onClick={exportCsv}>Export CSV</button>}
+        </div>
         {memberships.length === 0 && <p className="portal-notice">No Protection memberships yet.</p>}
         {memberships.map(m => (
           <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap' }}>

@@ -51,25 +51,28 @@ demo fixtures only). Delete only when ALL phases done.
       thought-for-today, 3 chips, reduced-motion-safe idle anim, typing
       dots, avatar per reply, crisis help link; crisisDetection untouched
 
-## Phase 5 — subscriptions/entitlements/payments
-- [~] SQL: subscription_events/payments/plans tables + admin RPCs +
-      expire_subscriptions() exist BUT prompt now says NO plans table and
-      NO separate history table — needs reconciliation: history must read
-      audit_logs, plans live in src/config/plans.js only, ONE
-      admin_set_subscription(uuid[], ...) function. Existing extra objects
-      may need removing from combined SQL (destructive-marked) or leaving
-      unused — DECIDE and document.
-- [x] UserManagement Change subscription modal (RPC-backed, bulk<=100,
-      history, typed expiry, required reason)
-- [x] api/cron/expire-subscriptions.js exists; verify it uses service
-      role; document enabling in MIGRATION_NOTES (check done)
-- [~] plans.js + entitlements.js + useEntitlements + RequiresPlan exist;
-      enforcement NOT wired into api/chat.js / storage / analytics pages
-- [x] Payments: api/_lib/payments.js (off|sandbox|live Daraja STK),
-      api/payments/{start,mpesa-callback,status}, SubscriptionPage flow,
-      .env.example; off→register-interest kept
-- [ ] Delete forbidden SQL helper files — DONE this session
-      (supabase/scripts/*.sql, supabase/seed/protection_demo.sql removed)
+## Phase 5 — subscriptions/entitlements/payments [x] code-complete; browser verify owed
+- [x] SQL reconciled to prompt: ONE admin_set_subscription(uuid[],...) —
+      atomic, super_admin, inline plan/status validation, log_admin_action
+      per user, returns jsonb rows, raises on 0 rows. Destructive-marked
+      drops for earlier draft objects (plans, subscription_events, bulk/
+      history/manual-payment RPCs, expire_subscriptions, validators).
+      payments table kept with provider_ref unique (+rename shim).
+- [x] UserManagement: single RPC for single+bulk; history reads audit_logs
+      (action='subscription_change', target_id=user)
+- [x] api/cron/expire-subscriptions.js: inline service-role sweep + audit
+      rows; CRON_SECRET bearer or ?secret=; documented in MIGRATION_NOTES
+      (no pg_cron, no SQL fn)
+- [x] Entitlements enforced: api/chat.js aiPriority → higher rolling quota
+      (CHAT_QUOTA_PRIORITY_*); storageQuotaMb enforced client-side in
+      MonthlyMirrorPage + PreciousPactPage via src/lib/storageQuota.js
+      (per-bucket recursive size sum, fails open). Analytics detail: no
+      distinct user analytics surface exists — noted as assumption;
+      RequiresPlan ready.
+- [x] Payments: provider_ref rename applied in start/status/callback;
+      subscription activation + audit via service role; .env.example
+      documents all vars incl. CHAT_QUOTA_* and CRON_SECRET
+- [x] supabase scripts/seed .sql files deleted (prompt: one SQL file only)
 
 ## Phase 6 — Protection + portals
 - [x] docs/PROTECTION.md, PROTECTION_TEST_PLAN.md, GO_LIVE_CHECKLIST.md
@@ -78,19 +81,25 @@ demo fixtures only). Delete only when ALL phases done.
 - [~] Member /protection-member page mode-gated (enrol/pending/active/
       consent/timeline/leave); benefits detail thin; find-therapist +
       pre-auth + leave RPCs done
-- [ ] Therapist portal shell+nav (Dashboard/Referrals/Sessions/Claims/
-      Payouts/Profile/Verification); Pending Verification link readable
-      (6g partially done — verify)
-- [~] Insurer portal: members (CSV roster+verify), pre-auths, plans
-      pages done; Claims/Invoices/Analytics exist? CSV export owed;
-      metrics definitions file owed
+- [x] Therapist portal shell+nav DONE: Dashboard/Referrals/Sessions/
+      Claims/Payouts/Profile & Verification; new pages
+      TherapistReferrals (accept + decline via new
+      therapist_decline_voucher RPC — returns voucher to pool),
+      TherapistSessions (per-voucher progress + log session),
+      TherapistClaims (all claims + new-claim link). Pending-verification
+      link on Dashboard already readable (6g).
+- [x] Insurer portal: members (CSV roster+verify+CSV export added),
+      pre-auths, plans, claims, invoices, analytics (metrics via
+      src/lib/metrics.js METRIC_DEFINITIONS + CSV export already present)
 - [~] /super-admin/protection: mode switch, pipeline, queues, partner
-      onboarding done; therapist invites owed
+      onboarding done; therapist invites still owed
 - [x] api/_lib/notify.js in-app + pluggable email/SMS no-op
-- [ ] In-memory "Sample" protection fixtures in src/demo (SQL seed was
-      deleted per prompt — must re-create as in-memory demo data)
-- [ ] Whitelisted views for insurer/therapist if needed (audit RLS/RPC
-      column exposure)
+- [x] In-memory "Sample" protection fixtures in src/demo/fixtures.js
+      (protection: insurer, plan, 3 therapists, 6 memberships in every
+      state, 7 claims across the pipeline) rendered on /demo — never
+      written to DB. SQL seed deleted per prompt.
+- [ ] Whitelisted views audit for insurer/therapist column exposure —
+      partially covered by RPC whitelisting; formal audit owed
 
 ## Notes / decisions
 - Avatar storage: profile stores path `uid/avatar.webp`; useAvatarUrl

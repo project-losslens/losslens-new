@@ -171,6 +171,37 @@ export default function Demo() {
       </section>
 
       <section className="portal-card">
+        <h2>Protection journey (sample)</h2>
+        <p className="portal-notice">{data.protection.label} Insurer: {data.protection.insurer.name} · Plan: {data.protection.insurer.plan}</p>
+        <h3>Verified therapists (sample)</h3>
+        <div className="portal-list">
+          {data.protection.therapists.map((t) => (
+            <article className="portal-list__item" key={t.name}>
+              <div><strong>{t.name}</strong><p>{t.county} · {t.languages.join(', ')}{t.telehealth ? ' · telehealth' : ''} · KES {t.fee.toLocaleString()}/session</p></div>
+              <span className="portal-status portal-status--pending">{t.status}</span>
+            </article>
+          ))}
+        </div>
+        <h3>Memberships (sample)</h3>
+        <div className="portal-list">
+          {data.protection.memberships.map((m) => (
+            <article className="portal-list__item" key={m.member_ref}>
+              <div><strong>{m.member_ref}</strong></div>
+              <span className="portal-status portal-status--pending">{m.status.replace(/_/g, ' ')}</span>
+            </article>
+          ))}
+        </div>
+        <h3>Claims pipeline (sample)</h3>
+        <div className="portal-list">
+          {data.protection.claims.map((c) => (
+            <article className="portal-list__item" key={c.ref}>
+              <div><strong>{c.ref}</strong><p>{c.state}</p></div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="portal-card">
         <h2>Admin analytics (sample)</h2>
         <div className="portal-stats">
           <article className="portal-card"><span>Total users</span><strong>{data.adminStats.total_users.toLocaleString()}</strong></article>

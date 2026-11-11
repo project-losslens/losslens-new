@@ -58,6 +58,9 @@ const TherapistDashboard = lazy(() => import('./pages/therapist/TherapistDashboa
 const TherapistOnboarding = lazy(() => import('./pages/therapist/TherapistOnboarding'))
 const TherapistClaimForm = lazy(() => import('./pages/therapist/TherapistClaimForm'))
 const TherapistPayouts = lazy(() => import('./pages/therapist/TherapistPayouts'))
+const TherapistReferrals = lazy(() => import('./pages/therapist/TherapistReferrals'))
+const TherapistSessions = lazy(() => import('./pages/therapist/TherapistSessions'))
+const TherapistClaims = lazy(() => import('./pages/therapist/TherapistClaims'))
 const InsurerLogin = lazy(() => import('./pages/insurer/InsurerLogin'))
 const InsurerDashboard = lazy(() => import('./pages/insurer/InsurerDashboard'))
 const InsurerClaims = lazy(() => import('./pages/insurer/InsurerClaims'))
@@ -116,6 +119,9 @@ function App() {
             <Route path="/therapist" element={<TherapistDashboard />} />
             <Route path="/therapist/onboarding" element={<TherapistOnboarding />} />
             <Route path="/therapist/claims/new" element={<TherapistClaimForm />} />
+            <Route path="/therapist/referrals" element={<TherapistReferrals />} />
+            <Route path="/therapist/sessions" element={<TherapistSessions />} />
+            <Route path="/therapist/claims" element={<TherapistClaims />} />
             <Route path="/therapist/payouts" element={<TherapistPayouts />} />
           </Route>
         </Route>

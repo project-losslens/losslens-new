@@ -123,5 +123,31 @@ export function generateDemoData() {
       open_crisis_alerts: 3,
       claims_in_pipeline: 27,
     },
+    protection: {
+      label: 'Sample Protection data — never written to the database.',
+      insurer: { name: 'Sample Insurance SACCO', plan: 'Sample Family Cover', member_ref_prefix: 'SMPL-' },
+      therapists: [
+        { name: 'Sample Therapist A', county: 'Nairobi', languages: ['English', 'Kiswahili'], telehealth: true, fee: 2500, status: 'active' },
+        { name: 'Sample Therapist B', county: 'Mombasa', languages: ['English', 'Kiswahili'], telehealth: false, fee: 2000, status: 'active' },
+        { name: 'Sample Therapist C', county: 'Kisumu', languages: ['English', 'Dholuo'], telehealth: true, fee: 1800, status: 'pending' },
+      ],
+      memberships: [
+        { member_ref: 'SMPL-0001', status: 'pending_verification' },
+        { member_ref: 'SMPL-0002', status: 'active' },
+        { member_ref: 'SMPL-0003', status: 'active' },
+        { member_ref: 'SMPL-0004', status: 'suspended' },
+        { member_ref: 'SMPL-0005', status: 'ended' },
+        { member_ref: 'SMPL-0006', status: 'rejected' },
+      ],
+      claims: [
+        { ref: 'SMPL-C-001', state: 'pre-authorisation requested' },
+        { ref: 'SMPL-C-002', state: 'pre-authorisation approved' },
+        { ref: 'SMPL-C-003', state: 'session completed' },
+        { ref: 'SMPL-C-004', state: 'claim submitted' },
+        { ref: 'SMPL-C-005', state: 'claim approved — awaiting payout' },
+        { ref: 'SMPL-C-006', state: 'claim paid' },
+        { ref: 'SMPL-C-007', state: 'claim rejected' },
+      ],
+    },
   }
 }

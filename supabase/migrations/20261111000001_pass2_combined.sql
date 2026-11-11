@@ -654,6 +654,32 @@ create policy protection_plans_insurer_write on public.protection_plans for all 
   using (exists (select 1 from public.insurers i where i.id = insurer_id and i.profile_id = auth.uid()))
   with check (exists (select 1 from public.insurers i where i.id = insurer_id and i.profile_id = auth.uid()));
 
+-- Therapist portal: decline an assigned voucher, returning it to the pool.
+-- Object added: function public.therapist_decline_voucher(uuid).
+create or replace function public.therapist_decline_voucher(p_voucher_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+begin
+  if auth.uid() is null or not public.is_active_user() then
+    raise exception 'Active sign-in required';
+  end if;
+  update public.provider_vouchers
+  set status = 'pending', therapist_id = null, updated_at = now()
+  where id = p_voucher_id
+    and therapist_id = auth.uid()
+    and status = 'assigned';
+  if not found then
+    raise exception 'Voucher not found or not awaiting your response';
+  end if;
+end;
+$$;
+revoke execute on function public.therapist_decline_voucher(uuid) from public, anon;
+grant execute on function public.therapist_decline_voucher(uuid) to authenticated;
+
+
 -- Verification: run as an authenticated administrator after applying.
 
 

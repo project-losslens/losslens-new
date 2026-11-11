@@ -83,9 +83,12 @@ export const superAdminNav = [
 ]
 
 export const therapistNav = [
-  { to: '/therapist', label: 'Therapist', icon: 'medical', end: true },
-  { to: '/therapist/onboarding', label: 'Verification', icon: 'profile' },
+  { to: '/therapist', label: 'Dashboard', icon: 'medical', end: true },
+  { to: '/therapist/referrals', label: 'Referrals', icon: 'users' },
+  { to: '/therapist/sessions', label: 'Sessions', icon: 'calendar' },
+  { to: '/therapist/claims', label: 'Claims', icon: 'document' },
   { to: '/therapist/payouts', label: 'Payouts', icon: 'document' },
+  { to: '/therapist/onboarding', label: 'Profile & Verification', icon: 'profile' },
 ]
 
 export const insurerNav = [
