@@ -14,6 +14,64 @@ const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
 }[character]))
 
+//  Recovery report encryption: AES-GCM via Web Crypto. The passphrase is
+//  generated client-side, shown to the user, and never leaves the browser.
+const PASSPHRASE_ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789' // no l/1/o/0 confusion
+function generateReportPassphrase() {
+  const bytes = new Uint8Array(8)
+  crypto.getRandomValues(bytes)
+  return [...bytes].map(b => PASSPHRASE_ALPHABET[b % PASSPHRASE_ALPHABET.length]).join('')
+}
+const toB64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)))
+const fromB64 = (b64) => Uint8Array.from(atob(b64), c => c.charCodeAt(0))
+
+async function encryptReportHtml(html, passphrase) {
+  const salt = crypto.getRandomValues(new Uint8Array(16))
+  const iv = crypto.getRandomValues(new Uint8Array(12))
+  const keyMaterial = await crypto.subtle.importKey('raw', new TextEncoder().encode(passphrase), 'PBKDF2', false, ['deriveKey'])
+  const key = await crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt']
+  )
+  const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(html))
+  return { salt: toB64(salt), iv: toB64(iv), data: toB64(cipher) }
+}
+
+function buildEncryptedReportPage(payload) {
+  const payloadJson = JSON.stringify(payload).replace(/</g, '\\u003c')
+  return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LossLens Recovery Report (encrypted)</title>
+<style>body{font-family:system-ui,sans-serif;background:#0B1220;color:#fff;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:1rem}main{max-width:420px;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:2rem;text-align:center}input{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:#0B1220;color:#fff;font-size:16px;box-sizing:border-box;margin:12px 0}button{width:100%;padding:12px;border:none;border-radius:8px;background:#2DD4BF;color:#0B1220;font-weight:600;font-size:15px;cursor:pointer}#err{color:#ff8080;font-size:13px;min-height:1.2em;margin-top:10px}</style></head><body>
+<main><h1 style="font-size:20px;color:#2DD4BF;margin:0 0 8px">LossLens Recovery Report</h1>
+<p style="color:rgba(255,255,255,.6);font-size:13px;margin:0 0 16px">This report is encrypted. Enter the passphrase you were given to view it.</p>
+<input id="pw" type="password" autocomplete="off" placeholder="Enter passphrase" aria-label="Report passphrase">
+<button id="go">Unlock report</button>
+<p id="err" role="alert"></p>
+<p style="color:rgba(255,255,255,.35);font-size:11px;margin-top:16px">Keep your passphrase private. It was shared with you separately from this file.</p>
+</main>
+<script>
+const PAYLOAD = ${payloadJson};
+const b64ToBytes = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function deriveKey(passphrase, salt) {
+  const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' }, km, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+}
+document.getElementById('go').addEventListener('click', async () => {
+  const pw = document.getElementById('pw').value;
+  const err = document.getElementById('err');
+  try {
+    const key = await deriveKey(pw, b64ToBytes(PAYLOAD.salt));
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64ToBytes(PAYLOAD.iv) }, key, b64ToBytes(PAYLOAD.data));
+    document.open(); document.write(new TextDecoder().decode(plain)); document.close();
+  } catch (e) { err.textContent = 'Wrong passphrase or corrupted file.'; }
+});
+document.getElementById('pw').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('go').click(); });
+</script></body></html>`
+}
+
 
 export default function Profile() {
   const navigate = useNavigate()
@@ -39,6 +97,7 @@ export default function Profile() {
 
   // Report
   const [generatingReport, setGeneratingReport] = useState(false)
+  const [reportPassphrase, setReportPassphrase] = useState(() => generateReportPassphrase())
 
   // Stats
   const [stats, setStats] = useState({ totalEntries: 0, cleanDays: 0, gambleDays: 0, cbtCompleted: 0, cbtTotal: 8, eventsAttended: 0, topTriggers: [], topCoping: [], recentEntries: [], badges: [] })
@@ -166,7 +225,9 @@ export default function Profile() {
     finally { setLoadingProfile(false) }
   }
 
-  //  Generate report as downloadable HTML (rename to make purpose clear)
+  //  Generate report as an encrypted, self-contained HTML file. The
+  //  passphrase is shown above the Download button and never stored
+  //  server-side or sent anywhere.
   const downloadRecoveryReport = async () => {
     setGeneratingReport(true)
     const today = new Date().toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -228,17 +289,29 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
 <div class="footer"><p>Generated by LossLens — Gambling Harm Recovery Platform</p><p>Confidential — For therapeutic use only</p></div>
 </body></html>`
 
-    const blob = new Blob([reportHTML], { type: 'text/html' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `LossLens-Recovery-Report-${fullName?.replace(/\s/g,'-') || 'User'}.html`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-    setGeneratingReport(false)
-    toast.success('Report downloaded! Open it in your browser.', 5000)
+    try {
+      const payload = await encryptReportHtml(reportHTML, reportPassphrase)
+      const encryptedPage = buildEncryptedReportPage(payload)
+      const blob = new Blob([encryptedPage], { type: 'text/html' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `LossLens-Recovery-Report-${fullName?.replace(/\s/g,'-') || 'User'}.html`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      setGeneratingReport(false)
+      toast.success('Encrypted report downloaded! Enter the passphrase to open it.', 6000)
+    } catch (err) {
+      setGeneratingReport(false)
+      toast.error('Could not create the report. Please try again.', 4000)
+    }
+  }
+
+  const copyPassphrase = async () => {
+    try { await navigator.clipboard.writeText(reportPassphrase); toast.success('Passphrase copied', 2000) }
+    catch { toast.error('Could not copy — write it down instead.', 3000) }
   }
 
   const handleProfileSave = async () => {
@@ -471,7 +544,16 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
           <div className="dash-section" style={{ marginBottom: '0.75rem', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06))', borderColor: '#2DD4BF' }}>
             <h3 className="fs-13" style={{ color: '#2DD4BF', marginBottom: '0.75rem' }}>Recovery Report</h3>
 
-            <p className="fs-12" style={{ color: '#7DBDEE', lineHeight: '1.5', marginBottom: '12px' }}>Your professional recovery report is ready. Download it to share with your therapist or counselor.</p>
+            <p className="fs-12" style={{ color: '#7DBDEE', lineHeight: '1.5', marginBottom: '12px' }}>Your professional recovery report is encrypted with a passphrase. Share the passphrase separately from the file.</p>
+            <div style={{ background: '#0B1220', border: '1px solid #7DBDEE', borderRadius: '10px', padding: '12px', marginBottom: '10px', textAlign: 'center' }}>
+              <p className="fs-11" style={{ color: 'rgba(255,255,255,0.5)', margin: '0 0 6px' }}>Report passphrase</p>
+              <p className="fs-22" style={{ color: '#F2C879', fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: '3px', margin: '0 0 8px' }}>{reportPassphrase}</p>
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                <button type="button" onClick={copyPassphrase} className="fs-11" style={{ padding: '6px 12px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '32px' }}>Copy</button>
+                <button type="button" onClick={() => setReportPassphrase(generateReportPassphrase())} className="fs-11" style={{ padding: '6px 12px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '32px' }}>Generate new passphrase</button>
+              </div>
+              <p className="fs-10" style={{ color: 'rgba(255,255,255,0.4)', margin: '8px 0 0' }}>Share this passphrase in person or by phone, not in the same message as the file.</p>
+            </div>
             <button onClick={downloadRecoveryReport} disabled={generatingReport} className="fs-12" style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
               {generatingReport ? <BrandLoader variant="inline" showWordmark={false} /> : 'Download Report'}
             </button>
