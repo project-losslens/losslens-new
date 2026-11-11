@@ -18,7 +18,7 @@ Plan authority: docs/UPGRADE_PLAN.md (delete only when ALL phases done)
 - [x] Combined SQL: avatars authenticated read policy appended
 - [x] index.html boot loader identical; removed on mount, 10s fallback
 - [ ] Browser screenshots 360/768/1280 all shells (menu overlap, top-right username+avatar, stray symbols, toast contrast)
-- [ ] UserAvatar wired into admin/super-admin/insurer/therapist user lists
+- [~] UserAvatar wired into UserManagement (users+payments tabs) and B2BClients member list; still owed: TherapistManagement, InsurerManagement, ChatViewer, insurer/therapist portal lists
 - [ ] Final toast-type audit pass
 - [ ] Final numeric-field audit pass
 
