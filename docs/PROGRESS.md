@@ -39,8 +39,8 @@ Plan authority: docs/UPGRADE_PLAN.md (delete only when ALL phases done)
 - [x] create_supporter_invitation redefined in combined SQL (same signature, NULL email/phone)
 - [x] /family-join: 30s visible poll + focus/visibility refetch + "Updated x ago" + Refresh button; supporter_get_summary verified live (queries profiles/diary/cbt at call time)
 ### Recovery report
-- [ ] AES-GCM encrypt in browser → self-contained HTML decrypting after passphrase
-- [ ] Random 8-char passphrase per report, shown ABOVE Download + Copy + "Share this passphrase in person or by phone, not in the same message as the file"
+- [x] AES-GCM (PBKDF2 100k) encrypt in browser → self-contained HTML decryptor page; opens only after passphrase
+- [x] Random 8-char passphrase shown above Download + Copy + required share-separately line + Generate new passphrase; never emailed/stored
 - [ ] "Generate new passphrase" action; never emailed/stored server-side
 ### Oloo
 - [ ] Remove glow/halo; flat hand-drawn inline SVG, teal+blue, 4 expressions (calm/happy/concerned/celebrating) context-driven
