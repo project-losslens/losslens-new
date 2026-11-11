@@ -3,6 +3,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
 import UserAvatar from '../../components/UserAvatar'
+import NumberField from '../../components/NumberField'
+import { PLANS, PLAN_STATUSES } from '../../config/plans'
 import { useI18n } from '../../i18n'
 import { BrandLoader } from '../../components/Brand'
 
@@ -34,8 +36,10 @@ export default function UserManagement() {
   const [showTherapistRevert, setShowTherapistRevert] = useState(null)
   const [showPasswordReset, setShowPasswordReset] = useState(null)
   const [resetLoading, setResetLoading] = useState(false)
-  const [showGrantPremium, setShowGrantPremium] = useState(null)
-  const [showRevokePremium, setShowRevokePremium] = useState(null)
+  const [subModal, setSubModal] = useState(null) // { users: [...] }
+  const [subForm, setSubForm] = useState({ plan: 'premium', status: 'active', planType: '', expiryDays: '', expiryDate: '', reason: '' })
+  const [subHistory, setSubHistory] = useState([])
+  const [subSaving, setSubSaving] = useState(false)
 
   const fetchUsers = useCallback(async () => {
     setLoading(true)
@@ -131,40 +135,58 @@ export default function UserManagement() {
     }
   }
 
-  const grantPremium = async (userId) => {
-    setActionLoading(userId)
-    try {
-      const { error } = await supabase.from('profiles').update({
-        subscription_plan: 'premium',
-        plan_type: 'individual',
-        subscription_status: 'active'
-      }).eq('id', userId)
-      if (error) throw error
-      setUsers(prev => prev.map(u => u.id === userId ? {
-        ...u, subscription_plan: 'premium', plan_type: 'individual', subscription_status: 'active'
-      } : u))
-      toast.success('Premium access granted!')
-    } catch (err) { toast.error('Failed to grant premium.') }
-    setActionLoading(null)
-    setShowGrantPremium(null)
+  const openSubModal = async (userOrUsers) => {
+    const list = Array.isArray(userOrUsers) ? userOrUsers : [userOrUsers]
+    const first = list[0] || {}
+    setSubForm({
+      plan: first.subscription_plan && first.subscription_plan !== 'free' ? first.subscription_plan : 'premium',
+      status: first.subscription_status || 'active',
+      planType: first.plan_type || '',
+      expiryDays: '', expiryDate: '', reason: '',
+    })
+    setSubHistory([])
+    setSubModal({ users: list })
+    if (list.length === 1) {
+      const { data } = await supabase.rpc('admin_get_subscription_history', { p_user_id: list[0].id, p_limit: 10 })
+      if (data) setSubHistory(data)
+    }
   }
 
-  const revokePremium = async (userId) => {
-    setActionLoading(userId)
+  const saveSubscription = async () => {
+    if (!subModal) return
+    if (!subForm.reason.trim()) { toast.error('A reason is required.'); return }
+    let expiresAt = null
+    if (subForm.expiryDate) expiresAt = new Date(subForm.expiryDate + 'T23:59:59').toISOString()
+    else if (subForm.expiryDays) expiresAt = new Date(Date.now() + Number(subForm.expiryDays) * 86400000).toISOString()
+    setSubSaving(true)
     try {
-      const { error } = await supabase.from('profiles').update({
-        subscription_plan: 'free',
-        plan_type: 'individual',
-        subscription_status: 'inactive'
-      }).eq('id', userId)
-      if (error) throw error
-      setUsers(prev => prev.map(u => u.id === userId ? {
-        ...u, subscription_plan: 'free', plan_type: 'individual', subscription_status: 'inactive'
-      } : u))
-      toast.success('Premium access revoked.')
-    } catch (err) { toast.error('Failed to revoke.') }
-    setActionLoading(null)
-    setShowRevokePremium(null)
+      const ids = subModal.users.map(u => u.id)
+      let rows = []
+      if (ids.length === 1) {
+        const { data, error } = await supabase.rpc('admin_set_subscription', {
+          p_user_id: ids[0], p_plan: subForm.plan, p_status: subForm.status,
+          p_expires_at: expiresAt, p_plan_type: subForm.planType || null, p_reason: subForm.reason.trim(),
+        })
+        if (error) throw error
+        rows = data ? [data] : []
+      } else {
+        const { data, error } = await supabase.rpc('admin_set_subscription_bulk', {
+          p_user_ids: ids, p_plan: subForm.plan, p_status: subForm.status,
+          p_expires_at: expiresAt, p_plan_type: subForm.planType || null, p_reason: subForm.reason.trim(),
+        })
+        if (error) throw error
+        rows = Array.isArray(data) ? data : []
+      }
+      const byId = new Map(rows.map(r => [r.id, r]))
+      setUsers(prev => prev.map(u => byId.has(u.id) ? { ...u, ...byId.get(u.id) } : u))
+      toast.success(`Subscription updated for ${rows.length || ids.length} user(s).`)
+      setSubModal(null)
+    } catch (err) {
+      console.error('Subscription update failed:', err)
+      toast.error(err?.message || 'Subscription update failed.')
+    } finally {
+      setSubSaving(false)
+    }
   }
 
   const handleExportCSV = () => {
@@ -290,6 +312,12 @@ export default function UserManagement() {
               style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'payments' ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeTab === 'payments' ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === 'payments' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
               Payments
             </button>
+            {activeTab === 'payments' && filtered.length > 0 && filtered.length <= 100 && (
+              <button onClick={() => openSubModal(filtered)}
+                style={{ padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--primary)', background: 'transparent', color: 'var(--primary)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
+                Bulk ({filtered.length})
+              </button>
+            )}
           </div>
 
           {/* Users Tab */}
@@ -456,16 +484,10 @@ export default function UserManagement() {
                           )}
                         </div>
                         <div style={{ display: 'flex', gap: '6px' }}>
-                          {(!u.subscription_plan || u.subscription_plan === 'free') && u.plan_type !== 'company' && (
-                            <button onClick={() => setShowGrantPremium(u)} disabled={actionLoading === u.id}
+                          {u.plan_type !== 'company' && (
+                            <button onClick={() => openSubModal(u)} disabled={actionLoading === u.id}
                               style={btn('transparent', 'var(--primary)', 'var(--primary)')}>
-                              {actionLoading === u.id ? '...' : 'Grant Premium'}
-                            </button>
-                          )}
-                          {(u.subscription_plan === 'premium' && u.plan_type !== 'company') && (
-                            <button onClick={() => setShowRevokePremium(u)} disabled={actionLoading === u.id}
-                              style={btn('transparent', 'var(--info)', 'var(--info)')}>
-                              {actionLoading === u.id ? '...' : 'Revoke'}
+                              {actionLoading === u.id ? '...' : 'Subscription'}
                             </button>
                           )}
                           {u.plan_type === 'company' && (
@@ -582,37 +604,54 @@ export default function UserManagement() {
         </div>
       )}
 
-      {/* Grant Premium Modal */}
-      {showGrantPremium && (
+      {/* Change Subscription Modal (single or bulk) */}
+      {subModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowGrantPremium(null)} />
-          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--primary)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <AppIcon name="diamond" size={36} style={{ display: 'block', margin: '0 auto 12px' }} />
-            <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 8px' }}>Grant Premium Access?</h3>
-            <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px' }}>
-              Give <strong style={{ color: 'var(--primary)' }}>"{showGrantPremium.full_name || 'User'}"</strong> free Premium access? This can be revoked later.
+          <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setSubModal(null)} />
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '1.5rem', border: '1px solid var(--primary)', maxWidth: '440px', width: '100%', maxHeight: '85vh', overflowY: 'auto' }}>
+            <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 4px' }}>Change subscription</h3>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', margin: '0 0 14px' }}>
+              {subModal.users.length === 1
+                ? `For ${subModal.users[0].full_name || subModal.users[0].username || 'user'} — changes are written to subscription history.`
+                : `Applying to ${subModal.users.length} users (max 100) — atomic: all or nothing.`}
             </p>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowGrantPremium(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
-              <button onClick={() => grantPremium(showGrantPremium.id)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Grant Premium</button>
+            <div className="form-group"><label>Plan</label>
+              <select value={subForm.plan} onChange={e => setSubForm({ ...subForm, plan: e.target.value })}>
+                {Object.values(PLANS).map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Revoke Premium Modal */}
-      {showRevokePremium && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowRevokePremium(null)} />
-          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--info)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <AppIcon name="download" size={36} style={{ display: 'block', margin: '0 auto 12px' }} />
-            <h3 style={{ color: 'var(--info)', fontSize: '16px', margin: '0 0 8px' }}>Revoke Premium Access?</h3>
-            <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px' }}>
-              <strong style={{ color: 'var(--primary)' }}>"{showRevokePremium.full_name || 'User'}"</strong> will be moved back to the Free plan.
-            </p>
+            <div className="form-group"><label>Status</label>
+              <select value={subForm.status} onChange={e => setSubForm({ ...subForm, status: e.target.value })}>
+                {PLAN_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className="form-group"><label>Plan type (optional)</label>
+              <input type="text" value={subForm.planType} onChange={e => setSubForm({ ...subForm, planType: e.target.value })} placeholder="e.g. individual" />
+            </div>
+            <div className="form-group"><label>Expires in (days)</label>
+              <NumberField value={subForm.expiryDays} onChange={v => setSubForm({ ...subForm, expiryDays: v })} placeholder="e.g. 30" min={0} />
+            </div>
+            <div className="form-group"><label>…or exact expiry date</label>
+              <input type="date" value={subForm.expiryDate} onChange={e => setSubForm({ ...subForm, expiryDate: e.target.value })} />
+            </div>
+            <div className="form-group"><label>Reason (required)</label>
+              <input type="text" value={subForm.reason} onChange={e => setSubForm({ ...subForm, reason: e.target.value })} placeholder="Why is this changing?" />
+            </div>
+            {subHistory.length > 0 && (
+              <div style={{ marginBottom: '12px' }}>
+                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', margin: '0 0 6px' }}>Recent history</p>
+                {subHistory.slice(0, 5).map(h => (
+                  <p key={h.id} style={{ color: 'rgba(255,255,255,0.45)', fontSize: '11px', margin: '2px 0' }}>
+                    {new Date(h.created_at).toLocaleDateString()} — {h.old_plan || '—'} → {h.new_plan || '—'} ({h.new_status}){h.reason ? ` · ${h.reason}` : ''}
+                  </p>
+                ))}
+              </div>
+            )}
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowRevokePremium(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
-              <button onClick={() => revokePremium(showRevokePremium.id)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(45,212,191,0.15)', border: 'none', color: 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Revoke</button>
+              <button onClick={() => setSubModal(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={saveSubscription} disabled={subSaving} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                {subSaving ? 'Saving…' : 'Save'}
+              </button>
             </div>
           </div>
         </div>
