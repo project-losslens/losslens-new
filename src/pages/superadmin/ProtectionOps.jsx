@@ -5,6 +5,7 @@ import { BrandLoader } from '../../components/Brand'
 import { toast } from '../../components/ToastProvider'
 import AppIcon from '../../components/AppIcon'
 import { PROTECTION_MODES } from '../../lib/protectionStates'
+import NumberField from '../../components/NumberField'
 
 //  Super-admin Protection Ops: pipeline counts, partner list, therapist
 //  verification queue, protection_mode switch (confirmed + audited).
@@ -23,14 +24,17 @@ export default function ProtectionOps() {
   const [partners, setPartners] = useState([])
   const [therapists, setTherapists] = useState([])
   const [saving, setSaving] = useState(false)
+  const [partnerForm, setPartnerForm] = useState({ insurer_id: '', cohort_name: '', per_member_fee: '', contract_start: '' })
+  const [insurers, setInsurers] = useState([])
 
   const load = useCallback(async () => {
     if (!user?.id) return
-    const [{ data: setting }, { data: mems }, { data: parts }, { data: ths }] = await Promise.all([
+    const [{ data: setting }, { data: mems }, { data: parts }, { data: ths }, { data: ins }] = await Promise.all([
       supabase.from('system_settings').select('value').eq('key', 'protection_mode').maybeSingle(),
       supabase.from('protection_memberships').select('status'),
       supabase.from('insurer_partnerships').select('id, cohort_name, status, per_member_fee, member_count').order('created_at', { ascending: false }).limit(20),
       supabase.from('therapists').select('id, specialty, status, license_number').eq('status', 'pending').limit(20),
+      supabase.from('insurers').select('id, name').eq('status', 'active').order('name'),
     ])
     const v = setting?.value
     setMode(typeof v === 'string' ? v.replace(/"/g, '') : (v?.mode || 'concept'))
@@ -40,6 +44,7 @@ export default function ProtectionOps() {
     setPending((mems || []).filter(m => m.status === 'pending_verification').slice(0, 20))
     setPartners(parts || [])
     setTherapists(ths || [])
+    setInsurers(ins || [])
     setLoading(false)
   }, [user?.id])
 
@@ -59,6 +64,23 @@ export default function ProtectionOps() {
     setMode(next)
     toast.success(`Protection mode set to ${next}.`)
     setSaving(false)
+  }
+
+  const createPartner = async () => {
+    if (!partnerForm.insurer_id || !partnerForm.cohort_name.trim()) { toast.error('Insurer and cohort name are required.'); return }
+    setSaving(true)
+    const { error } = await supabase.from('insurer_partnerships').insert({
+      insurer_id: partnerForm.insurer_id,
+      cohort_name: partnerForm.cohort_name.trim(),
+      per_member_fee: Number(partnerForm.per_member_fee) || 0,
+      contract_start: partnerForm.contract_start || null,
+      status: 'active',
+    })
+    setSaving(false)
+    if (error) { toast.error(error.message || 'Could not create partnership.'); return }
+    toast.success('Partnership created.')
+    setPartnerForm({ insurer_id: '', cohort_name: '', per_member_fee: '', contract_start: '' })
+    await load()
   }
 
   if (loading) return <BrandLoader variant="section" />
@@ -119,6 +141,24 @@ export default function ProtectionOps() {
             {t.specialty || 'Therapist'} · licence {t.license_number || '—'}
           </p>
         ))}
+      </section>
+
+      <section className="portal-card">
+        <h3>Partner onboarding</h3>
+        <div className="portal-form">
+          <label>Insurer
+            <select value={partnerForm.insurer_id} onChange={e => setPartnerForm({ ...partnerForm, insurer_id: e.target.value })}>
+              <option value="">Select insurer…</option>
+              {insurers.map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
+            </select>
+          </label>
+          <label>Cohort name<input value={partnerForm.cohort_name} onChange={e => setPartnerForm({ ...partnerForm, cohort_name: e.target.value })} maxLength={120} /></label>
+          <label>Per-member fee (KES)<NumberField value={partnerForm.per_member_fee} onChange={v => setPartnerForm({ ...partnerForm, per_member_fee: v ?? '' })} min={0} /></label>
+          <label>Contract start<input type="date" value={partnerForm.contract_start} onChange={e => setPartnerForm({ ...partnerForm, contract_start: e.target.value })} /></label>
+          <button type="button" className="btn-primary" onClick={createPartner} disabled={saving}>
+            {saving ? <BrandLoader variant="inline" showWordmark={false} /> : 'Create partnership'}
+          </button>
+        </div>
       </section>
 
       <section className="portal-card">
