@@ -9,6 +9,12 @@ demo fixtures only). Delete only when ALL phases done.
 
 ## Status legend: [x] done · [~] partial · [ ] not started
 
+> 2026-11-11 session 2: commits 8a105e9, 59bcb29, 192fd31, 3258460 on
+> wip/copilot-phase2-3. Build green. Dev server + browser preview left
+> running for manual screenshot pass — still owed: browser verification
+> of all shells at 360/768/1280, member benefits detail, therapist
+> invites in ProtectionOps, formal whitelisted-column audit.
+
 ## Phase 1 — cleanup [x]
 ## Phase 2 — auth/roles/redirects/super-admin [x]
 
