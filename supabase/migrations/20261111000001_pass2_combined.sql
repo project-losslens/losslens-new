@@ -83,6 +83,29 @@ drop policy if exists "avatars authenticated read" on storage.objects;
 create policy "avatars authenticated read" on storage.objects for select to authenticated
   using (bucket_id = 'avatars');
 
+-- Phase 4 / The Circle: the "Slip & Recovery" and "Family & Friends" rooms
+-- are removed from the product. DESTRUCTIVE: deletes their messages,
+-- reactions, authors and room-member rows. Room is a free-text column (no
+-- check constraint), and circle_room_counts / circle_purge_expired are
+-- room-agnostic, so no function changes are needed.
+delete from public.circle_message_reactions
+  where message_id in (
+    select id from public.circle_messages
+    where room in ('slip_recovery', 'family_friends')
+  );
+
+delete from public.circle_message_authors
+  where message_id in (
+    select id from public.circle_messages
+    where room in ('slip_recovery', 'family_friends')
+  );
+
+delete from public.circle_messages
+  where room in ('slip_recovery', 'family_friends');
+
+delete from public.circle_room_members
+  where room in ('slip_recovery', 'family_friends');
+
 -- Verification: run as an authenticated administrator after applying.
 select
   public.is_active_user() as active_user,

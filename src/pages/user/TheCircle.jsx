@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { createNotification } from '../../lib/notifications'
 import { ensureCircleHash } from '../../lib/storage'
 import { detectCrisis } from '../../lib/crisisDetection'
+import { primaryHelpline } from '../../config/helplines'
 import AppIcon from '../../components/AppIcon'
 import { BrandLoader } from '../../components/Brand'
 
@@ -13,8 +14,6 @@ const ROOMS = [
   { id: 'check_in', name: 'Daily Check-In', icon: 'calendar', desc: 'Morning & evening mood sharing', expiry_hours: 24 },
   { id: 'urge_support', name: 'Urge Support', icon: 'alert', desc: 'Real-time help during urges', expiry_hours: 2 },
   { id: 'victory', name: 'Victory Circle', icon: 'star', desc: 'Celebrate wins big and small', expiry_hours: 168 },
-  { id: 'slip_recovery', name: 'Slip & Recovery', icon: 'heart', desc: 'No-judgment space for setbacks', expiry_hours: 24 },
-  { id: 'family_friends', name: 'Family & Friends', icon: 'users', desc: 'For supporters of gamblers', expiry_hours: 168 },
 ]
 
 const MAX_MESSAGE_LENGTH = 280
@@ -43,7 +42,45 @@ const MENTION_REGEX = /@([A-Z][a-z]+ [A-Z][a-z]+)/g
 
 const ANIMALS = ['Elephant', 'Lion', 'Giraffe', 'Zebra', 'Rhino', 'Cheetah', 'Leopard', 'Buffalo', 'Eagle', 'Crane']
 const PREFIXES = ['Savannah', 'Pride', 'Acacia', 'Serengeti', 'Rift', 'Highland', 'Coastal', 'Forest', 'Plains', 'Valley']
-const ANIMAL_EMOJI = { Elephant:'', Lion:'', Giraffe:'', Zebra:'', Rhino:'', Cheetah:'', Leopard:'', Buffalo:'', Eagle:'', Crane:'' }
+
+//  De-duplicate by id; a realtime INSERT that matches an optimistic temp
+//  message (same author, same text, within 60s) replaces the temp instead of
+//  appending a second copy.
+function upsertCircleMessage(list, incoming) {
+  const idx = list.findIndex(m => m.id === incoming.id)
+  if (idx >= 0) {
+    const next = [...list]
+    next[idx] = { ...next[idx], ...incoming, _sending: false, _delivered: true, _failed: false }
+    return next
+  }
+  const tempIdx = list.findIndex(m =>
+    String(m.id).startsWith('temp_') &&
+    m.user_hash === incoming.user_hash &&
+    m.message === incoming.message &&
+    Math.abs(new Date(m.created_at) - new Date(incoming.created_at)) < 60000
+  )
+  if (tempIdx >= 0) {
+    const next = [...list]
+    next[tempIdx] = { ...incoming, reply_to: list[tempIdx].reply_to || null, _delivered: true }
+    return next
+  }
+  return [...list, incoming]
+}
+
+//  Poll merge: persisted rows are authoritative, temp (unsent) messages are
+//  preserved until their real row lands, everything else is dropped.
+function mergeCirclePoll(prev, data) {
+  const temps = prev.filter(m => String(m.id).startsWith('temp_'))
+  const merged = [...data]
+  for (const t of temps) {
+    const persisted = data.some(d =>
+      d.user_hash === t.user_hash && d.message === t.message &&
+      Math.abs(new Date(d.created_at) - new Date(t.created_at)) < 120000
+    )
+    if (!persisted) merged.push(t)
+  }
+  return merged.slice(-150)
+}
 
 function generateUserHash(userId) {
   let hash = 0
@@ -77,7 +114,8 @@ export default function TheCircle() {
   const [initError, setInitError] = useState(false)
   const [activeRoom, setActiveRoom] = useState(ROOMS[0].id)
   const [messages, setMessages] = useState([])
-  const [messageIds, setMessageIds] = useState(new Set())
+  const [userHashMap, setUserHashMap] = useState({})
+  const realtimeConnectedRef = useRef(false)
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const [showCrisisBanner, setShowCrisisBanner] = useState(false)
@@ -87,7 +125,6 @@ export default function TheCircle() {
   const [replyTo, setReplyTo] = useState(null)
   const [lastSendTime, setLastSendTime] = useState(0)
   const [showScrollButton, setShowScrollButton] = useState(false)
-  const [userHashMap, setUserHashMap] = useState({})
 
   const messagesEndRef = useRef(null)
   const messagesContainerRef = useRef(null)
@@ -177,32 +214,29 @@ export default function TheCircle() {
   //  Use only Realtime, not polling
   const subscribeToRoom = (room) => {
     if (channelRef.current) supabase.removeChannel(channelRef.current)
+    realtimeConnectedRef.current = false
     const channel = supabase.channel(`circle_${room}_${Date.now()}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'circle_messages', filter: `room=eq.${room}` }, (payload) => {
-        setMessages(prev => {
-          if (messageIds.has(payload.new.id)) return prev
-          setMessageIds(s => new Set([...s, payload.new.id]))
-          return [...prev, payload.new].slice(-150)
-        })
+        setMessages(prev => upsertCircleMessage(prev, payload.new).slice(-150))
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'circle_messages', filter: `room=eq.${room}` }, (payload) => {
         setMessages(prev => prev.filter(m => m.id !== payload.old.id))
-        setMessageIds(s => { const ns = new Set(s); ns.delete(payload.old.id); return ns })
       })
-      .subscribe()
+      .subscribe((status) => {
+        realtimeConnectedRef.current = status === 'SUBSCRIBED'
+      })
     channelRef.current = channel
   }
 
   const startPolling = (room) => {
     if (pollRef.current) clearInterval(pollRef.current)
-    //  Fallback polling every 10s as backup for Realtime
+    //  Fallback poll: only fetches while realtime is disconnected, and merges
+    //  results instead of replacing the list (protects optimistic messages).
     pollRef.current = setInterval(async () => {
+      if (realtimeConnectedRef.current) return
       try {
         const { data } = await supabase.from('circle_messages').select('id, room, user_hash, display_name, avatar_animal, avatar_prefix, message, message_type, expires_at, reply_to_id, reply_to_name, created_at').eq('room', room).order('created_at', { ascending: true }).limit(150)
-        if (data) {
-          setMessages(data)
-          setMessageIds(new Set(data.map(m => m.id)))
-        }
+        if (data) setMessages(prev => mergeCirclePoll(prev, data))
       } catch (err) { /* silent */ }
     }, 10000)
   }
@@ -210,10 +244,7 @@ export default function TheCircle() {
   const fetchMessages = async (room) => {
     try {
       const { data } = await supabase.from('circle_messages').select('id, room, user_hash, display_name, avatar_animal, avatar_prefix, message, message_type, expires_at, reply_to_id, reply_to_name, created_at').eq('room', room).order('created_at', { ascending: true }).limit(150)
-      if (data) {
-        setMessages(data)
-        setMessageIds(new Set(data.map(m => m.id)))
-      }
+      if (data) setMessages(prev => mergeCirclePoll(prev, data))
     } catch (err) { /* silent */ }
   }
 
@@ -282,7 +313,7 @@ export default function TheCircle() {
 
       if (error || !data) throw error
 
-      setMessages(prev => prev.map(m => m.id === tempId ? { ...data, _sending: false, _delivered: true, reply_to: replyData ? { id: replyData.id, name: replyData.name, message: replyData.message?.substring(0, 50), userId: replyData.userId } : null } : m))
+      setMessages(prev => upsertCircleMessage(prev, { ...data, reply_to: replyData ? { id: replyData.id, name: replyData.name, message: replyData.message?.substring(0, 50), userId: replyData.userId } : null }).slice(-150))
       setTimeout(() => setMessages(prev => prev.map(m => m.id === data.id ? { ...m, _delivered: false } : m)), 2000)
 
       //  Send mention notifications — properly resolve user IDs
@@ -291,7 +322,7 @@ export default function TheCircle() {
         const mentionedUserId = await resolveUserHash(mention)
         if (mentionedUserId && mentionedUserId !== userId) {
           try {
-            await createNotification(mentionedUserId, { title: ' You were mentioned', message: `${identity.displayName} mentioned you in The Circle`, type: 'info', icon: '', link: '/circle' })
+            await createNotification(mentionedUserId, { title: 'You were mentioned', message: `${identity.displayName} mentioned you in The Circle`, type: 'info', icon: 'users', link: '/circle' })
           } catch (err) { /* silent */ }
         }
       }
@@ -299,7 +330,7 @@ export default function TheCircle() {
       // Send reply notification
       if (replyData?.userId && replyData.userId !== userId) {
         try {
-          await createNotification(replyData.userId, { title: '↩ Someone replied to you', message: `${identity.displayName} replied in The Circle`, type: 'info', icon: '↩', link: '/circle' })
+          await createNotification(replyData.userId, { title: 'Someone replied to you', message: `${identity.displayName} replied in The Circle`, type: 'info', icon: 'chat', link: '/circle' })
         } catch (err) { /* silent */ }
       }
     } catch (err) {
@@ -340,7 +371,6 @@ export default function TheCircle() {
     return new Date(d).toLocaleDateString('en-KE', { month: 'short', day: 'numeric' })
   }
 
-  const getAvatarEmoji = (a) => ANIMAL_EMOJI[a] || ''
   const activeRoomData = useMemo(() => ROOMS.find(r => r.id === activeRoom), [activeRoom])
 
   if (initError) return (
@@ -361,14 +391,14 @@ export default function TheCircle() {
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', height: '100vh' }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', flexShrink: 0 }}>
           <div>
-            <h1 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> The Circle</h1>
-            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{onlineCount} online  · You: {getAvatarEmoji(identity.animal)} {identity.displayName}</p>
+            <h1 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}>The Circle</h1>
+            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{onlineCount} online  · You: {identity.displayName}</p>
           </div>
         </div>
 
         {showCrisisBanner && (
           <div className="fs-13" style={{ background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '12px 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>🆘 If you're in crisis: call Befrienders Kenya <strong>0800 722 030</strong></span>
+            <span><AppIcon name="alert" size={14} /> If you're in crisis: call {primaryHelpline.name} <strong>{primaryHelpline.phone}</strong></span>
             <button onClick={() => { setShowCrisisBanner(false); if (crisisTimerRef.current) clearTimeout(crisisTimerRef.current) }} className="fs-20" style={{ background: 'transparent', border: 'none', color: '#FFFFFF', cursor: 'pointer', padding: '4px 10px', minWidth: '44px', minHeight: '44px' }} aria-label="Dismiss crisis banner">×</button>
           </div>
         )}
@@ -392,7 +422,6 @@ export default function TheCircle() {
 
           {messages.length === 0 && (
             <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)' }}>
-              <p className="fs-32"></p>
               <p className="fs-14" style={{ color: '#2DD4BF' }}>No messages yet</p>
               <p className="fs-12">Be the first to share in {activeRoomData?.name}.</p>
             </div>
@@ -402,7 +431,7 @@ export default function TheCircle() {
             const isOwn = msg.user_hash === identity.hash
             return (
               <div key={msg.id} style={{ display: 'flex', gap: '8px', flexDirection: isOwn ? 'row-reverse' : 'row', marginBottom: '12px', animation: 'fadeIn 0.2s ease-out', opacity: msg._sending ? 0.7 : 1 }}>
-                <div className="fs-16" style={{ width: '32px', height: '32px', borderRadius: '50%', background: isOwn ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)', border: `2px solid ${isOwn ? '#2DD4BF' : '#7DBDEE'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{getAvatarEmoji(msg.avatar_animal)}</div>
+                <div className="fs-16" style={{ width: '32px', height: '32px', borderRadius: '50%', background: isOwn ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)', border: `2px solid ${isOwn ? '#2DD4BF' : '#7DBDEE'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{msg.avatar_animal?.[0] || '?'}</div>
                 <div style={{ maxWidth: '78%' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexDirection: isOwn ? 'row-reverse' : 'row', marginBottom: '2px' }}>
                     <span className="fs-12" style={{ color: isOwn ? '#2DD4BF' : '#2DD4BF', fontWeight: 500 }}>{msg.display_name}</span>
@@ -413,7 +442,7 @@ export default function TheCircle() {
                   </div>
                   {msg.reply_to && (
                     <div className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '2px', padding: '4px 8px', background: '#0B1220', borderRadius: '6px', borderLeft: '2px solid #2DD4BF' }}>
-                      ↩ <strong>{msg.reply_to.name}</strong>: "{msg.reply_to.message}..."
+                      <AppIcon name="chat" size={12} style={{ flexShrink: 0 }} /> <strong>{msg.reply_to.name}</strong>: "{msg.reply_to.message}..."
                     </div>
                   )}
                   <div className="fs-13" style={{ padding: '10px 14px', borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: isOwn ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)', border: `1px solid ${msg._failed ? 'rgba(255,255,255,0.08)' : isOwn ? '#7DBDEE' : 'rgba(255,255,255,0.12)'}`, color: '#7DBDEE', lineHeight: '1.5', wordBreak: 'break-word' }}>
@@ -421,11 +450,11 @@ export default function TheCircle() {
                   </div>
                   {!msg._sending && !msg._failed && (
                     <div style={{ display: 'flex', gap: '4px', marginTop: '4px', flexDirection: isOwn ? 'row-reverse' : 'row', flexWrap: 'wrap', opacity: 0.7 }}>
-                      <button onClick={() => handleReply(msg)} className="fs-12" style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '2px 8px', color: '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-label="Reply">↩</button>
+                      <button onClick={() => handleReply(msg)} className="fs-12" style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '2px 8px', color: '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-label="Reply"><AppIcon name="chat" size={14} /></button>
                       {REACTIONS.filter(r => (msg[r.key] || 0) > 0).map(r => (
                         <button key={r.key} onClick={() => handleReaction(msg.id, r.key)} className="fs-12" style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '2px 8px', color: '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-label={`${r.label} (${msg[r.key]})`}>{msg[r.key]}</button>
                       ))}
-                      {isOwn && <button onClick={() => handleDeleteMessage(msg.id)} className="fs-12" style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', padding: '2px 4px' }} aria-label="Delete message"></button>}
+                      {isOwn && <button onClick={() => handleDeleteMessage(msg.id)} className="fs-12" style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', padding: '2px 4px', display: 'flex', alignItems: 'center' }} aria-label="Delete message"><AppIcon name="close" size={12} /></button>}
                     </div>
                   )}
                 </div>
@@ -439,7 +468,7 @@ export default function TheCircle() {
         <div style={{ padding: '12px 1.5rem', borderTop: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', flexShrink: 0 }}>
           {replyTo && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: 'rgba(255,255,255,0.12)', borderRadius: '8px', marginBottom: '8px' }}>
-              <span className="fs-12" style={{ color: '#2DD4BF', flex: 1 }}>↩ Replying to <strong>{replyTo.name}</strong></span>
+              <AppIcon name="chat" size={12} style={{ flexShrink: 0 }} /><span style={{ color: '#2DD4BF', flex: 1 }}>Replying to <strong>{replyTo.name}</strong></span>
               <button onClick={() => setReplyTo(null)} className="fs-16" style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', padding: '4px 8px' }} aria-label="Cancel reply"></button>
             </div>
           )}
