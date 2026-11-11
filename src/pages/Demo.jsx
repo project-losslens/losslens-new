@@ -1,3 +1,4 @@
+import NumberField from '../components/NumberField'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import GuidedTour from '../components/GuidedTour'
@@ -117,8 +118,7 @@ export default function Demo() {
             </select>
           </label>
           <label>Urge level (0–10)
-            <input type="range" min="0" max="10" value={checkinForm.urge} onChange={(e) => setCheckinForm((f) => ({ ...f, urge: Number(e.target.value) }))} />
-            <span>{checkinForm.urge}</span>
+            <NumberField inputMode="numeric" min={0} max={10} step={1} value={checkinForm.urge} onChange={(urge) => setCheckinForm((current) => ({ ...current, urge: urge ?? 0 }))} />
           </label>
           <label className="demo-check">
             <input type="checkbox" checked={checkinForm.gambled} onChange={(e) => setCheckinForm((f) => ({ ...f, gambled: e.target.checked }))} />

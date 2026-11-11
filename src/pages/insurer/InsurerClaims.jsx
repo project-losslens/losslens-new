@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { toCsv, downloadCsv } from '../../lib/csv'
+import { BrandLoader } from '../../components/Brand'
 
 const CLAIM_CSV_COLUMNS = [
   { key: 'claim_id', label: 'Claim ID' },
@@ -66,7 +67,7 @@ export default function InsurerClaims() {
     downloadCsv('losslens-claims.csv', toCsv(rows, CLAIM_CSV_COLUMNS))
   }
 
-  if (loading) return <p role="status">Loading claims...</p>
+  if (loading) return <BrandLoader variant="section" />
   return (
     <section className="portal-page">
       <header className="portal-page__heading">

@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { useCrisisAlertCount } from '../../context/CrisisAlertCountContext'
 import { useAuthProfile } from '../../context/AuthProfileContext'
 import { supabase } from '../../lib/supabase'
+import { BrandLoader } from '../../components/Brand'
 
 //  Constants
 const ROUTES = {
   EVENTS: '/admin/events', GROUPS: '/admin/groups', RESOURCES: '/admin/resources',
   BROADCAST: '/admin/broadcast', ANALYTICS: '/admin/analytics', CRISIS: '/admin/crisis',
-  USERS: '/admin/users', ADMIN: '/admin', FLOAT: '/admin/float',
+  USERS: '/super-admin/users', ADMIN: '/admin', FLOAT: '/super-admin/float',
 }
 
 const fmtTime = (d) => d ? new Date(d).toLocaleString('en-KE') : '—'
@@ -170,7 +171,7 @@ export default function AdminDashboard() {
     { emoji: '', label: 'Manage Resources', path: ROUTES.RESOURCES, desc: 'Helplines & content' },
     { emoji: '', label: 'Broadcast', path: ROUTES.BROADCAST, desc: 'Send announcements' },
     { emoji: '', label: 'Analytics', path: ROUTES.ANALYTICS, desc: 'Platform insights' },
-    { emoji: '🆘', label: 'Crisis Alerts', path: ROUTES.CRISIS, desc: `${openCrisisAlerts} open` },
+    { emoji: '', label: 'Crisis Alerts', path: ROUTES.CRISIS, desc: `${openCrisisAlerts} open` },
   ]
 
   const getRiskColor = (level) => {
@@ -188,7 +189,7 @@ export default function AdminDashboard() {
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
               {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--text)', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
             </div>
-            <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Loading admin panel...</p>
+            <BrandLoader variant="section" />
           </div>
           <style>{`@keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }`}</style>
         </div>
@@ -260,7 +261,7 @@ export default function AdminDashboard() {
                     <button key={a.path} onClick={() => navigate(a.path)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '16px', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', fontFamily: 'var(--font-body)', transition: 'all 0.2s' }}
                       onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
                       onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'translateY(0)' }}>
-                      <span style={{ fontSize: '24px', flexShrink: 0 }}>{a.emoji}</span>
+                      <span style={{ fontSize: '24px', flexShrink: 0 }}><AppIcon name="alert" size={20} /></span>
                       <div><p style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500, margin: '0 0 2px' }}>{a.label}</p><p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>{a.desc}</p></div>
                     </button>
                   ))}
@@ -337,7 +338,7 @@ export default function AdminDashboard() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h3 style={{ color: 'var(--text)', fontSize: '14px', margin: 0 }}>🆘 Crisis Alerts {openCrisisAlerts > 0 && `(${openCrisisAlerts} open)`}</h3>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => setAlertPolling(!alertPolling)} style={{ padding: '4px 10px', borderRadius: '100px', background: 'transparent', border: `1px solid ${alertPolling ? 'var(--primary)' : 'rgba(255,255,255,0.4)'}`, color: alertPolling ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{alertPolling ? ' Live' : '⏸ Paused'}</button>
+                  <button onClick={() => setAlertPolling(!alertPolling)} style={{ padding: '4px 10px', borderRadius: '100px', background: 'transparent', border: `1px solid ${alertPolling ? 'var(--primary)' : 'rgba(255,255,255,0.4)'}`, color: alertPolling ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{alertPolling ? ' Live' : 'Paused'}</button>
                   <button onClick={() => navigate(ROUTES.CRISIS)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--text)', color: 'var(--text)', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Manage →</button>
                 </div>
               </div>

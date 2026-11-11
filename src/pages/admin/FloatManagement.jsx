@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { METRIC_DEFINITIONS } from '../../lib/metrics'
+import NumberField from '../../components/NumberField'
+import { BrandLoader } from '../../components/Brand'
 
 function FloatStat({ label, value, definition }) {
   return (
@@ -98,7 +100,7 @@ export default function FloatManagement() {
     setSaving(false)
   }
 
-  if (loading) return <p role="status">Loading claims float...</p>
+  if (loading) return <BrandLoader variant="section" />
   return (
     <section className="portal-page">
       <p className="portal-page__eyebrow">Admin operations</p>
@@ -120,7 +122,7 @@ export default function FloatManagement() {
             <option value="outflow">Outflow</option>
           </select>
         </label>
-        <label>Amount (KES)<input type="number" min="0.01" step="0.01" value={form.amount} onChange={(event) => setForm((current) => ({ ...current, amount: event.target.value }))} required /></label>
+        <label>Amount (KES)<NumberField inputMode="decimal" min={0.01} step={0.01} prefix="KES" value={form.amount} onChange={(amount) => setForm((current) => ({ ...current, amount: amount ?? '' }))} required /></label>
         <label>Note<input maxLength={500} value={form.note} onChange={(event) => setForm((current) => ({ ...current, note: event.target.value }))} /></label>
         <button className="btn-primary" disabled={saving}>{saving ? 'Recording...' : 'Record transaction'}</button>
       </form>

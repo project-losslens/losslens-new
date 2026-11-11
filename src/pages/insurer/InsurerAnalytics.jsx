@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { computeInsurerMetrics, formatMetric, METRIC_DEFINITIONS } from '../../lib/metrics'
 import { toCsv, downloadCsv } from '../../lib/csv'
+import { BrandLoader } from '../../components/Brand'
 
 const MIN_COHORT = 10
 
@@ -90,7 +91,7 @@ export default function InsurerAnalytics() {
     ]))
   }
 
-  if (loading) return <p role="status">Loading analytics...</p>
+  if (loading) return <BrandLoader variant="section" />
   return (
     <section className="portal-page">
       <header className="portal-page__heading">

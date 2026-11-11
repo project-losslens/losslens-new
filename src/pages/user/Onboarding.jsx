@@ -1,3 +1,4 @@
+import { BrandLoader } from '../../components/Brand'
 import { useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -283,7 +284,7 @@ export default function Onboarding() {
           </div>
 
           <button className="btn-primary full" onClick={handleFinish} disabled={loading} style={{ padding: '14px', fontSize: '15px' }}>
-            {loading ? <span className="spinner"></span> : `${t('onboarding.start')} →`}
+            {loading ? <BrandLoader variant="inline" showWordmark={false} /> : `${t('onboarding.start')} →`}
           </button>
           {saveError && <p role="alert" style={{ color: '#FFFFFF', fontSize: '13px', marginTop: '12px' }}>{saveError}</p>}
 
@@ -300,7 +301,7 @@ export default function Onboarding() {
     return (
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ width: '32px', height: '32px', border: '3px solid rgba(255,255,255,0.12)', borderTopColor: '#2DD4BF', borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 16px' }}></div>
+          <BrandLoader variant="section" showWordmark={false} />
           <p style={{ color: '#2DD4BF', fontSize: '14px' }}>{t('onboarding.setup')}</p>
         </div>
       </div>
@@ -399,7 +400,6 @@ export default function Onboarding() {
 
       <style>{`
         @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
       `}</style>
     </div>
   )

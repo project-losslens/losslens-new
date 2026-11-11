@@ -1,17 +1,13 @@
+import { toast } from '../../components/ToastProvider'
+import NumberField from '../../components/NumberField'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { BrandLoader } from '../../components/Brand'
 
 //  Constants
 const COVERAGE_TYPES = ['Mental Health', 'Addiction Rehab', 'Inpatient', 'Outpatient', 'Counseling', 'Crisis Intervention', 'General Health', 'Employee Wellness', 'Other']
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--info);color:var(--primary);padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), duration)
-}
 
 export default function InsurancePartners() {
   const navigate = useNavigate()
@@ -89,10 +85,10 @@ export default function InsurancePartners() {
         ? await supabase.from('insurance_partners').update(payload).eq('id', editingPartner.id)
         : await supabase.from('insurance_partners').insert(payload)
       if (saveError) throw saveError
-      showToast(editingPartner ? 'Partner updated!' : 'Partner added!')
+      toast.success(editingPartner ? 'Partner updated!' : 'Partner added!')
       setShowForm(false)
       fetchPartners()
-    } catch (err) { showToast('Save failed: ' + err.message) }
+    } catch (err) { toast.error('Save failed: ' + err.message) }
     finally { setSaving(false) }
   }
 
@@ -104,9 +100,9 @@ export default function InsurancePartners() {
     const { error: toggleError } = await supabase.from('insurance_partners').update({ status: newStatus }).eq('id', id)
     if (toggleError) {
       setPartners(prev => prev.map(p => p.id === id ? { ...p, status: currentStatus } : p))
-      showToast('Update failed.')
+      toast.error('Update failed.')
     } else {
-      showToast(`Partner ${newStatus === 'active' ? 'activated' : 'deactivated'}.`)
+      toast.success(`Partner ${newStatus === 'active' ? 'activated' : 'deactivated'}.`)
     }
     setActionLoading(null)
     setShowToggleConfirm(null)
@@ -116,10 +112,10 @@ export default function InsurancePartners() {
     setDeleting(true)
     const { error: delError } = await supabase.from('insurance_partners').delete().eq('id', id)
     if (delError) {
-      showToast('Delete failed.')
+      toast.error('Delete failed.')
     } else {
       setPartners(prev => prev.filter(p => p.id !== id))
-      showToast('Partner deleted.')
+      toast.success('Partner deleted.')
     }
     setDeleting(false)
     setShowDeleteConfirm(null)
@@ -151,7 +147,7 @@ export default function InsurancePartners() {
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
               {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
             </div>
-            <p style={{ color: 'var(--info)', fontSize: '13px' }}>Loading partners...</p>
+            <BrandLoader variant="section" />
           </div>
         </div>
         <style>{`@keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }`}</style>
@@ -222,7 +218,7 @@ export default function InsurancePartners() {
                     </div>
                     <div>
                       <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Commission % (0-100)</label>
-                      <input type="number" value={form.commission_pct} onChange={e => { setForm(p => ({ ...p, commission_pct: e.target.value })); setFormErrors(p => ({ ...p, commission_pct: '' })) }} style={{ ...inputStyle, borderColor: formErrors.commission_pct ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="e.g. 10" min="0" max="100" step="0.1" />
+                      <NumberField value={form.commission_pct} onChange={(commission_pct) => { setForm((current) => ({ ...current, commission_pct: commission_pct ?? '' })); setFormErrors((current) => ({ ...current, commission_pct: '' })) }} wrapperStyle={{ ...inputStyle, borderColor: formErrors.commission_pct ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="e.g. 10" inputMode="decimal" min={0} max={100} step={0.1} suffix="%" />
                       {formErrors.commission_pct && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{formErrors.commission_pct}</span>}
                     </div>
                   </div>
@@ -253,7 +249,7 @@ export default function InsurancePartners() {
 
           {filteredPartners.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
-              <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>{'\u{1F3E5}'}</span>
+              <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>{<AppIcon name="shield" size={48} style={{display:"block",margin:"0 auto 12px"}} />}</span>
               <p style={{ color: 'var(--primary)', fontSize: '14px' }}>{searchQuery || statusFilter !== 'all' ? 'No partners match your filters.' : 'No insurance partners yet.'}</p>
             </div>
           ) : (
@@ -271,7 +267,7 @@ export default function InsurancePartners() {
                       <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>{p.contact_name}  · {p.contact_email}</p>
                       <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: 0 }}>
                         {p.coverage_type || 'General'}  · {p.commission_pct || 0}% commission
-                        {p.notes && <span style={{ display: 'block', marginTop: '4px', color: 'var(--info)', fontSize: '11px', fontStyle: 'italic' }}>{'\u{1F4DD}'} {p.notes.substring(0, 80)}{p.notes.length > 80 ? '...' : ''}</span>}
+                        {p.notes && <span style={{ display: 'block', marginTop: '4px', color: 'var(--info)', fontSize: '11px', fontStyle: 'italic' }}>{<AppIcon name="document" size={12} />} {p.notes.substring(0, 80)}{p.notes.length > 80 ? '...' : ''}</span>}
                       </p>
                     </div>
                     <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
@@ -295,7 +291,7 @@ export default function InsurancePartners() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowToggleConfirm(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: `1px solid ${showToggleConfirm.status === 'active' ? 'var(--info)' : 'var(--primary)'}`, maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{showToggleConfirm.status === 'active' ? '\u{23F8}' : '\u{25B6}'}</span>
+            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{showToggleConfirm.status === 'active' ? 'Pause' : 'Resume'}</span>
             <h3 style={{ color: showToggleConfirm.status === 'active' ? 'var(--info)' : 'var(--primary)', fontSize: '16px', margin: '0 0 8px' }}>
               {showToggleConfirm.status === 'active' ? 'Deactivate Partner?' : 'Activate Partner?'}
             </h3>
@@ -317,7 +313,7 @@ export default function InsurancePartners() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowDeleteConfirm(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{'\u{1F5D1}'}</span>
+            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{<AppIcon name="close" size={36} style={{display:"block",margin:"0 auto 12px"}} />}</span>
             <h3 style={{ color: 'var(--text)', fontSize: '16px', margin: '0 0 8px' }}>Delete Partner?</h3>
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
               Permanently delete <strong style={{ color: 'var(--primary)' }}>"{showDeleteConfirm.company_name}"</strong>? This cannot be undone.

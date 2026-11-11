@@ -1,6 +1,7 @@
+import { BrandLoader } from '../../components/Brand'
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { supabase } from '../../lib/supabase'
+import { resetAuthBeforeSignIn, supabase } from '../../lib/supabase'
 import { primaryHelpline } from '../../config/helplines'
 import { PublicLayout } from '../../layouts/PublicLayout'
 import AppIcon from '../../components/AppIcon'
@@ -148,6 +149,7 @@ function Signup() {
     setError('')
     setGoogleLoading(true)
     try {
+      await resetAuthBeforeSignIn(true)
       const options = { redirectTo: `${window.location.origin}/auth/callback` }
       if (signupType === 'company' && companyValidation?.valid) {
         options.data = { plan_type: 'company', company_code: companyCode }
@@ -156,8 +158,13 @@ function Signup() {
         provider: 'google',
         options,
       })
-      if (googleError) { setError(t('signup.googleError')); setGoogleLoading(false) }
-    } catch { setGoogleLoading(false) }
+      if (googleError) setError(t('signup.googleError'))
+    } catch (signupError) {
+      console.error('Google sign-up failed:', signupError)
+      setError(t('signup.googleError'))
+    } finally {
+      setGoogleLoading(false)
+    }
   }
 
   const validateForm = () => {
@@ -310,7 +317,7 @@ function Signup() {
             gap: '10px', marginBottom: '1.25rem', fontFamily: 'var(--font-body)',
             fontWeight: 500, opacity: googleLoading ? 0.7 : 1
           }}>
-            {googleLoading ? <span className="spinner" /> : <><GoogleIcon /> {t('signup.google')}</>}
+            {googleLoading ? <BrandLoader variant="inline" showWordmark={false} /> : <><GoogleIcon /> {t('signup.google')}</>}
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.25rem' }}>
@@ -436,7 +443,7 @@ function Signup() {
             </div>
 
             <button className="btn-primary full" type="submit" disabled={!canSubmit}>
-              {loading ? <span className="spinner" /> : signupType === 'company' ? t('signup.submitCompany') : t('signup.submitIndividual')}
+              {loading ? <BrandLoader variant="inline" showWordmark={false} /> : signupType === 'company' ? t('signup.submitCompany') : t('signup.submitIndividual')}
             </button>
           </form>
 

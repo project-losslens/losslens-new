@@ -8,11 +8,9 @@ No TypeScript.
 
 - `npm run dev` — Vite dev server (frontend only; does NOT serve `api/`)
 - `npm run build` — primary verification; must pass
-- `npm test` — `node --test` unit tests + encoding check
-- `npm run test:e2e` — Playwright smoke tests (needs `npx playwright install chromium` once)
-- `npm run lighthouse` — Lighthouse a11y/perf report against `vite preview` on :4173
 - `npm run lint` — eslint; ~200 pre-existing errors/17 warnings is the
   baseline, do not treat as regressions
+- `npm run preview` — preview the production build
 - `vercel dev` — serves `api/` routes locally
 - CLI: `npx supabase` (devDependency)
 
@@ -20,9 +18,11 @@ No TypeScript.
 
 - Entry: `index.html` → `src/main.jsx` → `src/App.jsx` (all routes).
 - Roles on `profiles.role`: `user | admin | super_admin | therapist | insurer`.
-  Guards: `RequireAuth` / `RequireElevated` in `src/components/RouteGuards.jsx`.
-- Supabase singleton: `src/lib/supabase.js` (remember-me aware;
-  `createSupabaseClient(persist)` exported for Login's session-only mode).
+  `RequireAuth` and `canAccessPath` enforce the route map. Elevated pages use
+  `/super-admin/*`; therapists and insurers cannot enter the user app.
+- Supabase singleton: `src/lib/supabase.js` always persists to localStorage.
+  Session-only login uses a sessionStorage marker and clears local auth on the
+  next app start if that marker is missing.
 - AI flow: `src/lib/groq.js#askGroq` → `POST /api/chat` (JWT) → Groq →
   `chat_history`. Real prompt: `BASE_SYSTEM_PROMPT` in `api/chat.js`.
   Consent gate: `profiles.ai_data_consent_at`, enforced server-side.
@@ -40,8 +40,9 @@ Currently: `src/lib/crisisDetection.js` → `src/config/helplines.js`,
 
 ## Database
 
-Six migrations in `supabase/migrations/` (`20261110000001`–`06`),
-idempotent, applied in order. Full reference + verify queries:
+Six baseline migrations in `supabase/migrations/` (`20261110000001`–`06`),
+applied in order, followed by the manual Pass 2 SQL file documented in
+`docs/MIGRATION_NOTES.md`. Full reference + verify queries:
 `docs/DATABASE.md`. RLS on every table; helpers `is_admin()`,
 `is_super_admin()`, `is_active_user()`, `is_recently_authenticated()`.
 `enforce_profile_privilege_updates` trigger blocks non-super-admin writes to

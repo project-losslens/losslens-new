@@ -1,3 +1,4 @@
+import { BrandLoader } from '../../components/Brand'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { mailtoHref } from '../../config/site'
@@ -205,7 +206,7 @@ export default function Pricing() {
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '14px', fontSize: '14px' }}
                   aria-label={`${plan.cta} — ${plan.name} plan`}
                 >
-                  {loading === plan.id ? <span className="spinner"></span> : plan.cta}
+                  {loading === plan.id ? <BrandLoader variant="inline" showWordmark={false} /> : plan.cta}
                 </button>
               </article>
             ))}
@@ -270,7 +271,7 @@ export default function Pricing() {
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '14px', fontSize: '14px' }}
                 aria-label="Join with company code"
               >
-                {loading === 'company' ? <span className="spinner"></span> : companyPlan.cta}
+                {loading === 'company' ? <BrandLoader variant="inline" showWordmark={false} /> : companyPlan.cta}
               </button>
             </article>
 

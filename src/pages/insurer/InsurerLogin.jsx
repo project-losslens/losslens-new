@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { supabase } from '../../lib/supabase'
+import { clearAuthStorage, resetAuthBeforeSignIn, supabase } from '../../lib/supabase'
 import { PublicLayout } from '../../layouts/PublicLayout'
+import { useAuthProfile } from '../../context/AuthProfileContext'
 
 export default function InsurerLogin() {
   const navigate = useNavigate()
+  const { refreshProfile } = useAuthProfile()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -14,31 +16,29 @@ export default function InsurerLogin() {
     event.preventDefault()
     setLoading(true)
     setError('')
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
-    if (signInError) {
+    try {
+      await resetAuthBeforeSignIn(true)
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+      if (signInError) throw signInError
+      const profile = await refreshProfile(data.user)
+
+      if (!profile || (profile.role !== 'insurer' && profile.role !== 'super_admin')) {
+        const { error: signOutError } = await supabase.auth.signOut({ scope: 'local' })
+        if (signOutError) console.error('Could not sign out non-insurer account:', signOutError)
+        clearAuthStorage()
+        setError(profile
+          ? 'This account does not have insurer access. Use the correct portal or contact your administrator.'
+          : 'We could not verify your partner account. Please try again.')
+        return
+      }
+
+      navigate(profile.role === 'super_admin' ? '/admin' : '/insurer', { replace: true })
+    } catch (signInError) {
       console.error('Insurer sign-in failed:', signInError)
       setError('Unable to sign in. Check your credentials or contact your LossLens administrator.')
+    } finally {
       setLoading(false)
-      return
     }
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', data.user.id)
-      .single()
-
-    if (profileError || (profile?.role !== 'insurer' && profile?.role !== 'super_admin')) {
-      if (profileError) console.error('Insurer profile lookup failed:', profileError)
-      const { error: signOutError } = await supabase.auth.signOut()
-      if (signOutError) console.error('Could not sign out non-insurer account:', signOutError)
-      setError(profileError
-        ? 'We could not verify your partner account. Please try again.'
-        : 'This account does not have insurer access. Use the correct portal or contact your administrator.')
-      setLoading(false)
-      return
-    }
-
-    navigate(profile?.role === 'super_admin' ? '/admin' : '/insurer', { replace: true })
   }
 
   return (

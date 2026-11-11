@@ -1,3 +1,4 @@
+import { BrandLoader } from '../../components/Brand'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -166,12 +167,7 @@ export default function FamilyJoin() {
   //  Loading
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <AppIcon name="clock" size={40} style={{ display: 'block', margin: '0 auto 12px', color: '#7DBDEE' }} />
-          <p style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '18px' }}>Loading...</p>
-        </div>
-      </div>
+      <BrandLoader />
     )
   }
 

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
+import { BrandLoader } from '../../components/Brand'
 
 //  Constants
 const LOG_LIMIT = 300
@@ -155,7 +156,7 @@ export default function AuditLogs() {
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
               {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
             </div>
-            <p style={{ color: 'var(--info)', fontSize: '13px' }}>Loading audit logs...</p>
+            <BrandLoader variant="section" />
           </div>
         </div>
         <style>{`@keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }`}</style>

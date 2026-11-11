@@ -1,10 +1,12 @@
 import { NavLink } from 'react-router-dom'
 import AppIcon from './AppIcon'
+import { useI18n } from '../i18n'
 
-function Sidebar({ items, groups, brand, isMobile, drawerOpen, desktopOpen, onNavigate, onSignOut, isSuperAdmin, elevatedUnlocked }) {
+function Sidebar({ items, groups, brand, isMobile, drawerOpen, desktopOpen, onNavigate, onSignOut }) {
+  const { t } = useI18n()
   const expanded = isMobile ? drawerOpen : desktopOpen
   const normalItems = items.filter((item) => !item.section)
-  const elevatedItems = items.filter((item) => item.section === 'elevated')
+  const sections = [...new Set(items.filter((item) => item.section).map((item) => item.section))]
 
   const renderLink = (item) => (
     <NavLink
@@ -18,7 +20,6 @@ function Sidebar({ items, groups, brand, isMobile, drawerOpen, desktopOpen, onNa
       <AppIcon name={item.icon} size={19} />
       <span>{item.label}</span>
       {item.badge && <span className="sidebar__badge" aria-label={`${item.badge} open alerts`}>{item.badge > 99 ? '99+' : item.badge}</span>}
-      {item.section === 'elevated' && !elevatedUnlocked && <AppIcon name="shield" size={15} className="sidebar__lock" />}
     </NavLink>
   )
 
@@ -46,12 +47,12 @@ function Sidebar({ items, groups, brand, isMobile, drawerOpen, desktopOpen, onNa
             <>
               {brand.includes('Admin') && <h2 className="sidebar__section-title">Operations</h2>}
               <ul>{normalItems.map((item) => <li key={item.to}>{renderLink(item)}</li>)}</ul>
-              {isSuperAdmin && elevatedItems.length > 0 && (
-                <section className="sidebar__section" aria-label="Elevated">
-                  <h2>Elevated Access</h2>
-                  <ul>{elevatedItems.map((item) => <li key={item.to}>{renderLink(item)}</li>)}</ul>
+              {sections.map((section) => (
+                <section key={section} className="sidebar__section" aria-label={section === 'super-admin' ? t('nav.superAdminSection') : section}>
+                  <h2>{section === 'super-admin' ? t('nav.superAdminSection') : section}</h2>
+                  <ul>{items.filter((item) => item.section === section).map((item) => <li key={item.to}>{renderLink(item)}</li>)}</ul>
                 </section>
-              )}
+              ))}
             </>
           )}
         </nav>

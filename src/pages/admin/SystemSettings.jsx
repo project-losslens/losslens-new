@@ -1,6 +1,9 @@
+import NumberField from '../../components/NumberField'
+import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { BrandLoader } from '../../components/Brand'
 
 //  Constants
 const SETTINGS_KEYS = {
@@ -63,13 +66,6 @@ const SECTION_TABS = [
   { id: 'integrations', label: 'Integrations', icon: '' },
 ]
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--info);color:var(--primary);padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), duration)
-}
 
 export default function SystemSettings() {
   const navigate = useNavigate()
@@ -78,15 +74,9 @@ export default function SystemSettings() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState(null)
   const [activeSection, setActiveSection] = useState('general')
   const [showConfirm, setShowConfirm] = useState(null)
   const [validationErrors, setValidationErrors] = useState({})
-
-  const displayToast = useCallback((msg, type = 'success') => {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 3000)
-  }, [])
 
   //  Check for unsaved changes
   const hasUnsavedChanges = useMemo(() => {
@@ -141,7 +131,7 @@ export default function SystemSettings() {
   }
 
   const saveSettings = async () => {
-    if (!validateAll()) { displayToast('Fix validation errors before saving.', 'error'); return }
+    if (!validateAll()) { toast.error('Fix validation errors before saving.'); return }
 
     //  Confirmation for critical changes
     if (settings[SETTINGS_KEYS.MAINTENANCE_MODE] && !originalSettings?.[SETTINGS_KEYS.MAINTENANCE_MODE]) {
@@ -167,8 +157,8 @@ export default function SystemSettings() {
       const { error: upsertError } = await supabase.from('system_settings').upsert(upserts, { onConflict: 'key' })
       if (upsertError) throw upsertError
       setOriginalSettings({ ...settings })
-      displayToast('Settings saved successfully!')
-    } catch (err) { displayToast('Failed to save settings.', 'error') }
+      toast.success('Settings saved successfully!')
+    } catch (err) { toast.error('Failed to save settings.') }
     setSaving(false)
   }
 
@@ -180,7 +170,7 @@ export default function SystemSettings() {
   const resetToDefault = (key) => {
     if (DEFAULTS[key] !== undefined) {
       update(key, DEFAULTS[key])
-      displayToast('Reset to default.')
+      toast.success('Reset to default.')
     }
   }
 
@@ -206,7 +196,7 @@ export default function SystemSettings() {
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
               {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
             </div>
-            <p style={{ color: 'var(--info)', fontSize: '13px' }}>Loading settings...</p>
+            <BrandLoader variant="section" />
           </div>
         </div>
         <style>{`@keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }`}</style>
@@ -244,10 +234,6 @@ export default function SystemSettings() {
             {saving ? 'Saving...' : 'Save All Settings'}
           </button>
         </div>
-
-        {toast && (
-          <div style={{ position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', background: toast.type === 'error' ? 'rgba(255,255,255,0.08)' : 'var(--info)', color: toast.type === 'error' ? 'var(--text)' : 'var(--primary)', padding: '10px 20px', borderRadius: '100px', fontSize: '13px', zIndex: 'var(--z-toast)', whiteSpace: 'nowrap' }}>{toast.msg}</div>
-        )}
 
         <div style={{ padding: '1.5rem', maxWidth: '900px', margin: '0 auto' }}>
           {/* Section Tabs */}
@@ -299,9 +285,9 @@ export default function SystemSettings() {
                     ].map(([key, label]) => (
                       <div key={key}>
                         <label style={{ color: 'var(--primary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>{label}</label>
-                        <input type="number" value={settings[key]} onChange={e => update(key, parseInt(e.target.value) || DEFAULTS[key])}
-                          style={{ ...inputStyle, borderColor: validationErrors[key] ? 'var(--text)' : 'rgba(255,255,255,0.12)' }}
-                          min={VALIDATION[key]?.min} max={VALIDATION[key]?.max} />
+                        <NumberField value={settings[key]} onChange={(value) => update(key, value ?? DEFAULTS[key])}
+                          wrapperStyle={{ ...inputStyle, borderColor: validationErrors[key] ? 'var(--text)' : 'rgba(255,255,255,0.12)' }}
+                          inputMode="numeric" min={VALIDATION[key]?.min} max={VALIDATION[key]?.max} step={1} />
                         {validationErrors[key] && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{validationErrors[key]}</span>}
                       </div>
                     ))}
@@ -327,14 +313,14 @@ export default function SystemSettings() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginTop: '14px' }}>
                   <div>
                     <label style={{ color: 'var(--primary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Max Supporters Per User</label>
-                    <input type="number" value={settings.max_supporters_per_user} onChange={e => update(SETTINGS_KEYS.MAX_SUPPORTERS_PER_USER, parseInt(e.target.value) || DEFAULTS[SETTINGS_KEYS.MAX_SUPPORTERS_PER_USER])}
-                      style={{ ...inputStyle, borderColor: validationErrors[SETTINGS_KEYS.MAX_SUPPORTERS_PER_USER] ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} min="1" max="10" />
+                    <NumberField value={settings.max_supporters_per_user} onChange={(value) => update(SETTINGS_KEYS.MAX_SUPPORTERS_PER_USER, value ?? DEFAULTS[SETTINGS_KEYS.MAX_SUPPORTERS_PER_USER])}
+                      wrapperStyle={{ ...inputStyle, borderColor: validationErrors[SETTINGS_KEYS.MAX_SUPPORTERS_PER_USER] ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} inputMode="numeric" min={1} max={10} step={1} />
                     {validationErrors[SETTINGS_KEYS.MAX_SUPPORTERS_PER_USER] && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{validationErrors[SETTINGS_KEYS.MAX_SUPPORTERS_PER_USER]}</span>}
                   </div>
                   <div>
                     <label style={{ color: 'var(--primary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Message Retention (days)</label>
-                    <input type="number" value={settings.message_retention_days} onChange={e => update(SETTINGS_KEYS.MESSAGE_RETENTION_DAYS, parseInt(e.target.value) || DEFAULTS[SETTINGS_KEYS.MESSAGE_RETENTION_DAYS])}
-                      style={{ ...inputStyle, borderColor: validationErrors[SETTINGS_KEYS.MESSAGE_RETENTION_DAYS] ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} min="7" max="365" />
+                    <NumberField value={settings.message_retention_days} onChange={(value) => update(SETTINGS_KEYS.MESSAGE_RETENTION_DAYS, value ?? DEFAULTS[SETTINGS_KEYS.MESSAGE_RETENTION_DAYS])}
+                      wrapperStyle={{ ...inputStyle, borderColor: validationErrors[SETTINGS_KEYS.MESSAGE_RETENTION_DAYS] ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} inputMode="numeric" min={7} max={365} step={1} />
                     {validationErrors[SETTINGS_KEYS.MESSAGE_RETENTION_DAYS] && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{validationErrors[SETTINGS_KEYS.MESSAGE_RETENTION_DAYS]}</span>}
                     <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '4px' }}>Messages older than this are automatically deleted.</p>
                   </div>
@@ -349,14 +335,14 @@ export default function SystemSettings() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
                   <div>
                     <label style={{ color: 'var(--primary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Premium Price (KES/month)</label>
-                    <input type="number" value={settings.premium_price_kes} onChange={e => update(SETTINGS_KEYS.PREMIUM_PRICE_KES, parseInt(e.target.value) || DEFAULTS[SETTINGS_KEYS.PREMIUM_PRICE_KES])}
-                      style={{ ...inputStyle, borderColor: validationErrors[SETTINGS_KEYS.PREMIUM_PRICE_KES] ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} min="100" />
+                    <NumberField value={settings.premium_price_kes} onChange={(value) => update(SETTINGS_KEYS.PREMIUM_PRICE_KES, value ?? DEFAULTS[SETTINGS_KEYS.PREMIUM_PRICE_KES])}
+                      wrapperStyle={{ ...inputStyle, borderColor: validationErrors[SETTINGS_KEYS.PREMIUM_PRICE_KES] ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} inputMode="numeric" min={100} step={1} prefix="KES" />
                     {validationErrors[SETTINGS_KEYS.PREMIUM_PRICE_KES] && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{validationErrors[SETTINGS_KEYS.PREMIUM_PRICE_KES]}</span>}
                   </div>
                   <div>
                     <label style={{ color: 'var(--primary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Free Plan Diary Limit</label>
-                    <input type="number" value={settings.free_plan_diary_limit} onChange={e => update(SETTINGS_KEYS.FREE_PLAN_DIARY_LIMIT, parseInt(e.target.value) || DEFAULTS[SETTINGS_KEYS.FREE_PLAN_DIARY_LIMIT])}
-                      style={{ ...inputStyle, borderColor: validationErrors[SETTINGS_KEYS.FREE_PLAN_DIARY_LIMIT] ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} min="1" max="30" />
+                    <NumberField value={settings.free_plan_diary_limit} onChange={(value) => update(SETTINGS_KEYS.FREE_PLAN_DIARY_LIMIT, value ?? DEFAULTS[SETTINGS_KEYS.FREE_PLAN_DIARY_LIMIT])}
+                      wrapperStyle={{ ...inputStyle, borderColor: validationErrors[SETTINGS_KEYS.FREE_PLAN_DIARY_LIMIT] ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} inputMode="numeric" min={1} max={30} step={1} />
                     {validationErrors[SETTINGS_KEYS.FREE_PLAN_DIARY_LIMIT] && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{validationErrors[SETTINGS_KEYS.FREE_PLAN_DIARY_LIMIT]}</span>}
                   </div>
                 </div>
@@ -382,7 +368,7 @@ export default function SystemSettings() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowConfirm(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--text)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>{'\u{26A0}'}</span>
+            <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>{<AppIcon name="alert" size={40} style={{display:"block",margin:"0 auto 12px"}} />}</span>
             <h3 style={{ color: 'var(--text)', fontSize: '16px', margin: '0 0 8px' }}>Enable Maintenance Mode?</h3>
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
               All non-admin users will be locked out of the platform immediately.
@@ -399,7 +385,7 @@ export default function SystemSettings() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowConfirm(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--info)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>{'\u{1F6AB}'}</span>
+            <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>{<AppIcon name="shield" size={40} style={{display:"block",margin:"0 auto 12px"}} />}</span>
             <h3 style={{ color: 'var(--info)', fontSize: '16px', margin: '0 0 8px' }}>Disable New Signups?</h3>
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px', lineHeight: '1.6' }}>
               New users will not be able to create accounts. Existing users can still log in.

@@ -1,7 +1,9 @@
+import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { supabase } from '../../lib/supabase'
 import { ensureCircleHash } from '../../lib/storage'
 import AppIcon from '../../components/AppIcon'
+import { BrandLoader } from '../../components/Brand'
 
 //  Constants
 const MAX_ACTIVE_CHATS = 3
@@ -41,13 +43,6 @@ function generateAnonymousName(userId, roomId) {
 function containsBlockedContent(message) { return BLOCKED_PATTERNS.some(p => p.test(message)) }
 function containsCrisisContent(message) { return CRISIS_KEYWORDS.some(w => message.toLowerCase().includes(w)) }
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), duration)
-}
 
 export default function Whispers() {
   const [identity, setIdentity] = useState(null)
@@ -157,8 +152,8 @@ export default function Whispers() {
 
   const sendRequest = async () => {
     if (!identity) return
-    if (matches.filter(m => m.status === 'pending' && m.user1_hash === identity.hash).length >= MAX_PENDING_REQUESTS) { showToast('You have too many pending requests. Cancel one first.'); return }
-    if (matches.filter(m => m.status === 'active' && m.user2_hash).length >= MAX_ACTIVE_CHATS) { showToast('Maximum active chats reached. End one first.'); return }
+    if (matches.filter(m => m.status === 'pending' && m.user1_hash === identity.hash).length >= MAX_PENDING_REQUESTS) { toast.error('You have too many pending requests. Cancel one first.'); return }
+    if (matches.filter(m => m.status === 'active' && m.user2_hash).length >= MAX_ACTIVE_CHATS) { toast.error('Maximum active chats reached. End one first.'); return }
     setSendingRequest(true)
     try {
       await ensureCircleHash()
@@ -169,9 +164,9 @@ export default function Whispers() {
       if (error) throw error
       const match = Array.isArray(data) ? data[0] : data
       setMatches(prev => [match, ...prev])
-      showToast(' Request sent!', 3000)
+      toast.success('Request sent!', 3000)
       setActiveTab('sent')
-    } catch (err) { showToast('Failed to send.', 2000) }
+    } catch (err) { toast.error('Failed to send.', 2000) }
     setSendingRequest(false)
   }
 
@@ -183,14 +178,14 @@ export default function Whispers() {
         p_accept: true,
       })
       if (error) {
-        if (/already taken/i.test(error.message || '')) { showToast('This request was already taken.'); fetchMatches(identity.hash); return }
+        if (/already taken/i.test(error.message || '')) { toast.error('This request was already taken.'); fetchMatches(identity.hash); return }
         throw error
       }
       const match = Array.isArray(data) ? data[0] : data
       setMatches(prev => prev.map(m => m.id === matchId ? match : m))
       setActiveMatch(match)
-      showToast(' Chat opened!', 3000)
-    } catch (err) { showToast('Failed to accept.', 2000) }
+      toast.success('Chat opened!', 3000)
+    } catch (err) { toast.error('Failed to accept.', 2000) }
   }
 
   const rejectRequest = async (matchId) => {
@@ -201,24 +196,24 @@ export default function Whispers() {
         p_accept: false,
       })
       if (error) throw error
-      showToast('Declined.', 2000)
+      toast.success('Declined.', 2000)
       fetchMatches(identity.hash)
-    } catch (err) { showToast('Failed.', 2000) }
+    } catch (err) { toast.error('Failed.', 2000) }
   }
 
   const cancelRequest = async (matchId) => {
     //  Only cancel if still pending
     const match = matches.find(m => m.id === matchId)
-    if (match?.status !== 'pending') { showToast('Cannot cancel this request.'); return }
+    if (match?.status !== 'pending') { toast.error('Cannot cancel this request.'); return }
     try {
       const { error } = await supabase.rpc('whispers_respond', {
         p_match_id: matchId,
         p_accept: false,
       })
       if (error) throw error
-      showToast('Cancelled.', 2000)
+      toast.success('Cancelled.', 2000)
       fetchMatches(identity.hash)
-    } catch (err) { showToast('Failed.', 2000) }
+    } catch (err) { toast.error('Failed.', 2000) }
   }
 
   const handleSend = async (matchId) => {
@@ -227,16 +222,16 @@ export default function Whispers() {
 
     //  Content moderation
     if (containsCrisisContent(text)) {
-      showToast('🆘 If you or someone is in crisis, please call Befrienders Kenya: 0800 722 030', 5000)
+      toast.info('🆘 If you or someone is in crisis, please call Befrienders Kenya: 0800 722 030', 5000)
     }
-    if (containsBlockedContent(text)) { showToast(' Please don\'t share personal info.', 4000); return }
+    if (containsBlockedContent(text)) { toast.error('Please don\'t share personal info.', 4000); return }
 
     //  Rate limiting
     const now = Date.now()
-    if (now - lastSendTime < MESSAGE_COOLDOWN_MS) { showToast('Slow down!', 1500); return }
+    if (now - lastSendTime < MESSAGE_COOLDOWN_MS) { toast.error('Slow down!', 1500); return }
     setLastSendTime(now)
 
-    if (text.length > MAX_MESSAGE_LENGTH) { showToast(`Message too long. Max ${MAX_MESSAGE_LENGTH} characters.`, 2000); return }
+    if (text.length > MAX_MESSAGE_LENGTH) { toast.error(`Message too long. Max ${MAX_MESSAGE_LENGTH} characters.`, 2000); return }
 
     setSending(true)
     const tempId = `t_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
@@ -255,7 +250,7 @@ export default function Whispers() {
       setMessages(prev => prev.map(m => m.id === tempId ? { ...data, sending: false } : m))
     } catch (err) {
       setMessages(prev => prev.filter(m => m.id !== tempId))
-      showToast('Failed to send', 2000)
+      toast.error('Failed to send', 2000)
     }
     setSending(false)
   }
@@ -271,12 +266,12 @@ export default function Whispers() {
         reporter_hash: identity.hash,
         reason: reportReason.trim(),
       })
-      showToast('Report submitted. Chat ended.', 3000)
+      toast.success('Report submitted. Chat ended.', 3000)
       setShowReportModal(false)
       setReportReason('')
       setActiveMatch(null)
       setMessages([])
-    } catch (err) { showToast('Failed to submit report.', 2000) }
+    } catch (err) { toast.error('Failed to submit report.', 2000) }
     setSubmittingReport(false)
   }
 
@@ -289,9 +284,9 @@ export default function Whispers() {
         p_feedback: feedback || null,
       })
       if (error) throw error
-      showToast('Thank you ', 3000)
+      toast.success('Thank you ', 3000)
       fetchMatches(identity.hash)
-    } catch (err) { showToast('Failed to submit.', 2000) }
+    } catch (err) { toast.error('Failed to submit.', 2000) }
     setShowFeedback(false)
     setActiveMatch(null)
     setMessages([])
@@ -321,7 +316,7 @@ export default function Whispers() {
 
   if (!identity) return (
     <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ display: 'flex', gap: '8px' }}>{[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}</div>
+      <BrandLoader variant="section" />
     </div>
   )
 
@@ -508,7 +503,6 @@ export default function Whispers() {
         )}
       </div>
       <style>{`
-        @keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }
         @media (max-width: 768px) { .main-content { margin-left: 0 !important; } }
       `}</style>
     </div>

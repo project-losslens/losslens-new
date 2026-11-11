@@ -1,5 +1,6 @@
 import { Component } from 'react'
 import AppIcon from './AppIcon'
+import { BrandLoader } from './Brand'
 
 // Route-level safety net. Wrap <Routes> (or a layout) so a render error in any
 // page shows a calm fallback with a retry instead of a blank screen.
@@ -59,16 +60,10 @@ export function ErrorState({ message = 'Could not load this right now.', onRetry
   )
 }
 
-// Pulsing placeholder block for loading states. Respects reduced motion via CSS.
 export function Skeleton({ width = '100%', height = '16px', style }) {
-  return <div className="skeleton" style={{ width, height, ...style }} aria-hidden="true" />
+  return <BrandLoader variant="section" showWordmark={false} style={{ width, minHeight: height, ...style }} />
 }
 
-export function LoadingState({ label = 'Loading…' }) {
-  return (
-    <div className="state-wrap" aria-live="polite">
-      <div className="spinner" aria-hidden="true" />
-      <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', marginTop: '12px' }}>{label}</p>
-    </div>
-  )
+export function LoadingState({ label }) {
+  return <BrandLoader variant="section" label={label} />
 }

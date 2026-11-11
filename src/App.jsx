@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { BrandLoader } from './components/Brand'
-import { PublicOnly, RequireAuth, RequireElevated } from './components/RouteGuards'
+import { PublicOnly, RequireAuth } from './components/RouteGuards'
 import { CrisisAlertCountProvider } from './context/CrisisAlertCountContext'
 import { ErrorBoundary } from './components/Feedback'
 
@@ -130,19 +130,38 @@ function App() {
             <Route path="/admin/analytics" element={<UserAnalytics />} />
             <Route path="/admin/broadcast" element={<Broadcast />} />
             <Route path="/admin/crisis" element={<CrisisAlerts />} />
-            <Route element={<RequireElevated />}>
-              <Route path="/admin/users" element={<UserManagement />} />
-              <Route path="/admin/insurance" element={<InsurancePartners />} />
-              <Route path="/admin/b2b" element={<B2BClients />} />
-              <Route path="/admin/grants" element={<GrantApplications />} />
-              <Route path="/admin/chats" element={<ChatViewer />} />
-              <Route path="/admin/logs" element={<AuditLogs />} />
-              <Route path="/admin/settings" element={<SystemSettings />} />
-              <Route path="/admin/therapists" element={<TherapistManagement />} />
-              <Route path="/admin/insurers" element={<InsurerManagement />} />
-              <Route path="/admin/float" element={<FloatManagement />} />
-            </Route>
           </Route>
+        </Route>
+        <Route element={<RequireAuth role="super_admin" />}>
+          <Route element={<CrisisAlertCountProvider><AppShell admin /></CrisisAlertCountProvider>}>
+            <Route path="/super-admin" element={<Navigate to="/super-admin/users" replace />} />
+            <Route path="/super-admin/users" element={<UserManagement />} />
+            <Route path="/super-admin/insurance" element={<InsurancePartners />} />
+            <Route path="/super-admin/b2b" element={<B2BClients />} />
+            <Route path="/super-admin/grants" element={<GrantApplications />} />
+            <Route path="/super-admin/chats" element={<ChatViewer />} />
+            <Route path="/super-admin/logs" element={<AuditLogs />} />
+            <Route path="/super-admin/settings" element={<SystemSettings />} />
+            <Route path="/super-admin/therapists" element={<TherapistManagement />} />
+            <Route path="/super-admin/insurers" element={<InsurerManagement />} />
+            <Route path="/super-admin/float" element={<FloatManagement />} />
+          </Route>
+          <Route path="/admin/users" element={<Navigate to="/super-admin/users" replace />} />
+          <Route path="/admin/insurance" element={<Navigate to="/super-admin/insurance" replace />} />
+          <Route path="/admin/b2b" element={<Navigate to="/super-admin/b2b" replace />} />
+          <Route path="/admin/grants" element={<Navigate to="/super-admin/grants" replace />} />
+          <Route path="/admin/chats" element={<Navigate to="/super-admin/chats" replace />} />
+          <Route path="/admin/logs" element={<Navigate to="/super-admin/logs" replace />} />
+          <Route path="/admin/settings" element={<Navigate to="/super-admin/settings" replace />} />
+          <Route path="/admin/therapists" element={<Navigate to="/super-admin/therapists" replace />} />
+          <Route path="/admin/insurers" element={<Navigate to="/super-admin/insurers" replace />} />
+          <Route path="/admin/float" element={<Navigate to="/super-admin/float" replace />} />
+        </Route>
+        <Route element={<RequireAuth />}>
+          <Route path="/admin/*" element={<NotFound />} />
+          <Route path="/super-admin/*" element={<NotFound />} />
+          <Route path="/therapist/*" element={<NotFound />} />
+          <Route path="/insurer/*" element={<NotFound />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

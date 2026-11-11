@@ -1,8 +1,10 @@
+import { toast } from '../../components/ToastProvider'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { readAndMigrateStorageItem } from '../../lib/storage'
 import AppIcon from '../../components/AppIcon'
+import { BrandLoader } from '../../components/Brand'
 
 //  Constants
 const MAX_RECORDING_DURATION = 600 // 10 minutes
@@ -10,13 +12,6 @@ const MAX_WRITTEN_LENGTH = 2000
 const STORAGE_PATH_PENDING = 'pending'
 const STORAGE_PATH_WRITTEN = 'written'
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), duration)
-}
 
 export default function LossLensPactPage() {
   const navigate = useNavigate()
@@ -127,7 +122,7 @@ export default function LossLensPactPage() {
   //  Guard against double-click
   const startRecording = async () => {
     if (recording || streamRef.current || mediaRecorderRef.current?.state === 'recording') {
-      showToast('Already recording')
+      toast.info('Already recording')
       return
     }
     try {
@@ -140,7 +135,7 @@ export default function LossLensPactPage() {
 
       mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data) }
       mediaRecorder.onstop = () => handleRecordingStop()
-      mediaRecorder.onerror = () => { showToast('Recording error.'); stopRecording(); cleanup() }
+      mediaRecorder.onerror = () => { toast.error('Recording error.'); stopRecording(); cleanup() }
 
       mediaRecorder.start(1000)
       setRecording(true)
@@ -156,7 +151,7 @@ export default function LossLensPactPage() {
         })
       }, 1000)
     } catch (err) {
-      showToast('Microphone access denied.')
+      toast.error('Microphone access denied.')
       console.error('Recording start error:', err)
     }
   }
@@ -195,7 +190,7 @@ export default function LossLensPactPage() {
           duration_seconds: recordingTime,
           prompt: prompts[activePrompt].q,
         })
-        showToast(' Pact saved!')
+        toast.success('Pact saved!')
       } else {
         throw error
       }
@@ -216,7 +211,7 @@ export default function LossLensPactPage() {
             date: new Date().toISOString(),
           })
           try { localStorage.setItem(localKey, JSON.stringify(localPacts)) } catch {}
-          showToast('Saved on this device.')
+          toast.success('Saved on this device.')
         }
       } catch {}
     }
@@ -264,7 +259,7 @@ export default function LossLensPactPage() {
     }
     setDeleteConfirm(null)
     fetchPacts()
-    showToast('Pact deleted.', 2000)
+    toast.success('Pact deleted.', 2000)
   }
 
   //  Fixed incrementPlayCount using RPC
@@ -306,12 +301,12 @@ export default function LossLensPactPage() {
         play_count: 0,
       })
       if (error) throw error
-      showToast(' Written pact saved!')
+      toast.success('Written pact saved!')
       setWrittenPact('')
       setPactTitle('')
       setShowWritten(false)
       fetchPacts()
-    } catch (err) { showToast('Failed to save. Try again.', 2000) }
+    } catch (err) { toast.error('Failed to save. Try again.', 2000) }
   }
 
   const formatTime = (s) => {
@@ -322,7 +317,7 @@ export default function LossLensPactPage() {
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ display: 'flex', gap: '8px' }}>{[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}</div>
+      <BrandLoader variant="section" />
     </div>
   )
 
@@ -536,7 +531,6 @@ export default function LossLensPactPage() {
       <style>{`
         @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
         @keyframes voiceBar { 0%{height:5px} 100%{height:30px} }
-        @keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }
         @media (prefers-reduced-motion: reduce) { *,*::before,*::after{animation-duration:0.01ms!important} }
         @media (max-width: 768px) { .main-content { margin-left: 0 !important; } }
       `}</style>

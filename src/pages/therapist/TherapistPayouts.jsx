@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuthProfile } from '../../context/AuthProfileContext'
+import { BrandLoader } from '../../components/Brand'
 
 export default function TherapistPayouts() {
   const { user } = useAuthProfile()
@@ -30,7 +31,7 @@ export default function TherapistPayouts() {
     return () => window.clearTimeout(timer)
   }, [load])
 
-  if (loading) return <p role="status">Loading payouts...</p>
+  if (loading) return <BrandLoader variant="section" />
   return (
     <section className="portal-page">
       <p className="portal-page__eyebrow">Therapist portal</p>

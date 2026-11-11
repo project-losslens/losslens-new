@@ -66,16 +66,19 @@ export const adminNav = [
   { to: '/admin/analytics', label: 'Analytics', icon: 'analytics' },
   { to: '/admin/broadcast', label: 'Broadcast', icon: 'broadcast' },
   { to: '/admin/crisis', label: 'Crisis Alerts', icon: 'alert' },
-  { to: '/admin/therapists', label: 'Therapist Management', icon: 'medical', superAdminOnly: true },
-  { to: '/admin/float', label: 'Float Management', icon: 'analytics', superAdminOnly: true },
-  { to: '/admin/users', label: 'User Management', icon: 'users', section: 'elevated' },
-  { to: '/admin/insurance', label: 'Insurance Partners', icon: 'medical', section: 'elevated' },
-  { to: '/admin/b2b', label: 'B2B Clients', icon: 'building', section: 'elevated' },
-  { to: '/admin/grants', label: 'Grant Applications', icon: 'document', section: 'elevated' },
-  { to: '/admin/chats', label: 'Chat Viewer', icon: 'chat', section: 'elevated' },
-  { to: '/admin/logs', label: 'Audit Logs', icon: 'document', section: 'elevated' },
-  { to: '/admin/settings', label: 'System Settings', icon: 'settings', section: 'elevated' },
-  { to: '/admin/insurers', label: 'Insurer Management', icon: 'building', section: 'elevated' },
+]
+
+export const superAdminNav = [
+  { to: '/super-admin/users', label: 'User Management', icon: 'users', section: 'super-admin' },
+  { to: '/super-admin/insurance', label: 'Insurance Partners', icon: 'medical', section: 'super-admin' },
+  { to: '/super-admin/b2b', label: 'B2B Clients', icon: 'building', section: 'super-admin' },
+  { to: '/super-admin/grants', label: 'Grant Applications', icon: 'document', section: 'super-admin' },
+  { to: '/super-admin/chats', label: 'Chat Viewer', icon: 'chat', section: 'super-admin' },
+  { to: '/super-admin/logs', label: 'Audit Logs', icon: 'document', section: 'super-admin' },
+  { to: '/super-admin/settings', label: 'System Settings', icon: 'settings', section: 'super-admin' },
+  { to: '/super-admin/therapists', label: 'Therapist Management', icon: 'medical', section: 'super-admin' },
+  { to: '/super-admin/insurers', label: 'Insurer Management', icon: 'building', section: 'super-admin' },
+  { to: '/super-admin/float', label: 'Float Management', icon: 'analytics', section: 'super-admin' },
 ]
 
 export const therapistNav = [
@@ -94,7 +97,7 @@ export const insurerNav = [
 export function getPageTitle(pathname) {
   const pageTitles = {
     '/admin': 'Admin Dashboard',
-    '/admin/float': 'Claims Float',
+    '/super-admin/float': 'Claims Float',
     '/dashboard': 'Dashboard',
     '/diary': "Today's Diary",
     '/precious-pact': 'The LossLens Pact',
@@ -104,7 +107,7 @@ export function getPageTitle(pathname) {
   }
   if (pageTitles[pathname]) return pageTitles[pathname]
 
-  const navItem = [...userNav, ...adminNav]
+  const navItem = [...userNav, ...adminNav, ...superAdminNav]
     .filter((item) => item.to === pathname || pathname.startsWith(`${item.to}/`))
     .sort((a, b) => b.to.length - a.to.length)[0]
 

@@ -2,8 +2,10 @@
 
 # LossLens Schema Notes
 
-The schema is consolidated into six migrations in `supabase/migrations/`,
-applied in filename order. They are the final state of the schema — idempotent
+The baseline schema is consolidated into six migrations in
+`supabase/migrations/`, applied in filename order. The Pass 2 SQL changes are
+kept in `20261111000001_pass2_combined.sql` and applied after those six files.
+The baseline migrations are idempotent
 (`create table if not exists`, `create or replace function`, `drop policy if
 exists` before every `create policy`) and safe to re-run.
 
@@ -12,7 +14,7 @@ exists` before every `create policy`) and safe to re-run.
 | `20261110000001_core_schema.sql` | All user-domain tables (profiles incl. risk/freeze/AI-consent columns, diary, CBT, chat, resources, events, groups, crisis_alerts, broadcasts, notifications, supporters, circle + reactions, whispers + declines, media metadata, business/admin tables, audit_logs final shape, company-code attempts, account_deletion_log), indexes, base helpers (`current_user_role`, `is_super_admin`, `is_admin`, `is_active_user`, `is_recently_authenticated`, `log_admin_action`), triggers (new-user, privilege protection, identity scrub, audit immutability, updated_at, audit-table triggers), views (`admin_profiles_safe`, `circle_messages_safe`), badge seed data, realtime publication, storage buckets with final MIME types. |
 | `20261110000002_rls_grants_storage.sql` | `enable row level security` on every table, the single final policy set (owner policies, admin policies, restrictive `is_active_user` policies, hashed-identity circle/whispers policies), table grants/revokes, audit_logs actor FK, storage.objects policies for avatars/mirror-recordings/precious-pacts/therapist-documents. Portal/claims RLS lives in file 04. |
 | `20261110000003_rpc_functions.sql` | All user-domain security-definer RPCs: circle identity/reactions/notify/counts/purge, whispers (request, list open, respond, rate, report), supporter token + owner RPCs, company codes (validate rate-limited, redeem), `recompute_progress` (Nairobi-anchored, idempotent freeze), crisis (`record_crisis_event`/`pre_authorize_voucher` service-role only, resolve/escalate/contact), `send_broadcast`, `admin_get_user_contact`, `admin_dashboard_stats`, `increment_pact_play_count`. |
-| `20261110000004_portals_claims.sql` | Therapists, insurers, partnerships, provider_vouchers + pre_auth_vouchers (kept separate), provider_claims/payouts, claim_submissions, bulk invoices + claims, claims float + ledger; their RLS/grants; views `therapists_public` (active only) and `insurer_aggregate_stats` (cohort ≥ 25, banded risk); all portal/claims RPCs with elevated-access (`is_recently_authenticated`) guards on admin functions; insurer reports payment, only super-admin confirmation credits the float; ends with a guarded legacy weak-hash (`user_%`) remap that is a no-op on fresh databases. |
+| `20261110000004_portals_claims.sql` | Therapists, insurers, partnerships, provider_vouchers + pre_auth_vouchers (kept separate), provider_claims/payouts, claim_submissions, bulk invoices + claims, claims float + ledger; their RLS/grants; views `therapists_public` (active only) and `insurer_aggregate_stats` (cohort ≥ 25, banded risk); historical JWT-age guards on admin RPCs, superseded by the Pass 2 combined SQL; insurer reports payment, only super-admin confirmation credits the float; ends with a guarded legacy weak-hash (`user_%`) remap that is a no-op on fresh databases. |
 | `20261110000005_diary_urge_level.sql` | Adds `diary_entries.urge_level smallint` with a 0–10 check constraint for the quick check-in. |
 | `20261110000006_urge_toolkit_sessions.sql` | `urge_toolkit_sessions` (user_id, tool, duration_seconds, completed, metadata, created_at) with owner-only select/insert RLS for offline-synced toolkit logs. |
 
@@ -23,8 +25,8 @@ exists` before every `create policy`) and safe to re-run.
   `service_role` only; the browser reaches them via `api/chat.js` /
   `api/crisis.js`.
 - `profiles.ai_data_consent_at` gates Oloo AI chat (enforced in `api/chat.js`).
-- MFA must be enabled in the Supabase dashboard for admin roles (elevated RPCs
-  require `is_recently_authenticated()`).
+- Pass 2 removes the JWT-age password step-up. RPCs still enforce their
+  `is_admin()` or `is_super_admin()` authorization checks.
 - Verification queries live in `docs/DB_SETUP.md`.
 
 
@@ -34,7 +36,7 @@ exists` before every `create policy`) and safe to re-run.
 
 ## Applying the schema
 
-The schema is six idempotent migrations in `supabase/migrations/`:
+The baseline schema is six idempotent migrations in `supabase/migrations/`:
 
 1. `20261110000001_core_schema.sql` — tables, helpers, triggers, views, seeds, storage buckets
 2. `20261110000002_rls_grants_storage.sql` — RLS policies, grants, storage policies
@@ -43,23 +45,10 @@ The schema is six idempotent migrations in `supabase/migrations/`:
 5. `20261110000005_diary_urge_level.sql` — `diary_entries.urge_level` (0–10 check)
 6. `20261110000006_urge_toolkit_sessions.sql` — `urge_toolkit_sessions` table, owner-only RLS
 
-Apply **in order, once each** (they are also safe to re-run).
-
-### Option A — Supabase CLI (local)
-
-```bash
-npx supabase start        # starts local Postgres + auth + storage
-npx supabase db reset     # applies supabase/migrations in order
-```
-
-### Option B — Remote project
-
-```bash
-npx supabase link --project-ref <PROJECT_REF>
-npx supabase db push      # pushes pending migrations
-```
-
-Or paste each file, in order, into the Supabase Dashboard → SQL Editor and run.
+The owner applies SQL manually in the Supabase Dashboard → SQL Editor. For a
+fresh database, apply the six baseline files in order, then
+`20261111000001_pass2_combined.sql`. For an existing database that has the
+six baseline files, apply only the combined file. See `docs/MIGRATION_NOTES.md`.
 
 ## Required environment variables
 
@@ -74,11 +63,8 @@ Or paste each file, in order, into the Supabase Dashboard → SQL Editor and run
 
 ## Post-apply steps
 
-1. **Enable MFA (TOTP)** for admin roles in Supabase Dashboard → Authentication →
-   Sign In / Providers. Elevated RPCs require `is_recently_authenticated()`
-   (JWT `iat` within 15 minutes) in addition to admin role.
-2. **Deploy edge functions**: `supabase functions deploy send-invite delete-account`.
-3. **Schedule the circle expiry purge** (optional, needs pg_cron):
+1. **Deploy edge functions**: `supabase functions deploy send-invite delete-account`.
+2. **Schedule the circle expiry purge** (optional, needs pg_cron):
    `select cron.schedule('circle-purge-expired', '*/15 * * * *', 'select public.circle_purge_expired()');`
 
 ## VERIFY queries (run after applying)

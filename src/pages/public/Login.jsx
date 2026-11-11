@@ -1,7 +1,9 @@
+import { BrandLoader } from '../../components/Brand'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { roleHome, safeInternalPath } from '../../config/roleHome'
-import { createSupabaseClient } from '../../lib/supabase'
+import { canAccessPath, roleHome, safeInternalPath } from '../../config/roleHome'
+import { resetAuthBeforeSignIn, supabase } from '../../lib/supabase'
+import { useAuthProfile } from '../../context/AuthProfileContext'
 import { primaryHelpline } from '../../config/helplines'
 import { PublicLayout } from '../../layouts/PublicLayout'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
@@ -22,6 +24,7 @@ function Login() {
   const navigate = useNavigate()
   const location = useLocation()
   const { t } = useI18n()
+  const { refreshProfile } = useAuthProfile()
   const emailRef = useRef(null)
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
@@ -69,64 +72,71 @@ function Login() {
     if (!email.trim() || !password) { setError(t('login.errorFields')); return }
 
     setLoading(true)
-    localStorage.setItem('losslens_remember_me', String(rememberMe))
-    const loginClient = createSupabaseClient(rememberMe)
-    const { data, error: loginError } = await loginClient.auth.signInWithPassword({
-      email: email.trim().toLowerCase(),
-      password,
-    })
+    try {
+      await resetAuthBeforeSignIn(rememberMe)
+      const { data, error: loginError } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      })
 
-    if (loginError) {
-      const newAttempts = attempts + 1
-      setAttempts(newAttempts)
-      sessionStorage.setItem('login_attempts', newAttempts.toString())
-      if (newAttempts >= 5) {
-        const until = Date.now() + 300000
-        setCooldown(true)
-        setCooldownUntil(until)
-        sessionStorage.setItem('login_cooldown_until', until.toString())
-        setError(t('login.errorCooldown'))
-      } else {
-        setError(t('login.errorCredentials'))
+      if (loginError) {
+        const newAttempts = attempts + 1
+        setAttempts(newAttempts)
+        sessionStorage.setItem('login_attempts', newAttempts.toString())
+        if (newAttempts >= 5) {
+          const until = Date.now() + 300000
+          setCooldown(true)
+          setCooldownUntil(until)
+          sessionStorage.setItem('login_cooldown_until', until.toString())
+          setError(t('login.errorCooldown'))
+        } else {
+          setError(t('login.errorCredentials'))
+        }
+        setLoading(false)
+        return
       }
-      setLoading(false)
-      return
-    }
 
-    // Clear rate limit on success
-    sessionStorage.removeItem('login_attempts')
-    sessionStorage.removeItem('login_cooldown_until')
-    setAttempts(0)
+      sessionStorage.removeItem('login_attempts')
+      sessionStorage.removeItem('login_cooldown_until')
+      setAttempts(0)
 
-    const { data: profile, error: profileError } = await loginClient.from('profiles').select('role').eq('id', data.user.id).single()
-    if (profileError) {
-      console.error('Could not load profile after sign-in:', profileError)
-      setError(t('login.errorProfile'))
+      const profile = await refreshProfile(data.user)
+      if (!profile) {
+        console.error('Could not load profile after sign-in')
+        setError(t('login.errorProfile'))
+        setLoading(false)
+        return
+      }
+
+      const requestedPath = safeInternalPath(location.state?.from)
+      const destination = requestedPath && canAccessPath(profile?.role, requestedPath)
+        ? requestedPath
+        : roleHome(profile?.role)
       setLoading(false)
-      return
+      navigate(destination, { replace: true })
+    } catch (loginError) {
+      console.error('Login failed:', loginError)
+      setError(t('login.errorCredentials'))
+      setLoading(false)
     }
-    setLoading(false)
-    const destination = safeInternalPath(location.state?.from) || roleHome(profile?.role)
-    window.location.assign(destination)
   }
 
   const handleGoogleLogin = async () => {
     setError('')
     setGoogleLoading(true)
     try {
-      localStorage.setItem('losslens_remember_me', String(rememberMe))
-      const loginClient = createSupabaseClient(rememberMe)
-      const { error: googleError } = await loginClient.auth.signInWithOAuth({
+      await resetAuthBeforeSignIn(rememberMe)
+      const { error: googleError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo: `${window.location.origin}/auth/callback` },
       })
       if (googleError) {
         setError(t('login.errorGoogle'))
-        setGoogleLoading(false)
       }
     } catch (loginError) {
       console.error('Google sign-in failed:', loginError)
       setError(t('login.errorGoogle'))
+    } finally {
       setGoogleLoading(false)
     }
   }
@@ -168,7 +178,7 @@ function Login() {
             gap: '10px', marginBottom: '1.25rem', fontFamily: 'var(--font-body)',
             fontWeight: 500, opacity: (googleLoading || cooldown) ? 0.7 : 1
           }}>
-            {googleLoading ? <span className="spinner" /> : <><GoogleIcon /> {t('login.google')}</>}
+            {googleLoading ? <BrandLoader variant="inline" showWordmark={false} /> : <><GoogleIcon /> {t('login.google')}</>}
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.25rem' }}>
@@ -200,7 +210,7 @@ function Login() {
             </div>
 
             <button className="btn-primary full" type="submit" disabled={loading || cooldown} style={{ opacity: cooldown ? 0.5 : 1 }}>
-              {loading ? <span className="spinner"></span> : cooldown ? t('login.wait', { time: formatCooldown() }) : t('login.submit')}
+              {loading ? <BrandLoader variant="inline" showWordmark={false} /> : cooldown ? t('login.wait', { time: formatCooldown() }) : t('login.submit')}
             </button>
           </form>
 

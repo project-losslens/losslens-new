@@ -1,25 +1,12 @@
+import { BrandLoader } from '../../components/Brand'
+import { toast } from '../../components/ToastProvider'
+import NumberField from '../../components/NumberField'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useI18n } from '../../i18n'
 import { enqueueOfflineItem, offlineQueueCount, onOfflineQueueChange } from '../../lib/offlineQueue'
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `
-    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
-    background: #7DBDEE; color: #2DD4BF; padding: 10px 20px; border-radius: 100px;
-    font-size: 13px; font-weight: 500; z-index: var(--z-toast);
-    box-shadow: 0 4px 16px rgba(11,18,32,0.4); border: 1px solid rgba(255,255,255,0.4);
-    animation: slideInRight 0.3s ease-out; white-space: nowrap;
-  `
-  document.body.appendChild(toast)
-  setTimeout(() => {
-    toast.style.animation = 'slideOutRight 0.3s ease-in forwards'
-    setTimeout(() => toast.remove(), 300)
-  }, duration)
-}
 
 function triggerConfetti() {
   const colors = ['#2DD4BF', '#2DD4BF', '#2DD4BF', '#FFFFFF', '#7DBDEE', '#7DBDEE']
@@ -179,8 +166,8 @@ function Diary() {
 
   const handleSave = async () => {
     setSaveError('')
-    if (gambled === null) { showToast(t('diary.selectGambled'), 2000); return }
-    if (!userId) { showToast(t('diary.loginAgain'), 2000); return }
+    if (gambled === null) { toast.error(t('diary.selectGambled'), 2000); return }
+    if (!userId) { toast.error(t('diary.loginAgain'), 2000); return }
 
     setLoading(true)
     const today = new Date().toISOString().split('T')[0]
@@ -219,13 +206,13 @@ function Diary() {
         setLoading(false)
         setSaved(true)
         setShowCheckmark(true)
-        showToast(t('common.offlineSaved'), 5000)
+        toast.success(t('common.offlineSaved'), 5000)
         setTimeout(() => { setSaved(false); setShowCheckmark(false) }, 2000)
         return
       }
       setSaveError(error.message || t('diary.saveFailed'))
       setLoading(false)
-      showToast(` ${t('diary.saveFailed')}`, 3000)
+      toast.error(t('diary.saveFailed'), 3000)
       return
     }
 
@@ -255,12 +242,12 @@ function Diary() {
       const { recomputeProgress, checkBadges } = await import('../../lib/gamification')
       recomputed = await recomputeProgress()
       if (recomputed?.freeze_activated) {
-        showToast(t('diary.freezeActivated'), 4000)
+        toast.success(t('diary.freezeActivated'), 4000)
       }
       const earnedBadges = await checkBadges(userId) || []
       if (earnedBadges.length > 0) {
         triggerConfetti()
-        earnedBadges.forEach(b => showToast(t('diary.badgeEarned', { name: b.name }), 4000))
+        earnedBadges.forEach(b => toast.success(t('diary.badgeEarned', { name: b.name }), 4000))
       }
       // Streak milestone celebration — once per milestone per user.
       const MILESTONES = [1, 7, 14, 30, 60, 90]
@@ -270,7 +257,7 @@ function Diary() {
         if (!localStorage.getItem(key)) {
           localStorage.setItem(key, '1')
           if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) triggerConfetti()
-          showToast(t('diary.milestone', { count: newStreak }), 5000)
+          toast.success(t('diary.milestone', { count: newStreak }), 5000)
         }
       }
     } catch (err) {
@@ -284,8 +271,8 @@ function Diary() {
     setShowCheckmark(true)
     setSaveError('')
 
-    if (!gambled && !error) { triggerConfetti(); showToast(` ${t('diary.cleanDayLogged')}`, 3000) }
-    else showToast(` ${t('diary.entrySaved')}`, 3000)
+    if (!gambled && !error) { triggerConfetti(); toast.success(`${t('diary.cleanDayLogged')}`, 3000) }
+    else toast.success(`${t('diary.entrySaved')}`, 3000)
 
     setTimeout(() => { setSaved(false); setShowCheckmark(false) }, 2000)
   }
@@ -332,7 +319,7 @@ function Diary() {
               <div className="dash-section">
                 <h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}> {t('diary.gambledTitle')}</h3>
                 <div className="toggle-group">
-                  <button className={`toggle-btn ${gambled === false ? 'active-primary' : ''}`} onClick={() => { setGambled(false); showToast(` ${t('diary.cleanDayLogged')}`, 1500) }}> {t('diary.no')}</button>
+                  <button className={`toggle-btn ${gambled === false ? 'active-primary' : ''}`} onClick={() => { setGambled(false); toast.success(`${t('diary.cleanDayLogged')}`, 1500) }}> {t('diary.no')}</button>
                   <button className={`toggle-btn ${gambled === true ? 'active-alert' : ''}`} onClick={() => setGambled(true)}> {t('diary.yes')}</button>
                 </div>
               </div>
@@ -342,9 +329,9 @@ function Diary() {
                   <h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>{t('diary.gamblingDetails')}</h3>
                   <div className="form-group"><label>{t('diary.type')}</label><div className="chip-group">{gamblingTypes.map(type => <button key={type} className={`chip ${gamblingType === type ? 'chip-active' : ''}`} onClick={() => setGamblingType(type)}>{t(`diary.type.${type}`)}</button>)}</div></div>
                   <div className="form-row">
-                    <div className="form-group"><label>{t('diary.time')}</label><input type="number" placeholder="2" value={timeSpent} onChange={e => setTimeSpent(e.target.value)} /></div>
-                    <div className="form-group"><label>{t('diary.spent')}</label><input type="number" placeholder="500" value={moneySpent} onChange={e => setMoneySpent(e.target.value)} /></div>
-                    <div className="form-group"><label>{t('diary.won')}</label><input type="number" placeholder="0" value={moneyWon} onChange={e => setMoneyWon(e.target.value)} /></div>
+                    <div className="form-group"><label>{t('diary.time')}</label><NumberField inputMode="numeric" min={0} step={1} placeholder="2" value={timeSpent} onChange={setTimeSpent} /></div>
+                    <div className="form-group"><label>{t('diary.spent')}</label><NumberField inputMode="decimal" min={0} step={0.01} prefix="KES" placeholder="500" value={moneySpent} onChange={setMoneySpent} /></div>
+                    <div className="form-group"><label>{t('diary.won')}</label><NumberField inputMode="decimal" min={0} step={0.01} prefix="KES" placeholder="0" value={moneyWon} onChange={setMoneyWon} /></div>
                   </div>
                 </div>
               )}
@@ -367,7 +354,7 @@ function Diary() {
               </div>
 
               <button className="btn-primary full" onClick={handleSave} disabled={loading || saved || gambled === null}>
-                {loading ? <span className="spinner"></span> : saved ? ` ${t('diary.savedCheck')}` : todayEntry ? ` ${t('diary.updateEntry')}` : ` ${t('diary.saveEntry')}`}
+                {loading ? <BrandLoader variant="inline" showWordmark={false} /> : saved ? t('diary.savedCheck') : todayEntry ? t('diary.updateEntry') : t('diary.saveEntry')}
               </button>
             </>
           )}
@@ -382,7 +369,7 @@ function Diary() {
               <div className="dash-section" style={{ marginBottom: '1rem' }}><div className="progress-bar-wrap"><div className="progress-bar"><div className="progress-fill" style={{ width: `${stats.cleanRate}%` }} /></div><span className="progress-label">{stats.cleanRate}%</span></div></div>
               <div className="dash-section">
                 <div className="section-header"><h3>{t('diary.allEntries')}</h3></div>
-                {historyLoading ? <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '1rem' }}>{t('common.loading')}</p> :
+                {historyLoading ? <BrandLoader variant="inline" showWordmark={false} /> :
                  historyError ? <div style={{ textAlign: 'center', padding: '1.5rem' }}><p className="fs-13" style={{ color: 'rgba(255,255,255,0.55)', marginBottom: '10px' }}>{t('diary.loadError')}</p><button type="button" className="btn-primary" onClick={() => fetchHistory(userId)}>{t('common.retry')}</button></div> :
                  historyEntries.length === 0 ? <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '1.5rem' }}>{t('diary.noEntriesHistory')}</p> :
                  <div className="entries-list">{(showAllHistory ? historyEntries : historyEntries.slice(0, 7)).map((e, i) => (

@@ -1,6 +1,8 @@
+import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
+import { BrandLoader } from '../../components/Brand'
 
 const fmtTime = (d) => d ? new Date(d).toLocaleString('en-KE') : '—'
 
@@ -10,16 +12,10 @@ export default function CrisisAlerts() {
   const [alerts, setAlerts] = useState([])
   const [resolved, setResolved] = useState([])
   const [activeTab, setActiveTab] = useState('open')
-  const [toast, setToast] = useState(null)
   const [expandedId, setExpandedId] = useState(null)
   const [notes, setNotes] = useState({})
   const [resolvingId, setResolvingId] = useState(null)
   const [escalatingId, setEscalatingId] = useState(null)
-
-  const showToast = (msg, type = 'success') => {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 3000)
-  }
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
@@ -47,9 +43,9 @@ export default function CrisisAlerts() {
       p_notes: notes[id] || null,
     })
     if (resolveError) {
-      showToast('Failed to resolve.', 'error')
+      toast.error('Failed to resolve.')
     } else {
-      showToast(' Alert marked as resolved.')
+      toast.success('Alert marked as resolved.')
       setNotes(prev => { const n = { ...prev }; delete n[id]; return n })
       setExpandedId(null)
       fetchAll()
@@ -64,9 +60,9 @@ export default function CrisisAlerts() {
       p_notes: null,
     })
     if (escError) {
-      showToast('Escalation failed.', 'error')
+      toast.error('Escalation failed.')
     } else {
-      showToast(' Alert escalated! Contact counselor immediately.')
+      toast.success('Alert escalated! Contact counselor immediately.')
     }
     setEscalatingId(null)
   }
@@ -84,7 +80,7 @@ export default function CrisisAlerts() {
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
             {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--text)', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
           </div>
-          <p style={{ color: 'var(--text)', fontSize: '13px' }}>Loading crisis alerts...</p>
+          <BrandLoader variant="section" />
         </div>
         <style>{`@keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }`}</style>
       </div>
@@ -115,10 +111,6 @@ export default function CrisisAlerts() {
             <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Refresh</button>
           </div>
         </div>
-
-        {toast && (
-          <div style={{ position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', background: toast.type === 'error' ? 'rgba(255,255,255,0.08)' : 'var(--info)', color: toast.type === 'error' ? 'var(--text)' : 'var(--primary)', padding: '10px 20px', borderRadius: '100px', fontSize: '13px', zIndex: 'var(--z-toast)' }}>{toast.msg}</div>
-        )}
 
         {alerts.length > 0 && (
           <div style={{ margin: '1rem 1.5rem 0', padding: '12px 16px', background: 'rgba(255,255,255,0.08)', borderRadius: '10px', border: '1px solid var(--text)' }}>
@@ -193,10 +185,10 @@ export default function CrisisAlerts() {
 
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   <button onClick={() => resolveAlert(a.id)} disabled={resolvingId === a.id} style={btn('rgba(255,255,255,0.12)', 'var(--primary)', 'var(--primary)')}>
-                    {resolvingId === a.id ? '⏳...' : ' Mark Resolved'}
+                    {resolvingId === a.id ? '...' : ' Mark Resolved'}
                   </button>
                   <button onClick={() => escalate(a)} disabled={escalatingId === a.id} style={btn('rgba(255,255,255,0.08)', 'var(--text)', 'var(--text)')}>
-                    {escalatingId === a.id ? '⏳...' : ' Escalate'}
+                    {escalatingId === a.id ? '...' : ' Escalate'}
                   </button>
                 </div>
               </div>

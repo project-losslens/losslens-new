@@ -28,7 +28,3 @@ export async function ensureCircleHash() {
   }
   return data
 }
-
-export function randomDisplayName() {
-  return `${ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)]} ${ANIMALS[Math.floor(Math.random() * ANIMALS.length)]}`
-}

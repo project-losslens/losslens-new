@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuthProfile } from '../../context/AuthProfileContext'
+import { BrandLoader } from '../../components/Brand'
 
 const cardStyle = { background: 'var(--surface-secondary)', border: '1px solid var(--border)', borderRadius: 14, padding: 18 }
 
@@ -54,7 +55,7 @@ export default function TherapistDashboard() {
     setWorking('')
   }
 
-  if (loading) return <p role="status">Loading therapist dashboard...</p>
+  if (loading) return <BrandLoader variant="section" />
   if (error) return <section role="alert" style={cardStyle}><p>{error}</p><button className="btn-primary" onClick={load}>Retry</button></section>
 
   return (

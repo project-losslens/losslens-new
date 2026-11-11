@@ -1,3 +1,4 @@
+import { BrandLoader } from '../../components/Brand'
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -152,7 +153,7 @@ function ForgotPassword() {
             </div>
 
             <button className="btn-primary full" type="submit" disabled={loading}>
-              {loading ? <span className="spinner"></span> : 'Send reset link'}
+              {loading ? <BrandLoader variant="inline" showWordmark={false} /> : 'Send reset link'}
             </button>
           </form>
 

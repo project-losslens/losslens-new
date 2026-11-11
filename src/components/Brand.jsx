@@ -1,45 +1,106 @@
-import { useEffect, useRef, useState } from 'react'
-import { shouldShowLoader, loaderMinVisibleRemaining, stillLoadingVisible, retryVisible } from '../lib/loaderTiming'
+import { useEffect, useState, useSyncExternalStore } from 'react'
+import { loaderMinVisibleRemaining, retryVisible, shouldShowLoader, stillLoadingVisible } from '../lib/loaderTiming'
+import { useI18n } from '../i18n'
 
 const VISUALLY_HIDDEN = {
   position: 'absolute', width: 1, height: 1, padding: 0, margin: -1,
   overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', border: 0,
 }
 
-export function BrandLoader({
-  variant = 'fullscreen',
-  label = 'Loading',
-  showWordmark = variant === 'fullscreen',
-}) {
-  const [visible, setVisible] = useState(false)
-  const [elapsed, setElapsed] = useState(0)
-  const shownAtRef = useRef(null)
-  const timerRef = useRef(null)
+const subscribers = new Set()
+let requestCount = 0
+let isVisible = false
+let shownAt = null
+let showTimer = null
+let hideTimer = null
+
+function notifyLoaderSubscribers() {
+  subscribers.forEach((subscriber) => subscriber())
+}
+
+function subscribeToLoader(subscriber) {
+  subscribers.add(subscriber)
+  return () => subscribers.delete(subscriber)
+}
+
+function getLoaderVisibility() {
+  return isVisible
+}
+
+function requestGlobalLoader() {
+  requestCount += 1
+  if (hideTimer) {
+    window.clearTimeout(hideTimer)
+    hideTimer = null
+  }
+  if (requestCount === 1 && !isVisible) {
+    showTimer = window.setTimeout(() => {
+      if (!shouldShowLoader({ elapsedMs: 150 })) return
+      isVisible = true
+      shownAt = Date.now()
+      notifyLoaderSubscribers()
+    }, 150)
+  }
+
+  let released = false
+  return () => {
+    if (released) return
+    released = true
+    requestCount = Math.max(0, requestCount - 1)
+    if (requestCount > 0) return
+
+    if (showTimer) {
+      window.clearTimeout(showTimer)
+      showTimer = null
+    }
+    if (!isVisible) return
+
+    const remaining = loaderMinVisibleRemaining({ shownAtMs: shownAt, nowMs: Date.now() })
+    hideTimer = window.setTimeout(() => {
+      if (requestCount > 0) return
+      isVisible = false
+      shownAt = null
+      hideTimer = null
+      notifyLoaderSubscribers()
+    }, remaining)
+  }
+}
+
+export function BrandLoader({ variant = 'fullscreen', label, showWordmark = variant === 'fullscreen', style }) {
+  const { t } = useI18n()
+  const loaderLabel = label || t('common.loading')
+  useEffect(() => {
+    if (variant !== 'fullscreen') return undefined
+    return requestGlobalLoader()
+  }, [variant])
+
+  if (variant === 'fullscreen') return null
+  return <BrandLoaderView variant={variant} label={loaderLabel} showWordmark={showWordmark} style={style} />
+}
+
+export function GlobalLoaderHost() {
+  const visible = useSyncExternalStore(subscribeToLoader, getLoaderVisibility, () => false)
+  const [elapsedMs, setElapsedMs] = useState(0)
+  const { t } = useI18n()
 
   useEffect(() => {
-    const startedAt = Date.now()
-    timerRef.current = setInterval(() => {
-      const now = Date.now()
-      const elapsedMs = now - startedAt
-      setElapsed(elapsedMs)
-      if (shownAtRef.current === null && shouldShowLoader({ elapsedMs })) {
-        shownAtRef.current = now
-        setVisible(true)
-      }
-    }, 100)
-    return () => clearInterval(timerRef.current)
-  }, [])
-
-  // Keep visible at least 300ms once shown (BrandLoader unmounts with the
-  // loading state, so this is enforced by callers keeping it mounted briefly;
-  // the helper is exported for that logic).
-  void loaderMinVisibleRemaining
+    if (!visible) {
+      setElapsedMs(0)
+      return undefined
+    }
+    const updateElapsed = () => setElapsedMs(Date.now() - shownAt)
+    updateElapsed()
+    const timer = window.setInterval(updateElapsed, 1000)
+    return () => window.clearInterval(timer)
+  }, [visible])
 
   if (!visible) return null
+  return <BrandLoaderView variant="fullscreen" label={t('common.loading')} showWordmark elapsedMs={elapsedMs} />
+}
 
+function BrandLoaderView({ variant, label, showWordmark, elapsedMs = 0, style }) {
   const isFullscreen = variant === 'fullscreen'
   const isInline = variant === 'inline'
-
   const containerStyle = isFullscreen
     ? {
         position: 'fixed', inset: 0, zIndex: 'var(--z-toast, 9999)',
@@ -50,30 +111,27 @@ export function BrandLoader({
     : isInline
       ? { display: 'inline-flex', alignItems: 'center', gap: '10px' }
       : { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '40vh', padding: '2rem' }
-
-  const markSize = isFullscreen ? 72 : isInline ? 20 : 44
+  const markSize = isInline ? 20 : isFullscreen ? 72 : 44
 
   return (
     <div
       className={`brand-loader brand-loader--${variant}`}
-      style={containerStyle}
+      style={{ ...containerStyle, ...style }}
       role="status"
       aria-live="polite"
+      aria-label={label}
     >
-      <span style={VISUALLY_HIDDEN}>{label}</span>
-      <LogoMark size={markSize} className="brand-loader__mark" aria-hidden="true" />
+      <LogoMark size={markSize} className="brand-loader__mark" ariaHidden />
       {showWordmark && (
         <span className="brand-loader__wordmark" aria-hidden="true">
           Loss<span className="brand-loader__wordmark-accent">Lens</span>
         </span>
       )}
-      {!isInline && (
-        <span className="brand-loader__label">{label}</span>
-      )}
-      {isFullscreen && stillLoadingVisible(elapsed) && (
+      {!isInline && <span className="brand-loader__label">{label}</span>}
+      {isFullscreen && stillLoadingVisible(elapsedMs) && (
         <span className="brand-loader__still">Still loading...</span>
       )}
-      {isFullscreen && retryVisible(elapsed) && (
+      {isFullscreen && retryVisible(elapsedMs) && (
         <button type="button" className="btn-secondary" onClick={() => window.location.reload()}>
           Retry
         </button>
@@ -82,12 +140,9 @@ export function BrandLoader({
   )
 }
 
-/* ---- LogoMark ---- */
-// LossLens flower/aperture mark — 8 elliptical petals (alternating teal/blue)
-// around a ring and center dot. Colors sampled from public/losslens-logo.png.
-export function LogoMark({ size = 72, className = '', petalClass = 'brand-petal' }) {
+export function LogoMark({ size = 72, className = '', petalClass = 'brand-petal', ariaHidden = false }) {
   const petals = []
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 8; i += 1) {
     petals.push(
       <ellipse
         key={i}
@@ -96,17 +151,22 @@ export function LogoMark({ size = 72, className = '', petalClass = 'brand-petal'
         fill={i % 2 === 0 ? 'var(--brand-teal)' : 'var(--brand-blue)'}
         opacity="0.9"
         transform={`rotate(${i * 45} 50 50)`}
-        style={{ animationDelay: `${i * 0.35}s` }}
-      />
+        style={{ animationDelay: `${i * 0.1}s` }}
+      />,
     )
   }
   return (
     <svg
       className={className}
-      width={size} height={size} viewBox="0 0 100 100"
-      role="img" aria-label="LossLens logo" fill="none"
+      width={size}
+      height={size}
+      viewBox="0 0 100 100"
+      role={ariaHidden ? undefined : 'img'}
+      aria-label={ariaHidden ? undefined : 'LossLens logo'}
+      aria-hidden={ariaHidden}
+      fill="none"
     >
-      <g className="brand-mark-spin" style={{ transformOrigin: '50px 50px' }}>
+      <g className="brand-mark-spin">
         {petals}
         <circle cx="50" cy="50" r="12" stroke="var(--brand-blue)" strokeWidth="3" fill="none" />
         <circle cx="50" cy="50" r="4" fill="var(--brand-teal)" />

@@ -1,3 +1,4 @@
+import { BrandLoader } from '../../components/Brand'
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -100,7 +101,7 @@ function ResetPassword() {
   if (checkingToken) {
     return (
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: '32px', height: '32px', border: '3px solid rgba(255,255,255,0.12)', borderTopColor: '#2DD4BF', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }}></div>
+        <BrandLoader />
       </div>
     )
   }
@@ -111,7 +112,7 @@ function ResetPassword() {
       <PublicLayout>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}>⏰</span>
+            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}><AppIcon name="clock" size={40} style={{ display: 'block', margin: '0 auto 16px', color: '#7DBDEE' }} /></span>
             <h1 className="auth-title">Link expired</h1>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>{tokenError}</p>
             <Link className="btn-primary full" to="/forgot-password">Request a new link</Link>
@@ -219,7 +220,7 @@ function ResetPassword() {
             </div>
 
             <button className="btn-primary full" type="submit" disabled={!canSubmit}>
-              {loading ? <span className="spinner"></span> : 'Update password'}
+              {loading ? <BrandLoader variant="inline" showWordmark={false} /> : 'Update password'}
             </button>
           </form>
 

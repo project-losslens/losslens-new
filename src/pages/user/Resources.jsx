@@ -1,3 +1,4 @@
+import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -27,13 +28,6 @@ const EMERGENCY_CONTACTS = [
   { name: 'Befrienders Kenya', number: '0800 722 030', desc: 'Emotional support 24/7.' },
 ]
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), duration)
-}
 
 export default function Resources() {
   const navigate = useNavigate()
@@ -142,11 +136,11 @@ export default function Resources() {
         await navigator.share({ title: resource.name, text })
       } else {
         await navigator.clipboard.writeText(text)
-        showToast(' Copied!')
+        toast.success('Copied!')
       }
     } catch {
-      try { await navigator.clipboard.writeText(text); showToast(' Copied!') }
-      catch { showToast('Could not copy.', 2000) }
+      try { await navigator.clipboard.writeText(text); toast.success('Copied!') }
+      catch { toast.error('Could not copy.', 2000) }
     }
   }
 
@@ -161,9 +155,9 @@ export default function Resources() {
         category: suggestion.category || 'Crisis',
       })
       setSuggestionSent(true)
-      showToast(' Suggestion submitted!')
+      toast.success('Suggestion submitted!')
       setTimeout(() => { setShowSuggestionForm(false); setSuggestionSent(false); setSuggestion({ name: '', link: '', category: 'Crisis', notes: '' }) }, 1500)
-    } catch (err) { showToast('Failed to submit.', 2000) }
+    } catch (err) { toast.error('Failed to submit.', 2000) }
     setSubmittingSuggestion(false)
   }
 

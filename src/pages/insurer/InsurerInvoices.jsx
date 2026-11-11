@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { BrandLoader } from '../../components/Brand'
 
 export default function InsurerInvoices() {
   const [invoices, setInvoices] = useState([])
@@ -69,7 +70,7 @@ export default function InsurerInvoices() {
     setWorking('')
   }
 
-  if (loading) return <p role="status">Loading invoices...</p>
+  if (loading) return <BrandLoader variant="section" />
   return (
     <section className="portal-page">
       <p className="portal-page__eyebrow">Insurer portal</p>

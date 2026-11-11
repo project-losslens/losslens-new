@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuthProfile } from '../../context/AuthProfileContext'
 import { METRIC_DEFINITIONS } from '../../lib/metrics'
+import { BrandLoader } from '../../components/Brand'
 
 export default function InsurerDashboard() {
   const { user } = useAuthProfile()
@@ -39,7 +40,7 @@ export default function InsurerDashboard() {
     return () => window.clearTimeout(timer)
   }, [load])
 
-  if (loading) return <p role="status">Loading insurer dashboard...</p>
+  if (loading) return <BrandLoader variant="section" />
   return (
     <section className="portal-page">
       <header className="portal-page__heading">

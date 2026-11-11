@@ -1,3 +1,4 @@
+import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -13,13 +14,6 @@ const BREATH_INHALE = 4000
 const BREATH_HOLD = 7000
 const BREATH_EXHALE = 8000
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);animation:slideInRight 0.3s ease-out;white-space:nowrap`
-  document.body.appendChild(toast)
-  setTimeout(() => { toast.style.animation = 'slideOutRight 0.3s ease-in forwards'; setTimeout(() => toast.remove(), 300) }, duration)
-}
 
 function triggerConfetti() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -152,7 +146,7 @@ export default function UrgeToolkitPage() {
     const uid = userIdRef.current
     if (!uid) return
     const payload = { user_id: uid, tool, completed: true, metadata: extra }
-    const offline = () => enqueueOfflineItem('urge_session', payload).then(() => showToast(translate(getLanguage(), 'toolkit.sessionSaved'), 3000))
+    const offline = () => enqueueOfflineItem('urge_session', payload).then(() => toast.success(translate(getLanguage(), 'toolkit.sessionSaved'), 3000))
     if (typeof navigator !== 'undefined' && !navigator.onLine) { await offline(); return }
     const { error } = await supabase.from('urge_toolkit_sessions').insert(payload)
     if (error) await offline()
@@ -178,7 +172,7 @@ export default function UrgeToolkitPage() {
     if (timerRunning && timer > 0) {
       timerRef.current = setInterval(() => {
         setTimer(t => {
-          if (t <= 1) { setTimerRunning(false); setTimerComplete(true); triggerConfetti(); showToast(` ${translate(getLanguage(), 'toolkit.youMadeIt')}`, 4000); void logSession('timer', { duration_seconds: TIMER_DURATION }); return 0 }
+          if (t <= 1) { setTimerRunning(false); setTimerComplete(true); triggerConfetti(); toast.success(`${translate(getLanguage(), 'toolkit.youMadeIt')}`, 4000); void logSession('timer', { duration_seconds: TIMER_DURATION }); return 0 }
           return t - 1
         })
       }, 1000)
@@ -228,13 +222,13 @@ export default function UrgeToolkitPage() {
 
   const savePartner = async () => {
     if (!partnerName.trim()) return
-    if (partnerPhone && !/^(\+254|0)?7\d{8}$/.test(partnerPhone.replace(/\s/g, ''))) { showToast(t('toolkit.invalidPhone')); return }
+    if (partnerPhone && !/^(\+254|0)?7\d{8}$/.test(partnerPhone.replace(/\s/g, ''))) { toast.error(t('toolkit.invalidPhone')); return }
     try {
       await supabase.from('profiles').update({ accountability_partner_name: partnerName, accountability_partner_phone: partnerPhone }).eq('id', userId)
       setAccountabilityPartner({ name: partnerName, phone: partnerPhone })
       setShowAddPartner(false)
-      showToast(` ${t('toolkit.partnerSaved')}`, 3000)
-    } catch (err) { showToast(` ${t('toolkit.saveFailed')}`, 2000) }
+      toast.success(`${t('toolkit.partnerSaved')}`, 3000)
+    } catch (err) { toast.error(t('toolkit.saveFailed'), 2000) }
   }
 
   return (
@@ -313,7 +307,7 @@ export default function UrgeToolkitPage() {
               <div className="toggle-group" style={{ marginTop: '1.5rem', justifyContent: 'center' }}>
                 {!timerComplete ? (
                   <>
-                    <button className="toggle-btn active-primary" onClick={() => setTimerRunning(!timerRunning)} style={{ flex: '0 1 auto', minWidth: '100px' }}>{timerRunning ? `${t('toolkit.pause')} ⏸` : timer === TIMER_DURATION ? `${t('toolkit.start')} ▶` : `${t('toolkit.resume')} ▶`}</button>
+                    <button className="toggle-btn active-primary" onClick={() => setTimerRunning(!timerRunning)} style={{ flex: '0 1 auto', minWidth: '100px' }}>{timerRunning ? `${t('toolkit.pause')}` : timer === TIMER_DURATION ? `${t('toolkit.start')}` : `${t('toolkit.resume')}`}</button>
                     <button className="toggle-btn" onClick={() => { setTimer(TIMER_DURATION); setTimerRunning(false); setTimerComplete(false) }} style={{ flex: '0 1 auto', minWidth: '100px' }}>{t('toolkit.reset')} ↺</button>
                   </>
                 ) : (
@@ -337,7 +331,7 @@ export default function UrgeToolkitPage() {
                 {breathRounds >= 3 && <p className="fs-14" style={{ color: '#2DD4BF', marginTop: '0.5rem' }}> {t('toolkit.roundComplete', { count: breathRounds })}</p>}
               </div>
               <button className="toggle-btn active-primary" onClick={() => setBreathingActive(!breathingActive)} style={{ marginTop: '1rem', minWidth: '120px' }}>
-                {breathingActive ? `${t('toolkit.pause')} ⏸` : `${t('toolkit.start')} ▶`}
+                {breathingActive ? `${t('toolkit.pause')}` : `${t('toolkit.start')}`}
               </button>
             </div>
           )}
@@ -387,7 +381,7 @@ export default function UrgeToolkitPage() {
                         const updated = [newCard, ...copingCards].slice(0, 20)
                         setCopingCards(updated)
                         try { localStorage.setItem('losslens_coping_cards', JSON.stringify(updated)) } catch {}
-                        showToast(` ${t('toolkit.copingCardSaved')}`, 3000)
+                        toast.success(`${t('toolkit.copingCardSaved')}`, 3000)
                         void logSession('thought_record', { situation: thoughtRecord.situation, emotion: thoughtRecord.emotion })
                         setThoughtStep(0)
                         setThoughtRecord({ situation: '', automaticThought: '', emotion: '', evidenceFor: '', evidenceAgainst: '', balancedThought: '', newEmotion: '' })
@@ -438,11 +432,11 @@ export default function UrgeToolkitPage() {
                   </div>
                   {!challengeAccepted ? (
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className="btn-primary" style={{ flex: 1 }} onClick={() => { setChallengeAccepted(true); showToast(` ${t('toolkit.youGotThis')}`, 2000) }}> {t('toolkit.accept')}</button>
+                      <button className="btn-primary" style={{ flex: 1 }} onClick={() => { setChallengeAccepted(true); toast.success(`${t('toolkit.youGotThis')}`, 2000) }}> {t('toolkit.accept')}</button>
                       <button className="btn-ghost" style={{ flex: 1 }} onClick={spinWheel} disabled={spinning}> {t('toolkit.spinAgain')}</button>
                     </div>
                   ) : !challengeDone ? (
-                    <button className="btn-primary" style={{ width: '100%', background: '#2DD4BF', color: '#0B1220' }} onClick={() => { setChallengeDone(true); triggerConfetti(); showToast(` ${t('toolkit.challengeComplete')}`, 3000); void logSession('distraction', { challenge: randomChallenge }) }}> {t('toolkit.iDidIt')}</button>
+                    <button className="btn-primary" style={{ width: '100%', background: '#2DD4BF', color: '#0B1220' }} onClick={() => { setChallengeDone(true); triggerConfetti(); toast.success(`${t('toolkit.challengeComplete')}`, 3000); void logSession('distraction', { challenge: randomChallenge }) }}> {t('toolkit.iDidIt')}</button>
                   ) : (
                     <div><p className="fs-14" style={{ color: '#2DD4BF', marginBottom: '1rem' }}> {t('toolkit.urgeFaded')}</p><button className="btn-primary" style={{ width: '100%' }} onClick={() => { setRandomChallenge(null); setChallengeAccepted(false); setChallengeDone(false) }}> {t('toolkit.spinAgain')}</button></div>
                   )}

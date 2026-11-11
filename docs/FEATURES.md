@@ -29,15 +29,20 @@ and a branded Not Found page. Privacy and Terms are clearly identified as
 drafts pending legal review; their presence does not imply legal approval.
 
 ### Authentication entry pages
-Login supports email/password and Google OAuth, restores a protected destination
-after sign-in, and routes by profile role when no destination was requested.
+Login supports email/password and Google OAuth. A protected destination is
+restored only when the signed-in role is allowed to access it; otherwise login
+uses the role's own home. A single Supabase client stores sessions in
+localStorage, while session-only login is cleared on the next app start if its
+sessionStorage marker is missing.
 Signup collects profile identity and uses the database auth trigger to create
 the profile; confirmation and OAuth links return through `/auth/callback`.
 Password reset requests a Supabase recovery email and the reset page applies
-the returned recovery session. The insurer portal checks the profile role
-before granting access. Authenticated users are redirected away from public
-login/signup pages, and unknown routes render Not Found rather than redirecting
-to login.
+the returned recovery session. `/admin/*` is limited to admin and Super Admin,
+`/super-admin/*` to Super Admin, `/therapist/*` to therapists, and `/insurer/*`
+to insurers. Admins and Super Admins can also open the user app; therapists and
+insurers cannot. Unauthorized portal URLs redirect to the signed-in role's
+home, and the old elevated-page URLs redirect to the new Super Admin paths.
+Authenticated users are redirected away from public login/signup pages.
 
 Production and Preview must each have the Vercel `SITE_GATE_PASSWORD` and
 `SITE_GATE_SECRET` values configured and redeployed. The matching Supabase Auth
@@ -114,7 +119,7 @@ Admin access to private recovery records is not restored by the migration packag
 
 ## 10. Super Admin dashboard
 
-Super Admin pages implement user and administrator management, email lookup through `get_user_email`, password-reset invocation, role/status and subscription updates, system settings, audit logs, B2B clients, insurance partners, grant applications, and chat history viewing.
+Super Admin pages implement user and administrator management, email lookup through `get_user_email`, password-reset invocation, role/status and subscription updates, system settings, audit logs, B2B clients, insurance partners, grant applications, and chat history viewing. They live under `/super-admin/*`; therapist promotion is confirmed, changes the account to therapist-only access, and can be reverted to the user role.
 
 The Super Admin chat viewer conflicts with owner-only chat privacy because direct Super Admin table access was removed. Runtime compatibility requires a future privacy-reviewed server function or product decision rather than migration RLS bypass.
 

@@ -1,24 +1,19 @@
+import { BrandLoader } from '../../components/Brand'
+import AvatarCropper from '../../components/AvatarCropper'
+import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../../lib/supabase'
+import { clearAuthStorage, supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
 import { useI18n } from '../../i18n'
 
 //  Constants
 const TABS = { PROFILE: 'profile', SETTINGS: 'settings', SECURITY: 'security', DATA: 'data' }
-const AVATAR_OPTIONS = ['', '', '', '', '', '', '', '', '', '']
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
 }[character]))
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), duration)
-}
 
 export default function Profile() {
   const navigate = useNavigate()
@@ -37,7 +32,7 @@ export default function Profile() {
   const [profileError, setProfileError] = useState(false)
   const [savingProfile, setSavingProfile] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
-  const [showAvatarPicker, setShowAvatarPicker] = useState(false)
+  const [cropFile, setCropFile] = useState(null)
   const [joinedDate, setJoinedDate] = useState(null)
   const [totalSessions, setTotalSessions] = useState(0)
   const [sessionExpired, setSessionExpired] = useState(false)
@@ -243,67 +238,69 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
     setGeneratingReport(false)
-    showToast(' Report downloaded! Open it in your browser.', 5000)
+    toast.success('Report downloaded! Open it in your browser.', 5000)
   }
 
   const handleProfileSave = async () => {
     setSavingProfile(true)
     try {
       await supabase.from('profiles').update({ full_name: fullName, phone: `+254${phone}`, goal }).eq('id', userId)
-      showToast(' Profile updated!', 2000)
-    } catch (err) { showToast('Failed to save.', 2000) }
+      toast.success('Profile updated!', 2000)
+    } catch (err) { toast.error('Failed to save.', 2000) }
     finally { setSavingProfile(false) }
   }
 
-  const handleAvatarUpload = async (e) => {
-    const file = e.target.files[0]; if (!file) return
-    if (file.size > 5 * 1024 * 1024) { showToast('Image must be under 5MB.', 2000); return }
-    if (!file.type.startsWith('image/')) { showToast('Please upload an image.', 2000); return }
+  const handleAvatarFileSelect = (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) { toast.error('Please upload an image.', 2000); return }
+    setCropFile(file)
+  }
+
+  const handleAvatarSave = async (blob) => {
     setUploadingAvatar(true)
     try {
-      const fileName = `${userId}/${Date.now()}.jpg`
-      const { error } = await supabase.storage.from('avatars').upload(fileName, file, { upsert: true })
+      const fileName = `${userId}/avatar.webp`
+      const { error } = await supabase.storage.from('avatars').upload(fileName, blob, { upsert: true, contentType: 'image/webp' })
       if (error) throw error
       const { data: signedUrlData, error: signedUrlError } = await supabase.storage.from('avatars').createSignedUrl(fileName, 3600)
       if (signedUrlError) throw signedUrlError
-      setAvatarUrl(signedUrlData.signedUrl)
       const { error: profileError } = await supabase.from('profiles').update({ avatar_url: fileName }).eq('id', userId)
       if (profileError) throw profileError
-      showToast(' Photo updated!')
-    } catch (err) { showToast('Upload failed.', 2000) }
+      setAvatarUrl(signedUrlData.signedUrl)
+      setCropFile(null)
+      toast.success('Photo updated!')
+    } catch (err) { toast.error('Upload failed.', 2000) }
     setUploadingAvatar(false)
-  }
-
-  const handleAvatarSelect = async (emoji) => {
-    setAvatarUrl(emoji)
-    await supabase.from('profiles').update({ avatar_url: emoji }).eq('id', userId)
-    setShowAvatarPicker(false)
-    showToast(' Avatar updated!')
   }
 
   const savePrefs = async () => {
     setSavingPrefs(true)
     try {
       await supabase.from('profiles').update({ preferences: prefs }).eq('id', userId)
-      showToast('Preferences saved.', 2000)
-    } catch (err) { showToast('Failed to save.', 2000) }
+      toast.success('Preferences saved.', 2000)
+    } catch (err) { toast.error('Failed to save.', 2000) }
     setSavingPrefs(false)
   }
 
   const updatePassword = async () => {
     setSavingPassword(true)
-    if (!passwords.next || !passwords.confirm) { showToast('Fill in all fields.', 2000); setSavingPassword(false); return }
-    if (passwords.next.length < 8) { showToast('Min 8 characters.', 2000); setSavingPassword(false); return }
-    if (passwords.next !== passwords.confirm) { showToast("Passwords don't match.", 2000); setSavingPassword(false); return }
+    if (!passwords.next || !passwords.confirm) { toast.error('Fill in all fields.', 2000); setSavingPassword(false); return }
+    if (passwords.next.length < 8) { toast.error('Min 8 characters.', 2000); setSavingPassword(false); return }
+    if (passwords.next !== passwords.confirm) { toast.error("Passwords don't match.", 2000); setSavingPassword(false); return }
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email: session.user.email, password: passwords.current })
-      if (signInError) { showToast('Current password incorrect.', 2000); setSavingPassword(false); return }
-      const { error } = await supabase.auth.updateUser({ password: passwords.next })
-      if (error) { showToast(error.message, 2000); setSavingPassword(false); return }
-      showToast(' Password updated!', 3000)
+      const { error } = await supabase.auth.updateUser({
+        password: passwords.next,
+        current_password: passwords.current,
+      })
+      if (error) throw error
+      toast.success('Password updated!', 3000)
       setPasswords({ current: '', next: '', confirm: '' })
-    } catch (err) { showToast('Failed.', 2000) }
+    } catch (err) {
+      console.error('Password update failed:', err)
+      toast.error(err.message || 'Password update failed.', 2000)
+    }
     setSavingPassword(false)
   }
 
@@ -349,36 +346,35 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
       setMfaEnabled(true)
       setMfaEnrollment(null)
       setMfaCode('')
-      showToast('Authenticator enabled.', 2500)
+      toast.success('Authenticator enabled.', 2500)
     }
     setMfaLoading(false)
   }
 
   const handleDeleteAccount = async () => {
     if (deleteStep < 2) { setDeleteStep(prev => prev + 1); setDeleteInput(''); return }
-    if (deleteInput !== 'DELETE') { showToast('Type DELETE to confirm', 2000); return }
+    if (deleteInput !== 'DELETE') { toast.error('Type DELETE to confirm', 2000); return }
     setDeletingAccount(true)
     try {
       const { error: deleteError } = await supabase.functions.invoke('delete-account', { body: { action: 'self-delete' } })
       if (deleteError) throw deleteError
-      await supabase.auth.signOut()
-      sessionStorage.removeItem('elevated_unlocked_at')
+      const { error: signOutError } = await supabase.auth.signOut({ scope: 'local' })
+      clearAuthStorage()
+      if (signOutError) console.error('Account was deleted, but local sign-out returned an error:', signOutError)
       navigate('/', { replace: true })
     } catch (err) {
       console.error('Account deletion failed:', err)
-      showToast('Delete failed. Try again.', 2000)
+      toast.error('Delete failed. Try again.', 2000)
       setDeletingAccount(false)
     }
   }
 
   const handleSignOut = async () => {
-    const { error: signOutError } = await supabase.auth.signOut()
+    const { error: signOutError } = await supabase.auth.signOut({ scope: 'local' })
+    clearAuthStorage()
     if (signOutError) {
       console.error('Sign-out failed:', signOutError)
-      showToast('Could not sign out. Please try again.')
-      return
     }
-    sessionStorage.removeItem('elevated_unlocked_at')
     navigate('/login', { replace: true })
   }
 
@@ -409,7 +405,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
   if (loadingProfile) {
     return (
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ display: 'flex', gap: '8px' }}>{[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}</div>
+        <BrandLoader variant="section" />
       </div>
     )
   }
@@ -429,7 +425,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
 
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem',  }}>
           <div>
-            <h1 className="fs-16" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> My Profile</h1>
+            <h1 className="fs-16" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}>My Profile</h1>
             <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{fullName || 'Complete your profile'}</p>
           </div>
         </div>
@@ -455,7 +451,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
           {/* Badges */}
           {stats.badges.length > 0 && (
             <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-              <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}> Badges ({earnedBadges}/{stats.badges.length})</h3>
+              <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Badges ({earnedBadges}/{stats.badges.length})</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '6px' }}>
                 {stats.badges.map(b => (
                   <button type="button" key={b.id} className="clickable" onClick={() => handleBadgeClick(b)}
@@ -463,7 +459,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
                     onMouseEnter={e => { e.currentTarget.style.borderColor = '#2DD4BF'; e.currentTarget.style.transform = 'translateY(-2px)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = b.earned ? '#2DD4BF' : 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'translateY(0)' }}
                     title={b.earned ? `${b.name} — Click to explore` : `${b.name} (Locked)`}>
-                    <span className="fs-20" style={{ display: 'block' }}>{b.earned ? b.emoji : ''}</span>
+                    <span className="fs-20" style={{ display: 'block' }}>{b.earned ? <AppIcon name={b.icon || 'star'} size={22} /> : ''}</span>
                     <span className="fs-12" style={{ color: b.earned ? '#2DD4BF' : 'rgba(255,255,255,0.4)', display: 'block', marginTop: '3px' }}>{b.name}</span>
                   </button>
                 ))}
@@ -473,17 +469,17 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
 
           {/* Report Section */}
           <div className="dash-section" style={{ marginBottom: '0.75rem', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06))', borderColor: '#2DD4BF' }}>
-            <h3 className="fs-13" style={{ color: '#2DD4BF', marginBottom: '0.75rem' }}> Recovery Report</h3>
+            <h3 className="fs-13" style={{ color: '#2DD4BF', marginBottom: '0.75rem' }}>Recovery Report</h3>
 
             <p className="fs-12" style={{ color: '#7DBDEE', lineHeight: '1.5', marginBottom: '12px' }}>Your professional recovery report is ready. Download it to share with your therapist or counselor.</p>
             <button onClick={downloadRecoveryReport} disabled={generatingReport} className="fs-12" style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-              {generatingReport ? <span className="spinner"></span> : 'Download Report'}
+              {generatingReport ? <BrandLoader variant="inline" showWordmark={false} /> : 'Download Report'}
             </button>
           </div>
 
           {/* Tabs */}
           <div style={{ display: 'flex', gap: '4px', marginBottom: '0.75rem', background: 'rgba(255,255,255,0.06)', borderRadius: '10px', padding: '3px', border: '1px solid rgba(255,255,255,0.12)' }}>
-            {[{ id: TABS.PROFILE, label: ' Profile' }, { id: TABS.SETTINGS, label: ' Prefs' }, { id: TABS.SECURITY, label: ' Security' }, { id: TABS.DATA, label: ' Data' }].map(tab => (
+            {[{ id: TABS.PROFILE, label: 'Profile' }, { id: TABS.SETTINGS, label: 'Prefs' }, { id: TABS.SECURITY, label: 'Security' }, { id: TABS.DATA, label: 'Data' }].map(tab => (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)} className="fs-12" style={{ flex: 1, padding: '10px 6px', borderRadius: '8px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '44px' }}>{tab.label}</button>
             ))}
           </div>
@@ -493,29 +489,19 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
             <>
               <div className="dash-section" style={{ marginBottom: '0.75rem', textAlign: 'center' }}>
                 <div style={{ position: 'relative', display: 'inline-block' }}>
-                  <button type="button" className="card-action" aria-label="Change avatar" onClick={() => setShowAvatarPicker(!showAvatarPicker)} style={{ borderRadius: '50%' }} />
+                  <button type="button" className="card-action" aria-label="Change avatar" onClick={() => fileInputRef.current?.click()} style={{ borderRadius: '50%' }} />
                   {avatarUrl && avatarUrl.startsWith('http') ? <img src={avatarUrl} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #2DD4BF' }} />
-                  : avatarUrl ? <div className="fs-32" style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #2DD4BF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{avatarUrl}</div>
                   : <div className="fs-28" style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #7DBDEE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>{initials}</div>}
-                  <div className="fs-12" style={{ position: 'absolute', bottom: '0', right: '0', background: '#2DD4BF', color: '#0B1220', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0B1220' }}></div>
+                  <div className="fs-12" style={{ position: 'absolute', bottom: '0', right: '0', background: '#2DD4BF', color: '#0B1220', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0B1220' }}><AppIcon name="camera" size={12} /></div>
                 </div>
-                {showAvatarPicker && (
-                  <div style={{ marginTop: '10px' }}>
-                    <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '8px' }}>
-                      {AVATAR_OPTIONS.map(emoji => (
-                        <button key={emoji} onClick={() => handleAvatarSelect(emoji)} className="fs-20" style={{ width: '40px', height: '40px', borderRadius: '50%', background: avatarUrl === emoji ? 'rgba(255,255,255,0.12)' : '#0B1220', border: avatarUrl === emoji ? '2px solid #2DD4BF' : '1px solid rgba(255,255,255,0.12)', cursor: 'pointer' }} aria-label={`Select ${emoji} avatar`}>{emoji}</button>
-                      ))}
-                    </div>
-                    <button onClick={() => fileInputRef.current?.click()} disabled={uploadingAvatar} className="fs-12" style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '44px' }}>{uploadingAvatar ? 'Uploading...' : ' Upload photo'}</button>
-                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarUpload} style={{ display: 'none' }} />
-                  </div>
-                )}
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarFileSelect} style={{ display: 'none' }} />
+                {uploadingAvatar && <p className="fs-12" style={{ color: '#2DD4BF', marginTop: '8px' }}><BrandLoader variant="inline" showWordmark={false} /> Saving photo…</p>}
               </div>
 
               <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
                 <div className="form-group"><label>Full name</label><input type="text" value={fullName} onChange={e => setFullName(e.target.value)} /></div>
                 <div className="form-group"><label>Email</label><input type="email" value={email} disabled style={{ opacity: 0.5 }} /></div>
-                <div className="form-group"><label>Phone</label><div className="phone-input"><span className="phone-prefix">🇰🇪 +254</span><input type="tel" value={phone} onChange={e => setPhone(e.target.value.replace('+254', ''))} placeholder="7XX XXX XXX" /></div></div>
+                <div className="form-group"><label>Phone</label><div className="phone-input"><span className="phone-prefix">+254</span><input type="tel" value={phone} onChange={e => setPhone(e.target.value.replace('+254', ''))} placeholder="7XX XXX XXX" /></div></div>
               </div>
               <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
                 <label className="fs-12" style={{ color: '#2DD4BF', marginBottom: '8px', display: 'block' }}>My goal</label>
@@ -613,8 +599,8 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
           <button className="btn-ghost full fs-12" onClick={handleSignOut} style={{ padding: '10px', marginTop: '0.5rem', minHeight: '44px' }}>Sign out</button>
         </div>
       </div>
+      {cropFile && <AvatarCropper file={cropFile} saving={uploadingAvatar} onCancel={() => setCropFile(null)} onSave={handleAvatarSave} />}
       <style>{`
-        @keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }
         @media (max-width: 768px) { .main-content { margin-left: 0 !important; } }
       `}</style>
     </div>

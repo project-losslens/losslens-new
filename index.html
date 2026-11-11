@@ -9,15 +9,17 @@
       html, body { margin: 0; background: #0B1220; }
       #boot-loader {
         position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-        background: #0B1220; z-index: 9999;
+        flex-direction: column; background: #0B1220; z-index: 9999;
       }
-      #boot-loader .boot-spin { animation: boot-spin 6s linear infinite; transform-origin: 50px 50px; }
-      @keyframes boot-spin { to { transform: rotate(360deg); } }
-      #boot-loader .boot-petal { animation: boot-pulse 2.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
-      @keyframes boot-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+      #boot-loader .brand-mark-spin { transform-origin: 50px 50px; animation: brand-spin 14s ease-in-out infinite; }
+      #boot-loader .brand-petal { animation: brand-petal-pulse 2.4s ease-in-out infinite; }
+      #boot-loader .brand-wordmark { margin-top: 18px; color: #FFFFFF; font: 700 22px/1.2 system-ui, sans-serif; letter-spacing: .5px; }
+      #boot-loader .brand-wordmark-accent { color: #2DD4BF; }
+      #boot-loader .brand-label { margin-top: 10px; color: rgba(255,255,255,.55); font: 13px/1.4 system-ui, sans-serif; }
+      @keyframes brand-spin { to { transform: rotate(360deg); } }
+      @keyframes brand-petal-pulse { 0%,100% { opacity:.75 } 50% { opacity:1 } }
       @media (prefers-reduced-motion: reduce) {
-        #boot-loader .boot-spin { animation: none; }
-        #boot-loader .boot-petal { animation: none; opacity: .85; }
+        #boot-loader .brand-mark-spin, #boot-loader .brand-petal { animation: none; }
       }
     </style>
 
@@ -43,24 +45,28 @@
     <meta name="twitter:description" content="Free, private gambling support built for Kenya." />
   </head>
   <body>
-    <div id="root">
-      <div id="boot-loader" role="status" aria-label="Loading LossLens">
+    <div id="root"></div>
+    <div id="boot-loader" role="status" aria-label="Loading LossLens">
         <svg width="72" height="72" viewBox="0 0 100 100" fill="none" aria-hidden="true">
-          <g class="boot-spin">
-            <ellipse class="boot-petal" cx="50" cy="26" rx="9" ry="20" fill="#2DD4BF" opacity="0.9" transform="rotate(0 50 50)" />
-            <ellipse class="boot-petal" cx="50" cy="26" rx="9" ry="20" fill="#7DBDEE" opacity="0.9" transform="rotate(45 50 50)" style="animation-delay:.35s" />
-            <ellipse class="boot-petal" cx="50" cy="26" rx="9" ry="20" fill="#2DD4BF" opacity="0.9" transform="rotate(90 50 50)" style="animation-delay:.7s" />
-            <ellipse class="boot-petal" cx="50" cy="26" rx="9" ry="20" fill="#7DBDEE" opacity="0.9" transform="rotate(135 50 50)" style="animation-delay:1.05s" />
-            <ellipse class="boot-petal" cx="50" cy="26" rx="9" ry="20" fill="#2DD4BF" opacity="0.9" transform="rotate(180 50 50)" style="animation-delay:1.4s" />
-            <ellipse class="boot-petal" cx="50" cy="26" rx="9" ry="20" fill="#7DBDEE" opacity="0.9" transform="rotate(225 50 50)" style="animation-delay:1.75s" />
-            <ellipse class="boot-petal" cx="50" cy="26" rx="9" ry="20" fill="#2DD4BF" opacity="0.9" transform="rotate(270 50 50)" style="animation-delay:2.1s" />
-            <ellipse class="boot-petal" cx="50" cy="26" rx="9" ry="20" fill="#7DBDEE" opacity="0.9" transform="rotate(315 50 50)" style="animation-delay:2.45s" />
+          <g class="brand-mark-spin">
+            <ellipse class="brand-petal" cx="50" cy="26" rx="9" ry="20" fill="#2DD4BF" opacity="0.9" transform="rotate(0 50 50)" />
+            <ellipse class="brand-petal" cx="50" cy="26" rx="9" ry="20" fill="#7DBDEE" opacity="0.9" transform="rotate(45 50 50)" style="animation-delay:.1s" />
+            <ellipse class="brand-petal" cx="50" cy="26" rx="9" ry="20" fill="#2DD4BF" opacity="0.9" transform="rotate(90 50 50)" style="animation-delay:.2s" />
+            <ellipse class="brand-petal" cx="50" cy="26" rx="9" ry="20" fill="#7DBDEE" opacity="0.9" transform="rotate(135 50 50)" style="animation-delay:.3s" />
+            <ellipse class="brand-petal" cx="50" cy="26" rx="9" ry="20" fill="#2DD4BF" opacity="0.9" transform="rotate(180 50 50)" style="animation-delay:.4s" />
+            <ellipse class="brand-petal" cx="50" cy="26" rx="9" ry="20" fill="#7DBDEE" opacity="0.9" transform="rotate(225 50 50)" style="animation-delay:.5s" />
+            <ellipse class="brand-petal" cx="50" cy="26" rx="9" ry="20" fill="#2DD4BF" opacity="0.9" transform="rotate(270 50 50)" style="animation-delay:.6s" />
+            <ellipse class="brand-petal" cx="50" cy="26" rx="9" ry="20" fill="#7DBDEE" opacity="0.9" transform="rotate(315 50 50)" style="animation-delay:.7s" />
             <circle cx="50" cy="50" r="12" stroke="#7DBDEE" stroke-width="3" fill="none" />
             <circle cx="50" cy="50" r="4" fill="#2DD4BF" />
           </g>
         </svg>
-      </div>
+        <div class="brand-wordmark">Loss<span class="brand-wordmark-accent">Lens</span></div>
+        <div class="brand-label">Loading</div>
     </div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      window.setTimeout(() => document.getElementById('boot-loader')?.remove(), 10000)
+    </script>
   </body>
 </html>

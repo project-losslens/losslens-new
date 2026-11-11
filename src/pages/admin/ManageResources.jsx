@@ -1,23 +1,17 @@
+import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
+import { BrandLoader } from '../../components/Brand'
 
 //  Constants
 const CATEGORIES = ['Helpline', 'App', 'Podcast', 'Self-exclusion', 'Financial', 'Mindfulness', 'Other']
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--info);color:var(--primary);padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), duration)
-}
 
 export default function ManageResources() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [resources, setResources] = useState([])
-  const [toast, setToast] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)
   const [saving, setSaving] = useState(false)
@@ -29,10 +23,6 @@ export default function ManageResources() {
   const [formErrors, setFormErrors] = useState({})
   const [form, setForm] = useState({ name: '', description: '', phone: '', url: '', category: 'Helpline', hours: '', active: true })
 
-  const displayToast = useCallback((msg, type = 'success') => {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 3000)
-  }, [])
 
   //  Debounce search
   useEffect(() => {
@@ -88,10 +78,10 @@ export default function ManageResources() {
         ? await supabase.from('resources').update(payload).eq('id', editing.id)
         : await supabase.from('resources').insert(payload)
       if (saveError) throw saveError
-      displayToast(editing ? 'Resource updated.' : 'Resource added.')
+      toast.success(editing ? 'Resource updated.' : 'Resource added.')
       setShowForm(false)
       fetchAll()
-    } catch (err) { displayToast('Save failed: ' + err.message, 'error') }
+    } catch (err) { toast.error('Save failed: ' + err.message) }
     finally { setSaving(false) }
   }
 
@@ -103,9 +93,9 @@ export default function ManageResources() {
     if (toggleError) {
       // Rollback
       setResources(prev => prev.map(item => item.id === r.id ? { ...item, active: !newActive } : item))
-      displayToast('Update failed.', 'error')
+      toast.error('Update failed.')
     } else {
-      displayToast(newActive ? 'Resource activated.' : 'Resource hidden.')
+      toast.success(newActive ? 'Resource activated.' : 'Resource hidden.')
     }
   }
 
@@ -113,10 +103,10 @@ export default function ManageResources() {
     setDeleting(true)
     const { error: delError } = await supabase.from('resources').delete().eq('id', id)
     if (delError) {
-      displayToast('Delete failed.', 'error')
+      toast.error('Delete failed.')
     } else {
       setResources(prev => prev.filter(r => r.id !== id))
-      displayToast('Resource deleted.')
+      toast.success('Resource deleted.')
     }
     setDeleting(false)
     setShowDeleteConfirm(null)
@@ -142,7 +132,7 @@ export default function ManageResources() {
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
               {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
             </div>
-            <p style={{ color: 'var(--primary)', fontSize: '13px' }}>Loading resources...</p>
+            <BrandLoader variant="section" />
           </div>
         </div>
         <style>{`@keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }`}</style>
@@ -177,10 +167,6 @@ export default function ManageResources() {
             <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Refresh</button>
           </div>
         </div>
-
-        {toast && (
-          <div style={{ position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', background: toast.type === 'error' ? 'rgba(255,255,255,0.08)' : 'var(--info)', color: toast.type === 'error' ? 'var(--text)' : 'var(--primary)', padding: '10px 20px', borderRadius: '100px', fontSize: '13px', zIndex: 'var(--z-toast)', whiteSpace: 'nowrap' }}>{toast.msg}</div>
-        )}
 
         {/* Form Modal */}
         {showForm && (

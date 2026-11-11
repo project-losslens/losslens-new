@@ -1,3 +1,4 @@
+import { BrandLoader } from '../../components/Brand'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -152,7 +153,7 @@ function ChatViewer() {
             </div>
 
             {loading ? (
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textAlign: 'center', padding: '1rem' }}>Loading...</p>
+              <BrandLoader variant="section" />
             ) : filteredUsers.length === 0 ? (
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textAlign: 'center', padding: '1rem' }}>
                 {search ? 'No users found' : 'No chat history yet'}
@@ -217,7 +218,7 @@ function ChatViewer() {
                 <p style={{ fontSize: '12px' }}>All chats are read-only</p>
               </div>
             ) : chatLoading ? (
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', textAlign: 'center', padding: '2rem' }}>Loading conversations...</p>
+              <BrandLoader variant="section" />
             ) : conversations.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)' }}>
                 <p style={{ fontSize: '13px' }}>No conversations found for this user.</p>

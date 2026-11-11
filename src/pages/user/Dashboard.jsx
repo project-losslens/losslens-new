@@ -1,3 +1,5 @@
+import { BrandLoader } from '../../components/Brand'
+import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -35,22 +37,6 @@ function triggerConfetti() {
   }
 }
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `
-    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
-    background: #7DBDEE; color: #2DD4BF; padding: 10px 20px; border-radius: 100px;
-    font-size: 13px; font-weight: 500; z-index: var(--z-toast);
-    box-shadow: 0 4px 16px rgba(11,18,32,0.4); border: 1px solid rgba(255,255,255,0.4);
-    animation: slideInRight 0.3s ease-out; white-space: nowrap;
-  `
-  document.body.appendChild(toast)
-  setTimeout(() => {
-    toast.style.animation = 'slideOutRight 0.3s ease-in forwards'
-    setTimeout(() => toast.remove(), 300)
-  }, duration)
-}
 
 function UsernamePrompt({ userId, onComplete }) {
   const { t } = useI18n()
@@ -110,7 +96,7 @@ function UsernamePrompt({ userId, onComplete }) {
           {status === 'available' && <span className="fs-12" style={{ color: '#2DD4BF' }}>{t('dashboard.usernameAvailable')}</span>}
           <span className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('dashboard.usernameRules')}</span>
         </div>
-        <button className="btn-primary full" onClick={handleSave} disabled={loading || status === 'taken' || status === 'checking'}>{loading ? <span className="spinner" /> : `${t('dashboard.usernameSave')} →`}</button>
+        <button className="btn-primary full" onClick={handleSave} disabled={loading || status === 'taken' || status === 'checking'}>{loading ? <BrandLoader variant="inline" showWordmark={false} /> : `${t('dashboard.usernameSave')} →`}</button>
       </div>
     </div>
   )
@@ -213,13 +199,13 @@ function Dashboard() {
     if (profile?.streak_days > 0 && profile.streak_days % 7 === 0 && !streakCelebrated) {
       setStreakCelebrated(true)
       if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) triggerConfetti()
-      showToast(` ${profile.streak_days} days clean! You're amazing!`, 4000)
+      toast.success(`${profile.streak_days} days clean! You're amazing!`, 4000)
     }
   }, [profile?.streak_days, streakCelebrated])
 
   const handleTouchStart = (e) => { if (window.scrollY === 0) touchStartY.current = e.touches[0].clientY }
   const handleTouchMove = (e) => { if (touchStartY.current === 0) return; const distance = e.touches[0].clientY - touchStartY.current; if (distance > 0 && window.scrollY === 0) { setPullDistance(Math.min(distance * 0.4, 120)) } }
-  const handleTouchEnd = async () => { if (pullDistance >= pullThreshold && !refreshing) { setRefreshing(true); await fetchData(); showToast(t('dashboard.refreshToast'), 2000); setRefreshing(false) } touchStartY.current = 0; setPullDistance(0) }
+  const handleTouchEnd = async () => { if (pullDistance >= pullThreshold && !refreshing) { setRefreshing(true); await fetchData(); toast.success(t('dashboard.refreshToast'), 2000); setRefreshing(false) } touchStartY.current = 0; setPullDistance(0) }
 
   const [moneyInfoOpen, setMoneyInfoOpen] = useState(false)
   const stats = [
@@ -234,8 +220,7 @@ function Dashboard() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
-        <div style={{ animation: 'logoBreathe 2s ease-in-out infinite' }}><span style={{ fontFamily: 'var(--font-display)', fontSize: '36px', color: '#2DD4BF', fontWeight: 700 }}>LossLens</span></div>
-        <div style={{ display: 'flex', gap: '10px' }}>{[0, 1, 2].map(i => (<div key={i} style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i * 0.2}s ease-in-out infinite` }} />))}</div>
+        <BrandLoader variant="section" />
       </div>
     )
   }
@@ -256,7 +241,7 @@ function Dashboard() {
   return (
     <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
       {showUsernamePrompt && userId && (
-        <UsernamePrompt userId={userId} onComplete={(newUsername) => { setProfile(prev => ({ ...prev, username: newUsername })); setShowUsernamePrompt(false); showToast(t('dashboard.welcomeUsername', { username: newUsername }), 3000); }} />
+        <UsernamePrompt userId={userId} onComplete={(newUsername) => { setProfile(prev => ({ ...prev, username: newUsername })); setShowUsernamePrompt(false); toast.success(t('dashboard.welcomeUsername', { username: newUsername }), 3000); }} />
       )}
 
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
@@ -288,7 +273,7 @@ function Dashboard() {
           {pullDistance > 0 && (
             <div style={{ position: 'fixed', top: 0, left: '50%', zIndex: 'var(--z-modal)', transform: 'translateX(-50%)', paddingTop: Math.max(pullDistance - 40, 4), pointerEvents: 'none' }}>
               <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '2px solid #2DD4BF', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `rotate(${Math.min(pullDistance * 3, 360)}deg)`, opacity: Math.min(pullDistance / pullThreshold, 1) }}>
-                {refreshing ? <div style={{ width: '16px', height: '16px', border: '2px solid #2DD4BF', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> : <span className="fs-16" style={{ color: '#2DD4BF' }}>{pullDistance >= pullThreshold ? '' : '↓'}</span>}
+                {refreshing ? <BrandLoader variant="inline" showWordmark={false} /> : <span className="fs-16" style={{ color: '#2DD4BF' }}>{pullDistance >= pullThreshold ? '' : '↓'}</span>}
               </div>
             </div>
           )}
@@ -440,13 +425,10 @@ function Dashboard() {
       )}
 
       <style>{`
-        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
         @keyframes confettiFall { 0%{transform:translateY(-100%) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
         @keyframes slideInRight { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
         @keyframes slideOutRight { from{transform:translateX(0);opacity:1} to{transform:translateX(100%);opacity:0} }
         @keyframes slideDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes logoBreathe { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.05);opacity:0.7} }
-        @keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-12px);opacity:1} }
         @media (prefers-reduced-motion: reduce) { *,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important} }
         @media (max-width: 768px) { .main-content { margin-left: 0 !important; } }
       `}</style>

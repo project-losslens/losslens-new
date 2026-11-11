@@ -1,6 +1,9 @@
+import { toast } from '../../components/ToastProvider'
+import NumberField from '../../components/NumberField'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
+import { BrandLoader } from '../../components/Brand'
 
 //  Constants
 const EVENT_TYPES = ['Workshop', 'Support Group', 'Seminar', 'Webinar', 'Social Event', 'Training', 'Other']
@@ -24,7 +27,6 @@ export default function ManageEvents() {
   const [replyInputs, setReplyInputs] = useState({})
   const [sendingReply, setSendingReply] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [toast, setToast] = useState(null)
   const [togglingDiscussion, setTogglingDiscussion] = useState(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null)
   const [deleting, setDeleting] = useState(false)
@@ -33,11 +35,6 @@ export default function ManageEvents() {
     title: '', description: '', date: '', location: '',
     type: 'Workshop', spots: '', image_url: '', active: true, discussion_enabled: true
   })
-
-  const displayToast = useCallback((msg, type = 'success') => {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 3000)
-  }, [])
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
@@ -113,10 +110,10 @@ export default function ManageEvents() {
         ? await supabase.from('events').update(payload).eq('id', editingEvent.id)
         : await supabase.from('events').insert(payload)
       if (saveError) throw saveError
-      displayToast(editingEvent ? 'Event updated!' : 'Event created!')
+      toast.success(editingEvent ? 'Event updated!' : 'Event created!')
       setShowForm(false)
       fetchAll()
-    } catch (err) { displayToast('Save failed: ' + err.message, 'error') }
+    } catch (err) { toast.error('Save failed: ' + err.message) }
     finally { setSaving(false) }
   }
 
@@ -126,9 +123,9 @@ export default function ManageEvents() {
     const { error: toggleError } = await supabase.from('events').update({ active: newActive }).eq('id', ev.id)
     if (toggleError) {
       setEvents(prev => prev.map(e => e.id === ev.id ? { ...e, active: !newActive } : e))
-      displayToast('Update failed.', 'error')
+      toast.error('Update failed.')
     } else {
-      displayToast(newActive ? 'Event activated.' : 'Event deactivated.')
+      toast.success(newActive ? 'Event activated.' : 'Event deactivated.')
     }
   }
 
@@ -139,9 +136,9 @@ export default function ManageEvents() {
     const { error } = await supabase.from('events').update({ discussion_enabled: newVal }).eq('id', ev.id)
     if (error) {
       setEvents(prev => prev.map(e => e.id === ev.id ? { ...e, discussion_enabled: !newVal } : e))
-      displayToast('Failed to update.', 'error')
+      toast.error('Failed to update.')
     } else {
-      displayToast(newVal ? ' Discussion enabled.' : ' Discussion disabled.')
+      toast.success(newVal ? 'Discussion enabled.' : 'Discussion disabled.')
     }
     setTogglingDiscussion(null)
   }
@@ -159,8 +156,8 @@ export default function ManageEvents() {
       const { error: delError } = await supabase.from('events').delete().eq('id', id)
       if (delError) throw delError
       setEvents(prev => prev.filter(e => e.id !== id))
-      displayToast('Event deleted.')
-    } catch (err) { displayToast('Delete failed: ' + err.message, 'error') }
+      toast.success('Event deleted.')
+    } catch (err) { toast.error('Delete failed: ' + err.message) }
     setDeleting(false)
     setShowDeleteConfirm(null)
     setExpandedEvent(null)
@@ -179,23 +176,23 @@ export default function ManageEvents() {
         is_admin_reply: true,
       })
       if (replyError) throw replyError
-      displayToast('Reply posted!')
+      toast.success('Reply posted!')
       setReplyInputs(prev => ({ ...prev, [discussionId]: '' }))
       fetchAll()
-    } catch (err) { displayToast('Failed to reply.', 'error') }
+    } catch (err) { toast.error('Failed to reply.') }
     setSendingReply(false)
   }
 
   const deleteDiscussion = async (id) => {
     const { error: delError } = await supabase.from('event_discussions').delete().eq('id', id)
-    if (delError) { displayToast('Delete failed.', 'error') }
-    else { setDiscussions(prev => prev.filter(d => d.id !== id)); displayToast('Message deleted.') }
+    if (delError) { toast.error('Delete failed.') }
+    else { setDiscussions(prev => prev.filter(d => d.id !== id)); toast.success('Message deleted.') }
   }
 
   const deleteContact = async (id) => {
     const { error: delError } = await supabase.from('event_messages').delete().eq('id', id)
-    if (delError) { displayToast('Delete failed.', 'error') }
-    else { setContacts(prev => prev.filter(c => c.id !== id)); displayToast('Message deleted.') }
+    if (delError) { toast.error('Delete failed.') }
+    else { setContacts(prev => prev.filter(c => c.id !== id)); toast.success('Message deleted.') }
   }
 
   const markContactRead = async (id) => {
@@ -231,7 +228,7 @@ export default function ManageEvents() {
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
               {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
             </div>
-            <p style={{ color: 'var(--info)', fontSize: '13px' }}>Loading events...</p>
+            <BrandLoader variant="section" />
           </div>
         </div>
         <style>{`@keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }`}</style>
@@ -268,10 +265,6 @@ export default function ManageEvents() {
           </div>
         </div>
 
-        {toast && (
-          <div style={{ position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', background: toast.type === 'error' ? 'rgba(255,255,255,0.08)' : 'var(--info)', color: toast.type === 'error' ? 'var(--text)' : 'var(--primary)', padding: '10px 20px', borderRadius: '100px', fontSize: '13px', zIndex: 'var(--z-toast)', whiteSpace: 'nowrap' }}>{toast.msg}</div>
-        )}
-
         {/* Form Modal */}
         {showForm && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
@@ -304,7 +297,7 @@ export default function ManageEvents() {
                   </div>
                   <div>
                     <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Spots (min 1)</label>
-                    <input type="number" value={form.spots} onChange={e => { setForm(p => ({ ...p, spots: e.target.value })); setFormErrors(p => ({ ...p, spots: '' })) }} style={{ ...inputStyle, borderColor: formErrors.spots ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="e.g. 50" min="1" />
+                    <NumberField value={form.spots} onChange={(spots) => { setForm((current) => ({ ...current, spots: spots ?? '' })); setFormErrors((current) => ({ ...current, spots: '' })) }} wrapperStyle={{ ...inputStyle, borderColor: formErrors.spots ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="e.g. 50" inputMode="numeric" min={1} step={1} />
                     {formErrors.spots && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{formErrors.spots}</span>}
                   </div>
                 </div>
@@ -469,7 +462,7 @@ export default function ManageEvents() {
                         const a = document.createElement('a')
                         a.href = url; a.download = `rsvp-${ev.title?.replace(/\s/g,'-') || 'event'}.csv`
                         a.click(); URL.revokeObjectURL(url)
-                        displayToast(' RSVP list downloaded!')
+                        toast.success('RSVP list downloaded!')
                       }} style={btnStyle('transparent', 'var(--primary)', 'var(--primary)')}> Export CSV</button>
                     </div>
                     {[{ label: ' Going', list: r.going, color: 'var(--primary)' }, { label: ' Maybe', list: r.maybe, color: 'var(--info)' }, { label: " Can't", list: r.cant, color: 'var(--text)' }].map(({ label, list, color }) => list.length > 0 && (

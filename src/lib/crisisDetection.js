@@ -40,7 +40,3 @@ export function detectCrisis(message) {
   })
   return { crisis: matched.length > 0, keywords: matched }
 }
-
-export function crisisKeywordsOnly(message) {
-  return detectCrisis(message).keywords
-}

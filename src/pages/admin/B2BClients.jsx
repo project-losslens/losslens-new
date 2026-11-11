@@ -1,7 +1,10 @@
+import { toast } from '../../components/ToastProvider'
+import NumberField from '../../components/NumberField'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
+import { BrandLoader } from '../../components/Brand'
 
 const PLANS = { STANDARD: 'standard', ENTERPRISE: 'enterprise', CUSTOM: 'custom' }
 const PLAN_COLORS = {
@@ -10,13 +13,6 @@ const PLAN_COLORS = {
   [PLANS.CUSTOM]: { color: 'var(--info)', bg: 'rgba(255,255,255,0.04)', label: 'Custom' },
 }
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--info);color:var(--primary);padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), duration)
-}
 
 export default function B2BClients() {
   const navigate = useNavigate()
@@ -121,10 +117,10 @@ export default function B2BClients() {
         ? await supabase.from('b2b_clients').update(payload).eq('id', editingClient.id)
         : await supabase.from('b2b_clients').insert(payload)
       if (saveError) throw saveError
-      showToast(editingClient ? 'Client updated!' : 'Client added!')
+      toast.success(editingClient ? 'Client updated!' : 'Client added!')
       setShowForm(false)
       fetchClients()
-    } catch (err) { showToast('Save failed: ' + err.message, 'error') }
+    } catch (err) { toast.error('Save failed: ' + err.message) }
     finally { setSaving(false) }
   }
 
@@ -135,9 +131,9 @@ export default function B2BClients() {
     const { error: toggleError } = await supabase.from('b2b_clients').update({ status: newStatus }).eq('id', id)
     if (toggleError) {
       setClients(prev => prev.map(c => c.id === id ? { ...c, status: currentStatus } : c))
-      showToast('Update failed.', 'error')
+      toast.error('Update failed.')
     } else {
-      showToast(`Client ${newStatus === 'active' ? 'activated' : 'deactivated'}.`)
+      toast.success(`Client ${newStatus === 'active' ? 'activated' : 'deactivated'}.`)
     }
     setActionLoading(null)
     setShowToggleConfirm(null)
@@ -147,10 +143,10 @@ export default function B2BClients() {
     setDeleting(true)
     const { error: delError } = await supabase.from('b2b_clients').delete().eq('id', id)
     if (delError) {
-      showToast('Delete failed.', 'error')
+      toast.error('Delete failed.')
     } else {
       setClients(prev => prev.filter(c => c.id !== id))
-      showToast('Client deleted.')
+      toast.success('Client deleted.')
     }
     setDeleting(false)
     setShowDeleteConfirm(null)
@@ -158,7 +154,7 @@ export default function B2BClients() {
 
   const copyCode = (code) => {
     navigator.clipboard.writeText(code)
-    showToast('Company code copied!')
+    toast.success('Company code copied!')
   }
 
   const filteredClients = useMemo(() => {
@@ -188,7 +184,7 @@ export default function B2BClients() {
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
               {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
             </div>
-            <p style={{ color: 'var(--info)', fontSize: '13px' }}>Loading clients...</p>
+            <BrandLoader variant="section" />
           </div>
         </div>
         <style>{`@keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }`}</style>
@@ -262,7 +258,7 @@ export default function B2BClients() {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px' }}>
                     <div>
                       <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Seats</label>
-                      <input type="number" value={form.seats} onChange={e => { setForm(p => ({ ...p, seats: e.target.value })); setFormErrors(p => ({ ...p, seats: '' })) }} style={{ ...inputStyle, borderColor: formErrors.seats ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="e.g. 50" min="1" />
+                      <NumberField value={form.seats} onChange={(seats) => { setForm((current) => ({ ...current, seats: seats ?? '' })); setFormErrors((current) => ({ ...current, seats: '' })) }} wrapperStyle={{ ...inputStyle, borderColor: formErrors.seats ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="e.g. 50" inputMode="numeric" min={1} step={1} />
                       {formErrors.seats && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{formErrors.seats}</span>}
                     </div>
                     <div>
@@ -400,7 +396,7 @@ export default function B2BClients() {
                       {m.username && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginLeft: '6px' }}>@{m.username}</span>}
                     </div>
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                      <span style={{ color: 'var(--primary)', fontSize: '11px' }}>{'\u{1F525}'} {m.streak_days || 0}d</span>
+                      <span style={{ color: 'var(--primary)', fontSize: '11px' }}>{<AppIcon name="flame" size={12} />} {m.streak_days || 0}d</span>
                       <span style={{
                         background: m.risk_level === 'high' ? 'rgba(255,255,255,0.08)' : m.risk_level === 'medium' ? 'rgba(45,212,191,0.15)' : 'rgba(255,255,255,0.12)',
                         color: m.risk_level === 'high' ? 'var(--text)' : m.risk_level === 'medium' ? 'var(--info)' : 'var(--primary)',
@@ -421,7 +417,7 @@ export default function B2BClients() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowToggleConfirm(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: `1px solid ${showToggleConfirm.status === 'active' ? 'var(--info)' : 'var(--primary)'}`, maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{showToggleConfirm.status === 'active' ? '⏸' : '▶'}</span>
+            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{showToggleConfirm.status === 'active' ? 'Pause' : 'Resume'}</span>
             <h3 style={{ color: showToggleConfirm.status === 'active' ? 'var(--info)' : 'var(--primary)', fontSize: '16px', margin: '0 0 8px' }}>
               {showToggleConfirm.status === 'active' ? 'Deactivate Client?' : 'Activate Client?'}
             </h3>

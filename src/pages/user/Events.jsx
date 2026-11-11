@@ -1,3 +1,5 @@
+import { BrandLoader } from '../../components/Brand'
+import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -8,13 +10,6 @@ import AppIcon from '../../components/AppIcon'
 const TABS = { ALL: 'all', MINE: 'mine' }
 const EXPANDED_TABS = { DISCUSSION: 'discussion', MESSAGE: 'message' }
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), duration)
-}
 
 export default function Events() {
   const navigate = useNavigate()
@@ -116,22 +111,22 @@ export default function Events() {
       if (attendance === 'cant_go' && rsvps[eventId]) {
         const { error } = await supabase.from('event_rsvps').delete().eq('user_id', userId).eq('event_id', eventId)
         if (error) throw error
-        showToast('RSVP removed', 2000)
+        toast.success('RSVP removed', 2000)
       } else if (rsvps[eventId]) {
         const { error } = await supabase.from('event_rsvps').update({ attendance }).eq('user_id', userId).eq('event_id', eventId)
         if (error) throw error
-        showToast(attendance === 'going' ? ' Confirmed!' : ' Marked as maybe', 2000)
+        toast.success(attendance === 'going' ? ' Confirmed!' : ' Marked as maybe', 2000)
       } else {
         const { data, error } = await supabase.from('event_rsvps').insert({ user_id: userId, event_id: eventId, attendance }).select().single()
         if (error || !data) throw error || new Error('Insert failed')
         setRsvps(prev => ({ ...prev, [eventId]: { id: data.id, attendance } }))
-        showToast(attendance === 'going' ? ' Confirmed!' : ' Marked as maybe', 2000)
+        toast.success(attendance === 'going' ? ' Confirmed!' : ' Marked as maybe', 2000)
       }
     } catch (err) {
       // Rollback on failure
       setRsvps(prevRsvps)
       setAttendeeCounts(prevCounts)
-      showToast('Failed to save. Try again.', 2000)
+      toast.error('Failed to save. Try again.', 2000)
     } finally { setRsvpLoading(null) }
   }
 
@@ -150,12 +145,12 @@ export default function Events() {
       setTimeout(() => { if (discussionContainers.current[eventId]) discussionContainers.current[eventId].scrollTop = discussionContainers.current[eventId].scrollHeight }, 100)
     } catch (err) {
       setDiscussions(prev => ({ ...prev, [eventId]: prev[eventId].filter(m => m.id !== tempId) }))
-      showToast('Failed to post. Try again.', 2000)
+      toast.error('Failed to post. Try again.', 2000)
     } finally { setSubmittingQuestion(null) }
   }
 
   const handleContactAdmin = async (eventId) => {
-    if (!contactMessage.trim()) { showToast('Enter a message', 2000); return }
+    if (!contactMessage.trim()) { toast.error('Enter a message', 2000); return }
     setSendingContact(true)
     try {
       const { error } = await supabase.from('event_messages').insert({
@@ -167,10 +162,10 @@ export default function Events() {
       })
       if (error) throw error
       setContactSent(true)
-      showToast(' Message sent!', 3000)
+      toast.success('Message sent!', 3000)
       try { await createNotification(userId, { title: ' Message Sent', message: 'Admin will reply soon.', type: 'success', icon: '', link: '/events' }) } catch {}
       contactTimer.current = setTimeout(() => { setShowContactForm(null); setContactSent(false); setContactName(''); setContactPhone(''); setContactEmail(''); setContactMessage('') }, 2000)
-    } catch (err) { showToast('Failed to send.', 2000) }
+    } catch (err) { toast.error('Failed to send.', 2000) }
     finally { setSendingContact(false) }
   }
 
@@ -228,7 +223,7 @@ export default function Events() {
 
           {pageLoading && (
             <div style={{ textAlign: 'center', padding: '3rem' }}>
-              <span className="spinner" style={{ width: '28px', height: '28px', border: '3px solid rgba(255,255,255,0.12)', borderTopColor: '#2DD4BF', display: 'inline-block' }} />
+              <BrandLoader variant="section" />
             </div>
           )}
 
@@ -311,7 +306,7 @@ export default function Events() {
                       <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textAlign: 'center', marginBottom: '10px' }}>This event has passed</p>
                     )}
 
-                    {rsvpLoading === e.id && <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', textAlign: 'center', marginBottom: '8px' }}>Saving...</p>}
+                    {rsvpLoading === e.id && <BrandLoader variant="inline" showWordmark={false} />}
 
                     {isExpanded && (
                       <div style={{ animation: 'fadeIn 0.3s ease-out', paddingTop: '14px', borderTop: '1px solid rgba(255,255,255,0.12)', marginTop: '14px' }}>
@@ -339,7 +334,7 @@ export default function Events() {
                                 <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', margin: 0 }}>Discussion is closed for this event.</p>
                               </div>
                             ) : discussionsLoading[e.id] ? (
-                              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textAlign: 'center', padding: '1rem' }}>Loading...</p>
+                              <BrandLoader variant="section" />
                             ) : (
                               <>
                                 {eventDiscussions.length === 0 && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '10px' }}>No messages yet. Be the first!</p>}

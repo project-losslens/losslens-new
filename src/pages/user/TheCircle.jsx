@@ -1,3 +1,4 @@
+import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -5,14 +6,15 @@ import { createNotification } from '../../lib/notifications'
 import { ensureCircleHash } from '../../lib/storage'
 import { detectCrisis } from '../../lib/crisisDetection'
 import AppIcon from '../../components/AppIcon'
+import { BrandLoader } from '../../components/Brand'
 
 //  Constants
 const ROOMS = [
-  { id: 'check_in', name: 'Daily Check-In', icon: '', desc: 'Morning & evening mood sharing', expiry_hours: 24 },
-  { id: 'urge_support', name: 'Urge Support', icon: '🆘', desc: 'Real-time help during urges', expiry_hours: 2 },
-  { id: 'victory', name: 'Victory Circle', icon: '', desc: 'Celebrate wins big and small', expiry_hours: 168 },
-  { id: 'slip_recovery', name: 'Slip & Recovery', icon: '', desc: 'No-judgment space for setbacks', expiry_hours: 24 },
-  { id: 'family_friends', name: 'Family & Friends', icon: '', desc: 'For supporters of gamblers', expiry_hours: 168 },
+  { id: 'check_in', name: 'Daily Check-In', icon: 'calendar', desc: 'Morning & evening mood sharing', expiry_hours: 24 },
+  { id: 'urge_support', name: 'Urge Support', icon: 'alert', desc: 'Real-time help during urges', expiry_hours: 2 },
+  { id: 'victory', name: 'Victory Circle', icon: 'star', desc: 'Celebrate wins big and small', expiry_hours: 168 },
+  { id: 'slip_recovery', name: 'Slip & Recovery', icon: 'heart', desc: 'No-judgment space for setbacks', expiry_hours: 24 },
+  { id: 'family_friends', name: 'Family & Friends', icon: 'users', desc: 'For supporters of gamblers', expiry_hours: 168 },
 ]
 
 const MAX_MESSAGE_LENGTH = 280
@@ -67,13 +69,6 @@ function extractMentions(text) {
   return mentions.slice(0, MAX_MENTIONS)
 }
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);animation:slideInRight 0.3s ease-out;white-space:nowrap`
-  document.body.appendChild(toast)
-  setTimeout(() => { toast.style.animation = 'slideOutRight 0.3s ease-in forwards'; setTimeout(() => toast.remove(), 300) }, duration)
-}
 
 export default function TheCircle() {
   const navigate = useNavigate()
@@ -252,11 +247,11 @@ export default function TheCircle() {
       if (crisisTimerRef.current) clearTimeout(crisisTimerRef.current)
       crisisTimerRef.current = setTimeout(() => setShowCrisisBanner(false), 10000)
     }
-    if (containsBlockedContent(text)) { showToast(' Please don\'t share personal information.', 4000); return }
+    if (containsBlockedContent(text)) { toast.error('Please don\'t share personal information.', 4000); return }
 
     //  Rate limiting
     const now = Date.now()
-    if (now - lastSendTime < MESSAGE_COOLDOWN_MS) { showToast('Slow down!', 1500); return }
+    if (now - lastSendTime < MESSAGE_COOLDOWN_MS) { toast.error('Slow down!', 1500); return }
     setLastSendTime(now)
 
     setSending(true); setInput(''); setShowTemplates(false)
@@ -309,7 +304,7 @@ export default function TheCircle() {
       }
     } catch (err) {
       setMessages(prev => prev.map(m => m.id === tempId ? { ...m, _sending: false, _failed: true } : m))
-      showToast('Failed to send', 3000)
+      toast.error('Failed to send', 3000)
     }
     setSending(false)
   }
@@ -357,7 +352,7 @@ export default function TheCircle() {
 
   if (!identity) return (
     <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ display: 'flex', gap: '8px' }}>{[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}</div>
+      <BrandLoader variant="section" />
     </div>
   )
 
@@ -382,7 +377,7 @@ export default function TheCircle() {
         <div style={{ display: 'flex', gap: '4px', padding: '0.75rem 1rem', overflowX: 'auto', background: 'rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.12)', flexShrink: 0, WebkitOverflowScrolling: 'touch' }}>
           {ROOMS.map(room => (
             <button key={room.id} onClick={() => setActiveRoom(room.id)} className="fs-12" style={{ padding: '8px 14px', borderRadius: '100px', border: 'none', background: activeRoom === room.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeRoom === room.id ? '#2DD4BF' : '#2DD4BF', fontWeight: activeRoom === room.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }} role="tab" aria-selected={activeRoom === room.id}>
-              <span>{room.icon}</span><span>{room.name}</span>
+              <AppIcon name={room.icon} size={14} /><span>{room.name}</span>
               {memberCounts[room.id] > 0 && <span className="fs-12" style={{ background: '#2DD4BF', color: '#0B1220', padding: '1px 6px', borderRadius: '100px', fontWeight: 600 }}>{memberCounts[room.id]}</span>}
             </button>
           ))}
@@ -428,7 +423,7 @@ export default function TheCircle() {
                     <div style={{ display: 'flex', gap: '4px', marginTop: '4px', flexDirection: isOwn ? 'row-reverse' : 'row', flexWrap: 'wrap', opacity: 0.7 }}>
                       <button onClick={() => handleReply(msg)} className="fs-12" style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '2px 8px', color: '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-label="Reply">↩</button>
                       {REACTIONS.filter(r => (msg[r.key] || 0) > 0).map(r => (
-                        <button key={r.key} onClick={() => handleReaction(msg.id, r.key)} className="fs-12" style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '2px 8px', color: '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-label={`${r.label} (${msg[r.key]})`}>{r.emoji} {msg[r.key]}</button>
+                        <button key={r.key} onClick={() => handleReaction(msg.id, r.key)} className="fs-12" style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '2px 8px', color: '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-label={`${r.label} (${msg[r.key]})`}>{msg[r.key]}</button>
                       ))}
                       {isOwn && <button onClick={() => handleDeleteMessage(msg.id)} className="fs-12" style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', padding: '2px 4px' }} aria-label="Delete message"></button>}
                     </div>
@@ -465,7 +460,6 @@ export default function TheCircle() {
         @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
         @keyframes slideInRight { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
         @keyframes slideOutRight { from{transform:translateX(0);opacity:1} to{transform:translateX(100%);opacity:0} }
-        @keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }
         @media (prefers-reduced-motion: reduce) { *,*::before,*::after{animation-duration:0.01ms!important} }
         @media (max-width: 768px) { .main-content { margin-left: 0 !important; } }
       `}</style>

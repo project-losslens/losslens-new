@@ -1,3 +1,5 @@
+import { BrandLoader } from '../../components/Brand'
+import { toast } from '../../components/ToastProvider'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -16,13 +18,6 @@ const SUPPORTER_RESOURCES = [
   { title: 'Taking Care of Yourself', content: 'Supporting someone in recovery can be emotionally draining. Set healthy boundaries. Take breaks when needed. Consider talking to a counselor yourself. Your wellbeing matters too.' },
 ]
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), duration)
-}
 
 function FamilyPortalPage() {
   const navigate = useNavigate()
@@ -81,9 +76,9 @@ function FamilyPortalPage() {
   }
 
   const handleInvite = async () => {
-    if (!form.supporter_name.trim()) { showToast('Please enter a name'); return }
+    if (!form.supporter_name.trim()) { toast.error('Please enter a name'); return }
     if (invitations.filter(i => i.status === 'active' || i.status === 'pending').length >= MAX_SUPPORTERS) {
-      showToast(`Maximum ${MAX_SUPPORTERS} supporters allowed`); return
+      toast.error(`Maximum ${MAX_SUPPORTERS} supporters allowed`); return
     }
 
     setSaving(true)
@@ -101,10 +96,10 @@ function FamilyPortalPage() {
       setInvitations(prev => [data, ...prev])
       setShowForm(false)
       setForm({ supporter_name: '', supporter_email: '', supporter_phone: '', supporter_relation: '', permissions: ['Streak status', 'Goal progress', 'General mood'], anonymous_mode: false, crisis_contact: false, language: 'en' })
-      showToast(' Invitation created! Share the link with them.', 3000)
+      toast.success('Invitation created! Share the link with them.', 3000)
     } else {
       console.error('Supporter invitation creation failed:', error)
-      showToast('Failed to create invitation. Try again.', 3000)
+      toast.error('Failed to create invitation. Try again.', 3000)
     }
     setSaving(false)
   }
@@ -115,10 +110,10 @@ function FamilyPortalPage() {
     })
     if (renewError) {
       console.error('Supporter invitation renewal failed:', renewError)
-      showToast('Could not renew invitation.')
+      toast.error('Could not renew invitation.')
       return
     }
-    showToast(' Invitation renewed! Share the link again.', 3000)
+    toast.success('Invitation renewed! Share the link again.', 3000)
     fetchData()
   }
 
@@ -129,11 +124,11 @@ function FamilyPortalPage() {
     })
     if (removeError) {
       console.error('Supporter removal failed:', removeError)
-      showToast('Could not remove supporter.')
+      toast.error('Could not remove supporter.')
       return
     }
     setInvitations(prev => prev.filter(i => i.id !== invId))
-    showToast('Removed.', 2000)
+    toast.success('Removed.', 2000)
   }
 
   const handleTogglePause = async (inv) => {
@@ -143,11 +138,11 @@ function FamilyPortalPage() {
     })
     if (toggleError) {
       console.error('Supporter pause update failed:', toggleError)
-      showToast('Could not update supporter status.')
+      toast.error('Could not update supporter status.')
       return
     }
     setInvitations(prev => prev.map(i => i.id === inv.id ? { ...i, status: newStatus } : i))
-    showToast(newStatus === 'paused' ? '⏸ Paused' : '▶ Resumed', 2000)
+    toast.success(newStatus === 'paused' ? 'Paused' : 'Resumed', 2000)
   }
 
   const handleToggleCrisis = async (inv) => {
@@ -156,7 +151,7 @@ function FamilyPortalPage() {
     })
     if (crisisError) {
       console.error('Supporter crisis setting update failed:', crisisError)
-      showToast('Could not update crisis contact setting.')
+      toast.error('Could not update crisis contact setting.')
       return
     }
     setInvitations(prev => prev.map(i => i.id === inv.id ? { ...i, crisis_contact: !i.crisis_contact } : i))
@@ -167,7 +162,7 @@ function FamilyPortalPage() {
     const { data, error: messageError } = await supabase.rpc('supporter_owner_list_messages', { p_invitation_id: inv.id })
     if (messageError) {
       console.error('Supporter message load failed:', messageError)
-      showToast('Could not load messages.')
+      toast.error('Could not load messages.')
       setMessages([])
       return
     }
@@ -182,7 +177,7 @@ function FamilyPortalPage() {
     })
     if (sendError) {
       console.error('Supporter message send failed:', sendError)
-      showToast('Could not send message.')
+      toast.error('Could not send message.')
       return
     }
     setMessages(prev => [...prev, { id: Date.now().toString(), invitation_id: selectedInvitation.id, sender: 'user', content, created_at: new Date().toISOString() }])
@@ -195,11 +190,11 @@ function FamilyPortalPage() {
     })
     if (feedbackError) {
       console.error('Supporter feedback save failed:', feedbackError)
-      showToast('Could not save feedback.')
+      toast.error('Could not save feedback.')
       return
     }
     setFeedbackGiven(prev => ({ ...prev, [invId]: felt }))
-    showToast('Feedback saved ', 2000)
+    toast.success('Feedback saved ', 2000)
   }
 
   const handleShare = async (inv) => {
@@ -212,14 +207,14 @@ function FamilyPortalPage() {
         await navigator.share({ title: 'Join me on LossLens', text })
       } else {
         await navigator.clipboard.writeText(text)
-        showToast(' Invitation link copied with message!', 2000)
+        toast.success('Invitation link copied with message!', 2000)
       }
     } catch (err) {
       try {
         await navigator.clipboard.writeText(text)
-        showToast(' Link copied!', 2000)
+        toast.success('Link copied!', 2000)
       } catch {
-        showToast(' Share this link: ' + link, 5000)
+        toast.info('Share this link: ' + link, 5000)
       }
     }
   }
@@ -273,14 +268,14 @@ function FamilyPortalPage() {
                   <div className="form-group"><label>Name *</label><input type="text" value={form.supporter_name} onChange={e => setForm({ ...form, supporter_name: e.target.value })} placeholder="e.g. Mum" /></div>
                   <div className="form-group"><label>Relationship</label><input type="text" value={form.supporter_relation} onChange={e => setForm({ ...form, supporter_relation: e.target.value })} placeholder="e.g. Mother" /></div>
                   <div className="form-group"><label>Email (optional)</label><input type="email" value={form.supporter_email} onChange={e => setForm({ ...form, supporter_email: e.target.value })} placeholder="supporter@email.com" /></div>
-                  <div className="form-group"><label>Phone (optional)</label><div className="phone-input"><span className="phone-prefix">🇰🇪 +254</span><input type="tel" value={form.supporter_phone} onChange={e => setForm({ ...form, supporter_phone: e.target.value })} /></div></div>
+                  <div className="form-group"><label>Phone (optional)</label><div className="phone-input"><span className="phone-prefix">+254</span><input type="tel" value={form.supporter_phone} onChange={e => setForm({ ...form, supporter_phone: e.target.value })} /></div></div>
                   <div className="form-group"><label>What they can see</label><div className="chip-group">{ALL_PERMISSIONS.map(p => <button key={p} className={`chip ${form.permissions.includes(p) ? 'chip-active' : ''}`} onClick={() => togglePermission(p)}>{form.permissions.includes(p) ? ' ' : ''}{p}</button>)}</div></div>
                   <div style={{ display: 'flex', gap: '12px', marginBottom: '1rem' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#2DD4BF', cursor: 'pointer' }}><input type="checkbox" checked={form.anonymous_mode} onChange={e => setForm({ ...form, anonymous_mode: e.target.checked })} />Anonymous</label>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#7DBDEE', cursor: 'pointer' }}><input type="checkbox" checked={form.crisis_contact} onChange={e => setForm({ ...form, crisis_contact: e.target.checked })} />Crisis contact</label>
                   </div>
                   <button className="btn-primary full" onClick={handleInvite} disabled={saving || !form.supporter_name.trim()}>
-                    {saving ? <span className="spinner"></span> : 'Create invitation '}
+                    {saving ? <BrandLoader variant="inline" showWordmark={false} /> : 'Create invitation'}
                   </button>
                   <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', textAlign: 'center', marginTop: '8px' }}>After creating, share the invitation link with them.</p>
                 </div>
@@ -294,7 +289,7 @@ function FamilyPortalPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #2DD4BF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', color: '#2DD4BF' }}>{inv.supporter_name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)}</div>
                         <div>
-                          <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 500, margin: 0 }}>{inv.anonymous_mode ? 'A loved one' : inv.supporter_name}{inv.crisis_contact && <span style={{ fontSize: '10px', color: '#7DBDEE', marginLeft: '6px' }}>🆘</span>}</p>
+                          <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 500, margin: 0 }}>{inv.anonymous_mode ? 'A loved one' : inv.supporter_name}{inv.crisis_contact && <span style={{ fontSize: '10px', color: '#7DBDEE', marginLeft: '6px' }}><AppIcon name="alert" size={12} /></span>}</p>
                           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{inv.supporter_relation || 'Supporter'}</p>
                         </div>
                       </div>
@@ -326,7 +321,7 @@ function FamilyPortalPage() {
 
           {activeTab === 'privacy' && (
             <div className="dash-section"><h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '1rem' }}> Your privacy</h3>
-              {['Supporters never see diary content, money, or locations unless you allow it.', 'They see only what you choose to share — change anytime.', 'Change permissions or revoke access anytime.', 'Anonymous mode hides your identity.', 'Supporters don\'t need an account — they view via a secure link.'].map((t, i) => <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}><span style={{ color: '#2DD4BF' }}>"¢</span><span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>{t}</span></div>)}
+              {['Supporters never see diary content, money, or locations unless you allow it.', 'They see only what you choose to share — change anytime.', 'Change permissions or revoke access anytime.', 'Anonymous mode hides your identity.', 'Supporters don\'t need an account — they view via a secure link.'].map((t, i) => <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}><span style={{ color: '#2DD4BF' }}>•</span><span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>{t}</span></div>)}
             </div>
           )}
         </div>

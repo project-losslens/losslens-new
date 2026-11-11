@@ -1,6 +1,8 @@
+import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
+import { BrandLoader } from '../../components/Brand'
 
 //  Constants
 const MAX_BODY_LENGTH = 500
@@ -31,18 +33,12 @@ export default function Broadcast() {
   const [sending, setSending] = useState(false)
   const [error, setError] = useState(null)
   const [history, setHistory] = useState([])
-  const [toast, setToast] = useState(null)
   const [form, setForm] = useState({ title: '', body: '', target: 'all' })
   const [userCount, setUserCount] = useState(0)
   const [targetLabel, setTargetLabel] = useState('All Users')
   const [preview, setPreview] = useState(false)
   const [lastSendTime, setLastSendTime] = useState(0)
   const [showConfirm, setShowConfirm] = useState(false)
-
-  const showToast = useCallback((msg, type = 'success') => {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 3000)
-  }, [])
 
   //  Fetch correct user count based on target
   const fetchUserCount = useCallback(async (target) => {
@@ -80,11 +76,11 @@ export default function Broadcast() {
   }
 
   const send = async () => {
-    if (!form.title.trim() || !form.body.trim()) return showToast('Title and message are required.', 'error')
+    if (!form.title.trim() || !form.body.trim()) return toast.error('Title and message are required.')
 
     //  Rate limiting
     const now = Date.now()
-    if (now - lastSendTime < SEND_COOLDOWN_MS) { showToast('Please wait before sending again.', 'error'); return }
+    if (now - lastSendTime < SEND_COOLDOWN_MS) { toast.error('Please wait before sending again.'); return }
     setLastSendTime(now)
 
     setShowConfirm(false)
@@ -99,13 +95,13 @@ export default function Broadcast() {
       if (sendError) throw sendError
       const recipientCount = data?.recipient_count ?? userCount
 
-      showToast(` Broadcast sent to ${recipientCount.toLocaleString()} ${targetLabel.toLowerCase()}!`)
+      toast.success(`Broadcast sent to ${recipientCount.toLocaleString()} ${targetLabel.toLowerCase()}!`)
       setForm({ title: '', body: '', target: 'all' })
       setPreview(false)
       fetchAll()
       fetchUserCount('all')
     } catch (err) {
-      showToast('Send failed: ' + (err.message || 'Unknown error'), 'error')
+      toast.error('Send failed: ' + (err.message || 'Unknown error'))
     } finally { setSending(false) }
   }
 
@@ -134,7 +130,7 @@ export default function Broadcast() {
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
               {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
             </div>
-            <p style={{ color: 'var(--info)', fontSize: '13px' }}>Loading broadcast...</p>
+            <BrandLoader variant="section" />
           </div>
         </div>
         <style>{`@keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }`}</style>
@@ -169,10 +165,6 @@ export default function Broadcast() {
             <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Refresh</button>
           </div>
         </div>
-
-        {toast && (
-          <div style={{ position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', background: toast.type === 'error' ? 'rgba(255,255,255,0.08)' : 'var(--info)', color: toast.type === 'error' ? 'var(--text)' : 'var(--primary)', padding: '10px 20px', borderRadius: '100px', fontSize: '13px', zIndex: 'var(--z-toast)', whiteSpace: 'nowrap' }}>{toast.msg}</div>
-        )}
 
         <div style={{ padding: '1.5rem', maxWidth: '900px', margin: '0 auto' }}>
           {/* Compose */}
@@ -228,7 +220,7 @@ export default function Broadcast() {
                 <button onClick={() => setPreview(p => !p)} style={btn('transparent', 'rgba(255,255,255,0.4)', 'rgba(255,255,255,0.12)')}>{preview ? ' Hide Preview' : ' Preview'}</button>
                 <button onClick={() => setShowConfirm(true)} disabled={sending || !form.title.trim() || !form.body.trim()}
                   style={{ ...btn('var(--primary)', 'var(--bg)', 'var(--primary)'), opacity: (!form.title.trim() || !form.body.trim()) ? 0.5 : 1 }}>
-                  {sending ? '⏳ Sending...' : ` Send to ${userCount.toLocaleString()} Users`}
+                  {sending ? 'Sending...' : ` Send to ${userCount.toLocaleString()} Users`}
                 </button>
               </div>
 

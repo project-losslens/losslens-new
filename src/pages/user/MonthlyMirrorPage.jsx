@@ -1,7 +1,9 @@
+import { toast } from '../../components/ToastProvider'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
+import { BrandLoader } from '../../components/Brand'
 
 //  Constants
 const MAX_RECORDING_DURATION = 300 // 5 minutes
@@ -9,13 +11,6 @@ const MAX_STORAGE_SIZE = 50 * 1024 * 1024 // 50MB limit for localStorage fallbac
 const UPLOAD_RETRY_MAX = 3
 const MILESTONE_DISPLAY_DURATION = 8000
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), duration)
-}
 
 export default function MonthlyMirrorPage() {
   const navigate = useNavigate()
@@ -237,7 +232,7 @@ export default function MonthlyMirrorPage() {
   //  Guard against double-start
   const startRecording = async () => {
     if (streamRef.current || mediaRecorderRef.current?.state === 'recording') {
-      showToast('Already recording')
+      toast.info('Already recording')
       return
     }
     try {
@@ -253,7 +248,7 @@ export default function MonthlyMirrorPage() {
 
       mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data) }
       mediaRecorder.onstop = () => handleRecordingStop()
-      mediaRecorder.onerror = () => { showToast('Recording error. Please try again.'); stopRecording(); cleanup() }
+      mediaRecorder.onerror = () => { toast.error('Recording error. Please try again.'); stopRecording(); cleanup() }
 
       mediaRecorder.start(1000) // collect data every second
       setRecording(true)
@@ -269,7 +264,7 @@ export default function MonthlyMirrorPage() {
         })
       }, 1000)
     } catch (err) {
-      showToast(' Camera/Microphone access denied.')
+      toast.error('Camera/Microphone access denied.')
       console.error('Recording start error:', err)
     }
   }
@@ -281,7 +276,7 @@ export default function MonthlyMirrorPage() {
 
     //  Size check before upload
     if (blob.size > MAX_STORAGE_SIZE) {
-      showToast(' Video too large. Please record a shorter reflection (under 5 minutes).')
+      toast.error('Video too large. Please record a shorter reflection (under 5 minutes).')
       cleanup()
       setRecording(false)
       return
@@ -319,7 +314,7 @@ export default function MonthlyMirrorPage() {
             user_id: session.user.id, month: activeMonth, storage_path: fileName,
             type: 'video', duration_seconds: recordingTime, prompt: prompts[currentPrompt]?.q || 'Reflection',
           })
-          showToast(' Reflection saved!')
+          toast.success('Reflection saved!')
           setUploading(false)
           setRecorded(true)
           setTimeout(() => setRecorded(false), 3000)
@@ -343,12 +338,12 @@ export default function MonthlyMirrorPage() {
             const saved = JSON.parse(localStorage.getItem(key) || '[]')
             saved.push({ url: reader.result, type: 'video', duration: recordingTime, date: new Date().toISOString() })
             localStorage.setItem(key, JSON.stringify(saved))
-            showToast(' Saved locally. Will sync later.')
-          } catch (err) { showToast(' Failed to save. Video may be too large.') }
+            toast.success('Saved locally. Will sync later.')
+          } catch (err) { toast.error('Failed to save. Video may be too large.') }
         }
-      } catch (err) { showToast(' Failed to save. Video may be too large.') }
+      } catch (err) { toast.error('Failed to save. Video may be too large.') }
     } else {
-      showToast(' Video too large to save locally. Please try again.')
+      toast.error('Video too large to save locally. Please try again.')
     }
 
     setUploading(false)
@@ -386,8 +381,8 @@ export default function MonthlyMirrorPage() {
       }
       await query
       loadAllRecordings()
-      showToast('Deleted.', 2000)
-    } catch (err) { showToast('Delete failed.', 2000) }
+      toast.success('Deleted.', 2000)
+    } catch (err) { toast.error('Delete failed.', 2000) }
   }
 
   const retryUpload = async (localIndex) => {
@@ -411,10 +406,10 @@ export default function MonthlyMirrorPage() {
         localData.splice(localIndex, 1)
         if (localData.length === 0) localStorage.removeItem(localKey)
         else localStorage.setItem(localKey, JSON.stringify(localData))
-        showToast(' Synced!')
+        toast.success('Synced!')
         loadAllRecordings()
-      } else { showToast('Sync failed. Try again.') }
-    } catch (err) { showToast('Sync failed. Try again.') }
+      } else { toast.error('Sync failed. Try again.') }
+    } catch (err) { toast.error('Sync failed. Try again.') }
     setUploading(false)
   }
 
@@ -451,7 +446,7 @@ export default function MonthlyMirrorPage() {
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ display: 'flex', gap: '8px' }}>{[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}</div>
+      <BrandLoader variant="section" />
     </div>
   )
 
@@ -473,7 +468,7 @@ export default function MonthlyMirrorPage() {
         {/* Milestone Banner */}
         {milestone && (
           <div style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid #2DD4BF', padding: '10px 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: '#2DD4BF', fontSize: '12px' }}>{milestone.emoji} {milestone.text}</span>
+            <span style={{ color: '#2DD4BF', fontSize: '12px' }}>{milestone.text}</span>
             <button onClick={() => { setMilestone(null); if (milestoneTimerRef.current) clearTimeout(milestoneTimerRef.current) }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '16px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Dismiss milestone"></button>
           </div>
         )}
@@ -498,7 +493,7 @@ export default function MonthlyMirrorPage() {
           {/* Uploading Progress */}
           {uploading && (
             <div className="dash-section" style={{ marginBottom: '0.75rem', textAlign: 'center' }}>
-              <p style={{ color: '#7DBDEE', fontSize: '13px', marginBottom: '8px' }}>⏳ Uploading your reflection...</p>
+              <p style={{ color: '#7DBDEE', fontSize: '13px', marginBottom: '8px' }}><BrandLoader variant="inline" showWordmark={false} /></p>
               <div style={{ height: '4px', background: 'rgba(255,255,255,0.12)', borderRadius: '2px', overflow: 'hidden' }}>
                 <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#2DD4BF', transition: 'width 0.3s ease' }} />
               </div>
@@ -580,7 +575,7 @@ export default function MonthlyMirrorPage() {
           {!loadError && pendingRecordings.length > 0 && (
             <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: '#7DBDEE' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <h3 style={{ color: '#7DBDEE', fontSize: '12px', margin: 0 }}>⏳ Pending sync ({pendingRecordings.length})</h3>
+                <h3 style={{ color: '#7DBDEE', fontSize: '12px', margin: 0 }}>Pending sync ({pendingRecordings.length})</h3>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {pendingRecordings.map(r => (
@@ -593,7 +588,7 @@ export default function MonthlyMirrorPage() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ color: '#FFFFFF', fontSize: '11px', fontWeight: 500, margin: 0 }}>{new Date(r.created_at).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                         <p style={{ color: '#7DBDEE', fontSize: '10px', margin: '2px 0' }}>
-                          ⏳ {syncStatus[r._localIndex] || 'Waiting to sync'}  · {formatTime(r.duration_seconds)}
+                          {syncStatus[r._localIndex] || 'Waiting to sync'}  · {formatTime(r.duration_seconds)}
                         </p>
                       </div>
                       <button onClick={() => retryUpload(r._localIndex)} disabled={uploading}
@@ -692,7 +687,6 @@ export default function MonthlyMirrorPage() {
 
       <style>{`
         @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
-        @keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }
         @media (prefers-reduced-motion: reduce) { *,*::before,*::after{animation-duration:0.01ms!important} }
         @media (max-width: 768px) { .main-content { margin-left: 0 !important; } }
       `}</style>

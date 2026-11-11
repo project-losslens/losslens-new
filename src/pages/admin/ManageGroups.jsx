@@ -1,18 +1,14 @@
+import { toast } from '../../components/ToastProvider'
+import NumberField from '../../components/NumberField'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
+import { BrandLoader } from '../../components/Brand'
 
 //  Constants
 const SORT_OPTIONS = { NEWEST: 'newest', NAME: 'name', ACTIVE: 'active' }
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--info);color:var(--primary);padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), duration)
-}
 
 export default function ManageGroups() {
   const navigate = useNavigate()
@@ -22,7 +18,6 @@ export default function ManageGroups() {
   const [showForm, setShowForm] = useState(false)
   const [editingGroup, setEditingGroup] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [sortBy, setSortBy] = useState(SORT_OPTIONS.NEWEST)
@@ -34,10 +29,6 @@ export default function ManageGroups() {
     max_members: '', description: '', active: true, category: ''
   })
 
-  const displayToast = useCallback((msg, type = 'success') => {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 3000)
-  }, [])
 
   //  Debounce search
   useEffect(() => {
@@ -100,10 +91,10 @@ export default function ManageGroups() {
         ? await supabase.from('groups').update(payload).eq('id', editingGroup.id)
         : await supabase.from('groups').insert(payload)
       if (saveError) throw saveError
-      displayToast(editingGroup ? 'Group updated!' : 'Group created!')
+      toast.success(editingGroup ? 'Group updated!' : 'Group created!')
       setShowForm(false)
       fetchGroups()
-    } catch (err) { displayToast('Save failed: ' + err.message, 'error') }
+    } catch (err) { toast.error('Save failed: ' + err.message) }
     finally { setSaving(false) }
   }
 
@@ -114,9 +105,9 @@ export default function ManageGroups() {
     const { error: toggleError } = await supabase.from('groups').update({ active: newActive }).eq('id', g.id)
     if (toggleError) {
       setGroups(prev => prev.map(item => item.id === g.id ? { ...item, active: !newActive } : item))
-      displayToast('Update failed.', 'error')
+      toast.error('Update failed.')
     } else {
-      displayToast(newActive ? 'Group activated.' : 'Group deactivated.')
+      toast.success(newActive ? 'Group activated.' : 'Group deactivated.')
     }
   }
 
@@ -124,10 +115,10 @@ export default function ManageGroups() {
     setDeleting(true)
     const { error: delError } = await supabase.from('groups').delete().eq('id', id)
     if (delError) {
-      displayToast('Delete failed.', 'error')
+      toast.error('Delete failed.')
     } else {
       setGroups(prev => prev.filter(g => g.id !== id))
-      displayToast('Group deleted.')
+      toast.success('Group deleted.')
     }
     setDeleting(false)
     setShowDeleteConfirm(null)
@@ -162,7 +153,7 @@ export default function ManageGroups() {
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
               {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--info)', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
             </div>
-            <p style={{ color: 'var(--info)', fontSize: '13px' }}>Loading groups...</p>
+            <BrandLoader variant="section" />
           </div>
         </div>
         <style>{`@keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }`}</style>
@@ -198,10 +189,6 @@ export default function ManageGroups() {
             <button onClick={openCreate} style={{ padding: '8px 18px', borderRadius: '100px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> New Group</button>
           </div>
         </div>
-
-        {toast && (
-          <div style={{ position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', background: toast.type === 'error' ? 'rgba(255,255,255,0.08)' : 'var(--info)', color: toast.type === 'error' ? 'var(--text)' : 'var(--primary)', padding: '10px 20px', borderRadius: '100px', fontSize: '13px', zIndex: 'var(--z-toast)', whiteSpace: 'nowrap' }}>{toast.msg}</div>
-        )}
 
         {/* Form Modal */}
         {showForm && (
@@ -240,7 +227,7 @@ export default function ManageGroups() {
                   </div>
                   <div>
                     <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Max Members</label>
-                    <input type="number" value={form.max_members} onChange={e => { setForm(p => ({ ...p, max_members: e.target.value })); setFormErrors(p => ({ ...p, max_members: '' })) }} style={{ ...inputStyle, borderColor: formErrors.max_members ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="e.g. 20" min="1" />
+                    <NumberField value={form.max_members} onChange={(max_members) => { setForm((current) => ({ ...current, max_members: max_members ?? '' })); setFormErrors((current) => ({ ...current, max_members: '' })) }} wrapperStyle={{ ...inputStyle, borderColor: formErrors.max_members ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="e.g. 20" inputMode="numeric" min={1} step={1} />
                     {formErrors.max_members && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{formErrors.max_members}</span>}
                   </div>
                 </div>

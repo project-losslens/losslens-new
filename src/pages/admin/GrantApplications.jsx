@@ -1,11 +1,13 @@
+import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
+import { BrandLoader } from '../../components/Brand'
 
 //  Constants
 const STATUS_CONFIG = {
-  pending: { color: 'var(--info)', bg: 'rgba(45,212,191,0.15)', label: 'Pending', icon: '⏳' },
+  pending: { color: 'var(--info)', bg: 'rgba(45,212,191,0.15)', label: 'Pending', icon: '' },
   under_review: { color: 'var(--primary)', bg: 'rgba(255,255,255,0.12)', label: 'Under Review', icon: '' },
   approved: { color: 'var(--primary)', bg: 'rgba(255,255,255,0.12)', label: 'Approved', icon: '' },
   rejected: { color: 'var(--text)', bg: 'rgba(255,255,255,0.08)', label: 'Rejected', icon: '' },
@@ -13,13 +15,6 @@ const STATUS_CONFIG = {
 
 const STATUSES = ['all', 'pending', 'under_review', 'approved', 'rejected']
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--info);color:var(--primary);padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), duration)
-}
 
 export default function GrantApplications() {
   const navigate = useNavigate()
@@ -58,12 +53,12 @@ export default function GrantApplications() {
       const { error: updateError } = await supabase.from('grant_applications').update(payload).eq('id', id)
       if (updateError) throw updateError
       setApplications(prev => prev.map(a => a.id === id ? { ...a, status: newStatus, rejection_reason: reason } : a))
-      showToast(`Application ${newStatus.replace('_', ' ')}.`)
+      toast.success(`Application ${newStatus.replace('_', ' ')}.`)
       if (newStatus === 'rejected') {
         setShowRejectModal(null)
         setRejectReason('')
       }
-    } catch (err) { showToast('Update failed.', 'error') }
+    } catch (err) { toast.error('Update failed.') }
     setActionLoading(null)
   }
 
@@ -119,7 +114,7 @@ export default function GrantApplications() {
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
               {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
             </div>
-            <p style={{ color: 'var(--info)', fontSize: '13px' }}>Loading applications...</p>
+            <BrandLoader variant="section" />
           </div>
         </div>
         <style>{`@keyframes loadingDot { 0%,100%{transform:translateY(0);opacity:0.3} 50%{transform:translateY(-10px);opacity:1} }`}</style>

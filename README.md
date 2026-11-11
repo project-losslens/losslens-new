@@ -23,7 +23,7 @@ src/
   main.jsx              entry; registers the service worker and mounts the app
   api/ (repo root)      Vercel serverless routes — one file per route
   components/           shared UI (Brand, AppIcon, ContactIcons…)
-  components/RouteGuards.jsx   RequireAuth + RequireElevated
+  components/RouteGuards.jsx   RequireAuth + role-aware route map
   config/               site.js (contact + FACTS), helplines.js, nav.config.js
   context/              AuthProfile + CrisisAlertCount providers
   hooks/                index.js (useMediaQuery, useDocumentTitle)
@@ -33,7 +33,7 @@ middleware.js            Vercel Routing Middleware site gate
   pages/{public,user,admin,insurer,therapist}
   styles/               base.css (tokens+reset), globals.css, landing.css
 supabase/
-  migrations/           exactly four .sql files — see docs/DATABASE.md
+  migrations/           six baseline SQL files + Pass 2 combined SQL
   functions/            edge functions (separate deploy units)
 docs/                   DATABASE.md, FEATURES.md, HISTORY.md
 public/                 manifest, icons, service-worker.js
@@ -65,8 +65,8 @@ unset), `SUPABASE_ACCESS_TOKEN` + `SUPABASE_PROJECT_REF` for CLI deploys only.
 ```bash
 npm run dev        # Vite dev server (frontend only — does NOT serve api/)
 npm run build      # production build (primary verification)
-npm test           # node --test (unit tests)
 npm run lint       # eslint . (baseline has ~200 pre-existing errors)
+npm run preview    # preview the production build
 npx eslint <file>  # lint a single file
 vercel dev         # serves api/ routes locally (Vercel CLI)
 ```
@@ -75,7 +75,8 @@ vercel dev         # serves api/ routes locally (Vercel CLI)
 
 1. `npm ci`
 2. Copy `.env.example` to `.env` and fill in the client variables.
-3. Apply the four migrations (see `docs/DATABASE.md`) and deploy edge
+3. Apply the SQL files in the documented order (see `docs/MIGRATION_NOTES.md`)
+   and deploy edge
    functions if working on auth flows.
 4. `npm run dev` for UI work; `vercel dev` to exercise `/api/chat`.
 
@@ -83,8 +84,10 @@ vercel dev         # serves api/ routes locally (Vercel CLI)
 
 Order matters:
 
-1. Apply the four SQL files in `supabase/migrations/` **in order, once each**
-   (idempotent; also safe to re-run). See `docs/DATABASE.md` for verify queries.
+1. Apply the six baseline SQL files in `supabase/migrations/` in order, then
+   apply `20261111000001_pass2_combined.sql` from the Supabase SQL editor.
+   See `docs/MIGRATION_NOTES.md` for the manual steps and `docs/DATABASE.md`
+   for the schema reference.
 2. Deploy edge functions: `supabase functions deploy send-invite delete-account`
    and set `ALLOWED_ORIGIN`.
 3. Set the Vercel env vars above for **both Production and Preview**, then

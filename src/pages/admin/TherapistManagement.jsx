@@ -1,5 +1,7 @@
+import NumberField from '../../components/NumberField'
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { BrandLoader } from '../../components/Brand'
 
 export default function TherapistManagement() {
   const [therapists, setTherapists] = useState([])
@@ -121,7 +123,7 @@ export default function TherapistManagement() {
     setWorking('')
   }
 
-  if (loading) return <p role="status">Loading therapist operations...</p>
+  if (loading) return <BrandLoader variant="section" />
   return (
     <section className="portal-page">
       <p className="portal-page__eyebrow">Admin operations</p>
@@ -152,7 +154,7 @@ export default function TherapistManagement() {
               <article className="portal-list__item" key={voucher.id}>
                 <div><strong>Pending voucher</strong><p>Expires {new Date(voucher.expires_at).toLocaleDateString()}</p><small>{voucher.id}</small></div>
                 <div className="portal-list__actions">
-                  <label>Session fee (KES)<input type="number" min="0.01" step="0.01" value={voucherFees[voucher.id] || ''} onChange={(event) => setVoucherFees((current) => ({ ...current, [voucher.id]: event.target.value }))} /></label>
+                  <label>Session fee (KES)<NumberField inputMode="decimal" min={0.01} step={0.01} prefix="KES" value={voucherFees[voucher.id] || ''} onChange={(fee) => setVoucherFees((current) => ({ ...current, [voucher.id]: fee ?? '' }))} /></label>
                   <select aria-label={`Assign voucher ${voucher.id}`} value={voucherAssignments[voucher.id] || ''} disabled={working === voucher.id} onChange={(event) => setVoucherAssignments((current) => ({ ...current, [voucher.id]: event.target.value }))}>
                     <option value="" disabled>Assign active therapist</option>
                     {therapists.filter((therapist) => therapist.status === 'active').map((therapist) => <option key={therapist.id} value={therapist.id}>{therapist.specialty || therapist.id}</option>)}

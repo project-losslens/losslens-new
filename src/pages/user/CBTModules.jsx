@@ -1,24 +1,11 @@
+import { BrandLoader } from '../../components/Brand'
+import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useRef, useCallback } from 'react'
+import AppIcon from '../../components/AppIcon'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 
 //  Toast helper using React state instead of DOM manipulation
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `
-    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
-    background: #7DBDEE; color: #2DD4BF; padding: 10px 20px; border-radius: 100px;
-    font-size: 13px; font-weight: 500; z-index: var(--z-toast);
-    box-shadow: 0 4px 16px rgba(11,18,32,0.4); border: 1px solid rgba(255,255,255,0.4);
-    animation: slideInRight 0.3s ease-out; white-space: nowrap;
-  `
-  document.body.appendChild(toast)
-  setTimeout(() => {
-    toast.style.animation = 'slideOutRight 0.3s ease-in forwards'
-    setTimeout(() => toast.remove(), 300)
-  }, duration)
-}
 
 //  Confetti respects reduced motion
 function triggerConfetti() {
@@ -66,8 +53,8 @@ function CBTModules() {
       howItHelps: "You'll understand WHY you gamble — the first step to breaking the cycle.",
       outcome: "After this module, you'll be able to spot your triggers before they lead to urges.",
       lessons: [
-        { title: 'What is gambling harm?', readTime: '3 min', content: `Gambling harm isn't just about losing money. It's a spectrum that affects your mental health, relationships, work, and self-worth.\n\nIn Kenya, sports betting has exploded — especially among young men. The Premier League isn't just entertainment anymore; it's become a trigger for millions.\n\nGambling harm happens when:\n"¢ You spend more than you planned\n"¢ You chase losses hoping to "recover"\n"¢ It affects your mood, sleep, or relationships\n"¢ You hide your betting from loved ones\n"¢ You use M-Pesa loans or borrow to bet\n\nThe good news? Recognizing where you are is the first and most powerful step. This isn't about shame — it's about awareness.`, reflection: 'Think about your own gambling. Where do you fall on the spectrum? Be honest with yourself.' },
-        { title: 'Identifying your personal triggers', readTime: '3 min', content: `Triggers are situations, feelings, or thoughts that push you toward gambling.\n\nCommon triggers in Kenya:\n"¢  M-Pesa balance notifications\n"¢  Premier League match days\n"¢  Stress from unemployment\n"¢  Peer pressure\n"¢  Ads and promotions\n"¢  Boredom or loneliness\n\nYour task: Notice what happens right BEFORE the urge. Write it down. Patterns will emerge.`, reflection: 'What are YOUR top 3 triggers? Write them down where you can see them daily.' },
+        { title: 'What is gambling harm?', readTime: '3 min', content: `Gambling harm isn't just about losing money. It's a spectrum that affects your mental health, relationships, work, and self-worth.\n\nIn Kenya, sports betting has exploded — especially among young men. The Premier League isn't just entertainment anymore; it's become a trigger for millions.\n\nGambling harm happens when:\n• You spend more than you planned\n• You chase losses hoping to "recover"\n• It affects your mood, sleep, or relationships\n• You hide your betting from loved ones\n• You use M-Pesa loans or borrow to bet\n\nThe good news? Recognizing where you are is the first and most powerful step. This isn't about shame — it's about awareness.`, reflection: 'Think about your own gambling. Where do you fall on the spectrum? Be honest with yourself.' },
+        { title: 'Identifying your personal triggers', readTime: '3 min', content: `Triggers are situations, feelings, or thoughts that push you toward gambling.\n\nCommon triggers in Kenya:\n•  M-Pesa balance notifications\n•  Premier League match days\n•  Stress from unemployment\n•  Peer pressure\n•  Ads and promotions\n•  Boredom or loneliness\n\nYour task: Notice what happens right BEFORE the urge. Write it down. Patterns will emerge.`, reflection: 'What are YOUR top 3 triggers? Write them down where you can see them daily.' },
         { title: 'The gambling cycle', readTime: '2 min', content: `TRIGGER → URGE → ACTION → CONSEQUENCE → GUILT → (back to TRIGGER)\n\nBreaking this cycle means interrupting it EARLY — at the trigger or urge stage. Every module from here will give you tools to do exactly that.`, reflection: 'Draw your own gambling cycle. Where could YOU interrupt it?' },
       ]
     },
@@ -103,8 +90,8 @@ function CBTModules() {
       outcome: "You'll have a written plan for your top 3 triggers.",
       lessons: [
         { title: 'Avoidance vs. exposure', readTime: '3 min', content: `AVOIDANCE: Block betting sites, unfollow gambling accounts, avoid betting shops, turn off M-Pesa notifications.\n\nEXPOSURE: Build resistance gradually — watch matches without betting, keep M-Pesa with a budget.\n\nStart with avoidance for strong triggers. Build exposure later.`, reflection: "What's your strongest trigger? What's ONE thing you can do TODAY?" },
-        { title: 'Environmental restructuring', readTime: '3 min', content: `Your environment shapes behavior more than willpower.\n\n"¢ Delete betting apps\n"¢ Use M-Pesa "lock savings"\n"¢ Change match-day routines\n"¢ Put phone in another room\n"¢ Auto-savings on payday\n\nSmall changes = big results.`, reflection: "What's ONE environmental change you can make right now?" },
-        { title: 'Social support activation', readTime: '3 min', content: `You don't have to do this alone.\n\n"¢ Who knows about your journey?\n"¢ Who can you call when urges hit?\n"¢ What to say: "I'm working on reducing gambling. Can I call you if I'm struggling?"\n\nIf you have no one yet, use Oloo. That's why he's here.`, reflection: 'Who is ONE person you could talk to? What would you say?' },
+        { title: 'Environmental restructuring', readTime: '3 min', content: `Your environment shapes behavior more than willpower.\n\n• Delete betting apps\n• Use M-Pesa "lock savings"\n• Change match-day routines\n• Put phone in another room\n• Auto-savings on payday\n\nSmall changes = big results.`, reflection: "What's ONE environmental change you can make right now?" },
+        { title: 'Social support activation', readTime: '3 min', content: `You don't have to do this alone.\n\n• Who knows about your journey?\n• Who can you call when urges hit?\n• What to say: "I'm working on reducing gambling. Can I call you if I'm struggling?"\n\nIf you have no one yet, use Oloo. That's why he's here.`, reflection: 'Who is ONE person you could talk to? What would you say?' },
       ]
     },
     {
@@ -126,7 +113,7 @@ function CBTModules() {
       howItHelps: "A slip doesn't have to become a full return to gambling.",
       outcome: "You'll have an emergency plan for your riskiest situations.",
       lessons: [
-        { title: 'High-risk situations', readTime: '3 min', content: `What puts you at highest risk?\n\n"¢ Payday? (M-Pesa high)\n"¢ Weekend nights?\n"¢ After arguments?\n"¢ Watching matches alone?\n"¢ Friends betting?\n\nKnowing your danger zones = never surprised.`, reflection: 'What are YOUR top 3 high-risk situations?' },
+        { title: 'High-risk situations', readTime: '3 min', content: `What puts you at highest risk?\n\n• Payday? (M-Pesa high)\n• Weekend nights?\n• After arguments?\n• Watching matches alone?\n• Friends betting?\n\nKnowing your danger zones = never surprised.`, reflection: 'What are YOUR top 3 high-risk situations?' },
         { title: 'Coping cards', readTime: '3 min', content: `Create a card for each situation:\n\nSITUATION: Payday\n RISK: I'll bet "just a little"\n PLAN: Send savings first, pay bills, call friend, reward myself\n\nMake cards for your top 3. Read them BEFORE the risk hits.`, reflection: 'Create your first coping card now.' },
         { title: 'Emergency plans', readTime: '4 min', content: `If you slip:\n1. STOP immediately\n2. Call support person\n3. Write what happened\n4. Don't shame yourself — say "slip" not "failure"\n5. Get back to routine tomorrow\n6. Review coping cards\n\nA slip is data, not disaster.`, reflection: "What's your plan if a slip happens?" },
       ]
@@ -138,8 +125,8 @@ function CBTModules() {
       howItHelps: 'Nature abhors a vacuum. Fill gambling\'s space with something better.',
       outcome: "You'll have a personal growth plan that excites you.",
       lessons: [
-        { title: 'Value identification', readTime: '3 min', content: `What matters to YOU?\n\n"¢ What did you love before gambling?\n"¢ What would you do if money wasn't a concern?\n"¢ Who do you want to be in 5 years?\n\nYour values are your compass. Recovery brings you closer to them.`, reflection: 'What are your top 3 values? Are your actions aligned?' },
-        { title: 'Goal-setting', readTime: '3 min', content: `Instead of "stop gambling," try:\n"¢ Save KES 50,000 by December\n"¢ Buy land in 2 years\n"¢ Start a business\n"¢ Take family on holiday\n\nKES 500/week saved = KES 26,000/year. What could you do with that?`, reflection: "What's ONE exciting goal for the money you save?" },
+        { title: 'Value identification', readTime: '3 min', content: `What matters to YOU?\n\n• What did you love before gambling?\n• What would you do if money wasn't a concern?\n• Who do you want to be in 5 years?\n\nYour values are your compass. Recovery brings you closer to them.`, reflection: 'What are your top 3 values? Are your actions aligned?' },
+        { title: 'Goal-setting', readTime: '3 min', content: `Instead of "stop gambling," try:\n• Save KES 50,000 by December\n• Buy land in 2 years\n• Start a business\n• Take family on holiday\n\nKES 500/week saved = KES 26,000/year. What could you do with that?`, reflection: "What's ONE exciting goal for the money you save?" },
         { title: 'Life balance', readTime: '2 min', content: `Rate yourself 1-10 on:\n Health |  Growth |  Social |  Work |  Rest |  Fun\n\nWhere are you lowest? What's ONE small action this week?\n\nRecovery isn't just stopping gambling — it's building a life you don't want to escape from.`, reflection: 'Which area needs the most attention? Take one action this week.' },
       ]
     },
@@ -150,9 +137,9 @@ function CBTModules() {
       howItHelps: 'The best way to keep recovery strong is helping someone else.',
       outcome: "You'll have a maintenance plan and peer support option.",
       lessons: [
-        { title: 'Early warning signs', readTime: '3 min', content: `Even after months clean, watch for:\n\n"¢ Romanticizing past gambling\n"¢ "Testing" yourself\n"¢ Life stress building up\n"¢ Isolating from support\n"¢ Skipping diary entries\n"¢ Thinking "I'm cured"\n\nCreate a monthly maintenance checklist.`, reflection: 'Create your monthly checklist. When will you review it?' },
-        { title: 'Booster sessions', readTime: '3 min', content: `Schedule regular check-ins:\n"¢ Monthly: Review progress and triggers\n"¢ Quarterly: Re-read favorite lessons\n"¢ Annually: Celebrate your anniversary\n\nTreat these like important appointments.`, reflection: 'Schedule your first monthly booster now.' },
-        { title: 'Helping others', readTime: '3 min', content: `Your experience is VALUABLE.\n\nConsider:\n"¢ Sharing your story (anonymously if preferred)\n"¢ Being a buddy for someone starting out\n"¢ Writing tips for the community\n\nHelping others reinforces your own recovery.\n\n"Your mess becomes your message."`, reflection: 'Would you consider helping others? Even once can change a life.' },
+        { title: 'Early warning signs', readTime: '3 min', content: `Even after months clean, watch for:\n\n• Romanticizing past gambling\n• "Testing" yourself\n• Life stress building up\n• Isolating from support\n• Skipping diary entries\n• Thinking "I'm cured"\n\nCreate a monthly maintenance checklist.`, reflection: 'Create your monthly checklist. When will you review it?' },
+        { title: 'Booster sessions', readTime: '3 min', content: `Schedule regular check-ins:\n• Monthly: Review progress and triggers\n• Quarterly: Re-read favorite lessons\n• Annually: Celebrate your anniversary\n\nTreat these like important appointments.`, reflection: 'Schedule your first monthly booster now.' },
+        { title: 'Helping others', readTime: '3 min', content: `Your experience is VALUABLE.\n\nConsider:\n• Sharing your story (anonymously if preferred)\n• Being a buddy for someone starting out\n• Writing tips for the community\n\nHelping others reinforces your own recovery.\n\n"Your mess becomes your message."`, reflection: 'Would you consider helping others? Even once can change a life.' },
       ]
     },
   ]
@@ -188,7 +175,7 @@ function CBTModules() {
     //  Gate: Must have viewed at least one lesson from this module
     const hasViewedLesson = activeLesson && activeLesson.moduleId === moduleId
     if (!hasViewedLesson) {
-      showToast(' Please view at least one lesson before completing.', 2000)
+      toast.error('Please view at least one lesson before completing.', 2000)
       return
     }
 
@@ -200,7 +187,7 @@ function CBTModules() {
 
     if (error) {
       console.error('Failed to save progress:', error)
-      showToast(' Failed to save. Please try again.', 3000)
+      toast.error('Failed to save. Please try again.', 3000)
       setSaving(false)
       return
     }
@@ -215,19 +202,19 @@ function CBTModules() {
       triggerConfetti()
     }
 
-    showToast(` Module completed! Great work!`, 3000)
+    toast.success(`Module completed! Great work!`, 3000)
 
     const newCount = completedIds.length + 1
-    if (newCount === 8) setBadgeEarned({ emoji: '', name: 'CBT Master', color: '#2DD4BF' })
-    else if (newCount === 5) setBadgeEarned({ emoji: '', name: 'Dedicated Learner', color: '#2DD4BF' })
-    else if (newCount === 3) setBadgeEarned({ emoji: '', name: 'Active Learner', color: '#7DBDEE' })
-    else if (newCount === 1) setBadgeEarned({ emoji: '', name: 'Getting Started', color: '#2DD4BF' })
+    if (newCount === 8) setBadgeEarned({ icon: 'brain', name: 'CBT Master', color: '#2DD4BF' })
+    else if (newCount === 5) setBadgeEarned({ icon: 'brain', name: 'Dedicated Learner', color: '#2DD4BF' })
+    else if (newCount === 3) setBadgeEarned({ icon: 'brain', name: 'Active Learner', color: '#7DBDEE' })
+    else if (newCount === 1) setBadgeEarned({ icon: 'star', name: 'Getting Started', color: '#2DD4BF' })
 
     //  Error-handled badge check
     try {
       const { checkBadges } = await import('../../lib/gamification')
       const newBadges = await checkBadges(userId)
-      if (newBadges?.length > 0) newBadges.forEach(b => showToast(`${b.emoji} ${b.name} badge earned!`, 4000))
+      if (newBadges?.length > 0) newBadges.forEach(b => toast.success(`${b.name} badge earned!`, 4000))
     } catch (err) {
       console.error('Badge check failed:', err)
     }
@@ -256,7 +243,7 @@ function CBTModules() {
             <p style={{ color: '#2DD4BF', fontSize: '14px', marginTop: '8px' }}>{celebratingModule}</p>
             {badgeEarned && (
               <div style={{ marginTop: '16px', background: 'rgba(255,255,255,0.12)', padding: '12px 24px', borderRadius: '12px', border: `2px solid ${badgeEarned.color}`, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '28px' }}>{badgeEarned.emoji}</span>
+                <span style={{ fontSize: '28px', display: 'block' }}><AppIcon name={badgeEarned.icon || 'star'} size={28} /></span>
                 <span style={{ color: badgeEarned.color, fontSize: '16px', fontWeight: 600 }}>{badgeEarned.name} Badge!</span>
               </div>
             )}
@@ -332,7 +319,7 @@ function CBTModules() {
                         ))}</div>
                         {!completed && (
                           <button className="btn-primary" style={{ marginTop: '1rem', width: '100%' }} onClick={() => handleComplete(m.id, m.title)} disabled={saving}>
-                            {saving ? <span className="spinner"></span> : 'Mark module as complete'}
+                            {saving ? <BrandLoader variant="inline" showWordmark={false} /> : 'Mark module as complete'}
                           </button>
                         )}
                         {completed && <p style={{ color: '#2DD4BF', fontSize: '12px', textAlign: 'center', marginTop: '12px' }}> Completed — you can still review lessons</p>}

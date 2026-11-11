@@ -1,7 +1,9 @@
+import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
+import { useI18n } from '../../i18n'
+import { BrandLoader } from '../../components/Brand'
 
 const fmt = (d) => d ? new Date(d).toLocaleDateString('en-KE') : '—'
 
@@ -10,19 +12,12 @@ const TABS = [
   { id: 'premium', label: 'Premium', icon: '' },
   { id: 'company', label: 'Company', icon: '' },
   { id: 'free', label: 'Free', icon: '' },
-  { id: 'pending', label: 'Pending', icon: '⏳' },
+  { id: 'pending', label: 'Pending', icon: '' },
 ]
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--info);color:var(--primary);padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap'
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), duration)
-}
 
 export default function UserManagement() {
-  const navigate = useNavigate()
+  const { t } = useI18n()
   const [users, setUsers] = useState([])
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
@@ -34,11 +29,10 @@ export default function UserManagement() {
   const [expandedUser, setExpandedUser] = useState(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null)
   const [showSuspendConfirm, setShowSuspendConfirm] = useState(null)
+  const [showTherapistPromotion, setShowTherapistPromotion] = useState(null)
+  const [showTherapistRevert, setShowTherapistRevert] = useState(null)
   const [showPasswordReset, setShowPasswordReset] = useState(null)
   const [resetLoading, setResetLoading] = useState(false)
-  const [editingRole, setEditingRole] = useState(null)
-  const [newRole, setNewRole] = useState('')
-  const [savingRole, setSavingRole] = useState(false)
   const [showGrantPremium, setShowGrantPremium] = useState(null)
   const [showRevokePremium, setShowRevokePremium] = useState(null)
 
@@ -67,23 +61,10 @@ export default function UserManagement() {
       const { error: statusError } = await supabase.from('profiles').update({ status: newStatus }).eq('id', userId)
       if (statusError) throw statusError
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: newStatus } : u))
-      showToast(`User ${newStatus === 'suspended' ? 'suspended' : 'reactivated'}.`)
-    } catch (err) { showToast('Failed to update.') }
+      toast.success(`User ${newStatus === 'suspended' ? 'suspended' : 'reactivated'}.`)
+    } catch (err) { toast.error('Failed to update.') }
     setActionLoading(null)
     setShowSuspendConfirm(null)
-  }
-
-  const handleRoleChange = async (userId) => {
-    if (!newRole) return
-    setSavingRole(true)
-    try {
-      const { error: roleError } = await supabase.from('profiles').update({ role: newRole }).eq('id', userId)
-      if (roleError) throw roleError
-      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u))
-      showToast(`Role changed to ${newRole}.`)
-      setEditingRole(null)
-    } catch (err) { showToast('Failed to update role.') }
-    setSavingRole(false)
   }
 
   const deleteUser = async (userId) => {
@@ -94,8 +75,8 @@ export default function UserManagement() {
       })
       if (delError) throw delError
       setUsers(prev => prev.filter(u => u.id !== userId))
-      showToast('User deleted permanently.')
-    } catch (err) { showToast('Delete failed.') }
+      toast.success('User deleted permanently.')
+    } catch (err) { toast.error('Delete failed.') }
     setActionLoading(null)
     setShowDeleteConfirm(null)
   }
@@ -108,26 +89,45 @@ export default function UserManagement() {
         body: { action: 'reset-password', userId: showPasswordReset.id }
       })
       if (resetError || data?.error) throw new Error(data?.error || resetError?.message)
-      showToast(`Reset link sent for ${showPasswordReset.full_name || 'user'}.`)
+      toast.success(`Reset link sent for ${showPasswordReset.full_name || 'user'}.`)
       setShowPasswordReset(null)
     } catch (err) {
       console.error('Password reset link failed:', err)
-      showToast('Failed: ' + (err.message || 'Unknown error'))
+      toast.error('Failed: ' + (err.message || 'Unknown error'))
     }
     setResetLoading(false)
   }
 
   const promoteToTherapist = async (userId) => {
     setActionLoading(userId)
-    const { error: promotionError } = await supabase.rpc('admin_promote_therapist', { p_user_id: userId })
-    if (promotionError) {
-      console.error('Therapist promotion failed:', promotionError)
-      showToast('Failed to promote therapist.')
-    } else {
+    try {
+      const { error: promotionError } = await supabase.rpc('admin_promote_therapist', { p_user_id: userId })
+      if (promotionError) throw promotionError
       setUsers(prev => prev.map(user => user.id === userId ? { ...user, role: 'therapist' } : user))
-      showToast('Therapist account created; profile is pending verification.')
+      toast.success(t('users.promoteSuccess'))
+      setShowTherapistPromotion(null)
+    } catch (promotionError) {
+      console.error('Therapist promotion failed:', promotionError)
+      toast.error(t('users.promoteError'))
+    } finally {
+      setActionLoading(null)
     }
-    setActionLoading(null)
+  }
+
+  const revertTherapistToUser = async (userId) => {
+    setActionLoading(userId)
+    try {
+      const { error: revertError } = await supabase.rpc('admin_revert_therapist', { p_user_id: userId })
+      if (revertError) throw revertError
+      setUsers(prev => prev.map(user => user.id === userId ? { ...user, role: 'user' } : user))
+      toast.success(t('users.revertSuccess'))
+      setShowTherapistRevert(null)
+    } catch (revertError) {
+      console.error('Therapist role revert failed:', revertError)
+      toast.error(t('users.revertError'))
+    } finally {
+      setActionLoading(null)
+    }
   }
 
   const grantPremium = async (userId) => {
@@ -142,8 +142,8 @@ export default function UserManagement() {
       setUsers(prev => prev.map(u => u.id === userId ? {
         ...u, subscription_plan: 'premium', plan_type: 'individual', subscription_status: 'active'
       } : u))
-      showToast('Premium access granted!')
-    } catch (err) { showToast('Failed to grant premium.', 'error') }
+      toast.success('Premium access granted!')
+    } catch (err) { toast.error('Failed to grant premium.') }
     setActionLoading(null)
     setShowGrantPremium(null)
   }
@@ -160,8 +160,8 @@ export default function UserManagement() {
       setUsers(prev => prev.map(u => u.id === userId ? {
         ...u, subscription_plan: 'free', plan_type: 'individual', subscription_status: 'inactive'
       } : u))
-      showToast('Premium access revoked.')
-    } catch (err) { showToast('Failed to revoke.', 'error') }
+      toast.success('Premium access revoked.')
+    } catch (err) { toast.error('Failed to revoke.') }
     setActionLoading(null)
     setShowRevokePremium(null)
   }
@@ -178,7 +178,7 @@ export default function UserManagement() {
     const a = document.createElement('a')
     a.href = url; a.download = 'losslens-users-' + new Date().toISOString().split('T')[0] + '.csv'
     a.click(); URL.revokeObjectURL(url)
-    showToast('CSV exported!')
+    toast.success('CSV exported!')
   }
 
   const filtered = users.filter(u => {
@@ -237,7 +237,7 @@ export default function UserManagement() {
       <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
   
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
-          <p style={{ color: 'var(--info)' }}>Loading users...</p>
+          <BrandLoader variant="section" />
         </div>
       </div>
     )
@@ -309,7 +309,7 @@ export default function UserManagement() {
 
               {filtered.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
-                  <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>{'\u{1F465}'}</span>
+                  <AppIcon name="users" size={48} style={{ display: 'block', margin: '0 auto 12px' }} />
                   <p style={{ color: 'var(--primary)', fontSize: '14px' }}>{search ? 'No users match your search.' : 'No users found.'}</p>
                 </div>
               ) : (
@@ -343,22 +343,22 @@ export default function UserManagement() {
                             </div>
                             <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '4px' }}>
                               <span style={{ color: 'var(--primary)', fontSize: '11px' }}>
-                                {'\u{2709}'} {u.email || 'No email'}
-                                {u.email && <button onClick={() => { navigator.clipboard.writeText(u.email); showToast('Email copied!') }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', marginLeft: '4px' }} title="Copy email"></button>}
+                                 {u.email || 'No email'}
+                                {u.email && <button onClick={() => { navigator.clipboard.writeText(u.email); toast.success('Email copied!') }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', marginLeft: '4px' }} title="Copy email"></button>}
                               </span>
-                              <span style={{ color: 'var(--primary)', fontSize: '11px' }}>{'\u{1F4DE}'} {u.phone || 'No phone'}</span>
-                              <span style={{ color: 'var(--primary)', fontSize: '11px' }}>{'\u{1F525}'} {u.streak_days || 0}d streak</span>
+                              <span style={{ color: 'var(--primary)', fontSize: '11px' }}> {u.phone || 'No phone'}</span>
+                              <span style={{ color: 'var(--primary)', fontSize: '11px' }}> {u.streak_days || 0}d streak</span>
                               <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Joined {fmt(u.created_at)}</span>
                             </div>
 
                             {hasPartner && (
                               <div style={{ background: 'var(--bg)', border: '1px solid rgba(45,212,191,0.2)', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                                <span style={{ color: 'var(--primary)', fontSize: '11px', fontWeight: 600 }}>{'\u{1F91D}'} Partner:</span>
+                                <span style={{ color: 'var(--primary)', fontSize: '11px', fontWeight: 600 }}> Partner:</span>
                                 {u.accountability_partner_name && <span style={{ color: 'var(--text)', fontSize: '12px' }}>{u.accountability_partner_name}</span>}
                                 {u.accountability_partner_phone && (
                                   <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>
-                                    {'\u{1F4DE}'} {u.accountability_partner_phone}
-                                    <button onClick={() => { navigator.clipboard.writeText(u.accountability_partner_phone); showToast('Partner phone copied!') }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', marginLeft: '4px' }}></button>
+                                     {u.accountability_partner_phone}
+                                    <button onClick={() => { navigator.clipboard.writeText(u.accountability_partner_phone); toast.success('Partner phone copied!') }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', marginLeft: '4px' }}></button>
                                   </span>
                                 )}
                               </div>
@@ -378,24 +378,10 @@ export default function UserManagement() {
                             </button>
                             <button onClick={() => setShowPasswordReset(u)}
                               style={btn('transparent', 'var(--primary)', 'var(--primary)')}>Send Reset Link</button>
-                            {u.role === 'user' && <button onClick={() => promoteToTherapist(u.id)} disabled={actionLoading === u.id}
-                              style={btn('transparent', 'var(--info)', 'var(--info)')}>Promote to Therapist</button>}
-                            {editingRole === u.id ? (
-                              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                                <select value={newRole} onChange={e => setNewRole(e.target.value)}
-                                  style={{ padding: '6px 10px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '12px', fontFamily: 'var(--font-body)', cursor: 'pointer' }}>
-                                  <option value="">Select...</option>
-                                  <option value="user">User</option>
-                                  <option value="admin">Admin</option>
-                                  <option value="super_admin">Super Admin</option>
-                                  <option value="insurer">Insurer</option>
-                                </select>
-                                <button onClick={() => handleRoleChange(u.id)} disabled={savingRole || !newRole} style={btn('var(--primary)', 'var(--bg)', 'var(--primary)')}>{savingRole ? '...' : 'Save'}</button>
-                                <button onClick={() => setEditingRole(null)} style={btn('transparent', 'rgba(255,255,255,0.4)', 'rgba(255,255,255,0.12)')}>Cancel</button>
-                              </div>
-                            ) : (
-                              <button onClick={() => { setEditingRole(u.id); setNewRole(u.role || 'user') }} style={btn('transparent', 'var(--info)', 'var(--info)')}>Change Role</button>
-                            )}
+                            {u.role === 'user' && <button onClick={() => setShowTherapistPromotion(u)} disabled={actionLoading === u.id}
+                              style={btn('transparent', 'var(--info)', 'var(--info)')}>{t('users.promoteTherapist')}</button>}
+                            {u.role === 'therapist' && <button onClick={() => setShowTherapistRevert(u)} disabled={actionLoading === u.id}
+                              style={btn('transparent', 'var(--info)', 'var(--info)')}>{t('users.revertTherapist')}</button>}
                             <button onClick={() => setShowDeleteConfirm(u)} style={btn('transparent', 'var(--text)', 'rgba(255,255,255,0.08)')}>Delete</button>
                           </div>
                         )}
@@ -435,7 +421,7 @@ export default function UserManagement() {
                   { label: 'Premium Users', value: paymentStats.premium, icon: '', color: 'var(--primary)' },
                   { label: 'Company Users', value: paymentStats.company, icon: '', color: 'var(--primary)' },
                   { label: 'Free Users', value: paymentStats.free, icon: '', color: 'var(--primary)' },
-                  { label: 'Pending', value: paymentStats.pending, icon: '⏳', color: 'var(--info)' },
+                  { label: 'Pending', value: paymentStats.pending, icon: '', color: 'var(--info)' },
                 ].map((s, i) => (
                   <div key={i} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
                     <span style={{ fontSize: '20px', display: 'block', marginBottom: '4px' }}>{s.icon}</span>
@@ -498,7 +484,7 @@ export default function UserManagement() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowSuspendConfirm(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid ' + (showSuspendConfirm.status === 'suspended' ? 'var(--primary)' : 'var(--info)'), maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{showSuspendConfirm.status === 'suspended' ? '\u{25B6}' : '\u{23F8}'}</span>
+            <AppIcon name={showSuspendConfirm.status === 'suspended' ? 'check' : 'clock'} size={36} style={{ display: 'block', margin: '0 auto 12px' }} />
             <h3 style={{ color: showSuspendConfirm.status === 'suspended' ? 'var(--primary)' : 'var(--info)', fontSize: '16px', margin: '0 0 8px' }}>
               {showSuspendConfirm.status === 'suspended' ? 'Reactivate User?' : 'Suspend User?'}
             </h3>
@@ -515,12 +501,48 @@ export default function UserManagement() {
         </div>
       )}
 
+      {showTherapistPromotion && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+          <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowTherapistPromotion(null)} />
+          <section role="dialog" aria-modal="true" aria-labelledby="therapist-promotion-title" style={{ position: 'relative', background: 'var(--surface)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--info)', maxWidth: '420px', width: '100%' }}>
+            <h2 id="therapist-promotion-title">{t('users.promoteTitle')}</h2>
+            <p style={{ color: 'var(--text-muted)' }}>
+              {t('users.promoteMessage', { name: showTherapistPromotion.full_name || showTherapistPromotion.username || t('users.thisAccount') })}
+            </p>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
+              <button type="button" onClick={() => setShowTherapistPromotion(null)} style={{ flex: 1 }} className="btn-secondary">Cancel</button>
+              <button type="button" onClick={() => promoteToTherapist(showTherapistPromotion.id)} disabled={actionLoading === showTherapistPromotion.id} style={{ flex: 1 }} className="btn-primary">
+                {actionLoading === showTherapistPromotion.id ? t('users.roleUpdating') : t('users.promoteConfirm')}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {showTherapistRevert && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+          <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowTherapistRevert(null)} />
+          <section role="dialog" aria-modal="true" aria-labelledby="therapist-revert-title" style={{ position: 'relative', background: 'var(--surface)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--info)', maxWidth: '420px', width: '100%' }}>
+            <h2 id="therapist-revert-title">{t('users.revertTitle')}</h2>
+            <p style={{ color: 'var(--text-muted)' }}>
+              {t('users.revertMessage', { name: showTherapistRevert.full_name || showTherapistRevert.username || t('users.thisAccount') })}
+            </p>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
+              <button type="button" onClick={() => setShowTherapistRevert(null)} style={{ flex: 1 }} className="btn-secondary">Cancel</button>
+              <button type="button" onClick={() => revertTherapistToUser(showTherapistRevert.id)} disabled={actionLoading === showTherapistRevert.id} style={{ flex: 1 }} className="btn-primary">
+                {actionLoading === showTherapistRevert.id ? t('users.roleUpdating') : t('users.revertConfirm')}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
       {/* Delete Modal */}
       {showDeleteConfirm && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowDeleteConfirm(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{'\u{1F5D1}'}</span>
+            <AppIcon name="close" size={36} style={{ display: 'block', margin: '0 auto 12px' }} />
             <h3 style={{ color: 'var(--text)', fontSize: '16px', margin: '0 0 8px' }}>Delete User?</h3>
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px' }}>
               Permanently delete <strong style={{ color: 'var(--primary)' }}>"{showDeleteConfirm.full_name || 'User'}"</strong>? This cannot be undone.
@@ -540,7 +562,7 @@ export default function UserManagement() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowPasswordReset(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--primary)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{'\u{1F511}'}</span>
+            <AppIcon name="shield" size={36} style={{ display: 'block', margin: '0 auto 12px' }} />
             <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 4px' }}>Send Password Reset Link</h3>
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '16px' }}>
               For <strong style={{ color: 'var(--primary)' }}>{showPasswordReset.full_name || showPasswordReset.username || 'User'}</strong>
@@ -580,7 +602,7 @@ export default function UserManagement() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowRevokePremium(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--info)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
-            <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>⬇</span>
+            <AppIcon name="download" size={36} style={{ display: 'block', margin: '0 auto 12px' }} />
             <h3 style={{ color: 'var(--info)', fontSize: '16px', margin: '0 0 8px' }}>Revoke Premium Access?</h3>
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '20px' }}>
               <strong style={{ color: 'var(--primary)' }}>"{showRevokePremium.full_name || 'User'}"</strong> will be moved back to the Free plan.

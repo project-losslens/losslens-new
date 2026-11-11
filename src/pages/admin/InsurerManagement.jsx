@@ -1,5 +1,7 @@
+import NumberField from '../../components/NumberField'
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { BrandLoader } from '../../components/Brand'
 
 export default function InsurerManagement() {
   const [insurers, setInsurers] = useState([])
@@ -144,7 +146,7 @@ export default function InsurerManagement() {
     setSaving(false)
   }
 
-  if (loading) return <p role="status">Loading insurer accounts...</p>
+  if (loading) return <BrandLoader variant="section" />
   const linkedProfileIds = new Set(insurers.map((insurer) => insurer.profile_id))
   const availableProfiles = profiles.filter((profile) => !linkedProfileIds.has(profile.id))
 
@@ -209,7 +211,7 @@ export default function InsurerManagement() {
           {clients.map((client) => <option key={client.id} value={client.id}>{client.company_name}</option>)}
         </select></label>
         <label>Cohort name<input value={partnership.cohort_name} onChange={(event) => setPartnership((current) => ({ ...current, cohort_name: event.target.value }))} required maxLength={200} /></label>
-        <label>Per-member fee (KES)<input type="number" min="0" step="0.01" value={partnership.per_member_fee} onChange={(event) => setPartnership((current) => ({ ...current, per_member_fee: event.target.value }))} required /></label>
+        <label>Per-member fee (KES)<NumberField inputMode="decimal" min={0} step={0.01} prefix="KES" value={partnership.per_member_fee} onChange={(per_member_fee) => setPartnership((current) => ({ ...current, per_member_fee: per_member_fee ?? '' }))} required /></label>
         <label>Contract start<input type="date" value={partnership.contract_start} onChange={(event) => setPartnership((current) => ({ ...current, contract_start: event.target.value }))} /></label>
         <label>Contract end<input type="date" value={partnership.contract_end} onChange={(event) => setPartnership((current) => ({ ...current, contract_end: event.target.value }))} /></label>
         <button className="btn-primary" disabled={saving || !insurers.length || !clients.length}>{saving ? 'Saving...' : 'Create partnership'}</button>

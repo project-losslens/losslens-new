@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuthProfile } from '../../context/AuthProfileContext'
+import { BrandLoader } from '../../components/Brand'
 
 const MAX_LICENSE_FILE_SIZE = 5 * 1024 * 1024
 const ALLOWED_LICENSE_TYPES = ['application/pdf']
@@ -80,7 +81,7 @@ export default function TherapistOnboarding() {
     setSaving(false)
   }
 
-  if (loading) return <p role="status">Loading verification profile...</p>
+  if (loading) return <BrandLoader variant="section" />
   return (
     <section className="portal-page">
       <p className="portal-page__eyebrow">Therapist verification</p>

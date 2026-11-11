@@ -1,3 +1,5 @@
+import { BrandLoader } from '../../components/Brand'
+import { toast } from '../../components/ToastProvider'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -8,13 +10,6 @@ const PLANS = {
   PREMIUM: 'premium',
 }
 
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div')
-  toast.textContent = message
-  toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#7DBDEE;color:#2DD4BF;padding:10px 20px;border-radius:100px;font-size:13px;z-index: var(--z-toast);box-shadow:0 4px 16px rgba(11,18,32,0.4);border:1px solid rgba(255,255,255,0.4);white-space:nowrap`
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), duration)
-}
 
 export default function SubscriptionPage() {
   const navigate = useNavigate()
@@ -68,12 +63,12 @@ export default function SubscriptionPage() {
 
     // If already on company plan, show info
     if (profile?.plan_type === 'company') {
-      showToast('You\'re on a company-subsidized plan! All Premium features are included.')
+      toast.info('You\'re on a company-subsidized plan! All Premium features are included.')
       return
     }
 
     if (plan === currentPlan) {
-      showToast(`You're already on the ${plan === PLANS.FREE ? 'Free' : 'Premium'} plan!`, 2000)
+      toast.info(`You're already on the ${plan === PLANS.FREE ? 'Free' : 'Premium'} plan!`, 2000)
       return
     }
 
@@ -145,7 +140,7 @@ export default function SubscriptionPage() {
       setCompanyInfo({ company_name: client.company_name, plan: client.plan, company_code: companyCode.toUpperCase().trim() })
       setShowJoinCompany(false)
       setCompanyCode('')
-      showToast(` Joined ${client.company_name}! You now have company-subsidized access.`)
+      toast.success(`Joined ${client.company_name}! You now have company-subsidized access.`)
     } catch (err) {
       setJoinError('Failed to join. Try again.')
     }
@@ -163,7 +158,7 @@ export default function SubscriptionPage() {
   if (pageLoading) {
     return (
       <div className="page-root" style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: '32px', height: '32px', border: '3px solid rgba(255,255,255,0.12)', borderTopColor: '#2DD4BF', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }}></div>
+        <BrandLoader />
       </div>
     )
   }
@@ -345,7 +340,7 @@ export default function SubscriptionPage() {
             disabled={loading === PLANS.PREMIUM}
             style={{ padding: '14px', marginBottom: '1rem' }}
           >
-            {loading === PLANS.PREMIUM ? <span className="spinner"></span> : ' Upgrade to Premium'}
+            {loading === PLANS.PREMIUM ? <BrandLoader variant="inline" showWordmark={false} /> : 'Upgrade to Premium'}
           </button>
         )}
 
