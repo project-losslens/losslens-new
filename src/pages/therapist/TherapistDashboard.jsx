@@ -66,7 +66,7 @@ export default function TherapistDashboard() {
       </header>
       {therapist?.status !== 'active' && (
         <div role="status" className="portal-notice">
-          Your therapist account is awaiting verification. Complete your <Link to="/therapist/onboarding">profile and license details</Link>.
+          Your therapist account is awaiting verification. Complete your <Link to="/therapist/onboarding" style={{ color: '#2DD4BF', fontWeight: 600, textDecoration: 'underline' }}>profile and license details</Link>.
         </div>
       )}
       <div className="portal-stats">
