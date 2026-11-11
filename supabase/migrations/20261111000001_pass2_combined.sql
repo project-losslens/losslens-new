@@ -559,7 +559,7 @@ create policy protection_memberships_read on public.protection_memberships for s
   using (
     user_id = auth.uid()
     or public.is_super_admin()
-    or exists (select 1 from public.insurers i where i.id = insurer_id and i.user_id = auth.uid())
+    or exists (select 1 from public.insurers i where i.id = insurer_id and i.profile_id = auth.uid())
   );
 drop policy if exists protection_memberships_member_write on public.protection_memberships;
 create policy protection_memberships_member_write on public.protection_memberships for insert to authenticated
@@ -577,7 +577,7 @@ drop policy if exists protection_events_read on public.protection_events;
 create policy protection_events_read on public.protection_events for select to authenticated
   using (
     public.is_super_admin()
-    or exists (select 1 from public.insurers i where i.id = insurer_id and i.user_id = auth.uid())
+    or exists (select 1 from public.insurers i where i.id = insurer_id and i.profile_id = auth.uid())
     or exists (select 1 from public.protection_memberships m where m.id = membership_id and m.user_id = auth.uid())
   );
 drop policy if exists protection_plans_read on public.protection_plans;
@@ -668,7 +668,7 @@ declare
   v_report jsonb;
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
-  if not exists (select 1 from public.insurers where id = p_insurer_id and user_id = v_uid) then
+  if not exists (select 1 from public.insurers where id = p_insurer_id and profile_id = v_uid) then
     raise exception 'Not an insurer for this organisation';
   end if;
   if jsonb_array_length(coalesce(p_rows, '[]'::jsonb)) > 5000 then
@@ -701,7 +701,7 @@ begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
   select * into v_m from public.protection_memberships where id = p_membership_id for update;
   if not found then raise exception 'Membership not found'; end if;
-  if not exists (select 1 from public.insurers where id = v_m.insurer_id and user_id = v_uid) then
+  if not exists (select 1 from public.insurers where id = v_m.insurer_id and profile_id = v_uid) then
     raise exception 'Not an insurer for this organisation';
   end if;
   if v_m.status <> 'pending_verification' then
@@ -720,6 +720,16 @@ end;
 $$;
 revoke execute on function public.insurer_verify_membership(uuid, text) from public, anon;
 grant execute on function public.insurer_verify_membership(uuid, text) to authenticated;
+
+
+-- Insurer portal: read own pre-authorisations (status data only — the table
+-- carries no clinical content). Appended in Phase 6.
+drop policy if exists pre_auth_vouchers_insurer_select on public.pre_auth_vouchers;
+create policy pre_auth_vouchers_insurer_select on public.pre_auth_vouchers for select to authenticated
+  using (
+    insurer_id in (select i.id from public.insurers i where i.profile_id = auth.uid())
+    and public.is_active_user()
+  );
 
 -- Verification: run as an authenticated administrator after applying.
 select

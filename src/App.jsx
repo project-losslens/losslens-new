@@ -64,6 +64,7 @@ const InsurerClaims = lazy(() => import('./pages/insurer/InsurerClaims'))
 const InsurerInvoices = lazy(() => import('./pages/insurer/InsurerInvoices'))
 const InsurerAnalytics = lazy(() => import('./pages/insurer/InsurerAnalytics'))
 const InsurerMembers = lazy(() => import('./pages/insurer/InsurerMembers'))
+const InsurerPreAuths = lazy(() => import('./pages/insurer/InsurerPreAuths'))
 const Demo = lazy(() => import('./pages/Demo'))
 const AppShell = lazy(() => import('./layouts/AppShell'))
 
@@ -124,6 +125,7 @@ function App() {
             <Route path="/insurer/invoices" element={<InsurerInvoices />} />
             <Route path="/insurer/analytics" element={<InsurerAnalytics />} />
             <Route path="/insurer/members" element={<InsurerMembers />} />
+            <Route path="/insurer/pre-auths" element={<InsurerPreAuths />} />
           </Route>
         </Route>
         <Route element={<RequireAuth role="admin" />}>
