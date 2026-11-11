@@ -35,9 +35,9 @@ Plan authority: docs/UPGRADE_PLAN.md (delete only when ALL phases done)
 - [x] Timer: SVG ring already existed; added pulsing radial bg while running + milestone toasts at 5/2/1 min
 - [x] Breathing: BreathingOrb inline SVG (expand/contract, face, leaf), 4-4-6 rhythm, phase text + round counter, static under reduced-motion
 ### Family supporters
-- [ ] Remove email/phone fields; create share link; share sheet (copy/WhatsApp/SMS/native) with ready message; keep renew/pause/revoke
-- [ ] create_supporter_invitation updated in combined SQL
-- [ ] /family-join: refetch on mount + every 30s visible + on focus, "Updated <time ago>", manual refresh; verify supporter_get_summary live data
+- [x] Removed email/phone fields; create_supporter_invitation redefined NULLs them; share sheet (copy/WhatsApp/SMS/native) after create; renew/pause/revoke kept
+- [x] create_supporter_invitation redefined in combined SQL (same signature, NULL email/phone)
+- [x] /family-join: 30s visible poll + focus/visibility refetch + "Updated x ago" + Refresh button; supporter_get_summary verified live (queries profiles/diary/cbt at call time)
 ### Recovery report
 - [ ] AES-GCM encrypt in browser → self-contained HTML decrypting after passphrase
 - [ ] Random 8-char passphrase per report, shown ABOVE Download + Copy + "Share this passphrase in person or by phone, not in the same message as the file"
