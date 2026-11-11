@@ -1,6 +1,7 @@
 /* global process */
 
 import { detectCrisis, CRISIS_HELPLINE } from '../src/lib/crisisDetection.js'
+import { getEntitlements } from '../src/lib/entitlements.js'
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
 const GROQ_MODEL = 'openai/gpt-oss-20b'
@@ -9,6 +10,9 @@ const MAX_MESSAGES = 20
 const REQUEST_TIMEOUT_MS = 30000
 const QUOTA_PER_HOUR = Number(process.env.CHAT_QUOTA_PER_HOUR || 30)
 const QUOTA_PER_DAY = Number(process.env.CHAT_QUOTA_PER_DAY || 150)
+// Plans with aiPriority get a larger rolling quota ("priority AI responses").
+const QUOTA_PRIORITY_PER_HOUR = Number(process.env.CHAT_QUOTA_PRIORITY_PER_HOUR || 90)
+const QUOTA_PRIORITY_PER_DAY = Number(process.env.CHAT_QUOTA_PRIORITY_PER_DAY || 400)
 
 // TODO(owner): verify the helpline numbers below are current before release.
 const CRISIS_REPLY = `I'm really concerned about you. If you may be in immediate danger, please reach out now — ${CRISIS_HELPLINE}, or NACADA at 1192. You can also use the crisis resources inside LossLens. You matter and you are not alone.`
@@ -100,7 +104,7 @@ async function fetchConsentState(auth) {
     Authorization: `Bearer ${auth.token}`,
   }
   const response = await fetchWithTimeout(
-    `${auth.supabaseUrl}/rest/v1/profiles?id=eq.${auth.user.id}&select=ai_data_consent_at&limit=1`,
+    `${auth.supabaseUrl}/rest/v1/profiles?id=eq.${auth.user.id}&select=ai_data_consent_at,subscription_plan,subscription_status,subscription_expires_at,plan_type&limit=1`,
     { headers }, REQUEST_TIMEOUT_MS)
   if (!response.ok) return null
   const rows = await response.json()
@@ -238,8 +242,9 @@ export default async function handler(request, response) {
   if (!message) return json(response, 400, { error: 'A message is required' })
 
   // Consent gate: AI chat sends user context to Groq (US). Require explicit opt-in.
+  let profile
   try {
-    const profile = await fetchConsentState(auth)
+    profile = await fetchConsentState(auth)
     if (!profile) return json(response, 500, { error: 'Profile could not be loaded' })
     if (!profile.ai_data_consent_at) {
       return json(response, 403, { needsConsent: true })
@@ -255,7 +260,11 @@ export default async function handler(request, response) {
     return json(response, 503, { error: 'Conversation history is temporarily unavailable' })
   }
 
-  // ── Quota: per-user rolling limits on stored history ──
+  // ── Quota: per-user rolling limits on stored history.
+  // Plans with aiPriority (premium/company/protection) get a higher cap. ──
+  const aiPriority = getEntitlements(profile).aiPriority
+  const quotaPerHour = aiPriority ? QUOTA_PRIORITY_PER_HOUR : QUOTA_PER_HOUR
+  const quotaPerDay = aiPriority ? QUOTA_PRIORITY_PER_DAY : QUOTA_PER_DAY
   try {
     const now = Date.now()
     const [hourCount, dayCount] = await Promise.all([
@@ -265,7 +274,7 @@ export default async function handler(request, response) {
     if (hourCount == null || dayCount == null) {
       return json(response, 500, { error: 'Chat quota could not be verified' })
     }
-    if (hourCount >= QUOTA_PER_HOUR || dayCount >= QUOTA_PER_DAY) {
+    if (hourCount >= quotaPerHour || dayCount >= quotaPerDay) {
       return json(response, 429, { error: 'Message limit reached. Please take a break and try again later.' })
     }
   } catch (error) {

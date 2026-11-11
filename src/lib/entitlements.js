@@ -1,4 +1,4 @@
-import { PLANS } from '../config/plans'
+import { PLANS } from '../config/plans.js'
 
 //  Entitlements — single source of truth for what each plan unlocks.
 //  "Expired" always resolves to free. Core recovery and crisis help stay

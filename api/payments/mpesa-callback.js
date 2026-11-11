@@ -62,41 +62,40 @@ export default async function handler(req, res) {
     return json(res, 200, { ok: true, status: 'failed', reason: 'amount_mismatch' })
   }
 
-  // Success: mark payment + activate plan via the same privileged path.
+  // Success: mark payment + activate plan server-side (service role bypasses
+  // the privileged-fields trigger; same fields admin_set_subscription writes).
+  const expiresAt = new Date(Date.now() + 30 * 86400000).toISOString()
+  const reason = `M-Pesa payment ${mpesaReceipt || merchantRequestId || ''}`.trim()
   await db.from('payments').update({
     status: 'success',
-    reference: mpesaReceipt || merchantRequestId || payment.reference,
+    provider_ref: mpesaReceipt || merchantRequestId || payment.provider_ref,
     raw: { ...(payment.raw || {}), resultCode, merchantRequestId, mpesaReceipt, phone },
     updated_at: new Date().toISOString(),
   }).eq('id', payment.id)
 
-  const { error: rpcError } = await db.rpc('admin_set_subscription', {
-    p_user_id: payment.user_id,
-    p_plan: payment.plan || 'premium',
-    p_status: 'active',
-    p_expires_at: new Date(Date.now() + 30 * 86400000).toISOString(),
-    p_plan_type: null,
-    p_reason: `M-Pesa payment ${mpesaReceipt || merchantRequestId || ''}`.trim(),
-  }).catch(() => ({ error: 'rpc_failed' }))
-  // admin_set_subscription requires a super_admin caller; service role bypasses
-  // is_super_admin() only if the function checks auth — so write directly here
-  // instead when the RPC rejects.
-  if (rpcError) {
-    await db.from('profiles').update({
-      subscription_plan: payment.plan || 'premium',
-      subscription_status: 'active',
-      subscription_expires_at: new Date(Date.now() + 30 * 86400000).toISOString(),
-    }).eq('id', payment.user_id)
-    await db.from('subscription_events').insert({
-      user_id: payment.user_id,
-      changed_by: null,
+  const { data: before } = await db.from('profiles')
+    .select('subscription_plan, subscription_status, subscription_expires_at')
+    .eq('id', payment.user_id).maybeSingle()
+  await db.from('profiles').update({
+    subscription_plan: payment.plan || 'premium',
+    subscription_status: 'active',
+    subscription_expires_at: expiresAt,
+  }).eq('id', payment.user_id)
+  await db.from('audit_logs').insert({
+    actor_id: null,
+    action: 'subscription_change',
+    target_table: 'profiles',
+    target_id: payment.user_id,
+    metadata: {
+      old_plan: before?.subscription_plan || null,
       new_plan: payment.plan || 'premium',
+      old_status: before?.subscription_status || null,
       new_status: 'active',
-      expires_at: new Date(Date.now() + 30 * 86400000).toISOString(),
-      reason: `M-Pesa payment ${mpesaReceipt || merchantRequestId || ''}`.trim(),
+      new_expires_at: expiresAt,
+      reason,
       source: 'payment',
-    })
-  }
+    },
+  })
 
   return json(res, 200, { ok: true, status: 'success' })
 }

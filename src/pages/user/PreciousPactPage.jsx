@@ -5,6 +5,8 @@ import { supabase } from '../../lib/supabase'
 import { readAndMigrateStorageItem } from '../../lib/storage'
 import AppIcon from '../../components/AppIcon'
 import { BrandLoader } from '../../components/Brand'
+import { useEntitlements } from '../../hooks/useEntitlements'
+import { checkStorageQuota } from '../../lib/storageQuota'
 
 //  Constants
 const MAX_RECORDING_DURATION = 600 // 10 minutes
@@ -31,6 +33,7 @@ export default function LossLensPactPage() {
   const [totalPacts, setTotalPacts] = useState(0)
   const [reviewMode, setReviewMode] = useState(false)
   const [reviewBlob, setReviewBlob] = useState(null)
+  const { entitlements } = useEntitlements()
 
   const mediaRecorderRef = useRef(null)
   const streamRef = useRef(null)
@@ -177,6 +180,14 @@ export default function LossLensPactPage() {
     if (!session) { setUploading(false); return }
 
     const blob = reviewBlob
+    const extraMb = (blob?.size || 0) / (1024 * 1024)
+    const quota = await checkStorageQuota(session.user.id, entitlements.storageQuotaMb, extraMb)
+    if (!quota.allowed) {
+      toast.error(`Storage limit reached — your plan includes ${quota.quotaMb} MB. Delete old recordings or upgrade for more space.`, 6000)
+      setReviewBlob(null)
+      setUploading(false)
+      return
+    }
     const fileName = `${session.user.id}/${Date.now()}.webm`
     setReviewBlob(null)
 

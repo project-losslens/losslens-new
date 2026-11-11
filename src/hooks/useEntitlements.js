@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import { supabase } from './supabase'
+import { supabase } from '../lib/supabase'
 import { useState, useEffect } from 'react'
-import { effectivePlan, getEntitlements } from './entitlements'
+import { effectivePlan, getEntitlements } from '../lib/entitlements'
 
 //  Loads the current user's subscription fields and derives entitlements.
 //  Falls back to free when there is no session or the row is missing.

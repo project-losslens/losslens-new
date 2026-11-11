@@ -182,64 +182,33 @@ grant execute on function public.create_supporter_invitation(text, text, text, t
 
 -- ===========================================================================
 -- PHASE 5 — SUBSCRIPTIONS, ENTITLEMENTS, PAYMENTS
+-- Objects added by this section:
+--   * table public.payments            — provider payment ledger (idempotency)
+--   * function public.admin_set_subscription(uuid[], text, text, timestamptz,
+--     text, text)                       — super-admin plan changes (single + bulk)
+-- Plans live in src/config/plans.js; change history is read from audit_logs
+-- (written via log_admin_action inside the function). No plans or history
+-- tables are created.
+-- DESTRUCTIVE (only if the earlier Phase 5 draft was already applied): drops
+-- public.plans, public.subscription_events and the superseded RPCs below.
+-- Safe to run when they do not exist.
 -- ===========================================================================
 
--- Plans catalogue (seeded; code is the stable identifier used by the app).
-create table if not exists public.plans (
-  code text primary key,
-  name text not null,
-  description text,
-  price_kes numeric,
-  billing_period text,
-  sort_order integer not null default 0,
-  features jsonb not null default '[]'::jsonb,
-  created_at timestamptz not null default now()
-);
-insert into public.plans (code, name, description, price_kes, billing_period, sort_order, features)
-values
-  ('free', 'Free', 'Core recovery tools and crisis support — always free.', 0, 'month', 0,
-   '["Diary","Urge Toolkit","The Circle","Whispers","Family Portal","AI companion (standard)"]'::jsonb),
-  ('premium', 'Premium', 'Everything in Free plus deeper analytics, priority AI and more storage.', null, 'month', 1,
-   '["Analytics detail","AI priority","Increased storage","All Free features"]'::jsonb),
-  ('company', 'Company', 'B2B seat managed by an organisation.', null, 'month', 2,
-   '["Organisation dashboard","Seat management","All Free features"]'::jsonb),
-  ('protection_member', 'Protection Member', 'Member of a LossLens Protection insurance plan.', null, 'month', 3,
-   '["Therapy sessions via Protection","Pre-authorisation","Claims support"]'::jsonb)
-on conflict (code) do nothing;
+drop function if exists public.admin_set_subscription(uuid, text, text, timestamptz, text, text);
+drop function if exists public.admin_set_subscription_bulk(uuid[], text, text, timestamptz, text, text);
+drop function if exists public.admin_get_subscription_history(uuid, integer);
+drop function if exists public.admin_record_manual_payment(uuid, text, numeric, text, text);
+drop function if exists public.expire_subscriptions();
+drop table if exists public.subscription_events;
+drop table if exists public.plans;
 
-alter table public.plans enable row level security;
-drop policy if exists plans_read_all on public.plans;
-create policy plans_read_all on public.plans for select to authenticated using (true);
-
--- Subscription change history. Read: super_admin sees all, a user sees their
--- own rows. No client writes — only SECURITY DEFINER RPCs insert.
-create table if not exists public.subscription_events (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.profiles(id) on delete cascade,
-  changed_by uuid references public.profiles(id) on delete set null,
-  old_plan text,
-  new_plan text,
-  old_status text,
-  new_status text,
-  expires_at timestamptz,
-  plan_type text,
-  reason text,
-  source text not null default 'admin' check (source in ('admin','payment','system','company','trial','insurer')),
-  created_at timestamptz not null default now()
-);
-create index if not exists subscription_events_user_idx on public.subscription_events (user_id, created_at desc);
-alter table public.subscription_events enable row level security;
-drop policy if exists subscription_events_read on public.subscription_events;
-create policy subscription_events_read on public.subscription_events for select to authenticated
-  using (public.is_super_admin() or user_id = auth.uid());
-
--- Payments ledger. Users read their own rows; super_admin reads all.
--- Writes happen only via service role / SECURITY DEFINER RPCs.
+-- Payments ledger. provider_ref is unique for idempotency. Users read their
+-- own rows; super_admin reads all. Writes happen only via the service role.
 create table if not exists public.payments (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
   provider text not null default 'manual',
-  reference text unique,
+  provider_ref text unique,
   amount numeric not null,
   currency text not null default 'KES',
   plan text,
@@ -254,88 +223,28 @@ drop policy if exists payments_read on public.payments;
 create policy payments_read on public.payments for select to authenticated
   using (public.is_super_admin() or user_id = auth.uid());
 
--- Allowed values, kept in one place for RPC validation.
-create or replace function public.subscription_plan_allowed(p_plan text)
-returns boolean language sql immutable as $$
-  select p_plan in ('free','premium','company','protection_member')
-$$;
-create or replace function public.subscription_status_allowed(p_status text)
-returns boolean language sql immutable as $$
-  select p_status in ('active','trialing','pending','inactive','cancelled','expired')
-$$;
-
--- Set one user's subscription. super_admin only; validates input; writes the
--- profile update, a subscription_events row and an admin audit entry; raises
--- if zero rows changed. Returns the updated profile row.
-create or replace function public.admin_set_subscription(
-  p_user_id uuid,
-  p_plan text,
-  p_status text,
-  p_expires_at timestamptz default null,
-  p_plan_type text default null,
-  p_reason text default null
-)
-returns public.profiles
-language plpgsql
-security definer
-set search_path = pg_catalog, public
-as $$
-declare
-  v_old public.profiles;
-  v_new public.profiles;
+-- Backwards-compatible rename for databases where the earlier draft created
+-- payments.reference instead of provider_ref. Destructive only in the sense
+-- that it rewrites the column; data is preserved.
+do $$
 begin
-  if not public.is_super_admin() then
-    raise exception 'Only super_admin can change subscriptions';
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'payments' and column_name = 'reference'
+  ) and not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'payments' and column_name = 'provider_ref'
+  ) then
+    alter table public.payments rename column reference to provider_ref;
   end if;
-  if not public.subscription_plan_allowed(p_plan) then
-    raise exception 'Invalid plan: %', p_plan;
-  end if;
-  if not public.subscription_status_allowed(p_status) then
-    raise exception 'Invalid status: %', p_status;
-  end if;
-  if p_reason is null or length(btrim(p_reason)) = 0 then
-    raise exception 'A reason is required';
-  end if;
+end $$;
 
-  select * into v_old from public.profiles where id = p_user_id for update;
-  if not found then
-    raise exception 'User not found';
-  end if;
-
-  update public.profiles
-  set subscription_plan = p_plan,
-      subscription_status = p_status,
-      subscription_expires_at = p_expires_at,
-      plan_type = coalesce(nullif(btrim(coalesce(p_plan_type,'')), ''), plan_type)
-  where id = p_user_id;
-  if not found then
-    raise exception 'Subscription update affected 0 rows';
-  end if;
-
-  select * into v_new from public.profiles where id = p_user_id;
-
-  insert into public.subscription_events (
-    user_id, changed_by, old_plan, new_plan, old_status, new_status,
-    expires_at, plan_type, reason, source
-  ) values (
-    p_user_id, auth.uid(), v_old.subscription_plan, v_new.subscription_plan,
-    v_old.subscription_status, v_new.subscription_status,
-    v_new.subscription_expires_at, v_new.plan_type, btrim(p_reason), 'admin'
-  );
-
-  perform public.log_admin_action('subscription_change', 'profiles', p_user_id::text,
-    jsonb_build_object('old_plan', v_old.subscription_plan, 'new_plan', v_new.subscription_plan,
-      'old_status', v_old.subscription_status, 'new_status', v_new.subscription_status,
-      'reason', btrim(p_reason)));
-
-  return v_new;
-end;
-$$;
-revoke execute on function public.admin_set_subscription(uuid, text, text, timestamptz, text, text) from public, anon;
-grant execute on function public.admin_set_subscription(uuid, text, text, timestamptz, text, text) to authenticated;
-
--- Bulk variant: up to 100 users, atomic (any failure rolls back all).
-create or replace function public.admin_set_subscription_bulk(
+-- Set subscriptions for one user or many (up to 100), atomically.
+-- super_admin only; plan/status validated here (mirrors src/config/plans.js);
+-- writes profile updates plus one audit_logs row per user via log_admin_action
+-- (old/new plan, status, expiry and reason in metadata). Returns the updated
+-- rows as a jsonb array; raises if zero rows changed.
+create or replace function public.admin_set_subscription(
   p_user_ids uuid[],
   p_plan text,
   p_status text,
@@ -350,137 +259,69 @@ set search_path = pg_catalog, public
 as $$
 declare
   v_uid uuid;
+  v_count integer := 0;
+  v_old public.profiles;
+  v_new public.profiles;
   v_results jsonb := '[]'::jsonb;
 begin
   if not public.is_super_admin() then
     raise exception 'Only super_admin can change subscriptions';
   end if;
+  if p_plan not in ('free','premium','company','protection_member') then
+    raise exception 'Invalid plan: %', p_plan;
+  end if;
+  if p_status not in ('active','trialing','pending','inactive','cancelled','expired') then
+    raise exception 'Invalid status: %', p_status;
+  end if;
+  if p_reason is null or length(btrim(p_reason)) = 0 then
+    raise exception 'A reason is required';
+  end if;
   if p_user_ids is null or coalesce(array_length(p_user_ids, 1), 0) = 0 then
     raise exception 'No users supplied';
   end if;
   if coalesce(array_length(p_user_ids, 1), 0) > 100 then
-    raise exception 'Maximum 100 users per bulk change';
+    raise exception 'Maximum 100 users per change';
   end if;
+
   foreach v_uid in array p_user_ids loop
-    v_results := v_results || to_jsonb(public.admin_set_subscription(
-      v_uid, p_plan, p_status, p_expires_at, p_plan_type, p_reason));
+    select * into v_old from public.profiles where id = v_uid for update;
+    if not found then
+      raise exception 'User not found: %', v_uid;
+    end if;
+
+    update public.profiles
+    set subscription_plan = p_plan,
+        subscription_status = p_status,
+        subscription_expires_at = p_expires_at,
+        plan_type = coalesce(nullif(btrim(coalesce(p_plan_type,'')), ''), plan_type)
+    where id = v_uid;
+    if not found then
+      raise exception 'Subscription update affected 0 rows for user %', v_uid;
+    end if;
+
+    select * into v_new from public.profiles where id = v_uid;
+    v_count := v_count + 1;
+    v_results := v_results || to_jsonb(v_new);
+
+    perform public.log_admin_action('subscription_change', 'profiles', v_uid::text,
+      jsonb_build_object(
+        'old_plan', v_old.subscription_plan,
+        'new_plan', v_new.subscription_plan,
+        'old_status', v_old.subscription_status,
+        'new_status', v_new.subscription_status,
+        'old_expires_at', v_old.subscription_expires_at,
+        'new_expires_at', v_new.subscription_expires_at,
+        'reason', btrim(p_reason)));
   end loop;
+
+  if v_count = 0 then
+    raise exception 'Subscription update affected 0 rows';
+  end if;
   return v_results;
 end;
 $$;
-revoke execute on function public.admin_set_subscription_bulk(uuid[], text, text, timestamptz, text, text) from public, anon;
-grant execute on function public.admin_set_subscription_bulk(uuid[], text, text, timestamptz, text, text) to authenticated;
-
--- Subscription history for the admin UI. super_admin only.
-create or replace function public.admin_get_subscription_history(
-  p_user_id uuid default null,
-  p_limit integer default 50
-)
-returns setof public.subscription_events
-language plpgsql
-security definer
-set search_path = pg_catalog, public
-as $$
-begin
-  if not public.is_super_admin() then
-    raise exception 'Only super_admin can view subscription history';
-  end if;
-  return query
-    select * from public.subscription_events
-    where (p_user_id is null or user_id = p_user_id)
-    order by created_at desc
-    limit greatest(1, least(coalesce(p_limit, 50), 200));
-end;
-$$;
-revoke execute on function public.admin_get_subscription_history(uuid, integer) from public, anon;
-grant execute on function public.admin_get_subscription_history(uuid, integer) to authenticated;
-
--- Expiry sweep: mark subscriptions past their expiry as 'expired' and write
--- a system event. Run daily via pg_cron (see docs/MIGRATION_NOTES.md) or an
--- api/cron route with the service role.
-create or replace function public.expire_subscriptions()
-returns integer
-language plpgsql
-security definer
-set search_path = pg_catalog, public
-as $$
-declare
-  v_count integer := 0;
-  v_row record;
-begin
-  for v_row in
-    select id, subscription_plan, subscription_status, subscription_expires_at, plan_type
-    from public.profiles
-    where subscription_expires_at is not null
-      and subscription_expires_at <= now()
-      and subscription_status is distinct from 'expired'
-      and subscription_status is distinct from 'cancelled'
-    for update
-  loop
-    update public.profiles
-    set subscription_status = 'expired'
-    where id = v_row.id;
-    insert into public.subscription_events (
-      user_id, changed_by, old_plan, new_plan, old_status, new_status,
-      expires_at, plan_type, reason, source
-    ) values (
-      v_row.id, null, v_row.subscription_plan, v_row.subscription_plan,
-      v_row.subscription_status, 'expired',
-      v_row.subscription_expires_at, v_row.plan_type,
-      'Subscription expired', 'system'
-    );
-    v_count := v_count + 1;
-  end loop;
-  return v_count;
-end;
-$$;
-revoke execute on function public.expire_subscriptions() from public, anon, authenticated;
-grant execute on function public.expire_subscriptions() to service_role;
-
--- Record a manual/offline payment (admin-entered M-Pesa or bank receipt) and
--- activate the matching plan. super_admin only.
-create or replace function public.admin_record_manual_payment(
-  p_user_id uuid,
-  p_plan text,
-  p_amount numeric,
-  p_reference text default null,
-  p_reason text default 'Manual payment recorded'
-)
-returns jsonb
-language plpgsql
-security definer
-set search_path = pg_catalog, public
-as $$
-declare
-  v_payment public.payments;
-  v_profile public.profiles;
-begin
-  if not public.is_super_admin() then
-    raise exception 'Only super_admin can record payments';
-  end if;
-  if not public.subscription_plan_allowed(p_plan) then
-    raise exception 'Invalid plan: %', p_plan;
-  end if;
-  if p_amount is null or p_amount <= 0 then
-    raise exception 'Amount must be positive';
-  end if;
-
-  insert into public.payments (user_id, provider, reference, amount, plan, status)
-  values (p_user_id, 'manual', nullif(btrim(coalesce(p_reference, '')), ''), p_amount, p_plan, 'success')
-  returning * into v_payment;
-
-  v_profile := public.admin_set_subscription(
-    p_user_id, p_plan, 'active', now() + interval '30 days', null, p_reason);
-
-  perform public.log_admin_action('manual_payment', 'payments', v_payment.id::text,
-    jsonb_build_object('user_id', p_user_id, 'amount', p_amount, 'plan', p_plan,
-      'reference', p_reference));
-
-  return jsonb_build_object('payment', to_jsonb(v_payment), 'profile', to_jsonb(v_profile));
-end;
-$$;
-revoke execute on function public.admin_record_manual_payment(uuid, text, numeric, text, text) from public, anon;
-grant execute on function public.admin_record_manual_payment(uuid, text, numeric, text, text) to authenticated;
+revoke execute on function public.admin_set_subscription(uuid[], text, text, timestamptz, text, text) from public, anon;
+grant execute on function public.admin_set_subscription(uuid[], text, text, timestamptz, text, text) to authenticated;
 
 
 -- ===========================================================================

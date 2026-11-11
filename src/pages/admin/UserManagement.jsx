@@ -147,8 +147,24 @@ export default function UserManagement() {
     setSubHistory([])
     setSubModal({ users: list })
     if (list.length === 1) {
-      const { data } = await supabase.rpc('admin_get_subscription_history', { p_user_id: list[0].id, p_limit: 10 })
-      if (data) setSubHistory(data)
+      const { data } = await supabase
+        .from('audit_logs')
+        .select('id, created_at, metadata')
+        .eq('action', 'subscription_change')
+        .eq('target_table', 'profiles')
+        .eq('target_id', list[0].id)
+        .order('created_at', { ascending: false })
+        .limit(10)
+      if (data) {
+        setSubHistory(data.map((row) => ({
+          id: row.id,
+          created_at: row.created_at,
+          old_plan: row.metadata?.old_plan || null,
+          new_plan: row.metadata?.new_plan || null,
+          new_status: row.metadata?.new_status || null,
+          reason: row.metadata?.reason || null,
+        })))
+      }
     }
   }
 
@@ -161,22 +177,12 @@ export default function UserManagement() {
     setSubSaving(true)
     try {
       const ids = subModal.users.map(u => u.id)
-      let rows = []
-      if (ids.length === 1) {
-        const { data, error } = await supabase.rpc('admin_set_subscription', {
-          p_user_id: ids[0], p_plan: subForm.plan, p_status: subForm.status,
-          p_expires_at: expiresAt, p_plan_type: subForm.planType || null, p_reason: subForm.reason.trim(),
-        })
-        if (error) throw error
-        rows = data ? [data] : []
-      } else {
-        const { data, error } = await supabase.rpc('admin_set_subscription_bulk', {
-          p_user_ids: ids, p_plan: subForm.plan, p_status: subForm.status,
-          p_expires_at: expiresAt, p_plan_type: subForm.planType || null, p_reason: subForm.reason.trim(),
-        })
-        if (error) throw error
-        rows = Array.isArray(data) ? data : []
-      }
+      const { data, error } = await supabase.rpc('admin_set_subscription', {
+        p_user_ids: ids, p_plan: subForm.plan, p_status: subForm.status,
+        p_expires_at: expiresAt, p_plan_type: subForm.planType || null, p_reason: subForm.reason.trim(),
+      })
+      if (error) throw error
+      const rows = Array.isArray(data) ? data : []
       const byId = new Map(rows.map(r => [r.id, r]))
       setUsers(prev => prev.map(u => byId.has(u.id) ? { ...u, ...byId.get(u.id) } : u))
       toast.success(`Subscription updated for ${rows.length || ids.length} user(s).`)

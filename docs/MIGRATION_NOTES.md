@@ -9,8 +9,23 @@ statements from the application or from a local migration command.
    `20261110000006_urge_toolkit_sessions.sql` must already be applied in
    numeric order.
 2. Apply `supabase/migrations/20261111000001_pass2_combined.sql`.
-3. Run the verification `SELECT` at the end of that file while signed in as
-   an administrator.
+   If an earlier draft of the Phase 5 section was already applied, the file
+   now contains clearly marked destructive statements that drop
+   `public.plans`, `public.subscription_events` and the superseded
+   subscription RPCs before recreating the final shape. Re-running is safe.
+3. Sanity checks (run as an administrator, plain reads):
+   - `select public.is_super_admin();` returns true.
+   - `select proname from pg_proc where proname = 'admin_set_subscription';`
+     returns exactly one row.
+   - `select tablename from pg_tables where schemaname='public'
+     and tablename in ('plans','subscription_events','payments');`
+     returns only `payments`.
+   - `select column_name from information_schema.columns where
+     table_name='payments' and column_name in ('reference','provider_ref');`
+     returns only `provider_ref`.
+   - Sign in as super admin, change one user's subscription in
+     `/super-admin/users` with a reason, reload, and confirm the history
+     list shows the change (read from `audit_logs`).
 
 The new file redefines the legacy `is_recently_authenticated()` helper so it
 no longer checks JWT age. It returns true only for active administrators;
@@ -24,19 +39,39 @@ There are no manual Supabase dashboard steps for this change.
 
 ## Phase 5 additions (same combined file)
 
-The combined file now also contains: `plans` (seeded), `subscription_events`,
-`payments`, and RPCs `admin_set_subscription`, `admin_set_subscription_bulk`,
+Objects added: table `payments` (with unique `provider_ref` for
+idempotency) and ONE function `admin_set_subscription(uuid[], text, text,
+timestamptz, text, text)`. Plans live in `src/config/plans.js`; plan and
+status values are validated inside the function. Change history is read
+from `audit_logs` (the function calls the existing `log_admin_action`), so
+there is no history table. Manual payments during the pilot call the same
+function with a reason like `manual payment: <reference>`.
+
+The destructive block at the top of the Phase 5 section drops the earlier
+draft objects (`plans`, `subscription_events`, `admin_set_subscription_bulk`,
 `admin_get_subscription_history`, `admin_record_manual_payment`,
-`expire_subscriptions`, plus `subscription_plan_allowed` /
-`subscription_status_allowed` validators. Re-apply the file — every statement
-is idempotent.
+`expire_subscriptions`, `subscription_plan_allowed`,
+`subscription_status_allowed`) if they were applied. Re-apply the file —
+every statement is idempotent.
 
-### Subscription expiry job (pick one)
+### Subscription expiry job
 
-- **pg_cron** (if enabled on the project):
-  `select cron.schedule('expire-subscriptions', '15 3 * * *', $$select public.expire_subscriptions()$$);`
-- **Vercel Cron / external scheduler**: `GET /api/cron/expire-subscriptions`
-  with header `Authorization: Bearer $CRON_SECRET`. Add `CRON_SECRET` to env.
+`GET /api/cron/expire-subscriptions` with header
+`Authorization: Bearer $CRON_SECRET`, run daily by a Vercel Cron (or any
+external scheduler). No SQL or pg_cron is involved — the endpoint uses the
+service role and writes one `audit_logs` row per expiry. To enable on
+Vercel add to `vercel.json`:
+
+```json
+{ "crons": [{ "path": "/api/cron/expire-subscriptions", "schedule": "15 3 * * *" }] }
+```
+
+Vercel Cron cannot set headers, so the endpoint also accepts
+`?secret=$CRON_SECRET` as a query parameter; external schedulers should
+prefer `Authorization: Bearer $CRON_SECRET`. Keep `CRON_SECRET` server-side
+only.
+Even without the cron, the client entitlement check treats expired plans as
+free.
 
 ### Payments env vars
 
@@ -57,10 +92,10 @@ directory columns (`county`, `session_fee`, `telehealth`).
 
 ### Protection demo data
 
-1. Create demo auth users (demo-insurer@, demo-therapist1..3@,
-   demo-member1..10@example.com) via the app or auth admin.
-2. Run `supabase/seed/protection_demo.sql` as postgres.
-3. Remove with `supabase/scripts/remove_demo_data.sql`.
+There is NO SQL demo data. Sample Protection records live only in the
+in-app Demo mode fixtures (`src/demo`), held in memory and never written to
+the database. Real testing uses the UI onboarding wizard — see
+`docs/PROTECTION_TEST_PLAN.md`.
 
 ### Protection mode switch
 

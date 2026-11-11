@@ -41,7 +41,7 @@ export default async function handler(req, res) {
     const { data: payment } = await db.from('payments').insert({
       user_id: user.id,
       provider: mode === 'sandbox' ? 'sandbox' : 'mpesa',
-      reference: result.reference || null,
+      provider_ref: result.reference || null,
       amount,
       currency: 'KES',
       plan,
@@ -56,14 +56,18 @@ export default async function handler(req, res) {
         subscription_status: 'active',
         subscription_expires_at: expiresAt,
       }).eq('id', user.id)
-      await db.from('subscription_events').insert({
-        user_id: user.id,
-        changed_by: null,
-        new_plan: plan,
-        new_status: 'active',
-        expires_at: expiresAt,
-        reason: 'Sandbox payment',
-        source: 'payment',
+      await db.from('audit_logs').insert({
+        actor_id: null,
+        action: 'subscription_change',
+        target_table: 'profiles',
+        target_id: user.id,
+        metadata: {
+          new_plan: plan,
+          new_status: 'active',
+          new_expires_at: expiresAt,
+          reason: 'Sandbox payment',
+          source: 'payment',
+        },
       })
     }
     return json(res, 200, { ...result, amount, paymentId: payment?.id || null })

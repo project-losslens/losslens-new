@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
 import { BrandLoader } from '../../components/Brand'
+import { useEntitlements } from '../../hooks/useEntitlements'
+import { checkStorageQuota } from '../../lib/storageQuota'
 
 //  Constants
 const MAX_RECORDING_DURATION = 300 // 5 minutes
@@ -39,6 +41,17 @@ export default function MonthlyMirrorPage() {
   const [reviewBlob, setReviewBlob] = useState(null)
   const [syncStatus, setSyncStatus] = useState({})
   const [retryCount, setRetryCount] = useState({})
+  const { entitlements } = useEntitlements()
+
+  const quotaAllows = async (userId, blob) => {
+    const extraMb = (blob?.size || 0) / (1024 * 1024)
+    const quota = await checkStorageQuota(userId, entitlements.storageQuotaMb, extraMb)
+    if (!quota.allowed) {
+      toast.error(`Storage limit reached — your plan includes ${quota.quotaMb} MB. Delete old recordings or upgrade for more space.`, 6000)
+      return false
+    }
+    return true
+  }
 
   const videoRef = useRef(null)
   const mediaRecorderRef = useRef(null)
@@ -196,6 +209,10 @@ export default function MonthlyMirrorPage() {
         while (retries < UPLOAD_RETRY_MAX && !success) {
           try {
             const blob = await (await fetch(item.url)).blob()
+            if (!(await quotaAllows(session.user.id, blob))) {
+              setSyncStatus(prev => ({ ...prev, [i]: 'Storage limit reached' }))
+              break
+            }
             const fileName = `${session.user.id}/${activeMonth}/${Date.now()}.webm`
             const { error } = await supabase.storage.from('mirror-recordings').upload(fileName, blob)
             if (!error) {
@@ -299,6 +316,7 @@ export default function MonthlyMirrorPage() {
     if (!session) { setUploading(false); return }
 
     const blob = reviewBlob
+    if (!(await quotaAllows(session.user.id, blob))) { setReviewBlob(null); setUploading(false); return }
     const fileName = `${session.user.id}/${activeMonth}/${Date.now()}.webm`
     setReviewBlob(null)
 
@@ -396,6 +414,7 @@ export default function MonthlyMirrorPage() {
     const { data: { session } } = await supabase.auth.getSession()
     try {
       const blob = await (await fetch(item.url)).blob()
+      if (!(await quotaAllows(session.user.id, blob))) { setUploading(false); return }
       const fileName = `${session.user.id}/${activeMonth}/${Date.now()}.webm`
       const { error } = await supabase.storage.from('mirror-recordings').upload(fileName, blob)
       if (!error) {
