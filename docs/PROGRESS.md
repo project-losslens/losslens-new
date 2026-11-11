@@ -59,7 +59,7 @@ Plan authority: docs/UPGRADE_PLAN.md (delete only when ALL phases done)
 - [x] docs/PROTECTION.md written (model, state machine, role×table matrix, gaps)
 - [x] src/lib/protectionStates.js (MEMBERSHIP_STATES/TRANSITIONS/CONSENT_SCOPES/PROTECTION_MODES); SQL check constraints mirror membership states
 - [~] protection tables/RLS/RPCs + protection_mode seed + insurer pre_auth_vouchers select policy; whitelisted views still owed
-- [~] Member screens: /protection-member mode-gated enrol/pending/active/consent toggles/timeline/leave done; benefits/limits display, find-therapist, pre-auth request NOT yet
+- [~] Member screens: /protection-member mode-gated enrol/pending/active/consent toggles/timeline/leave done; benefits copy, find-therapist (county/lang/fee/telehealth), member_request_preauth (consent-gated) + member_leave_protection RPCs done; plan benefits/limits detail still thin
 - [ ] Therapist portal shell+nav (Dashboard/Referrals/Sessions/Claims/Payouts/Profile/Verification); fix Pending Verification link
 - [~] Insurer portal: /insurer/members added (CSV roster upload via insurer_upload_member_roster + verify via insurer_verify_membership); Pre-auths page added (/insurer/pre-auths + insurer RLS policy on pre_auth_vouchers); Plans page + CSV export still owed
 - [~] /super-admin/protection: mode switch (confirm+audit best-effort), pipeline counts, pending membership queue, therapist queue, partner list; partner wizard + therapist invites NOT yet
