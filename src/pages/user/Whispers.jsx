@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { ensureCircleHash } from '../../lib/storage'
 import AppIcon from '../../components/AppIcon'
 import { BrandLoader } from '../../components/Brand'
+import { primaryHelpline } from '../../config/helplines'
 
 //  Constants
 const MAX_ACTIVE_CHATS = 3
@@ -222,7 +223,7 @@ export default function Whispers() {
 
     //  Content moderation
     if (containsCrisisContent(text)) {
-      toast.info('🆘 If you or someone is in crisis, please call Befrienders Kenya: 0800 722 030', 5000)
+      toast.info(`If you or someone is in crisis, please call ${primaryHelpline?.name || 'a crisis line'}: ${primaryHelpline?.phone || ''}`, 5000)
     }
     if (containsBlockedContent(text)) { toast.error('Please don\'t share personal info.', 4000); return }
 

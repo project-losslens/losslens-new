@@ -2,6 +2,7 @@ import NumberField from '../../components/NumberField'
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { BrandLoader } from '../../components/Brand'
+import UserAvatar from '../../components/UserAvatar'
 
 export default function TherapistManagement() {
   const [therapists, setTherapists] = useState([])
@@ -21,11 +22,17 @@ export default function TherapistManagement() {
       supabase.from('provider_claims').select('id, voucher_id, therapist_id, session_date, claim_amount, status, paid_at, insurer_reimbursed_at').order('created_at', { ascending: false }).limit(100),
     ])
     const failure = therapistResult.error || voucherResult.error || claimResult.error
+    const therapistRows = therapistResult.data || []
+    const profileIds = therapistRows.map((row) => row.id).filter(Boolean)
+    const { data: profileRows } = profileIds.length
+      ? await supabase.from('profiles').select('id, full_name, username, avatar_url').in('id', profileIds)
+      : { data: [] }
+    const profilesById = Object.fromEntries((profileRows || []).map((row) => [row.id, row]))
     if (failure) {
       console.error('Therapist management load failed:', failure)
       setError('Could not load therapist operations.')
     } else {
-      setTherapists(therapistResult.data || [])
+      setTherapists(therapistRows.map((row) => ({ ...row, profile: profilesById[row.id] || null })))
       setVouchers(voucherResult.data || [])
       setClaims(claimResult.data || [])
     }
@@ -135,7 +142,14 @@ export default function TherapistManagement() {
           <div className="portal-list">
             {therapists.map((therapist) => (
               <article className="portal-list__item" key={therapist.id}>
-                <div><strong>{therapist.specialty || 'Specialty not entered'}</strong><p>License: {therapist.license_number || 'Not provided'}</p><small>{therapist.id}</small></div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <UserAvatar reference={therapist.profile?.avatar_url} name={therapist.profile?.full_name || therapist.profile?.username} size={36} />
+                  <div>
+                    <strong>{therapist.profile?.full_name || therapist.profile?.username || 'Therapist'}</strong>
+                    <p>{therapist.specialty || 'Specialty not entered'} · License: {therapist.license_number || 'Not provided'}</p>
+                    <small>{therapist.id}</small>
+                  </div>
+                </div>
                 <div className="portal-list__actions">
                   <span className={`portal-status portal-status--${therapist.status}`}>{therapist.status}</span>
                   {therapist.status !== 'active' && <button className="btn-primary" disabled={working === therapist.id} onClick={() => changeStatus(therapist.id, 'active')}>Verify</button>}
@@ -157,7 +171,7 @@ export default function TherapistManagement() {
                   <label>Session fee (KES)<NumberField inputMode="decimal" min={0.01} step={0.01} prefix="KES" value={voucherFees[voucher.id] || ''} onChange={(fee) => setVoucherFees((current) => ({ ...current, [voucher.id]: fee ?? '' }))} /></label>
                   <select aria-label={`Assign voucher ${voucher.id}`} value={voucherAssignments[voucher.id] || ''} disabled={working === voucher.id} onChange={(event) => setVoucherAssignments((current) => ({ ...current, [voucher.id]: event.target.value }))}>
                     <option value="" disabled>Assign active therapist</option>
-                    {therapists.filter((therapist) => therapist.status === 'active').map((therapist) => <option key={therapist.id} value={therapist.id}>{therapist.specialty || therapist.id}</option>)}
+                    {therapists.filter((therapist) => therapist.status === 'active').map((therapist) => <option key={therapist.id} value={therapist.id}>{therapist.profile?.full_name || therapist.profile?.username || therapist.specialty || therapist.id}</option>)}
                   </select>
                   <button className="btn-primary" type="button" disabled={working === voucher.id} onClick={() => assignVoucher(voucher.id)}>Assign</button>
                   <button className="btn-ghost" type="button" disabled={working === voucher.id} onClick={() => voidVoucher(voucher)}>Void</button>

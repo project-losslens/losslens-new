@@ -465,7 +465,7 @@ export default function LossLensPactPage() {
                             aria-label={expandedPlayer === pact.id ? 'Collapse' : 'Expand'}>{expandedPlayer === pact.id ? '▲' : ''}</button>
                         )}
                         {!pact._pending && pact.storage_path !== STORAGE_PATH_WRITTEN && (
-                          <a href={getPublicUrl(pact.storage_path) || '#'} download style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }} aria-label="Download">⬇</a>
+                          <a href={getPublicUrl(pact.storage_path) || '#'} download style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }} aria-label="Download"><AppIcon name="download" size={14} /></a>
                         )}
                         <button onClick={() => setDeleteConfirm({ id: pact.id, path: pact.storage_path, isLocal: pact._pending, localIndex: pact._localIndex })} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px' }} aria-label="Delete"></button>
                       </div>

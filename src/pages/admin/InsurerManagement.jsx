@@ -2,6 +2,7 @@ import NumberField from '../../components/NumberField'
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { BrandLoader } from '../../components/Brand'
+import UserAvatar from '../../components/UserAvatar'
 
 export default function InsurerManagement() {
   const [insurers, setInsurers] = useState([])
@@ -21,7 +22,7 @@ export default function InsurerManagement() {
   const load = useCallback(async () => {
     const [insurerResult, profileResult, clientResult, partnershipResult] = await Promise.all([
       supabase.from('insurers').select('id, profile_id, name, license_number, contact_email, contact_phone, status, created_at').order('created_at', { ascending: false }),
-      supabase.from('profiles').select('id, full_name, email').eq('role', 'insurer').order('created_at', { ascending: false }),
+      supabase.from('profiles').select('id, full_name, username, email, avatar_url').eq('role', 'insurer').order('created_at', { ascending: false }),
       supabase.from('b2b_clients').select('id, company_name').order('company_name'),
       supabase.from('insurer_partnerships').select('id, insurer_id, b2b_client_id, cohort_name, per_member_fee, status').order('created_at', { ascending: false }),
     ])
@@ -179,14 +180,24 @@ export default function InsurerManagement() {
         <h3>Linked insurers</h3>
         {insurers.length === 0 ? <p>No insurer organizations are linked.</p> : (
           <div className="portal-list">
-            {insurers.map((insurer) => (
+            {insurers.map((insurer) => {
+              const account = profiles.find((profile) => profile.id === insurer.profile_id)
+              return (
               <article className="portal-list__item" key={insurer.id}>
-                <div><strong>{insurer.name}</strong><p>{insurer.license_number || 'No license provided'} · {insurer.contact_email || 'No contact email'}</p><small>Account: {insurer.profile_id}</small></div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <UserAvatar reference={account?.avatar_url} name={account?.full_name || account?.username} size={36} />
+                  <div>
+                    <strong>{insurer.name}</strong>
+                    <p>{insurer.license_number || 'No license provided'} · {insurer.contact_email || 'No contact email'}</p>
+                    <small>Account: {account?.full_name || account?.username || insurer.profile_id}</small>
+                  </div>
+                </div>
                 <button className="btn-ghost" onClick={() => setStatus(insurer, insurer.status === 'active' ? 'suspended' : 'active')}>
                   {insurer.status === 'active' ? 'Suspend' : 'Reactivate'}
                 </button>
               </article>
-            ))}
+              )
+            })}
           </div>
         )}
       </section>

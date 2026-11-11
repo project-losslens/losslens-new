@@ -192,7 +192,7 @@ export default function Broadcast() {
                 <textarea value={form.body} onChange={e => setForm(p => ({ ...p, body: e.target.value.substring(0, MAX_BODY_LENGTH) }))} rows={5} style={{ ...inputStyle, resize: 'vertical' }} placeholder="Write your message to users..." />
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
                   <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>{form.body.length}/{MAX_BODY_LENGTH} characters</p>
-                  {isOverSMSLimit && <p style={{ color: 'var(--info)', fontSize: '11px', margin: 0 }}>⚠️ Over SMS limit ({SMS_MAX_LENGTH} chars)</p>}
+                  {isOverSMSLimit && <p style={{ color: 'var(--info)', fontSize: '11px', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}><AppIcon name="alert" size={12} /> Over SMS limit ({SMS_MAX_LENGTH} chars)</p>}
                 </div>
               </div>
 

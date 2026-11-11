@@ -7,11 +7,15 @@ import AppIcon from '../../components/AppIcon'
 
 //  Constants
 const CATEGORY_ICONS = {
-  Crisis: '🆘', Professional: '', 'Self-Exclusion': '',
-  'Financial Recovery': '', International: '', Apps: '',
-  Podcasts: '', 'Blocking Tools': '', Mindfulness: '', Other: '',
+  Crisis: 'alert', Professional: 'medical', 'Self-Exclusion': 'shield',
+  'Financial Recovery': 'coin', International: 'resources', Apps: 'resources',
+  Podcasts: 'volume', 'Blocking Tools': 'shield', Mindfulness: 'brain', Other: 'resources',
 }
 const ALL_CATEGORIES = Object.keys(CATEGORY_ICONS)
+const CatIcon = ({ category, size = 14 }) => {
+  const name = CATEGORY_ICONS[category]
+  return name ? <AppIcon name={name} size={size} /> : null
+}
 
 const DAILY_AFFIRMATIONS = [
   { text: "Every day you choose not to gamble is a victory.", day: 0 },
@@ -242,7 +246,7 @@ export default function Resources() {
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>Recently viewed</p>
               <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {recentlyViewed.map(r => (
-                  <button key={r.id} onClick={() => handleVisit(r)} style={{ padding: '6px 12px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '11px', whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: 'var(--font-body)', flexShrink: 0 }}>{CATEGORY_ICONS[r.category] || ''} {r.name}</button>
+                  <button key={r.id} onClick={() => handleVisit(r)} style={{ padding: '6px 12px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '11px', whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: 'var(--font-body)', flexShrink: 0 }}><CatIcon category={r.category} /> {r.name}</button>
                 ))}
               </div>
             </div>
@@ -254,7 +258,7 @@ export default function Resources() {
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>Recommended for you</p>
               <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {recommendedCats.map(cat => (
-                  <button key={cat} onClick={() => setActiveCategory(cat)} style={{ padding: '6px 12px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '11px', whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: 'var(--font-body)', flexShrink: 0 }}>{CATEGORY_ICONS[cat] || ''} {cat}</button>
+                  <button key={cat} onClick={() => setActiveCategory(cat)} style={{ padding: '6px 12px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '11px', whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: 'var(--font-body)', flexShrink: 0 }}><CatIcon category={cat} /> {cat}</button>
                 ))}
               </div>
             </div>
@@ -273,17 +277,17 @@ export default function Resources() {
           <div style={{ display: 'flex', gap: '6px', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }}>
             <button onClick={() => setActiveCategory('all')} style={{ padding: '6px 14px', borderRadius: '100px', border: `1px solid ${activeCategory === 'all' ? '#7DBDEE' : 'rgba(255,255,255,0.12)'}`, background: activeCategory === 'all' ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeCategory === 'all' ? '#2DD4BF' : '#2DD4BF', fontSize: '12px', fontWeight: activeCategory === 'all' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>All</button>
             {ALL_CATEGORIES.map(cat => (
-              <button key={cat} onClick={() => setActiveCategory(cat)} style={{ padding: '6px 14px', borderRadius: '100px', border: `1px solid ${activeCategory === cat ? '#7DBDEE' : 'rgba(255,255,255,0.12)'}`, background: activeCategory === cat ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeCategory === cat ? '#2DD4BF' : '#2DD4BF', fontSize: '12px', fontWeight: activeCategory === cat ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>{CATEGORY_ICONS[cat]} {cat}</button>
+              <button key={cat} onClick={() => setActiveCategory(cat)} style={{ padding: '6px 14px', borderRadius: '100px', border: `1px solid ${activeCategory === cat ? '#7DBDEE' : 'rgba(255,255,255,0.12)'}`, background: activeCategory === cat ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeCategory === cat ? '#2DD4BF' : '#2DD4BF', fontSize: '12px', fontWeight: activeCategory === cat ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}><CatIcon category={cat} /> {cat}</button>
             ))}
           </div>
 
           {/* Top Rated */}
           {topRated.length > 0 && activeCategory === 'all' && !debouncedSearch && (
             <div style={{ marginBottom: '1rem' }}>
-              <p style={{ color: '#2DD4BF', fontSize: '11px', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>⭐ Most helpful</p>
+              <p style={{ color: '#2DD4BF', fontSize: '11px', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Most helpful</p>
               {topRated.map(r => (
                 <div key={r.id} style={{ padding: '12px', background: 'rgba(255,255,255,0.12)', borderRadius: '10px', marginBottom: '6px', border: '1px solid #7DBDEE', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '24px' }}>{CATEGORY_ICONS[r.category] || ''}</span>
+                  <span style={{ fontSize: '24px', display: 'inline-flex' }}><CatIcon category={r.category} size={24} /></span>
                   <div style={{ flex: 1 }}>
                     <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 500, margin: 0 }}>{r.name}</p>
                     <p style={{ color: '#2DD4BF', fontSize: '11px', margin: '2px 0' }}>{r.detail}</p>
@@ -313,7 +317,7 @@ export default function Resources() {
           ) : (
             Object.entries(grouped).map(([category, items]) => (
               <div key={category} className="dash-section" style={{ marginBottom: '1rem' }}>
-                <h3 style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '1rem' }}>{CATEGORY_ICONS[category] || ''} {category}</h3>
+                <h3 style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '1rem' }}><CatIcon category={category} /> {category}</h3>
                 {items.map(r => (
                   <div key={r.id} style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', gap: '10px', transition: 'background 0.15s', borderRadius: '8px', paddingLeft: '8px', paddingRight: '8px' }}
                     onMouseEnter={e => e.currentTarget.style.background = '#0B1220'}
@@ -327,7 +331,7 @@ export default function Resources() {
                     </div>
                     <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexShrink: 0 }}>
                       <button onClick={() => handleRate(r.id, true)} style={{ background: 'transparent', border: 'none', fontSize: '13px', cursor: 'pointer', padding: '4px' }} title="Helpful"></button>
-                      <button onClick={() => toggleSave(r.id)} style={{ background: 'transparent', border: 'none', fontSize: '13px', cursor: 'pointer', padding: '4px', color: savedIds.includes(r.id) ? '#2DD4BF' : 'rgba(255,255,255,0.4)' }} title={savedIds.includes(r.id) ? 'Saved' : 'Save'}>{savedIds.includes(r.id) ? '⭐' : ''}</button>
+                      <button onClick={() => toggleSave(r.id)} style={{ background: 'transparent', border: 'none', fontSize: '13px', cursor: 'pointer', padding: '4px', color: savedIds.includes(r.id) ? '#2DD4BF' : 'rgba(255,255,255,0.4)' }} title={savedIds.includes(r.id) ? 'Saved' : 'Save'}>{savedIds.includes(r.id) ? <AppIcon name="star" size={14} /> : null}</button>
                       <button onClick={() => handleShare(r)} style={{ background: 'transparent', border: 'none', fontSize: '12px', cursor: 'pointer', padding: '4px', color: 'rgba(255,255,255,0.4)' }} title="Share"></button>
                       <button onClick={() => handleVisit(r)} style={{ padding: '6px 12px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>{r.link ? 'Visit' : 'View'}</button>
                     </div>
@@ -340,10 +344,10 @@ export default function Resources() {
           {/*  Saved Resources Section — Now Functional */}
           {savedResources.length > 0 && (
             <div className="dash-section" style={{ marginTop: '1rem', borderColor: '#2DD4BF' }}>
-              <h3 style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '0.75rem' }}>⭐ Saved ({savedResources.length})</h3>
+              <h3 style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '0.75rem' }}>Saved ({savedResources.length})</h3>
               {savedResources.map(r => (
                 <div key={r.id} style={{ padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>{CATEGORY_ICONS[r.category] || ''}</span>
+                  <span style={{ display: 'inline-flex' }}><CatIcon category={r.category} /></span>
                   <span style={{ color: '#FFFFFF', fontSize: '12px', flex: 1 }}>{r.name}</span>
                   <button onClick={() => handleVisit(r)} style={{ padding: '4px 10px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Visit</button>
                   <button onClick={() => toggleSave(r.id)} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '11px', cursor: 'pointer' }}></button>
