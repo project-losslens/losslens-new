@@ -56,9 +56,9 @@ Plan authority: docs/UPGRADE_PLAN.md (delete only when ALL phases done)
 - [x] Payments: api/_lib/payments.js (off|sandbox|live, Daraja STK), api/payments/start+mpesa-callback+status, SubscriptionPage phone/waiting/success/failure/retry/receipt flow, .env.example documented; off → register-interest kept
 
 ## Phase 6 — Protection + portals
-- [ ] docs/PROTECTION.md: existing model, state machine, role×table matrix, gaps
-- [ ] src/lib/protectionStates.js single source mirrored by SQL checks
-- [ ] protection_plans/memberships/consents/events tables + RLS + indexes; member_request_enrolment, member_set_consent, insurer_upload_member_roster, insurer_verify_membership RPCs; whitelisted views/RPCs
+- [ ] docs/PROTECTION.md: existing model, state machine, role×table matrix, gaps — NOT STARTED
+- [x] src/lib/protectionStates.js (MEMBERSHIP_STATES/TRANSITIONS/CONSENT_SCOPES/PROTECTION_MODES); SQL check constraints mirror membership states
+- [~] protection_plans/memberships/consents/events tables + RLS + indexes + 4 RPCs + protection_mode seed in combined SQL; whitelisted insurer/therapist views NOT yet created
 - [ ] Member screens (mode-gated): enrol, pending, active benefits/limits, find therapist, pre-auth request, timeline, consent toggles, leave Protection
 - [ ] Therapist portal shell+nav (Dashboard/Referrals/Sessions/Claims/Payouts/Profile/Verification); fix Pending Verification link
 - [ ] Insurer portal shell+nav (Dashboard/Members/Pre-auths/Claims/Invoices/Analytics/Plans); roster CSV validation report; shared metric definitions + CSV export grouped only
