@@ -47,13 +47,13 @@ Plan authority: docs/UPGRADE_PLAN.md (delete only when ALL phases done)
 - [x] Time-aware greeting EN/SW (oloo.greet.*), rotating thought-for-today (oloo.thought.0-4), 3 quick chips (urge/log/talk) on welcome card; CSS breathe+blink idle disabled under reduced-motion; typing dots kept; avatar beside replies; detectCrisis → tel: help link on assistant msgs; crisisDetection untouched; send/volume/mic/close icons added to AppIcon
 
 ## Phase 5 — subscriptions/entitlements/payments
-- [ ] subscription_events table + RLS; plans check constraint/table
-- [ ] admin_set_subscription / _bulk / admin_get_subscription_history RPCs (is_super_admin, validation, events + log_admin_action, pass privileged trigger)
-- [ ] UserManagement "Change subscription" modal: plan/status/type/typed expiry/reason/history/bulk; local state only after RPC row
-- [ ] Expiry job: pg_cron or api/cron/expire-subscriptions (service role); document
-- [ ] supabase/scripts/set_subscription.sql + grant_super_admin.sql with verification selects
-- [ ] plans.js + seeded plans table + entitlements.js + useEntitlements + RequiresPlan; enforce Pricing promises server-side where it matters; core recovery/crisis free
-- [ ] Payments Premium only: api/_lib/payments adapter (sandbox + M-Pesa Daraja STK), PAYMENTS_MODE=off|sandbox|live, api/payments/start + mpesa-callback (idempotent) + status, payments table RLS, SubscriptionPage flow, admin_record_manual_payment RPC, .env.example docs; off → register-interest
+- [x] subscription_events + payments + plans tables/RLS in combined SQL
+- [x] admin_set_subscription/_bulk/admin_get_subscription_history/admin_record_manual_payment/expire_subscriptions RPCs — super_admin gated, reason required, events+audit, privileged trigger passes via is_super_admin()
+- [x] UserManagement "Subscription" modal: plan/status/type/NumberField days-or-date expiry/required reason/history list; bulk button on Payments tab (<=100); state updated only from RPC-returned rows; real errors toasted
+- [~] expire_subscriptions() SQL fn added (service_role grant); pg_cron schedule + api/cron route NOT yet created — document in MIGRATION_NOTES
+- [x] supabase/scripts/set_subscription.sql + grant_super_admin.sql with verification selects
+- [~] plans.js + seeded plans + entitlements.js + useEntitlements + RequiresPlan done; enforcement of analytics/AI/storage NOT yet wired into pages; core stays free
+- [x] Payments: api/_lib/payments.js (off|sandbox|live, Daraja STK), api/payments/start+mpesa-callback+status, SubscriptionPage phone/waiting/success/failure/retry/receipt flow, .env.example documented; off → register-interest kept
 
 ## Phase 6 — Protection + portals
 - [ ] docs/PROTECTION.md: existing model, state machine, role×table matrix, gaps
