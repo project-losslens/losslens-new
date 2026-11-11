@@ -33,9 +33,18 @@ async function syncUrgeSession(item) {
   if (error) throw error
 }
 
+async function syncUrgeChallenge(item) {
+  const { payload } = item
+  const { error } = payload.id
+    ? await supabase.from('urge_challenges').update(payload).eq('id', payload.id)
+    : await supabase.from('urge_challenges').insert(payload)
+  if (error) throw error
+}
+
 const SYNCERS = {
   diary_entry: syncDiaryEntry,
   urge_session: syncUrgeSession,
+  urge_challenge: syncUrgeChallenge,
 }
 
 export async function syncOfflineQueue() {

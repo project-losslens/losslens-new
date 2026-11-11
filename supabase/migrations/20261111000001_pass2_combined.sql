@@ -106,6 +106,22 @@ delete from public.circle_messages
 delete from public.circle_room_members
   where room in ('slip_recovery', 'family_friends');
 
+-- Phase 4 / Urge Toolkit: user-chosen distraction challenges
+-- ("My challenges"). Owner-only RLS; status is doing/done/dropped.
+create table if not exists public.urge_challenges (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  challenge text not null,
+  status text not null default 'doing' check (status in ('doing', 'done', 'dropped')),
+  chosen_at timestamptz not null default now(),
+  completed_at timestamptz
+);
+create index if not exists urge_challenges_user_idx on public.urge_challenges (user_id, chosen_at desc);
+alter table public.urge_challenges enable row level security;
+drop policy if exists urge_challenges_owner_all on public.urge_challenges;
+create policy urge_challenges_owner_all on public.urge_challenges for all to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+
 -- Verification: run as an authenticated administrator after applying.
 select
   public.is_active_user() as active_user,

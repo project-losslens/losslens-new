@@ -1,9 +1,10 @@
 import { toast } from '../../components/ToastProvider'
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { readAndMigrateStorageItem } from '../../lib/storage'
 import AppIcon from '../../components/AppIcon'
+import ChallengeWheel from '../../components/ChallengeWheel'
 import { HELPLINES as CONFIG_HELPLINES } from '../../config/helplines'
 import { useI18n, translate, getLanguage } from '../../i18n'
 import { enqueueOfflineItem } from '../../lib/offlineQueue'
@@ -11,8 +12,8 @@ import { enqueueOfflineItem } from '../../lib/offlineQueue'
 //  Constants
 const TIMER_DURATION = 600 // 10 minutes
 const BREATH_INHALE = 4000
-const BREATH_HOLD = 7000
-const BREATH_EXHALE = 8000
+const BREATH_HOLD = 4000
+const BREATH_EXHALE = 6000
 
 
 function triggerConfetti() {
@@ -59,26 +60,30 @@ const TOOLS = [
   { id: 'helpline', icon: 'phone', titleKey: 'toolkit.helplineTitle', descKey: 'toolkit.helplineDesc', color: '#FFFFFF' },
 ]
 
-//  Breathing Human — React.memo for performance
-const BreathingHuman = ({ phase, size = 200 }) => {
-  const scale = phase === 'inhale' ? 1.1 : phase === 'hold' ? 1.1 : 1
-  const bellyScale = phase === 'inhale' ? 1.3 : phase === 'exhale' ? 0.85 : 1.1
+//  Breathing orb — inline SVG illustration, expands/contracts on the
+//  4-4-6 rhythm driven by the phase timeouts. Static under reduced motion.
+const BreathingOrb = ({ phase, size = 200 }) => {
+  const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const expanded = phase === 'inhale' || phase === 'hold'
+  const scale = reduced ? 1 : expanded ? 1.18 : 0.82
+  const dur = phase === 'inhale' ? '4s' : phase === 'hold' ? '0s' : '6s'
+  const label = phase === 'inhale' ? translate(getLanguage(), 'toolkit.breatheIn') : phase === 'hold' ? translate(getLanguage(), 'toolkit.hold') : translate(getLanguage(), 'toolkit.breatheOut')
   return (
-    <div style={{ width: size, height: size * 1.4, margin: '0 auto', position: 'relative', transition: 'all 4s ease-in-out' }} role="img" aria-label={translate(getLanguage(), 'toolkit.breathingAria', { phase: phase === 'inhale' ? translate(getLanguage(), 'toolkit.breatheIn') : phase === 'hold' ? translate(getLanguage(), 'toolkit.hold') : translate(getLanguage(), 'toolkit.breatheOut') })}>
-      <div style={{ width: size*0.3, height: size*0.3, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #2DD4BF', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', transition: 'transform 4s', transform: `scale(${scale})` }}>
-        <div style={{ display: 'flex', gap: size*0.05 }}><div style={{ width: size*0.03, height: size*0.04, borderRadius: '50%', background: '#FFFFFF' }} /><div style={{ width: size*0.03, height: size*0.04, borderRadius: '50%', background: '#FFFFFF' }} /></div>
-        <div style={{ width: size*0.05, height: size*0.02, borderRadius: '50%', background: 'rgba(255,255,255,0.4)', marginTop: size*0.02 }} />
-      </div>
-      <div style={{ width: size*0.05, height: size*0.06, background: 'rgba(255,255,255,0.12)', margin: '0 auto' }} />
-      <div style={{ width: size*0.45, height: size*0.55, borderRadius: '40% 40% 25% 25%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #2DD4BF', margin: '0 auto', position: 'relative', transition: 'transform 4s', transform: `scale(${scale})` }}>
-        <div style={{ position: 'absolute', bottom: '15%', left: '20%', width: '60%', height: '45%', borderRadius: '50%', background: 'rgba(45,212,191,0.15)', border: '1px solid rgba(45,212,191,0.3)', transition: 'transform 4s', transform: `scale(${bellyScale})` }} />
-        <div style={{ position: 'absolute', top: '10%', left: '-25%', width: '25%', height: '50%', background: 'rgba(255,255,255,0.12)', borderRadius: '30%', border: '1px solid #7DBDEE' }} />
-        <div style={{ position: 'absolute', top: '10%', right: '-25%', width: '25%', height: '50%', background: 'rgba(255,255,255,0.12)', borderRadius: '30%', border: '1px solid #7DBDEE' }} />
-      </div>
-      <div style={{ position: 'absolute', top: '45%', left: '50%', transform: 'translate(-50%,-50%)', color: '#2DD4BF', fontSize: size*0.1, fontWeight: 600, fontFamily: 'var(--font-display)', textShadow: '0 0 10px rgba(11,18,32,0.8)' }}>
-        {phase === 'inhale' ? translate(getLanguage(), 'toolkit.breatheIn') : phase === 'hold' ? translate(getLanguage(), 'toolkit.hold') : translate(getLanguage(), 'toolkit.breatheOut')}
-      </div>
-    </div>
+    <svg width={size} height={size} viewBox="0 0 200 200" role="img" aria-label={translate(getLanguage(), 'toolkit.breathingAria', { phase: label })} style={{ display: 'block', margin: '0 auto' }}>
+      <circle cx="100" cy="100" r="86" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" />
+      <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(125,219,238,0.35)" strokeWidth="1.5" strokeDasharray="4 6" />
+      <g style={{ transformOrigin: '100px 100px', transform: `scale(${scale})`, transition: reduced ? 'none' : `transform ${dur} ease-in-out` }}>
+        <circle cx="100" cy="100" r="52" fill="rgba(45,212,191,0.14)" stroke="#2DD4BF" strokeWidth="2.5" />
+        <circle cx="100" cy="100" r="38" fill="rgba(125,219,238,0.10)" stroke="#7DBDEE" strokeWidth="1.5" opacity="0.8" />
+        {/* simple face: two eyes + calm mouth */}
+        <circle cx="84" cy="92" r="4" fill="#FFFFFF" opacity="0.9" />
+        <circle cx="116" cy="92" r="4" fill="#FFFFFF" opacity="0.9" />
+        <path d="M88 112 Q100 120 112 112" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" opacity="0.85" />
+        {/* leaf sprout on top — calm, alive feel */}
+        <path d="M100 44 q-10 -12 -2 -18 q10 6 2 18" fill="#2DD4BF" opacity="0.85" />
+      </g>
+      <text x="100" y="172" textAnchor="middle" fontSize="15" fill="#2DD4BF" fontFamily="var(--font-body)" fontWeight="600">{label}</text>
+    </svg>
   )
 }
 
@@ -121,7 +126,8 @@ export default function UrgeToolkitPage() {
   const [spinning, setSpinning] = useState(false)
   const [randomChallenge, setRandomChallenge] = useState(null)
   const [challengeAccepted, setChallengeAccepted] = useState(false)
-  const [challengeDone, setChallengeDone] = useState(false)
+  const [wheelSpinRef] = useState(() => ({ current: null }))
+  const [challenges, setChallenges] = useState([])
 
   // Helpline
   const [showAddPartner, setShowAddPartner] = useState(false)
@@ -130,6 +136,7 @@ export default function UrgeToolkitPage() {
   const [accountabilityPartner, setAccountabilityPartner] = useState(null)
 
   useEffect(() => { fetchUser(); loadCopingCards(); return () => cleanup() }, [])
+  useEffect(() => { if (userId) fetchChallenges() }, [userId])
 
   const cleanup = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current)
@@ -168,17 +175,57 @@ export default function UrgeToolkitPage() {
   useEffect(() => { if (userId) loadPartner() }, [userId])
 
   //  Timer logic with proper cleanup
+  const milestoneRef = useRef(0)
   useEffect(() => {
     if (timerRunning && timer > 0) {
       timerRef.current = setInterval(() => {
         setTimer(t => {
           if (t <= 1) { setTimerRunning(false); setTimerComplete(true); triggerConfetti(); toast.success(`${translate(getLanguage(), 'toolkit.youMadeIt')}`, 4000); void logSession('timer', { duration_seconds: TIMER_DURATION }); return 0 }
-          return t - 1
+          const remaining = t - 1
+          const milestone = remaining === 300 ? 'toolkit.milestoneHalf' : remaining === 120 ? 'toolkit.milestoneSoon' : remaining === 60 ? 'toolkit.milestoneLast' : null
+          if (milestone && milestoneRef.current !== remaining) { milestoneRef.current = remaining; toast.info(translate(getLanguage(), milestone), 4000) }
+          return remaining
         })
       }, 1000)
     }
     return () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null } }
   }, [timerRunning])
+
+  //  Challenge list ("My challenges")
+  const fetchChallenges = async () => {
+    if (!userIdRef.current) return
+    const { data } = await supabase.from('urge_challenges').select('id, challenge, status, chosen_at, completed_at').eq('user_id', userIdRef.current).order('chosen_at', { ascending: false }).limit(20)
+    if (data) setChallenges(data)
+  }
+
+  const saveChallenge = async (index) => {
+    const challengeText = translate(getLanguage(), `toolkit.challenge.${index}`)
+    const optimistic = { id: 'tmp_' + Date.now(), challenge: challengeText, status: 'doing', chosen_at: new Date().toISOString() }
+    setChallenges(prev => [optimistic, ...prev])
+    const payload = { user_id: userIdRef.current, challenge: challengeText, status: 'doing' }
+    const offline = () => enqueueOfflineItem('urge_challenge', payload).then(() => setChallenges(prev => prev.map(c => c.id === optimistic.id ? { ...c, _pending: true } : c)))
+    if (typeof navigator !== 'undefined' && !navigator.onLine) { await offline(); return }
+    const { data, error } = await supabase.from('urge_challenges').insert(payload).select().single()
+    if (error || !data) { await offline(); return }
+    setChallenges(prev => prev.map(c => c.id === optimistic.id ? data : c))
+  }
+
+  const updateChallengeStatus = async (ch, status) => {
+    const patch = { status, ...(status === 'done' ? { completed_at: new Date().toISOString() } : {}) }
+    setChallenges(prev => prev.map(c => c.id === ch.id ? { ...c, ...patch } : c))
+    if (String(ch.id).startsWith('tmp_')) return
+    const offline = () => enqueueOfflineItem('urge_challenge', { id: ch.id, ...patch })
+    if (typeof navigator !== 'undefined' && !navigator.onLine) { await offline(); return }
+    const { error } = await supabase.from('urge_challenges').update(patch).eq('id', ch.id)
+    if (error) await offline()
+  }
+
+  const handleChallengeDone = (ch) => {
+    void updateChallengeStatus(ch, 'done')
+    triggerConfetti()
+    toast.success(`${translate(getLanguage(), 'toolkit.challengeComplete')}`, 3000)
+    void logSession('distraction', { challenge: ch.challenge, status: 'done' })
+  }
 
   //  Breathing — actual 4-7-8 with dynamic timeouts
   useEffect(() => {
@@ -206,19 +253,6 @@ export default function UrgeToolkitPage() {
 
   const formatTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
   const getTimerProgress = () => ((TIMER_DURATION - timer) / TIMER_DURATION) * 100
-
-  //  Spinning wheel — fixed seed for bar heights
-  const voiceBarHeights = useMemo(() => [1,2,3,4,5,6,7,8].map(i => 15 + Math.sin(i * 1.5) * 10), [])
-
-  const spinWheel = () => {
-    setSpinning(true); setChallengeAccepted(false); setChallengeDone(false)
-    let spins = 0; const maxSpins = 20
-    const spinInterval = setInterval(() => {
-      setRandomChallenge(Math.floor(Math.random() * DISTRACTION_CHALLENGES.length))
-      spins++
-      if (spins >= maxSpins) { clearInterval(spinInterval); setSpinning(false); setRandomChallenge(Math.floor(Math.random() * DISTRACTION_CHALLENGES.length)) }
-    }, 100)
-  }
 
   const savePartner = async () => {
     if (!partnerName.trim()) return
@@ -263,7 +297,7 @@ export default function UrgeToolkitPage() {
                     if (tool.id === 'timer') { setTimerComplete(false); setTimer(TIMER_DURATION); setTimerRunning(false) }
                     if (tool.id === 'breathing') { setBreathPhase('inhale'); setBreathRounds(0); setBreathingActive(true) }
                     if (tool.id === 'thought') setThoughtStep(0)
-                    if (tool.id === 'distraction') { setRandomChallenge(null); setChallengeAccepted(false); setChallengeDone(false); setSpinning(false) }
+                    if (tool.id === 'distraction') { setRandomChallenge(null); setChallengeAccepted(false); setSpinning(false) }
                   }
                 }}
                 style={activeTool === tool.id ? { borderColor: tool.color } : {}}
@@ -272,7 +306,7 @@ export default function UrgeToolkitPage() {
                 aria-pressed={activeTool === tool.id}
                 onKeyDown={e => { if (e.key === 'Enter') {
                   if (activeTool === tool.id) { setActiveTool(null); setBreathingActive(false) }
-                  else { setActiveTool(tool.id); if (tool.id === 'timer') { setTimerComplete(false); setTimer(TIMER_DURATION); setTimerRunning(false) }; if (tool.id === 'breathing') { setBreathPhase('inhale'); setBreathRounds(0); setBreathingActive(true) }; if (tool.id === 'thought') setThoughtStep(0); if (tool.id === 'distraction') { setRandomChallenge(null); setChallengeAccepted(false); setChallengeDone(false); setSpinning(false) } }
+                  else { setActiveTool(tool.id); if (tool.id === 'timer') { setTimerComplete(false); setTimer(TIMER_DURATION); setTimerRunning(false) }; if (tool.id === 'breathing') { setBreathPhase('inhale'); setBreathRounds(0); setBreathingActive(true) }; if (tool.id === 'thought') setThoughtStep(0); if (tool.id === 'distraction') { setRandomChallenge(null); setChallengeAccepted(false); setSpinning(false) } }
                 }}}
               >
                 <AppIcon name={tool.icon} size={28} className="tool-icon" />
@@ -284,7 +318,7 @@ export default function UrgeToolkitPage() {
 
           {/* ─── TIMER ─── */}
           {activeTool === 'timer' && (
-            <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out' }}>
+            <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out', borderRadius: '16px', padding: '1.5rem', background: timerRunning ? 'radial-gradient(circle at 50% 40%, rgba(45,212,191,0.10), transparent 65%)' : undefined, transition: 'background 1s ease' }}>
               <h3 className="fs-16" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>{t('toolkit.timerHeading')}</h3>
               <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem' }}>{t('toolkit.timerSub')}</p>
               <div style={{ position: 'relative', width: '200px', height: '200px', margin: '0 auto' }} role="timer" aria-label={`Countdown timer: ${formatTime(timer)} remaining`}>
@@ -325,7 +359,7 @@ export default function UrgeToolkitPage() {
             <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out' }}>
               <h3 className="fs-16" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>{t('toolkit.breathingHeading')}</h3>
               <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem' }}>{t('toolkit.breathingSub')}</p>
-              <BreathingHuman phase={breathPhase} size={180} />
+              <BreathingOrb phase={breathPhase} size={200} />
               <div style={{ marginTop: '1rem' }}>
                 <p className="fs-14" style={{ color: '#2DD4BF', fontWeight: 500 }} aria-live="polite">{t('toolkit.round', { count: breathRounds + 1 })}</p>
                 {breathRounds >= 3 && <p className="fs-14" style={{ color: '#2DD4BF', marginTop: '0.5rem' }}> {t('toolkit.roundComplete', { count: breathRounds })}</p>}
@@ -416,32 +450,56 @@ export default function UrgeToolkitPage() {
             <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out' }}>
               <h3 className="fs-16" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>{t('toolkit.distractionTitle')}</h3>
               <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem' }}>{t('toolkit.spinDesc')}</p>
-              <div style={{ position: 'relative', width: '180px', height: '180px', margin: '0 auto 1.5rem' }}>
-                <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'conic-gradient(#2DD4BF 0deg 60deg, #2DD4BF 60deg 120deg, #7DBDEE 120deg 180deg, #2DD4BF 180deg 240deg, #FFFFFF 240deg 300deg, #7DBDEE 300deg 360deg)', animation: spinning ? 'wheelSpin 1s ease-out' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(45,212,191,0.3)' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="fs-20">{spinning ? '' : ''}</span></div>
-                </div>
-                <div className="fs-20" style={{ position: 'absolute', top: '-8px', left: '50%', transform: 'translateX(-50%)' }}>▼</div>
-              </div>
+              <ChallengeWheel
+                labels={Array.from({ length: 8 }, (_, i) => t(`toolkit.wheelLabel.${i}`))}
+                landedIndex={randomChallenge}
+                spinning={spinning}
+                spinRef={wheelSpinRef}
+                onLanded={(idx) => { setSpinning(false); setRandomChallenge(idx); setChallengeAccepted(false); }}
+              />
               {!randomChallenge ? (
-                <button className="btn-primary fs-16" style={{ padding: '16px 32px' }} onClick={spinWheel} disabled={spinning}>{spinning ? ` ${t('toolkit.spinning')}` : ` ${t('toolkit.spinWheel')}`}</button>
+                <button className="btn-primary fs-16" style={{ padding: '16px 32px', marginTop: '1rem' }} onClick={() => { setSpinning(true); wheelSpinRef.current?.() }} disabled={spinning}>{spinning ? ` ${t('toolkit.spinning')}` : ` ${t('toolkit.spinWheel')}`}</button>
               ) : (
                 <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
-                  <div style={{ background: '#0B1220', border: `2px solid ${challengeDone ? '#2DD4BF' : '#2DD4BF'}`, borderRadius: '16px', padding: '24px', marginBottom: '1rem', transition: 'border-color 0.3s' }}>
+                  <div style={{ background: '#0B1220', border: '2px solid #2DD4BF', borderRadius: '16px', padding: '24px', margin: '1rem 0' }}>
                     <p className="fs-16" style={{ color: '#FFFFFF', fontWeight: 500, marginBottom: '8px' }}>{t(`toolkit.challenge.${randomChallenge}`)}</p>
                     <span className="fs-12" style={{ background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '4px 12px', borderRadius: '100px' }}>{t(`toolkit.category.${DISTRACTION_CHALLENGES[randomChallenge]}`)}</span>
                   </div>
                   {!challengeAccepted ? (
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className="btn-primary" style={{ flex: 1 }} onClick={() => { setChallengeAccepted(true); toast.success(`${t('toolkit.youGotThis')}`, 2000) }}> {t('toolkit.accept')}</button>
-                      <button className="btn-ghost" style={{ flex: 1 }} onClick={spinWheel} disabled={spinning}> {t('toolkit.spinAgain')}</button>
+                      <button className="btn-primary" style={{ flex: 1 }} onClick={async () => { setChallengeAccepted(true); await saveChallenge(randomChallenge); toast.success(`${t('toolkit.challengeSaved')}`, 2500) }}>{t('toolkit.imDoingIt')}</button>
+                      <button className="btn-ghost" style={{ flex: 1 }} onClick={() => { setSpinning(true); wheelSpinRef.current?.() }} disabled={spinning}> {t('toolkit.spinAgain')}</button>
                     </div>
-                  ) : !challengeDone ? (
-                    <button className="btn-primary" style={{ width: '100%', background: '#2DD4BF', color: '#0B1220' }} onClick={() => { setChallengeDone(true); triggerConfetti(); toast.success(`${t('toolkit.challengeComplete')}`, 3000); void logSession('distraction', { challenge: randomChallenge }) }}> {t('toolkit.iDidIt')}</button>
                   ) : (
-                    <div><p className="fs-14" style={{ color: '#2DD4BF', marginBottom: '1rem' }}> {t('toolkit.urgeFaded')}</p><button className="btn-primary" style={{ width: '100%' }} onClick={() => { setRandomChallenge(null); setChallengeAccepted(false); setChallengeDone(false) }}> {t('toolkit.spinAgain')}</button></div>
+                    <p className="fs-14" style={{ color: '#2DD4BF' }}> {t('toolkit.challengeSaved')}</p>
                   )}
                 </div>
               )}
+
+              {/* My challenges */}
+              <div style={{ marginTop: '1.5rem', textAlign: 'left', borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: '1rem' }}>
+                <h4 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '10px' }}>{t('toolkit.myChallenges')}</h4>
+                {challenges.filter(c => c.status !== 'dropped').length === 0 ? (
+                  <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('toolkit.noChallenges')}</p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {challenges.filter(c => c.status !== 'dropped').map(ch => (
+                      <div key={ch.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '10px 12px' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p className="fs-13" style={{ color: '#FFFFFF', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{ch.challenge}</p>
+                          <span className="fs-11" style={{ color: ch.status === 'done' ? '#2DD4BF' : 'rgba(255,255,255,0.4)' }}>{ch._pending ? '…' : t(`toolkit.status${ch.status === 'doing' ? 'Doing' : 'Done'}`)}</span>
+                        </div>
+                        {ch.status === 'doing' && (
+                          <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                            <button className="btn-primary fs-11" style={{ padding: '6px 10px', minHeight: '36px' }} onClick={() => handleChallengeDone(ch)}>{t('toolkit.markDone')}</button>
+                            <button className="btn-ghost fs-11" style={{ padding: '6px 10px', minHeight: '36px' }} onClick={() => void updateChallengeStatus(ch, 'dropped')}>{t('toolkit.dropChallenge')}</button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
