@@ -26,6 +26,8 @@ export default function ProtectionOps() {
   const [saving, setSaving] = useState(false)
   const [partnerForm, setPartnerForm] = useState({ insurer_id: '', cohort_name: '', per_member_fee: '', contract_start: '' })
   const [insurers, setInsurers] = useState([])
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviting, setInviting] = useState(false)
 
   const load = useCallback(async () => {
     if (!user?.id) return
@@ -83,6 +85,28 @@ export default function ProtectionOps() {
     await load()
   }
 
+  const inviteTherapist = async (event) => {
+    event.preventDefault()
+    if (!inviteEmail.trim()) return
+    setInviting(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('send-invite', {
+        body: { action: 'invite', email: inviteEmail.trim(), role: 'therapist' },
+      })
+      if (error || data?.error) {
+        console.error('Therapist invitation failed:', error || data?.error)
+        toast.error('Could not send the therapist invite.')
+      } else {
+        toast.success('Therapist invite sent.')
+        setInviteEmail('')
+      }
+    } catch (inviteError) {
+      console.error('Therapist invitation request failed:', inviteError)
+      toast.error('Could not send the therapist invite.')
+    }
+    setInviting(false)
+  }
+
   if (loading) return <BrandLoader variant="section" />
 
   return (
@@ -131,6 +155,14 @@ export default function ProtectionOps() {
             Membership {m.id.slice(0, 8)}… · ref {m.member_reference || '—'} · {new Date(m.created_at).toLocaleDateString()}
           </p>
         ))}
+      </section>
+
+      <section className="portal-card">
+        <h3>Invite a therapist</h3>
+        <form className="portal-form" onSubmit={inviteTherapist}>
+          <label>Email<input type="email" autoComplete="email" value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} required maxLength={254} /></label>
+          <button className="btn-primary" disabled={inviting}>{inviting ? 'Sending...' : 'Send therapist invite'}</button>
+        </form>
       </section>
 
       <section className="portal-card">

@@ -84,9 +84,10 @@ demo fixtures only). Delete only when ALL phases done.
 - [x] docs/PROTECTION.md, PROTECTION_TEST_PLAN.md, GO_LIVE_CHECKLIST.md
 - [x] src/lib/protectionStates.js; protection schema/RLS/RPCs +
       protection_mode seed in combined SQL
-- [~] Member /protection-member page mode-gated (enrol/pending/active/
-      consent/timeline/leave); benefits detail thin; find-therapist +
-      pre-auth + leave RPCs done
+- [x] Member /protection-member page mode-gated (enrol/pending/active/
+      consent/timeline/leave); active state now shows plan benefits/limits
+      chips from protection_plans + not-the-insurer disclaimer;
+      find-therapist + pre-auth + leave RPCs done
 - [x] Therapist portal shell+nav DONE: Dashboard/Referrals/Sessions/
       Claims/Payouts/Profile & Verification; new pages
       TherapistReferrals (accept + decline via new
@@ -97,15 +98,18 @@ demo fixtures only). Delete only when ALL phases done.
 - [x] Insurer portal: members (CSV roster+verify+CSV export added),
       pre-auths, plans, claims, invoices, analytics (metrics via
       src/lib/metrics.js METRIC_DEFINITIONS + CSV export already present)
-- [~] /super-admin/protection: mode switch, pipeline, queues, partner
-      onboarding done; therapist invites still owed
+- [x] /super-admin/protection: mode switch, pipeline, queues, partner
+      onboarding, therapist invites (send-invite edge fn, role=therapist)
 - [x] api/_lib/notify.js in-app + pluggable email/SMS no-op
 - [x] In-memory "Sample" protection fixtures in src/demo/fixtures.js
       (protection: insurer, plan, 3 therapists, 6 memberships in every
       state, 7 claims across the pipeline) rendered on /demo — never
       written to DB. SQL seed deleted per prompt.
-- [ ] Whitelisted views audit for insurer/therapist column exposure —
-      partially covered by RPC whitelisting; formal audit owed
+- [x] Whitelisted-column audit: insurer/therapist pages only read
+      insurers, insurer_partnerships, insurer_aggregate_stats (view),
+      protection_plans/memberships/consents/events, pre_auth_vouchers,
+      provider_vouchers/claims/payouts, therapists — no diary, chat,
+      recordings or risk tables. RPCs return whitelisted fields.
 
 ## Notes / decisions
 - Avatar storage: profile stores path `uid/avatar.webp`; useAvatarUrl

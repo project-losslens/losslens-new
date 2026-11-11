@@ -31,6 +31,7 @@ export default function ProtectionPage() {
   const [preauthSessions, setPreauthSessions] = useState(1)
   const [therapists, setTherapists] = useState([])
   const [preauthSent, setPreauthSent] = useState(false)
+  const [plan, setPlan] = useState(null)
 
   useEffect(() => {
     ;(async () => {
@@ -59,6 +60,17 @@ export default function ProtectionPage() {
       ])
       setConsents(c || [])
       setEvents(e || [])
+      if (mem.insurer_id) {
+        const { data: plan } = await supabase
+          .from('protection_plans')
+          .select('name, benefits, limits')
+          .eq('insurer_id', mem.insurer_id)
+          .eq('active', true)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        setPlan(plan || null)
+      }
       const { data: ths } = await supabase
         .from('therapists')
         .select('id, specialty, languages, county, session_fee, telehealth, bio')
@@ -194,6 +206,25 @@ export default function ProtectionPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {membership.status === 'active' && plan && (
+            <div className="dash-section" style={{ marginBottom: '1rem' }}>
+              <h2 className="fs-15" style={{ color: '#2DD4BF', marginBottom: '10px' }}>Your cover — {plan.name}</h2>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {Object.entries(plan.benefits || {}).map(([key, value]) => (
+                  <span key={key} className="fs-12" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '5px 12px', color: '#FFFFFF' }}>
+                    {key.replace(/_/g, ' ')}{value != null && value !== '' ? `: ${value}` : ''}
+                  </span>
+                ))}
+                {Object.keys(plan.benefits || {}).length === 0 && Object.entries(plan.limits || {}).map(([key, value]) => (
+                  <span key={key} className="fs-12" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '5px 12px', color: '#FFFFFF' }}>
+                    {key.replace(/_/g, ' ')}: {String(value)}
+                  </span>
+                ))}
+              </div>
+              <p className="fs-11" style={{ color: 'rgba(255,255,255,0.4)', marginTop: '8px' }}>LossLens is not the insurer — your insurer sells the policy, collects premiums and decides claims. Confirm cover details with your insurer.</p>
             </div>
           )}
 
