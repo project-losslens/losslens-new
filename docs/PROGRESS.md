@@ -56,16 +56,16 @@ Plan authority: docs/UPGRADE_PLAN.md (delete only when ALL phases done)
 - [x] Payments: api/_lib/payments.js (off|sandbox|live, Daraja STK), api/payments/start+mpesa-callback+status, SubscriptionPage phone/waiting/success/failure/retry/receipt flow, .env.example documented; off → register-interest kept
 
 ## Phase 6 — Protection + portals
-- [ ] docs/PROTECTION.md: existing model, state machine, role×table matrix, gaps — NOT STARTED
+- [x] docs/PROTECTION.md written (model, state machine, role×table matrix, gaps)
 - [x] src/lib/protectionStates.js (MEMBERSHIP_STATES/TRANSITIONS/CONSENT_SCOPES/PROTECTION_MODES); SQL check constraints mirror membership states
 - [~] protection_plans/memberships/consents/events tables + RLS + indexes + 4 RPCs + protection_mode seed in combined SQL; whitelisted insurer/therapist views NOT yet created
-- [ ] Member screens (mode-gated): enrol, pending, active benefits/limits, find therapist, pre-auth request, timeline, consent toggles, leave Protection
+- [~] Member screens: /protection-member mode-gated enrol/pending/active/consent toggles/timeline/leave done; benefits/limits display, find-therapist, pre-auth request NOT yet
 - [ ] Therapist portal shell+nav (Dashboard/Referrals/Sessions/Claims/Payouts/Profile/Verification); fix Pending Verification link
 - [ ] Insurer portal shell+nav (Dashboard/Members/Pre-auths/Claims/Invoices/Analytics/Plans); roster CSV validation report; shared metric definitions + CSV export grouped only
 - [ ] Super admin Protection Ops page: pipeline counts, partners, verification queue, protection_mode switch+audit, partner wizard, therapist invites
-- [ ] api/_lib/notify.js adapter: in-app + pluggable email/SMS no-op default; no clinical/diary content
-- [ ] supabase/seed/protection_demo.sql + supabase/scripts/remove_demo_data.sql
-- [ ] docs/PROTECTION_TEST_PLAN.md + docs/GO_LIVE_CHECKLIST.md
+- [x] api/_lib/notify.js: in-app insert + pluggable email/SMS no-op defaults; no clinical content
+- [x] supabase/seed/protection_demo.sql + supabase/scripts/remove_demo_data.sql (schema-corrected)
+- [ ] docs/PROTECTION_TEST_PLAN.md + docs/GO_LIVE_CHECKLIST.md — NOT STARTED
 
 ## Notes / decisions
 - Avatar storage: profile stores path `uid/avatar.webp`; useAvatarUrl signs+caches (50min TTL). avatars bucket now readable by any authenticated user (needed for admin/therapist/insurer lists); writes remain owner-folder-only.
