@@ -34,6 +34,7 @@ const MonthlyMirrorPage = lazy(() => import('./pages/user/MonthlyMirrorPage'))
 const FamilyPortalPage = lazy(() => import('./pages/user/FamilyPortalPage'))
 const Onboarding = lazy(() => import('./pages/user/Onboarding'))
 const SubscriptionPage = lazy(() => import('./pages/user/SubscriptionPage'))
+const ProtectionPage = lazy(() => import('./pages/user/ProtectionPage'))
 
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const ManageEvents = lazy(() => import('./pages/admin/ManageEvents'))
@@ -103,6 +104,7 @@ function App() {
             <Route path="/monthly-mirror" element={<MonthlyMirrorPage />} />
             <Route path="/family-portal" element={<FamilyPortalPage />} />
             <Route path="/subscription" element={<SubscriptionPage />} />
+            <Route path="/protection-member" element={<ProtectionPage />} />
           </Route>
         </Route>
         <Route element={<RequireAuth role="therapist" />}>
