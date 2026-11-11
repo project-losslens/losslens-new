@@ -1,75 +1,109 @@
 # LossLens upgrade — progress tracker
 
-Branch: `wip/copilot-phase2-3` (Phase 2+3 committed as dc4095c)
-Plan authority: docs/UPGRADE_PLAN.md (delete only when ALL phases done)
+Branch: `wip/copilot-phase2-3` (== main at 7191815; Phase 2+3 in dc4095c,
+Phases 4–6k committed through 7191815)
+Plan authority: docs/UPGRADE_PLAN.md — REWRITTEN to match the latest
+prompt (prompt overrides: no plans/history tables beyond what exists,
+ONE admin_set_subscription function, no SQL scripts/seed files, in-memory
+demo fixtures only). Delete only when ALL phases done.
 
 ## Status legend: [x] done · [~] partial · [ ] not started
 
 ## Phase 1 — cleanup [x]
-## Phase 2 — auth/roles/redirects/super-admin [x] (verified by code review)
+## Phase 2 — auth/roles/redirects/super-admin [x]
 
 ## Part A — finish Phase 3
-- [x] i18n en/sw dedupe + parity (484 keys each)
-- [x] BrandLoader on all loading states; spinners/dots removed
-- [x] Toast system; info→success/error sweep; leading spaces stripped
-- [x] Emoji/symbol cleanup (¢ bullets, flags, ⏰⏳🆘, \u{…}, empty icons)
-- [x] Profile avatar: AvatarCropper → 256px webp <100KB → avatars bucket; useAvatarUrl hook; authenticated read policy added to combined SQL
-- [x] NumberField everywhere; AvatarCropper ranges → NumberField (numeric grep clean)
-- [x] Combined SQL: avatars authenticated read policy appended
-- [x] index.html boot loader identical; removed on mount, 10s fallback
-- [ ] Browser screenshots 360/768/1280 all shells (menu overlap, top-right username+avatar, stray symbols, toast contrast)
-- [~] UserAvatar wired into UserManagement (users+payments tabs) and B2BClients member list; still owed: TherapistManagement, InsurerManagement, ChatViewer, insurer/therapist portal lists
+- [x] i18n en/sw dedupe + parity; BrandLoader everywhere; single toast
+      system; emoji/symbol cleanup; NumberField everywhere; AvatarCropper
+      → 256px webp avatars bucket + useAvatarUrl; index.html boot loader
+- [x] Combined SQL: avatars authenticated read policy
+- [ ] Browser screenshots 360/768/1280 all shells (menu overlap, top-right
+      username+avatar, stray symbols, toast contrast) — still owed
+- [~] UserAvatar wired: UserManagement, B2BClients done; owed:
+      TherapistManagement, InsurerManagement, ChatViewer, insurer and
+      therapist portal lists
 - [ ] Final toast-type audit pass
 - [ ] Final numeric-field audit pass
 
-## Phase 4 — feature fixes
+## Phase 4 — feature fixes [x] code-complete; browser verification owed
 ### The Circle
-- [x] Remove family_friends + slip_recovery rooms (UI; no other refs found in i18n/tabs/fixtures/docs)
-- [x] Combined SQL: destructive deletes for both rooms (messages, reactions, authors, members); no check constraints exist, counts/purge fns room-agnostic
-- [x] Fix duplicate message bug: upsertCircleMessage dedupe (id + temp match user_hash/text/60s), mergeCirclePoll merge-not-replace, poll gated on realtime SUBSCRIBED status
+- [x] family_friends + slip_recovery rooms removed (UI/i18n/tabs);
+      destructive deletes in combined SQL
+- [x] Duplicate message fix: dedupe by id + temp match (user_hash/text/
+      60s), poll merges not replaces, polls only when realtime down
 ### Urge Toolkit
-- [x] Real labelled wheel: ChallengeWheel.jsx — 8 text segments, pointer, 3.5s easeOutQuart spin, WebAudio tick + vibrate, landing highlight
-- [x] "I'll do it" → saves urge_challenges status=doing (not done); "Spin again" re-spins
-- [x] urge_challenges table + owner RLS in combined SQL; urge_challenge offline queue kind + syncUrgeChallenge
-- [x] "My challenges" list in distraction panel: doing/done states, mark-done celebrates, drop supported (dropped hidden)
-- [x] Timer: SVG ring already existed; added pulsing radial bg while running + milestone toasts at 5/2/1 min
-- [x] Breathing: BreathingOrb inline SVG (expand/contract, face, leaf), 4-4-6 rhythm, phase text + round counter, static under reduced-motion
+- [x] ChallengeWheel (8 segments, pointer, 3.5s easeOutQuart, tick+
+      vibrate, landing highlight); "I'll do it"→doing, "Spin again"
+- [x] urge_challenges table + owner RLS + offline queue; My challenges
+      list (doing/done/dropped, mark-done celebrates)
+- [x] Timer ring + pulse bg + milestone toasts; BreathingOrb SVG 4-4-6
+      with reduced-motion fallback
 ### Family supporters
-- [x] Removed email/phone fields; create_supporter_invitation redefined NULLs them; share sheet (copy/WhatsApp/SMS/native) after create; renew/pause/revoke kept
-- [x] create_supporter_invitation redefined in combined SQL (same signature, NULL email/phone)
-- [x] /family-join: 30s visible poll + focus/visibility refetch + "Updated x ago" + Refresh button; supporter_get_summary verified live (queries profiles/diary/cbt at call time)
+- [x] Shareable link flow (copy/WhatsApp/SMS/native); email/phone fields
+      removed from form; create_supporter_invitation NULLs them
+- [x] /family-join: 30s visible poll + focus refetch + "Updated x ago" +
+      Refresh; supporter_get_summary verified live
 ### Recovery report
-- [x] AES-GCM (PBKDF2 100k) encrypt in browser → self-contained HTML decryptor page; opens only after passphrase
-- [x] Random 8-char passphrase shown above Download + Copy + required share-separately line + Generate new passphrase; never emailed/stored
-- [x] "Generate new passphrase" action; never emailed/stored server-side
+- [x] AES-GCM self-contained HTML, 8-char passphrase above Download +
+      Copy + share-separately line + Generate new; never emailed/stored
 ### Oloo
-- [x] Removed glow/halo; flat hand-drawn inline SVG OlooCharacter (teal blob + blue belly + leaf), 6 expressions (calm/happy/concerned/celebrating/thinking/speaking); context-driven: high risk/low mood → concerned, streak%7 → celebrating, streak>=3 → happy
-- [x] Time-aware greeting EN/SW (oloo.greet.*), rotating thought-for-today (oloo.thought.0-4), 3 quick chips (urge/log/talk) on welcome card; CSS breathe+blink idle disabled under reduced-motion; typing dots kept; avatar beside replies; detectCrisis → tel: help link on assistant msgs; crisisDetection untouched; send/volume/mic/close icons added to AppIcon
+- [x] Flat SVG character, expressions by context, EN/SW greeting,
+      thought-for-today, 3 chips, reduced-motion-safe idle anim, typing
+      dots, avatar per reply, crisis help link; crisisDetection untouched
 
 ## Phase 5 — subscriptions/entitlements/payments
-- [x] subscription_events + payments + plans tables/RLS in combined SQL
-- [x] admin_set_subscription/_bulk/admin_get_subscription_history/admin_record_manual_payment/expire_subscriptions RPCs — super_admin gated, reason required, events+audit, privileged trigger passes via is_super_admin()
-- [x] UserManagement "Subscription" modal: plan/status/type/NumberField days-or-date expiry/required reason/history list; bulk button on Payments tab (<=100); state updated only from RPC-returned rows; real errors toasted
-- [~] expire_subscriptions() SQL fn added (service_role grant); pg_cron schedule + api/cron route NOT yet created — document in MIGRATION_NOTES
-- [x] supabase/scripts/set_subscription.sql + grant_super_admin.sql with verification selects
-- [~] plans.js + seeded plans + entitlements.js + useEntitlements + RequiresPlan done; enforcement of analytics/AI/storage NOT yet wired into pages; core stays free
-- [x] Payments: api/_lib/payments.js (off|sandbox|live, Daraja STK), api/payments/start+mpesa-callback+status, SubscriptionPage phone/waiting/success/failure/retry/receipt flow, .env.example documented; off → register-interest kept
+- [~] SQL: subscription_events/payments/plans tables + admin RPCs +
+      expire_subscriptions() exist BUT prompt now says NO plans table and
+      NO separate history table — needs reconciliation: history must read
+      audit_logs, plans live in src/config/plans.js only, ONE
+      admin_set_subscription(uuid[], ...) function. Existing extra objects
+      may need removing from combined SQL (destructive-marked) or leaving
+      unused — DECIDE and document.
+- [x] UserManagement Change subscription modal (RPC-backed, bulk<=100,
+      history, typed expiry, required reason)
+- [x] api/cron/expire-subscriptions.js exists; verify it uses service
+      role; document enabling in MIGRATION_NOTES (check done)
+- [~] plans.js + entitlements.js + useEntitlements + RequiresPlan exist;
+      enforcement NOT wired into api/chat.js / storage / analytics pages
+- [x] Payments: api/_lib/payments.js (off|sandbox|live Daraja STK),
+      api/payments/{start,mpesa-callback,status}, SubscriptionPage flow,
+      .env.example; off→register-interest kept
+- [ ] Delete forbidden SQL helper files — DONE this session
+      (supabase/scripts/*.sql, supabase/seed/protection_demo.sql removed)
 
 ## Phase 6 — Protection + portals
-- [x] docs/PROTECTION.md written (model, state machine, role×table matrix, gaps)
-- [x] src/lib/protectionStates.js (MEMBERSHIP_STATES/TRANSITIONS/CONSENT_SCOPES/PROTECTION_MODES); SQL check constraints mirror membership states
-- [~] protection tables/RLS/RPCs + protection_mode seed + insurer pre_auth_vouchers select policy; whitelisted views still owed
-- [~] Member screens: /protection-member mode-gated enrol/pending/active/consent toggles/timeline/leave done; benefits copy, find-therapist (county/lang/fee/telehealth), member_request_preauth (consent-gated) + member_leave_protection RPCs done; plan benefits/limits detail still thin
-- [ ] Therapist portal shell+nav (Dashboard/Referrals/Sessions/Claims/Payouts/Profile/Verification); fix Pending Verification link
-- [~] Insurer portal: /insurer/members added (CSV roster upload via insurer_upload_member_roster + verify via insurer_verify_membership); Pre-auths page added (/insurer/pre-auths + insurer RLS policy on pre_auth_vouchers); Plans page done (/insurer/plans + insurer write policy); CSV export still owed
-- [~] /super-admin/protection: mode switch (confirm+audit best-effort), pipeline counts, pending membership queue, therapist queue, partner list; partner onboarding form done; therapist invites NOT yet
-- [x] api/_lib/notify.js: in-app insert + pluggable email/SMS no-op defaults; no clinical content
-- [x] supabase/seed/protection_demo.sql + supabase/scripts/remove_demo_data.sql (schema-corrected)
-- [x] docs/PROTECTION_TEST_PLAN.md + docs/GO_LIVE_CHECKLIST.md
+- [x] docs/PROTECTION.md, PROTECTION_TEST_PLAN.md, GO_LIVE_CHECKLIST.md
+- [x] src/lib/protectionStates.js; protection schema/RLS/RPCs +
+      protection_mode seed in combined SQL
+- [~] Member /protection-member page mode-gated (enrol/pending/active/
+      consent/timeline/leave); benefits detail thin; find-therapist +
+      pre-auth + leave RPCs done
+- [ ] Therapist portal shell+nav (Dashboard/Referrals/Sessions/Claims/
+      Payouts/Profile/Verification); Pending Verification link readable
+      (6g partially done — verify)
+- [~] Insurer portal: members (CSV roster+verify), pre-auths, plans
+      pages done; Claims/Invoices/Analytics exist? CSV export owed;
+      metrics definitions file owed
+- [~] /super-admin/protection: mode switch, pipeline, queues, partner
+      onboarding done; therapist invites owed
+- [x] api/_lib/notify.js in-app + pluggable email/SMS no-op
+- [ ] In-memory "Sample" protection fixtures in src/demo (SQL seed was
+      deleted per prompt — must re-create as in-memory demo data)
+- [ ] Whitelisted views for insurer/therapist if needed (audit RLS/RPC
+      column exposure)
 
 ## Notes / decisions
-- Avatar storage: profile stores path `uid/avatar.webp`; useAvatarUrl signs+caches (50min TTL). avatars bucket now readable by any authenticated user (needed for admin/therapist/insurer lists); writes remain owner-folder-only.
-- Toast types: success=teal/dark text, error=red/white, info=dark/white in globals.css .ll-toast--*.
-- NumberField commits on blur/Enter; used for all numeric entry incl. AvatarCropper zoom/position.
-- Boot loader removed via rAF in main.jsx; index.html fallback timeout 10s.
-- Phase 3 items verified by code review only so far — browser screenshots still owed (Part A.1).
+- Avatar storage: profile stores path `uid/avatar.webp`; useAvatarUrl
+  signs+caches (50min TTL). avatars bucket readable by authenticated
+  users; writes owner-folder-only.
+- Toast types: success=teal/dark, error=red/white, info=dark/white in
+  globals.css .ll-toast--*.
+- NumberField commits on blur/Enter.
+- Boot loader removed via rAF in main.jsx; index.html fallback 10s.
+- 2026-11-11: UPGRADE_PLAN.md rewritten to match latest prompt; deleted
+  supabase/scripts/{grant_super_admin,set_subscription,
+  remove_demo_data}.sql and supabase/seed/protection_demo.sql (prompt:
+  exactly one SQL file, no scripts/seed). Demo protection data must be
+  in-memory in src/demo instead.
+- Phase 3/4/5/6 items largely verified by code review only — browser
+  screenshots still owed (Part A.1).
