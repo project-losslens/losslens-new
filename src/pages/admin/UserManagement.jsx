@@ -2,6 +2,7 @@ import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
+import UserAvatar from '../../components/UserAvatar'
 import { useI18n } from '../../i18n'
 import { BrandLoader } from '../../components/Brand'
 
@@ -326,6 +327,7 @@ export default function UserManagement() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
                           <div style={{ flex: 1, minWidth: '200px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                              <UserAvatar reference={u.avatar_url} name={u.full_name || u.username} size={32} />
                               <span style={{ color: 'var(--text)', fontSize: '14px', fontWeight: 600 }}>
                                 {u.full_name || 'Unnamed'}
                                 {u.username && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: 400 }}> @{u.username}</span>}
@@ -443,6 +445,7 @@ export default function UserManagement() {
                     return (
                       <div key={u.id} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                          <UserAvatar reference={u.avatar_url} name={u.full_name || u.username} size={32} />
                           <span style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500 }}>
                             {u.full_name || 'Unnamed'}
                             <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginLeft: '4px' }}>{u.email || ''}</span>

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
+import UserAvatar from '../../components/UserAvatar'
 import { BrandLoader } from '../../components/Brand'
 
 const PLANS = { STANDARD: 'standard', ENTERPRISE: 'enterprise', CUSTOM: 'custom' }
@@ -71,7 +72,7 @@ export default function B2BClients() {
   useEffect(() => { fetchClients() }, [fetchClients])
 
   const fetchClientMembers = async (client) => {
-    const { data } = await supabase.from('profiles').select('id, full_name, username, phone, streak_days, risk_level, last_active').eq('b2b_client_id', client.id).order('full_name', { ascending: true })
+    const { data } = await supabase.from('profiles').select('id, full_name, username, phone, streak_days, risk_level, last_active, avatar_url').eq('b2b_client_id', client.id).order('full_name', { ascending: true })
     setShowMembers({ client, members: data || [] })
   }
 
@@ -391,9 +392,12 @@ export default function B2BClients() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {showMembers.members.map(m => (
                   <div key={m.id} style={{ background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                    <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <UserAvatar reference={m.avatar_url} name={m.full_name || m.username} size={32} />
+                      <div>
                       <span style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500 }}>{m.full_name || 'Unnamed'}</span>
                       {m.username && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginLeft: '6px' }}>@{m.username}</span>}
+                      </div>
                     </div>
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                       <span style={{ color: 'var(--primary)', fontSize: '11px' }}>{<AppIcon name="flame" size={12} />} {m.streak_days || 0}d</span>
