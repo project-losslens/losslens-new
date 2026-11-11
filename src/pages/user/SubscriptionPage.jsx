@@ -24,6 +24,9 @@ export default function SubscriptionPage() {
   const [companyCode, setCompanyCode] = useState('')
   const [joinLoading, setJoinLoading] = useState(false)
   const [joinError, setJoinError] = useState('')
+  const [payPhone, setPayPhone] = useState('')
+  const [payStatus, setPayStatus] = useState('idle') // idle | waiting | success | failed
+  const [payRef, setPayRef] = useState('')
 
   useEffect(() => {
     fetchProfile()
@@ -82,10 +85,54 @@ export default function SubscriptionPage() {
           created_at: new Date().toISOString(),
         }).select().single()
       }
+
+      // Try the payments flow first (Premium only). /api/payments/start
+      // returns { started:false } when PAYMENTS_MODE=off.
+      if (session && plan === PLANS.PREMIUM) {
+        const res = await fetch('/api/payments/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+          body: JSON.stringify({ phone: payPhone, plan }),
+        })
+        const data = await res.json().catch(() => ({}))
+        if (data.started) {
+          if (data.simulated) {
+            setPayStatus('success')
+            await fetchProfile()
+            setLoading(null)
+            return
+          }
+          setPayRef(data.reference || '')
+          setPayStatus('waiting')
+          pollPaymentStatus(session.access_token)
+          setLoading(null)
+          return
+        }
+      }
     } catch (err) { /* Silent — analytics only */ }
 
     setLoading(null)
     setShowComingSoon(true)
+  }
+
+  const pollPaymentStatus = async (token) => {
+    const deadline = Date.now() + 3 * 60 * 1000
+    while (Date.now() < deadline) {
+      await new Promise(r => setTimeout(r, 5000))
+      try {
+        const res = await fetch(`/api/payments/status${payRef ? `?reference=${encodeURIComponent(payRef)}` : ''}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const data = await res.json().catch(() => ({}))
+        if (data.status === 'success') {
+          setPayStatus('success')
+          await fetchProfile()
+          return
+        }
+        if (data.status === 'failed') { setPayStatus('failed'); return }
+      } catch { /* keep polling */ }
+    }
+    setPayStatus('failed')
   }
 
   const handleJoinCompany = async () => {
@@ -333,16 +380,41 @@ export default function SubscriptionPage() {
         )}
 
         {/* Action Button — only for free individual users */}
-        {!isCompanyPlan && currentPlan === PLANS.FREE && !interestRegistered && (
+        {!isCompanyPlan && currentPlan === PLANS.FREE && !interestRegistered && (<>
           <button
             className="btn-primary full fs-15"
             onClick={() => handleUpgrade(PLANS.PREMIUM)}
-            disabled={loading === PLANS.PREMIUM}
-            style={{ padding: '14px', marginBottom: '1rem' }}
+            disabled={loading === PLANS.PREMIUM || payStatus === 'waiting'}
+            style={{ padding: '14px', marginBottom: '0.75rem' }}
           >
-            {loading === PLANS.PREMIUM ? <BrandLoader variant="inline" showWordmark={false} /> : 'Upgrade to Premium'}
+            {loading === PLANS.PREMIUM ? <BrandLoader variant="inline" showWordmark={false} /> : payStatus === 'waiting' ? 'Waiting for M-Pesa…' : 'Upgrade to Premium'}
           </button>
-        )}
+          {currentPlan === PLANS.FREE && payStatus === 'idle' && (
+            <div className="form-group" style={{ marginBottom: '1rem' }}>
+              <label htmlFor="mpesa-phone">M-Pesa number (optional — pay by phone)</label>
+              <input id="mpesa-phone" type="tel" value={payPhone} onChange={e => setPayPhone(e.target.value)} placeholder="07XX XXX XXX" />
+            </div>
+          )}
+          {payStatus === 'waiting' && (
+            <div className="dash-section" style={{ textAlign: 'center', marginBottom: '1rem' }}>
+              <BrandLoader variant="inline" showWordmark={false} />
+              <p className="fs-13" style={{ color: '#2DD4BF', marginTop: '8px' }}>Check your phone and enter your M-Pesa PIN to complete payment.</p>
+              {payRef && <p className="fs-11" style={{ color: 'rgba(255,255,255,0.4)' }}>Reference: {payRef}</p>}
+            </div>
+          )}
+          {payStatus === 'success' && (
+            <div className="dash-section" style={{ textAlign: 'center', marginBottom: '1rem', borderColor: '#2DD4BF' }}>
+              <p className="fs-14" style={{ color: '#2DD4BF' }}>Payment received — Premium is active. Receipt: {payRef || 'see M-Pesa'}</p>
+              <button className="btn-ghost fs-12" onClick={() => setPayStatus('idle')}>Done</button>
+            </div>
+          )}
+          {payStatus === 'failed' && (
+            <div className="dash-section" style={{ textAlign: 'center', marginBottom: '1rem', borderColor: '#ff9b9b' }}>
+              <p className="fs-14" style={{ color: '#ff9b9b' }}>Payment did not complete. You can try again.</p>
+              <button className="btn-primary fs-12" onClick={() => { setPayStatus('idle'); handleUpgrade(PLANS.PREMIUM) }}>Retry</button>
+            </div>
+          )}
+        </>)}
 
         {interestRegistered && (
           <div style={{ textAlign: 'center', padding: '1rem', background: 'rgba(255,255,255,0.12)', borderRadius: '12px', border: '1px solid #2DD4BF', marginBottom: '1rem' }}>
