@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuthProfile } from '../../context/AuthProfileContext'
 import { BrandLoader } from '../../components/Brand'
+import NumberField from '../../components/NumberField'
 
 const MAX_LICENSE_FILE_SIZE = 5 * 1024 * 1024
 const ALLOWED_LICENSE_TYPES = ['application/pdf']
@@ -9,7 +10,7 @@ const ALLOWED_LICENSE_TYPES = ['application/pdf']
 export default function TherapistOnboarding() {
   const { user } = useAuthProfile()
   const userId = user?.id
-  const [form, setForm] = useState({ license_number: '', specialty: '', languages: '', bio: '', license_document_path: '' })
+  const [form, setForm] = useState({ license_number: '', specialty: '', languages: '', bio: '', license_document_path: '', county: '', session_fee: '', telehealth: false })
   const [status, setStatus] = useState('pending')
   const [file, setFile] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -31,6 +32,9 @@ export default function TherapistOnboarding() {
         languages: (data.languages || []).join(', '),
         bio: data.bio || '',
         license_document_path: data.license_document_path || '',
+        county: data.county || '',
+        session_fee: data.session_fee ?? '',
+        telehealth: Boolean(data.telehealth),
       })
     }
     setLoading(false)
@@ -69,6 +73,9 @@ export default function TherapistOnboarding() {
       languages: form.languages.split(',').map((language) => language.trim()).filter(Boolean),
       bio: form.bio.trim(),
       license_document_path: documentPath || null,
+      county: form.county.trim() || null,
+      session_fee: form.session_fee === '' ? null : Number(form.session_fee),
+      telehealth: Boolean(form.telehealth),
     }).eq('id', user.id)
     if (saveError) {
       console.error('Therapist verification save failed:', saveError)
@@ -94,6 +101,12 @@ export default function TherapistOnboarding() {
         <label>Specialty<input value={form.specialty} onChange={(event) => setForm({ ...form, specialty: event.target.value })} required maxLength={120} /></label>
         <label>Languages (comma-separated)<input value={form.languages} onChange={(event) => setForm({ ...form, languages: event.target.value })} maxLength={200} /></label>
         <label>Professional bio<textarea value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} rows={5} maxLength={2000} /></label>
+        <label>County<input value={form.county} onChange={(event) => setForm({ ...form, county: event.target.value })} maxLength={80} /></label>
+        <label>Session fee (KES)<NumberField value={form.session_fee} onChange={(v) => setForm({ ...form, session_fee: v ?? '' })} min={0} step={50} /></label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <input type="checkbox" checked={form.telehealth} onChange={(event) => setForm({ ...form, telehealth: event.target.checked })} />
+          I offer telehealth sessions
+        </label>
         <label>License document (PDF; up to 5 MB)<input type="file" accept=".pdf,application/pdf" onChange={(event) => setFile(event.target.files?.[0] || null)} /></label>
         {form.license_document_path && <p>License document uploaded.</p>}
         <button className="btn-primary" disabled={saving}>{saving ? 'Saving...' : 'Save for verification'}</button>

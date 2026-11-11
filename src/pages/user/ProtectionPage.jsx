@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { getProtectionMode, protectionModeAllows } from '../../lib/protectionMode'
+import NumberField from '../../components/NumberField'
 import { BrandLoader } from '../../components/Brand'
 import { toast } from '../../components/ToastProvider'
 import AppIcon from '../../components/AppIcon'
@@ -27,6 +28,9 @@ export default function ProtectionPage() {
   const [insurerId, setInsurerId] = useState('')
   const [memberRef, setMemberRef] = useState('')
   const [saving, setSaving] = useState(false)
+  const [preauthSessions, setPreauthSessions] = useState(1)
+  const [therapists, setTherapists] = useState([])
+  const [preauthSent, setPreauthSent] = useState(false)
 
   useEffect(() => {
     ;(async () => {
@@ -55,6 +59,12 @@ export default function ProtectionPage() {
       ])
       setConsents(c || [])
       setEvents(e || [])
+      const { data: ths } = await supabase
+        .from('therapists')
+        .select('id, specialty, languages, county, session_fee, telehealth, bio')
+        .eq('status', 'active')
+        .limit(50)
+      setTherapists(ths || [])
     }
   }
 
@@ -79,10 +89,24 @@ export default function ProtectionPage() {
     setConsents(prev => prev.map(c => c.scope === scope ? { ...c, granted } : c))
   }
 
+  const requestPreauth = async () => {
+    if (!membership) return
+    setSaving(true)
+    const { error } = await supabase.rpc('member_request_preauth', {
+      p_membership_id: membership.id,
+      p_sessions: Number(preauthSessions) || 1,
+    })
+    setSaving(false)
+    if (error) { toast.error(error.message || 'Could not request pre-authorisation.'); return }
+    setPreauthSent(true)
+    toast.success('Pre-authorisation request sent to your insurer.')
+    await load()
+  }
+
   const leave = async () => {
     if (!confirm('Leave Protection? Your membership will end and consents are revoked.')) return
-    await supabase.from('protection_consents').update({ granted: false, revoked_at: new Date().toISOString() }).eq('membership_id', membership.id)
-    await supabase.from('protection_memberships').update({ status: 'ended', updated_at: new Date().toISOString() }).eq('id', membership.id)
+    const { error } = await supabase.rpc('member_leave_protection', { p_membership_id: membership.id })
+    if (error) { toast.error(error.message || 'Could not leave Protection.'); return }
     toast.success('You have left Protection.')
     await load()
   }
@@ -171,6 +195,37 @@ export default function ProtectionPage() {
                 </div>
               ))}
             </div>
+          )}
+
+          {membership.status === 'active' && (
+            <>
+              <div className="dash-section" style={{ marginBottom: '1rem' }}>
+                <h2 className="fs-15" style={{ color: '#2DD4BF', marginBottom: '10px' }}>Request pre-authorisation</h2>
+                <p className="fs-12" style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '10px' }}>Ask your insurer to approve therapy sessions before you book.</p>
+                <div className="form-group"><label>Sessions needed</label>
+                  <NumberField value={preauthSessions} onChange={v => setPreauthSessions(v ?? 1)} min={1} max={24} />
+                </div>
+                <button className="btn-primary" onClick={requestPreauth} disabled={saving || preauthSent}>
+                  {preauthSent ? 'Request sent' : saving ? <BrandLoader variant="inline" showWordmark={false} /> : 'Request pre-authorisation'}
+                </button>
+              </div>
+
+              {therapists.length > 0 && (
+                <div className="dash-section" style={{ marginBottom: '1rem' }}>
+                  <h2 className="fs-15" style={{ color: '#2DD4BF', marginBottom: '10px' }}>Find a verified therapist</h2>
+                  {therapists.map(t => (
+                    <div key={t.id} style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                      <p className="fs-13" style={{ color: '#FFFFFF', margin: 0 }}>{t.specialty || 'Therapist'}</p>
+                      <p className="fs-11" style={{ color: 'rgba(255,255,255,0.45)', margin: '2px 0 0' }}>
+                        {[t.county, (t.languages || []).join(', ')].filter(Boolean).join(' · ')}
+                        {t.telehealth ? ' · Telehealth available' : ''}
+                        {t.session_fee ? ` · KES ${Number(t.session_fee).toLocaleString()}/session` : ''}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
 
           {membership.status === 'active' && (

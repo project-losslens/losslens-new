@@ -731,7 +731,83 @@ create policy pre_auth_vouchers_insurer_select on public.pre_auth_vouchers for s
     and public.is_active_user()
   );
 
+
+-- Phase 6: therapist directory fields + member pre-authorisation request.
+alter table public.therapists add column if not exists county text;
+alter table public.therapists add column if not exists session_fee numeric(12,2);
+alter table public.therapists add column if not exists telehealth boolean not null default false;
+
+-- Member requests a pre-authorisation under an active membership.
+-- Creates a pre_auth_vouchers row tied to the membership's insurer.
+-- Returns the voucher id.
+create or replace function public.member_request_preauth(
+  p_membership_id uuid,
+  p_sessions integer default 1
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_m public.protection_memberships;
+  v_id uuid;
+begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  select * into v_m from public.protection_memberships where id = p_membership_id for update;
+  if not found or v_m.user_id <> v_uid then raise exception 'Membership not found'; end if;
+  if v_m.status <> 'active' then raise exception 'Membership is not active'; end if;
+  if p_sessions is null or p_sessions < 1 or p_sessions > 24 then
+    raise exception 'Sessions must be between 1 and 24';
+  end if;
+  -- Require billing/status consent before sharing anything with the insurer.
+  if not exists (select 1 from public.protection_consents
+                 where membership_id = p_membership_id and scope = 'status_updates' and granted) then
+    raise exception 'Enable status sharing consent before requesting pre-authorisation';
+  end if;
+  insert into public.pre_auth_vouchers (user_id, max_sessions, insurer_id)
+  values (v_uid, p_sessions, v_m.insurer_id)
+  returning id into v_id;
+  insert into public.protection_events (membership_id, insurer_id, actor_id, event_type, detail)
+  values (p_membership_id, v_m.insurer_id, v_uid, 'preauth_requested',
+          jsonb_build_object('sessions', p_sessions, 'voucher_id', v_id));
+  return v_id;
+end;
+$$;
+revoke execute on function public.member_request_preauth(uuid, integer) from public, anon;
+grant execute on function public.member_request_preauth(uuid, integer) to authenticated;
+
+-- Member "leave Protection": ends membership and revokes all consents.
+create or replace function public.member_leave_protection(p_membership_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_m public.protection_memberships;
+begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  select * into v_m from public.protection_memberships where id = p_membership_id for update;
+  if not found or v_m.user_id <> v_uid then raise exception 'Membership not found'; end if;
+  if v_m.status = 'ended' then return; end if;
+  update public.protection_consents
+  set granted = false, revoked_at = now()
+  where membership_id = p_membership_id and granted;
+  update public.protection_memberships
+  set status = 'ended', updated_at = now()
+  where id = p_membership_id;
+  insert into public.protection_events (membership_id, insurer_id, actor_id, event_type, detail)
+  values (p_membership_id, v_m.insurer_id, v_uid, 'membership_ended', '{}'::jsonb);
+end;
+$$;
+revoke execute on function public.member_leave_protection(uuid) from public, anon;
+grant execute on function public.member_leave_protection(uuid) to authenticated;
+
 -- Verification: run as an authenticated administrator after applying.
+
 select
   public.is_active_user() as active_user,
   public.is_admin() as administrator,
