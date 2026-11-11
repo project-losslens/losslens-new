@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
+import UserAvatar from '../../components/UserAvatar'
 
 function ChatViewer() {
   const navigate = useNavigate()
@@ -23,7 +24,7 @@ function ChatViewer() {
     try {
       const { data, error } = await supabase
         .from('chat_history')
-        .select('user_id, profiles(full_name)')
+        .select('user_id, profiles(full_name, avatar_url)')
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -41,6 +42,7 @@ function ChatViewer() {
           uniqueUsers.push({
             id: d.user_id,
             full_name: d.profiles?.full_name || 'Unknown User',
+            avatar_url: d.profiles?.avatar_url || null,
           })
         }
       })
@@ -176,12 +178,17 @@ function ChatViewer() {
                   onMouseEnter={e => { if (selectedUser !== u.id) e.currentTarget.style.background = 'var(--bg)' }}
                   onMouseLeave={e => { if (selectedUser !== u.id) e.currentTarget.style.background = 'transparent' }}
                 >
-                  <p style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500, margin: 0 }}>
-                    {u.full_name}
-                  </p>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '2px 0 0' }}>
-                    {u.id.slice(0, 8)}"¦
-                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <UserAvatar reference={u.avatar_url} name={u.full_name} size={32} />
+                    <div>
+                      <p style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500, margin: 0 }}>
+                        {u.full_name}
+                      </p>
+                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '2px 0 0' }}>
+                        {u.id.slice(0, 8)}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               ))
             )}
