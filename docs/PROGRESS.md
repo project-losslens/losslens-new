@@ -61,8 +61,8 @@ Plan authority: docs/UPGRADE_PLAN.md (delete only when ALL phases done)
 - [~] protection tables/RLS/RPCs + protection_mode seed + insurer pre_auth_vouchers select policy; whitelisted views still owed
 - [~] Member screens: /protection-member mode-gated enrol/pending/active/consent toggles/timeline/leave done; benefits copy, find-therapist (county/lang/fee/telehealth), member_request_preauth (consent-gated) + member_leave_protection RPCs done; plan benefits/limits detail still thin
 - [ ] Therapist portal shell+nav (Dashboard/Referrals/Sessions/Claims/Payouts/Profile/Verification); fix Pending Verification link
-- [~] Insurer portal: /insurer/members added (CSV roster upload via insurer_upload_member_roster + verify via insurer_verify_membership); Pre-auths page added (/insurer/pre-auths + insurer RLS policy on pre_auth_vouchers); Plans page + CSV export still owed
-- [~] /super-admin/protection: mode switch (confirm+audit best-effort), pipeline counts, pending membership queue, therapist queue, partner list; partner wizard + therapist invites NOT yet
+- [~] Insurer portal: /insurer/members added (CSV roster upload via insurer_upload_member_roster + verify via insurer_verify_membership); Pre-auths page added (/insurer/pre-auths + insurer RLS policy on pre_auth_vouchers); Plans page done (/insurer/plans + insurer write policy); CSV export still owed
+- [~] /super-admin/protection: mode switch (confirm+audit best-effort), pipeline counts, pending membership queue, therapist queue, partner list; partner onboarding form done; therapist invites NOT yet
 - [x] api/_lib/notify.js: in-app insert + pluggable email/SMS no-op defaults; no clinical content
 - [x] supabase/seed/protection_demo.sql + supabase/scripts/remove_demo_data.sql (schema-corrected)
 - [x] docs/PROTECTION_TEST_PLAN.md + docs/GO_LIVE_CHECKLIST.md
