@@ -79,6 +79,7 @@ export const superAdminNav = [
   { to: '/super-admin/therapists', label: 'Therapist Management', icon: 'medical', section: 'super-admin' },
   { to: '/super-admin/insurers', label: 'Insurer Management', icon: 'building', section: 'super-admin' },
   { to: '/super-admin/float', label: 'Float Management', icon: 'analytics', section: 'super-admin' },
+  { to: '/super-admin/protection', label: 'Protection Ops', icon: 'shield', section: 'super-admin' },
 ]
 
 export const therapistNav = [
@@ -92,6 +93,7 @@ export const insurerNav = [
   { to: '/insurer/claims', label: 'Claims', icon: 'document' },
   { to: '/insurer/invoices', label: 'Invoices', icon: 'document' },
   { to: '/insurer/analytics', label: 'Analytics', icon: 'analytics' },
+  { to: '/insurer/members', label: 'Members', icon: 'users' },
 ]
 
 export function getPageTitle(pathname) {
