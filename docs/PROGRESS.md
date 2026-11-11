@@ -61,8 +61,8 @@ Plan authority: docs/UPGRADE_PLAN.md (delete only when ALL phases done)
 - [~] protection_plans/memberships/consents/events tables + RLS + indexes + 4 RPCs + protection_mode seed in combined SQL; whitelisted insurer/therapist views NOT yet created
 - [~] Member screens: /protection-member mode-gated enrol/pending/active/consent toggles/timeline/leave done; benefits/limits display, find-therapist, pre-auth request NOT yet
 - [ ] Therapist portal shell+nav (Dashboard/Referrals/Sessions/Claims/Payouts/Profile/Verification); fix Pending Verification link
-- [ ] Insurer portal shell+nav (Dashboard/Members/Pre-auths/Claims/Invoices/Analytics/Plans); roster CSV validation report; shared metric definitions + CSV export grouped only
-- [ ] Super admin Protection Ops page: pipeline counts, partners, verification queue, protection_mode switch+audit, partner wizard, therapist invites
+- [~] Insurer portal: /insurer/members added (CSV roster upload via insurer_upload_member_roster + verify via insurer_verify_membership); Pre-auths + Plans pages NOT yet; metrics file exists (src/lib/metrics.js), CSV export owed
+- [~] /super-admin/protection: mode switch (confirm+audit best-effort), pipeline counts, pending membership queue, therapist queue, partner list; partner wizard + therapist invites NOT yet
 - [x] api/_lib/notify.js: in-app insert + pluggable email/SMS no-op defaults; no clinical content
 - [x] supabase/seed/protection_demo.sql + supabase/scripts/remove_demo_data.sql (schema-corrected)
 - [ ] docs/PROTECTION_TEST_PLAN.md + docs/GO_LIVE_CHECKLIST.md — NOT STARTED
