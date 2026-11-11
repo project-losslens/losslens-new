@@ -24,16 +24,16 @@ Plan authority: docs/UPGRADE_PLAN.md (delete only when ALL phases done)
 
 ## Phase 4 — feature fixes
 ### The Circle
-- [ ] Remove family_friends + slip_recovery rooms (UI, i18n, tabs, fixtures, docs)
-- [ ] Combined SQL: delete their messages/room-member rows (destructive), update check constraints, circle_room_counts, circle_purge_expired, policies
-- [ ] Fix duplicate message bug: single reducer dedupe by id, match temp↔realtime by user_hash+text+time, poll merges not replaces, poll only when realtime disconnected
+- [x] Remove family_friends + slip_recovery rooms (UI; no other refs found in i18n/tabs/fixtures/docs)
+- [x] Combined SQL: destructive deletes for both rooms (messages, reactions, authors, members); no check constraints exist, counts/purge fns room-agnostic
+- [x] Fix duplicate message bug: upsertCircleMessage dedupe (id + temp match user_hash/text/60s), mergeCirclePoll merge-not-replace, poll gated on realtime SUBSCRIBED status
 ### Urge Toolkit
-- [ ] Real labelled wheel: 6–8 text segments, pointer, 3–4s eased decelerating spin, tick/haptic, landing highlight
-- [ ] "I'll do it" → saves challenge in-progress (not done); "Spin again"
-- [ ] urge_challenges table + owner RLS in combined SQL + offline queue
-- [ ] "My challenges" list: In progress / Done / Dropped + "Mark as done" celebrate
-- [ ] Timer: animated ring, pulsing bg, milestone messages
-- [ ] Breathing: animated SVG/CSS 4-4-6, phase text, round counter, reduced-motion fallback
+- [x] Real labelled wheel: ChallengeWheel.jsx — 8 text segments, pointer, 3.5s easeOutQuart spin, WebAudio tick + vibrate, landing highlight
+- [x] "I'll do it" → saves urge_challenges status=doing (not done); "Spin again" re-spins
+- [x] urge_challenges table + owner RLS in combined SQL; urge_challenge offline queue kind + syncUrgeChallenge
+- [x] "My challenges" list in distraction panel: doing/done states, mark-done celebrates, drop supported (dropped hidden)
+- [x] Timer: SVG ring already existed; added pulsing radial bg while running + milestone toasts at 5/2/1 min
+- [x] Breathing: BreathingOrb inline SVG (expand/contract, face, leaf), 4-4-6 rhythm, phase text + round counter, static under reduced-motion
 ### Family supporters
 - [ ] Remove email/phone fields; create share link; share sheet (copy/WhatsApp/SMS/native) with ready message; keep renew/pause/revoke
 - [ ] create_supporter_invitation updated in combined SQL
