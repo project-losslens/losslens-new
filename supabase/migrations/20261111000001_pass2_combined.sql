@@ -122,6 +122,64 @@ drop policy if exists urge_challenges_owner_all on public.urge_challenges;
 create policy urge_challenges_owner_all on public.urge_challenges for all to authenticated
   using (user_id = auth.uid()) with check (user_id = auth.uid());
 
+-- Phase 4 / Family supporters: supporter contact details (email, phone) are
+-- no longer collected — invitations are shared as links only. The columns
+-- stay for compatibility; this re-definition keeps the same signature but
+-- always stores NULL for both fields. Safe to run twice.
+create or replace function public.create_supporter_invitation(
+  p_supporter_name text,
+  p_supporter_email text default null,
+  p_supporter_phone text default null,
+  p_supporter_relation text default null,
+  p_permissions jsonb default '["Streak status","Goal progress","General mood"]'::jsonb,
+  p_anonymous_mode boolean default false,
+  p_crisis_contact boolean default false
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_count int;
+  v_inv public.supporter_invitations;
+begin
+  if v_uid is null then
+    raise exception 'Not authenticated';
+  end if;
+  if not public.is_active_user() then
+    raise exception 'Account is suspended';
+  end if;
+  if p_supporter_name is null or length(btrim(p_supporter_name)) = 0 then
+    raise exception 'Supporter name is required';
+  end if;
+
+  select count(*) into v_count
+  from public.supporter_invitations
+  where user_id = v_uid and status in ('pending', 'active');
+  if v_count >= 5 then
+    raise exception 'Maximum 5 supporters allowed';
+  end if;
+
+  insert into public.supporter_invitations (
+    user_id, supporter_name, supporter_email, supporter_phone, supporter_relation,
+    permissions, anonymous_mode, crisis_contact, token, status, expires_at
+  ) values (
+    v_uid, btrim(p_supporter_name), null,
+    null, nullif(btrim(coalesce(p_supporter_relation,'')), ''),
+    coalesce(p_permissions, '[]'::jsonb), coalesce(p_anonymous_mode, false),
+    coalesce(p_crisis_contact, false),
+    replace(gen_random_uuid()::text, '-', '') || replace(gen_random_uuid()::text, '-', ''),
+    'pending', now() + interval '30 days'
+  ) returning * into v_inv;
+
+  return to_jsonb(v_inv);
+end;
+$$;
+revoke execute on function public.create_supporter_invitation(text, text, text, text, jsonb, boolean, boolean) from public, anon;
+grant execute on function public.create_supporter_invitation(text, text, text, text, jsonb, boolean, boolean) to authenticated;
+
 -- Verification: run as an authenticated administrator after applying.
 select
   public.is_active_user() as active_user,

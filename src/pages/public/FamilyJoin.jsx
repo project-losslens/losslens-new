@@ -54,6 +54,38 @@ export default function FamilyJoin() {
   //  Cleanup timer
   useEffect(() => { return () => { if (messageTimer.current) clearTimeout(messageTimer.current) } }, [])
 
+  //  Live data: re-fetch the summary on mount is covered by validateToken;
+  //  here we poll every 30s while the tab is visible and on focus regain.
+  const [lastUpdated, setLastUpdated] = useState(null)
+  const refreshData = useCallback(async () => {
+    if (status !== 'view' || !invitation) return
+    await loadUserData(invitation)
+    setLastUpdated(new Date())
+  }, [status, invitation, token])
+
+  useEffect(() => {
+    if (status !== 'view') return
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') void refreshData()
+    }, 30000)
+    const onFocus = () => { if (document.visibilityState === 'visible') void refreshData() }
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onFocus)
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onFocus)
+    }
+  }, [status, refreshData])
+
+  const timeAgo = (d) => {
+    if (!d) return ''
+    const s = Math.floor((Date.now() - d.getTime()) / 1000)
+    if (s < 10) return 'just now'
+    if (s < 60) return `${s}s ago`
+    return `${Math.floor(s / 60)}m ago`
+  }
+
   //  Validate token on mount
   useEffect(() => {
     if (!token) { setError('No invitation token found.'); setStatus('invalid'); setLoading(false); return }
@@ -239,6 +271,10 @@ export default function FamilyJoin() {
           {invitation.anonymous_mode ? 'Supporting a Loved One' : `Supporting ${userProfile?.full_name || 'Someone'}`}
         </h1>
         <p style={{ color: '#2DD4BF', fontSize: '13px', margin: 0 }}>Here's how they're doing. What you see is what they've chosen to share.</p>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '8px 0 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          {lastUpdated ? `Updated ${timeAgo(lastUpdated)}` : 'Loading latest…'}
+          <button type="button" onClick={() => void refreshData()} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#2DD4BF', borderRadius: '100px', padding: '2px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '28px' }}>Refresh</button>
+        </p>
       </div>
 
       <div style={{ maxWidth: '600px', margin: '0 auto', padding: '1.5rem' }}>

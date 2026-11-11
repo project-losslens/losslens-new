@@ -35,10 +35,11 @@ function FamilyPortalPage() {
   const [feedbackGiven, setFeedbackGiven] = useState({})
 
   const [form, setForm] = useState({
-    supporter_name: '', supporter_email: '', supporter_phone: '',
-    supporter_relation: '', permissions: ['Streak status', 'Goal progress', 'General mood'],
+    supporter_name: '', supporter_relation: '',
+    permissions: ['Streak status', 'Goal progress', 'General mood'],
     anonymous_mode: false, crisis_contact: false, language: 'en'
   })
+  const [shareInvite, setShareInvite] = useState(null)
 
   useEffect(() => { fetchData() }, [])
 
@@ -84,8 +85,8 @@ function FamilyPortalPage() {
     setSaving(true)
     const { data, error } = await supabase.rpc('create_supporter_invitation', {
       p_supporter_name: form.supporter_name,
-      p_supporter_email: form.supporter_email || null,
-      p_supporter_phone: form.supporter_phone || null,
+      p_supporter_email: null,
+      p_supporter_phone: null,
       p_supporter_relation: form.supporter_relation || null,
       p_permissions: form.permissions,
       p_anonymous_mode: form.anonymous_mode,
@@ -95,7 +96,8 @@ function FamilyPortalPage() {
     if (!error && data) {
       setInvitations(prev => [data, ...prev])
       setShowForm(false)
-      setForm({ supporter_name: '', supporter_email: '', supporter_phone: '', supporter_relation: '', permissions: ['Streak status', 'Goal progress', 'General mood'], anonymous_mode: false, crisis_contact: false, language: 'en' })
+      setForm({ supporter_name: '', supporter_relation: '', permissions: ['Streak status', 'Goal progress', 'General mood'], anonymous_mode: false, crisis_contact: false, language: 'en' })
+      setShareInvite(data)
       toast.success('Invitation created! Share the link with them.', 3000)
     } else {
       console.error('Supporter invitation creation failed:', error)
@@ -194,13 +196,17 @@ function FamilyPortalPage() {
       return
     }
     setFeedbackGiven(prev => ({ ...prev, [invId]: felt }))
-    toast.success('Feedback saved ', 2000)
+    toast.success('Feedback saved', 2000)
+  }
+
+  const buildShareText = (inv) => {
+    const link = `${window.location.origin}/family-join?token=${inv.token}`
+    const userName = inv.anonymous_mode ? 'Someone who cares about you' : profile?.full_name || 'Someone'
+    return { link, text: `${userName} would love your support on their recovery journey with LossLens.\n\nYou don't need to create an account — just click the link to see how they're doing: ${link}\n\nIt's private, secure, and you can stop anytime.` }
   }
 
   const handleShare = async (inv) => {
-    const link = `${window.location.origin}/family-join?token=${inv.token}`
-    const userName = inv.anonymous_mode ? 'Someone who cares about you' : profile?.full_name || 'Someone'
-    const text = `${userName} would love your support on their recovery journey with LossLens.\n\nYou don't need to create an account — just click the link to see how they're doing: ${link}\n\n It's private, secure, and you can stop anytime.`
+    const { link, text } = buildShareText(inv)
 
     try {
       if (navigator.share) {
@@ -219,6 +225,23 @@ function FamilyPortalPage() {
     }
   }
 
+  const shareVia = async (channel) => {
+    const inv = shareInvite
+    if (!inv) return
+    const { link, text } = buildShareText(inv)
+    if (channel === 'copy') {
+      try { await navigator.clipboard.writeText(text); toast.success('Link copied!', 2000) } catch { toast.info('Share this link: ' + link, 5000) }
+      return
+    }
+    if (channel === 'whatsapp') { window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener'); return }
+    if (channel === 'sms') { window.location.href = `sms:?&body=${encodeURIComponent(text)}`; return }
+    // native share
+    try {
+      if (navigator.share) await navigator.share({ title: 'Join me on LossLens', text })
+      else { await navigator.clipboard.writeText(text); toast.success('Link copied!', 2000) }
+    } catch { /* user dismissed */ }
+  }
+
   const getStatusBadge = (status) => {
     const map = {
       pending: { color: '#7DBDEE', bg: 'rgba(45,212,191,0.15)', label: 'Pending' },
@@ -235,7 +258,7 @@ function FamilyPortalPage() {
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ display: 'flex', gap: '8px' }}>{[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2DD4BF', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}</div>
+      <BrandLoader variant="section" />
     </div>
   )
 
@@ -243,7 +266,7 @@ function FamilyPortalPage() {
     <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
-          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Family Portal</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{activeSupporters.length} active  · {invitations.length} total</p></div>
+          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}>Family Portal</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{activeSupporters.length} active  · {invitations.length} total</p></div>
         </div>
         <div style={{ padding: '1.5rem' }}>
           <div className="dash-section" style={{ marginBottom: '1rem', borderColor: '#2DD4BF' }}>
@@ -264,12 +287,10 @@ function FamilyPortalPage() {
               )}
               {showForm && (
                 <div className="dash-section" style={{ marginBottom: '1rem' }}>
-                  <h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '1rem' }}> Invite a supporter</h3>
+                  <h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '1rem' }}>Invite a supporter</h3>
                   <div className="form-group"><label>Name *</label><input type="text" value={form.supporter_name} onChange={e => setForm({ ...form, supporter_name: e.target.value })} placeholder="e.g. Mum" /></div>
                   <div className="form-group"><label>Relationship</label><input type="text" value={form.supporter_relation} onChange={e => setForm({ ...form, supporter_relation: e.target.value })} placeholder="e.g. Mother" /></div>
-                  <div className="form-group"><label>Email (optional)</label><input type="email" value={form.supporter_email} onChange={e => setForm({ ...form, supporter_email: e.target.value })} placeholder="supporter@email.com" /></div>
-                  <div className="form-group"><label>Phone (optional)</label><div className="phone-input"><span className="phone-prefix">+254</span><input type="tel" value={form.supporter_phone} onChange={e => setForm({ ...form, supporter_phone: e.target.value })} /></div></div>
-                  <div className="form-group"><label>What they can see</label><div className="chip-group">{ALL_PERMISSIONS.map(p => <button key={p} className={`chip ${form.permissions.includes(p) ? 'chip-active' : ''}`} onClick={() => togglePermission(p)}>{form.permissions.includes(p) ? ' ' : ''}{p}</button>)}</div></div>
+                  <div className="form-group"><label>What they can see</label><div className="chip-group">{ALL_PERMISSIONS.map(p => <button key={p} className={`chip ${form.permissions.includes(p) ? 'chip-active' : ''}`} onClick={() => togglePermission(p)}>{p}</button>)}</div></div>
                   <div style={{ display: 'flex', gap: '12px', marginBottom: '1rem' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#2DD4BF', cursor: 'pointer' }}><input type="checkbox" checked={form.anonymous_mode} onChange={e => setForm({ ...form, anonymous_mode: e.target.checked })} />Anonymous</label>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#7DBDEE', cursor: 'pointer' }}><input type="checkbox" checked={form.crisis_contact} onChange={e => setForm({ ...form, crisis_contact: e.target.checked })} />Crisis contact</label>
@@ -297,7 +318,7 @@ function FamilyPortalPage() {
                     </div>
                     <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '6px' }}>{(inv.permissions || []).slice(0, 3).map(p => <span key={p} style={{ fontSize: '9px', background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '1px 6px', borderRadius: '100px' }}>{p}</span>)}</div>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                      {inv.status === 'active' && <button onClick={() => loadMessages(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}></button>}
+                      {inv.status === 'active' && <button onClick={() => loadMessages(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', gap: '4px' }}><AppIcon name="chat" size={12} /> Messages</button>}
                       <button onClick={() => handleShare(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Share</button>
                       {(inv.status === 'pending' || inv.status === 'expired') && <button onClick={() => handleResend(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Renew</button>}
                       {inv.status === 'active' && <button onClick={() => handleTogglePause(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#7DBDEE', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Pause</button>}
@@ -308,13 +329,14 @@ function FamilyPortalPage() {
               })}
               {invitations.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)' }}><AppIcon name="users" size={48} style={{ display: 'block', margin: '0 auto 8px', color: '#2DD4BF' }} /><p style={{ color: '#2DD4BF', fontSize: '14px' }}>No supporters yet.</p></div>
+
               )}
             </>
           )}
 
           {activeTab === 'resources' && (
             <div className="dash-section">
-              <h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '1rem' }}> For supporters</h3>
+              <h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '1rem' }}>For supporters</h3>
               {SUPPORTER_RESOURCES.map((r, i) => <div key={i} style={{ padding: '12px', background: '#0B1220', borderRadius: '8px', marginBottom: '8px' }}><h4 style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '4px' }}>{r.title}</h4><p style={{ color: '#7DBDEE', fontSize: '12px', lineHeight: '1.5', margin: 0 }}>{r.content}</p></div>)}
             </div>
           )}
@@ -326,8 +348,23 @@ function FamilyPortalPage() {
           )}
         </div>
       </div>
+
+      {shareInvite && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.8)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={() => setShareInvite(null)}>
+          <div style={{ background: '#0B1220', border: '1px solid #2DD4BF', borderRadius: '16px', padding: '1.5rem', maxWidth: '380px', width: '100%' }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ color: '#2DD4BF', fontSize: '16px', margin: '0 0 6px' }}>Share invitation link</h3>
+            <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '12px', margin: '0 0 14px', wordBreak: 'break-all' }}>{buildShareText(shareInvite).link}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button className="btn-primary full" onClick={() => void shareVia('copy')}>Copy link</button>
+              <button className="btn-secondary full" onClick={() => void shareVia('whatsapp')}>WhatsApp</button>
+              <button className="btn-secondary full" onClick={() => void shareVia('sms')}>SMS</button>
+              {typeof navigator !== 'undefined' && navigator.share && <button className="btn-secondary full" onClick={() => void shareVia('native')}>More options</button>}
+            </div>
+            <button className="btn-ghost full" style={{ marginTop: '10px' }} onClick={() => setShareInvite(null)}>Done</button>
+          </div>
+        </div>
+      )}
       <style>{`
-        @keyframes loadingDot { 0%,100%{opacity:0.3;transform:translateY(0)} 50%{opacity:1;transform:translateY(-4px)} }
         @media (max-width: 768px) { .main-content { margin-left: 0 !important; } }
       `}</style>
     </div>
