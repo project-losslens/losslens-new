@@ -1,32 +1,85 @@
 import { useState, useRef, useEffect } from 'react'
 import { askGroq } from '../lib/groq'
 import { supabase } from '../lib/supabase'
+import AppIcon from './AppIcon'
+import { detectCrisis } from '../lib/crisisDetection'
+import { primaryHelpline } from '../config/helplines'
+import { useI18n } from '../i18n'
 
-// — Oloo Character Avatar —
-const OlooAvatar = ({ size = 40, emotion = 'neutral' }) => (
-  <div className="oloo-chat-panel" style={{
-    width: size,
-    height: size,
-    borderRadius: '50%',
-    background: '#171E2B',
-    border: '2px solid #2DD4BF',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-    position: 'relative',
-    animation: emotion === 'thinking' ? 'avatarPulse 1.5s infinite' : emotion === 'speaking' ? 'avatarSpeak 0.3s infinite' : 'avatarFloat 3s infinite',
-    boxShadow: '0 0 15px rgba(45,212,191,0.2)',
-  }}>
-    <svg width={size * 0.6} height={size * 0.6} viewBox="0 0 30 30" fill="none">
-      <circle cx="15" cy="10" r="6" fill="#2DD4BF"/>
-      <path d="M6 28 Q6 20 15 20 Q24 20 24 28" fill="#2DD4BF"/>
-      <circle cx="12.5" cy="9.5" r="1.2" fill="#0B1220"/>
-      <circle cx="17.5" cy="9.5" r="1.2" fill="#0B1220"/>
-      <path d="M12 12.5 Q15 14.5 18 12.5" stroke="#0B1220" strokeWidth="1" fill="none" strokeLinecap="round"/>
-    </svg>
-  </div>
-);
+// — Oloo Character: flat, hand-drawn-style SVG in brand teal/blue.
+//    Expressions: calm, happy, concerned, celebrating, thinking, speaking.
+const OlooCharacter = ({ size = 40, emotion = 'calm' }) => {
+  const expr = ['calm', 'happy', 'concerned', 'celebrating', 'thinking', 'speaking'].includes(emotion) ? emotion : 'calm'
+  const ink = '#0B1220'
+  return (
+    <div className="oloo-avatar" style={{
+      width: size,
+      height: size,
+      borderRadius: '50%',
+      background: '#171E2B',
+      border: '2px solid #2DD4BF',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+      overflow: 'hidden',
+    }}>
+      <svg width={size * 0.9} height={size * 0.9} viewBox="0 0 64 64" aria-hidden="true">
+        {/* leaf sprout */}
+        <path d="M32 9c0-5 4-8 8-8 0 5-3 8-8 8Z" fill="#2DD4BF" stroke="#0B7A6F" strokeWidth="1" />
+        <path d="M32 9c0-4-3-7-7-7 0 4 3 7 7 7Z" fill="#7DBDEE" stroke="#1E6E8C" strokeWidth="1" />
+        {/* body blob */}
+        <path d="M14 57c-6-8-9-16-9-24C5 19 18 9 32 9s27 10 27 24c0 8-3 16-9 24-4 5-12 6-18 6s-14-1-18-6Z" fill="#2DD4BF" stroke="#0B7A6F" strokeWidth="1.6" />
+        {/* belly */}
+        <ellipse cx="32" cy="46" rx="12" ry="9" fill="#7DBDEE" opacity="0.9" />
+        {/* face — gentle idle breathe + periodic blink (disabled under reduced motion) */}
+        <g className="oloo-face">
+          {expr === 'celebrating' ? (
+            <g className="oloo-eyes" stroke={ink} strokeWidth="2" fill="none" strokeLinecap="round">
+              <path d="M23 30q2.5-3.5 5 0" />
+              <path d="M36 30q2.5-3.5 5 0" />
+            </g>
+          ) : (
+            <g className="oloo-eyes" fill={ink}>
+              <circle cx="25.5" cy={expr === 'thinking' ? 27 : 29} r="2.1" />
+              <circle cx="38.5" cy={expr === 'thinking' ? 27 : 29} r="2.1" />
+            </g>
+          )}
+          {expr === 'concerned' && (
+            <g stroke={ink} strokeWidth="1.6" strokeLinecap="round" fill="none">
+              <path d="M21 24.5l5 1.6" />
+              <path d="M43 24.5l-5 1.6" />
+            </g>
+          )}
+          {expr === 'happy' && (
+            <g fill="#F2C879" opacity="0.85">
+              <ellipse cx="20" cy="34" rx="3.4" ry="2" />
+              <ellipse cx="44" cy="34" rx="3.4" ry="2" />
+            </g>
+          )}
+          {expr === 'celebrating' && (
+            <g>
+              <path d="M14 18l1.6 3.4 3.4 1.6-3.4 1.6-1.6 3.4-1.6-3.4-3.4-1.6 3.4-1.6Z" fill="#F2C879" />
+              <path d="M50 14l1.2 2.6 2.6 1.2-2.6 1.2-1.2 2.6-1.2-2.6-2.6-1.2 2.6-1.2Z" fill="#7DBDEE" />
+            </g>
+          )}
+          {/* mouth */}
+          {expr === 'speaking' ? (
+            <ellipse cx="32" cy="38" rx="4" ry="5" fill={ink} />
+          ) : expr === 'happy' || expr === 'celebrating' ? (
+            <path d={expr === 'celebrating' ? 'M25 34Q32 45 39 34Q32 38 25 34Z' : 'M26 34Q32 42 38 34Q32 37 26 34Z'} fill={ink} />
+          ) : expr === 'concerned' ? (
+            <path d="M27 39.5q5-3.5 10 0" stroke={ink} strokeWidth="2" fill="none" strokeLinecap="round" />
+          ) : expr === 'thinking' ? (
+            <path d="M29 37.5h6" stroke={ink} strokeWidth="2" strokeLinecap="round" />
+          ) : (
+            <path d="M27 36.5q5 3 10 0" stroke={ink} strokeWidth="2" fill="none" strokeLinecap="round" />
+          )}
+        </g>
+      </svg>
+    </div>
+  )
+}
 
 // — Proactive Questions —
 function getProactiveQuestions(userContext) {
@@ -81,6 +134,7 @@ function getProactiveQuestions(userContext) {
 
 // — Main AIChat Component —
 function AIChat({ profile }) {
+  const { t } = useI18n();
   const firstName = profile?.full_name?.split(' ')[0] || 'friend';
   const userId = profile?.id;
 
@@ -344,6 +398,32 @@ function AIChat({ profile }) {
     }
   };
 
+  //  Oloo's expression follows context: streak milestone → celebrating,
+  //  high-risk day → concerned, otherwise calm/happy. thinking/speaking
+  //  are transient states that override it.
+  const contextExpression = (() => {
+    const p = userContext?.profile;
+    if (!p) return 'calm';
+    const streak = p.streak_days || 0;
+    const risk = String(p.risk_level || '').toLowerCase();
+    const lastEntry = userContext?.recentDiary?.[0];
+    const lowMood = lastEntry && (lastEntry.gambled === true || ['rough', 'bad', 'low', 'struggling', 'awful'].includes(String(lastEntry.mood || '').toLowerCase()));
+    if (risk === 'high' || lowMood) return 'concerned';
+    if (streak > 0 && streak % 7 === 0) return 'celebrating';
+    if (streak >= 3) return 'happy';
+    return 'calm';
+  })();
+  const shownEmotion = olooEmotion === 'thinking' ? 'thinking' : olooEmotion === 'speaking' ? 'speaking' : contextExpression;
+
+  //  Time-aware greeting + thought for today (EN/SW via i18n keys).
+  const hour = new Date().getHours();
+  const greetKey = hour >= 5 && hour < 12 ? 'oloo.greet.morning' : hour >= 12 && hour < 17 ? 'oloo.greet.afternoon' : 'oloo.greet.evening';
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  const thoughtKey = `oloo.thought.${dayOfYear % 5}`;
+  const greetingText = t(greetKey, { name: firstName });
+  const thoughtText = t(thoughtKey);
+  const quickChips = ['oloo.chip.urge', 'oloo.chip.log', 'oloo.chip.talk'];
+
   if (!profile) return null;
 
   return (
@@ -373,7 +453,7 @@ function AIChat({ profile }) {
             position: 'relative',
           }}>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '12px' }}>
-              <OlooAvatar size={36} />
+              <OlooCharacter size={36} />
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: '11px', color: '#2DD4BF', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>
                   Oloo is checking in
@@ -438,7 +518,7 @@ function AIChat({ profile }) {
           {isOpen ? (
             <span style={{ color: '#FFFFFF', fontSize: '24px' }}>{'\u00D7'}</span>
           ) : (
-            <OlooAvatar size={36} />
+            <OlooCharacter size={36} />
           )}
           <div style={{ position: 'absolute', bottom: '2px', right: '2px', width: '12px', height: '12px', borderRadius: '50%', background: '#2DD4BF', border: '2px solid #0B1220', animation: 'pulse 2s infinite' }} />
         </button>
@@ -462,7 +542,7 @@ function AIChat({ profile }) {
             padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.12)',
             display: 'flex', alignItems: 'center', gap: '12px',
           }}>
-            <OlooAvatar size={44} emotion={olooEmotion} />
+            <OlooCharacter size={44} emotion={shownEmotion} />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: '15px', fontWeight: 600, color: '#2DD4BF', marginBottom: '2px' }}>Oloo</div>
               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -476,7 +556,8 @@ function AIChat({ profile }) {
               style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '20px', cursor: 'pointer', padding: '4px 8px', borderRadius: '8px' }}
               onMouseEnter={(e) => { e.target.style.background = 'rgba(255,255,255,0.12)'; e.target.style.color = '#2DD4BF'; }}
               onMouseLeave={(e) => { e.target.style.background = 'transparent'; e.target.style.color = 'rgba(255,255,255,0.4)'; }}
-            >─</button>
+            aria-label="Close chat"
+          ><AppIcon name="close" size={18} /></button>
           </div>
 
           {/* Messages Area */}
@@ -500,10 +581,21 @@ function AIChat({ profile }) {
               </div>
             )}
 
+            {messages.length === 1 && (
+              <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(45,212,191,0.25)', borderRadius: '14px', padding: '14px' }}>
+                <p style={{ fontSize: '14px', color: '#2DD4BF', fontWeight: 600, margin: '0 0 6px' }}>{greetingText}</p>
+                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', lineHeight: '1.5', margin: '0 0 12px', fontStyle: 'italic' }}>{thoughtText}</p>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {quickChips.map(key => (
+                    <button key={key} type="button" onClick={() => sendMessage(t(key))} style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', color: '#2DD4BF', padding: '6px 14px', borderRadius: '100px', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '36px' }}>{t(key)}</button>
+                  ))}
+                </div>
+              </div>
+            )}
             {messages.map((msg, i) => (
               <div key={msg.id || i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start', animation: 'messageIn 0.3s ease-out' }}>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', flexDirection: msg.role === 'user' ? 'row-reverse' : 'row' }}>
-                  {msg.role === 'assistant' && <OlooAvatar size={24} emotion={speakingId === msg.id ? 'speaking' : 'neutral'} />}
+                  {msg.role === 'assistant' && <OlooCharacter size={24} emotion={speakingId === msg.id ? 'speaking' : 'calm'} />}
                   <div style={{ maxWidth: '80%', padding: '10px 14px', borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: msg.role === 'user' ? '#2DD4BF' : 'rgba(255,255,255,0.12)', color: msg.role === 'user' ? '#0B1220' : '#FFFFFF', fontSize: '13px', lineHeight: '1.6', fontWeight: msg.role === 'user' ? 500 : 300, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
                     {msg.content}
                   </div>
@@ -516,6 +608,9 @@ function AIChat({ profile }) {
                     ) : (
                       <button onClick={() => speakText(msg.content, msg.id)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Listen</button>
                     )}
+                    {detectCrisis(msg.content).crisis && (
+                      <a href={`tel:${primaryHelpline.tel || primaryHelpline.phone.replace(/\s/g, '')}`} style={{ fontSize: '10px', color: '#ff9b9b', textDecoration: 'none', fontWeight: 600 }}>{t('oloo.needHelp', { name: primaryHelpline.name })}</a>
+                    )}
                   </div>
                 )}
                 <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '4px', paddingLeft: msg.role === 'assistant' ? '32px' : '0' }}>
@@ -526,7 +621,7 @@ function AIChat({ profile }) {
 
             {loading && (
               <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', animation: 'messageIn 0.3s ease-out' }}>
-                <OlooAvatar size={24} emotion="thinking" />
+                <OlooCharacter size={24} emotion="thinking" />
                 <div style={{ background: 'rgba(255,255,255,0.12)', padding: '12px 16px', borderRadius: '16px 16px 16px 4px' }}>
                   <div style={{ display: 'flex', gap: '4px' }}>
                     {[0, 1, 2].map(i => (
@@ -557,7 +652,8 @@ function AIChat({ profile }) {
                   fontSize: '14px', cursor: 'pointer', flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
-              ></button>
+                aria-label={voiceEnabled ? 'Voice replies ON' : 'Voice replies OFF'}
+              ><AppIcon name="volume" size={16} /></button>
             )}
 
             <input
@@ -595,7 +691,8 @@ function AIChat({ profile }) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   animation: isListening ? 'pulse 1.5s infinite' : 'none',
                 }}
->{isListening ? 'Stop' : ''}</button>
+                aria-label={isListening ? 'Stop listening' : 'Voice input'}
+              ><AppIcon name={isListening ? 'close' : 'mic'} size={18} /></button>
             )}
 
             <button
@@ -609,7 +706,8 @@ function AIChat({ profile }) {
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                 transition: 'all 0.2s',
               }}
-            >→</button>
+              aria-label="Send message"
+            ><AppIcon name="send" size={18} /></button>
           </div>
         </div>
       )}
@@ -619,9 +717,11 @@ function AIChat({ profile }) {
         @media (max-width: 479px) {
           .oloo-chat-panel { right: 1rem !important; bottom: 6rem !important; width: calc(100vw - 2rem) !important; max-height: calc(100vh - 10rem) !important; }
         }
-        @keyframes avatarFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
-        @keyframes avatarPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        @keyframes avatarSpeak { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+        .oloo-face { transform-origin: 32px 34px; animation: olooBreathe 4.5s ease-in-out infinite; }
+        .oloo-eyes { transform-box: fill-box; transform-origin: center; animation: olooBlink 5s infinite; }
+        @keyframes olooBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.045); } }
+        @keyframes olooBlink { 0%, 91%, 100% { transform: scaleY(1); } 94% { transform: scaleY(0.08); } }
+        @media (prefers-reduced-motion: reduce) { .oloo-face, .oloo-eyes { animation: none !important; } }
         @keyframes floatButton { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

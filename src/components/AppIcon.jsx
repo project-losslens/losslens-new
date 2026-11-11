@@ -33,6 +33,8 @@ const paths = {
   download: 'M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2',
   star: 'm12 3 2.7 5.6 6.1.8-4.5 4.3 1.1 6.1L12 16.9 6.6 19.8l1.1-6.1L3.2 9.4l6.1-.8L12 3Z',
   camera: 'M3 7h4l2-3h6l2 3h4v12H3V7Zm9 9a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z',
+  send: 'M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z',
+  volume: 'M11 5 6 9H2v6h4l5 4V5Zm8.5 3a5 5 0 0 1 0 8M15.5 8.5a9 9 0 0 1 0 7',
 }
 
 export default function AppIcon({ name, size = 18, strokeWidth = 1.8, ...props }) {
