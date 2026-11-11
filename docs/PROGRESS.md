@@ -65,7 +65,7 @@ Plan authority: docs/UPGRADE_PLAN.md (delete only when ALL phases done)
 - [~] /super-admin/protection: mode switch (confirm+audit best-effort), pipeline counts, pending membership queue, therapist queue, partner list; partner wizard + therapist invites NOT yet
 - [x] api/_lib/notify.js: in-app insert + pluggable email/SMS no-op defaults; no clinical content
 - [x] supabase/seed/protection_demo.sql + supabase/scripts/remove_demo_data.sql (schema-corrected)
-- [ ] docs/PROTECTION_TEST_PLAN.md + docs/GO_LIVE_CHECKLIST.md — NOT STARTED
+- [x] docs/PROTECTION_TEST_PLAN.md + docs/GO_LIVE_CHECKLIST.md
 
 ## Notes / decisions
 - Avatar storage: profile stores path `uid/avatar.webp`; useAvatarUrl signs+caches (50min TTL). avatars bucket now readable by any authenticated user (needed for admin/therapist/insurer lists); writes remain owner-folder-only.
