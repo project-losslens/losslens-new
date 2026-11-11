@@ -95,6 +95,7 @@ export const insurerNav = [
   { to: '/insurer/analytics', label: 'Analytics', icon: 'analytics' },
   { to: '/insurer/members', label: 'Members', icon: 'users' },
   { to: '/insurer/pre-auths', label: 'Pre-auths', icon: 'document' },
+  { to: '/insurer/plans', label: 'Plans', icon: 'diamond' },
 ]
 
 export function getPageTitle(pathname) {

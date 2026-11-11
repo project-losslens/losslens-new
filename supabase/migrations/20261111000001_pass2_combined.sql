@@ -806,7 +806,15 @@ $$;
 revoke execute on function public.member_leave_protection(uuid) from public, anon;
 grant execute on function public.member_leave_protection(uuid) to authenticated;
 
+
+-- Insurer manages its own protection plans (Phase 6).
+drop policy if exists protection_plans_insurer_write on public.protection_plans;
+create policy protection_plans_insurer_write on public.protection_plans for all to authenticated
+  using (exists (select 1 from public.insurers i where i.id = insurer_id and i.profile_id = auth.uid()))
+  with check (exists (select 1 from public.insurers i where i.id = insurer_id and i.profile_id = auth.uid()));
+
 -- Verification: run as an authenticated administrator after applying.
+
 
 select
   public.is_active_user() as active_user,
