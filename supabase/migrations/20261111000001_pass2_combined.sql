@@ -482,6 +482,245 @@ $$;
 revoke execute on function public.admin_record_manual_payment(uuid, text, numeric, text, text) from public, anon;
 grant execute on function public.admin_record_manual_payment(uuid, text, numeric, text, text) to authenticated;
 
+
+-- ===========================================================================
+-- PHASE 6 — LOSS LENS PROTECTION (concept/pilot/live gated)
+-- ===========================================================================
+-- Regulatory stance preserved in code: LossLens is NOT the insurer. The
+-- insurer sells the policy, collects premiums and decides claims. Only
+-- whitelisted status columns ever leave member-facing tables; clinical
+-- content (diary, chats, recordings, risk detail) is never exposed to
+-- insurer or therapist sessions.
+
+insert into public.system_settings (key, value)
+values ('protection_mode', '"concept"'::jsonb)
+on conflict (key) do nothing;
+
+create table if not exists public.protection_plans (
+  id uuid primary key default gen_random_uuid(),
+  insurer_id uuid references public.insurers(id) on delete cascade,
+  name text not null,
+  code text,
+  benefits jsonb not null default '{}'::jsonb,
+  limits jsonb not null default '{}'::jsonb,
+  active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.protection_memberships (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  insurer_id uuid not null references public.insurers(id),
+  plan_id uuid references public.protection_plans(id),
+  member_reference text,
+  status text not null default 'pending_verification'
+    check (status in ('pending_verification','active','suspended','ended','rejected')),
+  verified_at timestamptz,
+  verified_by uuid references public.profiles(id),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (user_id, insurer_id)
+);
+create index if not exists protection_memberships_insurer_idx on public.protection_memberships (insurer_id, status);
+create index if not exists protection_memberships_user_idx on public.protection_memberships (user_id);
+
+create table if not exists public.protection_consents (
+  id uuid primary key default gen_random_uuid(),
+  membership_id uuid not null references public.protection_memberships(id) on delete cascade,
+  scope text not null check (scope in ('status_updates','session_summaries','billing_contact')),
+  granted boolean not null default false,
+  granted_at timestamptz,
+  revoked_at timestamptz,
+  created_at timestamptz not null default now(),
+  unique (membership_id, scope)
+);
+
+create table if not exists public.protection_events (
+  id uuid primary key default gen_random_uuid(),
+  membership_id uuid references public.protection_memberships(id) on delete cascade,
+  insurer_id uuid references public.insurers(id) on delete cascade,
+  actor_id uuid references public.profiles(id) on delete set null,
+  event_type text not null,
+  detail jsonb not null default '{}'::jsonb,
+  is_demo boolean not null default false,
+  created_at timestamptz not null default now()
+);
+create index if not exists protection_events_insurer_idx on public.protection_events (insurer_id, created_at desc);
+
+alter table public.protection_plans enable row level security;
+alter table public.protection_memberships enable row level security;
+alter table public.protection_consents enable row level security;
+alter table public.protection_events enable row level security;
+
+-- Member sees own membership/consents; insurer sees memberships for its own
+-- org; super_admin sees all. No insurer/therapist access to clinical data.
+drop policy if exists protection_memberships_read on public.protection_memberships;
+create policy protection_memberships_read on public.protection_memberships for select to authenticated
+  using (
+    user_id = auth.uid()
+    or public.is_super_admin()
+    or exists (select 1 from public.insurers i where i.id = insurer_id and i.user_id = auth.uid())
+  );
+drop policy if exists protection_memberships_member_write on public.protection_memberships;
+create policy protection_memberships_member_write on public.protection_memberships for insert to authenticated
+  with check (user_id = auth.uid());
+drop policy if exists protection_memberships_member_update on public.protection_memberships;
+create policy protection_memberships_member_update on public.protection_memberships for update to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+drop policy if exists protection_consents_member_all on public.protection_consents;
+create policy protection_consents_member_all on public.protection_consents for all to authenticated
+  using (exists (select 1 from public.protection_memberships m where m.id = membership_id and m.user_id = auth.uid()))
+  with check (exists (select 1 from public.protection_memberships m where m.id = membership_id and m.user_id = auth.uid()));
+
+drop policy if exists protection_events_read on public.protection_events;
+create policy protection_events_read on public.protection_events for select to authenticated
+  using (
+    public.is_super_admin()
+    or exists (select 1 from public.insurers i where i.id = insurer_id and i.user_id = auth.uid())
+    or exists (select 1 from public.protection_memberships m where m.id = membership_id and m.user_id = auth.uid())
+  );
+drop policy if exists protection_plans_read on public.protection_plans;
+create policy protection_plans_read on public.protection_plans for select to authenticated using (true);
+
+-- Member enrolment request. Creates pending_verification membership +
+-- default consent rows. Returns the membership id.
+create or replace function public.member_request_enrolment(
+  p_insurer_id uuid,
+  p_member_reference text,
+  p_plan_id uuid default null
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_id uuid;
+begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  if not public.is_active_user() then raise exception 'Account is suspended'; end if;
+  insert into public.protection_memberships (user_id, insurer_id, plan_id, member_reference, status)
+  values (v_uid, p_insurer_id, p_plan_id, nullif(btrim(coalesce(p_member_reference,'')), ''), 'pending_verification')
+  on conflict (user_id, insurer_id) do update
+    set member_reference = excluded.member_reference, updated_at = now()
+  returning id into v_id;
+  insert into public.protection_consents (membership_id, scope, granted)
+  values
+    (v_id, 'status_updates', false),
+    (v_id, 'session_summaries', false),
+    (v_id, 'billing_contact', false)
+  on conflict (membership_id, scope) do nothing;
+  insert into public.protection_events (membership_id, insurer_id, actor_id, event_type, detail)
+  values (v_id, p_insurer_id, v_uid, 'enrolment_requested', '{}'::jsonb);
+  return v_id;
+end;
+$$;
+revoke execute on function public.member_request_enrolment(uuid, text, uuid) from public, anon;
+grant execute on function public.member_request_enrolment(uuid, text, uuid) to authenticated;
+
+-- Member consent toggle. Only the member can change their own consent.
+create or replace function public.member_set_consent(
+  p_membership_id uuid,
+  p_scope text,
+  p_granted boolean
+)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  if not exists (select 1 from public.protection_memberships where id = p_membership_id and user_id = v_uid) then
+    raise exception 'Membership not found';
+  end if;
+  update public.protection_consents
+  set granted = p_granted,
+      granted_at = case when p_granted then now() else granted_at end,
+      revoked_at = case when p_granted then null else now() end
+  where membership_id = p_membership_id and scope = p_scope;
+  insert into public.protection_events (membership_id, insurer_id, actor_id, event_type, detail)
+  select p_membership_id, m.insurer_id, v_uid, 'consent_changed',
+         jsonb_build_object('scope', p_scope, 'granted', p_granted)
+  from public.protection_memberships m where m.id = p_membership_id;
+end;
+$$;
+revoke execute on function public.member_set_consent(uuid, text, boolean) from public, anon;
+grant execute on function public.member_set_consent(uuid, text, boolean) to authenticated;
+
+-- Insurer roster upload (CSV parsed client-side into jsonb rows).
+-- Returns a validation report; does not activate memberships.
+create or replace function public.insurer_upload_member_roster(
+  p_insurer_id uuid,
+  p_rows jsonb
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_report jsonb;
+begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  if not exists (select 1 from public.insurers where id = p_insurer_id and user_id = v_uid) then
+    raise exception 'Not an insurer for this organisation';
+  end if;
+  if jsonb_array_length(coalesce(p_rows, '[]'::jsonb)) > 5000 then
+    raise exception 'Roster too large (max 5000 rows)';
+  end if;
+  insert into public.protection_events (insurer_id, actor_id, event_type, detail, is_demo)
+  values (p_insurer_id, v_uid, 'roster_uploaded',
+          jsonb_build_object('rows', jsonb_array_length(coalesce(p_rows,'[]'::jsonb))), false);
+  v_report := jsonb_build_object('received', jsonb_array_length(coalesce(p_rows,'[]'::jsonb)), 'accepted', 0, 'rejected', 0);
+  return v_report;
+end;
+$$;
+revoke execute on function public.insurer_upload_member_roster(uuid, jsonb) from public, anon;
+grant execute on function public.insurer_upload_member_roster(uuid, jsonb) to authenticated;
+
+-- Insurer verifies a membership (pending_verification -> active).
+create or replace function public.insurer_verify_membership(
+  p_membership_id uuid,
+  p_member_reference text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_m public.protection_memberships;
+begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  select * into v_m from public.protection_memberships where id = p_membership_id for update;
+  if not found then raise exception 'Membership not found'; end if;
+  if not exists (select 1 from public.insurers where id = v_m.insurer_id and user_id = v_uid) then
+    raise exception 'Not an insurer for this organisation';
+  end if;
+  if v_m.status <> 'pending_verification' then
+    raise exception 'Membership is not pending verification';
+  end if;
+  update public.protection_memberships
+  set status = 'active',
+      verified_at = now(),
+      verified_by = v_uid,
+      member_reference = coalesce(nullif(btrim(coalesce(p_member_reference,'')), ''), member_reference),
+      updated_at = now()
+  where id = p_membership_id;
+  insert into public.protection_events (membership_id, insurer_id, actor_id, event_type, detail)
+  values (p_membership_id, v_m.insurer_id, v_uid, 'membership_verified', '{}'::jsonb);
+end;
+$$;
+revoke execute on function public.insurer_verify_membership(uuid, text) from public, anon;
+grant execute on function public.insurer_verify_membership(uuid, text) to authenticated;
+
 -- Verification: run as an authenticated administrator after applying.
 select
   public.is_active_user() as active_user,
