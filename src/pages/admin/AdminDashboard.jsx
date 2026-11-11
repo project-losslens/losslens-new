@@ -4,6 +4,7 @@ import { useCrisisAlertCount } from '../../context/CrisisAlertCountContext'
 import { useAuthProfile } from '../../context/AuthProfileContext'
 import { supabase } from '../../lib/supabase'
 import { BrandLoader } from '../../components/Brand'
+import AppIcon from '../../components/AppIcon'
 
 //  Constants
 const ROUTES = {

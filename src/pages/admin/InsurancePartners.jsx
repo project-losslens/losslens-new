@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { BrandLoader } from '../../components/Brand'
+import AppIcon from '../../components/AppIcon'
 
 //  Constants
 const COVERAGE_TYPES = ['Mental Health', 'Addiction Rehab', 'Inpatient', 'Outpatient', 'Counseling', 'Crisis Intervention', 'General Health', 'Employee Wellness', 'Other']
