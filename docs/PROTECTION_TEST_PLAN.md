@@ -2,8 +2,8 @@
 
 Prereqs: combined SQL applied twice cleanly; `protection_mode` set to `pilot`
 (super-admin → Protection Ops, or SQL: `update system_settings set value='"pilot"' where key='protection_mode'`).
-Demo data: run `supabase/seed/protection_demo.sql` after creating demo auth
-users; clean with `supabase/scripts/remove_demo_data.sql`.
+Demo data: run `(removed — demo data is in-memory only)` after creating demo auth
+users; clean with `(removed — demo data is in-memory only)`.
 
 ## Member (role=user)
 1. Log in → `/protection-member`.
@@ -36,5 +36,5 @@ users; clean with `supabase/scripts/remove_demo_data.sql`.
 ## Update (Protection rebuild)
 The seed/remove SQL files referenced below do NOT exist — demo data is
 in-memory only (src/demo/fixtures.js). The rebuilt architecture lives in
-consolidated migrations 20261112000001–08 (scripts 06–08 hold all Protection objects); test against a scratch Supabase project per
+consolidated migrations 20261112000001–08 applied in order on a fresh project; test against a scratch Supabase project per
 docs/MIGRATION_NOTES.md and the script-08 verification queries.

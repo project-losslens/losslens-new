@@ -25,10 +25,12 @@ begin
     'whispers_matches','whispers_messages','whispers_reports','whispers_declines',
     'mirror_recordings','precious_pacts','b2b_clients','grant_applications',
     'insurance_partners','system_settings','audit_logs','upgrade_interest',
-    'company_code_validation_attempts','account_deletion_log',
-    'therapists','provider_vouchers','provider_claims','provider_payouts',
-    'insurers','insurer_partnerships','claim_submissions','bulk_invoices',
-    'bulk_invoice_claims','claims_float','claims_float_transactions','pre_auth_vouchers'
+    'company_code_validation_attempts','account_deletion_log'
+    -- Portal/claims tables (therapists, provider_vouchers, provider_claims,
+    -- provider_payouts, insurers, insurer_partnerships, claim_submissions,
+    -- bulk_invoices, bulk_invoice_claims, claims_float,
+    -- claims_float_transactions, pre_auth_vouchers) are created in script 04,
+    -- which enables RLS on each of them. Do NOT reference them here.
   ] loop
     execute format('alter table public.%I enable row level security', t);
   end loop;

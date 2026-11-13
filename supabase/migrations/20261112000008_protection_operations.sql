@@ -56,6 +56,11 @@ create index if not exists pcl_membership_idx on public.protection_claims (membe
 create unique index if not exists pcl_duplicate_guard
   on public.protection_claims (policy_id, benefit_id, claim_type, event_date)
   where status not in ('cancelled','rejected');
+-- A provider claim may fund at most ONE non-terminal Protection claim,
+-- regardless of benefit code or event date. Cancelled/rejected rows release it.
+create unique index if not exists pcl_provider_claim_guard
+  on public.protection_claims (provider_claim_id)
+  where provider_claim_id is not null and status not in ('cancelled','rejected');
 
 create table if not exists public.protection_claim_events (
   id uuid primary key default gen_random_uuid(),
@@ -194,8 +199,18 @@ begin
       raise exception 'Members may only append member-originated claim events';
     end if;
   elsif v_actor_role in ('insurer', 'super_admin') then
-    if v_claim.insurer_id <> coalesce(public.protection_insurer_id(), v_claim.insurer_id) and not public.is_super_admin() then
-      raise exception 'Insurer cannot append events to another insurer''s claim';
+    if not public.is_super_admin() then
+      -- Insurer actors MUST resolve to an active insurer org; a missing or
+      -- suspended mapping can never satisfy the boundary check.
+      declare v_actor_insurer uuid := public.protection_insurer_id();
+      begin
+        if v_actor_insurer is null then
+          raise exception 'Active insurer mapping required';
+        end if;
+        if v_claim.insurer_id <> v_actor_insurer then
+          raise exception 'Insurer cannot append events to another insurer''s claim';
+        end if;
+      end;
     end if;
     if p_event_type not in ('adjudicated','settled') and not public.is_super_admin() then
       raise exception 'Insurers may only append approved insurer decision events';
@@ -336,6 +351,11 @@ begin
       and pav.policy_id = p_policy_id
       and pc.status in ('submitted','approved');
     if v_amount is null then raise exception 'Provider claim not found for this policy'; end if;
+    if exists (select 1 from public.protection_claims c2
+               where c2.provider_claim_id = p_provider_claim_id
+                 and c2.status not in ('cancelled','rejected')) then
+      raise exception 'This provider claim is already linked to an active Protection claim';
+    end if;
     if v_b.per_event_limit is not null and v_amount > v_b.per_event_limit then
       v_amount := v_b.per_event_limit;
     end if;
@@ -1583,3 +1603,94 @@ from pg_proc p join pg_namespace n on n.oid = p.pronamespace
 where n.nspname = 'public';
 
 select count(*) as sql_files_note; -- informational only
+
+-- ---------------------------------------------------------------------------
+-- CLAIM EVIDENCE WORKFLOW (post-audit remediation)
+-- Members attach evidence only to their OWN claims in evidence-accepting
+-- statuses. Storage paths must live under the member's uid folder so the
+-- storage.objects owner policy and this check agree. Insurer reads remain
+-- via insurer_get_claim (metadata only) + claim-evidence storage policy.
+-- ---------------------------------------------------------------------------
+create or replace function public.member_add_claim_evidence(
+  p_claim_id uuid,
+  p_evidence_type text,
+  p_storage_path text default null,
+  p_structured jsonb default '{}'::jsonb
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_c public.protection_claims;
+  v_id uuid;
+begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  perform public.protection_require_mode(array['pilot','live']);
+  if p_storage_path is null and (p_structured is null or p_structured = '{}'::jsonb) then
+    raise exception 'Evidence requires a document or structured data';
+  end if;
+  if p_storage_path is not null then
+    -- Path must be <uid>/<claim_id>/... inside the private bucket.
+    if p_storage_path not like v_uid::text || '/%' then
+      raise exception 'Evidence path must be within your own storage folder';
+    end if;
+    if length(p_storage_path) > 500 then raise exception 'Invalid evidence path'; end if;
+  end if;
+
+  select c.* into v_c from public.protection_claims c
+  join public.protection_memberships m on m.id = c.membership_id
+  where c.id = p_claim_id and m.user_id = v_uid;
+  if not found then raise exception 'Claim not found'; end if;
+  if v_c.status not in ('submitted','under_review','info_requested') then
+    raise exception 'Evidence can only be added while the claim is open';
+  end if;
+  if v_c.created_by is distinct from v_uid then
+    raise exception 'Only the claimant can add evidence';
+  end if;
+
+  insert into public.protection_claim_evidence (
+    claim_id, evidence_type, storage_path, structured, provided_by
+  ) values (
+    p_claim_id, left(btrim(coalesce(p_evidence_type,'document')), 60),
+    p_storage_path, coalesce(p_structured,'{}'::jsonb), v_uid
+  ) returning id into v_id;
+
+  perform public.protection_claim_event(p_claim_id, 'submitted',
+    jsonb_build_object('evidence_added', true, 'evidence_type', p_evidence_type));
+  return v_id;
+end;
+$$;
+revoke execute on function public.member_add_claim_evidence(uuid, text, text, jsonb) from public, anon;
+grant execute on function public.member_add_claim_evidence(uuid, text, text, jsonb) to authenticated;
+
+-- Members may list their own claim evidence metadata (paths stay private;
+-- signed URLs come from the storage policy).
+create or replace function public.member_list_claim_evidence(p_claim_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  if not exists (
+    select 1 from public.protection_claims c
+    join public.protection_memberships m on m.id = c.membership_id
+    where c.id = p_claim_id and m.user_id = v_uid
+  ) then raise exception 'Claim not found'; end if;
+  return coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'id', e.id, 'evidence_type', e.evidence_type,
+      'has_document', e.storage_path is not null, 'created_at', e.created_at
+    ) order by e.created_at)
+    from public.protection_claim_evidence e where e.claim_id = p_claim_id
+  ), '[]'::jsonb);
+end;
+$$;
+revoke execute on function public.member_list_claim_evidence(uuid) from public, anon;
+grant execute on function public.member_list_claim_evidence(uuid) to authenticated;

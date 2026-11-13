@@ -148,3 +148,22 @@ demo fixtures only). Delete only when ALL phases done.
   protection_log_access revoked from authenticated (internal definer calls
   only); claim-evidence bucket size/MIME limits; consent/mode policy notes.
 - NOT executed anywhere. Build passes. Awaiting scratch-DB application.
+
+## Authoritative installation procedure (eight scripts only)
+
+The repository contains EXACTLY eight executable SQL scripts. There is no
+separate "baseline + pass2" step — scripts 01-08 ARE the complete database.
+
+1. Create a fresh Supabase project.
+2. Apply `supabase/migrations/20261112000001_core_schema.sql` first.
+3. Apply `02_rls_storage_grants`, `03_rpc_functions`, `04_portals_claims`,
+   `05_urge_toolkit`, `06_pass2_protection_base`, `07_protection_core`,
+   `08_protection_operations` in numeric order. Script 06 contains
+   destructive cleanup of superseded subscription structures — do not run
+   it against a populated production DB without a backup.
+4. Run the verification queries at the end of script 08.
+5. Run the negative/positive regression matrix (PROTECTION_TEST_PLAN.md).
+6. Only then consider migrating the intended project.
+
+Demo data is in-memory only (`src/demo/fixtures.js`); no seed or cleanup
+SQL files exist or are required.

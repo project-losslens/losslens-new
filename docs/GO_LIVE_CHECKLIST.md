@@ -29,7 +29,7 @@
 - [ ] Cron/`expire_subscriptions` scheduled for subscription expiry.
 
 ## Protection rebuild additions (20261112000001–08)
-- [ ] Apply consolidated scripts 20261112000001–08 in order on scratch Supabase; run script-08 verification queries.
+- [ ] Fresh scratch Supabase project → apply 20261112000001–08 in order → run script-08 verification queries; run script-08 verification queries.
 - [ ] E2E pilot: enrol -> verify -> version approve -> issue policy -> record premium -> preauth -> decide ->
       therapist session -> claim -> adjudicate -> settle; member sees correct statuses only.
 - [ ] Negative tests: member self-activation, cross-insurer reads, crisis_alert_id exposure, preauth without
