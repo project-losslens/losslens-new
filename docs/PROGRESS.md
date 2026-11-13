@@ -126,3 +126,25 @@ demo fixtures only). Delete only when ALL phases done.
   in-memory in src/demo instead.
 - Phase 3/4/5/6 items largely verified by code review only — browser
   screenshots still owed (Part A.1).
+
+## Protection rebuild (20261112000001–08) — implemented, UNVERIFIED on live DB
+- 8 new consolidated migrations written (see MIGRATION_NOTES.md). NOT applied anywhere.
+- Membership self-write policies removed; consent gains purpose/wording_version; mode enforced in RPCs.
+- New: protection_plan_versions (immutable on approval), protection_benefits, protection_policies,
+  protection_roster_entries, protection_claims/_events/_evidence, protection_premium_records + claim-evidence bucket.
+- New RPCs: insurer/member policy+claims+premium+preauth decision layer; insurer reads whitelisted only.
+- insurer_aggregate_stats redefined on policies; risk bands removed. metrics.js lossRatio now null.
+- Frontend: ProtectionPage rewritten (policies/benefits/claims/consents/preauth); InsurerMembers
+  (policyholders+issue+premium), InsurerPreAuths (decisions), InsurerClaims (+Protection claims),
+  InsurerPlans (versions+benefits), InsurerAnalytics (actuarial report), ProtectionOps (version approval).
+- api/cron/protection-lifecycle.js added for the lifecycle sweep.
+- STILL OWED: live DB apply + verification, browser E2E, insurer invoice/float reconciliation review,
+  treatment-claim provider bridge UI, dispute workflow UI, expense-ratio source.
+
+## DB consolidation (final)
+- All 15 prior .sql files consolidated into exactly 8 scripts
+  (20261112000001–08). Originals deleted; mapping in MIGRATION_NOTES.md.
+- Security addendum appended to script 08: protection_claim_event and
+  protection_log_access revoked from authenticated (internal definer calls
+  only); claim-evidence bucket size/MIME limits; consent/mode policy notes.
+- NOT executed anywhere. Build passes. Awaiting scratch-DB application.

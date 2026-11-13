@@ -80,6 +80,34 @@ for live M-Pesa: `MPESA_BASE_URL`, `MPESA_CONSUMER_KEY`,
 `MPESA_CONSUMER_SECRET`, `MPESA_BUSINESS_SHORT_CODE`, `MPESA_PASSKEY`,
 `MPESA_CALLBACK_URL`. See `.env.example`.
 
+## Consolidated database deliverable (exactly 8 scripts)
+
+The ENTIRE database setup is consolidated into eight executable scripts in
+`supabase/migrations/`, applied in filename order on a fresh Supabase
+project. None have been executed — apply manually, then run the verification
+queries at the end of script 08.
+
+| # | Final script | Consolidated from | Contents |
+|---|---|---|---|
+| 1 | `20261112000001_core_schema.sql` | `20261110000001_core_schema.sql` | Extensions, enums, all core tables, profiles trigger, helper functions |
+| 2 | `20261112000002_rls_storage_grants.sql` | `20261110000002_rls_grants_storage.sql` | RLS policies, table grants, default privileges, storage.objects policies |
+| 3 | `20261112000003_rpc_functions.sql` | `20261110000003_rpc_functions.sql` | Core security-definer RPCs (circle, whispers, supporter, company codes, crisis, broadcast, admin) |
+| 4 | `20261112000004_portals_claims.sql` | `20261110000004_portals_claims.sql` | Portal tables (insurers, therapists, vouchers, claims, invoices, float), portal RPCs, therapist/insurer RLS |
+| 5 | `20261112000005_urge_toolkit.sql` | `20261110000005_diary_urge_level.sql` + `20261110000006_urge_toolkit_sessions.sql` | Diary urge_level column, urge toolkit sessions |
+| 6 | `20261112000006_pass2_protection_base.sql` | `20261111000001_pass2_combined.sql` | Protection base tables (plans/memberships/consents/events), Protection RPCs, subscription cleanup — **destructive drops of superseded structures** |
+| 7 | `20261112000007_protection_core.sql` | `20261112000001–04` protection scripts | Security helpers + mode gate, insurer access layer, plan versions/benefits/policies/roster, pre-auth repair |
+| 8 | `20261112000008_protection_operations.sql` | `20261112000005–08` protection scripts | Claims/evidence, premium ledger + lifecycle, actuarial views/reports, immutability guards, grants sweep, **security hardening addendum** (internal-only audit/event RPCs, evidence bucket limits) |
+
+Original-to-final mapping: every original `.sql` file is fully incorporated
+above; no functionality was dropped. Git history retains the originals.
+
+Key semantics: membership ≠ policy; policies bind to APPROVED immutable
+product versions; insurer confirms premiums (never LossLens subscriptions);
+fixed-sum amounts computed server-side; insurer claim settlement is recorded
+remittance isolated from `claims_float`; `protection_mode` enforced inside
+RPCs; insurer reads whitelisted via RPCs only; `protection_claim_event` and
+`protection_log_access` are internal-only (revoked from authenticated).
+
 ## Phase 6 additions (same combined file)
 
 `protection_plans`, `protection_memberships`, `protection_consents`,

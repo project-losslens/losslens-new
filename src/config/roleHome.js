@@ -45,6 +45,7 @@ const USER_PATHS = [
   '/monthly-mirror',
   '/family-portal',
   '/subscription',
+  '/protection-member',
 ]
 
 const ADMIN_PATHS = [

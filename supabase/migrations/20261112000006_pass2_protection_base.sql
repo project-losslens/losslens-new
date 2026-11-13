@@ -1,3 +1,8 @@
+-- 06_pass2_protection_base.sql — LossLens Protection base (part 6/8)
+-- Consolidated from: 20261111000001_pass2_combined.sql
+-- Depends on 01-05. Includes destructive cleanup of superseded
+-- subscription structures — review before applying to a populated DB.
+
 -- LossLens Pass 2 database changes.
 -- Apply after the existing 20261110000001 through 20261110000006 migrations.
 -- This file is intentionally additive and safe to run more than once.

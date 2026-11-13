@@ -349,3 +349,15 @@ RPCs (execute grants to `authenticated` unless noted):
 avatars (private after 003; images ≤5MB), mirror-recordings (private, video),
 precious-pacts (private, audio/video per FN-06), therapist-documents (private,
 application/pdf ≤5MB per 003).
+
+## Protection rebuild tables (20261112000001–08, pending manual apply)
+
+protection_plan_versions (immutable once approved; benefit_structure fixed_sum|treatment_reimbursement|hybrid),
+protection_benefits (typed schedule per version), protection_policies (contract; status issued|pending_payment|
+active|grace|lapsed|cancelled|expired; unique insurer+policy_number; one open policy per membership),
+protection_roster_entries, protection_claims (+_events history, +_evidence), protection_premium_records
+(insurer-confirmed, unique policy+period). Views: protection_policy_monthly_exposure,
+protection_premium_monthly, protection_claims_monthly. insurer_aggregate_stats redefined (cohort = policies,
+no risk bands). claim-evidence private bucket. Key RPCs prefixed insurer_/member_/admin_approve_plan_version/
+admin_actuarial_report; helpers protection_mode/protection_insurer_id/protection_is_active_insurer/
+protection_require_mode/protection_log_access.

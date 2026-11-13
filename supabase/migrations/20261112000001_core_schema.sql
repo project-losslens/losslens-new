@@ -1,3 +1,7 @@
+-- 01_core_schema.sql — LossLens consolidated schema (part 1/8)
+-- Consolidated from: 20261110000001_core_schema.sql
+-- Apply first. Idempotent. See docs/MIGRATION_NOTES.md.
+
 -- ============================================================================
 -- 20261110000001_core_schema.sql — LossLens core schema (consolidated)
 -- ============================================================================

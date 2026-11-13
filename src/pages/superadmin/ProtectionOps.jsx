@@ -26,17 +26,22 @@ export default function ProtectionOps() {
   const [saving, setSaving] = useState(false)
   const [partnerForm, setPartnerForm] = useState({ insurer_id: '', cohort_name: '', per_member_fee: '', contract_start: '' })
   const [insurers, setInsurers] = useState([])
+  const [versions, setVersions] = useState([])
+  const [planNames, setPlanNames] = useState({})
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviting, setInviting] = useState(false)
 
   const load = useCallback(async () => {
     if (!user?.id) return
-    const [{ data: setting }, { data: mems }, { data: parts }, { data: ths }, { data: ins }] = await Promise.all([
+    const [{ data: setting }, { data: mems }, { data: parts }, { data: ths }, { data: ins }, { data: vers }, { data: pls }] = await Promise.all([
       supabase.from('system_settings').select('value').eq('key', 'protection_mode').maybeSingle(),
       supabase.from('protection_memberships').select('status'),
       supabase.from('insurer_partnerships').select('id, cohort_name, status, per_member_fee, member_count').order('created_at', { ascending: false }).limit(20),
       supabase.from('therapists').select('id, specialty, status, license_number').eq('status', 'pending').limit(20),
       supabase.from('insurers').select('id, name').eq('status', 'active').order('name'),
+      supabase.from('protection_plan_versions').select('id, plan_id, version_no, status, benefit_structure, premium_amount, premium_frequency, created_at')
+        .in('status', ['draft', 'pending_approval', 'approved']).order('created_at', { ascending: false }).limit(50),
+      supabase.from('protection_plans').select('id, name, insurer_id'),
     ])
     const v = setting?.value
     setMode(typeof v === 'string' ? v.replace(/"/g, '') : (v?.mode || 'concept'))
@@ -47,6 +52,8 @@ export default function ProtectionOps() {
     setPartners(parts || [])
     setTherapists(ths || [])
     setInsurers(ins || [])
+    setVersions(vers || [])
+    setPlanNames(Object.fromEntries((pls || []).map(p => [p.id, p.name])))
     setLoading(false)
   }, [user?.id])
 
@@ -105,6 +112,14 @@ export default function ProtectionOps() {
       toast.error('Could not send the therapist invite.')
     }
     setInviting(false)
+  }
+
+  const approveVersion = async (v) => {
+    if (!confirm(`Approve product version v${v.version_no} for "${planNames[v.plan_id] || 'product'}"? Approved terms become immutable.`)) return
+    const { error } = await supabase.rpc('admin_approve_plan_version', { p_version_id: v.id })
+    if (error) { toast.error(error.message || 'Approval failed.'); return }
+    toast.success('Product version approved.')
+    await load()
   }
 
   if (loading) return <BrandLoader variant="section" />
@@ -191,6 +206,28 @@ export default function ProtectionOps() {
             {saving ? <BrandLoader variant="inline" showWordmark={false} /> : 'Create partnership'}
           </button>
         </div>
+      </section>
+
+      <section className="portal-card">
+        <h3>Product versions awaiting approval ({versions.filter(v => v.status !== 'approved').length})</h3>
+        {versions.length === 0 && <p className="portal-notice">No product versions yet.</p>}
+        {versions.map(v => (
+          <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 160 }}>
+              <p style={{ color: '#FFFFFF', fontSize: '13px', margin: 0 }}>
+                {planNames[v.plan_id] || 'Product'} · v{v.version_no}
+              </p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>
+                {v.benefit_structure.replace(/_/g, ' ')} · KES {Number(v.premium_amount || 0).toLocaleString()}/{v.premium_frequency}
+              </p>
+            </div>
+            <span style={{ color: v.status === 'approved' ? '#2DD4BF' : '#F2C879', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{v.status.replace(/_/g, ' ')}</span>
+            {v.status !== 'approved' && (
+              <button type="button" className="btn-primary fs-11" style={{ padding: '6px 10px', minHeight: '32px' }} onClick={() => approveVersion(v)}>Approve</button>
+            )}
+          </div>
+        ))}
+        <p className="portal-notice">Approval makes the version immutable. Verify benefit schedule, premium and waiting periods against the approved product filing first.</p>
       </section>
 
       <section className="portal-card">

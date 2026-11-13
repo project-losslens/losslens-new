@@ -7,7 +7,7 @@ export const METRIC_DEFINITIONS = {
   enrolledMembers: 'Eligible cohort — members covered by an active insurer partnership contract (privacy minimum: 10).',
   claimFrequency: 'Claim episodes per member per year — submitted claims divided by enrolled members, annualised over the observed window.',
   avgCostPerClaim: 'Mean claim amount (KES) across all submitted claims, regardless of adjudication status.',
-  lossRatio: 'Paid claim value (last 90 days) divided by invoiced premium value for the same period, shown as a percentage.',
+  lossRatio: 'Unavailable until earned-premium data exists (Protection script 07). Previously computed paid claims ÷ claim-cost invoices — that was NOT a loss ratio and has been removed.',
   retention: 'Active members divided by enrolled members, as a percentage.',
   monthlyTrend: 'Submitted claims and paid claim value grouped by calendar month of the session date.',
   // Claims-float metrics — shared by Float Management and insurer views.
@@ -69,7 +69,10 @@ export function computeInsurerMetrics({ claims = [], stats = null, invoices = []
       && ['sent', 'paid', 'payment_reported'].includes(inv.status))
     .reduce((sum, inv) => sum + (Number(inv.total_amount) || 0), 0)
   const paid90 = Number(stats?.total_paid_last_90d) || 0
-  const lossRatio = invoiced90 > 0 ? (paid90 / invoiced90) * 100 : null
+  // Loss ratio requires earned premium (Protection script 07 actuarial
+  // views). Paid claims ÷ claim-cost invoices is NOT a loss ratio — report
+  // unavailable rather than a misleading figure.
+  const lossRatio = null
 
   // Monthly trend by session month.
   const trendMap = new Map()

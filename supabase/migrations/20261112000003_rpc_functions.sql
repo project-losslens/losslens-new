@@ -1,3 +1,7 @@
+-- 03_rpc_functions.sql — LossLens consolidated core RPCs (part 3/8)
+-- Consolidated from: 20261110000003_rpc_functions.sql
+-- Depends on 01-02.
+
 -- ============================================================================
 -- 20261110000003_rpc_functions.sql — LossLens RPCs (consolidated, user domain)
 -- ============================================================================

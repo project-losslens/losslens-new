@@ -1,3 +1,7 @@
+-- 04_portals_claims.sql — LossLens consolidated portals/claims (part 4/8)
+-- Consolidated from: 20261110000004_portals_claims.sql
+-- Depends on 01-03.
+
 -- ============================================================================
 -- 20261110000004_portals_claims.sql — LossLens therapist/insurer/claims (consolidated)
 -- ============================================================================

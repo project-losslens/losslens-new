@@ -20,15 +20,17 @@ export default function InsurerAnalytics() {
   const [stats, setStats] = useState(null)
   const [claims, setClaims] = useState([])
   const [invoices, setInvoices] = useState([])
+  const [actuarial, setActuarial] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   const load = useCallback(async () => {
-    const [statsResult, claimsResult, invoiceResult] = await Promise.all([
+    const [statsResult, claimsResult, invoiceResult, actResult] = await Promise.all([
       supabase.from('insurer_aggregate_stats').select('*').maybeSingle(),
       supabase.rpc('insurer_list_claims'),
       supabase.from('bulk_invoices')
         .select('id, status, total_claims, total_amount, invoice_period_start, invoice_period_end'),
+      supabase.rpc('insurer_actuarial_report'),
     ])
     const failure = statsResult.error || claimsResult.error || invoiceResult.error
     if (failure) {
@@ -38,6 +40,7 @@ export default function InsurerAnalytics() {
       setStats(statsResult.data)
       setClaims(claimsResult.data || [])
       setInvoices(invoiceResult.data || [])
+      setActuarial(actResult.data || null)
       setError('')
     }
     setLoading(false)
@@ -134,12 +137,24 @@ export default function InsurerAnalytics() {
             )}
           </section>
           <section className="portal-card">
-            <h3>Plan mix</h3>
-            <pre className="portal-json">{JSON.stringify(stats.tier_mix, null, 2)}</pre>
-          </section>
-          <section className="portal-card">
-            <h3>Aggregate risk-band mix</h3>
-            <pre className="portal-json">{JSON.stringify(stats.aggregate_markov_state, null, 2)}</pre>
+            <h3>Actuarial report (12 months)</h3>
+            {actuarial?.suppressed ? (
+              <p className="portal-notice">{actuarial.reason}</p>
+            ) : actuarial ? (
+              <>
+                <div className="portal-stats">
+                  <MetricCard label="Open policies" value={actuarial.open_policies} />
+                  <MetricCard label="Member-months" value={Math.round(actuarial.member_months_12m)} />
+                  <MetricCard label="Earned premium" value={actuarial.earned_premium_12m} kind="money" />
+                  <MetricCard label="Incurred claims" value={actuarial.incurred_claims_12m} kind="money" />
+                  <MetricCard label="Paid claims" value={actuarial.paid_claims_12m} kind="money" />
+                  <MetricCard label="Loss ratio" value={actuarial.loss_ratio} kind="percent" definition={METRIC_DEFINITIONS.lossRatio} />
+                </div>
+                <p className="portal-notice">{actuarial.note}</p>
+              </>
+            ) : (
+              <p className="portal-notice">Actuarial reporting is available once premium and claims data exist.</p>
+            )}
           </section>
           <p className="portal-notice">Only grouped, de-identified measures are shown. Individual diary entries, chats, and screening scores are never exposed.</p>
         </>

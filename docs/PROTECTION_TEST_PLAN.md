@@ -32,3 +32,9 @@ users; clean with `supabase/scripts/remove_demo_data.sql`.
 - `npm run build`, `npm run lint` (~200 errors/17 warnings baseline).
 - Combined SQL run twice; verification SELECTs at file end.
 - Screenshots 360/768/1280 for all five shells.
+
+## Update (Protection rebuild)
+The seed/remove SQL files referenced below do NOT exist — demo data is
+in-memory only (src/demo/fixtures.js). The rebuilt architecture lives in
+consolidated migrations 20261112000001–08 (scripts 06–08 hold all Protection objects); test against a scratch Supabase project per
+docs/MIGRATION_NOTES.md and the script-08 verification queries.

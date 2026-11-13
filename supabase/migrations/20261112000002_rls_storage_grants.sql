@@ -1,3 +1,7 @@
+-- 02_rls_storage_grants.sql — LossLens consolidated RLS/grants/storage (part 2/8)
+-- Consolidated from: 20261110000002_rls_grants_storage.sql
+-- Depends on 01.
+
 -- ============================================================================
 -- 20261110000002_rls_grants_storage.sql — LossLens RLS, grants, storage (consolidated)
 -- ============================================================================

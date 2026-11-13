@@ -113,8 +113,7 @@ export function generateDemoData() {
       claims_last_90d: 14,
       avg_claim_amount: claims.reduce((s, c) => s + c.claim_amount, 0) / claims.length,
       total_paid_last_90d: claims.filter((c) => c.insurer_status === 'paid').reduce((s, c) => s + c.claim_amount, 0),
-      tier_mix: { free: 18, premium: 11, company: 5 },
-      aggregate_markov_state: { low: 12, medium: 15, high: 7 },
+      tier_mix: {},
     },
     adminStats: {
       total_users: 1284,

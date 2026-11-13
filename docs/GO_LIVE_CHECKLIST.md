@@ -27,3 +27,14 @@
 - [ ] Insurer/therapist sessions verified unable to read diary/chat/recordings/risk (RLS + RPC audit).
 - [ ] Notifications adapter wired to real email/SMS providers if required.
 - [ ] Cron/`expire_subscriptions` scheduled for subscription expiry.
+
+## Protection rebuild additions (20261112000001–08)
+- [ ] Apply consolidated scripts 20261112000001–08 in order on scratch Supabase; run script-08 verification queries.
+- [ ] E2E pilot: enrol -> verify -> version approve -> issue policy -> record premium -> preauth -> decide ->
+      therapist session -> claim -> adjudicate -> settle; member sees correct statuses only.
+- [ ] Negative tests: member self-activation, cross-insurer reads, crisis_alert_id exposure, preauth without
+      active policy, fixed-sum amount tampering, duplicate claims, premium over-confirmation.
+- [ ] Confirm hybrid benefit_structure stays disabled until counsel confirms fixed-sum vs reimbursement
+      may be combined under Kenyan microinsurance rules.
+- [ ] Schedule api/cron/protection-lifecycle.js (CRON_SECRET) for policy lapse/expiry sweeps.
+- [ ] Verify insurer/therapist sessions cannot read diary/chat/crisis/risk data post-migration.
