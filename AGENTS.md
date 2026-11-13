@@ -40,10 +40,10 @@ Currently: `src/lib/crisisDetection.js` → `src/config/helplines.js`,
 
 ## Database
 
-Six baseline migrations in `supabase/migrations/` (`20261110000001`–`06`),
-applied in order, followed by the manual Pass 2 SQL file documented in
-`docs/MIGRATION_NOTES.md`. Full reference + verify queries:
-`docs/DATABASE.md`. RLS on every table; helpers `is_admin()`,
+Eight consolidated migrations in `supabase/migrations/`
+(`20261112000001`–`08`), applied in filename order on a fresh project.
+Full reference + verify queries: `docs/DATABASE.md`; mapping:
+`docs/MIGRATION_NOTES.md`. RLS on every table; helpers `is_admin()`,
 `is_super_admin()`, `is_active_user()`, `is_recently_authenticated()`.
 `enforce_profile_privilege_updates` trigger blocks non-super-admin writes to
 privileged profile fields. New users get a `profiles` row from trigger —

@@ -21,6 +21,23 @@ function ProtectionClaims() {
   const [loading, setLoading] = useState(true)
   const [working, setWorking] = useState('')
   const [decision, setDecision] = useState({ decision: 'approved', amount: '', reason: '' })
+  const [evidenceFiles, setEvidenceFiles] = useState(null) // null=not loaded
+  const [evidenceBusy, setEvidenceBusy] = useState(false)
+
+  const loadEvidence = async () => {
+    if (!detail) return
+    setEvidenceBusy(true)
+    const { data, error } = await supabase.rpc('insurer_get_claim_evidence', { p_claim_id: detail.id })
+    setEvidenceBusy(false)
+    if (error) { toast.error(error.message || 'Could not load evidence.'); return }
+    // Convert private-bucket paths to 5-minute signed URLs.
+    const withUrls = await Promise.all((data || []).map(async ev => {
+      if (!ev.storage_path) return { ...ev, url: null }
+      const { data: signed } = await supabase.storage.from('claim-evidence').createSignedUrl(ev.storage_path, 300)
+      return { ...ev, url: signed?.signedUrl || null }
+    }))
+    setEvidenceFiles(withUrls)
+  }
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.rpc('insurer_list_protection_claims')
@@ -35,6 +52,7 @@ function ProtectionClaims() {
     const { data, error } = await supabase.rpc('insurer_get_claim', { p_claim_id: claimId })
     if (error) { toast.error(error.message || 'Could not load claim.'); return }
     setDetail(data)
+    setEvidenceFiles(null)
     setDecision({ decision: 'approved', amount: data?.claimed_amount ?? '', reason: '' })
   }
 
@@ -96,6 +114,18 @@ function ProtectionClaims() {
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 10px' }}>
             Benefit: {detail.benefit_name || detail.benefit_code || '—'} · Status: {detail.status.replace(/_/g, ' ')}
           </p>
+          <div style={{ marginBottom: '10px' }}>
+            <button type="button" className="btn-ghost fs-11" style={{ padding: '4px 10px' }} disabled={evidenceBusy} onClick={loadEvidence}>
+              {evidenceBusy ? 'Loading…' : evidenceFiles ? 'Refresh evidence' : 'View evidence'}
+            </button>
+            {evidenceFiles && evidenceFiles.length === 0 && <p className="portal-notice" style={{ marginTop: '6px' }}>No evidence attached.</p>}
+            {evidenceFiles?.map(ev => (
+              <p key={ev.id} className="fs-11" style={{ color: 'rgba(255,255,255,0.6)', margin: '4px 0 0' }}>
+                {ev.evidence_type || 'document'} · {new Date(ev.created_at).toLocaleDateString()}
+                {ev.url && <> · <a href={ev.url} target="_blank" rel="noreferrer" style={{ color: '#7DBDEE' }}>Open (5 min)</a></>}
+              </p>
+            ))}
+          </div>
           {['submitted', 'under_review', 'info_requested'].includes(detail.status) && (
             <>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>

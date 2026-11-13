@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { getProtectionMode, protectionModeAllows } from '../../lib/protectionMode'
@@ -40,6 +40,9 @@ export default function ProtectionPage() {
   const [preauthSessions, setPreauthSessions] = useState(1)
   const [preauthSent, setPreauthSent] = useState(false)
   const [claimForm, setClaimForm] = useState({ policy_id: '', benefit_code: '', claim_type: 'fixed_sum', event_description: '', event_date: '' })
+  const [evidence, setEvidence] = useState({}) // claim_id -> {items: [], open: bool, busy: bool}
+  const evidenceClaimId = useRef(null)
+  const evidenceInput = useRef(null)
 
   const load = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession()
@@ -133,6 +136,47 @@ export default function ProtectionPage() {
     const { error } = await supabase.rpc('member_cancel_claim', { p_claim_id: id })
     if (error) { toast.error(error.message || 'Could not cancel claim.'); return }
     await load()
+  }
+
+  const toggleEvidence = async (claimId) => {
+    const cur = evidence[claimId]
+    if (cur?.open) { setEvidence(p => ({ ...p, [claimId]: { ...cur, open: false } })); return }
+    setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), open: true, busy: true } }))
+    const { data, error } = await supabase.rpc('member_list_claim_evidence', { p_claim_id: claimId })
+    setEvidence(p => ({ ...p, [claimId]: { items: data || [], open: true, busy: false } }))
+    if (error) toast.error(error.message || 'Could not load evidence.')
+  }
+
+  const uploadEvidence = async (claimId, file) => {
+    if (!file) return
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-80)
+    const path = `${user.id}/${claimId}/${Date.now()}_${safe}`
+    setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: true } }))
+    const { error: upErr } = await supabase.storage.from('claim-evidence').upload(path, file)
+    if (upErr) {
+      setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: false } }))
+      toast.error(upErr.message || 'Upload failed.')
+      return
+    }
+    const { error } = await supabase.rpc('member_add_claim_evidence', {
+      p_claim_id: claimId, p_evidence_type: 'document', p_storage_path: path,
+    })
+    setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: false } }))
+    if (error) { toast.error(error.message || 'Could not attach evidence.'); return }
+    toast.success('Evidence uploaded.')
+    await toggleEvidence(claimId); await toggleEvidence(claimId) // reload list
+  }
+
+  const removeEvidence = async (claimId, item) => {
+    if (!confirm('Remove this evidence?')) return
+    const { error } = await supabase.rpc('member_remove_claim_evidence', { p_evidence_id: item.id })
+    if (error) { toast.error(error.message || 'Could not remove evidence.'); return }
+    if (item.storage_path) {
+      await supabase.storage.from('claim-evidence').remove([item.storage_path]).catch(() => {})
+    }
+    await toggleEvidence(claimId); await toggleEvidence(claimId)
   }
 
   const leave = async () => {
@@ -314,8 +358,36 @@ export default function ProtectionPage() {
                     {c.event_description}{c.event_date ? ` · ${c.event_date}` : ''}
                     {c.decision_reason ? ` · ${c.decision_reason}` : ''}
                   </p>
-                  {['submitted', 'info_requested'].includes(c.status) && (
-                    <button className="btn-ghost fs-11" style={{ marginTop: '6px', padding: '4px 10px' }} onClick={() => cancelClaim(c.id)}>Cancel claim</button>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
+                    {['submitted', 'info_requested'].includes(c.status) && (
+                      <button className="btn-ghost fs-11" style={{ padding: '4px 10px' }} onClick={() => cancelClaim(c.id)}>Cancel claim</button>
+                    )}
+                    <button className="btn-ghost fs-11" style={{ padding: '4px 10px' }} onClick={() => toggleEvidence(c.id)}>
+                      {evidence[c.id]?.open ? 'Hide evidence' : 'Evidence'}
+                    </button>
+                  </div>
+                  {evidence[c.id]?.open && (
+                    <div style={{ marginTop: '8px', padding: '8px', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px' }}>
+                      {(evidence[c.id].items || []).length === 0 && <p className="fs-11" style={{ color: 'rgba(255,255,255,0.45)', margin: 0 }}>No evidence attached yet.</p>}
+                      {(evidence[c.id].items || []).map(ev => (
+                        <div key={ev.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', padding: '4px 0' }}>
+                          <p className="fs-11" style={{ color: 'rgba(255,255,255,0.7)', margin: 0 }}>
+                            {ev.evidence_type || 'document'}{ev.has_document ? ' · file attached' : ''} · {new Date(ev.created_at).toLocaleDateString()}
+                          </p>
+                          {['submitted', 'under_review', 'info_requested'].includes(c.status) && (
+                            <button className="btn-ghost fs-11" style={{ padding: '2px 8px' }} onClick={() => removeEvidence(c.id, ev)}>Remove</button>
+                          )}
+                        </div>
+                      ))}
+                      {['submitted', 'under_review', 'info_requested'].includes(c.status) && (
+                        <div style={{ marginTop: '6px' }}>
+                          <button type="button" className="btn-ghost fs-11" disabled={evidence[c.id]?.busy}
+                            onClick={() => { evidenceClaimId.current = c.id; evidenceInput.current?.click() }}>
+                            {evidence[c.id]?.busy ? 'Uploading…' : 'Upload evidence (PDF/JPG/PNG/WebP, ≤10MB)'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               ))}
@@ -343,6 +415,11 @@ export default function ProtectionPage() {
           )}
         </>
       )}
+      <input ref={evidenceInput} type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" style={{ display: 'none' }}
+        onChange={e => {
+          const f = e.target.files?.[0]; e.target.value = ''
+          if (f && evidenceClaimId.current) uploadEvidence(evidenceClaimId.current, f)
+        }} />
     </div></div>
   )
 }

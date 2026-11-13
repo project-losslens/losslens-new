@@ -126,3 +126,18 @@ The gate needs no environment variables — its configuration is hardcoded in
 - `docs/FEATURES.md` — complete feature documentation
 - `docs/HISTORY.md` — condensed project history + open items
 - `AGENTS.md` — contributor/agent notes
+
+## LossLens Protection (concept/pilot stage)
+
+An optional gambling-harm recovery protection programme: members enrol via
+their insurer, insurers verify rosters, issue versioned policies, confirm
+premiums and adjudicate claims. LossLens is NOT the insurer — policies,
+premiums and claim decisions belong to the licensed insurer partner. Diary,
+chats, crisis data and behavioural scores are never exposed to insurers.
+The feature is gated by `protection_mode` (`concept`/`pilot`/`live`) and is
+in development — not an offer of insurance. See `docs/PROTECTION.md`.
+
+## Database
+
+Exactly eight SQL migrations in `supabase/migrations/` applied in order on a
+fresh Supabase project — see `docs/DATABASE.md` and `docs/MIGRATION_NOTES.md`.

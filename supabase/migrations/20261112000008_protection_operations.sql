@@ -1694,3 +1694,93 @@ end;
 $$;
 revoke execute on function public.member_list_claim_evidence(uuid) from public, anon;
 grant execute on function public.member_list_claim_evidence(uuid) to authenticated;
+
+-- Insurer evidence access: returns storage paths ONLY for claims owned by
+-- the caller's insurer org, audited via protection_log_access. Frontend
+-- converts paths to short-lived signed URLs via the Storage API.
+create or replace function public.insurer_get_claim_evidence(p_claim_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_insurer uuid := public.protection_insurer_id();
+  v_result jsonb;
+begin
+  if v_insurer is null then raise exception 'Active insurer access required'; end if;
+  perform public.protection_require_mode(array['pilot','live']);
+  if not exists (
+    select 1 from public.protection_claims c
+    where c.id = p_claim_id and c.insurer_id = v_insurer
+  ) then raise exception 'Claim not found'; end if;
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'id', e.id, 'evidence_type', e.evidence_type,
+    'storage_path', e.storage_path, 'structured', e.structured,
+    'created_at', e.created_at
+  ) order by e.created_at), '[]'::jsonb) into v_result
+  from public.protection_claim_evidence e where e.claim_id = p_claim_id;
+  perform public.protection_log_access('get_claim_evidence', 'protection_claim_evidence', p_claim_id::text, 'claims adjudication');
+  return v_result;
+end;
+$$;
+revoke execute on function public.insurer_get_claim_evidence(uuid) from public, anon;
+grant execute on function public.insurer_get_claim_evidence(uuid) to authenticated;
+
+-- Member evidence removal: own claim, open status only. Deletes metadata;
+-- the storage object is removed client-side via the owner-folder delete
+-- policy (best-effort — orphaned objects stay private and unreferenced).
+create or replace function public.member_remove_claim_evidence(p_evidence_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_claim_id uuid;
+  v_status text;
+begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  select e.claim_id, c.status into v_claim_id, v_status
+  from public.protection_claim_evidence e
+  join public.protection_claims c on c.id = e.claim_id
+  join public.protection_memberships m on m.id = c.membership_id
+  where e.id = p_evidence_id and m.user_id = v_uid and e.provided_by = v_uid;
+  if not found then raise exception 'Evidence not found'; end if;
+  if v_status not in ('submitted','under_review','info_requested') then
+    raise exception 'Evidence can only be removed while the claim is open';
+  end if;
+  delete from public.protection_claim_evidence where id = p_evidence_id;
+end;
+$$;
+revoke execute on function public.member_remove_claim_evidence(uuid) from public, anon;
+grant execute on function public.member_remove_claim_evidence(uuid) to authenticated;
+
+-- Return storage_path to the owning member so the UI can sign/delete it.
+create or replace function public.member_list_claim_evidence(p_claim_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  if not exists (
+    select 1 from public.protection_claims c
+    join public.protection_memberships m on m.id = c.membership_id
+    where c.id = p_claim_id and m.user_id = v_uid
+  ) then raise exception 'Claim not found'; end if;
+  return coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'id', e.id, 'evidence_type', e.evidence_type, 'storage_path', e.storage_path,
+      'has_document', e.storage_path is not null, 'created_at', e.created_at
+    ) order by e.created_at)
+    from public.protection_claim_evidence e where e.claim_id = p_claim_id
+  ), '[]'::jsonb);
+end;
+$$;
+revoke execute on function public.member_list_claim_evidence(uuid) from public, anon;
+grant execute on function public.member_list_claim_evidence(uuid) to authenticated;
