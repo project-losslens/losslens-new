@@ -262,7 +262,7 @@ export function validateQ(Q) {
       if (i !== j && q > 0 && !ALLOWED[STATES[i]].includes(STATES[j])) {
         errors.push(`Q transition ${STATES[i]}→${STATES[j]} is not allowed`)
       }
-      if (i === j && q > 0.000001) errors.push(`Q[${i}][${i}] positive diagonal`)
+      if (i === j && q > 0) errors.push(`Q[${i}][${i}] positive diagonal`)
       rowSum += q
     }
     if (Math.abs(rowSum) > 1e-6) errors.push(`Q row ${i} sums to ${rowSum}, expected 0`)

@@ -135,6 +135,11 @@ export default function ActuarialWorkbench() {
         derived from the transition matrix. Re-run after changing inputs; saved runs retain the
         parameters used for the displayed result.
       </p>
+      <p className="portal-notice">
+        Transition exposure and claims exposure are separate inputs: the projection horizon applies
+        only to state occupancy, while covered member-years and the milestone-rate assumptions drive
+        expected claims. Claims are not derived from state transitions or occupancy.
+      </p>
       <label>Data basis
         <select value={datasetType} onChange={e => setDatasetType(e.target.value)}>
           <option value="synthetic_assumption">Synthetic / assumption-based (unvalidated)</option>
@@ -185,7 +190,7 @@ export default function ActuarialWorkbench() {
             </div>
           </label>
           <label>Benefit amount per milestone (KES)<NumberField value={benefitAmount} min={0} onChange={v => setBenefitAmount(v ?? 0)} /></label>
-          <label>Covered member-years<NumberField value={memberYears} min={0} onChange={v => setMemberYears(v ?? 0)} /></label>
+          <label>Total covered member-years for claims estimate<NumberField value={memberYears} min={0} onChange={v => setMemberYears(v ?? 0)} /></label>
           <label>Claim acceptance rate<NumberField value={acceptance} min={0} max={1} step={0.01} onChange={v => setAcceptance(v ?? 1)} /></label>
           <label>Per-event cap (KES, optional)<NumberField value={perEventCap} min={0} onChange={v => setPerEventCap(v ?? '')} /></label>
           <label>Annual aggregate cap (KES, optional)<NumberField value={annualCap} min={0} onChange={v => setAnnualCap(v ?? '')} /></label>
