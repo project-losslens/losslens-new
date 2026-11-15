@@ -128,7 +128,6 @@ function ProtectionClaims() {
           <p style={{ color: '#FFFFFF', fontSize: '13px', margin: '0 0 6px' }}>
             {detail.member_reference} · {detail.claim_type === 'fixed_sum' ? 'Fixed sum' : 'Treatment'} · claimed KES {Number(detail.claimed_amount).toLocaleString()}
           </p>
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: '0 0 6px' }}>{detail.event_description}</p>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 10px' }}>
             Benefit: {detail.benefit_name || detail.benefit_code || '—'} · Status: {detail.status.replace(/_/g, ' ')}
             {detail.milestone && <> · Milestone: {detail.milestone.type} #{detail.milestone.ordinal} · service {detail.milestone.service_date} · verified {detail.milestone.verified_at ? new Date(detail.milestone.verified_at).toLocaleDateString() : '—'}</>}

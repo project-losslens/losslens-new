@@ -595,8 +595,8 @@ begin
   select jsonb_build_object(
     'id', c.id, 'claim_type', c.claim_type, 'status', c.status,
     'claimed_amount', c.claimed_amount, 'approved_amount', c.approved_amount,
-    'event_description', c.event_description, 'event_date', c.event_date,
-    'service_date', c.service_date, 'decision_reason', c.decision_reason,
+    'event_date', c.event_date,
+    'service_date', c.service_date,
     'settlement_status', c.settlement_status, 'created_at', c.created_at,
     'policy_number', p.policy_number, 'member_reference', m.member_reference,
     'benefit_code', b.benefit_code, 'benefit_name', b.name,
@@ -612,15 +612,14 @@ begin
         'type', ms.milestone_type,
         'ordinal', ms.ordinal,
         'service_date', ms.service_date,
-        'verified_at', ms.verified_at,
-        'attestation', ms.evidence->>'attestation'
+        'verified_at', ms.verified_at
       )
       from public.protection_milestones ms
       where ms.id = c.milestone_id and ms.status = 'verified'
     ),
     'history', coalesce((
       select jsonb_agg(jsonb_build_object(
-        'event_type', ev.event_type, 'detail', ev.detail, 'created_at', ev.created_at
+        'event_type', ev.event_type, 'created_at', ev.created_at
       ) order by ev.created_at)
       from public.protection_claim_events ev where ev.claim_id = c.id
     ), '[]'::jsonb)
@@ -1987,7 +1986,7 @@ begin
        or v_path_parts[1] <> v_uid::text
        or v_path_parts[2] <> p_claim_id::text
        or btrim(v_path_parts[3]) = ''
-       or v_path_parts[3] in ('.','..') then
+       or btrim(v_path_parts[3]) in ('.','..') then
       raise exception 'Evidence path must be <your user ID>/<claim ID>/<filename>';
     end if;
     if length(p_storage_path) > 500 then raise exception 'Invalid evidence path'; end if;
@@ -2063,8 +2062,8 @@ begin
         cardinality(string_to_array(e.storage_path, '/')) = 3
         and split_part(e.storage_path, '/', 1) = v_claim_user::text
         and split_part(e.storage_path, '/', 2) = c.id::text
-        and split_part(e.storage_path, '/', 3) <> ''
-        and split_part(e.storage_path, '/', 3) not in ('.','..')
+        and btrim(split_part(e.storage_path, '/', 3)) <> ''
+        and btrim(split_part(e.storage_path, '/', 3)) not in ('.','..')
         and exists (
           select 1 from storage.objects o
           where o.bucket_id = 'claim-evidence' and o.name = e.storage_path
@@ -2110,8 +2109,8 @@ begin
     cardinality(string_to_array(v_path, '/')) <> 3
     or split_part(v_path, '/', 1) <> v_uid::text
     or split_part(v_path, '/', 2) <> v_claim_id::text
-    or split_part(v_path, '/', 3) = ''
-    or split_part(v_path, '/', 3) in ('.','..')
+    or btrim(split_part(v_path, '/', 3)) = ''
+    or btrim(split_part(v_path, '/', 3)) in ('.','..')
   ) then
     raise exception 'Evidence path does not belong to this claim';
   end if;
@@ -2158,8 +2157,8 @@ begin
         and cardinality(string_to_array(e.storage_path, '/')) = 3
         and split_part(e.storage_path, '/', 1) = v_uid::text
         and split_part(e.storage_path, '/', 2) = p_claim_id::text
-        and split_part(e.storage_path, '/', 3) <> ''
-        and split_part(e.storage_path, '/', 3) not in ('.','..'),
+        and btrim(split_part(e.storage_path, '/', 3)) <> ''
+        and btrim(split_part(e.storage_path, '/', 3)) not in ('.','..'),
       'created_at', e.created_at
     ) order by e.created_at)
     from public.protection_claim_evidence e
@@ -2170,8 +2169,8 @@ begin
           cardinality(string_to_array(e.storage_path, '/')) = 3
           and split_part(e.storage_path, '/', 1) = v_uid::text
           and split_part(e.storage_path, '/', 2) = p_claim_id::text
-          and split_part(e.storage_path, '/', 3) <> ''
-          and split_part(e.storage_path, '/', 3) not in ('.','..')
+          and btrim(split_part(e.storage_path, '/', 3)) <> ''
+          and btrim(split_part(e.storage_path, '/', 3)) not in ('.','..')
         )
       )
   ), '[]'::jsonb);
@@ -2617,13 +2616,10 @@ begin
   select jsonb_build_object(
     'milestone_type', ms.milestone_type, 'ordinal', ms.ordinal,
     'service_date', ms.service_date, 'status', ms.status,
-    'verified_at', ms.verified_at,
-    'evidence', jsonb_build_object('attestation', ms.evidence->>'attestation'),
-    'episode_status', e.status, 'plan_ref', e.treatment_plan_ref
+    'verified_at', ms.verified_at
   ) into v_result
   from public.protection_claims c
   join public.protection_milestones ms on ms.id = c.milestone_id
-  join public.protection_treatment_episodes e on e.id = ms.episode_id
   where c.id = p_claim_id and c.insurer_id = v_ins;
   if v_result is null then raise exception 'Milestone not found'; end if;
   perform public.protection_log_access('get_claim_milestone','protection_milestones',p_claim_id::text,'claims adjudication');

@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
-import UserAvatar from '../../components/UserAvatar'
 import { BrandLoader } from '../../components/Brand'
 
 const PLANS = { STANDARD: 'standard', ENTERPRISE: 'enterprise', CUSTOM: 'custom' }
@@ -72,7 +71,14 @@ export default function B2BClients() {
   useEffect(() => { fetchClients() }, [fetchClients])
 
   const fetchClientMembers = async (client) => {
-    const { data } = await supabase.from('profiles').select('id, full_name, username, phone, streak_days, risk_level, last_active, avatar_url').eq('b2b_client_id', client.id).order('full_name', { ascending: true })
+    const { data, error } = await supabase.from('profiles')
+      .select('id, full_name, created_at, status')
+      .eq('b2b_client_id', client.id)
+      .order('full_name', { ascending: true })
+    if (error) {
+      toast.error(error.message || 'Could not load client members.')
+      return
+    }
     setShowMembers({ client, members: data || [] })
   }
 
@@ -392,21 +398,12 @@ export default function B2BClients() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {showMembers.members.map(m => (
                   <div key={m.id} style={{ background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <UserAvatar reference={m.avatar_url} name={m.full_name || m.username} size={32} />
-                      <div>
-                      <span style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500 }}>{m.full_name || 'Unnamed'}</span>
-                      {m.username && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginLeft: '6px' }}>@{m.username}</span>}
-                      </div>
-                    </div>
+                    <span style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500 }}>{m.full_name || 'Unnamed member'}</span>
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                      <span style={{ color: 'var(--primary)', fontSize: '11px' }}>{<AppIcon name="flame" size={12} />} {m.streak_days || 0}d</span>
-                      <span style={{
-                        background: m.risk_level === 'high' ? 'rgba(255,255,255,0.08)' : m.risk_level === 'medium' ? 'rgba(45,212,191,0.15)' : 'rgba(255,255,255,0.12)',
-                        color: m.risk_level === 'high' ? 'var(--text)' : m.risk_level === 'medium' ? 'var(--info)' : 'var(--primary)',
-                        padding: '2px 8px', borderRadius: '100px', fontSize: '10px'
-                      }}>{m.risk_level || 'low'}</span>
-                      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{m.last_active ? new Date(m.last_active).toLocaleDateString('en-KE') : 'Never'}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>
+                        Joined {new Date(m.created_at).toLocaleDateString('en-KE')}
+                      </span>
+                      <span style={{ color: 'var(--primary)', fontSize: '10px' }}>{m.status || 'active'}</span>
                     </div>
                   </div>
                 ))}
