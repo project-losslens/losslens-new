@@ -33,7 +33,7 @@ middleware.js            Vercel Routing Middleware site gate
   pages/{public,user,admin,insurer,therapist}
   styles/               base.css (tokens+reset), globals.css, landing.css
 supabase/
-  migrations/           six baseline SQL files + Pass 2 combined SQL
+  migrations/           exactly eight consolidated SQL migration scripts
   functions/            edge functions (separate deploy units)
 docs/                   DATABASE.md, FEATURES.md, HISTORY.md
 public/                 manifest, icons, service-worker.js
@@ -75,7 +75,7 @@ vercel dev         # serves api/ routes locally (Vercel CLI)
 
 1. `npm ci`
 2. Copy `.env.example` to `.env` and fill in the client variables.
-3. Apply the SQL files in the documented order (see `docs/MIGRATION_NOTES.md`)
+3. Apply the eight SQL scripts in numeric order (see `docs/MIGRATION_NOTES.md`)
    and deploy edge
    functions if working on auth flows.
 4. `npm run dev` for UI work; `vercel dev` to exercise `/api/chat`.
@@ -84,8 +84,7 @@ vercel dev         # serves api/ routes locally (Vercel CLI)
 
 Order matters:
 
-1. Apply the six baseline SQL files in `supabase/migrations/` in order, then
-   apply `20261111000001_pass2_combined.sql` from the Supabase SQL editor.
+1. Apply the eight migration scripts in `supabase/migrations/` in numeric order.
    See `docs/MIGRATION_NOTES.md` for the manual steps and `docs/DATABASE.md`
    for the schema reference.
 2. Deploy edge functions: `supabase functions deploy send-invite delete-account`

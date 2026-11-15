@@ -40,7 +40,7 @@ export default function ProtectionPage() {
   const [preauthSessions, setPreauthSessions] = useState(1)
   const [preauthSent, setPreauthSent] = useState(false)
   const [claimForm, setClaimForm] = useState({ policy_id: '', benefit_code: '', claim_type: 'fixed_sum', event_description: '', event_date: '' })
-  const [evidence, setEvidence] = useState({}) // claim_id -> {items: [], open: bool, busy: bool}
+  const [evidence, setEvidence] = useState({}) // claim_id -> {items, open, busy, error}
   const evidenceClaimId = useRef(null)
   const evidenceInput = useRef(null)
 
@@ -138,45 +138,96 @@ export default function ProtectionPage() {
     await load()
   }
 
+  const loadEvidence = async (claimId) => {
+    setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), open: true, busy: true, error: null } }))
+    const { data, error } = await supabase.rpc('member_list_claim_evidence', { p_claim_id: claimId })
+    if (error) {
+      setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), open: true, busy: false, error: error.message } }))
+      toast.error(error.message || 'Could not load evidence.')
+      return
+    }
+    let signedUrlFailed = false
+    const items = await Promise.all((data || []).map(async item => {
+      if (!item.storage_path) return { ...item, url: null }
+      const { data: signed, error: signError } = await supabase.storage
+        .from('claim-evidence').createSignedUrl(item.storage_path, 300)
+      if (signError || !signed?.signedUrl) {
+        signedUrlFailed = true
+        return { ...item, url: null, urlError: signError?.message || 'Could not create a secure file link.' }
+      }
+      return { ...item, url: signed.signedUrl }
+    }))
+    const message = signedUrlFailed ? 'Some evidence files could not be opened.' : null
+    setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), items, open: true, busy: false, error: message } }))
+    if (signedUrlFailed) toast.error(message)
+  }
+
   const toggleEvidence = async (claimId) => {
     const cur = evidence[claimId]
     if (cur?.open) { setEvidence(p => ({ ...p, [claimId]: { ...cur, open: false } })); return }
-    setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), open: true, busy: true } }))
-    const { data, error } = await supabase.rpc('member_list_claim_evidence', { p_claim_id: claimId })
-    setEvidence(p => ({ ...p, [claimId]: { items: data || [], open: true, busy: false } }))
-    if (error) toast.error(error.message || 'Could not load evidence.')
+    await loadEvidence(claimId)
   }
 
   const uploadEvidence = async (claimId, file) => {
     if (!file) return
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('The evidence file must be 10 MB or smaller.')
+      return
+    }
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    if (userError || !user) {
+      toast.error(userError?.message || 'Sign in again before uploading evidence.')
+      return
+    }
     const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-80)
     const path = `${user.id}/${claimId}/${Date.now()}_${safe}`
-    setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: true } }))
+    setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), open: true, busy: true, error: null, progress: 'Uploading file…' } }))
     const { error: upErr } = await supabase.storage.from('claim-evidence').upload(path, file)
     if (upErr) {
-      setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: false } }))
+      setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: false, progress: null, error: upErr.message } }))
       toast.error(upErr.message || 'Upload failed.')
       return
     }
+    setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), progress: 'Attaching evidence…' } }))
     const { error } = await supabase.rpc('member_add_claim_evidence', {
       p_claim_id: claimId, p_evidence_type: 'document', p_storage_path: path,
     })
-    setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: false } }))
-    if (error) { toast.error(error.message || 'Could not attach evidence.'); return }
+    if (error) {
+      const { error: cleanupError } = await supabase.storage.from('claim-evidence').remove([path])
+      const message = cleanupError
+        ? `${error.message || 'Could not attach evidence.'} The uploaded file could not be removed: ${cleanupError.message}`
+        : error.message || 'Could not attach evidence. The uploaded file was removed.'
+      setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: false, progress: null, error: message } }))
+      toast.error(message)
+      return
+    }
+    setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: false, progress: null } }))
     toast.success('Evidence uploaded.')
-    await toggleEvidence(claimId); await toggleEvidence(claimId) // reload list
+    await loadEvidence(claimId)
   }
 
   const removeEvidence = async (claimId, item) => {
     if (!confirm('Remove this evidence?')) return
+    setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: true, error: null, progress: 'Removing evidence…' } }))
     const { error } = await supabase.rpc('member_remove_claim_evidence', { p_evidence_id: item.id })
-    if (error) { toast.error(error.message || 'Could not remove evidence.'); return }
-    if (item.storage_path) {
-      await supabase.storage.from('claim-evidence').remove([item.storage_path]).catch(() => {})
+    if (error) {
+      const message = error.message || 'Could not remove evidence.'
+      setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: false, progress: null, error: message } }))
+      toast.error(message)
+      return
     }
-    await toggleEvidence(claimId); await toggleEvidence(claimId)
+    if (item.storage_path) {
+      const { error: storageError } = await supabase.storage.from('claim-evidence').remove([item.storage_path])
+      if (storageError) {
+        const message = `Evidence metadata was removed, but the private file could not be deleted: ${storageError.message}`
+        setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: false, progress: null, error: message } }))
+        toast.error(message)
+        await loadEvidence(claimId)
+        return
+      }
+    }
+    toast.success('Evidence removed.')
+    await loadEvidence(claimId)
   }
 
   const leave = async () => {
@@ -368,14 +419,29 @@ export default function ProtectionPage() {
                   </div>
                   {evidence[c.id]?.open && (
                     <div style={{ marginTop: '8px', padding: '8px', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px' }}>
+                      {evidence[c.id]?.progress && (
+                        <div role="progressbar" aria-label={evidence[c.id].progress} aria-valuetext={evidence[c.id].progress}
+                          style={{ color: 'rgba(255,255,255,0.65)', fontSize: '11px', marginBottom: '6px' }}>
+                          {evidence[c.id].progress}
+                        </div>
+                      )}
+                      {evidence[c.id]?.error && (
+                        <p role="alert" className="fs-11" style={{ color: '#ff9b9b', margin: '0 0 6px' }}>{evidence[c.id].error}</p>
+                      )}
+                      {evidence[c.id]?.busy && !evidence[c.id]?.progress && (
+                        <p className="fs-11" style={{ color: 'rgba(255,255,255,0.55)', margin: '0 0 6px' }}>Loading evidence…</p>
+                      )}
                       {(evidence[c.id].items || []).length === 0 && <p className="fs-11" style={{ color: 'rgba(255,255,255,0.45)', margin: 0 }}>No evidence attached yet.</p>}
                       {(evidence[c.id].items || []).map(ev => (
                         <div key={ev.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', padding: '4px 0' }}>
                           <p className="fs-11" style={{ color: 'rgba(255,255,255,0.7)', margin: 0 }}>
                             {ev.evidence_type || 'document'}{ev.has_document ? ' · file attached' : ''} · {new Date(ev.created_at).toLocaleDateString()}
+                            {ev.url && <> · <a href={ev.url} target="_blank" rel="noreferrer" style={{ color: '#7DBDEE' }}>Open (5 min)</a></>}
+                            {ev.urlError && <> · <span role="alert" style={{ color: '#ff9b9b' }}>{ev.urlError}</span></>}
                           </p>
                           {['submitted', 'under_review', 'info_requested'].includes(c.status) && (
-                            <button className="btn-ghost fs-11" style={{ padding: '2px 8px' }} onClick={() => removeEvidence(c.id, ev)}>Remove</button>
+                            <button className="btn-ghost fs-11" style={{ padding: '2px 8px' }} disabled={evidence[c.id]?.busy}
+                              onClick={() => removeEvidence(c.id, ev)}>Remove</button>
                           )}
                         </div>
                       ))}
@@ -383,7 +449,7 @@ export default function ProtectionPage() {
                         <div style={{ marginTop: '6px' }}>
                           <button type="button" className="btn-ghost fs-11" disabled={evidence[c.id]?.busy}
                             onClick={() => { evidenceClaimId.current = c.id; evidenceInput.current?.click() }}>
-                            {evidence[c.id]?.busy ? 'Uploading…' : 'Upload evidence (PDF/JPG/PNG/WebP, ≤10MB)'}
+                            {evidence[c.id]?.busy ? (evidence[c.id]?.progress || 'Working…') : 'Upload evidence (PDF/JPG/PNG/WebP, ≤10MB)'}
                           </button>
                         </div>
                       )}

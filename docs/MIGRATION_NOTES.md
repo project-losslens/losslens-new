@@ -5,15 +5,13 @@ statements from the application or from a local migration command.
 
 ## Order
 
-1. The existing migrations `20261110000001_core_schema.sql` through
-   `20261110000006_urge_toolkit_sessions.sql` must already be applied in
-   numeric order.
-2. Apply `supabase/migrations/20261111000001_pass2_combined.sql`.
-   If an earlier draft of the Phase 5 section was already applied, the file
-   now contains clearly marked destructive statements that drop
-   `public.plans`, `public.subscription_events` and the superseded
-   subscription RPCs before recreating the final shape. Re-running is safe.
-3. Sanity checks (run as an administrator, plain reads):
+1. Create a fresh Supabase project.
+2. Apply the eight final scripts in `supabase/migrations/` in numeric order:
+   `20261112000001_core_schema.sql` through `20261112000008_protection_operations.sql`.
+3. There is no separate baseline-plus-pass2 step; the final database is the
+   eight-script set above. Earlier migration files were consolidated and are
+   not a deployment sequence.
+4. Sanity checks (run as an administrator, plain reads):
    - `select public.is_super_admin();` returns true.
    - `select proname from pg_proc where proname = 'admin_set_subscription';`
      returns exactly one row.
@@ -27,8 +25,8 @@ statements from the application or from a local migration command.
      `/super-admin/users` with a reason, reload, and confirm the history
      list shows the change (read from `audit_logs`).
 
-The new file redefines the legacy `is_recently_authenticated()` helper so it
-no longer checks JWT age. It returns true only for active administrators;
+The final script set redefines the legacy `is_recently_authenticated()` helper
+so it no longer checks JWT age. It returns true only for active administrators;
 the role-specific `is_admin()` and `is_super_admin()` checks in each RPC remain
 the authorization boundary. It adds the `admin_revert_therapist(uuid)` RPC and
 replaces therapist self-access policies so a reverted user cannot continue to
@@ -37,7 +35,7 @@ not delete user or claims data.
 
 There are no manual Supabase dashboard steps for this change.
 
-## Phase 5 additions (same combined file)
+## Subscription additions (script 06)
 
 Objects added: table `payments` (with unique `provider_ref` for
 idempotency) and ONE function `admin_set_subscription(uuid[], text, text,
@@ -47,7 +45,7 @@ from `audit_logs` (the function calls the existing `log_admin_action`), so
 there is no history table. Manual payments during the pilot call the same
 function with a reason like `manual payment: <reference>`.
 
-The destructive block at the top of the Phase 5 section drops the earlier
+The destructive block in script 06 drops the earlier
 draft objects (`plans`, `subscription_events`, `admin_set_subscription_bulk`,
 `admin_get_subscription_history`, `admin_record_manual_payment`,
 `expire_subscriptions`, `subscription_plan_allowed`,
@@ -108,7 +106,7 @@ remittance isolated from `claims_float`; `protection_mode` enforced inside
 RPCs; insurer reads whitelisted via RPCs only; `protection_claim_event` and
 `protection_log_access` are internal-only (revoked from authenticated).
 
-## Phase 6 additions (same combined file)
+## Protection base additions (script 06)
 
 `protection_plans`, `protection_memberships`, `protection_consents`,
 `protection_events` tables + RLS; `member_request_enrolment`,

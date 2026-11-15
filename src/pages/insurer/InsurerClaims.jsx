@@ -23,19 +23,36 @@ function ProtectionClaims() {
   const [decision, setDecision] = useState({ decision: 'approved', amount: '', reason: '' })
   const [evidenceFiles, setEvidenceFiles] = useState(null) // null=not loaded
   const [evidenceBusy, setEvidenceBusy] = useState(false)
+  const [evidenceError, setEvidenceError] = useState('')
 
   const loadEvidence = async () => {
     if (!detail) return
     setEvidenceBusy(true)
+    setEvidenceError('')
     const { data, error } = await supabase.rpc('insurer_get_claim_evidence', { p_claim_id: detail.id })
-    setEvidenceBusy(false)
-    if (error) { toast.error(error.message || 'Could not load evidence.'); return }
+    if (error) {
+      setEvidenceBusy(false)
+      setEvidenceError(error.message || 'Could not load evidence.')
+      toast.error(error.message || 'Could not load evidence.')
+      return
+    }
     // Convert private-bucket paths to 5-minute signed URLs.
+    let signedUrlFailed = false
     const withUrls = await Promise.all((data || []).map(async ev => {
       if (!ev.storage_path) return { ...ev, url: null }
-      const { data: signed } = await supabase.storage.from('claim-evidence').createSignedUrl(ev.storage_path, 300)
-      return { ...ev, url: signed?.signedUrl || null }
+      const { data: signed, error: signError } = await supabase.storage
+        .from('claim-evidence').createSignedUrl(ev.storage_path, 300)
+      if (signError || !signed?.signedUrl) {
+        signedUrlFailed = true
+        return { ...ev, url: null, urlError: signError?.message || 'Could not create a secure file link.' }
+      }
+      return { ...ev, url: signed.signedUrl }
     }))
+    setEvidenceBusy(false)
+    if (signedUrlFailed) {
+      setEvidenceError('Some evidence files could not be opened.')
+      toast.error('Some evidence files could not be opened.')
+    }
     setEvidenceFiles(withUrls)
   }
 
@@ -53,6 +70,7 @@ function ProtectionClaims() {
     if (error) { toast.error(error.message || 'Could not load claim.'); return }
     setDetail(data)
     setEvidenceFiles(null)
+    setEvidenceError('')
     setDecision({ decision: 'approved', amount: data?.claimed_amount ?? '', reason: '' })
   }
 
@@ -118,11 +136,13 @@ function ProtectionClaims() {
             <button type="button" className="btn-ghost fs-11" style={{ padding: '4px 10px' }} disabled={evidenceBusy} onClick={loadEvidence}>
               {evidenceBusy ? 'Loading…' : evidenceFiles ? 'Refresh evidence' : 'View evidence'}
             </button>
+            {evidenceError && <p role="alert" className="portal-notice" style={{ marginTop: '6px', color: '#ff9b9b' }}>{evidenceError}</p>}
             {evidenceFiles && evidenceFiles.length === 0 && <p className="portal-notice" style={{ marginTop: '6px' }}>No evidence attached.</p>}
             {evidenceFiles?.map(ev => (
               <p key={ev.id} className="fs-11" style={{ color: 'rgba(255,255,255,0.6)', margin: '4px 0 0' }}>
                 {ev.evidence_type || 'document'} · {new Date(ev.created_at).toLocaleDateString()}
                 {ev.url && <> · <a href={ev.url} target="_blank" rel="noreferrer" style={{ color: '#7DBDEE' }}>Open (5 min)</a></>}
+                {ev.urlError && <> · <span role="alert" style={{ color: '#ff9b9b' }}>{ev.urlError}</span></>}
               </p>
             ))}
           </div>

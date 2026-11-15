@@ -1,11 +1,8 @@
 # LossLens upgrade — progress tracker
 
-Branch: `wip/copilot-phase2-3` (== main at 7191815; Phase 2+3 in dc4095c,
-Phases 4–6k committed through 7191815)
-Plan authority: docs/UPGRADE_PLAN.md — REWRITTEN to match the latest
-prompt (prompt overrides: no plans/history tables beyond what exists,
-ONE admin_set_subscription function, no SQL scripts/seed files, in-memory
-demo fixtures only). Delete only when ALL phases done.
+Branch: `main`
+Current installation reference: `docs/DATABASE.md` and
+`docs/MIGRATION_NOTES.md`. `docs/UPGRADE_PLAN.md` is historical.
 
 ## Status legend: [x] done · [~] partial · [ ] not started
 
@@ -78,12 +75,12 @@ demo fixtures only). Delete only when ALL phases done.
 - [x] Payments: provider_ref rename applied in start/status/callback;
       subscription activation + audit via service role; .env.example
       documents all vars incl. CHAT_QUOTA_* and CRON_SECRET
-- [x] supabase scripts/seed .sql files deleted (prompt: one SQL file only)
+- [x] Historical SQL seed/helper scripts removed; demo records remain in-memory.
 
 ## Phase 6 — Protection + portals
 - [x] docs/PROTECTION.md, PROTECTION_TEST_PLAN.md, GO_LIVE_CHECKLIST.md
 - [x] src/lib/protectionStates.js; protection schema/RLS/RPCs +
-      protection_mode seed in combined SQL
+      protection_mode seed in script 06
 - [x] Member /protection-member page mode-gated (enrol/pending/active/
       consent/timeline/leave); active state now shows plan benefits/limits
       chips from protection_plans + not-the-insurer disclaimer;
@@ -119,10 +116,12 @@ demo fixtures only). Delete only when ALL phases done.
   globals.css .ll-toast--*.
 - NumberField commits on blur/Enter.
 - Boot loader removed via rAF in main.jsx; index.html fallback 10s.
-- 2026-11-11: UPGRADE_PLAN.md rewritten to match latest prompt; deleted
+- 2026-11-11: UPGRADE_PLAN.md recorded the then-current single-SQL-file
+  constraint; it is now historical and superseded by the eight-script
+  fresh-install process in DATABASE.md and MIGRATION_NOTES.md. Deleted
   supabase/scripts/{grant_super_admin,set_subscription,
-  remove_demo_data}.sql and supabase/seed/protection_demo.sql (prompt:
-  exactly one SQL file, no scripts/seed). Demo protection data must be
+  remove_demo_data}.sql and supabase/seed/protection_demo.sql. Demo
+  Protection data remains
   in-memory in src/demo instead.
 - Phase 3/4/5/6 items largely verified by code review only — browser
   screenshots still owed (Part A.1).
@@ -147,7 +146,13 @@ demo fixtures only). Delete only when ALL phases done.
 - Security addendum appended to script 08: protection_claim_event and
   protection_log_access revoked from authenticated (internal definer calls
   only); claim-evidence bucket size/MIME limits; consent/mode policy notes.
-- NOT executed anywhere. Build passes. Awaiting scratch-DB application.
+- Database execution and browser E2E status are not certified by this tracker;
+  validate only against a disposable Supabase project before production.
+- Evidence workflow hardening: `user_id/claim_id/filename` is validated in
+  the RPCs and private Storage policies; member and insurer evidence UIs handle
+  progress, signed-link errors, and storage/database cleanup failures.
+- Report build and lint from the actual check results; no live database or
+  browser verification is implied.
 
 ## Authoritative installation procedure (eight scripts only)
 

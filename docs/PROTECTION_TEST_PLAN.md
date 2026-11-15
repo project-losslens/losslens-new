@@ -1,40 +1,67 @@
-# Protection test plan — manual scripts per role
+# Protection test plan
 
-Prereqs: combined SQL applied twice cleanly; `protection_mode` set to `pilot`
-(super-admin → Protection Ops, or SQL: `update system_settings set value='"pilot"' where key='protection_mode'`).
-Demo data: run `(removed — demo data is in-memory only)` after creating demo auth
-users; clean with `(removed — demo data is in-memory only)`.
+## Database test environment
 
-## Member (role=user)
-1. Log in → `/protection-member`.
-2. Concept mode: page shows teaser only. Switch to pilot → enrolment form appears.
-3 Enrol: pick "Sample Health Assurance", enter member ref → status `pending_verification`, consent toggles visible (all off).
-4. Toggle `status_updates` on → verify `protection_consents.granted=true` and a `consent_changed` event exists.
-5. After insurer verifies (below) → status `active`; benefits copy shows.
-6. "Leave Protection" → status `ended`, consents revoked.
+Use a disposable Supabase project. Apply the eight scripts in
+`supabase/migrations/` in filename order, from
+`20261112000001_core_schema.sql` through
+`20261112000008_protection_operations.sql`. This set is the complete fresh
+install; do not prepend legacy baseline or Pass 2 scripts. The scripts have not
+been executed against the live database.
 
-## Insurer (role=insurer)
-1. `/insurer/members` → upload `member_reference,email` CSV → report shows row count.
-2. Pending memberships list → enter/confirm member ref → Verify → status `active`.
-3. `/insurer/claims`, `/insurer/invoices`, `/insurer/analytics` unchanged.
-4. **Privacy check**: attempt to query `diary_entries`, `chat_history`, `recordings`, `daily_risk_score` for a member — must return 0 rows / permission denied.
+Create separate test accounts for two members, two insurers, a therapist, and a
+super admin. Use synthetic claim and evidence data only. Keep the environment
+in `concept` until the authorized test setup moves it to `pilot`; never use
+production member data.
 
-## Therapist (role=therapist)
-1. `/therapist` dashboard, `/therapist/onboarding` (verification), claims, payouts.
-2. **Privacy check**: same as insurer — no clinical tables readable.
+## Member
 
-## Super admin
-1. `/super-admin/protection` → switch mode concept→pilot→live with confirmation; check audit log entry.
-2. `/super-admin/users` → change a subscription; verify `subscription_events` row + history in modal.
-3. `/super-admin/therapists` → verify a pending therapist.
+1. In `concept`, verify Protection transactions are unavailable.
+2. In the approved test `pilot` environment, enrol in an eligible insurer and
+   verify pending/active membership and consent state.
+3. Submit a claim and open its Evidence section.
+4. Upload an allowed file; verify progress, successful attachment, and that the
+   member can open the short-lived signed file link.
+5. Upload a file while forcing the evidence-attachment RPC to fail. Verify the
+   UI reports the error and attempts to remove the uploaded object; if cleanup
+   also fails, verify the error identifies the remaining private object.
+6. Attempt evidence attachment using another claim's ID in the path, a path
+   under another member's UUID, a missing filename, and a non-private bucket.
+   Each must fail server-side and must not create evidence metadata.
+7. Remove evidence while the claim is open; verify metadata and the stored
+   object are removed. Verify removal is unavailable after the claim closes.
+8. As a second member, attempt to list, add, or remove evidence for the first
+   member's claim; each operation must fail.
 
-## Regression
-- `npm run build`, `npm run lint` (~200 errors/17 warnings baseline).
-- Combined SQL run twice; verification SELECTs at file end.
-- Screenshots 360/768/1280 for all five shells.
+## Insurer and storage boundaries
 
-## Update (Protection rebuild)
-The seed/remove SQL files referenced below do NOT exist — demo data is
-in-memory only (src/demo/fixtures.js). The rebuilt architecture lives in
-consolidated migrations 20261112000001–08 applied in order on a fresh project; test against a scratch Supabase project per
-docs/MIGRATION_NOTES.md and the script-08 verification queries.
+1. As insurer A, list and open a claim belonging to insurer A, retrieve its
+   evidence, and open the five-minute signed URL.
+2. As insurer A, request insurer B's claim evidence and request a signed URL
+   for insurer B's object; both must be denied.
+3. Attach two claims for the same member to test that a path under claim A
+   cannot be associated with claim B.
+4. Confirm the bucket remains private and insurer access is limited to evidence
+   linked to that insurer's claim.
+5. Confirm insurers and therapists cannot retrieve diary entries, Oloo
+   conversations, crisis records, relapse indicators, or detailed clinical
+   information through tables, views, storage, or RPCs.
+
+## Other Protection workflows
+
+- Verify insurer enrolment eligibility and rejection of inactive or expired
+  partnerships.
+- Exercise the policy, premium, pre-authorisation, claim decision, settlement,
+  and lifecycle flows, checking mode restrictions and insurer boundaries.
+- Revoke optional consent and verify subsequent optional disclosures stop;
+  essential policy servicing and records required for administration remain
+  governed by their applicable basis and access rules.
+
+## Application checks
+
+- Run `npm run build`.
+- Run targeted lint on modified JavaScript/JSX files.
+- Test member and insurer evidence flows in the browser at narrow and desktop
+  widths. Browser testing has not been performed as part of this test plan.
+- Demo fixtures are in-memory only (`src/demo/fixtures.js`); no SQL demo seed
+  or cleanup scripts are part of the eight-script database set.

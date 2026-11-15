@@ -1,8 +1,11 @@
-# LossLens upgrade — authoritative plan (supersedes earlier copies)
+# LossLens upgrade — historical implementation plan
 
-This file mirrors the current upgrade prompt. Where an older copy of this
-plan differs, THIS VERSION WINS (especially on SQL). Delete this file and
-docs/PROGRESS.md only when every phase is complete.
+This plan records the earlier implementation work and is retained for
+historical context. It is superseded by the current repository and the fresh
+database installation instructions in `docs/DATABASE.md` and
+`docs/MIGRATION_NOTES.md`. In particular, its original one-SQL-file limit is
+obsolete: the complete database now consists of exactly eight consolidated
+scripts in `supabase/migrations/`.
 
 State: Phase 1 (cleanup) and Phase 2 (auth, roles, redirects, super-admin
 separation under /super-admin, no password step-up) are DONE. Phase 3
@@ -14,26 +17,22 @@ Resumability: docs/PROGRESS.md tracks every item; update it after every
 completed item. If running short of room, finish the current item, commit,
 update PROGRESS.md and stop.
 
-## SQL MINIMUM RULE (strict)
+## Current database installation
 
-- The owner runs SQL manually in the Supabase SQL editor and wants as
-  little SQL as possible.
-- Exactly ONE SQL file: supabase/migrations/20261111000001_pass2_combined.sql
-  (append to it). No files in supabase/scripts or supabase/seed, no
-  demo-data scripts, no helper or maintenance scripts, no verification
-  query block.
-- Before adding any statement ask: can this be done with an existing
-  table, column, RPC or RLS policy, or in app code or config instead?
-  Prefer columns on existing tables over new tables, one function over
-  several, RLS policies over RPCs. No new views unless a security need
-  for column whitelisting cannot be met by existing views and RPCs.
-- Header comment at the top of each appended section lists every database
-  object added and the feature that needs it. Target under ~400 lines for
-  everything added in the remaining phases. State the object count in
-  each PR.
-- Everything idempotent; destructive statements clearly marked. Keep
-  docs/MIGRATION_NOTES.md in step: run order and 3–5 manual sanity checks
-  as plain text, not SQL files.
+- The entire fresh-install database is exactly these eight scripts, applied
+  in filename order: `20261112000001_core_schema.sql`,
+  `20261112000002_rls_storage_grants.sql`,
+  `20261112000003_rpc_functions.sql`,
+  `20261112000004_portals_claims.sql`,
+  `20261112000005_urge_toolkit.sql`,
+  `20261112000006_pass2_protection_base.sql`,
+  `20261112000007_protection_core.sql`, and
+  `20261112000008_protection_operations.sql`.
+- Do not use the historical migration filenames in this document as an
+  installation sequence. See `docs/DATABASE.md` for current instructions.
+- SQL is manually applied to a fresh or disposable Supabase project. Do not
+  execute this set against a populated or production project without a
+  separately reviewed forward migration and backup.
 
 ## Hard rules
 
@@ -256,8 +255,9 @@ marked "pending legal review".
   therapist, insurer and super admin can complete enrolment-to-paid-claim
   journey via UI-created records. No insurer/therapist session can read
   diary, chat, recording or risk data.
-- Exactly one SQL file, runs cleanly twice, header lists every object and
-  why.
+- The database deliverable contains exactly eight consolidated SQL scripts;
+  SQL execution results must be reported only after testing against a
+  disposable database.
 - git diff shows no gate changes. Each PR lists what was verified and
   how, assumptions, placeholder copy, unfinished items, SQL object
   count, exact manual SQL step.

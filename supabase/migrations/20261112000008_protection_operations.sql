@@ -129,24 +129,76 @@ values ('claim-evidence', 'claim-evidence', false)
 on conflict (id) do update set public = false;
 
 drop policy if exists claim_evidence_owner_rw on storage.objects;
-create policy claim_evidence_owner_rw on storage.objects for all to authenticated
+drop policy if exists claim_evidence_owner_read on storage.objects;
+create policy claim_evidence_owner_read on storage.objects for select to authenticated
   using (
     bucket_id = 'claim-evidence'
-    and (storage.foldername(name))[1] = auth.uid()::text
+    and cardinality(storage.foldername(name)) = 2
+    and split_part(name, '/', 1) = auth.uid()::text
+    and split_part(name, '/', 2) <> ''
+    and split_part(name, '/', 3) <> ''
+    and split_part(name, '/', 4) = ''
+    and exists (
+      select 1
+      from public.protection_claims c
+      join public.protection_memberships m on m.id = c.membership_id
+      join public.protection_claim_evidence e on e.claim_id = c.id
+      where c.id::text = split_part(name, '/', 2)
+        and m.user_id = auth.uid()
+        and e.storage_path = name
+    )
+  );
+drop policy if exists claim_evidence_owner_write on storage.objects;
+create policy claim_evidence_owner_write on storage.objects for all to authenticated
+  using (
+    bucket_id = 'claim-evidence'
+    and cardinality(storage.foldername(name)) = 2
+    and split_part(name, '/', 1) = auth.uid()::text
+    and split_part(name, '/', 2) <> ''
+    and split_part(name, '/', 3) <> ''
+    and split_part(name, '/', 4) = ''
+    and exists (
+      select 1
+      from public.protection_claims c
+      join public.protection_memberships m on m.id = c.membership_id
+      where c.id::text = split_part(name, '/', 2)
+        and m.user_id = auth.uid()
+        and c.created_by = auth.uid()
+        and c.status in ('submitted','under_review','info_requested')
+    )
   )
   with check (
     bucket_id = 'claim-evidence'
-    and (storage.foldername(name))[1] = auth.uid()::text
+    and cardinality(storage.foldername(name)) = 2
+    and split_part(name, '/', 1) = auth.uid()::text
+    and split_part(name, '/', 2) <> ''
+    and split_part(name, '/', 3) <> ''
+    and split_part(name, '/', 4) = ''
+    and exists (
+      select 1
+      from public.protection_claims c
+      join public.protection_memberships m on m.id = c.membership_id
+      where c.id::text = split_part(name, '/', 2)
+        and m.user_id = auth.uid()
+        and c.created_by = auth.uid()
+        and c.status in ('submitted','under_review','info_requested')
+    )
   );
 drop policy if exists claim_evidence_insurer_read on storage.objects;
 create policy claim_evidence_insurer_read on storage.objects for select to authenticated
   using (
     bucket_id = 'claim-evidence'
+    and cardinality(storage.foldername(name)) = 2
+    and split_part(name, '/', 3) <> ''
+    and split_part(name, '/', 4) = ''
     and public.protection_is_active_insurer()
     and exists (
       select 1 from public.protection_claim_evidence e
       join public.protection_claims c on c.id = e.claim_id
+      join public.protection_memberships m on m.id = c.membership_id
       where e.storage_path = name
+        and split_part(name, '/', 1) = m.user_id::text
+        and split_part(name, '/', 2) = c.id::text
         and c.insurer_id = public.protection_insurer_id()
     )
   );
@@ -1626,18 +1678,12 @@ declare
   v_uid uuid := auth.uid();
   v_c public.protection_claims;
   v_id uuid;
+  v_path_parts text[];
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
   perform public.protection_require_mode(array['pilot','live']);
   if p_storage_path is null and (p_structured is null or p_structured = '{}'::jsonb) then
     raise exception 'Evidence requires a document or structured data';
-  end if;
-  if p_storage_path is not null then
-    -- Path must be <uid>/<claim_id>/... inside the private bucket.
-    if p_storage_path not like v_uid::text || '/%' then
-      raise exception 'Evidence path must be within your own storage folder';
-    end if;
-    if length(p_storage_path) > 500 then raise exception 'Invalid evidence path'; end if;
   end if;
 
   select c.* into v_c from public.protection_claims c
@@ -1649,6 +1695,30 @@ begin
   end if;
   if v_c.created_by is distinct from v_uid then
     raise exception 'Only the claimant can add evidence';
+  end if;
+
+  if p_storage_path is not null then
+    v_path_parts := string_to_array(p_storage_path, '/');
+    if cardinality(v_path_parts) <> 3
+       or v_path_parts[1] <> v_uid::text
+       or v_path_parts[2] <> p_claim_id::text
+       or btrim(v_path_parts[3]) = ''
+       or v_path_parts[3] in ('.','..') then
+      raise exception 'Evidence path must be <your user ID>/<claim ID>/<filename>';
+    end if;
+    if length(p_storage_path) > 500 then raise exception 'Invalid evidence path'; end if;
+    if not exists (
+      select 1 from storage.buckets
+      where id = 'claim-evidence' and public = false
+    ) then
+      raise exception 'Claim evidence bucket is not configured as private';
+    end if;
+    if not exists (
+      select 1 from storage.objects
+      where bucket_id = 'claim-evidence' and name = p_storage_path
+    ) then
+      raise exception 'Uploaded evidence file was not found in the private claim-evidence bucket';
+    end if;
   end if;
 
   insert into public.protection_claim_evidence (
@@ -1666,35 +1736,6 @@ $$;
 revoke execute on function public.member_add_claim_evidence(uuid, text, text, jsonb) from public, anon;
 grant execute on function public.member_add_claim_evidence(uuid, text, text, jsonb) to authenticated;
 
--- Members may list their own claim evidence metadata (paths stay private;
--- signed URLs come from the storage policy).
-create or replace function public.member_list_claim_evidence(p_claim_id uuid)
-returns jsonb
-language plpgsql
-security definer
-set search_path = pg_catalog, public
-as $$
-declare
-  v_uid uuid := auth.uid();
-begin
-  if v_uid is null then raise exception 'Not authenticated'; end if;
-  if not exists (
-    select 1 from public.protection_claims c
-    join public.protection_memberships m on m.id = c.membership_id
-    where c.id = p_claim_id and m.user_id = v_uid
-  ) then raise exception 'Claim not found'; end if;
-  return coalesce((
-    select jsonb_agg(jsonb_build_object(
-      'id', e.id, 'evidence_type', e.evidence_type,
-      'has_document', e.storage_path is not null, 'created_at', e.created_at
-    ) order by e.created_at)
-    from public.protection_claim_evidence e where e.claim_id = p_claim_id
-  ), '[]'::jsonb);
-end;
-$$;
-revoke execute on function public.member_list_claim_evidence(uuid) from public, anon;
-grant execute on function public.member_list_claim_evidence(uuid) to authenticated;
-
 -- Insurer evidence access: returns storage paths ONLY for claims owned by
 -- the caller's insurer org, audited via protection_log_access. Frontend
 -- converts paths to short-lived signed URLs via the Storage API.
@@ -1706,20 +1747,46 @@ set search_path = pg_catalog, public
 as $$
 declare
   v_insurer uuid := public.protection_insurer_id();
+  v_claim_user uuid;
   v_result jsonb;
 begin
   if v_insurer is null then raise exception 'Active insurer access required'; end if;
   perform public.protection_require_mode(array['pilot','live']);
+  select m.user_id into v_claim_user
+  from public.protection_claims c
+  join public.protection_memberships m on m.id = c.membership_id
+  where c.id = p_claim_id and c.insurer_id = v_insurer;
+  if not found then raise exception 'Claim not found'; end if;
   if not exists (
-    select 1 from public.protection_claims c
-    where c.id = p_claim_id and c.insurer_id = v_insurer
-  ) then raise exception 'Claim not found'; end if;
+    select 1 from storage.buckets
+    where id = 'claim-evidence' and public = false
+  ) then
+    raise exception 'Claim evidence bucket is not configured as private';
+  end if;
   select coalesce(jsonb_agg(jsonb_build_object(
     'id', e.id, 'evidence_type', e.evidence_type,
     'storage_path', e.storage_path, 'structured', e.structured,
     'created_at', e.created_at
   ) order by e.created_at), '[]'::jsonb) into v_result
-  from public.protection_claim_evidence e where e.claim_id = p_claim_id;
+  from public.protection_claim_evidence e
+  join public.protection_claims c on c.id = e.claim_id
+  join public.protection_memberships m on m.id = c.membership_id
+  where e.claim_id = p_claim_id
+    and c.insurer_id = v_insurer
+    and (
+      e.storage_path is null
+      or (
+        cardinality(string_to_array(e.storage_path, '/')) = 3
+        and split_part(e.storage_path, '/', 1) = v_claim_user::text
+        and split_part(e.storage_path, '/', 2) = c.id::text
+        and split_part(e.storage_path, '/', 3) <> ''
+        and split_part(e.storage_path, '/', 3) not in ('.','..')
+        and exists (
+          select 1 from storage.objects o
+          where o.bucket_id = 'claim-evidence' and o.name = e.storage_path
+        )
+      )
+    );
   perform public.protection_log_access('get_claim_evidence', 'protection_claim_evidence', p_claim_id::text, 'claims adjudication');
   return v_result;
 end;
@@ -1727,9 +1794,9 @@ $$;
 revoke execute on function public.insurer_get_claim_evidence(uuid) from public, anon;
 grant execute on function public.insurer_get_claim_evidence(uuid) to authenticated;
 
--- Member evidence removal: own claim, open status only. Deletes metadata;
--- the storage object is removed client-side via the owner-folder delete
--- policy (best-effort — orphaned objects stay private and unreferenced).
+-- Member evidence removal: own claim, open status only. Metadata is removed
+-- first; the client then deletes the still-private object. If Storage deletion
+-- fails, the orphan has no evidence metadata and cannot be read by the insurer.
 create or replace function public.member_remove_claim_evidence(p_evidence_id uuid)
 returns void
 language plpgsql
@@ -1740,9 +1807,12 @@ declare
   v_uid uuid := auth.uid();
   v_claim_id uuid;
   v_status text;
+  v_claim_user uuid;
+  v_path text;
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
-  select e.claim_id, c.status into v_claim_id, v_status
+  select e.claim_id, c.status, m.user_id, e.storage_path
+    into v_claim_id, v_status, v_claim_user, v_path
   from public.protection_claim_evidence e
   join public.protection_claims c on c.id = e.claim_id
   join public.protection_memberships m on m.id = c.membership_id
@@ -1750,6 +1820,21 @@ begin
   if not found then raise exception 'Evidence not found'; end if;
   if v_status not in ('submitted','under_review','info_requested') then
     raise exception 'Evidence can only be removed while the claim is open';
+  end if;
+  if v_claim_user is distinct from v_uid then raise exception 'Claim not found'; end if;
+  if v_path is not null and (
+    cardinality(string_to_array(v_path, '/')) <> 3
+    or split_part(v_path, '/', 1) <> v_uid::text
+    or split_part(v_path, '/', 2) <> v_claim_id::text
+    or split_part(v_path, '/', 3) = ''
+    or split_part(v_path, '/', 3) in ('.','..')
+  ) then
+    raise exception 'Evidence path does not belong to this claim';
+  end if;
+  if v_path is not null and not exists (
+    select 1 from storage.buckets where id = 'claim-evidence' and public = false
+  ) then
+    raise exception 'Claim evidence bucket is not configured as private';
   end if;
   delete from public.protection_claim_evidence where id = p_evidence_id;
 end;
@@ -1773,12 +1858,38 @@ begin
     join public.protection_memberships m on m.id = c.membership_id
     where c.id = p_claim_id and m.user_id = v_uid
   ) then raise exception 'Claim not found'; end if;
+  if exists (
+    select 1 from public.protection_claim_evidence
+    where claim_id = p_claim_id and storage_path is not null
+  ) and not exists (
+    select 1 from storage.buckets
+    where id = 'claim-evidence' and public = false
+  ) then
+    raise exception 'Claim evidence bucket is not configured as private';
+  end if;
   return coalesce((
     select jsonb_agg(jsonb_build_object(
       'id', e.id, 'evidence_type', e.evidence_type, 'storage_path', e.storage_path,
-      'has_document', e.storage_path is not null, 'created_at', e.created_at
+      'has_document', e.storage_path is not null
+        and cardinality(string_to_array(e.storage_path, '/')) = 3
+        and split_part(e.storage_path, '/', 1) = v_uid::text
+        and split_part(e.storage_path, '/', 2) = p_claim_id::text
+        and split_part(e.storage_path, '/', 3) <> ''
+        and split_part(e.storage_path, '/', 3) not in ('.','..'),
+      'created_at', e.created_at
     ) order by e.created_at)
-    from public.protection_claim_evidence e where e.claim_id = p_claim_id
+    from public.protection_claim_evidence e
+    where e.claim_id = p_claim_id
+      and (
+        e.storage_path is null
+        or (
+          cardinality(string_to_array(e.storage_path, '/')) = 3
+          and split_part(e.storage_path, '/', 1) = v_uid::text
+          and split_part(e.storage_path, '/', 2) = p_claim_id::text
+          and split_part(e.storage_path, '/', 3) <> ''
+          and split_part(e.storage_path, '/', 3) not in ('.','..')
+        )
+      )
   ), '[]'::jsonb);
 end;
 $$;

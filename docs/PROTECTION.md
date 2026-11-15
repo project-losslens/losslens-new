@@ -1,13 +1,13 @@
 # LossLens Protection — model, state machine, access matrix, gaps
 
-Status: **rebuilt architecture implemented** (scripts `20261112000001`–`08`,
+Database installation: **eight consolidated scripts** (`20261112000001`–`08`),
 see `docs/MIGRATION_NOTES.md`). `protection_mode` in `system_settings` gates
 the feature: `concept` (default), `pilot`, `live` — now enforced **inside the
 RPCs** (`protection_require_mode`), not only in the UI. Pilot/live copy lives
 in `src/pages/public/protectionContent.js` and is marked **pending legal
 review**.
 
-## Rebuilt model (20261112000001–08)
+## Rebuilt model (eight-script fresh install)
 
 Membership ≠ policy. `protection_memberships` is programme participation;
 `protection_policies` is the contractual arrangement and binds to an
@@ -27,8 +27,12 @@ lapsed | cancelled | expired`, driven by the insurer-confirmed
 Claims: `protection_claims` (fixed_sum amount computed server-side from the
 benefit — never from provider fees; treatment claims link to
 `provider_claims`) + `protection_claim_events` history +
-`protection_claim_evidence` (private `claim-evidence` bucket, structured
-evidence only — no free-text clinical notes to insurers).
+`protection_claim_evidence`. Document evidence is stored in the private
+`claim-evidence` bucket using `user_id/claim_id/filename`; the database
+validates the member, claim, filename, and insurer relationship. Insurers
+receive only evidence linked to their claim through an audited RPC and
+short-lived signed URLs. Diary, Oloo conversation, crisis, relapse, and
+detailed clinical data are not claim evidence and are not insurer-facing.
 
 Pre-auth: `member_request_preauth` now requires an **active policy in
 force**, consent, and creates BOTH `pre_auth_vouchers` (with
@@ -61,7 +65,7 @@ insurers or therapists through any table, view or RPC. Only whitelisted
 status fields are shared, and only with the member's separate, revocable
 consent (`protection_consents`).
 
-## Existing model (baseline migrations 01–04)
+## Existing portal model (scripts 01–04)
 
 | Table | Purpose |
 |---|---|
@@ -77,7 +81,8 @@ consent (`protection_consents`).
 | `claims_float` / `claims_float_transactions` | Float ledger funding claims payouts |
 | `system_settings` | `protection_mode` key added in combined SQL |
 
-## New Phase 6 tables (combined SQL `20261111000001_pass2_combined.sql`)
+## Protection base tables (script 06,
+`20261112000006_pass2_protection_base.sql`)
 
 - `protection_plans` — per-insurer plan definitions (benefits/limits jsonb).
 - `protection_memberships` — member ↔ insurer link. States:
@@ -118,13 +123,18 @@ Claim side (existing): `provider_claims` submitted → approved → paid
 | provider_vouchers / claims / payouts | own vouchers | own claims/payouts | aggregate/whitelisted | all |
 | insurers / partnerships | public teaser only | never | own row | all |
 
-## Gaps found (tracked in PROGRESS.md)
+## Remaining verification and review
 
-- Whitelisted insurer/therapist-facing views/RPCs still to be created —
-  insurer portal currently reads base tables directly.
-- `protection_mode` switch UI + audit logging for super admin.
-- Member enrol/consent screens not yet built (mode-gated).
-- Notifications adapter (`api/_lib/notify.js`) not yet created.
-- Demo seed + removal scripts not yet created.
-- `insurer_upload_member_roster` currently logs + returns a stub report;
-  per-row upsert of roster members still TODO.
+- Database scripts have not been executed against a disposable or live
+  Supabase project; database behavior remains unverified.
+- Browser end-to-end testing remains outstanding.
+- Review the provider-to-treatment-claim bridge, dispute workflow, insurer
+  invoice/float reconciliation, and expense-ratio source before launch.
+
+## Database installation
+
+The entire fresh-install database is exactly scripts 01–08 in
+`supabase/migrations/`, applied in filename order. There is no separate
+baseline or Pass 2 installation step. Do not treat older migration filenames
+listed in consolidation notes as deployable. See `docs/DATABASE.md` for the
+script list and `docs/PROTECTION_TEST_PLAN.md` for disposable-project tests.
