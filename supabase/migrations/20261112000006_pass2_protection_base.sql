@@ -223,10 +223,100 @@ create table if not exists public.payments (
   updated_at timestamptz not null default now()
 );
 create index if not exists payments_user_idx on public.payments (user_id, created_at desc);
+create unique index if not exists payments_mpesa_checkout_unique
+  on public.payments ((raw->>'checkoutRequestId'))
+  where provider = 'mpesa' and nullif(raw->>'checkoutRequestId', '') is not null;
 alter table public.payments enable row level security;
 drop policy if exists payments_read on public.payments;
 create policy payments_read on public.payments for select to authenticated
   using (public.is_super_admin() or user_id = auth.uid());
+
+-- Complete a Daraja-verified payment and activate its entitlement atomically.
+-- This RPC is callable only by the server's service-role client.
+create or replace function public.service_confirm_mpesa_payment(
+  p_checkout_request_id text,
+  p_merchant_request_id text,
+  p_callback_receipt text default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_payment public.payments;
+  v_old public.profiles;
+  v_new public.profiles;
+  v_expires_at timestamptz;
+begin
+  if coalesce(auth.role(), '') <> 'service_role' then
+    raise exception 'Service role required';
+  end if;
+  if nullif(btrim(p_checkout_request_id), '') is null
+     or nullif(btrim(p_merchant_request_id), '') is null then
+    raise exception 'M-Pesa request identifiers are required';
+  end if;
+  if p_callback_receipt is not null and length(p_callback_receipt) > 80 then
+    raise exception 'Invalid M-Pesa receipt';
+  end if;
+
+  select * into v_payment
+  from public.payments
+  where provider = 'mpesa'
+    and raw->>'checkoutRequestId' = p_checkout_request_id
+    and raw->>'merchantRequestId' = p_merchant_request_id
+  for update;
+  if not found then
+    raise exception 'Matching M-Pesa payment not found';
+  end if;
+  if v_payment.status = 'success' then
+    return jsonb_build_object('status', 'already_processed');
+  end if;
+  if v_payment.status <> 'pending' or v_payment.plan <> 'premium'
+     or v_payment.currency <> 'KES' or v_payment.amount <= 0 then
+    raise exception 'Payment is not eligible for activation';
+  end if;
+
+  select * into v_old from public.profiles where id = v_payment.user_id for update;
+  if not found then raise exception 'Payment profile not found'; end if;
+
+  v_expires_at := now() + interval '30 days';
+  update public.payments
+  set status = 'success',
+      raw = raw || jsonb_build_object(
+        'verifiedByProviderQuery', true,
+        'callbackReceiptUnverified', p_callback_receipt
+      ),
+      updated_at = now()
+  where id = v_payment.id;
+
+  update public.profiles
+  set subscription_plan = 'premium',
+      subscription_status = 'active',
+      subscription_expires_at = v_expires_at
+  where id = v_payment.user_id
+  returning * into v_new;
+
+  insert into public.audit_logs (
+    actor_id, action, target_table, target_id, metadata
+  ) values (
+    null, 'subscription_change', 'profiles', v_payment.user_id::text,
+    jsonb_build_object(
+      'old_plan', v_old.subscription_plan,
+      'new_plan', v_new.subscription_plan,
+      'old_status', v_old.subscription_status,
+      'new_status', v_new.subscription_status,
+      'old_expires_at', v_old.subscription_expires_at,
+      'new_expires_at', v_new.subscription_expires_at,
+      'source', 'verified_mpesa_payment',
+      'payment_id', v_payment.id
+    )
+  );
+  return jsonb_build_object('status', 'success');
+end;
+$$;
+revoke execute on function public.service_confirm_mpesa_payment(text, text, text) from public, anon, authenticated;
+grant execute on function public.service_confirm_mpesa_payment(text, text, text) to service_role;
 
 -- Backwards-compatible rename for databases where the earlier draft created
 -- payments.reference instead of provider_ref. Destructive only in the sense

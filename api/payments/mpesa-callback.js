@@ -1,4 +1,4 @@
-import { paymentsMode } from '../../_lib/payments.js'
+import { paymentsMode, queryMpesaStkStatus } from '../../_lib/payments.js'
 import { createClient } from '@supabase/supabase-js'
 
 function json(res, status, body) {
@@ -11,8 +11,8 @@ function adminClient() {
   })
 }
 
-//  M-Pesa Daraja callback. Idempotent: keyed on MerchantRequestID/CheckoutRequestID.
-//  Verifies amount and reference before activating the plan.
+// Daraja callbacks are not signed. Verify successful callbacks against Daraja
+// before making the atomic, idempotent entitlement change in the database.
 export default async function handler(req, res) {
   if (req.method !== 'POST') return json(res, 405, { error: 'Method not allowed' })
   const mode = paymentsMode()
@@ -25,77 +25,60 @@ export default async function handler(req, res) {
   const resultCode = cb.ResultCode
   const checkoutRequestId = cb.CheckoutRequestID
   const merchantRequestId = cb.MerchantRequestID
-  const amount = Number(get('Amount') ?? 0)
-  const mpesaReceipt = get('MpesaReceiptNumber')
-  const phone = get('PhoneNumber')
+  if (typeof checkoutRequestId !== 'string' || typeof merchantRequestId !== 'string') {
+    return json(res, 400, { error: 'Invalid callback identifiers' })
+  }
 
   // Find the pending payment by checkout request id stored in raw.
-  const { data: payment } = await db
+  const { data: payment, error: lookupError } = await db
     .from('payments')
-    .select('*')
+    .select('id, provider_ref, raw')
     .eq('status', 'pending')
     .eq('provider', 'mpesa')
     .filter('raw->>checkoutRequestId', 'eq', checkoutRequestId)
     .maybeSingle()
 
+  if (lookupError) {
+    console.error('M-Pesa callback payment lookup failed', lookupError)
+    return json(res, 503, { error: 'Payment verification is temporarily unavailable' })
+  }
   if (!payment) {
     // Idempotent: already processed or unknown — acknowledge anyway.
     return json(res, 200, { ok: true, matched: false })
   }
 
-  if (resultCode !== 0) {
-    await db.from('payments').update({
-      status: 'failed',
-      raw: { ...(payment.raw || {}), resultCode, merchantRequestId },
-      updated_at: new Date().toISOString(),
-    }).eq('id', payment.id)
-    return json(res, 200, { ok: true, status: 'failed' })
+  const expectedMerchantRequestId = payment.raw?.merchantRequestId
+  if (!expectedMerchantRequestId || merchantRequestId !== expectedMerchantRequestId) {
+    console.warn('M-Pesa callback identifiers did not match the stored request', { paymentId: payment.id })
+    return json(res, 200, { ok: true, matched: false })
   }
 
-  const expected = Number(payment.amount)
-  if (amount !== expected) {
-    await db.from('payments').update({
-      status: 'failed',
-      raw: { ...(payment.raw || {}), resultCode, merchantRequestId, amountMismatch: { expected, got: amount } },
-      updated_at: new Date().toISOString(),
-    }).eq('id', payment.id)
-    return json(res, 200, { ok: true, status: 'failed', reason: 'amount_mismatch' })
+  if (String(resultCode) !== '0') {
+    return json(res, 200, { ok: true, status: 'pending' })
   }
 
-  // Success: mark payment + activate plan server-side (service role bypasses
-  // the privileged-fields trigger; same fields admin_set_subscription writes).
-  const expiresAt = new Date(Date.now() + 30 * 86400000).toISOString()
-  const reason = `M-Pesa payment ${mpesaReceipt || merchantRequestId || ''}`.trim()
-  await db.from('payments').update({
-    status: 'success',
-    provider_ref: mpesaReceipt || merchantRequestId || payment.provider_ref,
-    raw: { ...(payment.raw || {}), resultCode, merchantRequestId, mpesaReceipt, phone },
-    updated_at: new Date().toISOString(),
-  }).eq('id', payment.id)
+  let verification
+  try {
+    verification = await queryMpesaStkStatus(checkoutRequestId)
+  } catch (error) {
+    console.error('M-Pesa transaction status query failed', error)
+    return json(res, 503, { error: 'Payment verification is temporarily unavailable' })
+  }
 
-  const { data: before } = await db.from('profiles')
-    .select('subscription_plan, subscription_status, subscription_expires_at')
-    .eq('id', payment.user_id).maybeSingle()
-  await db.from('profiles').update({
-    subscription_plan: payment.plan || 'premium',
-    subscription_status: 'active',
-    subscription_expires_at: expiresAt,
-  }).eq('id', payment.user_id)
-  await db.from('audit_logs').insert({
-    actor_id: null,
-    action: 'subscription_change',
-    target_table: 'profiles',
-    target_id: payment.user_id,
-    metadata: {
-      old_plan: before?.subscription_plan || null,
-      new_plan: payment.plan || 'premium',
-      old_status: before?.subscription_status || null,
-      new_status: 'active',
-      new_expires_at: expiresAt,
-      reason,
-      source: 'payment',
-    },
+  if (String(verification.ResultCode) !== '0'
+      || verification.CheckoutRequestID !== checkoutRequestId
+      || verification.MerchantRequestID !== expectedMerchantRequestId) {
+    return json(res, 200, { ok: true, status: 'pending' })
+  }
+
+  const { data, error } = await db.rpc('service_confirm_mpesa_payment', {
+    p_checkout_request_id: checkoutRequestId,
+    p_merchant_request_id: expectedMerchantRequestId,
+    p_callback_receipt: get('MpesaReceiptNumber') || null,
   })
-
-  return json(res, 200, { ok: true, status: 'success' })
+  if (error) {
+    console.error('M-Pesa payment confirmation RPC failed', error)
+    return json(res, 503, { error: 'Payment activation is temporarily unavailable' })
+  }
+  return json(res, 200, { ok: true, status: data?.status || 'processed' })
 }

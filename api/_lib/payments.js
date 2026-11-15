@@ -55,7 +55,47 @@ async function mpesaStkPush({ phone, amount, accountRef, description }) {
   })
   const stk = await stkRes.json()
   if (stk.ResponseCode !== '0') throw new Error(stk.errorMessage || 'STK push failed')
-  return { reference: stk.MerchantRequestID || stk.CheckoutRequestID, checkoutRequestId: stk.CheckoutRequestID }
+  return {
+    reference: stk.MerchantRequestID || stk.CheckoutRequestID,
+    checkoutRequestId: stk.CheckoutRequestID,
+    merchantRequestId: stk.MerchantRequestID || null,
+  }
+}
+
+export async function queryMpesaStkStatus(checkoutRequestId) {
+  const base = process.env.MPESA_BASE_URL || 'https://sandbox.safaricom.co.ke'
+  const consumerKey = process.env.MPESA_CONSUMER_KEY
+  const consumerSecret = process.env.MPESA_CONSUMER_SECRET
+  const businessShortCode = process.env.MPESA_BUSINESS_SHORT_CODE
+  const passkey = process.env.MPESA_PASSKEY
+  if (!consumerKey || !consumerSecret || !businessShortCode || !passkey) {
+    throw new Error('M-Pesa credentials are not configured')
+  }
+
+  const tokenRes = await fetch(`${base}/oauth/v1/generate?grant_type=client_credentials`, {
+    headers: { Authorization: 'Basic ' + Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64') },
+  })
+  const tokenBody = await tokenRes.json()
+  if (!tokenRes.ok || !tokenBody.access_token) throw new Error('M-Pesa auth failed')
+
+  const timestamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)
+  const password = Buffer.from(`${businessShortCode}${passkey}${timestamp}`).toString('base64')
+  const queryRes = await fetch(`${base}/mpesa/stkpushquery/v1/query`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${tokenBody.access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      BusinessShortCode: businessShortCode,
+      Password: password,
+      Timestamp: timestamp,
+      CheckoutRequestID: checkoutRequestId,
+    }),
+  })
+  const query = await queryRes.json()
+  if (!queryRes.ok) throw new Error('M-Pesa transaction verification failed')
+  return query
 }
 
 //  Start a Premium purchase. Returns { reference, mode, simulated }.

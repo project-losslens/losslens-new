@@ -27,9 +27,21 @@ export default function SubscriptionPage() {
   const [payPhone, setPayPhone] = useState('')
   const [payStatus, setPayStatus] = useState('idle') // idle | waiting | success | failed
   const [payRef, setPayRef] = useState('')
+  const [premiumPrice, setPremiumPrice] = useState(null)
 
   useEffect(() => {
     fetchProfile()
+  }, [])
+
+  useEffect(() => {
+    let active = true
+    fetch('/api/payments/config')
+      .then(response => response.ok ? response.json() : Promise.reject(new Error('Could not load Premium pricing')))
+      .then(config => {
+        if (active && Number.isSafeInteger(config.amount) && config.amount > 0) setPremiumPrice(config.amount)
+      })
+      .catch(error => console.error('Premium pricing unavailable:', error))
+    return () => { active = false }
   }, [])
 
   const fetchProfile = async () => {
@@ -86,6 +98,12 @@ export default function SubscriptionPage() {
         }).select().single()
       }
 
+      if (premiumPrice == null) {
+        setLoading(null)
+        setShowComingSoon(true)
+        return
+      }
+
       // Try the payments flow first (Premium only). /api/payments/start
       // returns { started:false } when PAYMENTS_MODE=off.
       if (session && plan === PLANS.PREMIUM) {
@@ -95,6 +113,7 @@ export default function SubscriptionPage() {
           body: JSON.stringify({ phone: payPhone, plan }),
         })
         const data = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(data.error || 'Payment could not be started.')
         if (data.started) {
           if (data.simulated) {
             setPayStatus('success')
@@ -109,7 +128,12 @@ export default function SubscriptionPage() {
           return
         }
       }
-    } catch (err) { /* Silent — analytics only */ }
+    } catch (err) {
+      console.error('Premium upgrade failed:', err)
+      setLoading(null)
+      toast.error(err.message || 'Upgrade could not be started.')
+      return
+    }
 
     setLoading(null)
     setShowComingSoon(true)
@@ -289,7 +313,9 @@ export default function SubscriptionPage() {
               <span className="fs-12" style={{ position: 'absolute', top: '-10px', right: '16px', background: '#2DD4BF', color: '#0B1220', fontWeight: 600, padding: '3px 10px', borderRadius: '100px' }}>Premium</span>
               <AppIcon name="star" size={28} style={{ display: 'block', margin: '0 auto 8px', color: '#F2C879' }} />
               <h3 className="fs-15" style={{ color: '#FFFFFF', marginBottom: '4px' }}>Premium</h3>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: '#2DD4BF', margin: '0 0 4px' }}>KES 499</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: '#2DD4BF', margin: '0 0 4px' }}>
+                {premiumPrice == null ? 'Price to be announced' : `KES ${premiumPrice}`}
+              </p>
               <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>/month</p>
               {currentPlan === PLANS.PREMIUM && (
                 <span className="fs-12" style={{ display: 'inline-block', marginTop: '8px', background: '#2DD4BF', color: '#0B1220', padding: '3px 10px', borderRadius: '100px', fontWeight: 600 }}>Current Plan</span>

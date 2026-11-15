@@ -18,9 +18,22 @@ export default function Pricing() {
   const [loading, setLoading] = useState(null)
   const [expandedFaq, setExpandedFaq] = useState(null)
   const [planType, setPlanType] = useState('individual') // 'individual' or 'company'
+  const [premiumPrice, setPremiumPrice] = useState(null)
   const loadingTimer = useRef(null)
 
-  useEffect(() => { return () => { if (loadingTimer.current) clearTimeout(loadingTimer.current) } }, [])
+  useEffect(() => {
+    let active = true
+    fetch('/api/payments/config')
+      .then(response => response.ok ? response.json() : Promise.reject(new Error('Could not load Premium pricing')))
+      .then(config => {
+        if (active && Number.isSafeInteger(config.amount) && config.amount > 0) setPremiumPrice(config.amount)
+      })
+      .catch(error => console.error('Premium pricing unavailable:', error))
+    return () => {
+      active = false
+      if (loadingTimer.current) clearTimeout(loadingTimer.current)
+    }
+  }, [])
 
   const handleSelect = (plan, type) => {
     setLoading(plan)
@@ -63,8 +76,8 @@ export default function Pricing() {
       id: 'premium',
       name: 'Premium',
       badge: 'Most Popular',
-      price: 'KES 499',
-      period: '/month',
+      price: premiumPrice == null ? 'Price to be announced' : `KES ${premiumPrice}`,
+      period: premiumPrice == null ? '' : '/month',
       desc: 'Advanced features for committed recovery — and you support keeping LossLens free for everyone.',
       features: [
         ' Everything in Free',
@@ -77,7 +90,7 @@ export default function Pricing() {
         ' Custom Reminders & Alerts',
         ' Personalized Goal Tracking',
       ],
-      cta: 'Start 7-day free trial',
+      cta: 'Choose Premium',
       featured: true,
     },
   ]
