@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   STATES, estimateGenerator, matrixExp, occupancy, expectedClaims, grossPremium,
-  validateQ, validateP, validateCounts, validateProbabilityVector,
+  runScenarios, validateQ, validateP, validateCounts, validateProbabilityVector,
 } from '../src/lib/markov.js'
 
 const counts = [
@@ -99,4 +99,26 @@ test('premium assumptions reject invalid ratios', () => {
   assert.throws(() => grossPremium({
     expectedClaims: 100000, memberYears: 100, expenseRatio: 1.1,
   }), /expense ratio must be in \[0,1\]/)
+})
+
+test('sensitivity scenarios expose assumptions and reprice claims consistently', () => {
+  const base = {
+    memberYears: 100,
+    milestoneRates: { entry: 0.2, course: 1, reengagement: 0.3 },
+    benefitAmount: 5000,
+    acceptanceRate: 0.9,
+  }
+  const scenarios = runScenarios(base, [
+    { label: 'Base', multipliers: {} },
+    { label: 'Adverse claims', multipliers: { entry: 1.2 }, claimsAdj: 1.3, acceptanceRate: 0.95 },
+  ], { expenseRatio: 0.2, adminCostPerMemberYear: 500 })
+
+  assert.deepEqual(scenarios[0].assumptions.utilisationMultipliers, {
+    entry: 1, course: 1, reengagement: 1,
+  })
+  assert.equal(scenarios[0].premium.total_expected_claims, scenarios[0].expectedClaims)
+  assert.equal(scenarios[1].assumptions.benefitMultiplier, 1.3)
+  assert.equal(scenarios[1].assumptions.acceptanceRate, 0.95)
+  assert.ok(scenarios[1].expectedClaims > scenarios[0].expectedClaims)
+  assert.equal(scenarios[1].premium.total_expected_claims, scenarios[1].expectedClaims)
 })

@@ -213,22 +213,42 @@ export function grossPremium({ expectedClaims, memberYears, expenseRatio = null,
   }
 }
 
-// Scenario runner: applies utilisation multipliers to milestone rates.
-export function runScenarios(base, variants) {
+// Scenario runner: applies deterministic assumption changes to milestone rates.
+export function runScenarios(base, variants, pricing = null) {
   // variants: [{ label, multipliers: { entry, course, reengagement }, claimsAdj?, acceptanceRate? }]
   return variants.map(v => {
-    const rates = {
-      entry: (base.milestoneRates.entry || 0) * (v.multipliers?.entry ?? 1),
-      course: (base.milestoneRates.course || 0) * (v.multipliers?.course ?? 1),
-      reengagement: (base.milestoneRates.reengagement || 0) * (v.multipliers?.reengagement ?? 1),
+    const multipliers = {
+      entry: v.multipliers?.entry ?? 1,
+      course: v.multipliers?.course ?? 1,
+      reengagement: v.multipliers?.reengagement ?? 1,
     }
+    const rates = {
+      entry: (base.milestoneRates.entry || 0) * multipliers.entry,
+      course: (base.milestoneRates.course || 0) * multipliers.course,
+      reengagement: (base.milestoneRates.reengagement || 0) * multipliers.reengagement,
+    }
+    const benefitMultiplier = v.claimsAdj ?? 1
+    const acceptanceRate = v.acceptanceRate ?? base.acceptanceRate ?? 1
     const claims = expectedClaims({
       memberYears: base.memberYears, milestoneRates: rates,
-      benefitAmount: base.benefitAmount * (v.claimsAdj ?? 1),
-      acceptanceRate: v.acceptanceRate ?? base.acceptanceRate ?? 1,
+      benefitAmount: base.benefitAmount * benefitMultiplier,
+      acceptanceRate,
       perEventCap: base.perEventCap, annualCap: base.annualCap,
     })
-    return { label: v.label, milestoneRates: rates, expectedClaims: claims }
+    const scenario = {
+      label: v.label,
+      assumptions: { utilisationMultipliers: multipliers, benefitMultiplier, acceptanceRate },
+      milestoneRates: rates,
+      expectedClaims: claims,
+    }
+    if (pricing) {
+      scenario.premium = grossPremium({
+        ...pricing,
+        expectedClaims: claims,
+        memberYears: base.memberYears,
+      })
+    }
+    return scenario
   })
 }
 

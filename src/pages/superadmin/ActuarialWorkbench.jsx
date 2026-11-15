@@ -73,16 +73,20 @@ export default function ActuarialWorkbench() {
         annualCap: annualCap === '' ? null : Number(annualCap),
       }
       const claims = expectedClaims(modelBase)
-      const prem = grossPremium({
-        expectedClaims: claims, memberYears: modelBase.memberYears,
+      const pricingAssumptions = {
         expenseRatio: pricing.expenseRatio === '' ? null : Number(pricing.expenseRatio),
         adminCostPerMemberYear: Number(pricing.adminCost),
         acquisitionRatio: Number(pricing.acquisition),
         riskMarginRatio: Number(pricing.riskMargin),
         contingencyRatio: Number(pricing.contingency),
         reinsuranceRatio: Number(pricing.reinsurance),
+      }
+      const prem = grossPremium({
+        ...pricingAssumptions,
+        expectedClaims: claims,
+        memberYears: modelBase.memberYears,
       })
-      const scenarios = runScenarios(modelBase, SCENARIOS)
+      const scenarios = runScenarios(modelBase, SCENARIOS, pricingAssumptions)
       setResult({
         Q, P, occ, claims, prem, scenarios, meta, horizon, datasetType, datasetSource,
         params: {
@@ -223,12 +227,45 @@ export default function ActuarialWorkbench() {
           </section>
 
           <section className="portal-card">
-            <h3>Scenario comparison (expected claims, KES)</h3>
-            {result.scenarios.map(s => (
-              <p key={s.label} className="fs-13" style={{ color: 'rgba(255,255,255,0.75)', margin: '4px 0' }}>
-                {s.label}: <strong>{Math.round(s.expectedClaims).toLocaleString()}</strong>
-              </p>
-            ))}
+            <h3>Deterministic sensitivity scenarios</h3>
+            <p className="portal-notice">
+              These fixed stress cases change manually entered assumptions relative to the base case;
+              they are not probability-weighted forecasts, confidence intervals or stochastic simulations.
+              They do not model correlations between assumptions or uncertainty in transition rates.
+              Premium output uses the same pricing loadings as the base case.
+            </p>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ borderCollapse: 'collapse', fontSize: '12px', minWidth: '680px' }}>
+                <thead>
+                  <tr>
+                    <th style={{ padding: '4px 8px', color: '#7DBDEE' }}>Scenario</th>
+                    <th style={{ padding: '4px 8px', color: '#7DBDEE' }}>Utilisation multipliers (entry / course / re-entry)</th>
+                    <th style={{ padding: '4px 8px', color: '#7DBDEE' }}>Benefit multiplier</th>
+                    <th style={{ padding: '4px 8px', color: '#7DBDEE' }}>Acceptance</th>
+                    <th style={{ padding: '4px 8px', color: '#7DBDEE' }}>Expected claims (KES)</th>
+                    <th style={{ padding: '4px 8px', color: '#7DBDEE' }}>Gross premium (KES/member-year)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.scenarios.map(s => (
+                    <tr key={s.label}>
+                      <td style={{ padding: '4px 8px', color: '#fff' }}>{s.label}</td>
+                      <td style={{ padding: '4px 8px', color: 'rgba(255,255,255,0.75)' }}>
+                        {['entry', 'course', 'reengagement'].map(key => s.assumptions.utilisationMultipliers[key]).join(' / ')}
+                      </td>
+                      <td style={{ padding: '4px 8px', color: 'rgba(255,255,255,0.75)' }}>{s.assumptions.benefitMultiplier}×</td>
+                      <td style={{ padding: '4px 8px', color: 'rgba(255,255,255,0.75)' }}>{pct(s.assumptions.acceptanceRate)}</td>
+                      <td style={{ padding: '4px 8px', color: 'rgba(255,255,255,0.75)' }}>{Math.round(s.expectedClaims).toLocaleString()}</td>
+                      <td style={{ padding: '4px 8px', color: 'rgba(255,255,255,0.75)' }}>
+                        {s.premium.gross_premium_per_member_year == null
+                          ? 'Unavailable (expense ratio missing)'
+                          : fmt(s.premium.gross_premium_per_member_year, 2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </section>
 
           <section className="portal-card">
