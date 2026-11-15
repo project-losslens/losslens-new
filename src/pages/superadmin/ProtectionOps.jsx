@@ -3,7 +3,6 @@ import { supabase } from '../../lib/supabase'
 import { useAuthProfile } from '../../context/AuthProfileContext'
 import { BrandLoader } from '../../components/Brand'
 import { toast } from '../../components/ToastProvider'
-import AppIcon from '../../components/AppIcon'
 import { PROTECTION_MODES } from '../../lib/protectionStates'
 import NumberField from '../../components/NumberField'
 
@@ -222,7 +221,7 @@ export default function ProtectionOps() {
               </p>
             </div>
             <span style={{ color: v.status === 'approved' ? '#2DD4BF' : '#F2C879', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{v.status.replace(/_/g, ' ')}</span>
-            {v.status !== 'approved' && (
+            {v.status === 'pending_approval' && (
               <>
                 <button type="button" className="btn-primary fs-11" style={{ padding: '6px 10px', minHeight: '32px' }} onClick={() => approveVersion(v)}>Approve</button>
                 <button type="button" className="btn-ghost fs-11" style={{ padding: '6px 10px', minHeight: '32px' }} onClick={async () => {

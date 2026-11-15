@@ -49,6 +49,12 @@ create table if not exists public.protection_claims (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'pm_ordinal_range_chk') then
+    alter table public.protection_milestones add constraint pm_ordinal_range_chk
+      check (ordinal between 1 and 52);
+  end if;
+end $$;
 create index if not exists pcl_policy_idx on public.protection_claims (policy_id, status);
 create index if not exists pcl_insurer_idx on public.protection_claims (insurer_id, status, created_at desc);
 create index if not exists pcl_membership_idx on public.protection_claims (membership_id, created_at desc);
@@ -119,88 +125,113 @@ create policy pcev_read on public.protection_claim_evidence for select to authen
                where c.id = claim_id and m.user_id = auth.uid())
   );
 
-grant select on public.protection_claims to authenticated;
-grant select on public.protection_claim_events to authenticated;
-grant select on public.protection_claim_evidence to authenticated;
+revoke select on public.protection_claims from authenticated;
+revoke select on public.protection_claim_events from authenticated;
+revoke select on public.protection_claim_evidence from authenticated;
 
 -- Private evidence bucket.
 insert into storage.buckets (id, name, public)
 values ('claim-evidence', 'claim-evidence', false)
 on conflict (id) do update set public = false;
 
-drop policy if exists claim_evidence_owner_rw on storage.objects;
-drop policy if exists claim_evidence_owner_read on storage.objects;
-create policy claim_evidence_owner_read on storage.objects for select to authenticated
-  using (
-    bucket_id = 'claim-evidence'
-    and cardinality(storage.foldername(name)) = 2
-    and split_part(name, '/', 1) = auth.uid()::text
-    and split_part(name, '/', 2) <> ''
-    and split_part(name, '/', 3) <> ''
-    and split_part(name, '/', 4) = ''
+create or replace function public.protection_member_claim_evidence_read(p_path text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = pg_catalog, public
+as $$
+  select auth.uid() is not null
+    and cardinality(string_to_array(p_path, '/')) = 3
+    and split_part(p_path, '/', 1) = auth.uid()::text
+    and split_part(p_path, '/', 2) <> ''
+    and split_part(p_path, '/', 3) not in ('', '.', '..')
     and exists (
       select 1
       from public.protection_claims c
       join public.protection_memberships m on m.id = c.membership_id
       join public.protection_claim_evidence e on e.claim_id = c.id
-      where c.id::text = split_part(name, '/', 2)
+      where c.id::text = split_part(p_path, '/', 2)
         and m.user_id = auth.uid()
-        and e.storage_path = name
-    )
+        and e.storage_path = p_path
+    );
+$$;
+
+create or replace function public.protection_member_claim_evidence_write(p_path text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = pg_catalog, public
+as $$
+  select auth.uid() is not null
+    and cardinality(string_to_array(p_path, '/')) = 3
+    and split_part(p_path, '/', 1) = auth.uid()::text
+    and split_part(p_path, '/', 2) <> ''
+    and split_part(p_path, '/', 3) not in ('', '.', '..')
+    and exists (
+      select 1
+      from public.protection_claims c
+      join public.protection_memberships m on m.id = c.membership_id
+      where c.id::text = split_part(p_path, '/', 2)
+        and m.user_id = auth.uid()
+        and c.created_by = auth.uid()
+        and c.status in ('submitted','under_review','info_requested')
+    );
+$$;
+
+create or replace function public.protection_insurer_claim_evidence_read(p_path text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = pg_catalog, public
+as $$
+  select auth.uid() is not null
+    and public.protection_is_active_insurer()
+    and cardinality(string_to_array(p_path, '/')) = 3
+    and split_part(p_path, '/', 3) not in ('', '.', '..')
+    and exists (
+      select 1
+      from public.protection_claim_evidence e
+      join public.protection_claims c on c.id = e.claim_id
+      join public.protection_memberships m on m.id = c.membership_id
+      where e.storage_path = p_path
+        and split_part(p_path, '/', 1) = m.user_id::text
+        and split_part(p_path, '/', 2) = c.id::text
+        and c.insurer_id = public.protection_insurer_id()
+    );
+$$;
+
+revoke execute on function public.protection_member_claim_evidence_read(text) from public, anon;
+revoke execute on function public.protection_member_claim_evidence_write(text) from public, anon;
+revoke execute on function public.protection_insurer_claim_evidence_read(text) from public, anon;
+grant execute on function public.protection_member_claim_evidence_read(text) to authenticated;
+grant execute on function public.protection_member_claim_evidence_write(text) to authenticated;
+grant execute on function public.protection_insurer_claim_evidence_read(text) to authenticated;
+
+drop policy if exists claim_evidence_owner_rw on storage.objects;
+drop policy if exists claim_evidence_owner_read on storage.objects;
+create policy claim_evidence_owner_read on storage.objects for select to authenticated
+  using (
+    bucket_id = 'claim-evidence'
+    and public.protection_member_claim_evidence_read(name)
   );
 drop policy if exists claim_evidence_owner_write on storage.objects;
 create policy claim_evidence_owner_write on storage.objects for all to authenticated
   using (
     bucket_id = 'claim-evidence'
-    and cardinality(storage.foldername(name)) = 2
-    and split_part(name, '/', 1) = auth.uid()::text
-    and split_part(name, '/', 2) <> ''
-    and split_part(name, '/', 3) <> ''
-    and split_part(name, '/', 4) = ''
-    and exists (
-      select 1
-      from public.protection_claims c
-      join public.protection_memberships m on m.id = c.membership_id
-      where c.id::text = split_part(name, '/', 2)
-        and m.user_id = auth.uid()
-        and c.created_by = auth.uid()
-        and c.status in ('submitted','under_review','info_requested')
-    )
+    and public.protection_member_claim_evidence_write(name)
   )
   with check (
     bucket_id = 'claim-evidence'
-    and cardinality(storage.foldername(name)) = 2
-    and split_part(name, '/', 1) = auth.uid()::text
-    and split_part(name, '/', 2) <> ''
-    and split_part(name, '/', 3) <> ''
-    and split_part(name, '/', 4) = ''
-    and exists (
-      select 1
-      from public.protection_claims c
-      join public.protection_memberships m on m.id = c.membership_id
-      where c.id::text = split_part(name, '/', 2)
-        and m.user_id = auth.uid()
-        and c.created_by = auth.uid()
-        and c.status in ('submitted','under_review','info_requested')
-    )
+    and public.protection_member_claim_evidence_write(name)
   );
 drop policy if exists claim_evidence_insurer_read on storage.objects;
 create policy claim_evidence_insurer_read on storage.objects for select to authenticated
   using (
     bucket_id = 'claim-evidence'
-    and cardinality(storage.foldername(name)) = 2
-    and split_part(name, '/', 3) <> ''
-    and split_part(name, '/', 4) = ''
-    and public.protection_is_active_insurer()
-    and exists (
-      select 1 from public.protection_claim_evidence e
-      join public.protection_claims c on c.id = e.claim_id
-      join public.protection_memberships m on m.id = c.membership_id
-      where e.storage_path = name
-        and split_part(name, '/', 1) = m.user_id::text
-        and split_part(name, '/', 2) = c.id::text
-        and c.insurer_id = public.protection_insurer_id()
-    )
+    and public.protection_insurer_claim_evidence_read(name)
   );
 drop policy if exists claim_evidence_admin_read on storage.objects;
 create policy claim_evidence_admin_read on storage.objects for select to authenticated
@@ -296,11 +327,20 @@ as $$
   from public.protection_claims c
   where c.policy_id = p_policy_id
     and c.benefit_id = p_benefit_id
-    and c.status in ('approved','partially_approved','paid')
-    and c.created_at >= (date_trunc('year', now()) - make_interval(years => p_years_back))::date;
+    and c.status not in ('cancelled','rejected','draft')
+    and p_years_back >= 0
+    and c.event_date is not null
+    and c.event_date >= (
+      date_trunc('year', current_date) - make_interval(years => p_years_back)
+    )::date
+    and c.event_date < (
+      date_trunc('year', current_date) - make_interval(years => p_years_back)
+      + interval '1 year'
+    )::date;
 $$;
-revoke execute on function public.protection_benefit_used(uuid, uuid, integer) from public, anon;
-grant execute on function public.protection_benefit_used(uuid, uuid, integer) to authenticated;
+revoke execute on function public.protection_benefit_used(uuid, uuid, integer)
+  from public, anon, authenticated;
+grant execute on function public.protection_benefit_used(uuid, uuid, integer) to service_role;
 
 -- ---------------------------------------------------------------------------
 -- member_submit_claim — validates policy, benefit, waiting period,
@@ -330,7 +370,9 @@ declare
   v_claim_id uuid;
   v_amount numeric(14,2);
   v_used numeric;
+  v_used_year numeric;
   v_claims_ytd integer;
+  v_event_date date := coalesce(p_event_date, current_date);
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
   perform public.protection_require_mode(array['pilot','live']);
@@ -346,11 +388,14 @@ begin
   join public.protection_policies p on p.membership_id = m.id
   where p.id = p_policy_id and m.user_id = v_uid;
   if not found then raise exception 'Policy not found'; end if;
+  if v_m.status <> 'active' then raise exception 'Membership is not active'; end if;
 
   select * into v_p from public.protection_policies where id = p_policy_id for update;
   if v_p.status <> 'active'
-     or v_p.commencement_date > current_date
-     or (v_p.expiry_date is not null and v_p.expiry_date < current_date) then
+     or v_p.commencement_date is null
+     or v_event_date > current_date
+     or v_event_date < v_p.commencement_date
+     or (v_p.expiry_date is not null and v_event_date > v_p.expiry_date) then
     raise exception 'Policy is not in force';
   end if;
 
@@ -363,7 +408,10 @@ begin
   end if;
 
   select * into v_b from public.protection_benefits
-  where plan_version_id = v_p.plan_version_id and benefit_code = p_benefit_code and active;
+  where plan_version_id = v_p.plan_version_id and benefit_code = p_benefit_code
+    and active and is_active
+    and (effective_from is null or effective_from <= v_event_date)
+    and (effective_to is null or effective_to >= v_event_date);
   if not found then raise exception 'Benefit not found on this product'; end if;
   if v_b.benefit_type <> p_claim_type and not (v_b.benefit_type = 'provider_direct_payment' and p_claim_type = 'treatment_reimbursement') then
     raise exception 'Benefit type does not match claim type';
@@ -371,19 +419,8 @@ begin
 
   -- Waiting period: benefit-level days measured from commencement.
   if v_b.waiting_period_days > 0
-     and v_p.commencement_date + v_b.waiting_period_days > current_date then
+     and v_p.commencement_date + v_b.waiting_period_days > v_event_date then
     raise exception 'Benefit waiting period has not ended';
-  end if;
-
-  -- Frequency limit (claims per policy year).
-  if v_b.frequency_limit is not null then
-    select count(*) into v_claims_ytd from public.protection_claims
-    where policy_id = p_policy_id and benefit_id = v_b.id
-      and status not in ('cancelled','rejected','draft')
-      and created_at >= date_trunc('year', now());
-    if v_claims_ytd >= v_b.frequency_limit then
-      raise exception 'Benefit claim frequency limit reached';
-    end if;
   end if;
 
   -- Amount: fixed_sum uses contractual fixed_amount; treatment uses the
@@ -412,24 +449,44 @@ begin
       v_amount := v_b.per_event_limit;
     end if;
   end if;
+  if v_b.per_event_limit is not null and v_amount > v_b.per_event_limit then
+    v_amount := v_b.per_event_limit;
+  end if;
+  if v_amount <= 0 then raise exception 'Benefit amount must be positive'; end if;
 
   -- Per-event and aggregate limit checks.
-  v_used := public.protection_benefit_used(p_policy_id, v_b.id, 0);
+  select coalesce(sum(coalesce(c.approved_amount, c.claimed_amount)), 0) into v_used
+  from public.protection_claims c
+  where c.policy_id = p_policy_id and c.benefit_id = v_b.id
+    and c.status not in ('cancelled','rejected','draft');
   if v_b.per_policy_limit is not null and v_used + v_amount > v_b.per_policy_limit then
     raise exception 'Policy benefit limit would be exceeded';
   end if;
   if v_b.annual_limit is not null then
-    declare v_used_year numeric;
-    begin
-      select coalesce(sum(approved_amount),0) into v_used_year
-      from public.protection_claims
-      where policy_id = p_policy_id and benefit_id = v_b.id
-        and status in ('approved','partially_approved','paid')
-        and created_at >= date_trunc('year', now());
-      if v_used_year + v_amount > v_b.annual_limit then
-        raise exception 'Annual benefit limit would be exceeded';
-      end if;
-    end;
+    v_used_year := public.protection_benefit_used(
+      p_policy_id, v_b.id, extract(year from current_date)::integer - extract(year from v_event_date)::integer
+    );
+    if v_used_year + v_amount > v_b.annual_limit then
+      raise exception 'Annual benefit limit would be exceeded';
+    end if;
+  end if;
+  if v_b.frequency_limit is not null then
+    select count(*) into v_claims_ytd
+    from public.protection_claims c
+    where c.policy_id = p_policy_id and c.benefit_id = v_b.id
+      and c.status not in ('cancelled','rejected','draft')
+      and extract(year from c.event_date) = extract(year from v_event_date);
+    if v_claims_ytd >= v_b.frequency_limit then
+      raise exception 'Benefit claim frequency limit reached';
+    end if;
+  end if;
+  if v_v.terms->>'aggregate_limit_kes' is not null then
+    select coalesce(sum(coalesce(c.approved_amount, c.claimed_amount)), 0) into v_used
+    from public.protection_claims c
+    where c.policy_id = p_policy_id and c.status not in ('cancelled','rejected','draft');
+    if v_used + v_amount > (v_v.terms->>'aggregate_limit_kes')::numeric then
+      raise exception 'Policy aggregate limit would be exceeded';
+    end if;
   end if;
 
   insert into public.protection_claims (
@@ -439,7 +496,7 @@ begin
   ) values (
     p_policy_id, v_m.id, v_p.insurer_id, v_b.id, v_p.plan_version_id,
     p_claim_type, 'submitted', btrim(p_event_description),
-    coalesce(p_event_date, current_date), p_provider_claim_id,
+    v_event_date, p_provider_claim_id,
     v_amount, v_uid
   ) returning id into v_claim_id;
 
@@ -545,11 +602,22 @@ begin
     'benefit_code', b.benefit_code, 'benefit_name', b.name,
     'evidence', coalesce((
       select jsonb_agg(jsonb_build_object(
-        'evidence_type', e.evidence_type, 'structured', e.structured,
+        'evidence_type', e.evidence_type,
         'has_document', e.storage_path is not null, 'created_at', e.created_at
       ))
       from public.protection_claim_evidence e where e.claim_id = c.id
     ), '[]'::jsonb),
+    'milestone', (
+      select jsonb_build_object(
+        'type', ms.milestone_type,
+        'ordinal', ms.ordinal,
+        'service_date', ms.service_date,
+        'verified_at', ms.verified_at,
+        'attestation', ms.evidence->>'attestation'
+      )
+      from public.protection_milestones ms
+      where ms.id = c.milestone_id and ms.status = 'verified'
+    ),
     'history', coalesce((
       select jsonb_agg(jsonb_build_object(
         'event_type', ev.event_type, 'detail', ev.detail, 'created_at', ev.created_at
@@ -588,9 +656,14 @@ as $$
 declare
   v_insurer uuid := public.protection_insurer_id();
   v_c public.protection_claims;
+  v_p public.protection_policies;
+  v_v public.protection_plan_versions;
   v_b public.protection_benefits;
   v_new_status text;
   v_amount numeric(14,2);
+  v_used numeric;
+  v_used_year numeric;
+  v_claims_year integer;
 begin
   if v_insurer is null then raise exception 'Active insurer access required'; end if;
   perform public.protection_require_mode(array['pilot','live']);
@@ -603,6 +676,9 @@ begin
   if v_c.status not in ('submitted','under_review','info_requested') then
     raise exception 'Claim is not awaiting a decision';
   end if;
+  select * into v_p from public.protection_policies
+  where id = v_c.policy_id for update;
+  if not found or v_p.insurer_id <> v_insurer then raise exception 'Policy not found'; end if;
 
   v_new_status := case p_decision
     when 'approved' then 'approved'
@@ -616,33 +692,59 @@ begin
     if v_amount <= 0 or v_amount > v_c.claimed_amount then
       raise exception 'Approved amount must be positive and not exceed the claimed amount';
     end if;
+    if v_c.event_date is null or v_p.commencement_date is null
+       or v_c.event_date > current_date
+       or v_c.event_date < v_p.commencement_date
+       or (v_p.expiry_date is not null and v_c.event_date > v_p.expiry_date) then
+      raise exception 'Claim event date is outside the policy coverage period';
+    end if;
+    select * into v_v from public.protection_plan_versions where id = v_p.plan_version_id;
+    if not found then raise exception 'Policy product version not found'; end if;
     -- Re-check aggregate limits against remaining headroom.
     if v_c.benefit_id is not null then
-      select * into v_b from public.protection_benefits where id = v_c.benefit_id;
+      select * into v_b from public.protection_benefits
+      where id = v_c.benefit_id and plan_version_id = v_p.plan_version_id;
+      if not found then raise exception 'Claim benefit is not on the insured product version'; end if;
+      if v_b.per_event_limit is not null and v_amount > v_b.per_event_limit then
+        raise exception 'Approval would exceed the per-event benefit limit';
+      end if;
       if v_b.per_policy_limit is not null then
-        declare v_used numeric;
-        begin
-          select coalesce(sum(approved_amount),0) into v_used
-          from public.protection_claims
-          where policy_id = v_c.policy_id and benefit_id = v_c.benefit_id
-            and id <> v_c.id and status in ('approved','partially_approved','paid');
-          if v_used + v_amount > v_b.per_policy_limit then
-            raise exception 'Approval would exceed the per-policy benefit limit';
-          end if;
-        end;
+        select coalesce(sum(approved_amount),0) into v_used
+        from public.protection_claims
+        where policy_id = v_c.policy_id and benefit_id = v_c.benefit_id
+          and id <> v_c.id and status in ('approved','partially_approved','paid');
+        if v_used + v_amount > v_b.per_policy_limit then
+          raise exception 'Approval would exceed the per-policy benefit limit';
+        end if;
       end if;
       if v_b.annual_limit is not null then
-        declare v_used_year numeric;
-        begin
-          select coalesce(sum(approved_amount),0) into v_used_year
-          from public.protection_claims
-          where policy_id = v_c.policy_id and benefit_id = v_c.benefit_id
-            and id <> v_c.id and status in ('approved','partially_approved','paid')
-            and created_at >= date_trunc('year', now());
-          if v_used_year + v_amount > v_b.annual_limit then
-            raise exception 'Approval would exceed the annual benefit limit';
-          end if;
-        end;
+        select coalesce(sum(approved_amount),0) into v_used_year
+        from public.protection_claims
+        where policy_id = v_c.policy_id and benefit_id = v_c.benefit_id
+          and id <> v_c.id and status in ('approved','partially_approved','paid')
+          and extract(year from event_date) = extract(year from v_c.event_date);
+        if v_used_year + v_amount > v_b.annual_limit then
+          raise exception 'Approval would exceed the annual benefit limit';
+        end if;
+      end if;
+      if v_b.frequency_limit is not null then
+        select count(*) into v_claims_year
+        from public.protection_claims
+        where policy_id = v_c.policy_id and benefit_id = v_c.benefit_id
+          and id <> v_c.id and status in ('approved','partially_approved','paid')
+          and extract(year from event_date) = extract(year from v_c.event_date);
+        if v_claims_year >= v_b.frequency_limit then
+          raise exception 'Approval would exceed the benefit frequency limit';
+        end if;
+      end if;
+    end if;
+    if v_v.terms->>'aggregate_limit_kes' is not null then
+      select coalesce(sum(approved_amount),0) into v_used
+      from public.protection_claims
+      where policy_id = v_c.policy_id and id <> v_c.id
+        and status in ('approved','partially_approved','paid');
+      if v_used + v_amount > (v_v.terms->>'aggregate_limit_kes')::numeric then
+        raise exception 'Approval would exceed the policy aggregate limit';
       end if;
     end if;
   end if;
@@ -819,8 +921,21 @@ begin
 
   select * into v_p from public.protection_policies where id = p_policy_id for update;
   if not found or v_p.insurer_id <> v_insurer then raise exception 'Policy not found'; end if;
+  if v_p.commencement_date is null or p_period_start < v_p.commencement_date
+     or (v_p.expiry_date is not null and p_period_end > v_p.expiry_date) then
+    raise exception 'Premium period must fall within the policy coverage dates';
+  end if;
   if v_p.status in ('cancelled','expired','lapsed') then
     raise exception 'Policy is not in a premium-collectable state';
+  end if;
+  if exists (
+    select 1 from public.protection_premium_records r
+    where r.policy_id = p_policy_id
+      and r.period_start <= p_period_end
+      and r.period_end >= p_period_start
+      and (r.period_start <> p_period_start or r.period_end <> p_period_end)
+  ) then
+    raise exception 'Premium period overlaps an existing policy ledger period';
   end if;
 
   v_status := case
@@ -1120,13 +1235,13 @@ with months as (
 ),
 policy_days as (
   select p.insurer_id,
-         date_trunc('month', greatest(p.commencement_date, m.month_start))::date as eff_start,
-         least(coalesce(p.expiry_date, current_date + 1),
+         greatest(p.commencement_date, m.month_start) as eff_start,
+         least(coalesce(p.expiry_date + 1, current_date + 1),
                (m.month_start + interval '1 month')::date) as eff_end
   from public.protection_policies p
   join months m
     on p.commencement_date < (m.month_start + interval '1 month')::date
-   and coalesce(p.expiry_date, current_date + 1) > m.month_start
+   and coalesce(p.expiry_date + 1, current_date + 1) > m.month_start
   where p.status in ('active','grace') or p.status = 'expired'
 )
 select insurer_id,
@@ -1142,8 +1257,16 @@ create or replace view public.protection_premium_monthly as
 with rec as (
   select r.insurer_id, r.policy_id, r.period_start, r.period_end,
          r.amount_due, r.amount_received, r.status,
-         date_trunc('month', r.period_start)::date as wmonth
+         date_trunc('month', r.period_start)::date as month
   from public.protection_premium_records r
+),
+written as (
+  select insurer_id, month,
+         sum(amount_due) as written_premium,
+         sum(amount_received) as received_premium,
+         count(*) filter (where status = 'confirmed') as confirmed_records
+  from rec
+  group by insurer_id, month
 ),
 earned as (
   select rec.insurer_id,
@@ -1160,15 +1283,14 @@ earned as (
   where rec.status in ('confirmed','invoiced','overdue')
   group by rec.insurer_id, 2
 )
-select rec.insurer_id, rec.wmonth as written_month,
-       sum(rec.amount_due) as written_premium,
-       sum(rec.amount_received) as received_premium,
-       count(*) filter (where rec.status = 'confirmed') as confirmed_records
-from rec
-group by rec.insurer_id, rec.wmonth
-union all
-select e.insurer_id, e.month, null, null, null
-from earned e;
+select coalesce(w.insurer_id, e.insurer_id) as insurer_id,
+       coalesce(w.month, e.month) as month,
+       coalesce(w.written_premium, 0) as written_premium,
+       coalesce(w.received_premium, 0) as received_premium,
+       coalesce(w.confirmed_records, 0) as confirmed_records,
+       coalesce(e.earned_premium, 0) as earned_premium
+from written w
+full outer join earned e on e.insurer_id = w.insurer_id and e.month = w.month;
 
 -- Claims experience per insurer per month: counts, incurred (approved at
 -- decision), paid (settled). Incurred != paid.
@@ -1188,9 +1310,9 @@ group by c.insurer_id, 2;
 revoke all on public.protection_policy_monthly_exposure from anon;
 revoke all on public.protection_premium_monthly from anon;
 revoke all on public.protection_claims_monthly from anon;
-grant select on public.protection_policy_monthly_exposure to authenticated;
-grant select on public.protection_premium_monthly to authenticated;
-grant select on public.protection_claims_monthly to authenticated;
+revoke all on public.protection_policy_monthly_exposure from authenticated;
+revoke all on public.protection_premium_monthly from authenticated;
+revoke all on public.protection_claims_monthly from authenticated;
 
 -- ---------------------------------------------------------------------------
 -- insurer_actuarial_report — whitelisted portfolio aggregates + correct
@@ -1206,21 +1328,22 @@ as $$
 declare
   v_insurer uuid := public.protection_insurer_id();
   v_policy_count integer;
+  v_member_count integer;
   v_result jsonb;
 begin
   if v_insurer is null then raise exception 'Active insurer access required'; end if;
   perform public.protection_require_mode(array['pilot','live']);
 
-  select count(*) into v_policy_count
+  select count(distinct m.user_id), count(*) into v_member_count, v_policy_count
   from public.protection_policies p
+  join public.protection_memberships m on m.id = p.membership_id
   where p.insurer_id = v_insurer
     and p.status in ('issued','pending_payment','active','grace');
 
-  if v_policy_count < 25 then
+  if v_member_count < 25 then
     return jsonb_build_object(
       'suppressed', true,
-      'reason', 'Cohort below privacy minimum (25 policies)',
-      'open_policies', v_policy_count
+      'reason', 'Cohort below privacy minimum (25 distinct members)'
     );
   end if;
 
@@ -1235,7 +1358,9 @@ begin
     from (
       select distinct on (month) month, earned_premium
       from public.protection_premium_monthly pm
-      where pm.insurer_id = v_insurer and pm.earned_premium is not null
+      where pm.insurer_id = v_insurer
+        and pm.month >= date_trunc('month', current_date - interval '12 months')
+        and pm.earned_premium is not null
       order by month
     ) x
   ),
@@ -1388,13 +1513,32 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_status text;
+  v_version record;
+  v_membership_insurer uuid;
 begin
-  if tg_op = 'INSERT' or new.plan_version_id is distinct from old.plan_version_id then
-    select status into v_status from public.protection_plan_versions
-    where id = new.plan_version_id;
-    if v_status is distinct from 'approved' then
+  if tg_op = 'UPDATE' and (
+    new.plan_version_id is distinct from old.plan_version_id
+    or new.insurer_id is distinct from old.insurer_id
+    or new.membership_id is distinct from old.membership_id
+  ) then
+    raise exception 'An issued policy cannot change its member, insurer or product version';
+  end if;
+  if tg_op = 'INSERT'
+     or new.plan_version_id is distinct from old.plan_version_id
+     or new.insurer_id is distinct from old.insurer_id
+     or new.membership_id is distinct from old.membership_id then
+    select status, insurer_id into v_version
+    from public.protection_plan_versions where id = new.plan_version_id;
+    if v_version.status is distinct from 'approved' then
       raise exception 'Policies require an approved product version';
+    end if;
+    if v_version.insurer_id is distinct from new.insurer_id then
+      raise exception 'Policy insurer must match its approved product version';
+    end if;
+    select insurer_id into v_membership_insurer
+    from public.protection_memberships where id = new.membership_id;
+    if v_membership_insurer is distinct from new.insurer_id then
+      raise exception 'Policy insurer must match its membership insurer';
     end if;
   end if;
   new.updated_at := now();
@@ -1445,15 +1589,37 @@ security definer
 set search_path = pg_catalog, public
 as $$
 begin
-  if tg_op = 'DELETE' and old.status = 'approved' then
-    raise exception 'Approved product versions cannot be deleted';
+  if tg_op = 'DELETE' and old.status <> 'draft' then
+    raise exception 'Submitted product versions cannot be deleted';
   end if;
-  if tg_op = 'UPDATE' and old.status = 'approved' then
-    if new.benefit_structure is distinct from old.benefit_structure
+  if tg_op = 'UPDATE' then
+    if old.status in ('withdrawn','superseded') then
+      raise exception 'Terminal product versions cannot be changed';
+    end if;
+    if old.status = 'draft' and new.status not in ('draft','pending_approval','withdrawn') then
+      raise exception 'Invalid product version transition % -> %', old.status, new.status;
+    end if;
+    if old.status = 'pending_approval' and new.status not in ('pending_approval','approved','withdrawn') then
+      raise exception 'Invalid product version transition % -> %', old.status, new.status;
+    end if;
+    if old.status = 'approved' and new.status not in ('approved','superseded') then
+      raise exception 'Invalid product version transition % -> %', old.status, new.status;
+    end if;
+    if old.status in ('approved','superseded') and (
+       new.benefit_structure is distinct from old.benefit_structure
        or new.terms is distinct from old.terms
        or new.premium_amount is distinct from old.premium_amount
        or new.premium_frequency is distinct from old.premium_frequency
-       or new.plan_id is distinct from old.plan_id then
+       or new.plan_id is distinct from old.plan_id
+       or new.insurer_id is distinct from old.insurer_id
+       or new.id is distinct from old.id
+       or new.version_no is distinct from old.version_no
+       or new.effective_from is distinct from old.effective_from
+       or new.effective_to is distinct from old.effective_to
+       or new.approved_by is distinct from old.approved_by
+       or new.approved_at is distinct from old.approved_at
+       or new.created_by is distinct from old.created_by
+       or new.created_at is distinct from old.created_at) then
       raise exception 'Approved product versions are immutable';
     end if;
   end if;
@@ -1473,12 +1639,22 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_status text;
+  v_old_status text;
+  v_new_status text;
 begin
-  select status into v_status from public.protection_plan_versions
-  where id = coalesce(new.plan_version_id, old.plan_version_id);
-  if v_status is distinct from 'draft' then
-    raise exception 'Benefits are immutable once the product version leaves draft';
+  if tg_op in ('UPDATE','DELETE') then
+    select status into v_old_status from public.protection_plan_versions
+    where id = old.plan_version_id;
+    if v_old_status is distinct from 'draft' then
+      raise exception 'Benefits are immutable once the product version leaves draft';
+    end if;
+  end if;
+  if tg_op in ('INSERT','UPDATE') then
+    select status into v_new_status from public.protection_plan_versions
+    where id = new.plan_version_id;
+    if v_new_status is distinct from 'draft' then
+      raise exception 'Benefits may only be added to draft product versions';
+    end if;
   end if;
   return coalesce(new, old);
 end;
@@ -1487,6 +1663,103 @@ drop trigger if exists protection_benefit_immutable on public.protection_benefit
 create trigger protection_benefit_immutable
   before insert or update or delete on public.protection_benefits
   for each row execute function public.protection_benefit_immutable();
+
+create or replace function public.admin_approve_plan_version(p_version_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_version public.protection_plan_versions;
+  v_plan_id uuid;
+begin
+  if not public.is_super_admin() then raise exception 'Super-admin access required'; end if;
+  select plan_id into v_plan_id
+  from public.protection_plan_versions
+  where id = p_version_id;
+  if not found then raise exception 'Version not found'; end if;
+
+  perform 1 from public.protection_plans where id = v_plan_id for update;
+  select * into v_version
+  from public.protection_plan_versions
+  where id = p_version_id for update;
+  if v_version.status <> 'pending_approval' then
+    raise exception 'Only submitted versions can be approved';
+  end if;
+  if not exists (
+    select 1 from public.protection_benefits b
+    where b.plan_version_id = p_version_id and b.active and b.is_active
+  ) then
+    raise exception 'Version has no active benefits';
+  end if;
+
+  update public.protection_plan_versions
+  set status = 'superseded'
+  where plan_id = v_plan_id and id <> p_version_id and status = 'approved';
+  update public.protection_plan_versions
+  set status = 'approved', approved_by = auth.uid(), approved_at = now()
+  where id = p_version_id;
+  perform public.log_admin_action('plan_version_approved', 'protection_plan_versions',
+    p_version_id::text,
+    jsonb_build_object('plan_id', v_plan_id, 'version_no', v_version.version_no));
+end;
+$$;
+revoke execute on function public.admin_approve_plan_version(uuid) from public, anon;
+grant execute on function public.admin_approve_plan_version(uuid) to authenticated;
+
+create or replace function public.member_list_my_cover()
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_result jsonb;
+begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  perform public.protection_require_mode(array['pilot','live']);
+  select jsonb_build_object(
+    'policies', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'id', p.id, 'policy_number', p.policy_number, 'status', p.status,
+        'premium_status', p.premium_status, 'premium_amount', p.premium_amount,
+        'premium_frequency', p.premium_frequency,
+        'issue_date', p.issue_date, 'commencement_date', p.commencement_date,
+        'expiry_date', p.expiry_date, 'waiting_period_ends_at', p.waiting_period_ends_at,
+        'cancellation_reason', p.cancellation_reason,
+        'product_name', pl.name, 'version_no', v.version_no,
+        'benefit_structure', v.benefit_structure
+      ) order by p.created_at desc)
+      from public.protection_policies p
+      join public.protection_memberships m on m.id = p.membership_id
+      join public.protection_plan_versions v on v.id = p.plan_version_id
+      join public.protection_plans pl on pl.id = v.plan_id
+      where m.user_id = v_uid
+    ), '[]'::jsonb),
+    'benefits', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'policy_id', p.id, 'benefit_code', b.benefit_code, 'name', b.name,
+        'benefit_type', b.benefit_type, 'fixed_amount', b.fixed_amount,
+        'per_event_limit', b.per_event_limit, 'per_policy_limit', b.per_policy_limit,
+        'annual_limit', b.annual_limit, 'waiting_period_days', b.waiting_period_days,
+        'frequency_limit', b.frequency_limit, 'evidence_requirements', b.evidence_requirements,
+        'milestone_type', b.milestone_type, 'milestone_ordinal', b.milestone_ordinal,
+        'effective_from', b.effective_from, 'effective_to', b.effective_to
+      ))
+      from public.protection_policies p
+      join public.protection_memberships m on m.id = p.membership_id
+      join public.protection_benefits b
+        on b.plan_version_id = p.plan_version_id and b.active and b.is_active
+      where m.user_id = v_uid
+    ), '[]'::jsonb)
+  ) into v_result;
+  return v_result;
+end;
+$$;
+revoke execute on function public.member_list_my_cover() from public, anon;
+grant execute on function public.member_list_my_cover() to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- Grants sweep: every new Protection RPC must be executable by
@@ -1504,6 +1777,7 @@ begin
       or p.proname like 'member\_%' or p.proname = 'admin_approve_plan_version'
       or p.proname = 'admin_actuarial_report'
     )
+    and p.proname not in ('protection_claim_event', 'protection_benefit_used', 'protection_log_access')
   loop
     execute format('revoke execute on function %s from public, anon', r.sig);
     execute format('grant execute on function %s to authenticated', r.sig);
@@ -1615,6 +1889,10 @@ revoke execute on function public.protection_log_access(text, text, text, text)
   from public, anon, authenticated;
 grant execute on function public.protection_log_access(text, text, text, text)
   to service_role;
+revoke execute on function public.protection_benefit_used(uuid, uuid, integer)
+  from public, anon, authenticated;
+grant execute on function public.protection_benefit_used(uuid, uuid, integer)
+  to service_role;
 
 -- H. claim-evidence bucket: enforce size + MIME limits at the bucket level.
 update storage.buckets
@@ -1682,8 +1960,14 @@ declare
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
   perform public.protection_require_mode(array['pilot','live']);
+  if p_structured is not null and jsonb_typeof(p_structured) <> 'object' then
+    raise exception 'Structured evidence must be an object';
+  end if;
+  if p_structured is not null and p_structured <> '{}'::jsonb then
+    raise exception 'Structured claim evidence is not supported; attach a document instead';
+  end if;
   if p_storage_path is null and (p_structured is null or p_structured = '{}'::jsonb) then
-    raise exception 'Evidence requires a document or structured data';
+    raise exception 'A document is required';
   end if;
 
   select c.* into v_c from public.protection_claims c
@@ -1765,7 +2049,7 @@ begin
   end if;
   select coalesce(jsonb_agg(jsonb_build_object(
     'id', e.id, 'evidence_type', e.evidence_type,
-    'storage_path', e.storage_path, 'structured', e.structured,
+    'storage_path', e.storage_path,
     'created_at', e.created_at
   ) order by e.created_at), '[]'::jsonb) into v_result
   from public.protection_claim_evidence e
@@ -1941,7 +2225,13 @@ create policy pte_member_read on public.protection_treatment_episodes for select
     where m.id = membership_id and m.user_id = auth.uid()));
 drop policy if exists pte_therapist_read on public.protection_treatment_episodes;
 create policy pte_therapist_read on public.protection_treatment_episodes for select to authenticated
-  using (therapist_id = auth.uid());
+  using (
+    therapist_id = auth.uid()
+    and public.is_active_user()
+    and public.current_user_role() = 'therapist'
+    and exists (select 1 from public.therapists t
+                where t.id = auth.uid() and t.status = 'active')
+  );
 drop policy if exists pte_insurer_read on public.protection_treatment_episodes;
 create policy pte_insurer_read on public.protection_treatment_episodes for select to authenticated
   using (public.is_active_insurer(insurer_id));
@@ -1958,7 +2248,7 @@ create table if not exists public.protection_milestones (
   policy_id uuid not null references public.protection_policies(id) on delete cascade,
   insurer_id uuid not null references public.insurers(id) on delete cascade,
   milestone_type text not null check (milestone_type in ('entry','course','reengagement')),
-  ordinal integer not null default 1,
+  ordinal integer not null default 1 check (ordinal between 1 and 52),
   status text not null default 'verified' check (status in ('verified','disputed','void')),
   service_date date not null,
   verified_by uuid not null references public.therapists(id),
@@ -1980,7 +2270,13 @@ create policy pm_member_read on public.protection_milestones for select to authe
     where m.id = membership_id and m.user_id = auth.uid()));
 drop policy if exists pm_therapist_read on public.protection_milestones;
 create policy pm_therapist_read on public.protection_milestones for select to authenticated
-  using (verified_by = auth.uid());
+  using (
+    verified_by = auth.uid()
+    and public.is_active_user()
+    and public.current_user_role() = 'therapist'
+    and exists (select 1 from public.therapists t
+                where t.id = auth.uid() and t.status = 'active')
+  );
 drop policy if exists pm_insurer_read on public.protection_milestones;
 create policy pm_insurer_read on public.protection_milestones for select to authenticated
   using (public.is_active_insurer(insurer_id));
@@ -1989,6 +2285,8 @@ create policy pm_admin_all on public.protection_milestones for all to authentica
   using (public.is_super_admin()) with check (public.is_super_admin());
 revoke insert, update, delete on public.protection_milestones from authenticated;
 grant select on public.protection_milestones to authenticated;
+revoke select on public.protection_treatment_episodes from authenticated;
+revoke select on public.protection_milestones from authenticated;
 
 alter table public.protection_claims
   add column if not exists milestone_id uuid references public.protection_milestones(id) on delete set null;
@@ -2027,6 +2325,7 @@ language plpgsql security definer set search_path = pg_catalog, public as $$
 declare
   v_uid uuid := auth.uid();
   v_pol public.protection_policies;
+  v_membership_status text;
   v_ins uuid;
   v_id uuid;
 begin
@@ -2036,9 +2335,26 @@ begin
   join public.protection_memberships m on m.id = p.membership_id
   where p.id = p_policy_id and m.user_id = v_uid;
   if not found then raise exception 'Policy not found'; end if;
-  if v_pol.status not in ('active','grace') then raise exception 'Policy is not in force'; end if;
+  if v_pol.status not in ('active','grace')
+     or v_pol.commencement_date is null
+     or v_pol.commencement_date > current_date
+     or (v_pol.expiry_date is not null and v_pol.expiry_date < current_date)
+     or (v_pol.status = 'grace' and (v_pol.grace_ends_at is null or v_pol.grace_ends_at < now())) then
+    raise exception 'Policy is not in force';
+  end if;
+  select status into v_membership_status from public.protection_memberships
+  where id = v_pol.membership_id;
+  if v_membership_status <> 'active' then raise exception 'Membership is not active'; end if;
+  if p_plan_ref is not null and length(btrim(p_plan_ref)) > 80 then
+    raise exception 'Treatment plan reference is too long';
+  end if;
   select insurer_id into v_ins from public.protection_policies where id = p_policy_id;
-  if not exists (select 1 from public.therapists t where t.id = p_therapist_id and t.status = 'active') then
+  if not exists (
+    select 1 from public.therapists t
+    join public.profiles p on p.id = t.id
+    where t.id = p_therapist_id and t.status = 'active'
+      and p.role = 'therapist' and p.status = 'active'
+  ) then
     raise exception 'Therapist is not active';
   end if;
   insert into public.protection_treatment_episodes
@@ -2079,7 +2395,9 @@ create or replace function public.therapist_list_assigned_episodes()
 returns jsonb language plpgsql security definer set search_path = pg_catalog, public as $$
 declare v_uid uuid := auth.uid(); begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
-  if not exists (select 1 from public.therapists t where t.id = v_uid and t.status = 'active') then
+  if not public.is_active_user()
+     or public.current_user_role() is distinct from 'therapist'
+     or not exists (select 1 from public.therapists t where t.id = v_uid and t.status = 'active') then
     raise exception 'Active therapist verification required';
   end if;
   return coalesce((select jsonb_agg(jsonb_build_object(
@@ -2107,20 +2425,40 @@ returns uuid language plpgsql security definer set search_path = pg_catalog, pub
 declare
   v_uid uuid := auth.uid();
   v_ep public.protection_treatment_episodes;
+  v_pol public.protection_policies;
+  v_service_date date := coalesce(p_service_date, current_date);
   v_id uuid;
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
-  if not exists (select 1 from public.therapists t where t.id = v_uid and t.status = 'active') then
+  if not public.is_active_user()
+     or public.current_user_role() is distinct from 'therapist'
+     or not exists (select 1 from public.therapists t where t.id = v_uid and t.status = 'active') then
     raise exception 'Active therapist verification required';
   end if;
   perform public.protection_require_mode(array['pilot','live']);
   if p_milestone_type not in ('entry','course','reengagement') then
     raise exception 'Invalid milestone type';
   end if;
+  if p_evidence is not null and p_evidence <> '{}'::jsonb then
+    raise exception 'Free-text milestone evidence is not accepted';
+  end if;
+  if coalesce(p_ordinal, 1) < 1 or coalesce(p_ordinal, 1) > 52
+     or (p_milestone_type in ('entry','reengagement') and coalesce(p_ordinal, 1) <> 1) then
+    raise exception 'Milestone ordinal is invalid';
+  end if;
   select * into v_ep from public.protection_treatment_episodes
   where id = p_episode_id and therapist_id = v_uid for update;
   if not found then raise exception 'Episode not found or not assigned to you'; end if;
   if v_ep.status not in ('open','interrupted') then raise exception 'Episode is not verifiable'; end if;
+  if v_service_date > current_date or v_service_date < v_ep.started_at then
+    raise exception 'Service date must be between episode start and today';
+  end if;
+  select * into v_pol from public.protection_policies where id = v_ep.policy_id;
+  if not found or v_pol.commencement_date is null
+     or v_service_date < v_pol.commencement_date
+     or (v_pol.expiry_date is not null and v_service_date > v_pol.expiry_date) then
+    raise exception 'Service date is outside the policy coverage period';
+  end if;
   if p_milestone_type = 'reengagement' and not exists (
     select 1 from public.protection_treatment_episodes prev
     where prev.membership_id = v_ep.membership_id and prev.id <> v_ep.id
@@ -2136,8 +2474,12 @@ begin
      service_date, verified_by, evidence)
   values (p_episode_id, v_ep.membership_id, v_ep.policy_id, v_ep.insurer_id,
           p_milestone_type, coalesce(p_ordinal,1), coalesce(p_service_date, current_date),
-          v_uid, coalesce(p_evidence,'{}'::jsonb) - 'clinical_notes')
+          v_uid, jsonb_build_object('attestation', 'therapist_verified'))
   returning id into v_id;
+  insert into public.protection_events (membership_id, insurer_id, actor_id, event_type, detail)
+  values (v_ep.membership_id, v_ep.insurer_id, v_uid, 'treatment_milestone_verified',
+          jsonb_build_object('milestone_id', v_id, 'milestone_type', p_milestone_type,
+                             'service_date', v_service_date));
   return v_id;
 end $$;
 revoke execute on function public.therapist_verify_milestone(uuid,text,integer,date,jsonb) from public, anon;
@@ -2153,18 +2495,35 @@ declare
   v_b public.protection_benefits;
   v_amount numeric;
   v_used numeric;
+  v_used_year numeric;
   v_claim_id uuid;
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
   perform public.protection_require_mode(array['pilot','live']);
   select ms.* into v_ms from public.protection_milestones ms
   join public.protection_memberships m on m.id = ms.membership_id
-  where ms.id = p_milestone_id and m.user_id = v_uid;
+  where ms.id = p_milestone_id and m.user_id = v_uid
+  for update of ms;
   if not found then raise exception 'Milestone not found'; end if;
   if v_ms.status <> 'verified' then raise exception 'Milestone is not verified'; end if;
   if v_ms.claim_id is not null then raise exception 'Milestone already has a claim'; end if;
-  select p.* into v_pol from public.protection_policies p where p.id = v_ms.policy_id;
-  if v_pol.status not in ('active','grace') then raise exception 'Policy is not in force'; end if;
+  if not exists (select 1 from public.protection_memberships m
+                 where m.id = v_ms.membership_id and m.status = 'active') then
+    raise exception 'Membership is not active';
+  end if;
+  select p.* into v_pol from public.protection_policies p
+  where p.id = v_ms.policy_id for update;
+  if not found or v_pol.status not in ('active','grace')
+     or v_pol.commencement_date is null
+     or (v_pol.status = 'grace' and (v_pol.grace_ends_at is null or v_pol.grace_ends_at < now()))
+     or v_pol.membership_id <> v_ms.membership_id
+     or v_pol.insurer_id <> v_ms.insurer_id
+     or v_ms.service_date > current_date
+     or v_ms.service_date < v_pol.commencement_date
+     or (v_pol.expiry_date is not null and v_ms.service_date > v_pol.expiry_date)
+     or (v_pol.status = 'grace' and v_pol.grace_ends_at < now()) then
+    raise exception 'Policy is not in force for this milestone';
+  end if;
   select pv.id as version_id, pv.benefit_structure, pv.terms into v_ver
   from public.protection_policies p
   join public.protection_plan_versions pv on pv.id = p.plan_version_id
@@ -2173,11 +2532,15 @@ begin
   where b.plan_version_id = v_ver.version_id
     and b.milestone_type = v_ms.milestone_type
     and (b.milestone_ordinal is null or b.milestone_ordinal = v_ms.ordinal)
-    and b.is_active
+    and b.active and b.is_active
     and (b.effective_from is null or b.effective_from <= v_ms.service_date)
     and (b.effective_to is null or b.effective_to >= v_ms.service_date)
   order by b.milestone_ordinal nulls last limit 1;
   if not found then raise exception 'No benefit covers this milestone'; end if;
+  if v_ver.benefit_structure not in ('fixed_sum','hybrid')
+     or v_b.benefit_type <> 'fixed_sum' then
+    raise exception 'Milestone benefits must be fixed-sum benefits on a covered product';
+  end if;
   declare v_wait int := greatest(
     coalesce((v_ver.terms->>'waiting_period_days')::int, 0),
     coalesce(v_b.waiting_period_days, 0)); begin
@@ -2190,12 +2553,23 @@ begin
   if v_b.per_event_limit is not null and v_amount > v_b.per_event_limit then
     v_amount := v_b.per_event_limit;
   end if;
-  v_used := public.protection_benefit_used(v_pol.id, v_b.id, extract(year from v_ms.service_date)::int);
+  if v_amount <= 0 then raise exception 'Benefit amount must be positive'; end if;
+  select coalesce(sum(coalesce(c.approved_amount, c.claimed_amount)), 0) into v_used
+  from public.protection_claims c
+  where c.policy_id = v_pol.id and c.benefit_id = v_b.id
+    and c.status not in ('cancelled','rejected','draft');
   if v_b.per_policy_limit is not null and v_used + v_amount > v_b.per_policy_limit then
     raise exception 'Per-policy benefit limit would be exceeded';
   end if;
-  if v_b.annual_limit is not null and v_used + v_amount > v_b.annual_limit then
-    raise exception 'Annual benefit limit would be exceeded';
+  if v_b.annual_limit is not null then
+    select coalesce(sum(coalesce(c.approved_amount, c.claimed_amount)), 0) into v_used_year
+    from public.protection_claims c
+    where c.policy_id = v_pol.id and c.benefit_id = v_b.id
+      and c.status not in ('cancelled','rejected','draft')
+      and extract(year from c.event_date) = extract(year from v_ms.service_date);
+    if v_used_year + v_amount > v_b.annual_limit then
+      raise exception 'Annual benefit limit would be exceeded';
+    end if;
   end if;
   if v_b.frequency_limit is not null and
      (select count(*) from public.protection_claims c
@@ -2226,6 +2600,9 @@ begin
   perform public.protection_claim_event(v_claim_id, 'submitted',
     jsonb_build_object('milestone_id', v_ms.id, 'milestone_type', v_ms.milestone_type,
                        'service_date', v_ms.service_date));
+  insert into public.protection_events (membership_id, insurer_id, actor_id, event_type, detail)
+  values (v_ms.membership_id, v_ms.insurer_id, v_uid, 'milestone_claim_submitted',
+          jsonb_build_object('claim_id', v_claim_id, 'milestone_id', v_ms.id));
   return v_claim_id;
 end $$;
 revoke execute on function public.member_submit_milestone_claim(uuid) from public, anon;
@@ -2240,7 +2617,8 @@ begin
   select jsonb_build_object(
     'milestone_type', ms.milestone_type, 'ordinal', ms.ordinal,
     'service_date', ms.service_date, 'status', ms.status,
-    'verified_at', ms.verified_at, 'evidence', ms.evidence,
+    'verified_at', ms.verified_at,
+    'evidence', jsonb_build_object('attestation', ms.evidence->>'attestation'),
     'episode_status', e.status, 'plan_ref', e.treatment_plan_ref
   ) into v_result
   from public.protection_claims c
@@ -2282,7 +2660,7 @@ begin
   if not public.is_super_admin() then raise exception 'Super-admin only'; end if;
   return coalesce((select jsonb_agg(jsonb_build_object(
       'id', r.id, 'model_version', r.model_version, 'scenario_label', r.scenario_label,
-      'methodology', r.methodology, 'params', r.params, 'outputs', r.outputs,
+      'methodology', r.methodology, 'params', r.params, 'dataset', r.dataset, 'outputs', r.outputs,
       'created_at', r.created_at) order by r.created_at desc)
     from (select * from public.protection_actuarial_runs order by created_at desc limit 50) r), '[]'::jsonb);
 end $$;
@@ -2310,16 +2688,26 @@ begin
   if p_milestone_type is not null and p_milestone_type not in ('entry','course','reengagement','other') then
     raise exception 'Invalid milestone type';
   end if;
+  if p_milestone_ordinal is not null
+     and (p_milestone_ordinal < 1 or p_milestone_ordinal > 52
+          or (p_milestone_type in ('entry','reengagement') and p_milestone_ordinal <> 1)) then
+    raise exception 'Milestone ordinal is invalid';
+  end if;
+  if p_effective_from is not null and p_effective_to is not null
+     and p_effective_to < p_effective_from then
+    raise exception 'Benefit end date must not precede its start date';
+  end if;
   insert into public.protection_benefits
     (plan_version_id, benefit_code, name, benefit_type, fixed_amount,
      per_event_limit, per_policy_limit, annual_limit, waiting_period_days,
      frequency_limit, evidence_requirements, milestone_type, milestone_ordinal,
-     effective_from, effective_to, is_active)
+     effective_from, effective_to, active, is_active)
   values (p_plan_version_id, upper(btrim(p_benefit_code)), btrim(p_name), p_benefit_type,
           p_fixed_amount, p_per_event_limit, p_per_policy_limit, p_annual_limit,
           coalesce(p_waiting_period_days,0), p_frequency_limit,
           coalesce(p_evidence_requirements,'[]'::jsonb), p_milestone_type,
-          p_milestone_ordinal, p_effective_from, p_effective_to, coalesce(p_is_active,true))
+          p_milestone_ordinal, p_effective_from, p_effective_to,
+          coalesce(p_is_active,true), coalesce(p_is_active,true))
   on conflict (plan_version_id, benefit_code) do update set
     name = excluded.name, benefit_type = excluded.benefit_type,
     fixed_amount = excluded.fixed_amount, per_event_limit = excluded.per_event_limit,
@@ -2329,6 +2717,7 @@ begin
     evidence_requirements = excluded.evidence_requirements,
     milestone_type = excluded.milestone_type, milestone_ordinal = excluded.milestone_ordinal,
     effective_from = excluded.effective_from, effective_to = excluded.effective_to,
+    active = excluded.active,
     is_active = excluded.is_active
   returning id into v_id;
   return v_id;
@@ -2350,7 +2739,7 @@ declare v_ins uuid := public.protection_insurer_id(); v_ver record; begin
   if not found then raise exception 'Version not found'; end if;
   if v_ver.status <> 'draft' then raise exception 'Only draft versions can be submitted'; end if;
   if not exists (select 1 from public.protection_benefits b
-                 where b.plan_version_id = p_version_id and b.is_active) then
+                 where b.plan_version_id = p_version_id and b.active and b.is_active) then
     raise exception 'Version must have at least one active benefit';
   end if;
   update public.protection_plan_versions set status = 'pending_approval' where id = p_version_id;
@@ -2366,7 +2755,9 @@ declare v_ins uuid := public.protection_insurer_id(); v_ver record; begin
   select * into v_ver from public.protection_plan_versions
   where id = p_version_id and insurer_id = v_ins for update;
   if not found then raise exception 'Version not found'; end if;
-  if v_ver.status = 'approved' then raise exception 'Approved versions cannot be withdrawn; create a new version'; end if;
+  if v_ver.status not in ('draft','pending_approval') then
+    raise exception 'Only draft or submitted versions can be withdrawn';
+  end if;
   update public.protection_plan_versions set status = 'withdrawn' where id = p_version_id;
 end $$;
 revoke execute on function public.insurer_withdraw_plan_version(uuid) from public, anon;
@@ -2378,7 +2769,9 @@ declare v_ver record; begin
   if not public.is_super_admin() then raise exception 'Super-admin only'; end if;
   select * into v_ver from public.protection_plan_versions where id = p_version_id for update;
   if not found then raise exception 'Version not found'; end if;
-  if v_ver.status = 'approved' then raise exception 'Approved versions cannot be rejected'; end if;
+  if v_ver.status <> 'pending_approval' then
+    raise exception 'Only submitted versions can be rejected';
+  end if;
   update public.protection_plan_versions set status = 'withdrawn' where id = p_version_id;
   perform public.log_admin_action('plan_version_rejected','protection_plan_versions',p_version_id::text,
     jsonb_build_object('version_no', v_ver.version_no, 'reason', p_reason));

@@ -197,6 +197,21 @@ export default function ProtectionPage() {
       p_claim_id: claimId, p_evidence_type: 'document', p_storage_path: path,
     })
     if (error) {
+      const { data: attached, error: verifyError } = await supabase.rpc('member_list_claim_evidence', {
+        p_claim_id: claimId,
+      })
+      if (!verifyError && (attached || []).some(item => item.storage_path === path)) {
+        setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: false, progress: null } }))
+        toast.success('Evidence uploaded.')
+        await loadEvidence(claimId)
+        return
+      }
+      if (verifyError) {
+        const message = `${error.message || 'Could not confirm the evidence attachment.'} The uploaded file was retained because its database status could not be verified: ${verifyError.message}`
+        setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: false, progress: null, error: message } }))
+        toast.error(message)
+        return
+      }
       const { error: cleanupError } = await supabase.storage.from('claim-evidence').remove([path])
       const message = cleanupError
         ? `${error.message || 'Could not attach evidence.'} The uploaded file could not be removed: ${cleanupError.message}`
@@ -215,10 +230,21 @@ export default function ProtectionPage() {
     setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: true, error: null, progress: 'Removing evidence…' } }))
     const { error } = await supabase.rpc('member_remove_claim_evidence', { p_evidence_id: item.id })
     if (error) {
-      const message = error.message || 'Could not remove evidence.'
-      setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: false, progress: null, error: message } }))
-      toast.error(message)
-      return
+      const { data: remaining, error: verifyError } = await supabase.rpc('member_list_claim_evidence', {
+        p_claim_id: claimId,
+      })
+      if (verifyError) {
+        const message = `${error.message || 'Could not confirm evidence removal.'} The file was retained because its database status could not be verified: ${verifyError.message}`
+        setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: false, progress: null, error: message } }))
+        toast.error(message)
+        return
+      }
+      if ((remaining || []).some(entry => entry.id === item.id)) {
+        const message = error.message || 'Could not remove evidence.'
+        setEvidence(p => ({ ...p, [claimId]: { ...(p[claimId] || {}), busy: false, progress: null, error: message } }))
+        toast.error(message)
+        return
+      }
     }
     if (item.storage_path) {
       const { error: storageError } = await supabase.storage.from('claim-evidence').remove([item.storage_path])

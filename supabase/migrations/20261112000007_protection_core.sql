@@ -790,12 +790,22 @@ create table if not exists public.protection_roster_entries (
   membership_id uuid references public.protection_memberships(id) on delete set null,
   policy_id uuid references public.protection_policies(id) on delete set null,
   uploaded_by uuid references public.profiles(id),
+  uploaded_on date not null default current_date,
   uploaded_at timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
 create index if not exists pre_insurer_idx on public.protection_roster_entries (insurer_id, status);
+alter table public.protection_roster_entries
+  add column if not exists uploaded_on date;
+update public.protection_roster_entries
+set uploaded_on = uploaded_at::date
+where uploaded_on is null;
+alter table public.protection_roster_entries
+  alter column uploaded_on set default current_date,
+  alter column uploaded_on set not null;
+drop index if exists public.pre_insurer_ref;
 create unique index if not exists pre_insurer_ref
-  on public.protection_roster_entries (insurer_id, member_reference, uploaded_at::date);
+  on public.protection_roster_entries (insurer_id, member_reference, uploaded_on);
 
 alter table public.protection_plan_versions enable row level security;
 alter table public.protection_benefits enable row level security;
@@ -984,11 +994,12 @@ begin
   if not public.is_super_admin() then raise exception 'Super-admin access required'; end if;
   select * into v_version from public.protection_plan_versions where id = p_version_id for update;
   if not found then raise exception 'Version not found'; end if;
-  if v_version.status not in ('draft','pending_approval') then
-    raise exception 'Only draft or pending versions can be approved';
+  if v_version.status <> 'pending_approval' then
+    raise exception 'Only submitted versions can be approved';
   end if;
-  if not exists (select 1 from public.protection_benefits b where b.plan_version_id = p_version_id) then
-    raise exception 'Version has no benefits';
+  if not exists (select 1 from public.protection_benefits b
+                 where b.plan_version_id = p_version_id and b.active) then
+    raise exception 'Version has no active benefits';
   end if;
   update public.protection_plan_versions
   set status = 'approved', approved_by = auth.uid(), approved_at = now()

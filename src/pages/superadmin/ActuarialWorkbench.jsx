@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { BrandLoader } from '../../components/Brand'
 import { toast } from '../../components/ToastProvider'
 import NumberField from '../../components/NumberField'
 import {
   STATES, STATE_LABELS, ALLOWED, estimateGenerator, matrixExp, occupancy,
-  expectedClaims, grossPremium, runScenarios, validateCounts, validateQ, validateP,
+  expectedClaims, grossPremium, runScenarios, validateCounts, validateProbabilityVector, validateQ, validateP,
 } from '../../lib/markov'
 
 //  Super-admin actuarial workbench — four-state Markov model (S0–S3),
@@ -35,43 +34,69 @@ export default function ActuarialWorkbench() {
   const [result, setResult] = useState(null)
   const [runs, setRuns] = useState([])
   const [saving, setSaving] = useState(false)
-  const [synthetic, setSynthetic] = useState(true)
+  const [datasetType, setDatasetType] = useState('synthetic_assumption')
+  const [datasetSource, setDatasetSource] = useState('')
 
   const loadRuns = useCallback(async () => {
-    const { data } = await supabase.rpc('admin_list_actuarial_runs')
+    const { data, error } = await supabase.rpc('admin_list_actuarial_runs')
+    if (error) {
+      toast.error(error.message || 'Could not load saved actuarial runs.')
+      return
+    }
     setRuns(data || [])
   }, [])
   useEffect(() => { void loadRuns() }, [loadRuns])
 
   const run = () => {
+    if (datasetType === 'observed_aggregate' && !datasetSource.trim()) {
+      toast.error('Enter the source of the observed aggregate data.')
+      return
+    }
     const countErr = validateCounts(counts)
     if (countErr.length) { toast.error(countErr[0]); return }
-    const { Q, meta } = estimateGenerator(counts, exposure)
-    const qErr = validateQ(Q)
-    if (qErr.length) { toast.error(qErr[0]); return }
-    const P = matrixExp(Q, horizon)
-    const pErr = validateP(P)
-    if (pErr.length) { toast.error(`Projection check failed: ${pErr[0]}`); return }
-    const occ = occupancy(pi0.map(Number), P)
-    const claims = expectedClaims({
-      memberYears: Number(memberYears) || 0, milestoneRates: rates,
-      benefitAmount: Number(benefitAmount) || 0, acceptanceRate: Number(acceptance) || 1,
-      perEventCap: perEventCap === '' ? null : Number(perEventCap),
-      annualCap: annualCap === '' ? null : Number(annualCap),
-    })
-    const prem = grossPremium({
-      expectedClaims: claims, memberYears: Number(memberYears) || 0,
-      expenseRatio: pricing.expenseRatio === '' ? null : Number(pricing.expenseRatio),
-      adminCostPerMemberYear: Number(pricing.adminCost) || 0,
-      acquisitionRatio: Number(pricing.acquisition) || 0,
-      riskMarginRatio: Number(pricing.riskMargin) || 0,
-      contingencyRatio: Number(pricing.contingency) || 0,
-      reinsuranceRatio: Number(pricing.reinsurance) || 0,
-    })
-    const scenarios = runScenarios(
-      { memberYears: Number(memberYears) || 0, milestoneRates: rates, benefitAmount: Number(benefitAmount) || 0, acceptanceRate: Number(acceptance) || 1, perEventCap: perEventCap === '' ? null : Number(perEventCap), annualCap: annualCap === '' ? null : Number(annualCap) },
-      SCENARIOS)
-    setResult({ Q, P, occ, claims, prem, scenarios, meta, horizon })
+    const piErrors = validateProbabilityVector(pi0)
+    if (piErrors.length) { toast.error(piErrors[0]); return }
+    try {
+      const { Q, meta } = estimateGenerator(counts, exposure)
+      const qErr = validateQ(Q)
+      if (qErr.length) { toast.error(qErr[0]); return }
+      const P = matrixExp(Q, horizon)
+      const pErr = validateP(P)
+      if (pErr.length) { toast.error(`Projection check failed: ${pErr[0]}`); return }
+      const occ = occupancy(pi0.map(Number), P)
+      const modelBase = {
+        memberYears: Number(memberYears),
+        milestoneRates: rates,
+        benefitAmount: Number(benefitAmount),
+        acceptanceRate: Number(acceptance),
+        perEventCap: perEventCap === '' ? null : Number(perEventCap),
+        annualCap: annualCap === '' ? null : Number(annualCap),
+      }
+      const claims = expectedClaims(modelBase)
+      const prem = grossPremium({
+        expectedClaims: claims, memberYears: modelBase.memberYears,
+        expenseRatio: pricing.expenseRatio === '' ? null : Number(pricing.expenseRatio),
+        adminCostPerMemberYear: Number(pricing.adminCost),
+        acquisitionRatio: Number(pricing.acquisition),
+        riskMarginRatio: Number(pricing.riskMargin),
+        contingencyRatio: Number(pricing.contingency),
+        reinsuranceRatio: Number(pricing.reinsurance),
+      })
+      const scenarios = runScenarios(modelBase, SCENARIOS)
+      setResult({
+        Q, P, occ, claims, prem, scenarios, meta, horizon, datasetType, datasetSource,
+        params: {
+          counts, exposure, horizon, pi0, rates, benefitAmount,
+          memberYears: modelBase.memberYears,
+          acceptance: modelBase.acceptanceRate,
+          perEventCap: modelBase.perEventCap,
+          annualCap: modelBase.annualCap,
+          pricing,
+        },
+      })
+    } catch (error) {
+      toast.error(error.message || 'Model inputs are invalid.')
+    }
   }
 
   const save = async (scenarioLabel) => {
@@ -79,9 +104,13 @@ export default function ActuarialWorkbench() {
     setSaving(true)
     const { error } = await supabase.rpc('admin_save_actuarial_run', {
       p_model_version: 'ctmc-v1', p_scenario_label: scenarioLabel || 'custom',
-      p_methodology: 'Continuous-time Markov (uniformization exp(Qt)); aggregate inputs; milestone-based claims; gross premium build-up. Synthetic/assumption data — not validated.',
-      p_params: { counts, exposure, horizon, pi0, rates, benefitAmount, memberYears, acceptance, perEventCap, annualCap, pricing },
-      p_dataset: { synthetic, note: 'Aggregate transition counts and exposure — no member-level data.' },
+      p_methodology: 'Continuous-time Markov (uniformization exp(Qt)); aggregate inputs; milestone-based claims; gross premium build-up. Illustrative decision support only; not actuarially validated.',
+      p_params: result.params,
+      p_dataset: {
+        type: result.datasetType,
+        source: result.datasetType === 'observed_aggregate' ? result.datasetSource.trim() : null,
+        note: 'Aggregate transition counts and exposure — no member-level data; source is not independently verified.',
+      },
       p_outputs: { Q: result.Q, P: result.P, occupancy: result.occ, expectedClaims: result.claims, premium: result.prem, scenarios: result.scenarios },
     })
     setSaving(false)
@@ -102,12 +131,19 @@ export default function ActuarialWorkbench() {
         Four-state continuous-time Markov model (S0–S3). Decision-support only — not clinically or
         regulatorily validated. Inputs are aggregate counts/exposure or labelled synthetic data;
         no member-level recovery data is used. Transition ≠ claim: claims arise only from verified
-        treatment milestones.
+        treatment milestones. The claim frequency inputs are separate assumptions and are not
+        derived from the transition matrix. Re-run after changing inputs; saved runs retain the
+        parameters used for the displayed result.
       </p>
-      <label style={{ display: 'flex', gap: '8px', alignItems: 'center', color: 'rgba(255,255,255,0.7)', fontSize: '13px' }}>
-        <input type="checkbox" checked={synthetic} onChange={e => setSynthetic(e.target.checked)} />
-        Inputs are synthetic / assumption-based (unvalidated)
+      <label>Data basis
+        <select value={datasetType} onChange={e => setDatasetType(e.target.value)}>
+          <option value="synthetic_assumption">Synthetic / assumption-based (unvalidated)</option>
+          <option value="observed_aggregate">Observed aggregate experience (source unverified)</option>
+        </select>
       </label>
+      {datasetType === 'observed_aggregate' && (
+        <label>Aggregate data source<input value={datasetSource} maxLength={300} onChange={e => setDatasetSource(e.target.value)} /></label>
+      )}
 
       <section className="portal-card">
         <h3>Model inputs</h3>
@@ -123,7 +159,7 @@ export default function ActuarialWorkbench() {
                     <td key={j} style={{ padding: '4px 4px' }}>
                       {i === j ? <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> : (
                         <NumberField value={c} min={0} onChange={v => {
-                          const n = [...counts]; n[i][j] = v ?? 0; setCounts(n)
+                          setCounts(current => current.map((r, ri) => r.map((value, ci) => ri === i && ci === j ? v ?? 0 : value)))
                         }} />
                       )}
                     </td>
@@ -135,11 +171,11 @@ export default function ActuarialWorkbench() {
         </div>
         <div className="portal-form" style={{ marginTop: '12px' }}>
           <label>Exposure per state (member-years){exposure.map((e, i) => (
-            <NumberField key={i} value={e} min={0} onChange={v => { const n = [...exposure]; n[i] = v ?? 0; setExposure(n) }} />
+            <NumberField key={i} value={e} min={0} onChange={v => setExposure(current => current.map((value, index) => index === i ? v ?? 0 : value))} />
           ))}</label>
           <label>Projection horizon (years)<NumberField value={horizon} min={0.1} max={20} onChange={v => setHorizon(v ?? 1)} /></label>
           <label>Initial distribution π₀ (S0–S3){pi0.map((p, i) => (
-            <NumberField key={i} value={p} min={0} max={1} step={0.01} onChange={v => { const n = [...pi0]; n[i] = v ?? 0; setPi0(n) }} />
+            <NumberField key={i} value={p} min={0} max={1} step={0.01} onChange={v => setPi0(current => current.map((value, index) => index === i ? v ?? 0 : value))} />
           ))}</label>
           <label>Milestone rates /member-year — entry, course, re-engagement
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -163,7 +199,7 @@ export default function ActuarialWorkbench() {
             <h3>Results — {result.horizon}y horizon</h3>
             <div className="portal-stats">
               <article className="portal-card"><span>Expected claims (KES)</span><strong>{Math.round(result.claims).toLocaleString()}</strong></article>
-              <article className="portal-card"><span>Gross premium /member-year</span><strong>KES {fmt(result.prem.gross_premium_per_member_year, 2)}</strong></article>
+              <article className="portal-card"><span>{result.prem.expense_ratio_available ? 'Gross premium' : 'Known subtotal (expense unavailable)'} /member-year</span><strong>{result.prem.gross_premium_per_member_year == null ? 'n/a' : `KES ${fmt(result.prem.gross_premium_per_member_year, 2)}`}</strong></article>
               <article className="portal-card"><span>Pure premium /member-year</span><strong>KES {fmt(result.prem.pure_premium_per_member_year, 2)}</strong></article>
               <article className="portal-card"><span>Expense data</span><strong>{result.prem.expense_ratio_available ? 'loaded' : 'unavailable'}</strong></article>
             </div>
@@ -175,7 +211,10 @@ export default function ActuarialWorkbench() {
             ))}
             <h4 style={{ color: '#fff', fontSize: '13px', marginTop: '12px' }}>Transition intensities (Q, per year)</h4>
             <pre className="portal-json" style={{ fontSize: '11px' }}>{JSON.stringify(result.Q.map(r => r.map(v => +v.toFixed(4))), null, 1)}</pre>
-            <p className="portal-notice">Assumptions: time-homogeneous Markov, allowed transitions only, uniformization exp(Qt). Synthetic inputs — not validated.</p>
+            <p className="portal-notice">
+              Data basis: {result.datasetType === 'synthetic_assumption' ? 'synthetic / assumption-based' : `observed aggregate, source: ${result.datasetSource}`}.
+              Source not independently verified. Assumptions: time-homogeneous Markov and allowed transitions only; model is not validated.
+            </p>
           </section>
 
           <section className="portal-card">
@@ -190,7 +229,7 @@ export default function ActuarialWorkbench() {
           <section className="portal-card">
             <h3>Pricing build-up</h3>
             <div className="portal-form">
-              <label>Expense ratio (blank = unavailable)<NumberField value={pricing.expenseRatio} min={0} max={1} step={0.01} onChange={v => setPricing({ ...pricing, expenseRatio: v ?? '' })} /></label>
+              <label>Expense loading on pure claims cost (blank = unavailable)<NumberField value={pricing.expenseRatio} min={0} max={1} step={0.01} onChange={v => setPricing({ ...pricing, expenseRatio: v ?? '' })} /></label>
               <label>Admin cost /member-year (KES)<NumberField value={pricing.adminCost} min={0} onChange={v => setPricing({ ...pricing, adminCost: v ?? '' })} /></label>
               <label>Acquisition loading ratio<NumberField value={pricing.acquisition} min={0} step={0.01} onChange={v => setPricing({ ...pricing, acquisition: v ?? 0 })} /></label>
               <label>Risk margin ratio<NumberField value={pricing.riskMargin} min={0} step={0.01} onChange={v => setPricing({ ...pricing, riskMargin: v ?? 0 })} /></label>
@@ -199,7 +238,7 @@ export default function ActuarialWorkbench() {
               <button type="button" className="btn-primary" onClick={run}>Re-run with pricing</button>
             </div>
             <pre className="portal-json" style={{ fontSize: '11px' }}>{JSON.stringify(result.prem, null, 1)}</pre>
-            <p className="portal-notice">Illustrative gross premium only — not a market premium and not regulatorily validated. LossLens technology costs are separate from insurer risk costs.</p>
+            <p className="portal-notice">Illustrative only — not a market premium or actuarially validated. If expense data is unavailable, the known subtotal excludes it and gross premium is not reported. Each ratio loading is applied to pure claims cost and may overlap with other components. LossLens technology costs are separate from insurer risk costs.</p>
           </section>
 
           <section className="portal-card">
@@ -210,7 +249,7 @@ export default function ActuarialWorkbench() {
             {runs.length === 0 && <p className="portal-notice">No saved runs yet.</p>}
             {runs.map(r => (
               <p key={r.id} className="fs-12" style={{ color: 'rgba(255,255,255,0.6)', margin: '4px 0' }}>
-                {r.model_version} · {r.scenario_label || 'custom'} · {new Date(r.created_at).toLocaleString()}
+                {r.model_version} · {r.scenario_label || 'custom'} · {r.dataset?.type || 'data basis unavailable'} · {new Date(r.created_at).toLocaleString()}
               </p>
             ))}
           </section>

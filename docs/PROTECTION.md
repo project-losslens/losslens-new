@@ -146,8 +146,9 @@ script list and `docs/PROTECTION_TEST_PLAN.md` for disposable-project tests.
   `milestone_ordinal`, `effective_from/to`, `is_active` — still immutable once
   the version is approved.
 - `protection_treatment_episodes` + `protection_milestones`: clinician-verified
-  milestones (entry/course/re-engagement). Only eligibility fields shared;
-  `clinical_notes` key stripped server-side. Unique (episode,type,ordinal).
+  milestones (entry/course/re-engagement). The insurer receives only the
+  milestone type, ordinal, service date and verification timestamp; therapist
+  free-text evidence is not accepted. Unique (episode,type,ordinal).
 - `protection_claims.milestone_id` + `pcl_milestone_guard` — one claim per
   milestone; amount resolved server-side from the policy's original version.
 - `member_start_episode`, `member_list_my_milestones`,
@@ -157,4 +158,16 @@ script list and `docs/PROTECTION_TEST_PLAN.md` for disposable-project tests.
 - `insurer_upsert_benefit` extended with milestone/effective-date params.
 - Actuarial workbench: `src/lib/markov.js` (4-state CTMC, uniformization
   exp(Qt), occupancy, milestone-based claims, gross-premium build-up,
-  scenarios) + `/super-admin/actuarial` page. Synthetic/assumption data only.
+  scenarios) + `/super-admin/actuarial` page. It uses no member-level or
+  behavioural data. Inputs are explicitly labelled synthetic/assumption-based
+  or observed aggregate (source supplied but not independently verified).
+  The model is illustrative decision support, not actuarially validated or a
+  pricing recommendation. Transition rates assume a time-homogeneous CTMC;
+  claims rates, acceptance, benefit utilisation, expenses, acquisition,
+  reinsurance and risk margins are user-entered assumptions. Additive premium
+  loadings may overlap unless the user supplies non-overlapping components.
+  Sensitivity scenarios vary utilisation and claim severity only; they do not
+  quantify parameter uncertainty, credibility, confidence intervals, trend,
+  selection, inflation, reserves, capital, reinsurance structure or expenses
+  sourced from audited experience. Independent actuarial validation and
+  disposable-database/runtime testing remain required.

@@ -29,19 +29,18 @@ export default function TherapistMilestones() {
   useEffect(() => { void load() }, [load])
 
   const verify = async (ep) => {
-    const f = forms[ep.id] || { milestone_type: 'entry', ordinal: 1, service_date: '', note: '' }
+    const f = forms[ep.id] || { milestone_type: 'entry', ordinal: 1, service_date: '' }
     setWorking(ep.id)
     const { error } = await supabase.rpc('therapist_verify_milestone', {
       p_episode_id: ep.id,
       p_milestone_type: f.milestone_type,
       p_ordinal: Number(f.ordinal) || 1,
       p_service_date: f.service_date || null,
-      p_evidence: { provider_note: f.note?.trim() || null, plan_ref: ep.plan_ref },
     })
     setWorking('')
     if (error) { toast.error(error.message || 'Verification failed.'); return }
     toast.success('Milestone verified.')
-    setForms(p => ({ ...p, [ep.id]: { milestone_type: 'entry', ordinal: 1, service_date: '', note: '' } }))
+    setForms(p => ({ ...p, [ep.id]: { milestone_type: 'entry', ordinal: 1, service_date: '' } }))
     await load()
   }
 
@@ -52,10 +51,10 @@ export default function TherapistMilestones() {
       <header className="portal-page__heading">
         <div><p className="portal-page__eyebrow">Therapist portal</p><h2>Treatment milestones</h2></div>
       </header>
-      <p className="portal-notice">Verify insurance milestones for members on your caseload. Your attestation shares only eligibility fields — never clinical notes or recovery history.</p>
+      <p className="portal-notice">Verify insurance milestones for members on your caseload. The insurer receives only the milestone type, ordinal, service date and verification timestamp. Do not enter clinical notes here.</p>
       {episodes.length === 0 && <p className="portal-notice">No assigned treatment episodes.</p>}
       {episodes.map(ep => {
-        const f = forms[ep.id] || { milestone_type: 'entry', ordinal: 1, service_date: '', note: '' }
+        const f = forms[ep.id] || { milestone_type: 'entry', ordinal: 1, service_date: '' }
         const verifiable = ['open', 'interrupted'].includes(ep.status)
         return (
           <section key={ep.id} className="portal-card" style={{ marginBottom: '1rem' }}>
@@ -77,7 +76,6 @@ export default function TherapistMilestones() {
                 </label>
                 <label>Ordinal (course stage)<NumberField value={f.ordinal} min={1} max={52} onChange={v => setForms(p => ({ ...p, [ep.id]: { ...f, ordinal: v ?? 1 } }))} /></label>
                 <label>Service date<input type="date" value={f.service_date} onChange={e => setForms(p => ({ ...p, [ep.id]: { ...f, service_date: e.target.value } }))} /></label>
-                <label>Verification note (eligibility fields only)<input value={f.note} maxLength={500} onChange={e => setForms(p => ({ ...p, [ep.id]: { ...f, note: e.target.value } }))} placeholder="e.g. session attended, plan on file" /></label>
                 <button type="button" className="btn-primary fs-12" disabled={working === ep.id} onClick={() => verify(ep)}>
                   {working === ep.id ? 'Saving…' : 'Verify milestone'}
                 </button>

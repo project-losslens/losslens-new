@@ -51,6 +51,15 @@ production member data.
 
 - Verify insurer enrolment eligibility and rejection of inactive or expired
   partnerships.
+- Verify draft product versions cannot be approved directly; only
+  `pending_approval` versions can be approved, and approved content and policy
+  version bindings are immutable.
+- Reject milestone service dates before episode start, after today, or outside
+  policy coverage. Verify insurer claim detail receives only the milestone
+  type, ordinal, service date and verification timestamp.
+- Verify every claim amount and limit using the policy's bound product version,
+  including per-event, per-policy, annual, frequency and aggregate limits at
+  submission and insurer adjudication.
 - Exercise the policy, premium, pre-authorisation, claim decision, settlement,
   and lifecycle flows, checking mode restrictions and insurer boundaries.
 - Revoke optional consent and verify subsequent optional disclosures stop;
@@ -63,5 +72,10 @@ production member data.
 - Run targeted lint on modified JavaScript/JSX files.
 - Test member and insurer evidence flows in the browser at narrow and desktop
   widths. Browser testing has not been performed as part of this test plan.
+- Compare transition probabilities against an analytical CTMC reference and
+  test probability conservation, invalid inputs, zero exposure, high rates and
+  long horizons. These software tests do not establish actuarial validity.
+- Document scenario/data source and verify synthetic and unverified observed
+  aggregate inputs remain clearly labelled in saved runs and results.
 - Demo fixtures are in-memory only (`src/demo/fixtures.js`); no SQL demo seed
   or cleanup scripts are part of the eight-script database set.
