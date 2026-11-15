@@ -105,8 +105,11 @@ Production: https://losslens-new.vercel.app
 While the site is private, the app is protected by a server-side gate in
 `middleware.js` and `lib/gate.js`. Every request is checked before the app
 loads, including `/api/*` and static assets. Visitors must enter the password
-once; a secure HttpOnly cookie is set for 7 days. Requests without a valid
-cookie receive the gate page, and `/api/*` returns a 401 JSON response.
+once; a secure HttpOnly browser-session cookie is set. Its signed value
+expires after 7 days. Closing a tab does not necessarily clear a browser
+session, and browser session-restore settings may restore the cookie until its
+signature expires. Requests without a valid cookie receive the gate page, and
+`/api/*` returns a 401 JSON response.
 
 The gate needs no environment variables — its configuration is hardcoded in
 `lib/gate.js` as three constants:

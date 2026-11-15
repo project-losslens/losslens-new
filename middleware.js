@@ -120,7 +120,7 @@ export default async function middleware(request) {
         status: 303,
         headers: {
           Location: new URL(redirectTarget, url.origin).href,
-          'Set-Cookie': buildCookieHeader(GATE_COOKIE_NAME, cookie),
+          'Set-Cookie': buildCookieHeader(GATE_COOKIE_NAME, cookie, { sessionOnly: true }),
           'Cache-Control': 'no-store',
           'X-Robots-Tag': 'noindex, nofollow',
         },
