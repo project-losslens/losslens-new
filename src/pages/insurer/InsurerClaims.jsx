@@ -22,6 +22,7 @@ function ProtectionClaims() {
   const [working, setWorking] = useState('')
   const [decision, setDecision] = useState({ decision: 'approved', amount: '', reason: '' })
   const [evidenceFiles, setEvidenceFiles] = useState(null) // null=not loaded
+  const [milestoneInfo, setMilestoneInfo] = useState(null)
   const [evidenceBusy, setEvidenceBusy] = useState(false)
   const [evidenceError, setEvidenceError] = useState('')
 
@@ -131,6 +132,7 @@ function ProtectionClaims() {
           <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: '0 0 6px' }}>{detail.event_description}</p>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 10px' }}>
             Benefit: {detail.benefit_name || detail.benefit_code || '—'} · Status: {detail.status.replace(/_/g, ' ')}
+            {milestoneInfo && <> · Milestone: {milestoneInfo.milestone_type} #{milestoneInfo.ordinal} · service {milestoneInfo.service_date} · verified {milestoneInfo.verified_at ? new Date(milestoneInfo.verified_at).toLocaleDateString() : '—'}</>}
           </p>
           <div style={{ marginBottom: '10px' }}>
             <button type="button" className="btn-ghost fs-11" style={{ padding: '4px 10px' }} disabled={evidenceBusy} onClick={loadEvidence}>

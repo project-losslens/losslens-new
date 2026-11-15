@@ -172,3 +172,12 @@ separate "baseline + pass2" step — scripts 01-08 ARE the complete database.
 
 Demo data is in-memory only (`src/demo/fixtures.js`); no seed or cleanup
 SQL files exist or are required.
+
+## V2 milestone + actuarial implementation
+- Script 08 extended (still 8 scripts total): episodes, milestones, milestone
+  claims, actuarial runs, extended insurer_upsert_benefit.
+- New pages: /therapist/milestones, /super-admin/actuarial; member milestones
+  UI on ProtectionPage; insurer claims show milestone context; InsurerPlans
+  benefit form gains milestone/effective-date fields.
+- src/lib/markov.js + tests/markov.test.mjs (6 tests, node --test, all pass).
+- NOT executed against any database; build-verified only.

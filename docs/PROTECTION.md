@@ -138,3 +138,23 @@ The entire fresh-install database is exactly scripts 01–08 in
 baseline or Pass 2 installation step. Do not treat older migration filenames
 listed in consolidation notes as deployable. See `docs/DATABASE.md` for the
 script list and `docs/PROTECTION_TEST_PLAN.md` for disposable-project tests.
+
+
+## V2 additions (in script 08)
+
+- `protection_benefits` gains `milestone_type` (entry/course/reengagement/other),
+  `milestone_ordinal`, `effective_from/to`, `is_active` — still immutable once
+  the version is approved.
+- `protection_treatment_episodes` + `protection_milestones`: clinician-verified
+  milestones (entry/course/re-engagement). Only eligibility fields shared;
+  `clinical_notes` key stripped server-side. Unique (episode,type,ordinal).
+- `protection_claims.milestone_id` + `pcl_milestone_guard` — one claim per
+  milestone; amount resolved server-side from the policy's original version.
+- `member_start_episode`, `member_list_my_milestones`,
+  `member_submit_milestone_claim`, `therapist_list_assigned_episodes`,
+  `therapist_verify_milestone`, `insurer_get_claim_milestone`.
+- `protection_actuarial_runs` (super-admin only) + `admin_save/list_actuarial_run`.
+- `insurer_upsert_benefit` extended with milestone/effective-date params.
+- Actuarial workbench: `src/lib/markov.js` (4-state CTMC, uniformization
+  exp(Qt), occupancy, milestone-based claims, gross-premium build-up,
+  scenarios) + `/super-admin/actuarial` page. Synthetic/assumption data only.

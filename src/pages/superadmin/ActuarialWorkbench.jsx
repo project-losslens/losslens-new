@@ -1,0 +1,221 @@
+import { useCallback, useEffect, useState } from 'react'
+import { supabase } from '../../lib/supabase'
+import { BrandLoader } from '../../components/Brand'
+import { toast } from '../../components/ToastProvider'
+import NumberField from '../../components/NumberField'
+import {
+  STATES, STATE_LABELS, ALLOWED, estimateGenerator, matrixExp, occupancy,
+  expectedClaims, grossPremium, runScenarios, validateCounts, validateQ, validateP,
+} from '../../lib/markov'
+
+//  Super-admin actuarial workbench — four-state Markov model (S0–S3),
+//  aggregate/synthetic data only. Decision-support tool, NOT an automated
+//  insurance or clinical decision-maker. No member-level data is used.
+
+const ZERO_COUNTS = Array.from({ length: 4 }, () => [0, 0, 0, 0])
+const SCENARIOS = [
+  { label: 'Base', multipliers: {} },
+  { label: 'Lower utilisation', multipliers: { entry: 0.7, course: 0.7, reengagement: 0.7 } },
+  { label: 'Higher utilisation', multipliers: { entry: 1.4, course: 1.4, reengagement: 1.4 } },
+  { label: 'Adverse claims', multipliers: { entry: 1.2, course: 1.2, reengagement: 1.2 }, claimsAdj: 1.3, acceptanceRate: 0.95 },
+]
+
+export default function ActuarialWorkbench() {
+  const [counts, setCounts] = useState(ZERO_COUNTS)
+  const [exposure, setExposure] = useState([1000, 400, 300, 200]) // member-years per state
+  const [horizon, setHorizon] = useState(1) // years
+  const [pi0, setPi0] = useState([0.7, 0.2, 0.08, 0.02])
+  const [rates, setRates] = useState({ entry: 0.25, course: 1.5, reengagement: 0.4 }) // per member-year
+  const [benefitAmount, setBenefitAmount] = useState(5000)
+  const [memberYears, setMemberYears] = useState(1000)
+  const [acceptance, setAcceptance] = useState(0.9)
+  const [perEventCap, setPerEventCap] = useState('')
+  const [annualCap, setAnnualCap] = useState('')
+  const [pricing, setPricing] = useState({ expenseRatio: '', adminCost: '', acquisition: 0.15, riskMargin: 0.1, contingency: 0.05, reinsurance: 0 })
+  const [result, setResult] = useState(null)
+  const [runs, setRuns] = useState([])
+  const [saving, setSaving] = useState(false)
+  const [synthetic, setSynthetic] = useState(true)
+
+  const loadRuns = useCallback(async () => {
+    const { data } = await supabase.rpc('admin_list_actuarial_runs')
+    setRuns(data || [])
+  }, [])
+  useEffect(() => { void loadRuns() }, [loadRuns])
+
+  const run = () => {
+    const countErr = validateCounts(counts)
+    if (countErr.length) { toast.error(countErr[0]); return }
+    const { Q, meta } = estimateGenerator(counts, exposure)
+    const qErr = validateQ(Q)
+    if (qErr.length) { toast.error(qErr[0]); return }
+    const P = matrixExp(Q, horizon)
+    const pErr = validateP(P)
+    if (pErr.length) { toast.error(`Projection check failed: ${pErr[0]}`); return }
+    const occ = occupancy(pi0.map(Number), P)
+    const claims = expectedClaims({
+      memberYears: Number(memberYears) || 0, milestoneRates: rates,
+      benefitAmount: Number(benefitAmount) || 0, acceptanceRate: Number(acceptance) || 1,
+      perEventCap: perEventCap === '' ? null : Number(perEventCap),
+      annualCap: annualCap === '' ? null : Number(annualCap),
+    })
+    const prem = grossPremium({
+      expectedClaims: claims, memberYears: Number(memberYears) || 0,
+      expenseRatio: pricing.expenseRatio === '' ? null : Number(pricing.expenseRatio),
+      adminCostPerMemberYear: Number(pricing.adminCost) || 0,
+      acquisitionRatio: Number(pricing.acquisition) || 0,
+      riskMarginRatio: Number(pricing.riskMargin) || 0,
+      contingencyRatio: Number(pricing.contingency) || 0,
+      reinsuranceRatio: Number(pricing.reinsurance) || 0,
+    })
+    const scenarios = runScenarios(
+      { memberYears: Number(memberYears) || 0, milestoneRates: rates, benefitAmount: Number(benefitAmount) || 0, acceptanceRate: Number(acceptance) || 1, perEventCap: perEventCap === '' ? null : Number(perEventCap), annualCap: annualCap === '' ? null : Number(annualCap) },
+      SCENARIOS)
+    setResult({ Q, P, occ, claims, prem, scenarios, meta, horizon })
+  }
+
+  const save = async (scenarioLabel) => {
+    if (!result) { toast.error('Run the model first.'); return }
+    setSaving(true)
+    const { error } = await supabase.rpc('admin_save_actuarial_run', {
+      p_model_version: 'ctmc-v1', p_scenario_label: scenarioLabel || 'custom',
+      p_methodology: 'Continuous-time Markov (uniformization exp(Qt)); aggregate inputs; milestone-based claims; gross premium build-up. Synthetic/assumption data — not validated.',
+      p_params: { counts, exposure, horizon, pi0, rates, benefitAmount, memberYears, acceptance, perEventCap, annualCap, pricing },
+      p_dataset: { synthetic, note: 'Aggregate transition counts and exposure — no member-level data.' },
+      p_outputs: { Q: result.Q, P: result.P, occupancy: result.occ, expectedClaims: result.claims, premium: result.prem, scenarios: result.scenarios },
+    })
+    setSaving(false)
+    if (error) { toast.error(error.message || 'Save failed.'); return }
+    toast.success('Model run saved.')
+    await loadRuns()
+  }
+
+  const fmt = (v, d = 4) => v == null ? 'n/a' : Number(v).toFixed(d)
+  const pct = (v) => `${(Number(v) * 100).toFixed(1)}%`
+
+  return (
+    <section className="portal-page">
+      <header className="portal-page__heading">
+        <div><p className="portal-page__eyebrow">Super admin</p><h2>Actuarial workbench</h2></div>
+      </header>
+      <p className="portal-notice">
+        Four-state continuous-time Markov model (S0–S3). Decision-support only — not clinically or
+        regulatorily validated. Inputs are aggregate counts/exposure or labelled synthetic data;
+        no member-level recovery data is used. Transition ≠ claim: claims arise only from verified
+        treatment milestones.
+      </p>
+      <label style={{ display: 'flex', gap: '8px', alignItems: 'center', color: 'rgba(255,255,255,0.7)', fontSize: '13px' }}>
+        <input type="checkbox" checked={synthetic} onChange={e => setSynthetic(e.target.checked)} />
+        Inputs are synthetic / assumption-based (unvalidated)
+      </label>
+
+      <section className="portal-card">
+        <h3>Model inputs</h3>
+        <p className="portal-notice">Transition counts (rows = from-state, cols = to-state in order {STATES.join(', ')}). Only allowed transitions may be non-zero: {Object.entries(ALLOWED).map(([k, v]) => `${k}→{${v.join(',')}}`).join(' · ')}</p>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ borderCollapse: 'collapse', fontSize: '12px' }}>
+            <thead><tr><th></th>{STATES.map(s => <th key={s} style={{ padding: '4px 8px', color: '#7DBDEE' }}>{s}</th>)}</tr></thead>
+            <tbody>
+              {counts.map((row, i) => (
+                <tr key={i}>
+                  <td style={{ padding: '4px 8px', color: '#fff' }}>{STATES[i]}</td>
+                  {row.map((c, j) => (
+                    <td key={j} style={{ padding: '4px 4px' }}>
+                      {i === j ? <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> : (
+                        <NumberField value={c} min={0} onChange={v => {
+                          const n = [...counts]; n[i][j] = v ?? 0; setCounts(n)
+                        }} />
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="portal-form" style={{ marginTop: '12px' }}>
+          <label>Exposure per state (member-years){exposure.map((e, i) => (
+            <NumberField key={i} value={e} min={0} onChange={v => { const n = [...exposure]; n[i] = v ?? 0; setExposure(n) }} />
+          ))}</label>
+          <label>Projection horizon (years)<NumberField value={horizon} min={0.1} max={20} onChange={v => setHorizon(v ?? 1)} /></label>
+          <label>Initial distribution π₀ (S0–S3){pi0.map((p, i) => (
+            <NumberField key={i} value={p} min={0} max={1} step={0.01} onChange={v => { const n = [...pi0]; n[i] = v ?? 0; setPi0(n) }} />
+          ))}</label>
+          <label>Milestone rates /member-year — entry, course, re-engagement
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {['entry', 'course', 'reengagement'].map(k => (
+                <NumberField key={k} value={rates[k]} min={0} onChange={v => setRates({ ...rates, [k]: v ?? 0 })} />
+              ))}
+            </div>
+          </label>
+          <label>Benefit amount per milestone (KES)<NumberField value={benefitAmount} min={0} onChange={v => setBenefitAmount(v ?? 0)} /></label>
+          <label>Covered member-years<NumberField value={memberYears} min={0} onChange={v => setMemberYears(v ?? 0)} /></label>
+          <label>Claim acceptance rate<NumberField value={acceptance} min={0} max={1} step={0.01} onChange={v => setAcceptance(v ?? 1)} /></label>
+          <label>Per-event cap (KES, optional)<NumberField value={perEventCap} min={0} onChange={v => setPerEventCap(v ?? '')} /></label>
+          <label>Annual aggregate cap (KES, optional)<NumberField value={annualCap} min={0} onChange={v => setAnnualCap(v ?? '')} /></label>
+          <button type="button" className="btn-primary" onClick={run}>Run model</button>
+        </div>
+      </section>
+
+      {result && (
+        <>
+          <section className="portal-card">
+            <h3>Results — {result.horizon}y horizon</h3>
+            <div className="portal-stats">
+              <article className="portal-card"><span>Expected claims (KES)</span><strong>{Math.round(result.claims).toLocaleString()}</strong></article>
+              <article className="portal-card"><span>Gross premium /member-year</span><strong>KES {fmt(result.prem.gross_premium_per_member_year, 2)}</strong></article>
+              <article className="portal-card"><span>Pure premium /member-year</span><strong>KES {fmt(result.prem.pure_premium_per_member_year, 2)}</strong></article>
+              <article className="portal-card"><span>Expense data</span><strong>{result.prem.expense_ratio_available ? 'loaded' : 'unavailable'}</strong></article>
+            </div>
+            <h4 style={{ color: '#fff', fontSize: '13px' }}>State occupancy at horizon</h4>
+            {result.occ.map((p, i) => (
+              <p key={i} className="fs-13" style={{ color: 'rgba(255,255,255,0.75)', margin: '4px 0' }}>
+                {STATE_LABELS[STATES[i]]}: <strong>{pct(p)}</strong>
+              </p>
+            ))}
+            <h4 style={{ color: '#fff', fontSize: '13px', marginTop: '12px' }}>Transition intensities (Q, per year)</h4>
+            <pre className="portal-json" style={{ fontSize: '11px' }}>{JSON.stringify(result.Q.map(r => r.map(v => +v.toFixed(4))), null, 1)}</pre>
+            <p className="portal-notice">Assumptions: time-homogeneous Markov, allowed transitions only, uniformization exp(Qt). Synthetic inputs — not validated.</p>
+          </section>
+
+          <section className="portal-card">
+            <h3>Scenario comparison (expected claims, KES)</h3>
+            {result.scenarios.map(s => (
+              <p key={s.label} className="fs-13" style={{ color: 'rgba(255,255,255,0.75)', margin: '4px 0' }}>
+                {s.label}: <strong>{Math.round(s.expectedClaims).toLocaleString()}</strong>
+              </p>
+            ))}
+          </section>
+
+          <section className="portal-card">
+            <h3>Pricing build-up</h3>
+            <div className="portal-form">
+              <label>Expense ratio (blank = unavailable)<NumberField value={pricing.expenseRatio} min={0} max={1} step={0.01} onChange={v => setPricing({ ...pricing, expenseRatio: v ?? '' })} /></label>
+              <label>Admin cost /member-year (KES)<NumberField value={pricing.adminCost} min={0} onChange={v => setPricing({ ...pricing, adminCost: v ?? '' })} /></label>
+              <label>Acquisition loading ratio<NumberField value={pricing.acquisition} min={0} step={0.01} onChange={v => setPricing({ ...pricing, acquisition: v ?? 0 })} /></label>
+              <label>Risk margin ratio<NumberField value={pricing.riskMargin} min={0} step={0.01} onChange={v => setPricing({ ...pricing, riskMargin: v ?? 0 })} /></label>
+              <label>Contingency ratio<NumberField value={pricing.contingency} min={0} step={0.01} onChange={v => setPricing({ ...pricing, contingency: v ?? 0 })} /></label>
+              <label>Reinsurance ratio<NumberField value={pricing.reinsurance} min={0} step={0.01} onChange={v => setPricing({ ...pricing, reinsurance: v ?? 0 })} /></label>
+              <button type="button" className="btn-primary" onClick={run}>Re-run with pricing</button>
+            </div>
+            <pre className="portal-json" style={{ fontSize: '11px' }}>{JSON.stringify(result.prem, null, 1)}</pre>
+            <p className="portal-notice">Illustrative gross premium only — not a market premium and not regulatorily validated. LossLens technology costs are separate from insurer risk costs.</p>
+          </section>
+
+          <section className="portal-card">
+            <h3>Saved runs</h3>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+              <button type="button" className="btn-primary fs-12" disabled={saving} onClick={() => save('base')}>{saving ? 'Saving…' : 'Save current run'}</button>
+            </div>
+            {runs.length === 0 && <p className="portal-notice">No saved runs yet.</p>}
+            {runs.map(r => (
+              <p key={r.id} className="fs-12" style={{ color: 'rgba(255,255,255,0.6)', margin: '4px 0' }}>
+                {r.model_version} · {r.scenario_label || 'custom'} · {new Date(r.created_at).toLocaleString()}
+              </p>
+            ))}
+          </section>
+        </>
+      )}
+    </section>
+  )
+}

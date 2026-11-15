@@ -80,6 +80,7 @@ export const superAdminNav = [
   { to: '/super-admin/insurers', label: 'Insurer Management', icon: 'building', section: 'super-admin' },
   { to: '/super-admin/float', label: 'Float Management', icon: 'analytics', section: 'super-admin' },
   { to: '/super-admin/protection', label: 'Protection Ops', icon: 'shield', section: 'super-admin' },
+  { to: '/super-admin/actuarial', label: 'Actuarial Workbench', icon: 'analytics', section: 'super-admin' },
 ]
 
 export const therapistNav = [
@@ -88,6 +89,7 @@ export const therapistNav = [
   { to: '/therapist/sessions', label: 'Sessions', icon: 'calendar' },
   { to: '/therapist/claims', label: 'Claims', icon: 'document' },
   { to: '/therapist/payouts', label: 'Payouts', icon: 'document' },
+  { to: '/therapist/milestones', label: 'Milestones', icon: 'medical' },
   { to: '/therapist/onboarding', label: 'Profile & Verification', icon: 'profile' },
 ]
 

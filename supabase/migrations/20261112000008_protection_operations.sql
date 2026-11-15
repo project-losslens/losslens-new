@@ -1895,3 +1895,443 @@ end;
 $$;
 revoke execute on function public.member_list_claim_evidence(uuid) from public, anon;
 grant execute on function public.member_list_claim_evidence(uuid) to authenticated;
+
+-- ===========================================================================
+-- V2: MILESTONE BENEFITS, TREATMENT EPISODES, MILESTONE VERIFICATION,
+--     MILESTONE CLAIMS, ACTUARIAL WORKBENCH
+-- ===========================================================================
+
+-- Benefit schedule gains milestone configuration (immutable once version
+-- approved — existing triggers cover row immutability).
+alter table public.protection_benefits
+  add column if not exists milestone_type text,
+  add column if not exists milestone_ordinal integer,
+  add column if not exists effective_from date,
+  add column if not exists effective_to date,
+  add column if not exists is_active boolean not null default true;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'pb_milestone_type_chk') then
+    alter table public.protection_benefits add constraint pb_milestone_type_chk
+      check (milestone_type is null or milestone_type in ('entry','course','reengagement','other'));
+  end if;
+end $$;
+create index if not exists pb_milestone_idx on public.protection_benefits
+  (plan_version_id, milestone_type, milestone_ordinal) where is_active;
+
+create table if not exists public.protection_treatment_episodes (
+  id uuid primary key default gen_random_uuid(),
+  membership_id uuid not null references public.protection_memberships(id) on delete cascade,
+  policy_id uuid not null references public.protection_policies(id) on delete cascade,
+  insurer_id uuid not null references public.insurers(id) on delete cascade,
+  therapist_id uuid references public.therapists(id) on delete set null,
+  treatment_plan_ref text,
+  status text not null default 'open' check (status in ('open','interrupted','completed','closed')),
+  started_at date not null default current_date,
+  created_by uuid not null references public.profiles(id),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists pte_membership_idx on public.protection_treatment_episodes (membership_id);
+create index if not exists pte_therapist_idx on public.protection_treatment_episodes (therapist_id, status);
+create index if not exists pte_insurer_idx on public.protection_treatment_episodes (insurer_id);
+alter table public.protection_treatment_episodes enable row level security;
+drop policy if exists pte_member_read on public.protection_treatment_episodes;
+create policy pte_member_read on public.protection_treatment_episodes for select to authenticated
+  using (exists (select 1 from public.protection_memberships m
+    where m.id = membership_id and m.user_id = auth.uid()));
+drop policy if exists pte_therapist_read on public.protection_treatment_episodes;
+create policy pte_therapist_read on public.protection_treatment_episodes for select to authenticated
+  using (therapist_id = auth.uid());
+drop policy if exists pte_insurer_read on public.protection_treatment_episodes;
+create policy pte_insurer_read on public.protection_treatment_episodes for select to authenticated
+  using (public.is_active_insurer(insurer_id));
+drop policy if exists pte_admin_all on public.protection_treatment_episodes;
+create policy pte_admin_all on public.protection_treatment_episodes for all to authenticated
+  using (public.is_super_admin()) with check (public.is_super_admin());
+revoke insert, update, delete on public.protection_treatment_episodes from authenticated;
+grant select on public.protection_treatment_episodes to authenticated;
+
+create table if not exists public.protection_milestones (
+  id uuid primary key default gen_random_uuid(),
+  episode_id uuid not null references public.protection_treatment_episodes(id) on delete cascade,
+  membership_id uuid not null references public.protection_memberships(id) on delete cascade,
+  policy_id uuid not null references public.protection_policies(id) on delete cascade,
+  insurer_id uuid not null references public.insurers(id) on delete cascade,
+  milestone_type text not null check (milestone_type in ('entry','course','reengagement')),
+  ordinal integer not null default 1,
+  status text not null default 'verified' check (status in ('verified','disputed','void')),
+  service_date date not null,
+  verified_by uuid not null references public.therapists(id),
+  verified_at timestamptz not null default now(),
+  evidence jsonb not null default '{}'::jsonb,
+  claim_id uuid references public.protection_claims(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+-- One verification per episode+type+ordinal (re-verification = new episode).
+create unique index if not exists pm_episode_milestone_uq
+  on public.protection_milestones (episode_id, milestone_type, ordinal);
+create index if not exists pm_membership_idx on public.protection_milestones (membership_id, created_at desc);
+create index if not exists pm_policy_idx on public.protection_milestones (policy_id, status);
+create index if not exists pm_insurer_idx on public.protection_milestones (insurer_id, created_at desc);
+alter table public.protection_milestones enable row level security;
+drop policy if exists pm_member_read on public.protection_milestones;
+create policy pm_member_read on public.protection_milestones for select to authenticated
+  using (exists (select 1 from public.protection_memberships m
+    where m.id = membership_id and m.user_id = auth.uid()));
+drop policy if exists pm_therapist_read on public.protection_milestones;
+create policy pm_therapist_read on public.protection_milestones for select to authenticated
+  using (verified_by = auth.uid());
+drop policy if exists pm_insurer_read on public.protection_milestones;
+create policy pm_insurer_read on public.protection_milestones for select to authenticated
+  using (public.is_active_insurer(insurer_id));
+drop policy if exists pm_admin_all on public.protection_milestones;
+create policy pm_admin_all on public.protection_milestones for all to authenticated
+  using (public.is_super_admin()) with check (public.is_super_admin());
+revoke insert, update, delete on public.protection_milestones from authenticated;
+grant select on public.protection_milestones to authenticated;
+
+alter table public.protection_claims
+  add column if not exists milestone_id uuid references public.protection_milestones(id) on delete set null;
+create unique index if not exists pcl_milestone_guard
+  on public.protection_claims (milestone_id)
+  where milestone_id is not null and status not in ('cancelled','rejected');
+
+-- Actuarial modelling workbench runs (super-admin only; aggregate/synthetic
+-- data only — never member-level clinical or behavioural data).
+create table if not exists public.protection_actuarial_runs (
+  id uuid primary key default gen_random_uuid(),
+  model_version text not null,
+  scenario_label text,
+  methodology text,
+  params jsonb not null default '{}'::jsonb,
+  dataset jsonb,
+  outputs jsonb not null default '{}'::jsonb,
+  created_by uuid references public.profiles(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+alter table public.protection_actuarial_runs enable row level security;
+drop policy if exists par_admin_all on public.protection_actuarial_runs;
+create policy par_admin_all on public.protection_actuarial_runs for all to authenticated
+  using (public.is_super_admin()) with check (public.is_super_admin());
+revoke all on public.protection_actuarial_runs from anon, authenticated;
+grant select, insert on public.protection_actuarial_runs to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Member: start a treatment episode against an active policy + therapist.
+-- ---------------------------------------------------------------------------
+create or replace function public.member_start_episode(
+  p_policy_id uuid, p_therapist_id uuid, p_plan_ref text default null
+)
+returns uuid
+language plpgsql security definer set search_path = pg_catalog, public as $$
+declare
+  v_uid uuid := auth.uid();
+  v_pol public.protection_policies;
+  v_ins uuid;
+  v_id uuid;
+begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  perform public.protection_require_mode(array['pilot','live']);
+  select p.* into v_pol from public.protection_policies p
+  join public.protection_memberships m on m.id = p.membership_id
+  where p.id = p_policy_id and m.user_id = v_uid;
+  if not found then raise exception 'Policy not found'; end if;
+  if v_pol.status not in ('active','grace') then raise exception 'Policy is not in force'; end if;
+  select insurer_id into v_ins from public.protection_policies where id = p_policy_id;
+  if not exists (select 1 from public.therapists t where t.id = p_therapist_id and t.status = 'active') then
+    raise exception 'Therapist is not active';
+  end if;
+  insert into public.protection_treatment_episodes
+    (membership_id, policy_id, insurer_id, therapist_id, treatment_plan_ref, created_by)
+  values (v_pol.membership_id, p_policy_id, v_ins, p_therapist_id, nullif(btrim(p_plan_ref),''), v_uid)
+  returning id into v_id;
+  return v_id;
+end $$;
+revoke execute on function public.member_start_episode(uuid,uuid,text) from public, anon;
+grant execute on function public.member_start_episode(uuid,uuid,text) to authenticated;
+
+create or replace function public.member_list_my_milestones()
+returns jsonb language plpgsql security definer set search_path = pg_catalog, public as $$
+declare v_uid uuid := auth.uid(); begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  return jsonb_build_object(
+    'episodes', coalesce((select jsonb_agg(jsonb_build_object(
+        'id', e.id, 'status', e.status, 'started_at', e.started_at,
+        'plan_ref', e.treatment_plan_ref, 'therapist_id', e.therapist_id,
+        'specialty', t.specialty) order by e.created_at desc)
+      from public.protection_treatment_episodes e
+      left join public.therapists t on t.id = e.therapist_id
+      join public.protection_memberships m on m.id = e.membership_id
+      where m.user_id = v_uid), '[]'::jsonb),
+    'milestones', coalesce((select jsonb_agg(jsonb_build_object(
+        'id', ms.id, 'episode_id', ms.episode_id, 'milestone_type', ms.milestone_type,
+        'ordinal', ms.ordinal, 'service_date', ms.service_date, 'status', ms.status,
+        'claim_id', ms.claim_id, 'created_at', ms.created_at) order by ms.created_at desc)
+      from public.protection_milestones ms
+      join public.protection_memberships m on m.id = ms.membership_id
+      where m.user_id = v_uid), '[]'::jsonb)
+  );
+end $$;
+revoke execute on function public.member_list_my_milestones() from public, anon;
+grant execute on function public.member_list_my_milestones() to authenticated;
+
+create or replace function public.therapist_list_assigned_episodes()
+returns jsonb language plpgsql security definer set search_path = pg_catalog, public as $$
+declare v_uid uuid := auth.uid(); begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  if not exists (select 1 from public.therapists t where t.id = v_uid and t.status = 'active') then
+    raise exception 'Active therapist verification required';
+  end if;
+  return coalesce((select jsonb_agg(jsonb_build_object(
+      'id', e.id, 'status', e.status, 'started_at', e.started_at,
+      'plan_ref', e.treatment_plan_ref, 'member_reference', m.member_reference,
+      'policy_number', p.policy_number,
+      'milestones', coalesce((select jsonb_agg(jsonb_build_object(
+          'id', ms.id, 'milestone_type', ms.milestone_type, 'ordinal', ms.ordinal,
+          'service_date', ms.service_date, 'status', ms.status) order by ms.ordinal)
+        from public.protection_milestones ms where ms.episode_id = e.id), '[]'::jsonb)
+    ) order by e.created_at desc)
+    from public.protection_treatment_episodes e
+    join public.protection_memberships m on m.id = e.membership_id
+    join public.protection_policies p on p.id = e.policy_id
+    where e.therapist_id = v_uid), '[]'::jsonb);
+end $$;
+revoke execute on function public.therapist_list_assigned_episodes() from public, anon;
+grant execute on function public.therapist_list_assigned_episodes() to authenticated;
+
+create or replace function public.therapist_verify_milestone(
+  p_episode_id uuid, p_milestone_type text, p_ordinal integer default 1,
+  p_service_date date default current_date, p_evidence jsonb default '{}'::jsonb
+)
+returns uuid language plpgsql security definer set search_path = pg_catalog, public as $$
+declare
+  v_uid uuid := auth.uid();
+  v_ep public.protection_treatment_episodes;
+  v_id uuid;
+begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  if not exists (select 1 from public.therapists t where t.id = v_uid and t.status = 'active') then
+    raise exception 'Active therapist verification required';
+  end if;
+  perform public.protection_require_mode(array['pilot','live']);
+  if p_milestone_type not in ('entry','course','reengagement') then
+    raise exception 'Invalid milestone type';
+  end if;
+  select * into v_ep from public.protection_treatment_episodes
+  where id = p_episode_id and therapist_id = v_uid for update;
+  if not found then raise exception 'Episode not found or not assigned to you'; end if;
+  if v_ep.status not in ('open','interrupted') then raise exception 'Episode is not verifiable'; end if;
+  if p_milestone_type = 'reengagement' and not exists (
+    select 1 from public.protection_treatment_episodes prev
+    where prev.membership_id = v_ep.membership_id and prev.id <> v_ep.id
+      and prev.status in ('completed','interrupted','closed')
+  ) then raise exception 'Re-engagement requires a prior treatment episode'; end if;
+  if exists (select 1 from public.protection_milestones ms
+             where ms.episode_id = p_episode_id and ms.milestone_type = p_milestone_type
+               and ms.ordinal = coalesce(p_ordinal,1)) then
+    raise exception 'Milestone already verified for this episode';
+  end if;
+  insert into public.protection_milestones
+    (episode_id, membership_id, policy_id, insurer_id, milestone_type, ordinal,
+     service_date, verified_by, evidence)
+  values (p_episode_id, v_ep.membership_id, v_ep.policy_id, v_ep.insurer_id,
+          p_milestone_type, coalesce(p_ordinal,1), coalesce(p_service_date, current_date),
+          v_uid, coalesce(p_evidence,'{}'::jsonb) - 'clinical_notes')
+  returning id into v_id;
+  return v_id;
+end $$;
+revoke execute on function public.therapist_verify_milestone(uuid,text,integer,date,jsonb) from public, anon;
+grant execute on function public.therapist_verify_milestone(uuid,text,integer,date,jsonb) to authenticated;
+
+create or replace function public.member_submit_milestone_claim(p_milestone_id uuid)
+returns uuid language plpgsql security definer set search_path = pg_catalog, public as $$
+declare
+  v_uid uuid := auth.uid();
+  v_ms public.protection_milestones;
+  v_pol public.protection_policies;
+  v_ver record;
+  v_b public.protection_benefits;
+  v_amount numeric;
+  v_used numeric;
+  v_claim_id uuid;
+begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  perform public.protection_require_mode(array['pilot','live']);
+  select ms.* into v_ms from public.protection_milestones ms
+  join public.protection_memberships m on m.id = ms.membership_id
+  where ms.id = p_milestone_id and m.user_id = v_uid;
+  if not found then raise exception 'Milestone not found'; end if;
+  if v_ms.status <> 'verified' then raise exception 'Milestone is not verified'; end if;
+  if v_ms.claim_id is not null then raise exception 'Milestone already has a claim'; end if;
+  select p.* into v_pol from public.protection_policies p where p.id = v_ms.policy_id;
+  if v_pol.status not in ('active','grace') then raise exception 'Policy is not in force'; end if;
+  select pv.id as version_id, pv.benefit_structure, pv.terms into v_ver
+  from public.protection_policies p
+  join public.protection_plan_versions pv on pv.id = p.plan_version_id
+  where p.id = v_ms.policy_id;
+  select * into v_b from public.protection_benefits b
+  where b.plan_version_id = v_ver.version_id
+    and b.milestone_type = v_ms.milestone_type
+    and (b.milestone_ordinal is null or b.milestone_ordinal = v_ms.ordinal)
+    and b.is_active
+    and (b.effective_from is null or b.effective_from <= v_ms.service_date)
+    and (b.effective_to is null or b.effective_to >= v_ms.service_date)
+  order by b.milestone_ordinal nulls last limit 1;
+  if not found then raise exception 'No benefit covers this milestone'; end if;
+  declare v_wait int := greatest(
+    coalesce((v_ver.terms->>'waiting_period_days')::int, 0),
+    coalesce(v_b.waiting_period_days, 0)); begin
+    if v_ms.service_date < v_pol.commencement_date + v_wait then
+      raise exception 'Waiting period has not elapsed for this milestone';
+    end if;
+  end;
+  v_amount := coalesce(v_b.fixed_amount, 0);
+  if v_amount <= 0 then raise exception 'Benefit has no fixed amount configured'; end if;
+  if v_b.per_event_limit is not null and v_amount > v_b.per_event_limit then
+    v_amount := v_b.per_event_limit;
+  end if;
+  v_used := public.protection_benefit_used(v_pol.id, v_b.id, extract(year from v_ms.service_date)::int);
+  if v_b.per_policy_limit is not null and v_used + v_amount > v_b.per_policy_limit then
+    raise exception 'Per-policy benefit limit would be exceeded';
+  end if;
+  if v_b.annual_limit is not null and v_used + v_amount > v_b.annual_limit then
+    raise exception 'Annual benefit limit would be exceeded';
+  end if;
+  if v_b.frequency_limit is not null and
+     (select count(*) from public.protection_claims c
+      where c.policy_id = v_pol.id and c.benefit_id = v_b.id
+        and c.status not in ('cancelled','rejected')
+        and extract(year from c.event_date) = extract(year from v_ms.service_date)) >= v_b.frequency_limit then
+    raise exception 'Benefit frequency limit reached';
+  end if;
+  if v_ver.terms->>'aggregate_limit_kes' is not null then
+    declare v_agg numeric; begin
+      select coalesce(sum(coalesce(c.approved_amount, c.claimed_amount)),0) into v_agg
+      from public.protection_claims c where c.policy_id = v_pol.id
+        and c.status not in ('cancelled','rejected');
+      if v_agg + v_amount > (v_ver.terms->>'aggregate_limit_kes')::numeric then
+        raise exception 'Policy aggregate limit would be exceeded';
+      end if;
+    end;
+  end if;
+  insert into public.protection_claims
+    (membership_id, policy_id, insurer_id, benefit_id, milestone_id, claim_type,
+     status, event_description, event_date, claimed_amount, created_by)
+  values (v_ms.membership_id, v_pol.id, v_pol.insurer_id, v_b.id, v_ms.id,
+          'fixed_sum', 'submitted',
+          'Treatment milestone: ' || v_ms.milestone_type || ' #' || v_ms.ordinal,
+          v_ms.service_date, v_amount, v_uid)
+  returning id into v_claim_id;
+  update public.protection_milestones set claim_id = v_claim_id where id = v_ms.id;
+  perform public.protection_claim_event(v_claim_id, 'submitted',
+    jsonb_build_object('milestone_id', v_ms.id, 'milestone_type', v_ms.milestone_type,
+                       'service_date', v_ms.service_date));
+  return v_claim_id;
+end $$;
+revoke execute on function public.member_submit_milestone_claim(uuid) from public, anon;
+grant execute on function public.member_submit_milestone_claim(uuid) to authenticated;
+
+create or replace function public.insurer_get_claim_milestone(p_claim_id uuid)
+returns jsonb language plpgsql security definer set search_path = pg_catalog, public as $$
+declare
+  v_ins uuid := public.protection_insurer_id(); v_result jsonb;
+begin
+  if v_ins is null then raise exception 'Active insurer access required'; end if;
+  select jsonb_build_object(
+    'milestone_type', ms.milestone_type, 'ordinal', ms.ordinal,
+    'service_date', ms.service_date, 'status', ms.status,
+    'verified_at', ms.verified_at, 'evidence', ms.evidence,
+    'episode_status', e.status, 'plan_ref', e.treatment_plan_ref
+  ) into v_result
+  from public.protection_claims c
+  join public.protection_milestones ms on ms.id = c.milestone_id
+  join public.protection_treatment_episodes e on e.id = ms.episode_id
+  where c.id = p_claim_id and c.insurer_id = v_ins;
+  if v_result is null then raise exception 'Milestone not found'; end if;
+  perform public.protection_log_access('get_claim_milestone','protection_milestones',p_claim_id::text,'claims adjudication');
+  return v_result;
+end $$;
+revoke execute on function public.insurer_get_claim_milestone(uuid) from public, anon;
+grant execute on function public.insurer_get_claim_milestone(uuid) to authenticated;
+
+create or replace function public.admin_save_actuarial_run(
+  p_model_version text, p_scenario_label text, p_methodology text,
+  p_params jsonb, p_dataset jsonb, p_outputs jsonb
+)
+returns uuid language plpgsql security definer set search_path = pg_catalog, public as $$
+declare v_id uuid;
+begin
+  if not public.is_super_admin() then raise exception 'Super-admin only'; end if;
+  if p_model_version is null or btrim(p_model_version) = '' then raise exception 'Model version required'; end if;
+  insert into public.protection_actuarial_runs
+    (model_version, scenario_label, methodology, params, dataset, outputs, created_by)
+  values (left(btrim(p_model_version),40), left(coalesce(p_scenario_label,''),80),
+          left(coalesce(p_methodology,''),2000), coalesce(p_params,'{}'::jsonb),
+          p_dataset, coalesce(p_outputs,'{}'::jsonb), auth.uid())
+  returning id into v_id;
+  perform public.log_admin_action('actuarial_run_saved','protection_actuarial_runs',v_id::text,
+    jsonb_build_object('model_version', p_model_version, 'scenario', p_scenario_label));
+  return v_id;
+end $$;
+revoke execute on function public.admin_save_actuarial_run(text,text,text,jsonb,jsonb,jsonb) from public, anon;
+grant execute on function public.admin_save_actuarial_run(text,text,text,jsonb,jsonb,jsonb) to authenticated;
+
+create or replace function public.admin_list_actuarial_runs()
+returns jsonb language plpgsql security definer set search_path = pg_catalog, public as $$
+begin
+  if not public.is_super_admin() then raise exception 'Super-admin only'; end if;
+  return coalesce((select jsonb_agg(jsonb_build_object(
+      'id', r.id, 'model_version', r.model_version, 'scenario_label', r.scenario_label,
+      'methodology', r.methodology, 'params', r.params, 'outputs', r.outputs,
+      'created_at', r.created_at) order by r.created_at desc)
+    from (select * from public.protection_actuarial_runs order by created_at desc limit 50) r), '[]'::jsonb);
+end $$;
+revoke execute on function public.admin_list_actuarial_runs() from public, anon;
+grant execute on function public.admin_list_actuarial_runs() to authenticated;
+
+create or replace function public.insurer_upsert_benefit(
+  p_plan_version_id uuid, p_benefit_code text, p_name text, p_benefit_type text,
+  p_fixed_amount numeric, p_per_event_limit numeric, p_per_policy_limit numeric,
+  p_annual_limit numeric, p_waiting_period_days integer, p_frequency_limit integer,
+  p_evidence_requirements jsonb,
+  p_milestone_type text default null, p_milestone_ordinal integer default null,
+  p_effective_from date default null, p_effective_to date default null,
+  p_is_active boolean default true
+) returns uuid language plpgsql security definer set search_path = pg_catalog, public as $$
+declare
+  v_ins uuid := public.protection_insurer_id(); v_ver record; v_id uuid;
+begin
+  if v_ins is null then raise exception 'Active insurer access required'; end if;
+  perform public.protection_require_mode(array['pilot','live']);
+  select pv.* into v_ver from public.protection_plan_versions pv
+  where pv.id = p_plan_version_id and pv.insurer_id = v_ins;
+  if not found then raise exception 'Product version not found'; end if;
+  if v_ver.status <> 'draft' then raise exception 'Only draft versions can be edited'; end if;
+  if p_milestone_type is not null and p_milestone_type not in ('entry','course','reengagement','other') then
+    raise exception 'Invalid milestone type';
+  end if;
+  insert into public.protection_benefits
+    (plan_version_id, benefit_code, name, benefit_type, fixed_amount,
+     per_event_limit, per_policy_limit, annual_limit, waiting_period_days,
+     frequency_limit, evidence_requirements, milestone_type, milestone_ordinal,
+     effective_from, effective_to, is_active)
+  values (p_plan_version_id, upper(btrim(p_benefit_code)), btrim(p_name), p_benefit_type,
+          p_fixed_amount, p_per_event_limit, p_per_policy_limit, p_annual_limit,
+          coalesce(p_waiting_period_days,0), p_frequency_limit,
+          coalesce(p_evidence_requirements,'[]'::jsonb), p_milestone_type,
+          p_milestone_ordinal, p_effective_from, p_effective_to, coalesce(p_is_active,true))
+  on conflict (plan_version_id, benefit_code) do update set
+    name = excluded.name, benefit_type = excluded.benefit_type,
+    fixed_amount = excluded.fixed_amount, per_event_limit = excluded.per_event_limit,
+    per_policy_limit = excluded.per_policy_limit, annual_limit = excluded.annual_limit,
+    waiting_period_days = excluded.waiting_period_days,
+    frequency_limit = excluded.frequency_limit,
+    evidence_requirements = excluded.evidence_requirements,
+    milestone_type = excluded.milestone_type, milestone_ordinal = excluded.milestone_ordinal,
+    effective_from = excluded.effective_from, effective_to = excluded.effective_to,
+    is_active = excluded.is_active
+  returning id into v_id;
+  return v_id;
+end $$;
+revoke execute on function public.insurer_upsert_benefit(uuid,text,text,text,numeric,numeric,numeric,numeric,integer,integer,jsonb,text,integer,date,date,boolean) from public, anon;
+grant execute on function public.insurer_upsert_benefit(uuid,text,text,text,numeric,numeric,numeric,numeric,integer,integer,jsonb,text,integer,date,date,boolean) to authenticated;

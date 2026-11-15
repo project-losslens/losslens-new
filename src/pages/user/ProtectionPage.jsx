@@ -33,6 +33,7 @@ export default function ProtectionPage() {
   const [data, setData] = useState({ memberships: [], consents: [], events: [] })
   const [cover, setCover] = useState({ policies: [], benefits: [] })
   const [claims, setClaims] = useState([])
+  const [milestones, setMilestones] = useState({ episodes: [], milestones: [] })
   const [therapists, setTherapists] = useState([])
   const [insurerId, setInsurerId] = useState('')
   const [memberRef, setMemberRef] = useState('')
@@ -47,16 +48,18 @@ export default function ProtectionPage() {
   const load = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { navigate('/login'); return }
-    const [prot, cov, cls, ths, ins] = await Promise.all([
+    const [prot, cov, cls, ms, ths, ins] = await Promise.all([
       supabase.rpc('member_list_my_protection'),
       supabase.rpc('member_list_my_cover'),
       supabase.rpc('member_list_my_claims'),
+      supabase.rpc('member_list_my_milestones'),
       supabase.rpc('member_list_therapists'),
       supabase.from('insurers').select('id, name').eq('status', 'active'),
     ])
     setData(prot.data || { memberships: [], consents: [], events: [] })
     setCover(cov.data || { policies: [], benefits: [] })
     setClaims(Array.isArray(cls.data) ? cls.data : (cls.data || []))
+    setMilestones(ms.data || { episodes: [], milestones: [] })
     setTherapists(ths.data || [])
     setInsurers(ins.data || [])
   }, [navigate])
@@ -230,6 +233,15 @@ export default function ProtectionPage() {
     await loadEvidence(claimId)
   }
 
+  const claimMilestone = async (milestoneId) => {
+    setSaving(true)
+    const { error } = await supabase.rpc('member_submit_milestone_claim', { p_milestone_id: milestoneId })
+    setSaving(false)
+    if (error) { toast.error(error.message || 'Could not submit claim.'); return }
+    toast.success('Milestone claim submitted for insurer review.')
+    await load()
+  }
+
   const leave = async () => {
     if (!confirm('Leave Protection? Your membership will end, consents are revoked and in-force policies cancelled.')) return
     const { error } = await supabase.rpc('member_leave_protection', { p_membership_id: membership.id })
@@ -391,6 +403,35 @@ export default function ProtectionPage() {
               <button className="btn-primary" onClick={submitClaim} disabled={saving || !claimForm.benefit_code}>
                 {saving ? <BrandLoader variant="inline" showWordmark={false} /> : 'Submit claim'}
               </button>
+            </div>
+          )}
+
+          {(milestones.milestones?.length > 0 || milestones.episodes?.length > 0) && (
+            <div className="dash-section" style={{ marginBottom: '1rem' }}>
+              <h2 className="fs-15" style={{ color: '#2DD4BF', marginBottom: '10px' }}>Treatment milestones</h2>
+              <p className="fs-11" style={{ color: 'rgba(255,255,255,0.45)', marginBottom: '8px' }}>
+                Your clinician verifies treatment milestones. A verified milestone can be claimed once — the insurer decides the claim.
+              </p>
+              {(milestones.episodes || []).map(e => (
+                <p key={e.id} className="fs-12" style={{ color: 'rgba(255,255,255,0.6)', margin: '4px 0' }}>
+                  Treatment episode · {e.status}{e.specialty ? ` · ${e.specialty}` : ''} · started {e.started_at}
+                </p>
+              ))}
+              {(milestones.milestones || []).map(m => (
+                <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', flexWrap: 'wrap' }}>
+                  <p className="fs-13" style={{ color: '#FFFFFF', margin: 0, flex: 1, minWidth: 160 }}>
+                    {m.milestone_type === 'entry' ? 'Entry' : m.milestone_type === 'course' ? `Course stage ${m.ordinal}` : 'Re-engagement'} · {m.service_date}
+                  </p>
+                  <span style={{ color: '#7DBDEE', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{m.status}</span>
+                  {m.claim_id
+                    ? <span className="fs-11" style={{ color: '#2DD4BF' }}>Claim submitted</span>
+                    : m.status === 'verified' && (
+                      <button className="btn-primary fs-11" style={{ padding: '4px 10px', minHeight: '30px' }} disabled={saving} onClick={() => claimMilestone(m.id)}>
+                        Claim milestone
+                      </button>
+                    )}
+                </div>
+              ))}
             </div>
           )}
 

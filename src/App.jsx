@@ -54,10 +54,12 @@ const TherapistManagement = lazy(() => import('./pages/admin/TherapistManagement
 const InsurerManagement = lazy(() => import('./pages/admin/InsurerManagement'))
 const FloatManagement = lazy(() => import('./pages/admin/FloatManagement'))
 const ProtectionOps = lazy(() => import('./pages/superadmin/ProtectionOps'))
+const ActuarialWorkbench = lazy(() => import('./pages/superadmin/ActuarialWorkbench'))
 const TherapistDashboard = lazy(() => import('./pages/therapist/TherapistDashboard'))
 const TherapistOnboarding = lazy(() => import('./pages/therapist/TherapistOnboarding'))
 const TherapistClaimForm = lazy(() => import('./pages/therapist/TherapistClaimForm'))
 const TherapistPayouts = lazy(() => import('./pages/therapist/TherapistPayouts'))
+const TherapistMilestones = lazy(() => import('./pages/therapist/TherapistMilestones'))
 const TherapistReferrals = lazy(() => import('./pages/therapist/TherapistReferrals'))
 const TherapistSessions = lazy(() => import('./pages/therapist/TherapistSessions'))
 const TherapistClaims = lazy(() => import('./pages/therapist/TherapistClaims'))
@@ -123,6 +125,7 @@ function App() {
             <Route path="/therapist/sessions" element={<TherapistSessions />} />
             <Route path="/therapist/claims" element={<TherapistClaims />} />
             <Route path="/therapist/payouts" element={<TherapistPayouts />} />
+            <Route path="/therapist/milestones" element={<TherapistMilestones />} />
           </Route>
         </Route>
         <Route element={<RequireAuth role="insurer" />}>
@@ -161,6 +164,7 @@ function App() {
             <Route path="/super-admin/insurers" element={<InsurerManagement />} />
             <Route path="/super-admin/float" element={<FloatManagement />} />
             <Route path="/super-admin/protection" element={<ProtectionOps />} />
+            <Route path="/super-admin/actuarial" element={<ActuarialWorkbench />} />
           </Route>
           <Route path="/admin/users" element={<Navigate to="/super-admin/users" replace />} />
           <Route path="/admin/insurance" element={<Navigate to="/super-admin/insurance" replace />} />

@@ -90,6 +90,7 @@ const THERAPIST_PATHS = [
   '/therapist/onboarding',
   '/therapist/claims/new',
   '/therapist/payouts',
+  '/therapist/milestones',
 ]
 
 const INSURER_PATHS = [

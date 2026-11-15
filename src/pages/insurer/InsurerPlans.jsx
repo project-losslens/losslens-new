@@ -32,7 +32,7 @@ export default function InsurerPlans() {
   const [error, setError] = useState('')
   const [form, setForm] = useState({ name: '', code: '' })
   const [versionForm, setVersionForm] = useState({ plan_id: '', benefit_structure: 'fixed_sum', premium_amount: '', premium_frequency: 'monthly', policy_term_months: '12', waiting_period_days: '0', grace_period_days: '30', aggregate_limit_kes: '' })
-  const [benefitForm, setBenefitForm] = useState({ plan_version_id: '', benefit_code: '', name: '', benefit_type: 'fixed_sum', fixed_amount: '', per_event_limit: '', per_policy_limit: '', annual_limit: '', waiting_period_days: '0', frequency_limit: '', evidence_requirements: '' })
+  const [benefitForm, setBenefitForm] = useState({ plan_version_id: '', benefit_code: '', name: '', benefit_type: 'fixed_sum', fixed_amount: '', per_event_limit: '', per_policy_limit: '', annual_limit: '', waiting_period_days: '0', frequency_limit: '', evidence_requirements: '', milestone_type: '', milestone_ordinal: '', effective_from: '', effective_to: '' })
   const [saving, setSaving] = useState(false)
 
   const load = useCallback(async () => {
@@ -115,6 +115,11 @@ export default function InsurerPlans() {
       p_waiting_period_days: Number(benefitForm.waiting_period_days) || 0,
       p_frequency_limit: benefitForm.frequency_limit === '' ? null : Number(benefitForm.frequency_limit),
       p_evidence_requirements: evidence,
+      p_milestone_type: benefitForm.milestone_type || null,
+      p_milestone_ordinal: benefitForm.milestone_ordinal === '' ? null : Number(benefitForm.milestone_ordinal),
+      p_effective_from: benefitForm.effective_from || null,
+      p_effective_to: benefitForm.effective_to || null,
+      p_is_active: true,
     })
     setSaving(false)
     if (rpcError) { toast.error(rpcError.message || 'Could not save benefit.'); return }
@@ -231,6 +236,16 @@ export default function InsurerPlans() {
           <label>Annual limit (KES, optional)<NumberField value={benefitForm.annual_limit} onChange={v => setBenefitForm({ ...benefitForm, annual_limit: v ?? '' })} min={0} /></label>
           <label>Benefit waiting period (days)<NumberField value={benefitForm.waiting_period_days} onChange={v => setBenefitForm({ ...benefitForm, waiting_period_days: v ?? '' })} min={0} /></label>
           <label>Frequency limit per year (optional)<NumberField value={benefitForm.frequency_limit} onChange={v => setBenefitForm({ ...benefitForm, frequency_limit: v ?? '' })} min={0} /></label>
+          <label>Milestone type (optional — fixed-sum milestone benefits)
+            <select value={benefitForm.milestone_type} onChange={e => setBenefitForm({ ...benefitForm, milestone_type: e.target.value })}>
+              <option value="">None</option><option value="entry">Entry</option>
+              <option value="course">Course</option><option value="reengagement">Re-engagement</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <label>Milestone ordinal (course stage)<NumberField value={benefitForm.milestone_ordinal} onChange={v => setBenefitForm({ ...benefitForm, milestone_ordinal: v ?? '' })} min={1} /></label>
+          <label>Effective from<input type="date" value={benefitForm.effective_from} onChange={e => setBenefitForm({ ...benefitForm, effective_from: e.target.value })} /></label>
+          <label>Effective to<input type="date" value={benefitForm.effective_to} onChange={e => setBenefitForm({ ...benefitForm, effective_to: e.target.value })} /></label>
           <label>Evidence requirements (semicolon-separated)<input value={benefitForm.evidence_requirements} onChange={e => setBenefitForm({ ...benefitForm, evidence_requirements: e.target.value })} placeholder="service confirmation; provider attestation" /></label>
           <button type="button" className="btn-primary" onClick={addBenefit} disabled={saving || !insurer}>
             {saving ? <BrandLoader variant="inline" showWordmark={false} /> : 'Save benefit'}
