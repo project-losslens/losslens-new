@@ -27,7 +27,7 @@ export default function AppShell({ admin = false }) {
   const [drawerForLocation, setDrawerForLocation] = useState(null)
   const drawerOpen = isMobile && drawerForLocation === location.key
   const portalNav = role === 'therapist' ? therapistNav : role === 'insurer' ? insurerNav : null
-  const isUserRole = !admin && !portalNav
+  const isUserRole = role === 'user'
   const activeNav = admin
     ? [...adminNav, ...(isSuperAdmin ? superAdminNav : [])]
     : portalNav || userNav
@@ -112,7 +112,6 @@ export default function AppShell({ admin = false }) {
             <h1>{getPageTitle(location.pathname)}</h1>
           </div>
           <div className="shell__header-actions">
-            {admin && <Link className="shell__back-link" to="/dashboard">{t('shell.backToApp')}</Link>}
             <details className="shell__account">
               <summary>
                 <UserAvatar reference={avatarReference} name={accountName} className="shell__account-avatar" size={34} />
@@ -123,7 +122,7 @@ export default function AppShell({ admin = false }) {
                   <UserAvatar reference={avatarReference} name={accountName} size={36} />
                   <span>{accountName}</span>
                 </div>
-                <Link to="/profile">{t('shell.profile')}</Link>
+                {isUserRole && <Link to="/profile">{t('shell.profile')}</Link>}
                 <button type="button" onClick={handleSignOut}>{t('shell.signOut')}</button>
               </div>
             </details>
@@ -135,7 +134,7 @@ export default function AppShell({ admin = false }) {
         </div>
       </main>
       {isUserRole && isMobile && <MobileNav onSignOut={handleSignOut} />}
-      <CrisisAccessButton />
+      {isUserRole && <CrisisAccessButton />}
     </div>
   )
 }

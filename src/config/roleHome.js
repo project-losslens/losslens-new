@@ -111,7 +111,7 @@ export function canAccessPath(role, path) {
 
   if (PUBLIC_PATHS.includes(pathname)) return true
   if (USER_PATHS.some((route) => isWithinRoute(pathname, route))) {
-    return ['user', 'admin', 'super_admin'].includes(role)
+    return role === 'user'
   }
   if (LEGACY_SUPER_ADMIN_PATHS.some((route) => isWithinRoute(pathname, route))) {
     return role === 'super_admin'
