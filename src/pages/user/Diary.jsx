@@ -372,13 +372,23 @@ function Diary() {
                 {historyLoading ? <BrandLoader variant="inline" showWordmark={false} /> :
                  historyError ? <div style={{ textAlign: 'center', padding: '1.5rem' }}><p className="fs-13" style={{ color: 'rgba(255,255,255,0.55)', marginBottom: '10px' }}>{t('diary.loadError')}</p><button type="button" className="btn-primary" onClick={() => fetchHistory(userId)}>{t('common.retry')}</button></div> :
                  historyEntries.length === 0 ? <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '1.5rem' }}>{t('diary.noEntriesHistory')}</p> :
-                 <div className="entries-list">{(showAllHistory ? historyEntries : historyEntries.slice(0, 7)).map((e, i) => (
+                 <div className="entries-list">{(showAllHistory ? historyEntries : historyEntries.slice(0, 5)).map((e, i) => (
                    <div className="entry-item" key={i} style={{ animation: `fadeIn 0.3s ease-out ${i * 0.05}s both` }}>
                      <div className="entry-top"><span className="entry-date">{new Date(e.date).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric' })}</span><span className={`entry-status ${e.gambled ? 'gambled' : 'clean'}`}>{e.gambled ? t('diary.gambledStatus') : t('diary.cleanStatus')}</span></div>
                      <div className="entry-mood">{(e.mood || '').trim() ? t(`diary.mood.${(e.mood || '').trim()}`) === `diary.mood.${(e.mood || '').trim()}` ? (e.mood || '').trim() : t(`diary.mood.${(e.mood || '').trim()}`) : t('diary.noMood')}</div>
                      {e.notes && <p className="entry-note">{e.notes}</p>}
                    </div>
                  ))}</div>}
+                {!historyLoading && !historyError && historyEntries.length > 5 && (
+                  <button
+                    type="button"
+                    className="btn-ghost fs-12"
+                    onClick={() => setShowAllHistory(value => !value)}
+                    style={{ marginTop: '0.75rem' }}
+                  >
+                    {showAllHistory ? 'Show fewer entries' : 'Show more entries'}
+                  </button>
+                )}
               </div>
             </>
           )}

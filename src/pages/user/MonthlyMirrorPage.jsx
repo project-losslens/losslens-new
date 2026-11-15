@@ -132,7 +132,21 @@ export default function MonthlyMirrorPage() {
         .eq('user_id', uid)
         .order('created_at', { ascending: false })
 
-      const thisMonth = (allData || []).filter(r => r.month === activeMonth)
+      const thisMonth = await Promise.all((allData || [])
+        .filter(r => r.month === activeMonth)
+        .map(async (recording) => {
+          if (!recording.storage_path || recording.storage_path === 'pending') {
+            return { ...recording, _signedUrl: null, _signedUrlError: 'Recording path is unavailable.' }
+          }
+          const { data: signed, error: signError } = await supabase.storage
+            .from('mirror-recordings')
+            .createSignedUrl(recording.storage_path, 3600)
+          return {
+            ...recording,
+            _signedUrl: signError ? null : signed?.signedUrl || null,
+            _signedUrlError: signError?.message || null,
+          }
+        }))
 
       // Pending from localStorage
       const localKey = `mirror_fallback_${activeMonth}`
@@ -441,14 +455,6 @@ export default function MonthlyMirrorPage() {
     document.body.removeChild(a)
   }
 
-  const getPublicUrl = (path) => {
-    if (!path || path === 'pending') return ''
-    try {
-      const { data } = supabase.storage.from('mirror-recordings').getPublicUrl(path)
-      return data?.publicUrl || ''
-    } catch { return '' }
-  }
-
   const formatTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 
   const navigateMonth = (dir) => {
@@ -635,7 +641,7 @@ export default function MonthlyMirrorPage() {
                   <div key={r.id} style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px' }}>
                       <div style={{ width: '64px', height: '44px', borderRadius: '4px', background: '#0B1220', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
-                        <video src={getPublicUrl(r.storage_path)} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} preload="metadata" muted playsInline />
+                        <video src={r._signedUrl || undefined} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} preload="metadata" muted playsInline />
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(11,18,32,0.3)' }}>
                           <AppIcon name="camera" size={16} style={{ color: '#FFFFFF' }} />
                         </div>
@@ -650,13 +656,15 @@ export default function MonthlyMirrorPage() {
                       </div>
                       <div style={{ display: 'flex', gap: '3px', flexShrink: 0 }}>
                         <button onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)} style={{ background: expandedPlayer === r.id ? 'rgba(255,255,255,0.12)' : 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label={expandedPlayer === r.id ? 'Collapse video' : 'Expand video'}>{expandedPlayer === r.id ? '▼' : '▶'}</button>
-                        <button onClick={() => handleDownload(getPublicUrl(r.storage_path), `precious-${activeMonth}-reflection.webm`)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Download" aria-label="Download recording"><AppIcon name="download" size={14} /></button>
+                        <button onClick={() => handleDownload(r._signedUrl, `precious-${activeMonth}-reflection.webm`)} disabled={!r._signedUrl} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: r._signedUrl ? 'pointer' : 'not-allowed', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title={r._signedUrl ? 'Download' : 'Secure file link unavailable'} aria-label="Download recording"><AppIcon name="download" size={14} /></button>
                         <button onClick={() => handleDelete(r.id, r.storage_path)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Delete" aria-label="Delete recording"></button>
                       </div>
                     </div>
                     {expandedPlayer === r.id && (
                       <div style={{ borderTop: '1px solid rgba(255,255,255,0.12)', background: '#0B1220' }}>
-                        <video controls autoPlay style={{ width: '100%', display: 'block', maxHeight: '300px' }} src={getPublicUrl(r.storage_path)} />
+                        {r._signedUrl
+                          ? <video controls autoPlay style={{ width: '100%', display: 'block', maxHeight: '300px' }} src={r._signedUrl} />
+                          : <p role="alert" className="portal-notice">{r._signedUrlError || 'Could not create a secure link for this recording.'}</p>}
                       </div>
                     )}
                   </div>

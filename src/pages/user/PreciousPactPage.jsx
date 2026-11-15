@@ -92,7 +92,20 @@ export default function LossLensPactPage() {
     try {
       const { data, error: pactsErrorRes } = await supabase.from('precious_pacts').select('*').eq('user_id', uid).order('created_at', { ascending: false }).limit(30)
       if (pactsErrorRes) throw pactsErrorRes
-      const syncedPacts = (data || []).map(p => ({ ...p, _synced: true }))
+      const syncedPacts = await Promise.all((data || []).map(async (pact) => {
+        if (!pact.storage_path || pact.storage_path === STORAGE_PATH_WRITTEN || pact.storage_path === STORAGE_PATH_PENDING) {
+          return { ...pact, _synced: true }
+        }
+        const { data: signed, error: signError } = await supabase.storage
+          .from('precious-pacts')
+          .createSignedUrl(pact.storage_path, 3600)
+        return {
+          ...pact,
+          _synced: true,
+          _signedUrl: signError ? null : signed?.signedUrl || null,
+          _signedUrlError: signError?.message || null,
+        }
+      }))
 
       //  User-specific localStorage key
       const localKey = `losslens_pacts_${uid}`
@@ -289,14 +302,6 @@ export default function LossLensPactPage() {
     }
   }
 
-  const getPublicUrl = (path) => {
-    if (!path || path === STORAGE_PATH_PENDING) return null
-    try {
-      const { data } = supabase.storage.from('precious-pacts').getPublicUrl(path)
-      return data?.publicUrl || null
-    } catch { return null }
-  }
-
   const saveWrittenPact = async () => {
     if (!writtenPact.trim() || writtenPact.length > MAX_WRITTEN_LENGTH) return
     const { data: { session } } = await supabase.auth.getSession()
@@ -476,14 +481,20 @@ export default function LossLensPactPage() {
                             aria-label={expandedPlayer === pact.id ? 'Collapse' : 'Expand'}>{expandedPlayer === pact.id ? '▲' : ''}</button>
                         )}
                         {!pact._pending && pact.storage_path !== STORAGE_PATH_WRITTEN && (
-                          <a href={getPublicUrl(pact.storage_path) || '#'} download style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }} aria-label="Download"><AppIcon name="download" size={14} /></a>
+                          pact._signedUrl
+                            ? <a href={pact._signedUrl} download style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }} aria-label="Download"><AppIcon name="download" size={14} /></a>
+                            : <span role="alert" title={pact._signedUrlError || 'Secure file link unavailable'} style={{ color: '#ff9b9b', fontSize: '10px' }}>Link unavailable</span>
                         )}
                         <button onClick={() => setDeleteConfirm({ id: pact.id, path: pact.storage_path, isLocal: pact._pending, localIndex: pact._localIndex })} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px' }} aria-label="Delete"></button>
                       </div>
                     </div>
                     {expandedPlayer === pact.id && pact.storage_path !== STORAGE_PATH_WRITTEN && (
                       <div style={{ borderTop: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', padding: '12px' }}>
-                        <audio controls autoPlay style={{ width: '100%' }} src={pact._pending ? pact._localUrl : getPublicUrl(pact.storage_path)} onPlay={() => incrementPlayCount(pact.id)} />
+                        {pact._pending
+                          ? <audio controls autoPlay style={{ width: '100%' }} src={pact._localUrl} />
+                          : pact._signedUrl
+                            ? <audio controls autoPlay style={{ width: '100%' }} src={pact._signedUrl} onPlay={() => incrementPlayCount(pact.id)} />
+                            : <p role="alert" className="portal-notice">{pact._signedUrlError || 'Could not create a secure link for this recording.'}</p>}
                       </div>
                     )}
                     {expandedPlayer === pact.id && pact.storage_path === STORAGE_PATH_WRITTEN && (
