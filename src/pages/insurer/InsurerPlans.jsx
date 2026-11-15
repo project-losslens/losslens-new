@@ -171,6 +171,20 @@ export default function InsurerPlans() {
                 </p>
               </div>
               <span style={{ color: v.status === 'approved' ? '#2DD4BF' : v.status === 'draft' ? '#F2C879' : 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{v.status.replace(/_/g, ' ')}</span>
+              {v.status === 'draft' && (
+                <>
+                  <button type="button" className="btn-primary fs-11" style={{ padding: '4px 10px', minHeight: '30px' }} onClick={async () => {
+                    const { error } = await supabase.rpc('insurer_submit_plan_version', { p_version_id: v.id })
+                    if (error) toast.error(error.message || 'Submit failed.')
+                    else { toast.success('Version submitted for approval.'); await load() }
+                  }}>Submit</button>
+                  <button type="button" className="btn-ghost fs-11" style={{ padding: '4px 10px', minHeight: '30px' }} onClick={async () => {
+                    const { error } = await supabase.rpc('insurer_withdraw_plan_version', { p_version_id: v.id })
+                    if (error) toast.error(error.message || 'Withdraw failed.')
+                    else { toast.success('Version withdrawn.'); await load() }
+                  }}>Withdraw</button>
+                </>
+              )}
             </div>
             {versionBenefits(v.id).length > 0 && (
               <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '11px', margin: '6px 0 0' }}>

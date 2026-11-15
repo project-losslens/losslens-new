@@ -223,7 +223,16 @@ export default function ProtectionOps() {
             </div>
             <span style={{ color: v.status === 'approved' ? '#2DD4BF' : '#F2C879', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{v.status.replace(/_/g, ' ')}</span>
             {v.status !== 'approved' && (
-              <button type="button" className="btn-primary fs-11" style={{ padding: '6px 10px', minHeight: '32px' }} onClick={() => approveVersion(v)}>Approve</button>
+              <>
+                <button type="button" className="btn-primary fs-11" style={{ padding: '6px 10px', minHeight: '32px' }} onClick={() => approveVersion(v)}>Approve</button>
+                <button type="button" className="btn-ghost fs-11" style={{ padding: '6px 10px', minHeight: '32px' }} onClick={async () => {
+                  const reason = prompt('Rejection reason (optional):')
+                  if (reason === null) return
+                  const { error } = await supabase.rpc('admin_reject_plan_version', { p_version_id: v.id, p_reason: reason || null })
+                  if (error) toast.error(error.message || 'Reject failed.')
+                  else { toast.success('Version rejected.'); await load() }
+                }}>Reject</button>
+              </>
             )}
           </div>
         ))}

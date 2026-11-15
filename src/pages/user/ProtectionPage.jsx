@@ -34,6 +34,7 @@ export default function ProtectionPage() {
   const [cover, setCover] = useState({ policies: [], benefits: [] })
   const [claims, setClaims] = useState([])
   const [milestones, setMilestones] = useState({ episodes: [], milestones: [] })
+  const [episodeForm, setEpisodeForm] = useState({ therapist_id: '', plan_ref: '' })
   const [therapists, setTherapists] = useState([])
   const [insurerId, setInsurerId] = useState('')
   const [memberRef, setMemberRef] = useState('')
@@ -233,6 +234,20 @@ export default function ProtectionPage() {
     await loadEvidence(claimId)
   }
 
+  const startEpisode = async () => {
+    if (!activePolicy || !episodeForm.therapist_id) { toast.error('Choose a therapist for your active policy.'); return }
+    setSaving(true)
+    const { error } = await supabase.rpc('member_start_episode', {
+      p_policy_id: activePolicy.id, p_therapist_id: episodeForm.therapist_id,
+      p_plan_ref: episodeForm.plan_ref.trim() || null,
+    })
+    setSaving(false)
+    if (error) { toast.error(error.message || 'Could not start episode.'); return }
+    toast.success('Treatment episode started — your clinician can now verify milestones.')
+    setEpisodeForm({ therapist_id: '', plan_ref: '' })
+    await load()
+  }
+
   const claimMilestone = async (milestoneId) => {
     setSaving(true)
     const { error } = await supabase.rpc('member_submit_milestone_claim', { p_milestone_id: milestoneId })
@@ -417,6 +432,22 @@ export default function ProtectionPage() {
                   Treatment episode · {e.status}{e.specialty ? ` · ${e.specialty}` : ''} · started {e.started_at}
                 </p>
               ))}
+              {activePolicy && ['active','grace'].includes(activePolicy.status) && therapists.length > 0 && (
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'end', margin: '8px 0' }}>
+                  <label className="fs-11" style={{ color: 'rgba(255,255,255,0.6)' }}>Clinician
+                    <select value={episodeForm.therapist_id} onChange={e => setEpisodeForm({ ...episodeForm, therapist_id: e.target.value })}
+                      style={{ display: 'block', marginTop: '4px', background: '#0B1220', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '6px 8px' }}>
+                      <option value="">Select…</option>
+                      {therapists.map(t => <option key={t.therapist_ref} value={t.therapist_ref}>{t.specialty || 'Therapist'}{t.county ? ` · ${t.county}` : ''}</option>)}
+                    </select>
+                  </label>
+                  <label className="fs-11" style={{ color: 'rgba(255,255,255,0.6)' }}>Treatment plan ref
+                    <input value={episodeForm.plan_ref} onChange={e => setEpisodeForm({ ...episodeForm, plan_ref: e.target.value })} maxLength={80}
+                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '12px', width: '140px' }} />
+                  </label>
+                  <button type="button" className="btn-primary fs-11" style={{ padding: '6px 12px', minHeight: '32px' }} disabled={saving} onClick={startEpisode}>Start episode</button>
+                </div>
+              )}
               {(milestones.milestones || []).map(m => (
                 <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', flexWrap: 'wrap' }}>
                   <p className="fs-13" style={{ color: '#FFFFFF', margin: 0, flex: 1, minWidth: 160 }}>

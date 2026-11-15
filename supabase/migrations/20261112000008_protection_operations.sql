@@ -2335,3 +2335,53 @@ begin
 end $$;
 revoke execute on function public.insurer_upsert_benefit(uuid,text,text,text,numeric,numeric,numeric,numeric,integer,integer,jsonb,text,integer,date,date,boolean) from public, anon;
 grant execute on function public.insurer_upsert_benefit(uuid,text,text,text,numeric,numeric,numeric,numeric,integer,integer,jsonb,text,integer,date,date,boolean) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- V2 product lifecycle transitions (draft -> pending_approval -> approved;
+-- withdrawn/superseded terminal-ish states). Approved content stays immutable.
+-- ---------------------------------------------------------------------------
+create or replace function public.insurer_submit_plan_version(p_version_id uuid)
+returns void language plpgsql security definer set search_path = pg_catalog, public as $$
+declare v_ins uuid := public.protection_insurer_id(); v_ver record; begin
+  if v_ins is null then raise exception 'Active insurer access required'; end if;
+  perform public.protection_require_mode(array['pilot','live']);
+  select * into v_ver from public.protection_plan_versions
+  where id = p_version_id and insurer_id = v_ins for update;
+  if not found then raise exception 'Version not found'; end if;
+  if v_ver.status <> 'draft' then raise exception 'Only draft versions can be submitted'; end if;
+  if not exists (select 1 from public.protection_benefits b
+                 where b.plan_version_id = p_version_id and b.is_active) then
+    raise exception 'Version must have at least one active benefit';
+  end if;
+  update public.protection_plan_versions set status = 'pending_approval' where id = p_version_id;
+end $$;
+revoke execute on function public.insurer_submit_plan_version(uuid) from public, anon;
+grant execute on function public.insurer_submit_plan_version(uuid) to authenticated;
+
+create or replace function public.insurer_withdraw_plan_version(p_version_id uuid)
+returns void language plpgsql security definer set search_path = pg_catalog, public as $$
+declare v_ins uuid := public.protection_insurer_id(); v_ver record; begin
+  if v_ins is null then raise exception 'Active insurer access required'; end if;
+  perform public.protection_require_mode(array['pilot','live']);
+  select * into v_ver from public.protection_plan_versions
+  where id = p_version_id and insurer_id = v_ins for update;
+  if not found then raise exception 'Version not found'; end if;
+  if v_ver.status = 'approved' then raise exception 'Approved versions cannot be withdrawn; create a new version'; end if;
+  update public.protection_plan_versions set status = 'withdrawn' where id = p_version_id;
+end $$;
+revoke execute on function public.insurer_withdraw_plan_version(uuid) from public, anon;
+grant execute on function public.insurer_withdraw_plan_version(uuid) to authenticated;
+
+create or replace function public.admin_reject_plan_version(p_version_id uuid, p_reason text default null)
+returns void language plpgsql security definer set search_path = pg_catalog, public as $$
+declare v_ver record; begin
+  if not public.is_super_admin() then raise exception 'Super-admin only'; end if;
+  select * into v_ver from public.protection_plan_versions where id = p_version_id for update;
+  if not found then raise exception 'Version not found'; end if;
+  if v_ver.status = 'approved' then raise exception 'Approved versions cannot be rejected'; end if;
+  update public.protection_plan_versions set status = 'withdrawn' where id = p_version_id;
+  perform public.log_admin_action('plan_version_rejected','protection_plan_versions',p_version_id::text,
+    jsonb_build_object('version_no', v_ver.version_no, 'reason', p_reason));
+end $$;
+revoke execute on function public.admin_reject_plan_version(uuid,text) from public, anon;
+grant execute on function public.admin_reject_plan_version(uuid,text) to authenticated;
