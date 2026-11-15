@@ -55,12 +55,12 @@ Deno.serve(async (req) => {
     let targetId = user.id
     if (action === 'admin-delete' || (userId && userId !== user.id)) {
       const { data: callerProfile, error: profileError } = await caller
-        .from('profiles').select('role, is_super_admin').eq('id', user.id).single()
+        .from('profiles').select('role').eq('id', user.id).single()
       if (profileError || !callerProfile) {
         console.error('Account deletion caller role lookup failed:', profileError)
         return json(403, { error: 'Forbidden' })
       }
-      if (callerProfile.role !== 'super_admin' && callerProfile.is_super_admin !== true) {
+      if (callerProfile.role !== 'super_admin') {
         return json(403, { error: 'Forbidden' })
       }
       targetId = userId
@@ -69,8 +69,20 @@ Deno.serve(async (req) => {
 
     const admin = createClient(supabaseUrl, serviceKey)
     const { data: profile, error: targetError } = await admin
-      .from('profiles').select('circle_user_hash').eq('id', targetId).maybeSingle()
+      .from('profiles').select('circle_user_hash, role, status').eq('id', targetId).maybeSingle()
     if (targetError) throw targetError
+    if (!profile) return json(404, { error: 'Account not found' })
+    if (profile.role === 'super_admin' && profile.status === 'active') {
+      if (targetId === user.id) {
+        return json(403, { error: 'A super-admin cannot delete their own account' })
+      }
+      const { count, error: countError } = await admin.from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('role', 'super_admin')
+        .eq('status', 'active')
+      if (countError) throw countError
+      if (count <= 1) return json(409, { error: 'Cannot delete the last active super-admin' })
+    }
     const userHash = profile?.circle_user_hash
 
     const runStep = async (step: string, operation: () => Promise<void>) => {
@@ -114,7 +126,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    for (const bucket of ['avatars', 'mirror-recordings', 'precious-pacts', 'therapist-documents']) {
+    for (const bucket of ['avatars', 'mirror-recordings', 'precious-pacts', 'therapist-documents', 'claim-evidence']) {
       await runStep(`storage:${bucket}`, async () => {
         const paths: string[] = []
         await listFiles(bucket, targetId, paths)

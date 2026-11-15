@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { clearSupabaseStorage, supabase } from '../lib/supabase'
 
 const AuthProfileContext = createContext(null)
-const PROFILE_COLUMNS = 'id, username, avatar_url, role, is_super_admin, status, onboarding_completed, onboarding_skipped'
+const PROFILE_COLUMNS = 'id, username, avatar_url, role, status, onboarding_completed, onboarding_skipped'
 
 export function AuthProfileProvider({ children }) {
   const [authState, setAuthState] = useState({ status: 'loading', user: null, profile: null, error: null })
@@ -118,8 +118,8 @@ export function AuthProfileProvider({ children }) {
       username,
       avatar_url: avatarUrl,
       avatarUrl,
-      isAdmin: profile?.role === 'admin' || profile?.role === 'super_admin' || profile?.is_super_admin === true,
-      isSuperAdmin: profile?.role === 'super_admin' || profile?.is_super_admin === true,
+      isAdmin: profile?.role === 'admin' || profile?.role === 'super_admin',
+      isSuperAdmin: profile?.role === 'super_admin',
       status: profile?.status || null,
       refreshProfile,
       retryProfile,

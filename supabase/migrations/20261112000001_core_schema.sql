@@ -637,7 +637,7 @@ as $$
   select exists (
     select 1 from public.profiles p
     where p.id = auth.uid()
-      and (p.is_super_admin = true or p.role = 'super_admin')
+      and p.role = 'super_admin'
   );
 $$;
 
@@ -649,7 +649,7 @@ as $$
   select exists (
     select 1 from public.profiles p
     where p.id = auth.uid()
-      and (p.role in ('admin', 'super_admin') or p.is_super_admin = true)
+      and p.role in ('admin', 'super_admin')
   );
 $$;
 
@@ -871,6 +871,53 @@ drop trigger if exists sync_is_super_admin_flag on public.profiles;
 create trigger sync_is_super_admin_flag
   before insert or update on public.profiles
   for each row execute function public.sync_is_super_admin_flag();
+
+update public.profiles
+set is_super_admin = (role = 'super_admin')
+where is_super_admin is distinct from (role = 'super_admin');
+
+create or replace function public.prevent_last_super_admin_removal()
+returns trigger
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_count integer;
+begin
+  if tg_op = 'UPDATE' then
+    if old.role = 'super_admin' and old.status = 'active'
+       and (new.role is distinct from 'super_admin' or new.status is distinct from 'active') then
+      perform pg_advisory_xact_lock(19830716, 1);
+      select count(*) into v_count
+      from public.profiles
+      where role = 'super_admin' and status = 'active';
+      if v_count <= 1 then
+        raise exception 'Cannot remove or deactivate the last active super_admin';
+      end if;
+    end if;
+    return new;
+  end if;
+
+  if old.role = 'super_admin' and old.status = 'active' then
+    if old.id = auth.uid() then
+      raise exception 'A super_admin cannot delete their own account';
+    end if;
+    perform pg_advisory_xact_lock(19830716, 1);
+    select count(*) into v_count
+    from public.profiles
+    where role = 'super_admin' and status = 'active';
+    if v_count <= 1 then
+      raise exception 'Cannot delete the last active super_admin';
+    end if;
+  end if;
+  return old;
+end;
+$$;
+drop trigger if exists prevent_last_super_admin_removal on public.profiles;
+create trigger prevent_last_super_admin_removal
+  before update of role, status or delete on public.profiles
+  for each row execute function public.prevent_last_super_admin_removal();
 
 create or replace function public.audit_profile_privileged_change()
 returns trigger
