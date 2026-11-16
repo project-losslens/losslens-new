@@ -443,6 +443,11 @@ create table if not exists public.supporter_feedback (
   created_at timestamptz not null default now()
 );
 
+-- Databases created before token hashing already have this table with a
+-- raw `token` column; create table if not exists skips them, so add the
+-- hash column explicitly before anything references it.
+alter table public.supporter_invitations add column if not exists token_hash text;
+
 create index if not exists supporter_invitations_token_hash_idx on public.supporter_invitations(token_hash);
 
 -- Migration path for databases created before token hashing: backfill the
@@ -456,6 +461,10 @@ do $$ begin
     execute $q$update public.supporter_invitations set token_hash = encode(extensions.digest(token,'sha256'),'hex') where token_hash is null$q$;
     execute 'alter table public.supporter_invitations drop column token';
   end if;
+  -- Column is NOT NULL on fresh installs; enforce it for upgraded tables too.
+  execute 'alter table public.supporter_invitations alter column token_hash set not null';
+  execute 'alter table public.supporter_invitations add constraint supporter_invitations_token_hash_key unique (token_hash)';
+exception when duplicate_object then null;
 end $$;
 create index if not exists supporter_invitations_user_status_idx on public.supporter_invitations(user_id, status);
 create index if not exists supporter_messages_invitation_idx on public.supporter_messages(invitation_id, created_at);
