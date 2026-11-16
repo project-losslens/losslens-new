@@ -864,21 +864,38 @@ declare
   v_remaining integer;
   v_actor text;
   v_attempts integer;
+  v_code_attempts integer;
   v_ip text;
+  v_ip_raw text;
+  v_xff text[];
   v_valid boolean := false;
 begin
+  -- Trust only the right-most X-Forwarded-For entry: it is the value appended
+  -- by the closest proxy. Earlier entries are client-controlled and can be
+  -- spoofed to reset rate-limit counters.
   begin
-    v_ip := current_setting('request.headers', true)::jsonb->>'x-forwarded-for';
+    v_ip_raw := current_setting('request.headers', true)::jsonb->>'x-forwarded-for';
   exception when others then
-    v_ip := null;
+    v_ip_raw := null;
   end;
-  v_actor := coalesce(nullif(split_part(v_ip, ',', 1), ''), (select auth.uid())::text, 'anonymous');
+  if v_ip_raw is not null and btrim(v_ip_raw) <> '' then
+    v_xff := string_to_array(v_ip_raw, ',');
+    v_ip := btrim(v_xff[array_length(v_xff, 1)]);
+  else
+    v_ip := null;
+  end if;
+  v_actor := coalesce(nullif(v_ip, ''), (select auth.uid())::text, 'anonymous');
   perform pg_advisory_xact_lock(hashtext(v_actor));
   delete from public.company_code_validation_attempts
   where actor_key = v_actor and attempted_at < now() - interval '1 hour';
+  delete from public.company_code_validation_attempts
+  where actor_key = 'code:' || v_code and attempted_at < now() - interval '1 hour';
   insert into public.company_code_validation_attempts(actor_key) values (v_actor);
+  insert into public.company_code_validation_attempts(actor_key) values ('code:' || v_code);
   select count(*) into v_attempts from public.company_code_validation_attempts
   where actor_key = v_actor and attempted_at >= now() - interval '1 hour';
+  select count(*) into v_code_attempts from public.company_code_validation_attempts
+  where actor_key = 'code:' || v_code and attempted_at >= now() - interval '1 hour';
 
   select * into v_client from public.b2b_clients
   where upper(company_code) = v_code and status = 'active'
@@ -890,7 +907,9 @@ begin
     and (v_client.max_users is null or v_remaining > 0);
 
   perform pg_sleep(0.15);
-  if v_attempts > 20 then v_valid := false; end if;
+  -- Per-actor and global per-code throttles. Over-limit responses are
+  -- identical in shape to a normal negative result (no oracle).
+  if v_attempts > 20 or v_code_attempts > 200 then v_valid := false; end if;
   return jsonb_build_object(
     'valid', v_valid,
     'company_name', case when v_valid then v_client.company_name else null end,
@@ -919,8 +938,10 @@ begin
   if not public.is_active_user() then
     raise exception 'Account is suspended';
   end if;
+  -- Lock the company row so seat counting and the profile update are atomic
+  -- across concurrent redeemers.
   select * into v_client from public.b2b_clients
-  where upper(company_code) = v_code and status = 'active' limit 1;
+  where upper(company_code) = v_code and status = 'active' limit 1 for update;
   if not found then
     raise exception 'Invalid or inactive company code';
   end if;
