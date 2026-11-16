@@ -220,3 +220,9 @@ SQL files exist or are required.
 - Duplicate-function scan: no remaining differing-signature overloads.
 - STILL UNVERIFIED: no database available — apply-twice on fresh project,
   deletion flow, realtime subscriber isolation, storage cross-user tests.
+- Script 08: final anon lockdown — EXECUTE revoked on all public functions
+  from PUBLIC/anon, service_role restored, explicit 6-function anon
+  allowlist (5 supporter_* + validate_company_code).
+- Supporter tokens now stored as md5 hashes only (token_hash column);
+  raw token returned once at create/renew. Both create_supporter_invitation
+  definitions updated (scripts 03, 06); legacy column backfilled+dropped.
