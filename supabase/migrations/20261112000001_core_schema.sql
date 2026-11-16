@@ -1227,8 +1227,10 @@ begin
     if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'crisis_alerts') then
       execute 'alter publication supabase_realtime add table public.crisis_alerts';
     end if;
-    if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'audit_logs') then
-      execute 'alter publication supabase_realtime add table public.audit_logs';
+    -- audit_logs is deliberately NOT published: it is admin-only audit data
+    -- with no client-side realtime consumer. Re-add only via a reviewed change.
+    if exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'audit_logs') then
+      execute 'alter publication supabase_realtime drop table public.audit_logs';
     end if;
   end if;
 end $$;
