@@ -537,6 +537,23 @@ declare
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
   if not public.is_active_user() then raise exception 'Account is suspended'; end if;
+  if public.current_user_role() is distinct from 'user' then
+    raise exception 'Active member account required';
+  end if;
+  if p_insurer_id is null or not exists (
+    select 1 from public.insurers i
+    join public.profiles p on p.id = i.profile_id
+    where i.id = p_insurer_id and i.status = 'active'
+      and p.role = 'insurer' and p.status = 'active'
+  ) then
+    raise exception 'Selected insurer is not active';
+  end if;
+  if p_plan_id is not null and not exists (
+    select 1 from public.protection_plans p
+    where p.id = p_plan_id and p.insurer_id = p_insurer_id and p.active
+  ) then
+    raise exception 'Selected product is not offered by this insurer';
+  end if;
   insert into public.protection_memberships (user_id, insurer_id, plan_id, member_reference, status)
   values (v_uid, p_insurer_id, p_plan_id, nullif(btrim(coalesce(p_member_reference,'')), ''), 'pending_verification')
   on conflict (user_id, insurer_id) do update
