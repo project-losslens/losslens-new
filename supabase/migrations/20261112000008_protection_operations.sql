@@ -2774,3 +2774,134 @@ declare v_ver record; begin
 end $$;
 revoke execute on function public.admin_reject_plan_version(uuid,text) from public, anon;
 grant execute on function public.admin_reject_plan_version(uuid,text) to authenticated;
+
+-- CBT module completion is recorded server-side. The current authored modules
+-- contain three lessons each; update this allowlist with the content if that
+-- curriculum changes.
+create table if not exists public.cbt_module_sessions (
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  module_id text not null check (module_id in ('1','2','3','4','5','6','7','8')),
+  started_at timestamptz not null default now(),
+  viewed_lessons integer[] not null default '{}',
+  primary key (user_id, module_id),
+  check (viewed_lessons <@ array[0,1,2])
+);
+alter table public.cbt_module_sessions enable row level security;
+drop policy if exists cbt_module_sessions_owner_read on public.cbt_module_sessions;
+create policy cbt_module_sessions_owner_read on public.cbt_module_sessions
+  for select to authenticated using (user_id = auth.uid());
+revoke all on public.cbt_module_sessions from anon, authenticated;
+grant select on public.cbt_module_sessions to authenticated;
+
+-- Prevent client-side fabrication of completion rows; the SECURITY DEFINER
+-- completion function below is the only authenticated write path.
+revoke all on public.cbt_progress from anon, authenticated;
+grant select on public.cbt_progress to authenticated;
+
+create or replace function public.member_record_cbt_lesson(
+  p_module_id text,
+  p_lesson_index integer
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_session public.cbt_module_sessions;
+begin
+  if v_uid is null or not public.is_active_user()
+     or public.current_user_role() is distinct from 'user' then
+    raise exception 'Active member access required';
+  end if;
+  if p_module_id is null or p_module_id not in ('1','2','3','4','5','6','7','8')
+     or p_lesson_index is null or p_lesson_index < 0 or p_lesson_index > 2 then
+    raise exception 'Invalid CBT module or lesson';
+  end if;
+  insert into public.cbt_module_sessions (user_id, module_id)
+  values (v_uid, p_module_id)
+  on conflict (user_id, module_id) do nothing;
+  select * into v_session
+  from public.cbt_module_sessions
+  where user_id = v_uid and module_id = p_module_id
+  for update;
+  if exists (
+    select 1 from public.cbt_progress
+    where user_id = v_uid and module_id = p_module_id and completed
+  ) then
+    raise exception 'Module is already complete';
+  end if;
+  if not (p_lesson_index = any(v_session.viewed_lessons)) then
+    update public.cbt_module_sessions
+    set viewed_lessons = array_append(viewed_lessons, p_lesson_index)
+    where user_id = v_uid and module_id = p_module_id
+    returning * into v_session;
+  end if;
+
+  return jsonb_build_object(
+    'started_at', v_session.started_at,
+    'viewed_lessons', v_session.viewed_lessons
+  );
+end;
+$$;
+revoke execute on function public.member_record_cbt_lesson(text,integer) from public, anon;
+grant execute on function public.member_record_cbt_lesson(text,integer) to authenticated;
+
+create or replace function public.member_complete_cbt_module(p_module_id text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_session public.cbt_module_sessions;
+begin
+  if v_uid is null or not public.is_active_user()
+     or public.current_user_role() is distinct from 'user' then
+    raise exception 'Active member access required';
+  end if;
+  if p_module_id is null or p_module_id not in ('1','2','3','4','5','6','7','8') then
+    raise exception 'Invalid CBT module';
+  end if;
+  if exists (
+    select 1 from public.cbt_progress
+    where user_id = v_uid and module_id = p_module_id and completed
+  ) then
+    return jsonb_build_object('status', 'already_complete');
+  end if;
+
+  select * into v_session
+  from public.cbt_module_sessions
+  where user_id = v_uid and module_id = p_module_id
+  for update;
+  if not found then
+    raise exception 'Start this module and view every lesson before completing it';
+  end if;
+  if exists (
+    select 1 from public.cbt_progress
+    where user_id = v_uid and module_id = p_module_id and completed
+  ) then
+    return jsonb_build_object('status', 'already_complete');
+  end if;
+  if not (v_session.viewed_lessons @> array[0,1,2]) then
+    raise exception 'View every lesson before completing this module';
+  end if;
+  if v_session.started_at > now() - interval '20 minutes' then
+    raise exception 'The minimum 20-minute learning period has not elapsed';
+  end if;
+
+  insert into public.cbt_progress (
+    user_id, module_id, completed, completed_at
+  ) values (
+    v_uid, p_module_id, true, now()
+  )
+  on conflict (user_id, module_id) do update
+    set completed = true, completed_at = excluded.completed_at;
+
+  return jsonb_build_object('status', 'completed');
+end;
+$$;
+revoke execute on function public.member_complete_cbt_module(text) from public, anon;
+grant execute on function public.member_complete_cbt_module(text) to authenticated;

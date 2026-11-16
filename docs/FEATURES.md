@@ -64,7 +64,7 @@ Ordinary users are client-guarded through `profiles.role`. Assignment and entitl
 Diary creates and updates one daily entry, lists recent entries, records mood, triggers, coping, thoughts, notes, amount gambled, gamble state, and updates streak/money-saved profile fields. It uses owner-filtered CRUD on `diary_entries` and profile updates.
 
 ### CBT modules
-CBT modules retrieve completed progress and upsert module completion, answers, title, and completion time. The source-level contract indicates `(user_id, module_id)` is the logical completion identity, but exact live constraints remain migration-dependent.
+CBT modules retrieve member-owned progress and record lesson views through an authenticated RPC. Completion is written server-side only after all three lessons in the module have been recorded and at least 20 minutes have elapsed since the first lesson view. Authenticated clients have read-only access to completion rows; the RPC checks the member role and completion conditions. This enforcement is defined in migration 08 and must be applied before the client flow is enabled in a deployed environment.
 
 ### Urge Toolkit
 Urge Toolkit provides client-side coping exercises and controls, including timers, breathing, delay, grounding, and crisis access where implemented. This page should be treated as UI and interaction behavior backed by frontend state, rather than a complete server event audit.

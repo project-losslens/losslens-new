@@ -1,8 +1,7 @@
 import { BrandLoader } from '../../components/Brand'
 import { toast } from '../../components/ToastProvider'
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import AppIcon from '../../components/AppIcon'
-import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 
 //  Toast helper using React state instead of DOM manipulation
@@ -30,9 +29,10 @@ function triggerConfetti() {
 }
 
 function CBTModules() {
-  const navigate = useNavigate()
   const [activeModule, setActiveModule] = useState(null)
   const [completedIds, setCompletedIds] = useState([])
+  const [moduleSessions, setModuleSessions] = useState({})
+  const [clockNow, setClockNow] = useState(0)
   const [progressError, setProgressError] = useState(false)
   const [userId, setUserId] = useState(null)
   const [showCelebration, setShowCelebration] = useState(false)
@@ -144,21 +144,57 @@ function CBTModules() {
     },
   ]
 
-  useEffect(() => { fetchProgress() }, [])
-
   const fetchProgress = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
       setUserId(session.user.id)
-      const { data, error } = await supabase.from('cbt_progress').select('module_id').eq('user_id', session.user.id).eq('completed', true)
-      if (error) throw error
-      setCompletedIds((data || []).map(d => d.module_id))
+      const [progressResult, sessionResult] = await Promise.all([
+        supabase.from('cbt_progress').select('module_id').eq('user_id', session.user.id).eq('completed', true),
+        supabase.from('cbt_module_sessions').select('module_id, started_at, viewed_lessons').eq('user_id', session.user.id),
+      ])
+      if (progressResult.error) throw progressResult.error
+      if (sessionResult.error) throw sessionResult.error
+      setCompletedIds((progressResult.data || []).map(d => Number(d.module_id)))
+      setModuleSessions(Object.fromEntries((sessionResult.data || []).map(row => [
+        Number(row.module_id),
+        { startedAt: row.started_at, viewedLessons: row.viewed_lessons || [] },
+      ])))
       setProgressError(false)
     } catch (err) {
       console.error('Failed to fetch progress:', err)
       setProgressError(true)
     }
+  }
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void fetchProgress() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    const timer = setInterval(() => setClockNow(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const openLesson = async (moduleId, lessonIndex) => {
+    const { data, error } = await supabase.rpc('member_record_cbt_lesson', {
+      p_module_id: String(moduleId),
+      p_lesson_index: lessonIndex,
+    })
+    if (error) {
+      console.error('Failed to record CBT lesson view:', error)
+      toast.error('Could not save lesson progress. Please try again.', 3000)
+      return
+    }
+    setModuleSessions(current => ({
+      ...current,
+      [moduleId]: {
+        startedAt: data.started_at,
+        viewedLessons: data.viewed_lessons || [],
+      },
+    }))
+    setActiveLesson({ moduleId, lessonIndex })
   }
 
   //  Auto-expand first incomplete module
@@ -172,22 +208,29 @@ function CBTModules() {
   const handleComplete = async (moduleId, moduleTitle) => {
     if (!userId || completedIds.includes(moduleId) || saving) return
 
-    //  Gate: Must have viewed at least one lesson from this module
-    const hasViewedLesson = activeLesson && activeLesson.moduleId === moduleId
-    if (!hasViewedLesson) {
-      toast.error('Please view at least one lesson before completing.', 2000)
+    const progress = moduleSessions[moduleId]
+    const lessonCount = modules.find(module => module.id === moduleId)?.lessons.length || 0
+    const lessonsViewed = progress?.viewedLessons || []
+    const elapsedMs = progress?.startedAt ? clockNow - new Date(progress.startedAt).getTime() : 0
+    const allLessonsViewed = modules.find(module => module.id === moduleId)
+      ?.lessons.every((_, index) => lessonsViewed.includes(index))
+    if (!progress || !allLessonsViewed || lessonsViewed.length < lessonCount) {
+      toast.error('View every lesson in this module before completing it.', 3000)
+      return
+    }
+    if (elapsedMs < 20 * 60 * 1000) {
+      toast.error('Complete the 20-minute learning period before marking this module complete.', 3000)
       return
     }
 
     setSaving(true)
-    const { error } = await supabase.from('cbt_progress').upsert(
-      { user_id: userId, module_id: moduleId, completed: true, completed_at: new Date().toISOString() },
-      { onConflict: 'user_id,module_id' }
-    )
+    const { error } = await supabase.rpc('member_complete_cbt_module', {
+      p_module_id: String(moduleId),
+    })
 
     if (error) {
       console.error('Failed to save progress:', error)
-      toast.error('Failed to save. Please try again.', 3000)
+      toast.error(error.message || 'Failed to save. Please try again.', 3000)
       setSaving(false)
       return
     }
@@ -257,8 +300,12 @@ function CBTModules() {
         </div>
 
         <div style={{ padding: '1.5rem' }}>
+          <p className="portal-notice">
+            To complete a module, view every lesson and spend at least 20 minutes in that module.
+            Progress is checked and saved securely.
+          </p>
           <div className="dash-section" style={{ marginBottom: '1rem' }}><div className="progress-bar-wrap"><div className="progress-bar"><div className="progress-fill" style={{ width: `${(completedCount / modules.length) * 100}%`, transition: 'width 0.8s ease' }} /></div><span className="progress-label">{Math.round((completedCount / modules.length) * 100)}%</span></div>
-            {progressError && <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', marginTop: '8px', textAlign: 'center' }}>Could not load your progress. <button type="button" className="clickable" onClick={fetchProgress} style={{ color: '#7DBDEE', padding: 0, font: 'inherit' }}>Try again</button></p>}
+            {progressError && <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', marginTop: '8px', textAlign: 'center' }}>Could not load your progress.             <button type="button" className="clickable" onClick={() => { void fetchProgress() }} style={{ color: '#7DBDEE', padding: 0, font: 'inherit' }}>Try again</button></p>}
           </div>
 
           {allCompleted && (
@@ -308,20 +355,37 @@ function CBTModules() {
                         </div>
                         <div className="lessons-list">{m.lessons.map((l, i) => (
                           <div key={i} className="lesson-item" style={{ cursor: 'pointer', padding: '10px', borderRadius: '8px' }}
-                            onClick={() => setActiveLesson({ moduleId: m.id, lessonIndex: i })}
+                            onClick={() => { void openLesson(m.id, i) }}
                             onMouseEnter={e => e.currentTarget.style.background = '#0B1220'}
                             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                             role="button" tabIndex={0}
-                            onKeyDown={e => { if (e.key === 'Enter') setActiveLesson({ moduleId: m.id, lessonIndex: i }) }}
+                            onKeyDown={e => { if (e.key === 'Enter') void openLesson(m.id, i) }}
                           >
                             <span className="lesson-num">{i + 1}</span><div style={{ flex: 1 }}><span className="lesson-text">{l.title}</span><span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', display: 'block' }}>{l.readTime}</span></div><span style={{ color: 'rgba(255,255,255,0.4)' }}>→</span>
                           </div>
                         ))}</div>
-                        {!completed && (
-                          <button className="btn-primary" style={{ marginTop: '1rem', width: '100%' }} onClick={() => handleComplete(m.id, m.title)} disabled={saving}>
-                            {saving ? <BrandLoader variant="inline" showWordmark={false} /> : 'Mark module as complete'}
-                          </button>
-                        )}
+                        {!completed && (() => {
+                          const progress = moduleSessions[m.id]
+                          const elapsedMs = progress?.startedAt ? clockNow - new Date(progress.startedAt).getTime() : 0
+                          const remainingSeconds = Math.max(0, Math.ceil((20 * 60 * 1000 - elapsedMs) / 1000))
+                          const lessonsViewed = progress?.viewedLessons || []
+                          const allLessonsViewed = m.lessons.every((_, index) => lessonsViewed.includes(index))
+                          const canComplete = allLessonsViewed && remainingSeconds === 0
+                          return (
+                            <>
+                              <p className="portal-notice" style={{ marginTop: '12px' }}>
+                                {allLessonsViewed
+                                  ? remainingSeconds > 0
+                                    ? `Learning period: ${Math.floor(remainingSeconds / 60)}:${String(remainingSeconds % 60).padStart(2, '0')} remaining.`
+                                    : 'All lessons viewed and the minimum learning period is complete.'
+                                  : `${lessonsViewed.length} of ${m.lessons.length} lessons viewed. View every lesson and spend at least 20 minutes in this module.`}
+                              </p>
+                              <button className="btn-primary" style={{ marginTop: '1rem', width: '100%' }} onClick={() => { void handleComplete(m.id, m.title) }} disabled={saving || !canComplete}>
+                                {saving ? <BrandLoader variant="inline" showWordmark={false} /> : 'Mark module as complete'}
+                              </button>
+                            </>
+                          )
+                        })()}
                         {completed && <p style={{ color: '#2DD4BF', fontSize: '12px', textAlign: 'center', marginTop: '12px' }}> Completed — you can still review lessons</p>}
                       </div>
                     )}
