@@ -542,6 +542,14 @@ const FAQS = [
     a: 'Yes — but only after it shows you the details and you confirm. Nothing consequential happens without your say-so, and the system confirms the result.',
   },
   {
+    q: 'What are the three LossLens Protection structures?',
+    a: 'Medical Rider (added to an eligible existing medical policy), Individual Cover (standalone), and Group Cover (through a participating organisation). All three share the same proposed treatment benefits — they differ only in enrolment and policy structure.',
+  },
+  {
+    q: 'Can I buy LossLens Protection today?',
+    a: 'No. It is a proposed product under development, subject to insurer underwriting and regulatory approval. Contact the team to register interest.',
+  },
+  {
     q: 'Is LossLens Protection already available?',
     a: 'No. It is a concept-stage programme — not for sale, not an offer of cover, and not a promise that it will launch. The full explanation is on the Protection page.',
   },
