@@ -370,7 +370,7 @@ create table if not exists public.supporter_invitations (
   supporter_phone text,
   supporter_relation text,
   permissions jsonb not null default '[]'::jsonb,
-  token text not null unique,
+  token text not null unique default encode(gen_random_bytes(24), 'hex'),
   status text not null default 'pending',
   anonymous_mode boolean not null default false,
   crisis_contact boolean not null default false,
