@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
-import Aurora from '../../components/Aurora'
+import TopographicBackground from '../../components/TopographicBackground'
 import { useI18n } from '../../i18n'
 
 //  Constants
@@ -254,7 +254,7 @@ export default function Onboarding() {
   if (step >= QUESTIONS.length) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-        <Aurora variant="app" />
+        <TopographicBackground variant="app" />
         <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2.5rem 2rem', maxWidth: '500px', width: '100%', textAlign: 'center', animation: 'fadeIn 0.5s ease-out' }}>
           <AppIcon name="flame" size={48} style={{ display: 'block', margin: '0 auto 12px', color: '#2DD4BF' }} />
           <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', marginBottom: '8px' }}>{t('onboarding.journeyBegins')}</h2>
@@ -302,7 +302,7 @@ export default function Onboarding() {
   if (skipped) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-        <Aurora variant="app" />
+        <TopographicBackground variant="app" />
         <div style={{ textAlign: 'center' }}>
           <BrandLoader variant="section" showWordmark={false} />
           <p style={{ color: '#2DD4BF', fontSize: '14px' }}>{t('onboarding.setup')}</p>
@@ -315,7 +315,7 @@ export default function Onboarding() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-      <Aurora variant="app" />
+      <TopographicBackground variant="app" />
       <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2rem', maxWidth: '500px', width: '100%', animation: 'fadeIn 0.3s ease-out' }}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
           <LanguageSwitcher />

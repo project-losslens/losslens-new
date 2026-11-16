@@ -119,7 +119,7 @@ html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
   /* Page background lives on html, not body: body's background would paint
-     above the fixed z-index:-1 aurora layer and hide it. */
+     above the fixed z-index:-1 topo layer and hide it. */
   background: var(--bg);
 }
 

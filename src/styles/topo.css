@@ -1,0 +1,58 @@
+/* Topographic-line backdrop — replaces aurora.css.
+   Fixed layer behind content; never intercepts pointer events. */
+
+.topo {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 15% 0%, rgba(6, 59, 80, 0.55) 0%, transparent 55%),
+    radial-gradient(100% 80% at 85% 100%, rgba(22, 200, 211, 0.07) 0%, transparent 60%),
+    linear-gradient(180deg, #031027 0%, #06142B 55%, #031027 100%);
+}
+
+.topo__lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.topo__line { stroke-width: 1; }
+.topo__line--1 { stroke: rgba(49, 214, 204, 0.16); }
+.topo__line--2 { stroke: rgba(22, 200, 211, 0.11); }
+.topo__line--3 { stroke: rgba(125, 189, 238, 0.09); }
+.topo__line--accent { stroke: rgba(49, 214, 204, 0.22); }
+
+/* Public/hero: most expressive */
+.topo--hero .topo__line--1 { stroke: rgba(49, 214, 204, 0.22); }
+.topo--hero .topo__line--2 { stroke: rgba(22, 200, 211, 0.15); }
+.topo--hero .topo__line--3 { stroke: rgba(125, 189, 238, 0.12); }
+.topo--hero .topo__line--accent { stroke: rgba(49, 214, 204, 0.3); }
+
+/* Member app: restrained */
+.topo--app .topo__line--1 { stroke: rgba(49, 214, 204, 0.10); }
+.topo--app .topo__line--2 { stroke: rgba(22, 200, 211, 0.07); }
+.topo--app .topo__line--3 { stroke: rgba(125, 189, 238, 0.05); }
+.topo--app .topo__line--accent { stroke: rgba(49, 214, 204, 0.12); }
+
+/* Admin/staff: most restrained */
+.topo--admin .topo__line--1 { stroke: rgba(49, 214, 204, 0.07); }
+.topo--admin .topo__line--2 { stroke: rgba(22, 200, 211, 0.05); }
+.topo--admin .topo__line--3 { stroke: rgba(125, 189, 238, 0.04); }
+.topo--admin .topo__line--accent { stroke: rgba(49, 214, 204, 0.08); }
+.topo--admin {
+  background:
+    radial-gradient(120% 90% at 15% 0%, rgba(6, 59, 80, 0.35) 0%, transparent 55%),
+    linear-gradient(180deg, #031027 0%, #06142B 60%, #031027 100%);
+}
+
+@media (max-width: 640px) {
+  .topo__line--3, .topo__line--accent { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topo__lines { display: none; }
+}

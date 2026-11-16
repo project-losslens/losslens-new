@@ -51,6 +51,27 @@ async function fetchWithTimeout(url, options, timeoutMs) {
   }
 }
 
+function safeDatabaseErrorCode(payload) {
+  const code = payload?.code
+  return typeof code === 'string' && /^[A-Z0-9_]{1,32}$/.test(code) ? code : null
+}
+
+async function reportDatabaseFailure(operation, response) {
+  const payload = await response.clone().json().catch(() => null)
+  console.error('Oloo Supabase request failed:', {
+    operation,
+    upstreamStatus: response.status,
+    errorCode: safeDatabaseErrorCode(payload),
+  })
+}
+
+function reportNetworkFailure(operation, error) {
+  console.error('Oloo upstream request failed:', {
+    operation,
+    category: error?.name === 'AbortError' ? 'timeout' : 'network_error',
+  })
+}
+
 async function getAuthenticatedUser(request) {
   const supabaseUrl = process.env.VITE_SUPABASE_URL
   // Vercel env var must hold the sb_publishable_ key.
@@ -130,18 +151,72 @@ async function fetchConsentState(auth) {
   return rows?.[0] ?? null
 }
 
+// Privileged write: ai_data_consent_at is a protected profile field, so the
+// user JWT cannot PATCH it (enforce_profile_privilege_updates). The consent
+// endpoint therefore writes with the service-role key, scoped to the single
+// authenticated user's own row.
 async function recordConsent(auth) {
-  const response = await fetchWithTimeout(`${auth.supabaseUrl}/rest/v1/profiles?id=eq.${auth.user.id}`, {
-    method: 'PATCH',
-    headers: {
-      apikey: auth.supabaseKey,
-      Authorization: `Bearer ${auth.token}`,
-      'Content-Type': 'application/json',
-      Prefer: 'return=minimal',
-    },
-    body: JSON.stringify({ ai_data_consent_at: new Date().toISOString() }),
-  }, REQUEST_TIMEOUT_MS)
-  if (!response.ok) throw new Error('CONSENT_WRITE_FAILED')
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!serviceKey) throw new Error('CONSENT_SERVICE_NOT_CONFIGURED')
+  const headers = {
+    apikey: serviceKey,
+    Authorization: `Bearer ${serviceKey}`,
+    'Content-Type': 'application/json',
+    Prefer: 'return=representation',
+  }
+  const profileUrl = `${auth.supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(auth.user.id)}`
+  let response
+  try {
+    response = await fetchWithTimeout(
+      `${profileUrl}&ai_data_consent_at=is.null&select=id,ai_data_consent_at`,
+      {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ ai_data_consent_at: new Date().toISOString() }),
+      },
+      REQUEST_TIMEOUT_MS,
+    )
+  } catch (error) {
+    reportNetworkFailure('consent.write', error)
+    throw new Error('CONSENT_WRITE_FAILED')
+  }
+  if (!response.ok) {
+    await reportDatabaseFailure('consent.write', response)
+    throw new Error('CONSENT_WRITE_FAILED')
+  }
+  const rows = await response.json().catch(() => null)
+  if (Array.isArray(rows) && rows.some((row) =>
+    row?.id === auth.user.id && Boolean(row.ai_data_consent_at))) return
+
+  // A retry can find the original timestamp already stored. Preserve it and
+  // report success only after confirming the caller's own profile has consent.
+  let existingResponse
+  try {
+    existingResponse = await fetchWithTimeout(
+      `${profileUrl}&select=id,ai_data_consent_at&limit=1`,
+      {
+        headers: {
+          apikey: serviceKey,
+          Authorization: `Bearer ${serviceKey}`,
+        },
+      },
+      REQUEST_TIMEOUT_MS,
+    )
+  } catch (error) {
+    reportNetworkFailure('consent.verify', error)
+    throw new Error('CONSENT_WRITE_FAILED')
+  }
+  if (!existingResponse.ok) {
+    await reportDatabaseFailure('consent.verify', existingResponse)
+    throw new Error('CONSENT_WRITE_FAILED')
+  }
+  const existingRows = await existingResponse.json().catch(() => null)
+  if (Array.isArray(existingRows) && existingRows.some((row) =>
+    row?.id === auth.user.id && Boolean(row.ai_data_consent_at))) return
+  if (Array.isArray(existingRows) && existingRows.length === 0) {
+    throw new Error('CONSENT_PROFILE_NOT_FOUND')
+  }
+  throw new Error('CONSENT_WRITE_FAILED')
 }
 
 async function saveHistory(auth, role, message) {

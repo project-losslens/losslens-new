@@ -4,7 +4,7 @@ import { BrandLoader } from './components/Brand'
 import { PublicOnly, RequireAuth } from './components/RouteGuards'
 import { CrisisAlertCountProvider } from './context/CrisisAlertCountContext'
 import { ErrorBoundary } from './components/Feedback'
-import Aurora from './components/Aurora'
+import TopographicBackground from './components/TopographicBackground'
 
 const Landing = lazy(() => import('./pages/public/Landing'))
 const Login = lazy(() => import('./pages/public/Login'))
@@ -80,7 +80,7 @@ const AppShell = lazy(() => import('./layouts/AppShell'))
 function App() {
   return (
     <>
-    <Aurora />
+    <TopographicBackground />
     <Suspense fallback={<BrandLoader />}>
       <ErrorBoundary>
       <Routes>

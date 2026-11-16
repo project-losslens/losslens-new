@@ -675,7 +675,7 @@ declare
   v_uid uuid := (select auth.uid());
   v_count int;
   v_inv public.supporter_invitations;
-  v_raw_token text := encode(gen_random_bytes(24), 'hex');
+  v_raw_token text := encode(extensions.gen_random_bytes(24), 'hex');
 begin
   if v_uid is null then
     raise exception 'Not authenticated';
@@ -772,7 +772,7 @@ begin
   elsif p_action = 'renew' then
     -- Rotate the token on renew so an old link cannot be reused. Only the
     -- hash is stored; the new raw token is returned once to the owner.
-    v_new_token := encode(gen_random_bytes(24), 'hex');
+    v_new_token := encode(extensions.gen_random_bytes(24), 'hex');
     update public.supporter_invitations
     set expires_at = now() + interval '7 days', status = 'pending', responded_at = null,
         token_hash = encode(extensions.digest(v_new_token,'sha256'),'hex')

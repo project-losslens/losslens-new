@@ -224,18 +224,24 @@ function AIChat({ profile }) {
     if (!userId || aiConsentSaving) return;
     setAiConsentSaving(true);
     setAiConsentError('');
-    const { error } = await supabase
-      .from('profiles')
-      .update({ ai_data_consent_at: new Date().toISOString() })
-      .eq('id', userId);
-    if (error) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch('/api/consent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token || ''}`,
+        },
+        body: JSON.stringify({ consent: true }),
+      });
+      if (!response.ok) throw new Error(`consent ${response.status}`);
+      setAiConsent(true);
+    } catch (error) {
       console.error('AI data consent could not be saved:', error);
       setAiConsentError('Your consent could not be saved. Please try again.');
+    } finally {
       setAiConsentSaving(false);
-      return;
     }
-    setAiConsent(true);
-    setAiConsentSaving(false);
   };
 
   // Auto-scroll

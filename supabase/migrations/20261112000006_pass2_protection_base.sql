@@ -157,7 +157,7 @@ declare
   v_uid uuid := (select auth.uid());
   v_count int;
   v_inv public.supporter_invitations;
-  v_raw_token text := encode(gen_random_bytes(24), 'hex');
+  v_raw_token text := encode(extensions.gen_random_bytes(24), 'hex');
 begin
   if v_uid is null then
     raise exception 'Not authenticated';
