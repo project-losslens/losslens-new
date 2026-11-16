@@ -14,6 +14,7 @@ import { useCrisisAlertCount } from '../context/CrisisAlertCountContext'
 import { clearAuthStorage, supabase } from '../lib/supabase'
 import { startOfflineSync } from '../lib/offlineSync'
 import { useI18n } from '../i18n'
+import Aurora from '../components/Aurora'
 
 export default function AppShell({ admin = false }) {
   const location = useLocation()
@@ -78,6 +79,7 @@ export default function AppShell({ admin = false }) {
 
   return (
     <div className={`shell${admin ? ' shell--admin' : ''}${isUserRole && isMobile ? ' shell--mobile-nav' : ''}`} style={{ '--sidebar-w': !isMobile && desktopOpen ? '240px' : '0px' }}>
+      <Aurora variant={admin ? 'admin' : 'app'} />
       <a className="shell__skip" href="#main-content">{t('shell.skipToContent')}</a>
       {!(isUserRole && isMobile) && (
         <Sidebar

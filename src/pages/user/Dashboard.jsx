@@ -219,7 +219,7 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
         <BrandLoader variant="section" />
       </div>
     )
@@ -227,7 +227,7 @@ function Dashboard() {
 
   if (sessionExpired) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
           <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
           <h2 className="fs-22" style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>{t('dashboard.sessionExpired')}</h2>

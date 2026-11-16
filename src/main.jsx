@@ -7,6 +7,7 @@ import { ToastProvider } from './components/ToastProvider'
 import './styles/base.css'
 import './styles/globals.css'
 import './styles/utilities.css'
+import './styles/aurora.css'
 import App from './App.jsx'
 
 import { registerSW, setupInstallPrompt } from './lib/pwa'

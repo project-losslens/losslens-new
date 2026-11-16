@@ -75,7 +75,7 @@ export default function CrisisAlerts() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
             {[0,1,2].map(i => <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--text)', animation: `loadingDot 1.2s ${i*0.2}s infinite` }} />)}
@@ -89,7 +89,7 @@ export default function CrisisAlerts() {
 
   if (error) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <p style={{ color: 'var(--text)', marginBottom: '12px' }}>{error}</p>
           <button onClick={fetchAll} style={btn('transparent', 'var(--text)', 'var(--text)')}>Retry</button>
@@ -99,7 +99,7 @@ export default function CrisisAlerts() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
 
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>

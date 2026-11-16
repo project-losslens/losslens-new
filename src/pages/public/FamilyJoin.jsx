@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
+import Aurora from '../../components/Aurora'
 
 //  Constants for permissions
 const PERMISSIONS = {
@@ -206,7 +207,8 @@ export default function FamilyJoin() {
   //  Invalid
   if (status === 'invalid') {
     return (
-      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+        <Aurora variant="hero" />
         <div style={{ maxWidth: '440px', width: '100%', textAlign: 'center' }}>
           <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#FFFFFF' }} />
           <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', marginBottom: '12px' }}>Invalid Link</h2>
@@ -220,7 +222,8 @@ export default function FamilyJoin() {
   //  Declined
   if (status === 'declined') {
     return (
-      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+        <Aurora variant="hero" />
         <div style={{ maxWidth: '440px', width: '100%', textAlign: 'center', background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2.5rem', border: '1px solid rgba(255,255,255,0.12)' }}>
           <AppIcon name="heart" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
           <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', marginBottom: '12px' }}>You've Declined</h2>
@@ -235,7 +238,8 @@ export default function FamilyJoin() {
   if (status === 'pending') {
     const permissions = invitation?.permissions || []
     return (
-      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+        <Aurora variant="hero" />
         <div style={{ maxWidth: '480px', width: '100%', background: 'rgba(255,255,255,0.06)', borderRadius: '20px', padding: '2.5rem 2rem', border: '2px solid #2DD4BF', textAlign: 'center' }}>
           <AppIcon name="users" size={48} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
           <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '8px' }}>{invitation.supporter_name},</h2>
@@ -264,7 +268,8 @@ export default function FamilyJoin() {
   const risk = userStats?.riskLevel ? getRisk(userStats.riskLevel) : null
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0B1220' }}>
+    <div style={{ minHeight: '100vh' }}>
+      <Aurora variant="hero" />
       <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', padding: '2rem 1.5rem', textAlign: 'center', borderBottom: '2px solid #2DD4BF' }}>
         <AppIcon name="users" size={40} style={{ display: 'block', margin: '0 auto 8px', color: '#2DD4BF' }} />
         <h1 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', margin: '0 0 4px' }}>

@@ -26,7 +26,6 @@
 
   min-height: 100vh;
   overflow-x: clip;
-  background: var(--ll-bg);
   color: var(--ll-text);
   font-family: var(--ll-font-body);
   font-size: 1rem;
@@ -227,7 +226,7 @@
   padding: calc(clamp(4rem, 8vw, 7rem) + 4.5rem) 1rem 4rem;
   background:
     radial-gradient(55rem 26rem at 78% -12%, rgba(45, 212, 191, 0.16), transparent 62%),
-    var(--ll-bg);
+    transparent;
 }
 .ll-hero__grid {
   display: grid;
@@ -406,7 +405,7 @@
 .ll-cta {
   background:
     radial-gradient(40rem 18rem at 15% 0%, rgba(45, 212, 191, 0.1), transparent 65%),
-    var(--ll-bg);
+    transparent;
 }
 .ll-cta__inner {
   display: flex;
@@ -436,7 +435,7 @@
   padding: 0.8rem 1rem;
   border: 1px solid var(--ll-border);
   border-radius: 12px;
-  background: var(--ll-bg);
+  background: var(--ll-surface);
   color: var(--ll-text) !important;
   text-decoration: none;
 }
@@ -451,7 +450,6 @@
 .ll-footer {
   padding: 2.5rem 1rem;
   border-top: 1px solid var(--ll-border);
-  background: var(--ll-bg);
 }
 .ll-footer__inner {
   width: min(100% - 2rem, 70rem);

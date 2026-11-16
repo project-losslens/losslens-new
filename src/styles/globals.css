@@ -1,6 +1,5 @@
 body {
   font-family: var(--font-body);
-  background: var(--bg);
 }
 
 .portal-page {
@@ -49,7 +48,6 @@ body {
   min-height: 100vh;
   place-items: center;
   padding: 1.5rem;
-  background: var(--bg);
   color: var(--text);
 }
 
@@ -247,7 +245,6 @@ body {
 }
 
 .root {
-  background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
@@ -257,7 +254,6 @@ body {
 .page-root {
   min-height: 100vh;
   overflow-x: hidden;
-  background: var(--bg);
   color: var(--text);
 }
 
@@ -1670,7 +1666,6 @@ button:active {
 .shell {
   min-height: 100vh;
   color: var(--text);
-  background: var(--bg);
 }
 
 .shell__main {

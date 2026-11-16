@@ -5,6 +5,7 @@ import GuidedTour from '../components/GuidedTour'
 import { generateDemoData, DEMO_LABEL } from '../demo/fixtures'
 import { computeInsurerMetrics, formatMetric, METRIC_DEFINITIONS } from '../lib/metrics'
 import { isDemoEnabled } from '../lib/demoMode'
+import Aurora from '../components/Aurora'
 
 const CHECKIN_KEY = 'll-demo-checkins'
 const TOUR_KEY = 'll-demo-tour-done'
@@ -33,6 +34,7 @@ export default function Demo() {
   if (!isDemoEnabled()) {
     return (
       <section className="portal-page">
+        <Aurora variant="app" />
         <h1>Demo mode</h1>
         <p className="portal-notice">Demo mode is disabled for this deployment.</p>
         <Link to="/login" className="btn-primary">Back to sign in</Link>
@@ -87,6 +89,7 @@ export default function Demo() {
 
   return (
     <section className="portal-page demo-page">
+      <Aurora variant="app" />
       <header className="portal-page__heading">
         <div>
           <p className="portal-page__eyebrow">Demo mode</p>

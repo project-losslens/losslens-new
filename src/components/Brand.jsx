@@ -105,7 +105,7 @@ function BrandLoaderView({ variant, label, showWordmark, elapsedMs = 0, style })
     ? {
         position: 'fixed', inset: 0, zIndex: 'var(--z-toast, 9999)',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        background: 'var(--bg)', minHeight: '100dvh',
+        background: 'rgba(11, 18, 32, 0.6)', minHeight: '100dvh',
         padding: 'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)',
       }
     : isInline

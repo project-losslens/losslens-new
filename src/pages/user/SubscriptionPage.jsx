@@ -228,7 +228,7 @@ export default function SubscriptionPage() {
 
   if (pageLoading) {
     return (
-      <div className="page-root" style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="page-root" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <BrandLoader />
       </div>
     )
@@ -236,7 +236,7 @@ export default function SubscriptionPage() {
 
   if (pageError) {
     return (
-      <div className="page-root" style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div className="page-root" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <p className="fs-14" style={{ color: 'rgba(255,255,255,0.55)', marginBottom: '12px' }}>Could not load your subscription.</p>
         <button type="button" className="btn-primary" onClick={() => { setPageLoading(true); fetchProfile() }}>Try again</button>
       </div>

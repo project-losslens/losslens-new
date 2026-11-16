@@ -1,0 +1,180 @@
+/* ─── Aurora borealis background system ───
+   Layered, slow-drifting northern-lights gradients rendered on a fixed,
+   pointer-events-none layer beneath all page content. No JavaScript
+   animation — transform/opacity only. Variants control intensity:
+     base  — subtle default (mounted globally in App)
+     hero  — rich treatment for public pages (PublicLayout, /protection)
+     app   — restrained layer for authenticated app shells
+     admin — faintest layer for admin / super-admin portals            */
+
+:root {
+  --aurora-teal: #2DD4BF;
+  --aurora-green: #3ECF8E;
+  --aurora-blue: #7DBDEE;
+  --aurora-violet: #8F7FF5;
+}
+
+.aurora {
+  /* Intensity knobs — overridden per variant below. */
+  --aurora-glow-a: 0.32;
+  --aurora-glow-b: 0.24;
+  --aurora-glow-c: 0.14;
+  --aurora-glow-d: 0.12;
+  --aurora-blob-a: 0.48;
+  --aurora-blob-b: 0.38;
+  --aurora-dur-a: 56s;
+  --aurora-dur-b: 76s;
+
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+
+  /* Static aurora field: soft teal/blue/green/violet veils over --bg. */
+  background-image:
+    radial-gradient(90% 65% at 50% -10%, rgba(45, 212, 191, var(--aurora-glow-a)), transparent 70%),
+    radial-gradient(80% 60% at 90% 4%, rgba(125, 189, 238, var(--aurora-glow-b)), transparent 72%),
+    radial-gradient(95% 70% at 8% 30%, rgba(62, 207, 142, var(--aurora-glow-c)), transparent 70%),
+    radial-gradient(75% 60% at 60% 112%, rgba(143, 127, 245, var(--aurora-glow-d)), transparent 72%);
+}
+
+/* Two large, heavily feathered "curtain" blobs that drift on independent
+   slow cycles. Only transform is animated, so motion stays on the
+   compositor and never blocks scrolling or input. */
+.aurora::before,
+.aurora::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.aurora::before {
+  top: -32vmax;
+  left: -22vmax;
+  width: 145vmax;
+  height: 54vmax;
+  background: radial-gradient(50% 50% at 50% 50%,
+    rgba(45, 212, 191, var(--aurora-blob-a)),
+    rgba(62, 207, 142, calc(var(--aurora-blob-a) * 0.4)) 55%,
+    transparent 78%);
+  animation: aurora-sway-a var(--aurora-dur-a) ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.aurora::after {
+  top: 12vh;
+  right: -34vmax;
+  width: 125vmax;
+  height: 48vmax;
+  background: radial-gradient(50% 50% at 50% 50%,
+    rgba(125, 189, 238, var(--aurora-blob-b)),
+    rgba(143, 127, 245, calc(var(--aurora-blob-b) * 0.45)) 55%,
+    transparent 78%);
+  animation: aurora-sway-b var(--aurora-dur-b) ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes aurora-sway-a {
+  0%   { transform: translate3d(-6vmax, 0, 0) rotate(-7deg) scale(1.05); }
+  50%  { transform: translate3d(7vmax, -4vmax, 0) rotate(-4deg) scale(1.12); }
+  100% { transform: translate3d(-3vmax, 3vmax, 0) rotate(-8deg) scale(1.02); }
+}
+
+@keyframes aurora-sway-b {
+  0%   { transform: translate3d(5vmax, 2vmax, 0) rotate(6deg) scale(1.08); }
+  50%  { transform: translate3d(-6vmax, -3vmax, 0) rotate(3deg) scale(1.14); }
+  100% { transform: translate3d(4vmax, -2vmax, 0) rotate(7deg) scale(1.04); }
+}
+
+/* ─── Variants ─── */
+
+.aurora--hero {
+  --aurora-glow-a: 0.55;
+  --aurora-glow-b: 0.44;
+  --aurora-glow-c: 0.26;
+  --aurora-glow-d: 0.22;
+  --aurora-blob-a: 0.72;
+  --aurora-blob-b: 0.58;
+  --aurora-dur-a: 42s;
+  --aurora-dur-b: 58s;
+}
+
+.aurora--app {
+  --aurora-glow-a: 0.24;
+  --aurora-glow-b: 0.18;
+  --aurora-glow-c: 0.11;
+  --aurora-glow-d: 0.09;
+  --aurora-blob-a: 0.34;
+  --aurora-blob-b: 0.27;
+  --aurora-dur-a: 62s;
+  --aurora-dur-b: 84s;
+}
+
+.aurora--admin {
+  --aurora-glow-a: 0.14;
+  --aurora-glow-b: 0.11;
+  --aurora-glow-c: 0.07;
+  --aurora-glow-d: 0.06;
+  --aurora-blob-a: 0.22;
+  --aurora-blob-b: 0.18;
+  --aurora-dur-a: 72s;
+  --aurora-dur-b: 96s;
+}
+
+/* ─── Chrome accents ───
+   Keep operational surfaces readable while letting the aurora breathe
+   around them. */
+
+.shell__header {
+  background-color: var(--surface);
+  background-image: linear-gradient(105deg,
+    rgba(45, 212, 191, 0.10),
+    rgba(125, 189, 238, 0.05) 45%,
+    transparent 75%);
+}
+
+.shell--admin .shell__header {
+  background-image: none;
+}
+
+/* User dashboard welcome region: a soft aurora lift behind the header area. */
+.dashboard {
+  background-image: radial-gradient(70% 45% at 18% 0%,
+    rgba(45, 212, 191, 0.10), transparent 70%);
+}
+
+/* Auth + public cards sit over the stronger hero aurora, so raise their
+   surface opacity to preserve text contrast. */
+.auth-card,
+.ll-landing .card,
+.ll-landing .pricing-card,
+.ll-landing .stat-card,
+.ll-landing .dash-section,
+.ll-landing .module-card,
+.ll-landing .tool-card {
+  background: rgba(11, 18, 32, 0.78);
+}
+
+/* Public feature/partner/note surfaces: darken the shared tint enough to
+   keep aurora glow subtle behind text. Doubled class beats landing.css
+   regardless of stylesheet load order (landing.css arrives with the lazy
+   PublicLayout chunk, after this file). */
+.ll-landing.ll-landing {
+  --ll-surface: rgba(11, 18, 32, 0.58);
+}
+
+/* ─── Reduced motion / low-data: static aurora ─── */
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora::before,
+  .aurora::after {
+    animation: none;
+  }
+}
+
+html[data-low-data='true'] .aurora::before,
+html[data-low-data='true'] .aurora::after {
+  animation: none;
+}

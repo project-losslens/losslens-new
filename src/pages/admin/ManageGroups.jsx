@@ -146,7 +146,7 @@ export default function ManageGroups() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
+      <div style={{ display: 'flex', minHeight: '100vh' }}>
   
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
@@ -163,7 +163,7 @@ export default function ManageGroups() {
 
   if (error) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
+      <div style={{ display: 'flex', minHeight: '100vh' }}>
   
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>

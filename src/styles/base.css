@@ -118,11 +118,13 @@ body {
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
+  /* Page background lives on html, not body: body's background would paint
+     above the fixed z-index:-1 aurora layer and hide it. */
+  background: var(--bg);
 }
 
 body {
   margin: 0;
-  background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
   font-weight: 400;

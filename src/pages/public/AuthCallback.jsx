@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { BrandLoader } from '../../components/Brand'
 import { roleHome } from '../../config/roleHome'
 import { useAuthProfile } from '../../context/AuthProfileContext'
+import Aurora from '../../components/Aurora'
 import { useDocumentTitle } from '../../hooks'
 
 export default function AuthCallback() {
@@ -22,6 +23,7 @@ export default function AuthCallback() {
   if (authStatus === 'error') {
     return (
       <main className="auth-container">
+        <Aurora variant="hero" />
         <section className="auth-card" role="alert">
           <h1 className="auth-title">We could not complete sign in</h1>
           <p className="auth-sub">Check your connection and try the confirmation link again.</p>
@@ -32,6 +34,7 @@ export default function AuthCallback() {
   }
   return (
     <main className="auth-container">
+      <Aurora variant="hero" />
       <section className="auth-card" role="alert">
         <h1 className="auth-title">Sign-in link not completed</h1>
         <p className="auth-sub">The link may have expired. Request a new one or sign in.</p>

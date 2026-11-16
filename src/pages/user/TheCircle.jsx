@@ -374,14 +374,14 @@ export default function TheCircle() {
   const activeRoomData = useMemo(() => ROOMS.find(r => r.id === activeRoom), [activeRoom])
 
   if (initError) return (
-    <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
       <p className="fs-14" style={{ color: 'rgba(255,255,255,0.55)', marginBottom: '12px' }}>Could not connect to The Circle.</p>
       <button type="button" className="btn-primary" onClick={initUser}>Try again</button>
     </div>
   )
 
   if (!identity) return (
-    <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <BrandLoader variant="section" />
     </div>
   )

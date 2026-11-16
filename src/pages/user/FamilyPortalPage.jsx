@@ -257,7 +257,7 @@ function FamilyPortalPage() {
   const canInvite = invitations.filter(i => i.status === 'active' || i.status === 'pending').length < MAX_SUPPORTERS
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <BrandLoader variant="section" />
     </div>
   )

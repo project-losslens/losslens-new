@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import AppIcon from '../components/AppIcon'
 import { LogoMark } from '../components/Brand'
 import ContactIcons from '../components/ContactIcons'
+import Aurora from '../components/Aurora'
 import { roleHome } from '../config/roleHome'
 import { useAuthProfile } from '../context/AuthProfileContext'
 import '../styles/landing.css'
@@ -146,6 +147,7 @@ export function PublicLayout({ children }) {
 
   return (
     <div className="ll-landing">
+      <Aurora variant="hero" />
       <Link className="ll-skip" to="#public-main">Skip to content</Link>
       <Header />
       <div id="public-main">{children}</div>

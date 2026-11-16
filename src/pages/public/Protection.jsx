@@ -4,6 +4,7 @@ import { SHOW_PROTECTION } from './protectionContent'
 import { supabase } from '../../lib/supabase'
 import { PROTECTION_CONTENT as C } from './protectionContent'
 import ContactIcons from '../../components/ContactIcons'
+import Aurora from '../../components/Aurora'
 import { useDocumentTitle } from '../../hooks'
 import '../../styles/landing.css'
 
@@ -39,6 +40,7 @@ function ProtectionInner() {
 
   return (
     <div className="ll-landing">
+      <Aurora variant="hero" />
       <main className="ll-band" style={{ paddingTop: 'var(--space-7)' }}>
         <div className="ll-container ll-narrow">
           <p className="ll-eyebrow">LossLens Protection</p>

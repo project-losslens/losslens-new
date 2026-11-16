@@ -100,7 +100,7 @@ function ResetPassword() {
   //  Token checking screen
   if (checkingToken) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <BrandLoader />
       </div>
     )

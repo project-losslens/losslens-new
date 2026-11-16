@@ -514,7 +514,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
 
   if (sessionExpired) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
           <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
           <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>Please log in</h2>
@@ -526,7 +526,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
 
   if (loadingProfile) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <BrandLoader variant="section" />
       </div>
     )
@@ -534,7 +534,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
 
   if (profileError) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0B1220', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <p className="fs-14" style={{ color: 'rgba(255,255,255,0.55)', marginBottom: '12px' }}>Could not load your profile.</p>
         <button type="button" className="btn-primary" onClick={() => { setLoadingProfile(true); setProfileError(false); fetchAllData() }}>Try again</button>
       </div>
