@@ -126,6 +126,8 @@ Admin access to private recovery records is not restored by the migration packag
 
 Super Admin pages implement user and administrator management, email lookup through `get_user_email`, password-reset invocation, role/status and subscription updates, system settings, audit logs, B2B clients, insurance partners, grant applications, and chat history viewing. They live under `/super-admin/*`; therapist promotion is confirmed, changes the account to therapist-only access, and can be reverted to the user role.
 
+Insurance partner records support multiple selected coverage categories. The base migration adds `contact_email`, `coverage_types`, and a validated percentage field while retaining legacy `email` and `commission_rate` columns.
+
 The Super Admin chat viewer conflicts with owner-only chat privacy because direct Super Admin table access was removed. Runtime compatibility requires a future privacy-reviewed server function or product decision rather than migration RLS bypass.
 
 ## 11. Backend and database architecture

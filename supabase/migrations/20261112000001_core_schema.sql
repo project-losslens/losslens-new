@@ -555,13 +555,35 @@ create table if not exists public.insurance_partners (
   id uuid primary key default gen_random_uuid(),
   company_name text not null,
   contact_name text,
+  contact_email text,
   email text,
   phone text,
   status text not null default 'active',
   commission_rate numeric(8,4),
+  commission_pct numeric(5,2) check (commission_pct is null or commission_pct between 0 and 100),
+  coverage_types text[] not null default '{}',
   notes text,
   created_at timestamptz not null default now()
 );
+alter table public.insurance_partners add column if not exists contact_email text;
+alter table public.insurance_partners add column if not exists commission_pct numeric(5,2);
+alter table public.insurance_partners add column if not exists coverage_types text[] not null default '{}';
+update public.insurance_partners
+set contact_email = email
+where contact_email is null and email is not null;
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'insurance_partners_commission_pct_range'
+      and conrelid = 'public.insurance_partners'::regclass
+  ) then
+    alter table public.insurance_partners
+      add constraint insurance_partners_commission_pct_range
+      check (commission_pct is null or commission_pct between 0 and 100);
+  end if;
+end;
+$$;
 
 create table if not exists public.system_settings (
   key text primary key,

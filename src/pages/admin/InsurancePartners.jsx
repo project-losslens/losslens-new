@@ -1,7 +1,6 @@
 import { toast } from '../../components/ToastProvider'
 import NumberField from '../../components/NumberField'
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { BrandLoader } from '../../components/Brand'
 import AppIcon from '../../components/AppIcon'
@@ -9,9 +8,12 @@ import AppIcon from '../../components/AppIcon'
 //  Constants
 const COVERAGE_TYPES = ['Mental Health', 'Addiction Rehab', 'Inpatient', 'Outpatient', 'Counseling', 'Crisis Intervention', 'General Health', 'Employee Wellness', 'Other']
 
+const EMPTY_FORM = {
+  company_name: '', contact_email: '', contact_name: '',
+  coverage_types: [], commission_pct: '', status: 'active', notes: '',
+}
 
 export default function InsurancePartners() {
-  const navigate = useNavigate()
   const [partners, setPartners] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -25,10 +27,7 @@ export default function InsurancePartners() {
   const [showToggleConfirm, setShowToggleConfirm] = useState(null)
   const [deleting, setDeleting] = useState(false)
   const [formErrors, setFormErrors] = useState({})
-  const [form, setForm] = useState({
-    company_name: '', contact_email: '', contact_name: '',
-    coverage_type: '', commission_pct: '', status: 'active', notes: ''
-  })
+  const [form, setForm] = useState(EMPTY_FORM)
 
   const fetchPartners = useCallback(async () => {
     setLoading(true)
@@ -43,11 +42,14 @@ export default function InsurancePartners() {
     } finally { setLoading(false) }
   }, [])
 
-  useEffect(() => { fetchPartners() }, [fetchPartners])
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void fetchPartners() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [fetchPartners])
 
   const openCreate = () => {
     setEditingPartner(null)
-    setForm({ company_name: '', contact_email: '', contact_name: '', coverage_type: '', commission_pct: '', status: 'active', notes: '' })
+    setForm({ ...EMPTY_FORM, coverage_types: [] })
     setFormErrors({})
     setShowForm(true)
   }
@@ -56,7 +58,7 @@ export default function InsurancePartners() {
     setEditingPartner(p)
     setForm({
       company_name: p.company_name || '', contact_email: p.contact_email || '',
-      contact_name: p.contact_name || '', coverage_type: p.coverage_type || '',
+      contact_name: p.contact_name || '', coverage_types: p.coverage_types || [],
       commission_pct: p.commission_pct || '', status: p.status || 'active', notes: p.notes || ''
     })
     setFormErrors({})
@@ -128,7 +130,7 @@ export default function InsurancePartners() {
       const matchesSearch = !searchQuery ||
         p.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.contact_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.coverage_type?.toLowerCase().includes(searchQuery.toLowerCase())
+        (p.coverage_types || []).some(type => type.toLowerCase().includes(searchQuery.toLowerCase()))
       const matchesStatus = statusFilter === 'all' || p.status === statusFilter
       return matchesSearch && matchesStatus
     })
@@ -211,11 +213,22 @@ export default function InsurancePartners() {
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
                     <div>
-                      <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Coverage Type</label>
-                      <select value={form.coverage_type} onChange={e => setForm(p => ({ ...p, coverage_type: e.target.value }))} style={{ ...inputStyle, cursor: 'pointer' }}>
-                        <option value="">Select type...</option>
-                        {COVERAGE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                      </select>
+                      <fieldset style={{ border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '10px' }}>
+                        <legend style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px' }}>Coverage categories</legend>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px' }}>
+                          {COVERAGE_TYPES.map(type => (
+                            <label key={type} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.75)', fontSize: '12px' }}>
+                              <input type="checkbox" checked={form.coverage_types.includes(type)} onChange={event => setForm(current => ({
+                                ...current,
+                                coverage_types: event.target.checked
+                                  ? [...current.coverage_types, type]
+                                  : current.coverage_types.filter(value => value !== type),
+                              }))} />
+                              {type}
+                            </label>
+                          ))}
+                        </div>
+                      </fieldset>
                     </div>
                     <div>
                       <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Commission % (0-100)</label>
@@ -267,7 +280,7 @@ export default function InsurancePartners() {
                       </div>
                       <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>{p.contact_name}  · {p.contact_email}</p>
                       <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: 0 }}>
-                        {p.coverage_type || 'General'}  · {p.commission_pct || 0}% commission
+                        {(p.coverage_types || []).join(', ') || 'Coverage not specified'}  · {p.commission_pct ?? 0}% commission
                         {p.notes && <span style={{ display: 'block', marginTop: '4px', color: 'var(--info)', fontSize: '11px', fontStyle: 'italic' }}>{<AppIcon name="document" size={12} />} {p.notes.substring(0, 80)}{p.notes.length > 80 ? '...' : ''}</span>}
                       </p>
                     </div>
