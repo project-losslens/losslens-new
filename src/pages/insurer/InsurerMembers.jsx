@@ -29,6 +29,7 @@ export default function InsurerMembers() {
   const [report, setReport] = useState(null)
   const [uploading, setUploading] = useState(false)
   const [verifyRef, setVerifyRef] = useState({})
+  const [verifyStructure, setVerifyStructure] = useState({})
   const [issueForm, setIssueForm] = useState({}) // membership_id -> {version_id, policy_number, commencement, expiry, premium}
   const [premiumForm, setPremiumForm] = useState({}) // policy_id -> {period_start, period_end, amount_due, amount_received, payment_ref, channel}
   const [working, setWorking] = useState('')
@@ -90,6 +91,7 @@ export default function InsurerMembers() {
     const ref = verifyRef[m.membership_id] ?? m.member_reference ?? ''
     const { error: rpcError } = await supabase.rpc('insurer_verify_membership', {
       p_membership_id: m.membership_id, p_member_reference: ref || null,
+      p_cover_structure: verifyStructure[m.membership_id] || m.cover_structure || null,
     })
     if (rpcError) { toast.error(rpcError.message || 'Verification failed.'); return }
     toast.success('Membership verified.')
@@ -225,6 +227,14 @@ export default function InsurerMembers() {
                       onChange={e => setVerifyRef(p => ({ ...p, [m.membership_id]: e.target.value }))}
                       placeholder="Member ref"
                       style={{ width: '110px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '12px' }} />
+                    <select value={verifyStructure[m.membership_id] ?? m.cover_structure ?? ''}
+                      onChange={e => setVerifyStructure(p => ({ ...p, [m.membership_id]: e.target.value }))}
+                      style={{ padding: '6px 6px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '11px' }}>
+                      <option value="">Structure…</option>
+                      <option value="medical_rider">Rider</option>
+                      <option value="individual">Individual</option>
+                      <option value="group">Group</option>
+                    </select>
                     <button type="button" className="btn-primary fs-11" style={{ padding: '6px 10px', minHeight: '32px' }} onClick={() => verify(m)}>
                       <AppIcon name="check" size={12} /> Verify
                     </button>
