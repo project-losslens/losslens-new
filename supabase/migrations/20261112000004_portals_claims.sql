@@ -15,9 +15,13 @@
 -- Therapist portal schema and workflows. Idempotent; apply after security hardening.
 
 alter table public.profiles drop constraint if exists profiles_role_check;
-alter table public.profiles
-  add constraint profiles_role_check
-  check (role in ('user', 'admin', 'super_admin', 'therapist', 'insurer'));
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'profiles_role_check') then
+    alter table public.profiles
+      add constraint profiles_role_check
+      check (role in ('user', 'admin', 'super_admin', 'therapist', 'insurer'));
+  end if;
+end $$;
 
 create table if not exists public.therapists (
   id uuid primary key references public.profiles(id) on delete cascade,
@@ -1304,8 +1308,12 @@ notify pgrst, 'reload schema';
 alter table public.bulk_invoices add column if not exists payment_reference text;
 alter table public.bulk_invoices add column if not exists payment_reported_at timestamptz;
 alter table public.bulk_invoices drop constraint if exists bulk_invoices_status_check;
-alter table public.bulk_invoices add constraint bulk_invoices_status_check
-  check (status in ('draft', 'sent', 'payment_reported', 'paid', 'disputed'));
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'bulk_invoices_status_check') then
+    alter table public.bulk_invoices add constraint bulk_invoices_status_check
+      check (status in ('draft', 'sent', 'payment_reported', 'paid', 'disputed'));
+  end if;
+end $$;
 
 revoke execute on function public.insurer_reimburse_bulk(uuid, uuid, text)
   from authenticated, anon, public;

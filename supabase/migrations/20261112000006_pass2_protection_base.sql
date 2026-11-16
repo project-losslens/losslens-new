@@ -93,23 +93,31 @@ create policy "avatars authenticated read" on storage.objects for select to auth
 -- reactions, authors and room-member rows. Room is a free-text column (no
 -- check constraint), and circle_room_counts / circle_purge_expired are
 -- room-agnostic, so no function changes are needed.
-delete from public.circle_message_reactions
-  where message_id in (
-    select id from public.circle_messages
-    where room in ('slip_recovery', 'family_friends')
-  );
+-- Guarded: runs only on an empty/fresh database or when the owner explicitly
+-- sets losslens.allow_destructive_reset = 'on'. Re-running on a populated or
+-- already-migrated database changes nothing.
+do $$ begin
+  if current_setting('losslens.allow_destructive_reset', true) = 'on'
+     or not exists (select 1 from public.profiles limit 1) then
+    delete from public.circle_message_reactions
+      where message_id in (
+        select id from public.circle_messages
+        where room in ('slip_recovery', 'family_friends')
+      );
 
-delete from public.circle_message_authors
-  where message_id in (
-    select id from public.circle_messages
-    where room in ('slip_recovery', 'family_friends')
-  );
+    delete from public.circle_message_authors
+      where message_id in (
+        select id from public.circle_messages
+        where room in ('slip_recovery', 'family_friends')
+      );
 
-delete from public.circle_messages
-  where room in ('slip_recovery', 'family_friends');
+    delete from public.circle_messages
+      where room in ('slip_recovery', 'family_friends');
 
-delete from public.circle_room_members
-  where room in ('slip_recovery', 'family_friends');
+    delete from public.circle_room_members
+      where room in ('slip_recovery', 'family_friends');
+  end if;
+end $$;
 
 -- Phase 4 / Urge Toolkit: user-chosen distraction challenges
 -- ("My challenges"). Owner-only RLS; status is doing/done/dropped.
@@ -199,13 +207,21 @@ grant execute on function public.create_supporter_invitation(text, text, text, t
 -- Safe to run when they do not exist.
 -- ===========================================================================
 
-drop function if exists public.admin_set_subscription(uuid, text, text, timestamptz, text, text);
-drop function if exists public.admin_set_subscription_bulk(uuid[], text, text, timestamptz, text, text);
-drop function if exists public.admin_get_subscription_history(uuid, integer);
-drop function if exists public.admin_record_manual_payment(uuid, text, numeric, text, text);
-drop function if exists public.expire_subscriptions();
-drop table if exists public.subscription_events;
-drop table if exists public.plans;
+-- Guarded one-time cleanup: runs only on an empty/fresh database or when the
+-- owner explicitly sets losslens.allow_destructive_reset = 'on'. On a
+-- populated or already-migrated database this block is a no-op.
+do $$ begin
+  if current_setting('losslens.allow_destructive_reset', true) = 'on'
+     or not exists (select 1 from public.profiles limit 1) then
+    drop function if exists public.admin_set_subscription(uuid, text, text, timestamptz, text, text);
+    drop function if exists public.admin_set_subscription_bulk(uuid[], text, text, timestamptz, text, text);
+    drop function if exists public.admin_get_subscription_history(uuid, integer);
+    drop function if exists public.admin_record_manual_payment(uuid, text, numeric, text, text);
+    drop function if exists public.expire_subscriptions();
+    drop table if exists public.subscription_events;
+    drop table if exists public.plans;
+  end if;
+end $$;
 
 -- Payments ledger. provider_ref is unique for idempotency. Users read their
 -- own rows; super_admin reads all. Writes happen only via the service role.
