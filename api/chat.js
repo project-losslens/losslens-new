@@ -2,6 +2,10 @@
 
 import { detectCrisis, CRISIS_HELPLINE } from '../src/lib/crisisDetection.js'
 import { getEntitlements } from '../src/lib/entitlements.js'
+import { OLOO_KNOWLEDGE, OLOO_ACTION_PROTOCOL } from './_lib/oloo/knowledge.js'
+import { extractAction } from './_lib/oloo/protocol.js'
+import { getAction } from './_lib/oloo/actions.js'
+import { actionContext } from './_lib/oloo/server.js'
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
 const GROQ_MODEL = 'openai/gpt-oss-20b'
@@ -24,7 +28,11 @@ Listen first and respond empathetically without judgement. Support gambling reco
 Never diagnose anyone, claim to be a licensed therapist, or present yourself as Groq or another AI model. Never provide gambling tips, odds, betting strategies, or emergency contact details that are not already provided by LossLens.
 
 If a user may be in immediate danger, self-harming, or considering suicide, encourage them to use LossLens crisis resources and seek immediate trusted or professional support. Clearly state that you are not their only source of support.
-Stay conversational and avoid long lists unless the user asks for structure. Keep most replies concise. Encourage practical next steps and real-world support.`
+Stay conversational and avoid long lists unless the user asks for structure. Keep most replies concise. Encourage practical next steps and real-world support.
+
+${OLOO_KNOWLEDGE}
+
+${OLOO_ACTION_PROTOCOL}`
 
 function json(response, status, body) {
   response.statusCode = status
@@ -153,6 +161,62 @@ async function countRecentMessages(auth, sinceIso) {
   const range = response.headers.get('content-range') || ''
   const total = Number(range.split('/')[1])
   return Number.isFinite(total) ? total : null
+}
+
+async function callGroq(messages) {
+  const groqResponse = await fetchWithTimeout(GROQ_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages,
+      max_tokens: 700,
+      temperature: 0.8,
+    }),
+  }, REQUEST_TIMEOUT_MS)
+
+  const data = await groqResponse.json().catch(() => null)
+  if (!groqResponse.ok) {
+    if (groqResponse.status === 429) return { error: 'busy' }
+    if (groqResponse.status >= 500) return { error: 'unavailable' }
+    return { error: 'failed' }
+  }
+  const content = data?.choices?.[0]?.message?.content?.trim()
+  return content ? { content } : { error: 'empty' }
+}
+
+// Runs a validated read-only action, then asks Groq to comment on the real
+// result so Oloo stays conversational. Returns payload fields for the client.
+async function runReadAction(auth, actionId, params, priorMessages, replyText) {
+  const def = getAction(actionId)
+  if (!def || def.confirm) return null
+  const ctx = actionContext(auth)
+  let result
+  try {
+    result = await def.run(ctx, params && typeof params === 'object' ? params : {})
+  } catch {
+    result = { ok: false, error: 'action_failed' }
+  }
+  const resultJson = JSON.stringify(result?.data ?? result).slice(0, 6000)
+  const followup = await callGroq([
+    { role: 'system', content: `${BASE_SYSTEM_PROMPT}${OLOO_KNOWLEDGE}\n\n${OLOO_ACTION_PROTOCOL}` },
+    ...priorMessages,
+    { role: 'assistant', content: replyText || '' },
+    { role: 'user', content: `[system] Action "${actionId}" result: ${resultJson}. Briefly tell the user what happened or what you found, in 1-3 sentences, using only this data. If it failed, say so plainly.` },
+  ])
+  return {
+    action: {
+      id: actionId,
+      ok: Boolean(result?.ok),
+      summary: typeof result?.summary === 'string' ? result.summary.slice(0, 500) : null,
+      data: result?.ok ? result.data : null,
+      error: result?.ok ? null : (result?.error || 'Action failed'),
+    },
+    followupReply: followup.content || null,
+  }
 }
 
 async function fetchChatHistory(auth) {
@@ -289,6 +353,8 @@ export default async function handler(request, response) {
   }
 
   let reply
+  let pendingAction = null
+  let actionPayload = null
   const crisis = detectCrisis(message)
   if (crisis.crisis) {
     reply = CRISIS_REPLY
@@ -314,32 +380,44 @@ export default async function handler(request, response) {
     }
 
     try {
-      const groqResponse = await fetchWithTimeout(GROQ_URL, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: GROQ_MODEL,
-          messages: [
-            { role: 'system', content: `${BASE_SYSTEM_PROMPT}${context ? `\n\nPrivate user context from LossLens: ${context}` : ''}` },
-            ...history,
-            { role: 'user', content: message },
-          ],
-          max_tokens: 300,
-          temperature: 0.8,
-        }),
-      }, REQUEST_TIMEOUT_MS)
-
-      const data = await groqResponse.json().catch(() => null)
-      if (!groqResponse.ok) {
-        if (groqResponse.status === 429) return json(response, 429, { error: 'Oloo is busy right now. Please try again shortly.' })
-        if (groqResponse.status >= 500) return json(response, 502, { error: 'Oloo is temporarily unavailable. Please try again shortly.' })
-        return json(response, 502, { error: 'Oloo could not respond. Please try again.' })
-      }
-      reply = data?.choices?.[0]?.message?.content?.trim()
+      const groqMessages = [
+        { role: 'system', content: `${BASE_SYSTEM_PROMPT}${context ? `\n\nPrivate user context from LossLens: ${context}` : ''}` },
+        ...history,
+        { role: 'user', content: message },
+      ]
+      const groqResult = await callGroq(groqMessages)
+      if (groqResult.error === 'busy') return json(response, 429, { error: 'Oloo is busy right now. Please try again shortly.' })
+      if (groqResult.error) return json(response, 502, { error: 'Oloo is temporarily unavailable. Please try again shortly.' })
+      reply = groqResult.content
       if (!reply) return json(response, 502, { error: 'Oloo could not respond. Please try again.' })
+
+      // ── Action protocol: the model may append `ACTION: {"id":...,"params":{...}}`.
+      const { reply: cleanReply, action } = extractAction(reply)
+      if (action) {
+        const def = getAction(action.id)
+        if (!def) {
+          reply = cleanReply || reply
+        } else if (def.confirm) {
+          // Consequential action — return a pending proposal; the client must
+          // POST /api/actions after the user explicitly confirms.
+          reply = cleanReply || `Ready to ${action.id.replace(/[._]/g, ' ')} — please confirm below.`
+          pendingAction = {
+            id: action.id,
+            params: action.params,
+            summary: typeof def.describe === 'function'
+              ? def.describe(action.params || {})
+              : `${action.id.replace(/[._]/g, ' ')}: ${JSON.stringify(action.params).slice(0, 400)}`,
+          }
+        } else {
+          const outcome = await runReadAction(auth, action.id, action.params, groqMessages, cleanReply || reply)
+          if (outcome) {
+            reply = outcome.followupReply || cleanReply || reply
+            actionPayload = outcome.action
+          } else {
+            reply = cleanReply || reply
+          }
+        }
+      }
     } catch (error) {
       if (error.name === 'AbortError') return json(response, 504, { error: 'Oloo took too long to respond. Please try again.' })
       return json(response, 502, { error: 'Oloo is temporarily unavailable. Please try again shortly.' })
@@ -352,7 +430,11 @@ export default async function handler(request, response) {
     return json(response, 503, { error: 'Conversation history could not be saved. Please try again.' })
   }
 
-  return json(response, 200, { reply })
+  return json(response, 200, {
+    reply,
+    ...(pendingAction ? { pendingAction } : {}),
+    ...(actionPayload ? { action: actionPayload } : {}),
+  })
   } catch (error) {
     console.error(error)
     return json(response, 500, { error: 'internal' })

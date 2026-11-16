@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { askGroq } from '../lib/groq'
+import { useNavigate } from 'react-router-dom'
+import { askGroq, runOlooAction } from '../lib/groq'
 import { supabase } from '../lib/supabase'
 import AppIcon from './AppIcon'
 import { detectCrisis } from '../lib/crisisDetection'
@@ -135,6 +136,7 @@ function getProactiveQuestions(userContext) {
 // — Main AIChat Component —
 function AIChat({ profile }) {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const firstName = profile?.full_name?.split(' ')[0] || 'friend';
   const userId = profile?.id;
 
@@ -377,15 +379,21 @@ function AIChat({ profile }) {
     setOlooEmotion('thinking');
 
     try {
-      const reply = await askGroq(content);
+      const res = await askGroq(content);
       const replyId = (Date.now() + 1).toString();
-      const replyMsg = { role: 'assistant', content: reply, id: replyId };
+      const replyMsg = {
+        role: 'assistant',
+        content: res?.reply || "Hmm, I lost my train of thought. What were you saying?",
+        id: replyId,
+        pendingAction: res?.pendingAction || null,
+        action: res?.action || null,
+      };
 
       setOlooEmotion('neutral');
       setMessages([...updatedMessages, replyMsg]);
 
-      if (voiceEnabled) {
-        setTimeout(() => speakText(reply, replyId), 200);
+      if (voiceEnabled && replyMsg.content) {
+        setTimeout(() => speakText(replyMsg.content, replyId), 200);
       }
     } catch {
       setOlooEmotion('neutral');
@@ -395,6 +403,33 @@ function AIChat({ profile }) {
       }]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ─── Confirm / run a pending Oloo action ───
+  const [actionBusyId, setActionBusyId] = useState(null);
+  const resolvePendingAction = async (msg, confirmed) => {
+    if (!msg.pendingAction || actionBusyId) return;
+    const pa = msg.pendingAction;
+    setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, pendingAction: { ...pa, state: confirmed ? 'running' : 'cancelled' } } : m));
+    if (!confirmed) return;
+    setActionBusyId(msg.id);
+    try {
+      const res = await runOlooAction(pa.id, pa.params || {});
+      const resultMsg = {
+        role: 'assistant',
+        content: res?.ok
+          ? (res.summary || 'Done.')
+          : `That didn't work: ${res?.error || 'please try again.'}`,
+        id: (Date.now() + 1).toString(),
+        action: res?.ok ? { id: pa.id, ok: true, summary: res.summary, data: res.data } : { id: pa.id, ok: false, error: res?.error },
+      };
+      setMessages(prev => [
+        ...prev.map(m => m.id === msg.id ? { ...m, pendingAction: { ...pa, state: 'done' } } : m),
+        resultMsg,
+      ]);
+    } finally {
+      setActionBusyId(null);
     }
   };
 
@@ -613,6 +648,31 @@ function AIChat({ profile }) {
                     )}
                   </div>
                 )}
+                {/* Pending action confirmation card */}
+                {msg.pendingAction && (
+                  <div style={{ maxWidth: '85%', marginTop: '6px', background: 'rgba(45,212,191,0.08)', border: '1px solid rgba(45,212,191,0.35)', borderRadius: '12px', padding: '10px 12px' }}>
+                    {msg.pendingAction.state === 'cancelled' ? (
+                      <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)', margin: 0 }}>Cancelled.</p>
+                    ) : msg.pendingAction.state === 'done' || msg.pendingAction.state === 'running' ? (
+                      <p style={{ fontSize: '11px', color: '#2DD4BF', margin: 0 }}>{msg.pendingAction.state === 'running' ? 'Running…' : 'Completed.'}</p>
+                    ) : (
+                      <>
+                        <p style={{ fontSize: '11px', color: '#2DD4BF', fontWeight: 600, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Please confirm</p>
+                        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.75)', margin: '0 0 8px', lineHeight: 1.5, wordBreak: 'break-word' }}>{msg.pendingAction.summary}</p>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button type="button" onClick={() => resolvePendingAction(msg, true)} disabled={actionBusyId === msg.id} style={{ background: '#2DD4BF', border: 'none', color: '#0B1220', padding: '6px 14px', borderRadius: '100px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Confirm</button>
+                          <button type="button" onClick={() => resolvePendingAction(msg, false)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)', padding: '6px 14px', borderRadius: '100px', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* Executed action result card */}
+                {msg.action && (
+                  <ActionResultCard action={msg.action} onNavigate={(path) => { setIsOpen(false); navigate(path); }} />
+                )}
+
                 <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '4px', paddingLeft: msg.role === 'assistant' ? '32px' : '0' }}>
                   {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                 </span>
@@ -730,6 +790,77 @@ function AIChat({ profile }) {
         @keyframes typingDot { 0%, 100% { transform: translateY(0); opacity: 0.3; } 50% { transform: translateY(-5px); opacity: 1; } }
       `}</style>
     </>
+  );
+}
+
+// — Action result card: renders structured results from executed Oloo actions —
+// navigation buttons, event lists, and compact status summaries.
+function ActionResultCard({ action, onNavigate }) {
+  if (!action) return null;
+  const data = action.data || {};
+
+  const cardStyle = {
+    maxWidth: '85%', marginTop: '6px',
+    background: action.ok === false ? 'rgba(255,120,120,0.07)' : 'rgba(255,255,255,0.06)',
+    border: `1px solid ${action.ok === false ? 'rgba(255,120,120,0.3)' : 'rgba(125,189,238,0.3)'}`,
+    borderRadius: '12px', padding: '10px 12px',
+  };
+
+  if (action.ok === false) {
+    return (
+      <div style={cardStyle}>
+        <p style={{ fontSize: '12px', color: '#ff9b9b', margin: 0 }}>{action.error || 'Action failed'}</p>
+      </div>
+    );
+  }
+
+  const events = Array.isArray(data.events) ? data.events : null;
+  const registrations = Array.isArray(data.registrations) ? data.registrations : null;
+  const diaryEntries = Array.isArray(data.entries) ? data.entries : null;
+
+  return (
+    <div style={cardStyle}>
+      {data.navigate && (
+        <button
+          type="button"
+          onClick={() => onNavigate?.(data.navigate)}
+          style={{ background: '#2DD4BF', border: 'none', color: '#0B1220', padding: '6px 14px', borderRadius: '100px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', marginBottom: events || registrations || diaryEntries ? '8px' : 0 }}
+        >Open {data.label || 'page'}</button>
+      )}
+      {events && events.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {events.slice(0, 5).map(ev => (
+            <div key={ev.id} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5 }}>
+              <span style={{ color: '#2DD4BF', fontWeight: 600 }}>{ev.title}</span>
+              <span style={{ color: 'rgba(255,255,255,0.55)' }}> — {ev.date ? new Date(ev.date).toLocaleDateString('en-KE', { weekday: 'short', day: 'numeric', month: 'short' }) : ''}{ev.location ? ` · ${ev.location}` : ''}{ev.my_rsvp ? ` · ${ev.my_rsvp}` : ''}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {registrations && registrations.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {registrations.slice(0, 5).map(r => (
+            <div key={r.event_id} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5 }}>
+              <span style={{ color: '#2DD4BF', fontWeight: 600 }}>{r.title}</span>
+              <span style={{ color: 'rgba(255,255,255,0.55)' }}> — {r.date ? new Date(r.date).toLocaleDateString('en-KE', { day: 'numeric', month: 'short' }) : ''} · {r.attendance}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {diaryEntries && diaryEntries.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {diaryEntries.slice(0, 5).map((e, i) => (
+            <div key={e.date + i} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5 }}>
+              <span style={{ color: '#2DD4BF', fontWeight: 600 }}>{e.date}</span>
+              <span style={{ color: 'rgba(255,255,255,0.55)' }}> — {e.gambled ? 'gambled' : 'clean day'}{e.mood ? ` · ${e.mood}` : ''}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {!data.navigate && !events && !registrations && !diaryEntries && action.summary && (
+        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.5 }}>{action.summary}</p>
+      )}
+    </div>
   );
 }
 
