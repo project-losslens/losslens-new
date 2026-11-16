@@ -3195,3 +3195,19 @@ grant execute on function public.supporter_get_summary(text) to anon;
 grant execute on function public.supporter_post_message(text, text) to anon;
 grant execute on function public.supporter_list_messages(text) to anon;
 grant execute on function public.validate_company_code(text) to anon;
+
+-- ===========================================================================
+-- FK INDEX SWEEP (code-read generated; catalog verification pending)
+-- Columns referenced by RLS policies, joins and cascades that lacked a
+-- covering index. All idempotent.
+-- ===========================================================================
+create index if not exists cm_user_hash_idx on public.circle_messages (user_hash, created_at desc);
+create index if not exists circle_room_members_hash_idx on public.circle_room_members (user_hash);
+create index if not exists circle_message_authors_hash_idx on public.circle_message_authors (user_hash);
+create index if not exists whispers_sender_hash_idx on public.whispers_messages (sender_hash, created_at desc);
+create index if not exists event_rsvps_user_idx on public.event_rsvps (user_id, event_id);
+create index if not exists cbt_module_sessions_user_idx on public.cbt_module_sessions (user_id, started_at desc);
+create index if not exists account_deletion_log_user_idx on public.account_deletion_log (user_id, created_at desc);
+create index if not exists protection_events_membership_idx on public.protection_events (membership_id, created_at desc);
+create index if not exists crisis_alerts_user_idx on public.crisis_alerts (user_id, created_at desc);
+create index if not exists supporter_feedback_user_idx on public.supporter_feedback (user_id, created_at desc);
