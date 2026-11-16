@@ -4,6 +4,7 @@ import AppIcon from '../../../components/AppIcon'
 import { FACTS, SITE, mailtoHref } from '../../../config/site'
 import { HELPLINES, primaryHelpline } from '../../../config/helplines'
 import { PLAN_META, PLANS } from '../../../config/plans'
+import { PROTECTION_STATUS, STRUCTURES, STRUCTURE_ORDER } from '../../../config/protectionProducts'
 
 /* ------------------------------------------------------------------ */
 /* 1 — Hero                                                            */
@@ -21,8 +22,8 @@ export function Hero() {
             in one place, at your own pace.
           </p>
           <div className="ll-hero__actions">
-            <Link to="/signup" className="ll-btn ll-btn--primary">Get started free</Link>
-            <Link to="/#how-it-works" className="ll-btn ll-btn--ghost">Explore how it works</Link>
+            <Link to="/signup" className="ll-btn ll-btn--primary">Explore Recovery</Link>
+            <Link to="/protection" className="ll-btn ll-btn--ghost">Explore Protection</Link>
           </div>
           <p className="ll-hero__crisis">
             In crisis? Call{' '}
@@ -343,75 +344,44 @@ const PROTECTION_ROLES = [
   ['LossLens', 'provides the recovery platform, education, day-to-day tools and — with separate permission — limited status updates. LossLens is not the insurer.'],
 ]
 
-const PROTECTION_COVERS = [
-  'Clinical assessment for gambling disorder',
-  'Outpatient therapy, including CBT where appropriate',
-  'Psychiatric consultation when clinically needed',
-  'Structured outpatient programmes',
-  'Inpatient treatment only where clinically necessary and pre-approved',
-  'Follow-up after treatment',
-  'Family counselling, with the patient\u2019s consent',
-]
-
-const PROTECTION_NEVER = [
-  'Betting stakes, gambling losses or debts',
-  'Loan balances or lost savings',
-  'Rent arrears or cash compensation for having gambled',
-  'Treatment that is not clinically necessary',
-]
-
-const PROTECTION_PRIVACY = [
-  'Your diary is never shared with insurers.',
-  'Oloo conversations are never shared with insurers.',
-  'Crisis data and behavioural risk scores are never shared with insurers.',
-  'Any permitted status sharing is limited and separately authorised by you.',
-  'Insurance decisions belong to the insurer — never to LossLens.',
-]
-
 export function ProtectionSection() {
   return (
     <section className="ll-section ll-section--protection" id="protection" aria-labelledby="ll-protection-title">
       <div className="ll-container">
         <p className="ll-eyebrow">LossLens Protection · concept stage</p>
-        <h2 id="ll-protection-title">A proposed treatment benefit — not insurance you can buy today</h2>
+        <h2 id="ll-protection-title">One treatment-benefit package. Three ways to access protection.</h2>
         <p className="ll-lede">
-          LossLens Protection is a concept for a treatment benefit that could one
-          day be added to an existing medical insurance product. It is not cash
-          compensation for gambling losses, it is not for sale, and it is not an
-          offer of cover.
+          LossLens Protection is a proposed insurance-backed treatment benefit —
+          not cash compensation for gambling losses, not for sale, and not an
+          offer of cover. All three structures share the same benefits and
+          clinical rules; they differ only in how you enrol.
         </p>
+        <p className="ll-note">{PROTECTION_STATUS}</p>
         <div className="ll-protection__grid">
-          <div className="ll-protection__card">
-            <h3>Who would do what</h3>
-            <ul>
-              {PROTECTION_ROLES.map(([name, body]) => (
-                <li key={name}><strong>{name}:</strong> {body}</li>
-              ))}
-            </ul>
-          </div>
-          <div className="ll-protection__card">
-            <h3>What it could cover <small>proposed, subject to insurer and regulator</small></h3>
-            <ul className="ll-protection__covers">
-              {PROTECTION_COVERS.map((item) => <li key={item}>{item}</li>)}
-            </ul>
-          </div>
-          <div className="ll-protection__card">
-            <h3>What it would never cover</h3>
-            <ul className="ll-protection__never">
-              {PROTECTION_NEVER.map((item) => <li key={item}>{item}</li>)}
-            </ul>
-          </div>
+          {STRUCTURE_ORDER.map((slug) => {
+            const s = STRUCTURES[slug]
+            return (
+              <article className="ll-protection__card" key={slug}>
+                <h3>{s.name}</h3>
+                <p className="ll-lede" style={{ fontSize: '0.88rem' }}>{s.tagline}</p>
+                <Link to={`/protection/${slug}`} className="ll-btn ll-btn--ghost" style={{ fontSize: '0.85rem' }}>{s.cta}</Link>
+              </article>
+            )
+          })}
         </div>
         <div className="ll-protection__privacy">
-          <h3>Your privacy boundary</h3>
+          <h3>Who does what</h3>
           <ul>
-            {PROTECTION_PRIVACY.map((item) => <li key={item}>{item}</li>)}
+            {PROTECTION_ROLES.map(([name, body]) => (
+              <li key={name}><strong>{name}:</strong> {body}</li>
+            ))}
           </ul>
           <p>
             A LossLens quiz, risk score or Oloo conversation never creates a
-            clinical diagnosis or determines insurance eligibility. Platform
-            subscriptions and any future insurance premiums are completely
-            separate things.
+            clinical diagnosis or determines insurance eligibility. Your diary,
+            chats, crisis data and risk scores are never shared with insurers.
+            Platform subscriptions and any future insurance premiums are
+            completely separate things.
           </p>
           <Link to="/protection" className="ll-btn ll-btn--ghost">Read the full Protection concept</Link>
         </div>

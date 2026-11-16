@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Link } from 'react-router-dom'
 import { SHOW_PROTECTION } from './protectionContent'
+import { COMMON_PACKAGE, PROTECTION_STATUS, STRUCTURES, STRUCTURE_ORDER } from '../../config/protectionProducts'
 import { supabase } from '../../lib/supabase'
 import { PROTECTION_CONTENT as C } from './protectionContent'
 import ContactIcons from '../../components/ContactIcons'
@@ -45,16 +46,36 @@ function ProtectionInner() {
         <div className="ll-container ll-narrow">
           <p className="ll-eyebrow">LossLens Protection</p>
           <h1 className="ll-h2" style={{ fontSize: 'var(--step-4)' }}>An idea we are working on</h1>
-          <p className="ll-lede" style={{ marginBottom: 'var(--space-6)' }}>{C.status}</p>
+          <p className="ll-crisis__note" style={{ marginBottom: 'var(--space-6)' }}>{PROTECTION_STATUS}</p>
+
+          <Section title="One treatment-benefit package. Three ways to access protection.">
+            <p className="ll-lede" style={{ marginBottom: 'var(--space-4)' }}>
+              All three arrangements share the same proposed treatment benefits, clinical rules and claims framework.
+              They differ only in how you enrol and how the policy is structured — through an existing medical policy,
+              as a standalone individual policy, or through a participating organisation.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--space-4)' }}>
+              {STRUCTURE_ORDER.map((slug) => {
+                const s = STRUCTURES[slug]
+                return (
+                  <article key={slug} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: 'var(--space-4)' }}>
+                    <h3 style={{ color: '#2DD4BF', fontSize: 'var(--step-1)', margin: '0 0 var(--space-2)' }}>{s.name}</h3>
+                    <p className="ll-lede" style={{ marginBottom: 'var(--space-3)' }}>{s.tagline}</p>
+                    <Link to={`/protection/${slug}`} className="ll-btn ll-btn--ghost" style={{ fontSize: 'var(--step--1)' }}>{s.cta}</Link>
+                  </article>
+                )
+              })}
+            </div>
+          </Section>
 
           <Section title={C.what.title}>
             {C.what.body.map((p) => <p className="ll-lede" key={p.slice(0, 30)} style={{ marginBottom: 'var(--space-3)' }}>{p}</p>)}
           </Section>
 
-          <Section title={C.couldCover.title}>
-            <p className="ll-lede" style={{ marginBottom: 'var(--space-3)' }}>{C.couldCover.qualifier}</p>
+          <Section title={COMMON_PACKAGE.title}>
+            <p className="ll-lede" style={{ marginBottom: 'var(--space-3)' }}>{COMMON_PACKAGE.qualifier}</p>
             <ul className="ll-privacy" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              {C.couldCover.items.map((i) => <li key={i} className="ll-privacy" style={{ paddingLeft: 'var(--space-5)' }}>{i}</li>)}
+              {COMMON_PACKAGE.couldCover.map((i) => <li key={i} className="ll-privacy" style={{ paddingLeft: 'var(--space-5)' }}>{i}</li>)}
             </ul>
           </Section>
 

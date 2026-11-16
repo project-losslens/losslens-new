@@ -126,6 +126,10 @@ function Footer() {
           <Link to="/login">Log in</Link>
           <Link to="/signup">Sign up</Link>
           <Link to="/pricing">Pricing</Link>
+          <Link to="/protection">Protection</Link>
+          <Link to="/protection/medical-rider">Medical Rider</Link>
+          <Link to="/protection/individual-cover">Individual Cover</Link>
+          <Link to="/protection/group-cover">Group Cover</Link>
           <Link to="/privacy">Privacy</Link>
           <Link to="/terms">Terms</Link>
           <Link to="/about">About</Link>
