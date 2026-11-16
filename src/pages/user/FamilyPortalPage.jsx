@@ -40,6 +40,9 @@ function FamilyPortalPage() {
     anonymous_mode: false, crisis_contact: false, language: 'en'
   })
   const [shareInvite, setShareInvite] = useState(null)
+  // Raw invitation tokens are only returned once (at create/renew); the DB
+  // stores hashes. Keep them in memory so Share can build a real link.
+  const [shareTokens, setShareTokens] = useState({})
 
   useEffect(() => { fetchData() }, [])
 
@@ -95,6 +98,7 @@ function FamilyPortalPage() {
 
     if (!error && data) {
       setInvitations(prev => [data, ...prev])
+      if (data.token) setShareTokens(prev => ({ ...prev, [data.id]: data.token }))
       setShowForm(false)
       setForm({ supporter_name: '', supporter_relation: '', permissions: ['Streak status', 'Goal progress', 'General mood'], anonymous_mode: false, crisis_contact: false, language: 'en' })
       setShareInvite(data)
@@ -107,7 +111,7 @@ function FamilyPortalPage() {
   }
 
   const handleResend = async (inv) => {
-    const { error: renewError } = await supabase.rpc('supporter_owner_manage', {
+    const { data, error: renewError } = await supabase.rpc('supporter_owner_manage', {
       p_invitation_id: inv.id, p_action: 'renew', p_value: {},
     })
     if (renewError) {
@@ -115,12 +119,16 @@ function FamilyPortalPage() {
       toast.error('Could not renew invitation.')
       return
     }
-    toast.success('Invitation renewed! Share the link again.', 3000)
+    if (data?.token) {
+      setShareTokens(prev => ({ ...prev, [inv.id]: data.token }))
+      setShareInvite({ ...inv, ...data })
+    }
+    toast.success('Invitation renewed! Share the new link.', 3000)
     fetchData()
   }
 
   const handleRemove = async (invId) => {
-    if (!confirm('Remove this supporter?')) return
+    if (!confirm('End this support relationship? The supporter will immediately lose access to everything you share, and reconnecting requires a new invitation.')) return
     const { error: removeError } = await supabase.rpc('supporter_owner_manage', {
       p_invitation_id: invId, p_action: 'remove', p_value: {},
     })
@@ -200,13 +208,20 @@ function FamilyPortalPage() {
   }
 
   const buildShareText = (inv) => {
-    const link = `${window.location.origin}/family-join?token=${inv.token}`
+    const token = inv.token || shareTokens[inv.id]
+    if (!token) return null
+    const link = `${window.location.origin}/family-join?token=${token}`
     const userName = inv.anonymous_mode ? 'Someone who cares about you' : profile?.full_name || 'Someone'
     return { link, text: `${userName} would love your support on their recovery journey with LossLens.\n\nYou don't need to create an account — just click the link to see how they're doing: ${link}\n\nIt's private, secure, and you can stop anytime.` }
   }
 
   const handleShare = async (inv) => {
-    const { link, text } = buildShareText(inv)
+    const payload = buildShareText(inv)
+    if (!payload) {
+      toast.error('No shareable link — renew the invitation to get a new one.', 3000)
+      return
+    }
+    const { link, text } = payload
 
     try {
       if (navigator.share) {
@@ -228,9 +243,14 @@ function FamilyPortalPage() {
   const shareVia = async (channel) => {
     const inv = shareInvite
     if (!inv) return
-    const { link, text } = buildShareText(inv)
+    const payload = buildShareText(inv)
+    if (!payload) {
+      toast.error('No shareable link — renew the invitation to get a new one.', 3000)
+      return
+    }
+    const { link, text } = payload
     if (channel === 'copy') {
-      try { await navigator.clipboard.writeText(text); toast.success('Link copied!', 2000) } catch { toast.info('Share this link: ' + link, 5000) }
+      try { await navigator.clipboard.writeText(link); toast.success('Link copied!', 2000) } catch { toast.info('Share this link: ' + link, 5000) }
       return
     }
     if (channel === 'whatsapp') { window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener'); return }
@@ -248,7 +268,8 @@ function FamilyPortalPage() {
       active: { color: '#2DD4BF', bg: 'rgba(255,255,255,0.12)', label: 'Active' },
       declined: { color: '#FFFFFF', bg: 'rgba(255,255,255,0.08)', label: 'Declined' },
       expired: { color: 'rgba(255,255,255,0.4)', bg: '#0B1220', label: 'Expired' },
-      paused: { color: 'rgba(255,255,255,0.4)', bg: '#0B1220', label: 'Paused' },
+      paused: { color: 'rgba(255,255,255,0.4)', bg: '#0B1220', label: 'Sharing paused' },
+      revoked: { color: '#FFFFFF', bg: 'rgba(255,255,255,0.08)', label: 'Revoked' },
     }
     return map[status] || map.pending
   }
@@ -319,10 +340,11 @@ function FamilyPortalPage() {
                     <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '6px' }}>{(inv.permissions || []).slice(0, 3).map(p => <span key={p} style={{ fontSize: '9px', background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '1px 6px', borderRadius: '100px' }}>{p}</span>)}</div>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                       {inv.status === 'active' && <button onClick={() => loadMessages(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', gap: '4px' }}><AppIcon name="chat" size={12} /> Messages</button>}
-                      <button onClick={() => handleShare(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Share</button>
+                      {(inv.status === 'pending' || inv.status === 'expired') && <button onClick={() => handleShare(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Share</button>}
                       {(inv.status === 'pending' || inv.status === 'expired') && <button onClick={() => handleResend(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Renew</button>}
-                      {inv.status === 'active' && <button onClick={() => handleTogglePause(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#7DBDEE', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Pause</button>}
-                      <button onClick={() => handleRemove(inv.id)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Remove</button>
+                      {inv.status === 'active' && <button onClick={() => handleTogglePause(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#7DBDEE', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Pause sharing</button>}
+                      {inv.status === 'paused' && <button onClick={() => handleTogglePause(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Resume sharing</button>}
+                      {inv.status !== 'revoked' && <button onClick={() => handleRemove(inv.id)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Revoke</button>}
                     </div>
                   </div>
                 )
@@ -349,11 +371,45 @@ function FamilyPortalPage() {
         </div>
       </div>
 
+      {selectedInvitation && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.8)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={() => setSelectedInvitation(null)}>
+          <div style={{ background: '#0B1220', border: '1px solid #2DD4BF', borderRadius: '16px', padding: '1.5rem', maxWidth: '440px', width: '100%', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <h3 style={{ color: '#2DD4BF', fontSize: '16px', margin: 0 }}>Messages — {selectedInvitation.anonymous_mode ? 'A loved one' : selectedInvitation.supporter_name}</h3>
+              <button onClick={() => setSelectedInvitation(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '18px', cursor: 'pointer' }} aria-label="Close messages">×</button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '10px', minHeight: '120px' }}>
+              {messages.length === 0 && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textAlign: 'center', marginTop: '1rem' }}>No messages yet. Say hello.</p>}
+              {messages.map(m => (
+                <div key={m.id} style={{ alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%', background: m.sender === 'user' ? 'rgba(45,212,191,0.15)' : 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px 10px' }}>
+                  <p style={{ color: '#FFFFFF', fontSize: '12px', margin: 0, whiteSpace: 'pre-wrap' }}>{m.content}</p>
+                  <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '9px', margin: '4px 0 0', textAlign: 'right' }}>{m.sender === 'user' ? 'You' : 'Supporter'} · {m.created_at ? new Date(m.created_at).toLocaleString() : ''}</p>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input type="text" value={messageInput} onChange={e => setMessageInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') sendMessage() }} placeholder="Write a message…" maxLength={500} style={{ flex: 1, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', padding: '10px', color: '#FFFFFF', fontSize: '13px', fontFamily: 'var(--font-body)' }} />
+              <button className="btn-primary" onClick={sendMessage} disabled={!messageInput.trim()} style={{ padding: '10px 16px' }}>Send</button>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '10px', justifyContent: 'center' }}>
+              {feedbackGiven[selectedInvitation.id] ? (
+                <span style={{ color: '#2DD4BF', fontSize: '11px' }}>Feedback: {feedbackGiven[selectedInvitation.id] === 'yes' ? 'Feeling supported' : 'Could be better'}</span>
+              ) : (
+                <>
+                  <button onClick={() => giveFeedback(selectedInvitation.id, 'yes')} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '100px', color: '#2DD4BF', fontSize: '10px', padding: '4px 10px', cursor: 'pointer' }}>Feeling supported</button>
+                  <button onClick={() => giveFeedback(selectedInvitation.id, 'no')} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '100px', color: 'rgba(255,255,255,0.5)', fontSize: '10px', padding: '4px 10px', cursor: 'pointer' }}>Could be better</button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {shareInvite && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.8)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={() => setShareInvite(null)}>
           <div style={{ background: '#0B1220', border: '1px solid #2DD4BF', borderRadius: '16px', padding: '1.5rem', maxWidth: '380px', width: '100%' }} onClick={e => e.stopPropagation()}>
             <h3 style={{ color: '#2DD4BF', fontSize: '16px', margin: '0 0 6px' }}>Share invitation link</h3>
-            <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '12px', margin: '0 0 14px', wordBreak: 'break-all' }}>{buildShareText(shareInvite).link}</p>
+            <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '12px', margin: '0 0 14px', wordBreak: 'break-all' }}>{buildShareText(shareInvite)?.link || 'Link unavailable — renew the invitation to generate a new one.'}</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <button className="btn-primary full" onClick={() => void shareVia('copy')}>Copy link</button>
               <button className="btn-secondary full" onClick={() => void shareVia('whatsapp')}>WhatsApp</button>

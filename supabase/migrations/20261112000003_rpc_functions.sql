@@ -541,6 +541,35 @@ $$;
 revoke execute on function public.supporter_respond(text, boolean) from public;
 grant execute on function public.supporter_respond(text, boolean) to anon, authenticated;
 
+-- Supporter-initiated end of an ACTIVE relationship. Distinct from
+-- supporter_respond (which only handles pending invitations): revocation is
+-- permanent and cannot be undone by either party — a new invitation is
+-- required to reconnect.
+create or replace function public.supporter_leave(p_token text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_inv public.supporter_invitations;
+begin
+  select * into v_inv from public.supporter_invitations
+  where token_hash = encode(extensions.digest(p_token,'sha256'),'hex') for update;
+  if not found or v_inv.status <> 'active'
+     or (v_inv.expires_at is not null and v_inv.expires_at <= now()) then
+    -- Uniform response: do not reveal whether the token exists.
+    return jsonb_build_object('left', false);
+  end if;
+  update public.supporter_invitations
+  set status = 'revoked', responded_at = now()
+  where id = v_inv.id;
+  return jsonb_build_object('left', true);
+end;
+$$;
+revoke execute on function public.supporter_leave(text) from public;
+grant execute on function public.supporter_leave(text) to anon, authenticated;
+
 create or replace function public.supporter_get_summary(p_token text)
 returns jsonb
 language plpgsql
@@ -757,8 +786,10 @@ begin
   if not found then raise exception 'Invitation not found'; end if;
 
   if p_action = 'remove' then
-    delete from public.supporter_invitations where id = v_inv.id;
-    return jsonb_build_object('removed', true);
+    -- Revoke rather than delete: keeps an audit record and every supporter
+    -- RPC already requires status = 'active', so access ends immediately.
+    update public.supporter_invitations set status = 'revoked' where id = v_inv.id returning * into v_inv;
+    return to_jsonb(v_inv) || jsonb_build_object('revoked', true);
   elsif p_action = 'pause' then
     if v_inv.status <> 'active' then raise exception 'Only active invitations can be paused'; end if;
     update public.supporter_invitations set status = 'paused' where id = v_inv.id returning * into v_inv;
@@ -770,6 +801,9 @@ begin
     set crisis_contact = coalesce((p_value ->> 'crisis_contact')::boolean, false)
     where id = v_inv.id returning * into v_inv;
   elsif p_action = 'renew' then
+    -- A revoked relationship can never be reactivated; a new invitation is
+    -- required instead.
+    if v_inv.status = 'revoked' then raise exception 'Revoked invitations cannot be renewed'; end if;
     -- Rotate the token on renew so an old link cannot be reused. Only the
     -- hash is stored; the new raw token is returned once to the owner.
     v_new_token := encode(extensions.gen_random_bytes(24), 'hex');

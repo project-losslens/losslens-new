@@ -3196,6 +3196,7 @@ end $$;
 -- Explicit anon allowlist (supporter portal + company-code validation).
 grant execute on function public.supporter_lookup(text) to anon;
 grant execute on function public.supporter_respond(text, boolean) to anon;
+grant execute on function public.supporter_leave(text) to anon;
 grant execute on function public.supporter_get_summary(text) to anon;
 grant execute on function public.supporter_post_message(text, text) to anon;
 grant execute on function public.supporter_list_messages(text) to anon;

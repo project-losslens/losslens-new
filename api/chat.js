@@ -63,6 +63,10 @@ async function reportDatabaseFailure(operation, response) {
     upstreamStatus: response.status,
     errorCode: safeDatabaseErrorCode(payload),
   })
+  return {
+    upstreamStatus: response.status,
+    upstreamCode: safeDatabaseErrorCode(payload),
+  }
 }
 
 function reportNetworkFailure(operation, error) {
@@ -70,6 +74,10 @@ function reportNetworkFailure(operation, error) {
     operation,
     category: error?.name === 'AbortError' ? 'timeout' : 'network_error',
   })
+}
+
+function reportOperationFailure(operation, error) {
+  if (!error?.upstreamStatus) reportNetworkFailure(operation, error)
 }
 
 async function getAuthenticatedUser(request) {
@@ -178,15 +186,15 @@ async function recordConsent(auth) {
     )
   } catch (error) {
     reportNetworkFailure('consent.write', error)
-    throw new Error('CONSENT_WRITE_FAILED')
+    throw new Error('CONSENT_WRITE_FAILED', { cause: error })
   }
   if (!response.ok) {
     await reportDatabaseFailure('consent.write', response)
     throw new Error('CONSENT_WRITE_FAILED')
   }
   const rows = await response.json().catch(() => null)
-  if (Array.isArray(rows) && rows.some((row) =>
-    row?.id === auth.user.id && Boolean(row.ai_data_consent_at))) return
+  if (Array.isArray(rows) && rows.length === 1
+      && rows[0]?.id === auth.user.id && Boolean(rows[0].ai_data_consent_at)) return
 
   // A retry can find the original timestamp already stored. Preserve it and
   // report success only after confirming the caller's own profile has consent.
@@ -204,15 +212,15 @@ async function recordConsent(auth) {
     )
   } catch (error) {
     reportNetworkFailure('consent.verify', error)
-    throw new Error('CONSENT_WRITE_FAILED')
+    throw new Error('CONSENT_WRITE_FAILED', { cause: error })
   }
   if (!existingResponse.ok) {
     await reportDatabaseFailure('consent.verify', existingResponse)
     throw new Error('CONSENT_WRITE_FAILED')
   }
   const existingRows = await existingResponse.json().catch(() => null)
-  if (Array.isArray(existingRows) && existingRows.some((row) =>
-    row?.id === auth.user.id && Boolean(row.ai_data_consent_at))) return
+  if (Array.isArray(existingRows) && existingRows.length === 1
+      && existingRows[0]?.id === auth.user.id && Boolean(existingRows[0].ai_data_consent_at)) return
   if (Array.isArray(existingRows) && existingRows.length === 0) {
     throw new Error('CONSENT_PROFILE_NOT_FOUND')
   }
@@ -230,7 +238,11 @@ async function saveHistory(auth, role, message) {
     },
     body: JSON.stringify({ user_id: auth.user.id, role, message }),
   }, REQUEST_TIMEOUT_MS)
-  if (!response.ok) throw new Error('CHAT_HISTORY_WRITE_FAILED')
+  if (!response.ok) {
+    const error = new Error('CHAT_HISTORY_WRITE_FAILED')
+    Object.assign(error, await reportDatabaseFailure(`chat_history.${role}_write`, response))
+    throw error
+  }
 }
 
 async function countRecentMessages(auth, sinceIso) {
@@ -266,6 +278,10 @@ async function callGroq(messages) {
 
   const data = await groqResponse.json().catch(() => null)
   if (!groqResponse.ok) {
+    console.error('Oloo Groq request failed:', {
+      upstreamStatus: groqResponse.status,
+      errorCode: safeDatabaseErrorCode(data),
+    })
     if (groqResponse.status === 429) return { error: 'busy' }
     if (groqResponse.status >= 500) return { error: 'unavailable' }
     return { error: 'failed' }
@@ -315,7 +331,11 @@ async function fetchChatHistory(auth) {
       },
     },
     REQUEST_TIMEOUT_MS)
-  if (!response.ok) throw new Error('CHAT_HISTORY_READ_FAILED')
+  if (!response.ok) {
+    const error = new Error('CHAT_HISTORY_READ_FAILED')
+    Object.assign(error, await reportDatabaseFailure('chat_history.read', response))
+    throw error
+  }
   const rows = await response.json()
   return rows.reverse()
     .filter(row => ['user', 'assistant'].includes(row.role) && typeof row.message === 'string')
@@ -406,8 +426,12 @@ export default async function handler(request, response) {
   let history
   try {
     history = await fetchChatHistory(auth)
-  } catch {
-    return json(response, 503, { error: 'Conversation history is temporarily unavailable' })
+  } catch (error) {
+    reportOperationFailure('chat_history.read', error)
+    return json(response, 503, {
+      error: 'Conversation history could not be loaded.',
+      code: 'CHAT_HISTORY_READ_UNAVAILABLE',
+    })
   }
 
   // ── Quota: per-user rolling limits on stored history.
@@ -434,8 +458,12 @@ export default async function handler(request, response) {
 
   try {
     await saveHistory(auth, 'user', message)
-  } catch {
-    return json(response, 503, { error: 'Conversation history is temporarily unavailable' })
+  } catch (error) {
+    reportOperationFailure('chat_history.user_write', error)
+    return json(response, 503, {
+      error: 'Your message could not be saved to conversation history.',
+      code: 'CHAT_USER_MESSAGE_SAVE_UNAVAILABLE',
+    })
   }
 
   let reply
@@ -455,7 +483,14 @@ export default async function handler(request, response) {
     }
   } else {
     if (!process.env.GROQ_API_KEY) {
-      return json(response, 503, { error: 'AI service is temporarily unavailable' })
+      console.error('Oloo configuration error:', {
+        operation: 'chat.groq',
+        category: 'missing_api_key',
+      })
+      return json(response, 503, {
+        error: 'AI service is temporarily unavailable.',
+        code: 'AI_SERVICE_NOT_CONFIGURED',
+      })
     }
 
     let context
@@ -512,8 +547,12 @@ export default async function handler(request, response) {
 
   try {
     await saveHistory(auth, 'assistant', reply)
-  } catch {
-    return json(response, 503, { error: 'Conversation history could not be saved. Please try again.' })
+  } catch (error) {
+    reportOperationFailure('chat_history.assistant_write', error)
+    return json(response, 503, {
+      error: 'The reply could not be saved to conversation history.',
+      code: 'CHAT_ASSISTANT_MESSAGE_SAVE_UNAVAILABLE',
+    })
   }
 
   return json(response, 200, {
@@ -522,7 +561,9 @@ export default async function handler(request, response) {
     ...(actionPayload ? { action: actionPayload } : {}),
   })
   } catch (error) {
-    console.error(error)
+    console.error('Oloo request failed:', {
+      category: error?.name === 'AbortError' ? 'timeout' : 'unexpected_error',
+    })
     return json(response, 500, { error: 'internal' })
   }
 }
@@ -540,13 +581,35 @@ export async function consentHandler(request, response) {
     if (typeof body === 'string') {
       try { body = JSON.parse(body) } catch { return json(response, 400, { error: 'invalid_body' }) }
     }
-    if (!body || typeof body !== 'object' || body.consent !== true) {
+    if (!body || typeof body !== 'object' || Array.isArray(body)
+        || Object.keys(body).length !== 1 || body.consent !== true) {
       return json(response, 400, { error: 'Explicit consent is required' })
     }
     await recordConsent(auth)
     return json(response, 200, { ok: true })
   } catch (error) {
-    console.error('Consent recording failed:', error?.message || error)
-    return json(response, 500, { error: 'Consent could not be recorded' })
+    if (error?.message === 'CONSENT_SERVICE_NOT_CONFIGURED') {
+      console.error('Oloo configuration error:', {
+        operation: 'consent.write',
+        category: 'missing_service_role_key',
+      })
+      return json(response, 503, {
+        error: 'Consent service is temporarily unavailable.',
+        code: 'CONSENT_SERVICE_NOT_CONFIGURED',
+      })
+    }
+    if (error?.message === 'CONSENT_PROFILE_NOT_FOUND') {
+      return json(response, 404, { error: 'Your profile could not be found.' })
+    }
+    if (error?.message !== 'CONSENT_WRITE_FAILED') {
+      console.error('Oloo consent request failed:', {
+        operation: 'consent.authenticate',
+        category: error?.name === 'AbortError' ? 'timeout' : 'unexpected_error',
+      })
+    }
+    return json(response, 503, {
+      error: 'Consent could not be recorded. Please try again.',
+      code: 'CONSENT_WRITE_UNAVAILABLE',
+    })
   }
 }

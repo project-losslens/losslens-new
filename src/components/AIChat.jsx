@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { askGroq, runOlooAction } from '../lib/groq'
 import { supabase } from '../lib/supabase'
@@ -151,11 +151,13 @@ function AIChat({ profile }) {
   const [loading, setLoading] = useState(false);
   const [proactive, setProactive] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
-  const [aiConsent, setAiConsent] = useState(null);
+  const [consentState, setConsentState] = useState({ userId: null, consent: null, error: '' });
   const [aiConsentSaving, setAiConsentSaving] = useState(false);
-  const [aiConsentError, setAiConsentError] = useState('');
   const [olooEmotion, setOlooEmotion] = useState('neutral');
-  const [userContext, setUserContext] = useState(null);
+  const [userContextState, setUserContextState] = useState({ userId: null, context: null });
+  const aiConsent = consentState.userId === userId ? consentState.consent : null;
+  const aiConsentError = consentState.userId === userId ? consentState.error : '';
+  const userContext = userContextState.userId === userId ? userContextState.context : null;
 
   // Voice states
   const [isListening, setIsListening] = useState(false);
@@ -177,68 +179,118 @@ function AIChat({ profile }) {
     if (SpeechRecognition) setVoiceSupported(true);
   }, []);
 
-  // Fetch user context
-  useEffect(() => {
-    if (userId) fetchUserData();
-  }, [userId]);
-
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
+    if (!userId) return;
+    proactiveQuestions.current = getProactiveQuestions(null);
+    let consentProfile;
     try {
-      const { data: profileData } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('ai_data_consent_at')
         .eq('id', userId)
         .single();
-      setAiConsent(Boolean(profileData?.ai_data_consent_at));
-
-      const { data: recentDiary } = await supabase
-        .from('diary_entries')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(7);
-
-      const { count: cbtCompleted } = await supabase
-        .from('cbt_progress')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .eq('completed', true);
-
-      const userData = { profile: profileData, recentDiary: recentDiary || [], cbtCompleted: cbtCompleted || 0 };
-      setUserContext(userData);
-      proactiveQuestions.current = getProactiveQuestions(userData);
-
-      if (profileData?.streak_days >= 7) {
-        setMessages([{
-          role: 'assistant',
-          content: `Hi ${firstName}!  Welcome back!  ${profileData.streak_days} days gamble-free — that's amazing! How are you feeling today?`,
-        }]);
-      }
+      if (error) throw error;
+      consentProfile = data;
     } catch (error) {
-      console.error('Error fetching user data:', error);
-      setAiConsent(false);
+      console.error('Oloo consent status could not be loaded:', error?.code || 'request_failed');
+      setConsentState({
+        userId,
+        consent: null,
+        error: 'Consent status could not be checked. Please try again.',
+      });
+      return;
     }
-  };
+
+    const consentRecorded = Boolean(consentProfile?.ai_data_consent_at);
+    setConsentState({ userId, consent: consentRecorded, error: '' });
+    if (!consentRecorded) {
+      setUserContextState({ userId, context: null });
+      proactiveQuestions.current = getProactiveQuestions(null);
+      return;
+    }
+
+    let profileResult;
+    let diaryResult;
+    let cbtResult;
+    try {
+      [profileResult, diaryResult, cbtResult] = await Promise.all([
+        supabase.from('profiles')
+          .select('id, full_name, streak_days, money_saved, risk_level')
+          .eq('id', userId)
+          .single(),
+        supabase.from('diary_entries')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(7),
+        supabase.from('cbt_progress')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .eq('completed', true),
+      ]);
+    } catch (error) {
+      console.error('Oloo recovery context could not be loaded:', error?.code || 'request_failed');
+      setUserContextState({ userId, context: null });
+      return;
+    }
+    const contextErrors = [profileResult.error, diaryResult.error, cbtResult.error].filter(Boolean);
+    if (contextErrors.length) {
+      console.error('Oloo recovery context could not be loaded:', {
+        errorCodes: contextErrors.map((error) => error.code || 'request_failed'),
+      });
+    }
+    const userData = {
+      profile: profileResult.data || null,
+      recentDiary: diaryResult.data || [],
+      cbtCompleted: cbtResult.count || 0,
+    };
+    setUserContextState({ userId, context: userData });
+    proactiveQuestions.current = getProactiveQuestions(userData);
+
+    if (userData.profile?.streak_days >= 7) {
+      setMessages([{
+        role: 'assistant',
+        content: `Hi ${firstName}!  Welcome back!  ${userData.profile.streak_days} days gamble-free — that's amazing! How are you feeling today?`,
+      }]);
+    }
+  }, [firstName, userId]);
+
+  useEffect(() => {
+    if (userId) fetchUserData();
+  }, [fetchUserData, userId]);
 
   const acceptAiConsent = async () => {
     if (!userId || aiConsentSaving) return;
     setAiConsentSaving(true);
-    setAiConsentError('');
+    const updateConsent = (consent, error = '') => setConsentState({ userId, consent, error });
+    updateConsent(aiConsent);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.access_token) {
+        updateConsent(aiConsent, 'Your session has expired. Please sign in again to save consent.');
+        return;
+      }
       const response = await fetch('/api/consent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${session?.access_token || ''}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ consent: true }),
       });
-      if (!response.ok) throw new Error(`consent ${response.status}`);
-      setAiConsent(true);
-    } catch (error) {
-      console.error('AI data consent could not be saved:', error);
-      setAiConsentError('Your consent could not be saved. Please try again.');
+      const result = await response.json().catch(() => null);
+      if (!response.ok || result?.ok !== true) {
+        updateConsent(aiConsent, response.status === 401
+          ? 'Your session has expired. Please sign in again to save consent.'
+          : result?.error || 'Your consent could not be saved. Please try again.');
+        return;
+      }
+      updateConsent(true);
+      fetchUserData().catch((error) => {
+        console.error('Oloo consented context could not be loaded:', error?.code || 'request_failed');
+      });
+    } catch {
+      updateConsent(aiConsent, 'The consent service could not be reached. Please try again.');
     } finally {
       setAiConsentSaving(false);
     }
@@ -368,7 +420,11 @@ function AIChat({ profile }) {
     const content = (text || input).trim();
     if (!content || loading) return;
     if (aiConsent !== true) {
-      setAiConsentError(aiConsent === null ? 'Checking consent status. Please try again.' : '');
+      setConsentState({
+        userId,
+        consent: aiConsent,
+        error: aiConsent === null ? 'Checking consent status. Please try again.' : '',
+      });
       return;
     }
 
@@ -606,7 +662,7 @@ function AIChat({ profile }) {
             {aiConsent !== true ? (
               <div role="dialog" aria-labelledby="ai-consent-title" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '16px', color: '#FFFFFF' }}>
                 <h3 id="ai-consent-title" style={{ fontSize: '14px', color: '#2DD4BF', marginBottom: '8px' }}>Before you chat with Oloo</h3>
-                <p style={{ fontSize: '12px', lineHeight: '1.6', color: 'rgba(255,255,255,0.7)' }}>Your messages will be saved in your chat history and sent to our AI provider to generate responses. Oloo is not a substitute for professional care.</p>
+                <p style={{ fontSize: '12px', lineHeight: '1.6', color: 'rgba(255,255,255,0.7)' }}>Your messages and relevant recovery context may be sent to Groq, a US-based AI provider, to generate responses, and messages are saved in your chat history. Oloo is not a substitute for professional care.</p>
                 {aiConsentError && <p role="alert" style={{ fontSize: '12px', color: '#ff9b9b' }}>{aiConsentError}</p>}
                 <button className="btn-primary full" type="button" onClick={acceptAiConsent} disabled={aiConsentSaving || aiConsent === null} style={{ marginTop: '12px' }}>
                   {aiConsentSaving ? 'Saving...' : aiConsent === null ? 'Checking...' : 'I agree and continue'}

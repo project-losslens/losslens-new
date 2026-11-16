@@ -164,8 +164,9 @@ export default function FamilyJoin() {
   const handleStopSupporting = async () => {
     setShowStopModal(false); setActing(true); setActError('')
     try {
-      const { error: stopError } = await supabase.rpc('supporter_respond', { p_token: token, p_accept: false })
+      const { data: leaveData, error: stopError } = await supabase.rpc('supporter_leave', { p_token: token })
       if (stopError) throw stopError
+      if (leaveData?.left === false) throw new Error('not_active')
       setStatus('declined')
     } catch (err) { setActError('Failed. Please try again.') }
     finally { setActing(false) }

@@ -33,7 +33,7 @@ export const askGroq = async (message) => {
     let data = await response.json().catch(() => null)
 
     if (response.status === 403 && data?.needsConsent) {
-      // Oloo sends conversation context to Groq (US). Require explicit consent.
+      // Oloo sends messages and relevant recovery context to Groq (US).
       const accepted = window.confirm(
         'Allow Oloo to send your chat messages and LossLens recovery context to Groq (a US-based AI provider) so it can reply?\n\n' +
         'Je, ruhusu Oloo kutuma ujumbe wako na taarifa za kurejesha kwenye Groq (kanda ya Marekani) ili aweze kujibu?'
@@ -47,8 +47,19 @@ export const askGroq = async (message) => {
         },
         body: JSON.stringify({ consent: true }),
       })
-      if (!consentResponse.ok) return { reply: 'Consent could not be saved. Please try again.' }
-      return askGroq(content)
+      const consentResult = await consentResponse.json().catch(() => null)
+      if (!consentResponse.ok || consentResult?.ok !== true) {
+        return {
+          reply: consentResponse.status === 401
+            ? 'Your session has expired. Please sign in again to continue.'
+            : consentResult?.error || 'Consent could not be saved. Please try again.',
+        }
+      }
+      response = await callApi('/api/chat', { message: content })
+      data = await response.json().catch(() => null)
+      if (response.status === 403 && data?.needsConsent) {
+        return { reply: 'Consent could not be verified. Please close Oloo and try again.' }
+      }
     }
 
     if (!response.ok) {
