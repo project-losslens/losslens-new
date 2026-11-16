@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 import { canShowInstall, showInstallPrompt } from '../../lib/pwa'
 import { useDocumentTitle } from '../../hooks'
 import { PublicLayout } from '../../layouts/PublicLayout'
-import { About, ClosingCTA, CrisisStrip, Features, Hero, HowItWorks } from './landing/Sections'
+import {
+  ClosingCTA, CrisisStrip, Ecosystem, Faq, Features, Founder,
+  Hero, HowItWorks, OlooSection, PricingSection, PrivacyTrust,
+  ProtectionSection, WhyExists,
+} from './landing/Sections'
 
 const INSTALL_DISMISSED_UNTIL = 'll_install_dismissed_until'
 const FOURTEEN_DAYS = 14 * 24 * 60 * 60 * 1000
@@ -73,9 +77,16 @@ export default function Landing() {
     <PublicLayout>
       <main>
         <Hero />
-        <About />
+        <WhyExists />
+        <Ecosystem />
         <Features />
+        <OlooSection />
         <HowItWorks />
+        <ProtectionSection />
+        <PricingSection />
+        <PrivacyTrust />
+        <Founder />
+        <Faq />
         <ClosingCTA />
         <CrisisStrip />
       </main>

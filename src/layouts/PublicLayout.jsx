@@ -4,15 +4,19 @@ import AppIcon from '../components/AppIcon'
 import { LogoMark } from '../components/Brand'
 import ContactIcons from '../components/ContactIcons'
 import Aurora from '../components/Aurora'
+import { mailtoHref, telHref } from '../config/site'
 import { roleHome } from '../config/roleHome'
 import { useAuthProfile } from '../context/AuthProfileContext'
 import '../styles/landing.css'
 
 const NAV_LINKS = [
   { to: '/', label: 'Home' },
-  { to: '/#how-it-works', label: 'How it works' },
   { to: '/#features', label: 'Features' },
+  { to: '/#how-it-works', label: 'How it works' },
+  { to: '/#oloo', label: 'Oloo' },
+  { to: '/protection', label: 'Protection' },
   { to: '/pricing', label: 'Pricing' },
+  { to: '/about', label: 'About' },
   { to: '/#crisis-help', label: 'Crisis help' },
 ]
 
@@ -136,6 +140,75 @@ function Footer() {
   )
 }
 
+// Floating "Talk to the team" control for public visitors. Opens a small
+// panel with the existing email/phone contact mechanisms — it is not a chat
+// widget and sends nothing to a server. Signed-in members are pointed at the
+// existing support ticket page instead.
+function TalkToTeam() {
+  const { authStatus, user } = useAuthProfile()
+  const [open, setOpen] = useState(false)
+  const buttonRef = useRef(null)
+  const panelRef = useRef(null)
+  const signedIn = authStatus === 'ready' && Boolean(user)
+
+  useEffect(() => {
+    if (!open) return undefined
+    const onKey = (event) => {
+      if (event.key === 'Escape') {
+        setOpen(false)
+        buttonRef.current?.focus()
+      }
+    }
+    const onClick = (event) => {
+      if (panelRef.current && !panelRef.current.contains(event.target)) setOpen(false)
+    }
+    document.addEventListener('keydown', onKey)
+    document.addEventListener('mousedown', onClick)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('mousedown', onClick)
+    }
+  }, [open])
+
+  return (
+    <div className="ll-contact-fab" ref={panelRef}>
+      {open && (
+        <div className="ll-contact-fab__panel" role="dialog" aria-label="Contact LossLens">
+          {signedIn ? (
+            <>
+              <p>Signed in? The fastest route is a support ticket.</p>
+              <Link to="/support" className="ll-btn ll-btn--primary" onClick={() => setOpen(false)}>
+                Open support
+              </Link>
+            </>
+          ) : (
+            <>
+              <p>Reach the LossLens team by email or phone.</p>
+              <div className="ll-contact-fab__actions">
+                <a className="ll-btn ll-btn--primary" href={mailtoHref('Website enquiry')}>Email us</a>
+                <a className="ll-btn ll-btn--ghost" href={telHref()}>Call us</a>
+              </div>
+              <p className="ll-contact-fab__note">Need urgent help? See crisis support at the bottom of the page.</p>
+            </>
+          )}
+        </div>
+      )}
+      <button
+        ref={buttonRef}
+        type="button"
+        className="ll-contact-fab__button"
+        aria-expanded={open}
+        aria-controls="ll-contact-panel"
+        aria-label="Talk to the LossLens team"
+        onClick={() => setOpen((value) => !value)}
+      >
+        <AppIcon name="mail" size={20} />
+        <span>Talk to the team</span>
+      </button>
+    </div>
+  )
+}
+
 export function PublicLayout({ children }) {
   const { hash } = useLocation()
 
@@ -152,6 +225,7 @@ export function PublicLayout({ children }) {
       <Header />
       <div id="public-main">{children}</div>
       <Footer />
+      <TalkToTeam />
     </div>
   )
 }

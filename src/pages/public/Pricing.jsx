@@ -9,7 +9,7 @@ const FAQS = [
   { q: 'What does Premium add?', a: 'Premium unlocks advanced features like detailed analytics, priority AI responses, extended video storage, and more. You also directly support keeping LossLens free for everyone.' },
   { q: 'Can I switch plans?', a: 'Absolutely. Upgrade or downgrade anytime. If you downgrade, you keep access to Premium features until the end of your billing period.' },
   { q: 'How do I pay?', a: 'Premium subscriptions are processed securely via M-Pesa. We never store your payment details — all transactions are handled by our payment partner.' },
-  { q: 'Is my data private?', a: 'Completely. Your diary, mood logs, and conversations are encrypted. You can delete everything anytime with one click. We never sell your data.' },
+  { q: 'Is my data private?', a: 'Your diary, mood logs and conversations are private to your account and are not shared with insurers or employers. You can request account deletion from Settings. We never sell your data.' },
   { q: 'What is the Company plan?', a: 'For organizations that want to offer LossLens to their employees. Includes subsidized pricing, admin dashboard for the company, usage reports, and dedicated support. Ask your employer if they offer LossLens.' },
 ]
 
@@ -99,18 +99,17 @@ export default function Pricing() {
     id: 'company',
     name: 'Company Plan',
     badge: 'Subsidized',
-    price: 'KES 199',
-    period: '/employee/month',
-    desc: 'Your employer covers part of the cost. You get Premium features at a fraction of the price.',
+    price: 'Contact us',
+    period: '',
+    desc: 'An employer-sponsored or subsidised option. Pricing is set per organisation — contact the team for details.',
     features: [
       ' Everything in Premium',
-      ' Paid by your employer',
-      ' Save 60% vs individual Premium',
+      ' Paid or subsidised by your employer',
+      ' Join with a company code',
       ' Company admin dashboard',
-      ' Anonymous usage reports',
-      ' Team progress insights',
+      ' Usage reports for the organisation',
       ' Priority support',
-      ' Your data stays private from employer',
+      ' Your personal data stays private from your employer',
     ],
     cta: 'Join with company code',
     featured: true,
@@ -323,9 +322,9 @@ export default function Pricing() {
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Built with trust & transparency</p>
           <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', flexWrap: 'wrap' }}>
             {[
-              { label: 'End-to-end encrypted' },
+              { label: 'Private by design' },
               { label: 'Built in Kenya' },
-              { label: 'Delete data anytime' },
+              { label: 'Account deletion available' },
               { label: 'Free forever for individuals' },
             ].map((t, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#2DD4BF', fontSize: '12px' }}>
