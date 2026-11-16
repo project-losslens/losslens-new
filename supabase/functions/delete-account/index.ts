@@ -212,6 +212,29 @@ Deno.serve(async (req) => {
       const { error } = await admin.from('insurers').update({ profile_id: null }).eq('profile_id', targetId)
       if (error) throw error
     })
+    // Protection memberships are insurance-administration records: end the
+    // membership and strip identity rather than deleting the row. Policies,
+    // claims and the premium ledger survive via ON DELETE SET NULL FKs.
+    // Consents are revoked FIRST (they key on membership_id, resolved while
+    // user_id is still present), then the membership itself is anonymised.
+    await runStep('anonymize:protection_consents', async () => {
+      const { data: memberships, error: membershipError } = await admin
+        .from('protection_memberships').select('id').eq('user_id', targetId)
+      if (membershipError) throw membershipError
+      const membershipIds = (memberships || []).map((m) => m.id)
+      if (!membershipIds.length) return
+      const { error } = await admin.from('protection_consents')
+        .update({ granted: false, revoked_at: new Date().toISOString() })
+        .in('membership_id', membershipIds)
+        .is('revoked_at', null)
+      if (error) throw error
+    })
+    await runStep('anonymize:protection_memberships', async () => {
+      const { error } = await admin.from('protection_memberships')
+        .update({ status: 'ended', user_id: null })
+        .eq('user_id', targetId)
+      if (error) throw error
+    })
 
     await runStep('delete:auth_user', async () => {
       const { error } = await admin.auth.admin.deleteUser(targetId)

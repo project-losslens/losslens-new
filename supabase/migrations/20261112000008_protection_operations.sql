@@ -3089,3 +3089,74 @@ alter default privileges for role postgres in schema public
   revoke execute on functions from public, anon;
 alter default privileges for role postgres in schema public
   grant execute on functions to authenticated;
+
+-- ===========================================================================
+-- ACCOUNT-DELETION RECONCILIATION
+-- Financial and insurance-administration rows must survive member deletion
+-- with identity stripped, never cascade away. Every FK from the tables below
+-- to public.profiles is re-created as ON DELETE SET NULL (single-column FKs
+-- only; staff references verified_by/created_by/cancelled_by/decision_by get
+-- the same rule). Member-owned user_id columns are made nullable so the row
+-- can be retained with identity removed. Idempotent: constraint names are
+-- preserved and re-created only when the delete rule differs.
+-- ===========================================================================
+do $$
+declare
+  c record;
+  v_col text;
+  v_deltext text;
+begin
+  for c in
+    select con.conname,
+           n.nspname || '.' || cl.relname as tbl,
+           con.conrelid,
+           con.conkey[1] as attnum,
+           con.confdeltype
+    from pg_constraint con
+    join pg_class cl on cl.oid = con.conrelid
+    join pg_namespace n on n.oid = cl.relnamespace
+    where con.contype = 'f'
+      and con.confrelid = 'public.profiles'::regclass
+      and n.nspname = 'public'
+      and cl.relname in (
+        'payments',
+        'protection_memberships',
+        'provider_vouchers',
+        'provider_claims',
+        'protection_policies',
+        'protection_claims',
+        'protection_claim_events',
+        'protection_claim_evidence',
+        'protection_milestones',
+        'protection_treatment_episodes',
+        'protection_premium_records',
+        'protection_roster_entries',
+        'pre_auth_vouchers',
+        'claim_submissions',
+        'bulk_invoices'
+      )
+  loop
+    if c.confdeltype <> 'n' then  -- 'n' = ON DELETE SET NULL
+      select a.attname into v_col
+      from pg_attribute a
+      where a.attrelid = c.conrelid and a.attnum = c.attnum;
+      execute format('alter table %s drop constraint %I', c.tbl, c.conname);
+      execute format('alter table %s alter column %I drop not null', c.tbl, v_col);
+      execute format(
+        'alter table %s add constraint %I foreign key (%I) references public.profiles(id) on delete set null',
+        c.tbl, c.conname, v_col
+      );
+    end if;
+  end loop;
+end $$;
+
+-- Documented deletion rule (applied by supabase/functions/delete-account):
+--   * member PII tables (diary, chat, mirror, pacts, rsvps, notifications,
+--     supporter data, circle/whispers rows) are deleted outright;
+--   * financial/insurance rows above are retained with user_id (and staff
+--     references) set to NULL — payments, memberships, policies, claims,
+--     premium ledger and claim evidence survive for insurer/admin records;
+--   * protection_memberships.status is set to 'ended' before anonymisation;
+--   * storage objects are removed per bucket before the auth user is deleted;
+--   * actor_id on audit_logs is already ON DELETE SET NULL (see script 02) —
+--     audit rows are pseudonymised, not deleted, and TRUNCATE is revoked.
