@@ -479,6 +479,24 @@ create table if not exists public.protection_memberships (
   updated_at timestamptz not null default now(),
   unique (user_id, insurer_id)
 );
+-- Upgraded databases already have protection_memberships without
+-- cover_structure (CREATE TABLE IF NOT EXISTS skips it) — add explicitly.
+alter table public.protection_memberships
+  add column if not exists cover_structure text;
+-- Enrolment route for the shared LossLens Protection package (Option A):
+-- medical_rider | individual | group. Nullable for legacy/unknown rows.
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'protection_memberships_cover_structure_check'
+      and conrelid = 'public.protection_memberships'::regclass
+  ) then
+    alter table public.protection_memberships
+      add constraint protection_memberships_cover_structure_check
+      check (cover_structure in ('medical_rider','individual','group'));
+  end if;
+end $$;
 create index if not exists protection_memberships_insurer_idx on public.protection_memberships (insurer_id, status);
 create index if not exists protection_memberships_user_idx on public.protection_memberships (user_id);
 create index if not exists protection_memberships_structure_idx on public.protection_memberships (insurer_id, cover_structure);
