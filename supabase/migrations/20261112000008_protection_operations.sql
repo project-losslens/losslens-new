@@ -1266,7 +1266,7 @@ earned as (
          date_trunc('month', d.m)::date as month,
          sum(rec.amount_due *
              greatest(least(rec.period_end, (d.m + interval '1 month')::date - 1)
-                      - greatest(rec.period_start, d.m) + 1, 0)::numeric
+                      - greatest(rec.period_start, d.m::date) + 1, 0)::numeric
              / greatest(rec.period_end - rec.period_start + 1, 1)) as earned_premium
   from rec
   cross join lateral generate_series(
