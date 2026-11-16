@@ -7,7 +7,7 @@
 -- Apply after the existing 20261110000001 through 20261110000006 migrations.
 -- This file is intentionally additive and safe to run more than once.
 
--- Phase 2: remove the JWT-age password step-up while retaining role checks.
+-- remove the JWT-age password step-up while retaining role checks.
 -- RPCs still enforce is_admin() or is_super_admin(); this helper only confirms
 -- that the caller is an active administrator for backward compatibility.
 create or replace function public.is_recently_authenticated()
@@ -23,7 +23,7 @@ $$;
 revoke execute on function public.is_recently_authenticated() from public, anon;
 grant execute on function public.is_recently_authenticated() to authenticated;
 
--- Phase 2: reversible therapist-only role assignment.
+-- reversible therapist-only role assignment.
 create or replace function public.admin_revert_therapist(p_user_id uuid)
 returns uuid
 language plpgsql
@@ -80,7 +80,7 @@ create policy therapist_self_update on public.therapists for update to authentic
     and exists (select 1 from public.profiles p where p.id = (select auth.uid()) and p.role = 'therapist')
   );
 
--- Phase 3: profile pictures are shown in the top bar and in admin, insurer
+-- profile pictures are shown in the top bar and in admin, insurer
 -- and therapist user lists, so any signed-in user may read the avatars bucket.
 -- Writes remain restricted to each user's own folder by the existing
 -- 20261110000002_rls_grants_storage.sql policies.
@@ -88,7 +88,7 @@ drop policy if exists "avatars authenticated read" on storage.objects;
 create policy "avatars authenticated read" on storage.objects for select to authenticated
   using (bucket_id = 'avatars');
 
--- Phase 4 / The Circle: the "Slip & Recovery" and "Family & Friends" rooms
+-- The Circle: the "Slip & Recovery" and "Family & Friends" rooms
 -- are removed from the product. DESTRUCTIVE: deletes their messages,
 -- reactions, authors and room-member rows. Room is a free-text column (no
 -- check constraint), and circle_room_counts / circle_purge_expired are
@@ -119,7 +119,7 @@ do $$ begin
   end if;
 end $$;
 
--- Phase 4 / Urge Toolkit: user-chosen distraction challenges
+-- Urge Toolkit: user-chosen distraction challenges
 -- ("My challenges"). Owner-only RLS; status is doing/done/dropped.
 create table if not exists public.urge_challenges (
   id uuid primary key default gen_random_uuid(),
@@ -135,7 +135,7 @@ drop policy if exists urge_challenges_owner_all on public.urge_challenges;
 create policy urge_challenges_owner_all on public.urge_challenges for all to authenticated
   using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 
--- Phase 4 / Family supporters: supporter contact details (email, phone) are
+-- Family supporters: supporter contact details (email, phone) are
 -- no longer collected — invitations are shared as links only. The columns
 -- stay for compatibility; this re-definition keeps the same signature but
 -- always stores NULL for both fields. Safe to run twice.
@@ -695,7 +695,7 @@ grant execute on function public.insurer_verify_membership(uuid, text) to authen
 
 
 -- Insurer portal: read own pre-authorisations (status data only — the table
--- carries no clinical content). Appended in Phase 6.
+-- carries no clinical content). 
 drop policy if exists pre_auth_vouchers_insurer_select on public.pre_auth_vouchers;
 create policy pre_auth_vouchers_insurer_select on public.pre_auth_vouchers for select to authenticated
   using (
@@ -704,7 +704,7 @@ create policy pre_auth_vouchers_insurer_select on public.pre_auth_vouchers for s
   );
 
 
--- Phase 6: therapist directory fields + member pre-authorisation request.
+-- therapist directory fields + member pre-authorisation request.
 alter table public.therapists add column if not exists county text;
 alter table public.therapists add column if not exists session_fee numeric(12,2);
 alter table public.therapists add column if not exists telehealth boolean not null default false;
