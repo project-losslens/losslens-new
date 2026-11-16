@@ -465,7 +465,7 @@ declare
   v_inv public.supporter_invitations;
   v_name text;
   v_attempts integer;
-  v_key text := 'sup:' || md5(coalesce(p_token, ''));
+  v_key text := 'sup:' || encode(extensions.digest(coalesce(p_token, ''),'sha256'),'hex');
 begin
   -- Failed-lookup throttle: tokens are secrets, so only their hash is stored.
   -- >30 lookups per token per hour returns the same null as a bad token.
@@ -479,7 +479,7 @@ begin
   end if;
 
   select * into v_inv from public.supporter_invitations
-  where token_hash = md5(p_token) limit 1;
+  where token_hash = encode(extensions.digest(p_token,'sha256'),'hex') limit 1;
   -- Uniform response: unknown, expired and revoked tokens are
   -- indistinguishable to the caller.
   if not found
@@ -518,7 +518,7 @@ declare
   v_inv public.supporter_invitations;
 begin
   select * into v_inv from public.supporter_invitations
-  where token_hash = md5(p_token) for update;
+  where token_hash = encode(extensions.digest(p_token,'sha256'),'hex') for update;
   if not found then
     raise exception 'Invalid invitation';
   end if;
@@ -555,7 +555,7 @@ declare
   v_cbt int;
 begin
   select * into v_inv from public.supporter_invitations
-  where token_hash = md5(p_token);
+  where token_hash = encode(extensions.digest(p_token,'sha256'),'hex');
   if not found or v_inv.status <> 'active'
      or (v_inv.expires_at is not null and v_inv.expires_at <= now()) then
     raise exception 'Invitation is not active';
@@ -612,7 +612,7 @@ declare
   v_msg public.supporter_messages;
 begin
   select * into v_inv from public.supporter_invitations
-  where token_hash = md5(p_token);
+  where token_hash = encode(extensions.digest(p_token,'sha256'),'hex');
   if not found or v_inv.status <> 'active'
      or (v_inv.expires_at is not null and v_inv.expires_at <= now()) then
     raise exception 'Invitation is not active';
@@ -641,7 +641,7 @@ declare
   v_msgs jsonb;
 begin
   select * into v_inv from public.supporter_invitations
-  where token_hash = md5(p_token);
+  where token_hash = encode(extensions.digest(p_token,'sha256'),'hex');
   if not found or v_inv.status <> 'active'
      or (v_inv.expires_at is not null and v_inv.expires_at <= now()) then
     raise exception 'Invitation is not active';
@@ -704,7 +704,7 @@ begin
     nullif(btrim(coalesce(p_supporter_phone,'')), ''), nullif(btrim(coalesce(p_supporter_relation,'')), ''),
     coalesce(p_permissions, '[]'::jsonb), coalesce(p_anonymous_mode, false),
     coalesce(p_crisis_contact, false),
-    md5(v_raw_token),
+    encode(extensions.digest(v_raw_token,'sha256'),'hex'),
     'pending', now() + interval '30 days'
   ) returning * into v_inv;
 
@@ -775,7 +775,7 @@ begin
     v_new_token := encode(gen_random_bytes(24), 'hex');
     update public.supporter_invitations
     set expires_at = now() + interval '7 days', status = 'pending', responded_at = null,
-        token_hash = md5(v_new_token)
+        token_hash = encode(extensions.digest(v_new_token,'sha256'),'hex')
     where id = v_inv.id returning * into v_inv;
   else
     raise exception 'Unsupported invitation action';

@@ -8,8 +8,12 @@
 -- Final state of all user-domain tables, indexes, base helper functions,
 -- triggers, views, seed data, realtime publication and storage buckets.
 -- Portal/claims tables live in 20261110000004_portals_claims.sql.
--- Idempotent: safe to apply twice. No pgcrypto dependency (gen_random_uuid only).
+-- Idempotent: safe to apply twice. Uses pgcrypto (extensions schema) for
+-- SHA-256 hashing of supporter invitation tokens.
 -- ============================================================================
+
+-- pgcrypto provides digest() for SHA-256 token hashing (supporter invites).
+create extension if not exists pgcrypto with schema extensions;
 
 -- b2b_clients must exist before the profiles FK below references it.
 create table if not exists public.b2b_clients (
@@ -406,7 +410,7 @@ do $$ begin
     where table_schema = 'public' and table_name = 'supporter_invitations'
       and column_name = 'token'
   ) then
-    execute 'update public.supporter_invitations set token_hash = md5(token) where token_hash is null';
+    execute $q$update public.supporter_invitations set token_hash = encode(extensions.digest(token,'sha256'),'hex') where token_hash is null$q$;
     execute 'alter table public.supporter_invitations drop column token';
   end if;
 end $$;

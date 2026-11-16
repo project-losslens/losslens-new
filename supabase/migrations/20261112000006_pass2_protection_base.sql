@@ -186,7 +186,7 @@ begin
     null, nullif(btrim(coalesce(p_supporter_relation,'')), ''),
     coalesce(p_permissions, '[]'::jsonb), coalesce(p_anonymous_mode, false),
     coalesce(p_crisis_contact, false),
-    md5(v_raw_token),
+    encode(extensions.digest(v_raw_token,'sha256'),'hex'),
     'pending', now() + interval '30 days'
   ) returning * into v_inv;
 
