@@ -1,5 +1,5 @@
 import { toast } from '../../components/ToastProvider'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useI18n } from '../../i18n'
 import AppIcon from '../../components/AppIcon'
@@ -9,6 +9,9 @@ const fmtTime = (d) => d ? new Date(d).toLocaleString('en-KE') : '—'
 
 export default function CrisisAlerts() {
   const { t } = useI18n()
+  // t is a new closure every render — keep it in a ref so callbacks stay stable.
+  const tRef = useRef(t)
+  useEffect(() => { tRef.current = t })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [alerts, setAlerts] = useState([])
@@ -20,7 +23,8 @@ export default function CrisisAlerts() {
   const [escalatingId, setEscalatingId] = useState(null)
 
   const fetchAll = useCallback(async () => {
-    setLoading(true)
+    // No setLoading(true) here — only the initial mount shows the full loader;
+    // refreshes/retries keep the current content on screen.
     setError(null)
     try {
       const [openRes, doneRes] = await Promise.all([
@@ -30,18 +34,18 @@ export default function CrisisAlerts() {
       const failed = openRes.error || doneRes.error
       if (failed) {
         console.error('crisis_alerts query failed:', failed.code, failed.message)
-        setError(t('admin.crisis.loadFailed'))
+        setError(tRef.current('admin.crisis.loadFailed'))
         return
       }
       setAlerts(openRes.data || [])
       setResolved(doneRes.data || [])
     } catch (err) {
       console.error('crisis_alerts fetch threw:', err)
-      setError(t('admin.crisis.loadFailed'))
+      setError(tRef.current('admin.crisis.loadFailed'))
     } finally {
       setLoading(false)
     }
-  }, [t])
+  }, [])
 
   useEffect(() => { fetchAll() }, [fetchAll])
 

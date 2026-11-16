@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCrisisAlertCount } from '../../context/CrisisAlertCountContext'
 import { useAuthProfile } from '../../context/AuthProfileContext'
@@ -22,6 +22,9 @@ export default function AdminDashboard() {
   const { isSuperAdmin } = useAuthProfile()
   const openCrisisAlerts = useCrisisAlertCount()
   const { t } = useI18n()
+  // t is a new closure every render — keep it in a ref so callbacks stay stable.
+  const tRef = useRef(t)
+  useEffect(() => { tRef.current = t })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [stats, setStats] = useState({
@@ -71,7 +74,7 @@ export default function AdminDashboard() {
         const { data, error } = await supabase.from('crisis_alerts').select('*, profiles!user_id(full_name, username)').eq('resolved', false).order('created_at', { ascending: false }).limit(5)
         if (error) {
           console.error('crisis_alerts poll failed:', error.code, error.message)
-          setAlertsError(t('admin.crisis.loadFailed'))
+          setAlertsError(tRef.current('admin.crisis.loadFailed'))
         } else {
           setAlerts(data || [])
           setAlertsError(null)
@@ -79,7 +82,7 @@ export default function AdminDashboard() {
       } catch (err) { /* silent */ }
     }, 30000)
     return () => clearInterval(interval)
-  }, [alertPolling, t])
+  }, [alertPolling])
 
   //  Realtime crisis alerts
   useEffect(() => {
@@ -92,7 +95,8 @@ export default function AdminDashboard() {
   }, [])
 
   const fetchAllData = useCallback(async () => {
-    setLoading(true)
+    // No setLoading(true) — the full-page loader is only for the first mount;
+    // refreshes and retries keep the existing content on screen.
     setError(null)
     try {
       const today = new Date().toISOString().split('T')[0]
@@ -135,7 +139,7 @@ export default function AdminDashboard() {
       setRecentUsers(recentUsersRes.data || [])
       if (crisisAlertsRes.error) {
         console.error('crisis_alerts query failed:', crisisAlertsRes.error.code, crisisAlertsRes.error.message)
-        setAlertsError(t('admin.crisis.loadFailed'))
+        setAlertsError(tRef.current('admin.crisis.loadFailed'))
         setAlerts([])
       } else {
         setAlerts(crisisAlertsRes.data || [])
@@ -149,7 +153,7 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false)
     }
-  }, [t])
+  }, [])
 
   useEffect(() => { fetchAllData() }, [fetchAllData])
 
