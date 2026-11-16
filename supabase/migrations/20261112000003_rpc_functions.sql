@@ -467,7 +467,11 @@ declare
 begin
   select * into v_inv from public.supporter_invitations
   where token = p_token limit 1;
-  if not found then
+  -- Uniform response: unknown, expired and revoked tokens are
+  -- indistinguishable to the caller.
+  if not found
+     or v_inv.status = 'revoked'
+     or (v_inv.expires_at is not null and v_inv.expires_at <= now()) then
     return null;
   end if;
 
@@ -480,9 +484,7 @@ begin
     'permissions', v_inv.permissions,
     'anonymous_mode', v_inv.anonymous_mode,
     'crisis_contact', v_inv.crisis_contact,
-    'status', case
-      when v_inv.expires_at is not null and v_inv.expires_at <= now() then 'expired'
-      else v_inv.status end,
+    'status', v_inv.status,
     'responded_at', v_inv.responded_at,
     'expires_at', v_inv.expires_at,
     'created_at', v_inv.created_at,
