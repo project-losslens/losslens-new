@@ -472,12 +472,50 @@ create table if not exists public.protection_memberships (
     check (status in ('pending_verification','active','suspended','ended','rejected')),
   verified_at timestamptz,
   verified_by uuid references public.profiles(id),
+  -- Enrolment route for the shared LossLens Protection package (Option A):
+  -- medical_rider | individual | group. Nullable for legacy/unknown rows.
+  cover_structure text check (cover_structure in ('medical_rider','individual','group')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (user_id, insurer_id)
 );
 create index if not exists protection_memberships_insurer_idx on public.protection_memberships (insurer_id, status);
 create index if not exists protection_memberships_user_idx on public.protection_memberships (user_id);
+create index if not exists protection_memberships_structure_idx on public.protection_memberships (insurer_id, cover_structure);
+
+-- cover_structure may be set at enrolment and confirmed/changed by the
+-- insurer or staff, but an ordinary member cannot alter it once the
+-- membership leaves pending_verification (i.e. after activation).
+create or replace function public.enforce_membership_cover_structure()
+returns trigger
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_role text;
+begin
+  if tg_op = 'INSERT' then
+    return new;
+  end if;
+  if new.cover_structure is not distinct from old.cover_structure then
+    return new;
+  end if;
+  -- service_role / definer RPC paths bypass auth.uid(); only block plain
+  -- member updates once the membership is active.
+  if old.status = 'active' and (select auth.uid()) is not null then
+    select role into v_role from public.profiles where id = (select auth.uid());
+    if v_role is null or v_role not in ('admin','super_admin','insurer') then
+      raise exception 'Cover structure cannot be changed after activation';
+    end if;
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists protection_memberships_cover_structure_guard on public.protection_memberships;
+create trigger protection_memberships_cover_structure_guard
+  before insert or update on public.protection_memberships
+  for each row execute function public.enforce_membership_cover_structure();
 
 create table if not exists public.protection_consents (
   id uuid primary key default gen_random_uuid(),

@@ -32,6 +32,7 @@ export default function InsurerMembers() {
   const [issueForm, setIssueForm] = useState({}) // membership_id -> {version_id, policy_number, commencement, expiry, premium}
   const [premiumForm, setPremiumForm] = useState({}) // policy_id -> {period_start, period_end, amount_due, amount_received, payment_ref, channel}
   const [working, setWorking] = useState('')
+  const [structureFilter, setStructureFilter] = useState('')
 
   const load = useCallback(async () => {
     const { data: ins } = await supabase.from('insurers').select('id, name').eq('profile_id', (await supabase.auth.getUser()).data.user?.id).maybeSingle()
@@ -182,11 +183,20 @@ export default function InsurerMembers() {
 
       <section className="portal-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <h3 style={{ margin: 0 }}>Policyholders ({rows.length})</h3>
+          <h3 style={{ margin: 0 }}>Policyholders ({rows.filter(m => !structureFilter || m.cover_structure === structureFilter).length})</h3>
+          {rows.length > 0 && (
+            <select value={structureFilter} onChange={e => setStructureFilter(e.target.value)}
+              style={{ padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '12px' }}>
+              <option value="">All structures</option>
+              <option value="medical_rider">Medical Rider</option>
+              <option value="individual">Individual</option>
+              <option value="group">Group</option>
+            </select>
+          )}
           {rows.length > 0 && <button type="button" className="btn-ghost fs-12" onClick={exportCsv}>Export CSV</button>}
         </div>
         {rows.length === 0 && !error && <p className="portal-notice">No Protection memberships yet.</p>}
-        {rows.map(m => {
+        {rows.filter(m => !structureFilter || m.cover_structure === structureFilter).map(m => {
           const f = issueForm[m.membership_id] || {}
           const canIssue = m.membership_status === 'active' && !m.policy_id && versions.length > 0
           return (
@@ -199,6 +209,11 @@ export default function InsurerMembers() {
                   </p>
                 </div>
                 <span style={{ color: STATUS_COLOR[m.membership_status] || '#fff', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{m.membership_status.replace(/_/g, ' ')}</span>
+                {m.cover_structure && (
+                  <span style={{ color: '#7DBDEE', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase' }}>
+                    {m.cover_structure === 'medical_rider' ? 'Rider' : m.cover_structure === 'group' ? 'Group' : 'Individual'}
+                  </span>
+                )}
                 {m.policy_status && (
                   <span style={{ color: POLICY_STATUS_COLOR[m.policy_status] || '#fff', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>
                     {m.policy_status.replace(/_/g, ' ')}{m.premium_status ? ` · ${m.premium_status.replace(/_/g, ' ')}` : ''}

@@ -228,10 +228,12 @@ create policy protection_events_read on public.protection_events for select to a
 -- ---------------------------------------------------------------------------
 -- member_request_enrolment: server-side mode gate + active-insurer check.
 -- ---------------------------------------------------------------------------
+drop function if exists public.member_request_enrolment(uuid, text, uuid);
 create or replace function public.member_request_enrolment(
   p_insurer_id uuid,
   p_member_reference text,
-  p_plan_id uuid default null
+  p_plan_id uuid default null,
+  p_cover_structure text default null
 )
 returns uuid
 language plpgsql
@@ -269,11 +271,17 @@ begin
   ) then
     raise exception 'Plan does not belong to this insurer';
   end if;
+  if p_cover_structure is not null
+     and p_cover_structure not in ('medical_rider','individual','group') then
+    raise exception 'Invalid cover structure';
+  end if;
 
-  insert into public.protection_memberships (user_id, insurer_id, plan_id, member_reference, status)
-  values (v_uid, p_insurer_id, p_plan_id, nullif(btrim(coalesce(p_member_reference,'')), ''), 'pending_verification')
+  insert into public.protection_memberships (user_id, insurer_id, plan_id, member_reference, status, cover_structure)
+  values (v_uid, p_insurer_id, p_plan_id, nullif(btrim(coalesce(p_member_reference,'')), ''), 'pending_verification', p_cover_structure)
   on conflict (user_id, insurer_id) do update
-    set member_reference = excluded.member_reference, updated_at = now()
+    set member_reference = excluded.member_reference,
+        cover_structure = coalesce(excluded.cover_structure, public.protection_memberships.cover_structure),
+        updated_at = now()
     where public.protection_memberships.status in ('pending_verification', 'rejected')
   returning id into v_id;
   if v_id is null then
@@ -294,8 +302,8 @@ begin
   return v_id;
 end;
 $$;
-revoke execute on function public.member_request_enrolment(uuid, text, uuid) from public, anon;
-grant execute on function public.member_request_enrolment(uuid, text, uuid) to authenticated;
+revoke execute on function public.member_request_enrolment(uuid, text, uuid, text) from public, anon;
+grant execute on function public.member_request_enrolment(uuid, text, uuid, text) to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- member_set_consent: upsert with purpose/version; logs event. History of
@@ -347,9 +355,11 @@ grant execute on function public.member_set_consent(uuid, text, boolean) to auth
 -- insurer_verify_membership: require ACTIVE insurer org (status + role),
 -- not merely a profile link. Transition rules unchanged.
 -- ---------------------------------------------------------------------------
+drop function if exists public.insurer_verify_membership(uuid, text);
 create or replace function public.insurer_verify_membership(
   p_membership_id uuid,
-  p_member_reference text default null
+  p_member_reference text default null,
+  p_cover_structure text default null
 )
 returns void
 language plpgsql
@@ -371,11 +381,16 @@ begin
   if v_m.status <> 'pending_verification' then
     raise exception 'Membership is not pending verification';
   end if;
+  if p_cover_structure is not null
+     and p_cover_structure not in ('medical_rider','individual','group') then
+    raise exception 'Invalid cover structure';
+  end if;
   update public.protection_memberships
   set status = 'active',
       verified_at = now(),
       verified_by = v_uid,
       member_reference = coalesce(nullif(btrim(coalesce(p_member_reference,'')), ''), member_reference),
+      cover_structure = coalesce(p_cover_structure, cover_structure),
       updated_at = now()
   where id = p_membership_id;
   insert into public.protection_events (membership_id, insurer_id, actor_id, event_type, detail)
@@ -383,8 +398,8 @@ begin
   perform public.protection_log_access('verify_membership', 'protection_memberships', p_membership_id::text, 'membership verification');
 end;
 $$;
-revoke execute on function public.insurer_verify_membership(uuid, text) from public, anon;
-grant execute on function public.insurer_verify_membership(uuid, text) to authenticated;
+revoke execute on function public.insurer_verify_membership(uuid, text, text) from public, anon;
+grant execute on function public.insurer_verify_membership(uuid, text, text) to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- insurer_upload_member_roster: harden auth (active insurer) + mode gate.
@@ -503,6 +518,7 @@ returns table (
   member_reference text,
   status text,
   plan_id uuid,
+  cover_structure text,
   verified_at timestamptz,
   created_at timestamptz
 )
@@ -516,7 +532,7 @@ begin
   if v_insurer is null then raise exception 'Active insurer access required'; end if;
   perform public.protection_require_mode(array['pilot', 'live']);
   return query
-    select m.id, m.member_reference, m.status, m.plan_id, m.verified_at, m.created_at
+    select m.id, m.member_reference, m.status, m.plan_id, m.cover_structure, m.verified_at, m.created_at
     from public.protection_memberships m
     where m.insurer_id = v_insurer
     order by m.created_at desc
@@ -594,6 +610,7 @@ begin
       select jsonb_agg(jsonb_build_object(
         'id', m.id, 'insurer_id', m.insurer_id, 'plan_id', m.plan_id,
         'member_reference', m.member_reference, 'status', m.status,
+        'cover_structure', m.cover_structure,
         'verified_at', m.verified_at, 'created_at', m.created_at
       ) order by m.created_at desc)
       from public.protection_memberships m where m.user_id = v_uid
@@ -1256,6 +1273,7 @@ returns table (
   membership_id uuid,
   member_reference text,
   membership_status text,
+  cover_structure text,
   policy_id uuid,
   policy_number text,
   policy_status text,
@@ -1274,7 +1292,7 @@ begin
   if v_insurer is null then raise exception 'Active insurer access required'; end if;
   perform public.protection_require_mode(array['pilot', 'live']);
   return query
-    select m.id, m.member_reference, m.status,
+    select m.id, m.member_reference, m.status, m.cover_structure,
            p.id, p.policy_number, p.status, p.premium_status,
            p.commencement_date, p.expiry_date, pl.name
     from public.protection_memberships m

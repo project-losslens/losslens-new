@@ -38,6 +38,7 @@ export default function ProtectionPage() {
   const [therapists, setTherapists] = useState([])
   const [insurerId, setInsurerId] = useState('')
   const [memberRef, setMemberRef] = useState('')
+  const [coverStructure, setCoverStructure] = useState('')
   const [saving, setSaving] = useState(false)
   const [preauthSessions, setPreauthSessions] = useState(1)
   const [preauthSent, setPreauthSent] = useState(false)
@@ -87,6 +88,7 @@ export default function ProtectionPage() {
     setSaving(true)
     const { error } = await supabase.rpc('member_request_enrolment', {
       p_insurer_id: insurerId, p_member_reference: memberRef || null,
+      p_cover_structure: coverStructure || null,
     })
     setSaving(false)
     if (error) { toast.error(error.message || 'Could not submit enrolment.'); return }
@@ -324,6 +326,14 @@ export default function ProtectionPage() {
               </div>
               <div className="form-group"><label>Member reference (from your policy documents)</label>
                 <input type="text" value={memberRef} onChange={e => setMemberRef(e.target.value)} placeholder="e.g. POL-12345" />
+              </div>
+              <div className="form-group"><label>How are you enrolling? (optional — your insurer confirms)</label>
+                <select value={coverStructure} onChange={e => setCoverStructure(e.target.value)}>
+                  <option value="">Not sure yet</option>
+                  <option value="medical_rider">Medical Rider — added to my existing medical policy</option>
+                  <option value="individual">Individual Cover — standalone policy</option>
+                  <option value="group">Group Cover — through my employer or organisation</option>
+                </select>
               </div>
               <button className="btn-primary full" onClick={enrol} disabled={saving}>
                 {saving ? <BrandLoader variant="inline" showWordmark={false} /> : 'Request enrolment'}
