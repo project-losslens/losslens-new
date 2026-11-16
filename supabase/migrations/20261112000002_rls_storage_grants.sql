@@ -573,6 +573,47 @@ grant select on public.circle_messages_safe to authenticated;
 -- ---------------------------------------------------------------------------
 -- Storage policies (storage.objects)
 -- ---------------------------------------------------------------------------
+
+-- Event images: public-read bucket; only admins may write objects.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('event-images', 'event-images', true, 5242880,
+        array['image/jpeg','image/png','image/webp'])
+on conflict (id) do update set
+  public = true,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "event-images public read" on storage.objects;
+create policy "event-images public read" on storage.objects for select
+  using (bucket_id = 'event-images');
+drop policy if exists "event-images admin write" on storage.objects;
+create policy "event-images admin write" on storage.objects for insert to authenticated
+  with check (bucket_id = 'event-images' and public.is_super_admin());
+drop policy if exists "event-images admin update" on storage.objects;
+create policy "event-images admin update" on storage.objects for update to authenticated
+  using (bucket_id = 'event-images' and public.is_super_admin())
+  with check (bucket_id = 'event-images' and public.is_super_admin());
+drop policy if exists "event-images admin delete" on storage.objects;
+create policy "event-images admin delete" on storage.objects for delete to authenticated
+  using (bucket_id = 'event-images' and public.is_super_admin());
+
+-- Per-user storage quota (500 MB across all buckets). Checked inside the
+-- user-writable bucket INSERT policies below.
+create or replace function public.storage_user_quota_ok()
+returns boolean
+language sql
+stable
+security definer
+set search_path = pg_catalog, public
+as $$
+  select coalesce((
+    select sum(coalesce((o.metadata->>'size')::bigint, 0))
+    from storage.objects o
+    where o.owner = (select auth.uid())
+  ), 0) < 524288000;
+$$;
+revoke execute on function public.storage_user_quota_ok() from public, anon;
+grant execute on function public.storage_user_quota_ok() to authenticated;
 drop policy if exists "avatar owner read" on storage.objects;
 drop policy if exists "avatars public select" on storage.objects;
 drop policy if exists "avatar owner select" on storage.objects;
@@ -580,7 +621,7 @@ create policy "avatar owner select" on storage.objects for select to authenticat
   using (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text);
 drop policy if exists "avatar owner insert" on storage.objects;
 create policy "avatar owner insert" on storage.objects for insert to authenticated
-  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text);
+  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text and public.storage_user_quota_ok());
 drop policy if exists "avatar owner update" on storage.objects;
 create policy "avatar owner update" on storage.objects for update to authenticated
   using (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text)
@@ -594,7 +635,7 @@ create policy "mirror read" on storage.objects for select to authenticated
   using (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = (select auth.uid())::text);
 drop policy if exists "mirror write" on storage.objects;
 create policy "mirror write" on storage.objects for insert to authenticated
-  with check (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = (select auth.uid())::text);
+  with check (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = (select auth.uid())::text and public.storage_user_quota_ok());
 drop policy if exists "mirror update" on storage.objects;
 create policy "mirror update" on storage.objects for update to authenticated
   using (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = (select auth.uid())::text)
@@ -608,7 +649,7 @@ create policy "pact read" on storage.objects for select to authenticated
   using (bucket_id = 'precious-pacts' and ((storage.foldername(name))[1] = (select auth.uid())::text));
 drop policy if exists "pact write" on storage.objects;
 create policy "pact write" on storage.objects for insert to authenticated
-  with check (bucket_id = 'precious-pacts' and (storage.foldername(name))[1] = (select auth.uid())::text);
+  with check (bucket_id = 'precious-pacts' and (storage.foldername(name))[1] = (select auth.uid())::text and public.storage_user_quota_ok());
 drop policy if exists "pact update" on storage.objects;
 create policy "pact update" on storage.objects for update to authenticated
   using (bucket_id = 'precious-pacts' and (storage.foldername(name))[1] = (select auth.uid())::text)
@@ -624,7 +665,8 @@ create policy therapist_documents_read on storage.objects for select to authenti
 drop policy if exists therapist_documents_insert on storage.objects;
 create policy therapist_documents_insert on storage.objects for insert to authenticated
   with check (bucket_id = 'therapist-documents'
-    and (storage.foldername(name))[1] = (select auth.uid())::text);
+    and (storage.foldername(name))[1] = (select auth.uid())::text
+    and public.storage_user_quota_ok());
 drop policy if exists therapist_documents_update on storage.objects;
 create policy therapist_documents_update on storage.objects for update to authenticated
   using (bucket_id = 'therapist-documents'

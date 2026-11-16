@@ -1272,7 +1272,7 @@ end $$;
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values
   ('avatars', 'avatars', false, 5242880, array['image/jpeg','image/png','image/webp']),
-  ('mirror-recordings', 'mirror-recordings', false, 104857600, array['video/webm','video/mp4']),
+  ('mirror-recordings', 'mirror-recordings', false, 104857600, array['video/webm','video/mp4','audio/webm','audio/mp4']),
   ('precious-pacts', 'precious-pacts', false, 104857600, array['audio/webm','audio/mp4','audio/ogg','audio/x-m4a']),
   ('therapist-documents', 'therapist-documents', false, 5242880, array['application/pdf'])
 on conflict (id) do update set
