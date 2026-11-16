@@ -18,12 +18,20 @@ const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character
 //  generated client-side, shown to the user, and never leaves the browser.
 const PASSPHRASE_ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789' // no l/1/o/0 confusion
 function generateReportPassphrase() {
-  const bytes = new Uint8Array(8)
-  crypto.getRandomValues(bytes)
-  return [...bytes].map(b => PASSPHRASE_ALPHABET[b % PASSPHRASE_ALPHABET.length]).join('')
+  const phrase = []
+  const limit = Math.floor(256 / PASSPHRASE_ALPHABET.length) * PASSPHRASE_ALPHABET.length
+  while (phrase.length < 12) {
+    const bytes = new Uint8Array(16)
+    crypto.getRandomValues(bytes)
+    for (const byte of bytes) {
+      if (byte >= limit) continue
+      phrase.push(PASSPHRASE_ALPHABET[byte % PASSPHRASE_ALPHABET.length])
+      if (phrase.length === 12) break
+    }
+  }
+  return phrase.join('')
 }
 const toB64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)))
-const fromB64 = (b64) => Uint8Array.from(atob(b64), c => c.charCodeAt(0))
 
 async function encryptReportHtml(html, passphrase) {
   const salt = crypto.getRandomValues(new Uint8Array(16))
@@ -97,7 +105,7 @@ export default function Profile() {
 
   // Report
   const [generatingReport, setGeneratingReport] = useState(false)
-  const [reportPassphrase, setReportPassphrase] = useState(() => generateReportPassphrase())
+  const [reportPassphrase, setReportPassphrase] = useState('')
 
   // Stats
   const [stats, setStats] = useState({ totalEntries: 0, cleanDays: 0, gambleDays: 0, cbtCompleted: 0, cbtTotal: 8, eventsAttended: 0, topTriggers: [], topCoping: [], recentEntries: [], badges: [] })
@@ -149,6 +157,13 @@ export default function Profile() {
     const uid = session.user.id
     setUserId(uid)
     setEmail(session.user.email)
+    const reportPassphraseKey = `losslens:report-passphrase:${uid}`
+    let savedReportPassphrase = sessionStorage.getItem(reportPassphraseKey)
+    if (!savedReportPassphrase) {
+      savedReportPassphrase = generateReportPassphrase()
+      sessionStorage.setItem(reportPassphraseKey, savedReportPassphrase)
+    }
+    setReportPassphrase(savedReportPassphrase)
 
     try {
       //  Parallelize independent queries
@@ -230,7 +245,12 @@ export default function Profile() {
   //  server-side or sent anywhere.
   const downloadRecoveryReport = async () => {
     setGeneratingReport(true)
-    const today = new Date().toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' })
+    const formatReportDate = (value) => {
+      if (!value) return 'Not recorded'
+      const date = new Date(value)
+      return Number.isNaN(date.getTime()) ? 'Not recorded' : date.toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' })
+    }
+    const today = formatReportDate(new Date())
     const cleanRate = stats.totalEntries > 0 ? Math.round((stats.cleanDays / stats.totalEntries) * 100) : 0
     const reportName = escapeHtml(fullName || 'N/A')
     const reportEmail = escapeHtml(email)
@@ -238,55 +258,78 @@ export default function Profile() {
     const reportGoal = escapeHtml(goal)
     const reportRisk = escapeHtml(riskLevel.toUpperCase())
     const reportTriggers = stats.topTriggers.map(([trigger, count]) => `<tr><td>${escapeHtml(trigger)}</td><td>${count} times</td></tr>`).join('')
+    const reportCoping = stats.topCoping.map(([coping, count]) => `<tr><td>${escapeHtml(coping)}</td><td>${count} times</td></tr>`).join('')
+    const reportEntries = stats.recentEntries.map(entry => `<tr><td>${escapeHtml(formatReportDate(entry.date))}</td><td>${escapeHtml(entry.mood || 'Not recorded')}</td><td>${entry.gambled ? 'Reported' : 'Not reported'}</td></tr>`).join('')
+    const reportBadges = stats.badges.filter(badge => badge.earned).map(badge => `<span class="badge">${escapeHtml(badge.name)}</span>`).join('')
+    const reportCbt = stats.cbtTotal > 0
+      ? `${stats.cbtCompleted} of ${stats.cbtTotal} modules completed`
+      : 'No module data available'
 
     const reportHTML = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>LossLens Recovery Report - ${reportName}</title>
 <style>
-  @page { margin: 2cm; }
-  body { font-family: 'Georgia', serif; background: #0B1220; color: #FFFFFF; line-height: 1.8; max-width: 750px; margin: auto; padding: 1.5rem; }
-  .header { text-align: center; border-bottom: 3px solid rgba(255,255,255,0.12); padding-bottom: 1.5rem; margin-bottom: 2rem; }
-  .header h1 { color: #FFFFFF; margin: 0; font-size: 26px; }
-  .header .subtitle { color: rgba(255,255,255,0.33); font-size: 12px; margin: 6px 0 0; }
-  .header .confidential { color: rgba(255,255,255,0.08); font-size: 10px; margin: 8px 0 0; text-transform: uppercase; letter-spacing: 2px; }
-  h2 { color: #FFFFFF; border-bottom: 2px solid rgba(255,255,255,0.12); padding-bottom: 8px; font-size: 18px; margin-bottom: 1rem; }
-  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; }
-  .info-item { padding: 6px 0; border-bottom: 1px dotted rgba(255,255,255,0.87); }
-  .info-item strong { color: #FFFFFF; display: inline-block; width: 120px; }
-  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 1rem 0; }
-  .stat-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 14px 10px; text-align: center; }
-  .stat-card .value { font-size: 22px; font-weight: bold; color: rgba(255,255,255,0.12); display: block; }
-  .stat-card .label { font-size: 9px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
-  table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 11px; }
-  th { background: rgba(255,255,255,0.12); color: #FFFFFF; padding: 10px 8px; text-align: left; font-weight: 500; font-size: 10px; }
-  td { padding: 8px; border-bottom: 1px solid #FFFFFF; }
-  tr:nth-child(even) { background: rgba(255,255,255,0.04); }
-  .clean { color: rgba(255,255,255,0.12); font-weight: bold; }
-  .gambled { color: rgba(255,255,255,0.08); font-weight: bold; }
-  .footer { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 2px solid rgba(255,255,255,0.12); text-align: center; }
-  .footer p { font-size: 10px; color: rgba(255,255,255,0.5); margin: 2px 0; }
-  .badge { display: inline-block; background: rgba(255,255,255,0.12); color: #FFFFFF; padding: 3px 10px; border-radius: 4px; font-size: 10px; margin: 2px; }
+  @page { margin: 1.8cm; }
+  * { box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; background: #fff; color: #17212f; line-height: 1.55; max-width: 820px; margin: auto; padding: 1.5rem; }
+  body:before { content: 'PRIVATE RECOVERY INFORMATION'; position: fixed; inset: 36% -10%; transform: rotate(-24deg); color: rgba(11,18,32,.045); font-size: clamp(24px, 6vw, 56px); font-weight: 700; letter-spacing: .12em; white-space: nowrap; pointer-events: none; z-index: -1; }
+  .header { display: flex; align-items: center; justify-content: center; gap: 12px; border-bottom: 3px solid #2DD4BF; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+  .mark { width: 46px; height: 46px; flex: none; }
+  .header h1 { color: #0B1220; margin: 0; font-size: 24px; }
+  .subtitle { color: #475569; font-size: 12px; margin: 4px 0 0; }
+  .confidential { color: #334155; font-size: 10px; margin: 7px 0 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+  h2 { color: #0B1220; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; font-size: 16px; margin: 1.5rem 0 .6rem; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
+  .info-item { padding: 5px 0; border-bottom: 1px dotted #cbd5e1; overflow-wrap: anywhere; }
+  .info-item strong { color: #334155; display: inline-block; min-width: 112px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: .8rem 0; }
+  .stat-card { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px 8px; text-align: center; }
+  .stat-card .value { font-size: 20px; font-weight: bold; color: #0f766e; display: block; }
+  .stat-card .label { font-size: 9px; color: #334155; text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; margin: .7rem 0; font-size: 11px; }
+  th { background: #e2e8f0; color: #0B1220; padding: 8px; text-align: left; font-size: 10px; }
+  td { padding: 7px 8px; border-bottom: 1px solid #cbd5e1; }
+  tr:nth-child(even) { background: #f8fafc; }
+  .empty { color: #475569; font-style: italic; }
+  .footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #cbd5e1; text-align: center; }
+  .footer p { font-size: 10px; color: #475569; margin: 3px 0; }
+  .badge { display: inline-block; background: #e6fffb; color: #115e59; border: 1px solid #99f6e4; padding: 3px 9px; border-radius: 4px; font-size: 10px; margin: 2px; }
+  @media print { body { padding: 0; } .stat-card { break-inside: avoid; } }
+  @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } body { padding: 1rem; } }
 </style></head><body>
-<div class="header"><h1>LossLens Recovery Report</h1><p class="subtitle">Generated on ${today}</p><p class="confidential">CONFIDENTIAL — For Therapeutic Use Only</p></div>
+<div class="header"><svg class="mark" viewBox="0 0 100 100" aria-label="LossLens mark">${Array.from({ length: 8 }, (_, i) => `<ellipse cx="50" cy="26" rx="9" ry="20" fill="${i % 2 === 0 ? '#2DD4BF' : '#7DBDEE'}" opacity=".9" transform="rotate(${i * 45} 50 50)"/>`).join('')}<circle cx="50" cy="50" r="12" stroke="#7DBDEE" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="4" fill="#2DD4BF"/></svg><div><h1>LossLens Recovery Report</h1><p class="subtitle">Generated ${today}</p><p class="confidential">Private recovery information · Share only with your consent</p></div></div>
 <h2>Client Information</h2>
 <div class="info-grid">
   <div class="info-item"><strong>Full Name:</strong> ${reportName}</div>
   <div class="info-item"><strong>Email:</strong> ${reportEmail}</div>
   <div class="info-item"><strong>Phone:</strong> ${reportPhone}</div>
   <div class="info-item"><strong>Goal:</strong> ${reportGoal}</div>
-  <div class="info-item"><strong>Risk Level:</strong> ${reportRisk}</div>
-  <div class="info-item"><strong>Member Since:</strong> ${joinedDate ? new Date(joinedDate).toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</div>
-  <div class="info-item"><strong>Clean Since:</strong> ${cleanSince ? new Date(cleanSince).toLocaleDateString('en-KE') : 'N/A'}</div>
+  <div class="info-item"><strong>App screening category:</strong> ${reportRisk}</div>
+  <div class="info-item"><strong>Member Since:</strong> ${escapeHtml(formatReportDate(joinedDate))}</div>
+  <div class="info-item"><strong>Clean Since:</strong> ${escapeHtml(formatReportDate(cleanSince))}</div>
   <div class="info-item"><strong>App Usage:</strong> ${totalSessions} active days  · ${stats.totalEntries} diary entries</div>
 </div>
 <h2>Recovery Overview</h2>
 <div class="stats-grid">
-  <div class="stat-card"><span class="value">${cleanRate}%</span><span class="label">Clean Rate</span></div>
-  <div class="stat-card"><span class="value">${stats.cleanDays}</span><span class="label">Clean Days</span></div>
-  <div class="stat-card"><span class="value">KES ${moneySaved.toLocaleString()}</span><span class="label">Money Saved</span></div>
-  <div class="stat-card"><span class="value">${streakDays}</span><span class="label">Current Streak</span></div>
+  <div class="stat-card"><span class="value">${stats.totalEntries ? `${cleanRate}%` : '—'}</span><span class="label">No-gambling diary entries</span></div>
+  <div class="stat-card"><span class="value">${stats.totalEntries ? stats.cleanDays : '—'}</span><span class="label">No-gambling entries</span></div>
+  <div class="stat-card"><span class="value">${stats.totalEntries ? `KES ${Number(moneySaved).toLocaleString()}` : '—'}</span><span class="label">Reported savings</span></div>
+  <div class="stat-card"><span class="value">${stats.totalEntries ? Number(streakDays) : '—'}</span><span class="label">Current streak</span></div>
 </div>
-${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</th><th>Frequency</th></tr>${reportTriggers}</table>` : ''}
-<div class="footer"><p>Generated by LossLens — Gambling Harm Recovery Platform</p><p>Confidential — For therapeutic use only</p></div>
+<p class="empty">${stats.totalEntries ? `${stats.totalEntries} diary entries recorded across ${totalSessions} days.` : 'No diary entries are available yet. Diary-based measures are not calculated.'}</p>
+<h2>Learning and participation</h2>
+<div class="info-grid">
+  <div class="info-item"><strong>CBT learning:</strong> ${escapeHtml(reportCbt)}</div>
+  <div class="info-item"><strong>Event RSVPs:</strong> ${stats.eventsAttended}</div>
+</div>
+<h2>Commonly recorded triggers</h2>
+${stats.topTriggers.length > 0 ? `<table><thead><tr><th>Trigger</th><th>Diary entries</th></tr></thead><tbody>${reportTriggers}</tbody></table>` : '<p class="empty">No trigger data recorded.</p>'}
+<h2>Coping strategies recorded</h2>
+${stats.topCoping.length > 0 ? `<table><thead><tr><th>Strategy</th><th>Diary entries</th></tr></thead><tbody>${reportCoping}</tbody></table>` : '<p class="empty">No coping strategy data recorded.</p>'}
+<h2>Recent diary overview</h2>
+${stats.recentEntries.length > 0 ? `<table><thead><tr><th>Date</th><th>Mood</th><th>Gambling reported</th></tr></thead><tbody>${reportEntries}</tbody></table>` : '<p class="empty">No diary entries are available for this period.</p>'}
+<h2>Achievements</h2>
+${reportBadges || '<p class="empty">No achievements recorded.</p>'}
+<div class="footer"><p>Generated by LossLens for personal recovery reflection.</p><p>This self-reported summary is not a clinical assessment, diagnosis, or treatment plan. App screening categories are not clinical diagnoses.</p><p>Protect this file and share it only with people you choose.</p></div>
 </body></html>`
 
     try {
@@ -300,7 +343,7 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
-      URL.revokeObjectURL(url)
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000)
       setGeneratingReport(false)
       toast.success('Encrypted report downloaded! Enter the passphrase to open it.', 6000)
     } catch (err) {
@@ -312,6 +355,12 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
   const copyPassphrase = async () => {
     try { await navigator.clipboard.writeText(reportPassphrase); toast.success('Passphrase copied', 2000) }
     catch { toast.error('Could not copy — write it down instead.', 3000) }
+  }
+
+  const generateNewReportPassphrase = () => {
+    const newPassphrase = generateReportPassphrase()
+    setReportPassphrase(newPassphrase)
+    if (userId) sessionStorage.setItem(`losslens:report-passphrase:${userId}`, newPassphrase)
   }
 
   const handleProfileSave = async () => {
@@ -549,12 +598,12 @@ ${stats.topTriggers.length > 0 ? `<h2>Top Triggers</h2><table><tr><th>Trigger</t
               <p className="fs-11" style={{ color: 'rgba(255,255,255,0.5)', margin: '0 0 6px' }}>Report passphrase</p>
               <p className="fs-22" style={{ color: '#F2C879', fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: '3px', margin: '0 0 8px' }}>{reportPassphrase}</p>
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                <button type="button" onClick={copyPassphrase} className="fs-11" style={{ padding: '6px 12px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '32px' }}>Copy</button>
-                <button type="button" onClick={() => setReportPassphrase(generateReportPassphrase())} className="fs-11" style={{ padding: '6px 12px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '32px' }}>Generate new passphrase</button>
+                <button type="button" onClick={() => { void copyPassphrase() }} disabled={!reportPassphrase} className="fs-11" style={{ padding: '6px 12px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '32px' }}>Copy</button>
+                <button type="button" onClick={generateNewReportPassphrase} disabled={!reportPassphrase} className="fs-11" style={{ padding: '6px 12px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '32px' }}>Generate new passphrase</button>
               </div>
               <p className="fs-10" style={{ color: 'rgba(255,255,255,0.4)', margin: '8px 0 0' }}>Share this passphrase in person or by phone, not in the same message as the file.</p>
             </div>
-            <button onClick={downloadRecoveryReport} disabled={generatingReport} className="fs-12" style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+            <button onClick={() => { void downloadRecoveryReport() }} disabled={generatingReport || !reportPassphrase} className="fs-12" style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
               {generatingReport ? <BrandLoader variant="inline" showWordmark={false} /> : 'Download Report'}
             </button>
           </div>

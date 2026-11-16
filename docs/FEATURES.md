@@ -63,6 +63,8 @@ Ordinary users are client-guarded through `profiles.role`. Assignment and entitl
 ### Recovery diary
 Diary creates and updates one daily entry, lists recent entries, records mood, triggers, coping, thoughts, notes, amount gambled, gamble state, and updates streak/money-saved profile fields. It uses owner-filtered CRUD on `diary_entries` and profile updates.
 
+The encrypted Recovery Report is generated locally and includes a profile summary, diary-derived counts and recent overview, commonly recorded triggers and coping strategies, CBT progress, event RSVPs, and earned badges. Missing diary or achievement data is shown explicitly; app screening categories are not clinical diagnoses. The passphrase is generated in the browser and must be shared separately from the downloaded encrypted file.
+
 ### CBT modules
 CBT modules retrieve member-owned progress and record lesson views through an authenticated RPC. Completion is written server-side only after all three lessons in the module have been recorded and at least 20 minutes have elapsed since the first lesson view. Authenticated clients have read-only access to completion rows; the RPC checks the member role and completion conditions. This enforcement is defined in migration 08 and must be applied before the client flow is enabled in a deployed environment.
 
