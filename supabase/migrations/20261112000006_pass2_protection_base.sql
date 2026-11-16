@@ -205,7 +205,7 @@ grant execute on function public.create_supporter_invitation(text, text, text, t
 -- Plans live in src/config/plans.js; change history is read from audit_logs
 -- (written via log_admin_action inside the function). No plans or history
 -- tables are created.
--- DESTRUCTIVE (only if the earlier Phase 5 draft was already applied): drops
+-- DESTRUCTIVE (only relevant if an earlier draft was already applied): drops
 -- public.plans, public.subscription_events and the superseded RPCs below.
 -- Safe to run when they do not exist.
 -- ===========================================================================
@@ -779,7 +779,7 @@ revoke execute on function public.member_leave_protection(uuid) from public, ano
 grant execute on function public.member_leave_protection(uuid) to authenticated;
 
 
--- Insurer manages its own protection plans (Phase 6).
+-- Insurer manages its own protection plans.
 drop policy if exists protection_plans_insurer_write on public.protection_plans;
 create policy protection_plans_insurer_write on public.protection_plans for all to authenticated
   using (exists (select 1 from public.insurers i where i.id = insurer_id and i.profile_id = (select auth.uid())))
