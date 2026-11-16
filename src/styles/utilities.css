@@ -190,6 +190,3 @@ html[data-low-data='true'] canvas:not([data-low-data-keep]) {
 .tour-card p { color: var(--text-secondary, rgba(255,255,255,0.7)); margin: 0 0 1rem; }
 .tour-actions { display: flex; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap; }
 
-/* Demo page */
-.demo-check { display: flex; align-items: center; gap: 0.5rem; min-height: 44px; }
-.demo-timer { font-size: 1.5rem; font-weight: 600; color: #2DD4BF; font-variant-numeric: tabular-nums; }

@@ -75,7 +75,6 @@ const InsurerAnalytics = lazy(() => import('./pages/insurer/InsurerAnalytics'))
 const InsurerMembers = lazy(() => import('./pages/insurer/InsurerMembers'))
 const InsurerPreAuths = lazy(() => import('./pages/insurer/InsurerPreAuths'))
 const InsurerPlans = lazy(() => import('./pages/insurer/InsurerPlans'))
-const Demo = lazy(() => import('./pages/Demo'))
 const AppShell = lazy(() => import('./layouts/AppShell'))
 
 function App() {
@@ -102,7 +101,6 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/partners" element={<Partners />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/demo" element={<Demo />} />
 
         <Route element={<RequireAuth />}>
           <Route path="/onboarding" element={<Onboarding />} />

@@ -26,7 +26,6 @@ const PUBLIC_PATHS = [
   '/terms',
   '/about',
   '/partners',
-  '/demo',
   '/auth/callback',
   '/insurer/login',
 ]

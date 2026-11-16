@@ -35,7 +35,6 @@ export default {
   'login.signUp': 'Jisajili bure',
   'login.insurer': 'Mshirika wa bima?',
   'login.insurerLogin': 'Ingia kama insurer',
-  'login.demo': 'Jaribu demo',
   'login.crisis': 'Katika hatari? Piga {name}: {phone} ({hours})',
   'login.errorCredentials': 'Taarifa si sahihi. Tafadhali jaribu tena.',
   'login.errorCooldown': 'Majaribio mengi sana. Tafadhali jaribu tena baadaye.',
