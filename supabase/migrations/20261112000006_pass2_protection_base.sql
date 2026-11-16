@@ -157,6 +157,7 @@ declare
   v_uid uuid := (select auth.uid());
   v_count int;
   v_inv public.supporter_invitations;
+  v_raw_token text := encode(gen_random_bytes(24), 'hex');
 begin
   if v_uid is null then
     raise exception 'Not authenticated';
@@ -175,19 +176,21 @@ begin
     raise exception 'Maximum 5 supporters allowed';
   end if;
 
+  -- Only the hash is persisted; the raw token is returned once so the owner
+  -- can build the invite link. It is never stored or logged.
   insert into public.supporter_invitations (
     user_id, supporter_name, supporter_email, supporter_phone, supporter_relation,
-    permissions, anonymous_mode, crisis_contact, token, status, expires_at
+    permissions, anonymous_mode, crisis_contact, token_hash, status, expires_at
   ) values (
     v_uid, btrim(p_supporter_name), null,
     null, nullif(btrim(coalesce(p_supporter_relation,'')), ''),
     coalesce(p_permissions, '[]'::jsonb), coalesce(p_anonymous_mode, false),
     coalesce(p_crisis_contact, false),
-    replace(gen_random_uuid()::text, '-', '') || replace(gen_random_uuid()::text, '-', ''),
+    md5(v_raw_token),
     'pending', now() + interval '30 days'
   ) returning * into v_inv;
 
-  return to_jsonb(v_inv);
+  return to_jsonb(v_inv) || jsonb_build_object('token', v_raw_token);
 end;
 $$;
 revoke execute on function public.create_supporter_invitation(text, text, text, text, jsonb, boolean, boolean) from public, anon;

@@ -370,7 +370,8 @@ create table if not exists public.supporter_invitations (
   supporter_phone text,
   supporter_relation text,
   permissions jsonb not null default '[]'::jsonb,
-  token text not null unique default encode(gen_random_bytes(24), 'hex'),
+  -- Only the hash is stored; the raw token is returned once at creation.
+  token_hash text not null unique,
   status text not null default 'pending',
   anonymous_mode boolean not null default false,
   crisis_contact boolean not null default false,
@@ -395,7 +396,20 @@ create table if not exists public.supporter_feedback (
   created_at timestamptz not null default now()
 );
 
-create index if not exists supporter_invitations_token_idx on public.supporter_invitations(token);
+create index if not exists supporter_invitations_token_hash_idx on public.supporter_invitations(token_hash);
+
+-- Migration path for databases created before token hashing: backfill the
+-- hash from any legacy raw token column, then drop it. Idempotent.
+do $$ begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'supporter_invitations'
+      and column_name = 'token'
+  ) then
+    execute 'update public.supporter_invitations set token_hash = md5(token) where token_hash is null';
+    execute 'alter table public.supporter_invitations drop column token';
+  end if;
+end $$;
 create index if not exists supporter_invitations_user_status_idx on public.supporter_invitations(user_id, status);
 create index if not exists supporter_messages_invitation_idx on public.supporter_messages(invitation_id, created_at);
 

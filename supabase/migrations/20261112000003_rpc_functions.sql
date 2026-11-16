@@ -479,7 +479,7 @@ begin
   end if;
 
   select * into v_inv from public.supporter_invitations
-  where token = p_token limit 1;
+  where token_hash = md5(p_token) limit 1;
   -- Uniform response: unknown, expired and revoked tokens are
   -- indistinguishable to the caller.
   if not found
@@ -518,7 +518,7 @@ declare
   v_inv public.supporter_invitations;
 begin
   select * into v_inv from public.supporter_invitations
-  where token = p_token for update;
+  where token_hash = md5(p_token) for update;
   if not found then
     raise exception 'Invalid invitation';
   end if;
@@ -555,7 +555,7 @@ declare
   v_cbt int;
 begin
   select * into v_inv from public.supporter_invitations
-  where token = p_token;
+  where token_hash = md5(p_token);
   if not found or v_inv.status <> 'active'
      or (v_inv.expires_at is not null and v_inv.expires_at <= now()) then
     raise exception 'Invitation is not active';
@@ -612,7 +612,7 @@ declare
   v_msg public.supporter_messages;
 begin
   select * into v_inv from public.supporter_invitations
-  where token = p_token;
+  where token_hash = md5(p_token);
   if not found or v_inv.status <> 'active'
      or (v_inv.expires_at is not null and v_inv.expires_at <= now()) then
     raise exception 'Invitation is not active';
@@ -641,7 +641,7 @@ declare
   v_msgs jsonb;
 begin
   select * into v_inv from public.supporter_invitations
-  where token = p_token;
+  where token_hash = md5(p_token);
   if not found or v_inv.status <> 'active'
      or (v_inv.expires_at is not null and v_inv.expires_at <= now()) then
     raise exception 'Invitation is not active';
@@ -675,6 +675,7 @@ declare
   v_uid uuid := (select auth.uid());
   v_count int;
   v_inv public.supporter_invitations;
+  v_raw_token text := encode(gen_random_bytes(24), 'hex');
 begin
   if v_uid is null then
     raise exception 'Not authenticated';
@@ -693,19 +694,21 @@ begin
     raise exception 'Maximum 5 supporters allowed';
   end if;
 
+  -- Only the hash is persisted; the raw token is returned once so the owner
+  -- can build the invite link. It is never stored or logged.
   insert into public.supporter_invitations (
     user_id, supporter_name, supporter_email, supporter_phone, supporter_relation,
-    permissions, anonymous_mode, crisis_contact, token, status, expires_at
+    permissions, anonymous_mode, crisis_contact, token_hash, status, expires_at
   ) values (
     v_uid, btrim(p_supporter_name), nullif(btrim(coalesce(p_supporter_email,'')), ''),
     nullif(btrim(coalesce(p_supporter_phone,'')), ''), nullif(btrim(coalesce(p_supporter_relation,'')), ''),
     coalesce(p_permissions, '[]'::jsonb), coalesce(p_anonymous_mode, false),
     coalesce(p_crisis_contact, false),
-    replace(gen_random_uuid()::text, '-', '') || replace(gen_random_uuid()::text, '-', ''),
+    md5(v_raw_token),
     'pending', now() + interval '30 days'
   ) returning * into v_inv;
 
-  return to_jsonb(v_inv);
+  return to_jsonb(v_inv) || jsonb_build_object('token', v_raw_token);
 end;
 $$;
 revoke execute on function public.create_supporter_invitation(text, text, text, text, jsonb, boolean, boolean) from public, anon;
@@ -743,6 +746,7 @@ set search_path = pg_catalog, public
 as $$
 declare
   v_inv public.supporter_invitations;
+  v_new_token text;
 begin
   if (select auth.uid()) is null or not public.is_active_user() then
     raise exception 'Active sign-in required';
@@ -766,15 +770,20 @@ begin
     set crisis_contact = coalesce((p_value ->> 'crisis_contact')::boolean, false)
     where id = v_inv.id returning * into v_inv;
   elsif p_action = 'renew' then
-    -- Rotate the token on renew so an old link cannot be reused.
+    -- Rotate the token on renew so an old link cannot be reused. Only the
+    -- hash is stored; the new raw token is returned once to the owner.
+    v_new_token := encode(gen_random_bytes(24), 'hex');
     update public.supporter_invitations
     set expires_at = now() + interval '7 days', status = 'pending', responded_at = null,
-        token = replace(gen_random_uuid()::text, '-', '') || replace(gen_random_uuid()::text, '-', '')
+        token_hash = md5(v_new_token)
     where id = v_inv.id returning * into v_inv;
   else
     raise exception 'Unsupported invitation action';
   end if;
-  return to_jsonb(v_inv);
+  return to_jsonb(v_inv)
+    || case when v_new_token is not null
+            then jsonb_build_object('token', v_new_token)
+            else '{}'::jsonb end;
 end;
 $$;
 
