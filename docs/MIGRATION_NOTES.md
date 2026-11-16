@@ -27,13 +27,33 @@ statements from the application or from a local migration command.
 
 The final script set redefines the legacy `is_recently_authenticated()` helper
 so it no longer checks JWT age. It returns true only for active administrators;
-the role-specific `is_admin()` and `is_super_admin()` checks in each RPC remain
-the authorization boundary. It adds the `admin_revert_therapist(uuid)` RPC and
-replaces therapist self-access policies so a reverted user cannot continue to
-access therapist profile data. The RPC and policy changes are idempotent and do
-not delete user or claims data.
+the role-specific database checks remain the authorization boundary. Script 08
+adds super-admin account-management RPCs and revokes authenticated execution
+from the legacy reason-free therapist promotion/reversion RPCs. Role/profile
+changes are audited, role changes revoke target sessions, therapist work must
+be reassigned before role exit, and an active insurer organisation must be
+linked before an account receives the insurer role.
 
-There are no manual Supabase dashboard steps for this change.
+Apply the eight scripts manually in order; no SQL has been run against the
+owner's project. Deploy the `admin-user-update` Edge Function and configure
+`ALLOWED_ORIGIN`, `RESEND_API_KEY`, and `EMAIL_FROM` before using admin email
+changes. The Resend sender must be verified. No live database or email-provider
+test has been performed.
+
+The migration adds a `must_change_password` gate and an authenticated
+`/change-temporary-password` flow. A service-generated temporary password is
+returned once to the super-admin; the target must replace it before protected
+data access. The migration also adds a case-insensitive username unique index.
+Before applying script 01 to existing data, resolve any duplicate usernames
+ignoring case and reserved usernames (`admin`, `support`, `losslens`, `oloo`,
+`system`); the script fails with an explicit error rather than renaming users.
+
+For manual verification after applying all eight scripts: test the full
+super-admin role/profile/credential matrix using separate accounts, confirm
+role-specific access changes immediately, check session revocation, verify
+auth/profile email and phone synchronization, confirm audit values are masked,
+and verify that no temporary password is stored or logged. A disposable local
+Supabase run was not possible in the implementation environment.
 
 ## Subscription additions (script 06)
 

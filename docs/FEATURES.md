@@ -56,7 +56,18 @@ Pricing is implemented as a frontend pricing presentation. Family join accepts s
 
 Profiles support full name, username, phone, goal, avatar, preferences, risk level, streak information, clean-start date, money saved, freeze state, badges and accountability fields. Signup and dashboard creation are implemented. Profile updates include profile-password reporting, contact details, avatar emoji or file upload, preferences, and account deletion.
 
-Ordinary users are client-guarded through `profiles.role`. Assignment and entitlement changes require server-side database authorization. Client-side role checks are duplicated with the migration RLS and privileged-field protections, but live policy enforcement remains unverified.
+The super-admin user editor changes roles through a database RPC and profile
+fields through a step-up-authenticated Edge Function plus an RPC. The database
+checks the caller's live `profiles.role`, protects the last active super-admin,
+links insurer roles to active organisations, stages new therapists as
+pending-verification, and preserves/reassigns relevant claim and voucher
+history. Role and profile changes are audited; role and credential changes
+revoke target sessions. Email updates sync Auth and profile records, attempt
+notices to both addresses, and record masked values. Temporary passwords are
+generated server-side, returned once, and require a password change before
+protected data access. These controls are code-read only; the migrations,
+Edge Function secrets, email delivery, session revocation and role matrix have
+not been tested against a disposable or live Supabase project.
 
 ## 4. Gambling recovery and CBT
 

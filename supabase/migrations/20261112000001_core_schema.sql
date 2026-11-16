@@ -71,6 +71,7 @@ create table if not exists public.profiles (
   risk_factors jsonb not null default '[]'::jsonb,
   last_risk_check date,
   is_super_admin boolean default false,
+  must_change_password boolean not null default false,
   ai_data_consent_at timestamptz,
   created_at timestamptz not null default now(),
   last_active timestamptz
@@ -115,6 +116,7 @@ alter table public.profiles add column if not exists risk_factors jsonb not null
 alter table public.profiles add column if not exists last_risk_check date;
 alter table public.profiles add column if not exists is_super_admin boolean default false;
 alter table public.profiles add column if not exists ai_data_consent_at timestamptz;
+alter table public.profiles add column if not exists must_change_password boolean not null default false;
 
 do $$
 begin
@@ -132,6 +134,37 @@ create index if not exists profiles_role_status_idx on public.profiles(role, sta
 create index if not exists profiles_b2b_client_idx on public.profiles(b2b_client_id);
 create index if not exists profiles_last_active_idx on public.profiles(last_active desc);
 create unique index if not exists profiles_username_unique_idx on public.profiles(username) where username is not null;
+do $$
+begin
+  if exists (
+    select 1 from public.profiles
+    where username is not null
+    group by lower(username)
+    having count(*) > 1
+  ) then
+    raise exception 'Resolve duplicate usernames ignoring case before applying this migration';
+  end if;
+  if exists (
+    select 1 from public.profiles
+    where lower(btrim(username)) in ('admin','support','losslens','oloo','system')
+  ) then
+    raise exception 'Resolve reserved usernames before applying this migration';
+  end if;
+end $$;
+create unique index if not exists profiles_username_lower_unique_idx
+  on public.profiles(lower(username)) where username is not null;
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'profiles_username_not_reserved'
+      and conrelid = 'public.profiles'::regclass
+  ) then
+    alter table public.profiles add constraint profiles_username_not_reserved
+      check (username is null or lower(btrim(username)) not in
+        ('admin', 'support', 'losslens', 'oloo', 'system'));
+  end if;
+end $$;
 
 -- ---------------------------------------------------------------------------
 -- Recovery / CBT / chat
@@ -699,9 +732,11 @@ language sql stable security definer
 set search_path = pg_catalog, public, pg_temp
 as $$
   select coalesce(
-    (select p.status from public.profiles p where p.id = (select auth.uid())),
-    'active'
-  ) <> 'suspended';
+    (select p.status <> 'suspended'
+       and not p.must_change_password
+       from public.profiles p where p.id = (select auth.uid())),
+    true
+  );
 $$;
 
 create or replace function public.is_recently_authenticated()
@@ -849,6 +884,27 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
+create or replace function public.sync_profile_auth_contact()
+returns trigger
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+begin
+  if new.email is distinct from old.email then
+    update public.profiles set email = new.email where id = new.id;
+  end if;
+  if new.phone is distinct from old.phone then
+    update public.profiles set phone = new.phone where id = new.id;
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists sync_profile_auth_contact on auth.users;
+create trigger sync_profile_auth_contact
+  after update of email, phone on auth.users
+  for each row execute function public.sync_profile_auth_contact();
+
 create or replace function public.enforce_profile_privilege_updates()
 returns trigger
 language plpgsql
@@ -871,6 +927,7 @@ begin
     if old.role is distinct from new.role
       or old.status is distinct from new.status
       or old.is_super_admin is distinct from new.is_super_admin
+      or old.must_change_password is distinct from new.must_change_password
       or old.plan_type is distinct from new.plan_type
       or old.b2b_client_id is distinct from new.b2b_client_id
       or old.subscription_status is distinct from new.subscription_status
@@ -914,6 +971,7 @@ begin
       or old.risk_level is distinct from new.risk_level
       or old.circle_user_hash is distinct from new.circle_user_hash
       or old.is_super_admin is distinct from new.is_super_admin
+      or old.must_change_password is distinct from new.must_change_password
       or old.ai_data_consent_at is distinct from new.ai_data_consent_at)
      and not public.is_super_admin() then
     raise exception 'Only super_admin can change entitlements and privileged profile fields';

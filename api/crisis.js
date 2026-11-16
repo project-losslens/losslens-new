@@ -50,6 +50,25 @@ export default async function handler(request, response) {
     const user = await userResponse.json()
     if (!user?.id) return json(response, 401, { error: 'unauthorized' })
 
+    const profileResponse = await fetchWithTimeout(
+      `${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(user.id)}&select=status,must_change_password&limit=1`,
+      {
+        headers: {
+          apikey: serviceKey,
+          Authorization: 'Bearer ' + serviceKey,
+        },
+      },
+    )
+    if (!profileResponse.ok) {
+      console.error('Crisis account status lookup failed:', profileResponse.status)
+      return json(response, 503, { error: 'Account access could not be verified' })
+    }
+    const profiles = await profileResponse.json()
+    const profile = profiles?.[0]
+    if (!profile || profile.status === 'suspended' || profile.must_change_password) {
+      return json(response, 403, { error: 'Account access is restricted' })
+    }
+
     let body = request.body || {}
     if (typeof body === 'string') {
       try {

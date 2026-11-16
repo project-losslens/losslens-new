@@ -3,8 +3,10 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { BrandLoader } from '../../components/Brand'
 import UserAvatar from '../../components/UserAvatar'
+import { useI18n } from '../../i18n'
 
 export default function InsurerManagement() {
+  const { t } = useI18n()
   const [insurers, setInsurers] = useState([])
   const [profiles, setProfiles] = useState([])
   const [clients, setClients] = useState([])
@@ -22,7 +24,8 @@ export default function InsurerManagement() {
   const load = useCallback(async () => {
     const [insurerResult, profileResult, clientResult, partnershipResult] = await Promise.all([
       supabase.from('insurers').select('id, profile_id, name, license_number, contact_email, contact_phone, status, created_at').order('created_at', { ascending: false }),
-      supabase.from('profiles').select('id, full_name, username, email, avatar_url').eq('role', 'insurer').order('created_at', { ascending: false }),
+      supabase.from('profiles').select('id, full_name, username, email, avatar_url')
+        .in('role', ['user', 'insurer']).order('created_at', { ascending: false }),
       supabase.from('b2b_clients').select('id, company_name').order('company_name'),
       supabase.from('insurer_partnerships').select('id, insurer_id, b2b_client_id, cohort_name, per_member_fee, status').order('created_at', { ascending: false }),
     ])
@@ -81,14 +84,14 @@ export default function InsurerManagement() {
     setNotice('')
     try {
       const { data, error: inviteError } = await supabase.functions.invoke('send-invite', {
-        body: { action: 'invite', email: inviteEmail.trim(), role: 'insurer' },
+        body: { action: 'invite', email: inviteEmail.trim(), role: 'user' },
       })
       if (inviteError || data?.error) {
         console.error('Insurer invitation failed:', inviteError || data?.error)
         setError('Could not send the insurer invitation.')
       } else {
         setInviteEmail('')
-        setNotice('Invitation sent. The insurer account can be linked after the user accepts.')
+        setNotice(t('users.insurerInviteSent'))
         await load()
       }
     } catch (inviteError) {
@@ -155,7 +158,7 @@ export default function InsurerManagement() {
     <section className="portal-page">
       <p className="portal-page__eyebrow">Elevated access</p>
       <h2>Insurer management</h2>
-      <p>Create an insurer organization link for an existing account whose role has been provisioned as insurer.</p>
+      <p>{t('users.insurerOrgFirst')}</p>
       {error && <p className="portal-error" role="alert">{error} <button type="button" onClick={load}>Retry</button></p>}
       {notice && <p className="portal-notice" role="status">{notice}</p>}
       <form className="portal-card portal-form" onSubmit={inviteInsurer}>
@@ -166,7 +169,7 @@ export default function InsurerManagement() {
       <form className="portal-card portal-form" onSubmit={submit}>
         <label>Insurer account
           <select value={form.profile_id} onChange={(event) => setForm((current) => ({ ...current, profile_id: event.target.value }))} required>
-            <option value="">Select an insurer user</option>
+            <option value="">{t('users.selectInsurerAccount')}</option>
             {availableProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.full_name || profile.email || profile.id}</option>)}
           </select>
         </label>

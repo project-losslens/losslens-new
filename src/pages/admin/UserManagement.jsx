@@ -7,6 +7,8 @@ import NumberField from '../../components/NumberField'
 import { PLANS, PLAN_STATUSES } from '../../config/plans'
 import { useI18n } from '../../i18n'
 import { BrandLoader } from '../../components/Brand'
+import { useAuthProfile } from '../../context/AuthProfileContext'
+import UserAccountEditor from '../../components/admin/UserAccountEditor'
 
 const fmt = (d) => d ? new Date(d).toLocaleDateString('en-KE') : '—'
 
@@ -21,6 +23,7 @@ const TABS = [
 
 export default function UserManagement() {
   const { t } = useI18n()
+  const { user: actor, isSuperAdmin } = useAuthProfile()
   const [users, setUsers] = useState([])
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
@@ -32,10 +35,7 @@ export default function UserManagement() {
   const [expandedUser, setExpandedUser] = useState(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null)
   const [showSuspendConfirm, setShowSuspendConfirm] = useState(null)
-  const [showTherapistPromotion, setShowTherapistPromotion] = useState(null)
-  const [showTherapistRevert, setShowTherapistRevert] = useState(null)
-  const [showPasswordReset, setShowPasswordReset] = useState(null)
-  const [resetLoading, setResetLoading] = useState(false)
+  const [editingUser, setEditingUser] = useState(null)
   const [subModal, setSubModal] = useState(null) // { users: [...] }
   const [subForm, setSubForm] = useState({ plan: 'premium', status: 'active', planType: '', expiryDays: '', expiryDate: '', reason: '' })
   const [subHistory, setSubHistory] = useState([])
@@ -52,12 +52,15 @@ export default function UserManagement() {
 
       if (fetchError) throw fetchError
       setUsers(data || [])
-    } catch (err) {
+    } catch {
       setError('Failed to load users.')
     } finally { setLoading(false) }
   }, [])
 
-  useEffect(() => { fetchUsers() }, [fetchUsers])
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void fetchUsers() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [fetchUsers])
 
   const toggleStatus = async (userId, currentStatus) => {
     setActionLoading(userId)
@@ -67,7 +70,7 @@ export default function UserManagement() {
       if (statusError) throw statusError
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: newStatus } : u))
       toast.success(`User ${newStatus === 'suspended' ? 'suspended' : 'reactivated'}.`)
-    } catch (err) { toast.error('Failed to update.') }
+    } catch { toast.error('Failed to update.') }
     setActionLoading(null)
     setShowSuspendConfirm(null)
   }
@@ -81,58 +84,9 @@ export default function UserManagement() {
       if (delError) throw delError
       setUsers(prev => prev.filter(u => u.id !== userId))
       toast.success('User deleted permanently.')
-    } catch (err) { toast.error('Delete failed.') }
+    } catch { toast.error('Delete failed.') }
     setActionLoading(null)
     setShowDeleteConfirm(null)
-  }
-
-  const handleAdminResetPassword = async () => {
-    if (!showPasswordReset) return
-    setResetLoading(true)
-    try {
-      const { data, error: resetError } = await supabase.functions.invoke('send-invite', {
-        body: { action: 'reset-password', userId: showPasswordReset.id }
-      })
-      if (resetError || data?.error) throw new Error(data?.error || resetError?.message)
-      toast.success(`Reset link sent for ${showPasswordReset.full_name || 'user'}.`)
-      setShowPasswordReset(null)
-    } catch (err) {
-      console.error('Password reset link failed:', err)
-      toast.error('Failed: ' + (err.message || 'Unknown error'))
-    }
-    setResetLoading(false)
-  }
-
-  const promoteToTherapist = async (userId) => {
-    setActionLoading(userId)
-    try {
-      const { error: promotionError } = await supabase.rpc('admin_promote_therapist', { p_user_id: userId })
-      if (promotionError) throw promotionError
-      setUsers(prev => prev.map(user => user.id === userId ? { ...user, role: 'therapist' } : user))
-      toast.success(t('users.promoteSuccess'))
-      setShowTherapistPromotion(null)
-    } catch (promotionError) {
-      console.error('Therapist promotion failed:', promotionError)
-      toast.error(t('users.promoteError'))
-    } finally {
-      setActionLoading(null)
-    }
-  }
-
-  const revertTherapistToUser = async (userId) => {
-    setActionLoading(userId)
-    try {
-      const { error: revertError } = await supabase.rpc('admin_revert_therapist', { p_user_id: userId })
-      if (revertError) throw revertError
-      setUsers(prev => prev.map(user => user.id === userId ? { ...user, role: 'user' } : user))
-      toast.success(t('users.revertSuccess'))
-      setShowTherapistRevert(null)
-    } catch (revertError) {
-      console.error('Therapist role revert failed:', revertError)
-      toast.error(t('users.revertError'))
-    } finally {
-      setActionLoading(null)
-    }
   }
 
   const openSubModal = async (userOrUsers) => {
@@ -242,6 +196,7 @@ export default function UserManagement() {
 
   const highRiskCount = users.filter(u => u.risk_level === 'high').length
   const suspendedCount = users.filter(u => u.status === 'suspended').length
+  const activeSuperAdminCount = users.filter(u => u.role === 'super_admin' && u.status === 'active').length
 
   const riskBadge = (risk) => {
     if (risk === 'high') return { bg: 'rgba(255,255,255,0.08)', color: 'var(--text)', border: 'var(--text)', label: 'High' }
@@ -368,11 +323,9 @@ export default function UserManagement() {
                               </span>
                               <span style={{ background: risk.bg, color: risk.color, border: '1px solid ' + risk.border, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{risk.label} Risk</span>
                               <span style={{ background: plan.bg, color: plan.color, border: '1px solid ' + plan.border, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{plan.label}</span>
-                              {u.role !== 'user' && (
-                                <span style={{ background: 'rgba(45,212,191,0.15)', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>
-                                  {{ super_admin: 'Super Admin', admin: 'Admin', therapist: 'Therapist', insurer: 'Insurer' }[u.role] || u.role}
-                                </span>
-                              )}
+                              <span style={{ background: 'rgba(45,212,191,0.15)', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>
+                                {t(({ super_admin: 'users.roleSuperAdmin', admin: 'users.roleAdmin', therapist: 'users.roleTherapist', insurer: 'users.roleInsurer', user: 'users.roleUser' })[u.role] || 'users.roleUser')}
+                              </span>
                               {isSuspended && (
                                 <span style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text)', border: '1px solid var(--text)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>Suspended</span>
                               )}
@@ -412,12 +365,12 @@ export default function UserManagement() {
                               style={btn('transparent', isSuspended ? 'var(--primary)' : 'var(--info)', isSuspended ? 'var(--primary)' : 'var(--info)')}>
                               {actionLoading === u.id ? '...' : isSuspended ? 'Reactivate' : 'Suspend'}
                             </button>
-                            <button onClick={() => setShowPasswordReset(u)}
-                              style={btn('transparent', 'var(--primary)', 'var(--primary)')}>Send Reset Link</button>
-                            {u.role === 'user' && <button onClick={() => setShowTherapistPromotion(u)} disabled={actionLoading === u.id}
-                              style={btn('transparent', 'var(--info)', 'var(--info)')}>{t('users.promoteTherapist')}</button>}
-                            {u.role === 'therapist' && <button onClick={() => setShowTherapistRevert(u)} disabled={actionLoading === u.id}
-                              style={btn('transparent', 'var(--info)', 'var(--info)')}>{t('users.revertTherapist')}</button>}
+                            {isSuperAdmin && (
+                              <button type="button" onClick={() => setEditingUser(u)}
+                                style={btn('transparent', 'var(--primary)', 'var(--primary)')}>
+                                {t('users.editUser')}
+                              </button>
+                            )}
                             <button onClick={() => setShowDeleteConfirm(u)} style={btn('transparent', 'var(--text)', 'rgba(255,255,255,0.08)')}>Delete</button>
                           </div>
                         )}
@@ -532,42 +485,6 @@ export default function UserManagement() {
         </div>
       )}
 
-      {showTherapistPromotion && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowTherapistPromotion(null)} />
-          <section role="dialog" aria-modal="true" aria-labelledby="therapist-promotion-title" style={{ position: 'relative', background: 'var(--surface)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--info)', maxWidth: '420px', width: '100%' }}>
-            <h2 id="therapist-promotion-title">{t('users.promoteTitle')}</h2>
-            <p style={{ color: 'var(--text-muted)' }}>
-              {t('users.promoteMessage', { name: showTherapistPromotion.full_name || showTherapistPromotion.username || t('users.thisAccount') })}
-            </p>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
-              <button type="button" onClick={() => setShowTherapistPromotion(null)} style={{ flex: 1 }} className="btn-secondary">Cancel</button>
-              <button type="button" onClick={() => promoteToTherapist(showTherapistPromotion.id)} disabled={actionLoading === showTherapistPromotion.id} style={{ flex: 1 }} className="btn-primary">
-                {actionLoading === showTherapistPromotion.id ? t('users.roleUpdating') : t('users.promoteConfirm')}
-              </button>
-            </div>
-          </section>
-        </div>
-      )}
-
-      {showTherapistRevert && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowTherapistRevert(null)} />
-          <section role="dialog" aria-modal="true" aria-labelledby="therapist-revert-title" style={{ position: 'relative', background: 'var(--surface)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--info)', maxWidth: '420px', width: '100%' }}>
-            <h2 id="therapist-revert-title">{t('users.revertTitle')}</h2>
-            <p style={{ color: 'var(--text-muted)' }}>
-              {t('users.revertMessage', { name: showTherapistRevert.full_name || showTherapistRevert.username || t('users.thisAccount') })}
-            </p>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
-              <button type="button" onClick={() => setShowTherapistRevert(null)} style={{ flex: 1 }} className="btn-secondary">Cancel</button>
-              <button type="button" onClick={() => revertTherapistToUser(showTherapistRevert.id)} disabled={actionLoading === showTherapistRevert.id} style={{ flex: 1 }} className="btn-primary">
-                {actionLoading === showTherapistRevert.id ? t('users.roleUpdating') : t('users.revertConfirm')}
-              </button>
-            </div>
-          </section>
-        </div>
-      )}
-
       {/* Delete Modal */}
       {showDeleteConfirm && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
@@ -582,28 +499,6 @@ export default function UserManagement() {
               <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
               <button onClick={() => deleteUser(showDeleteConfirm.id)} disabled={actionLoading === showDeleteConfirm.id} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
                 {actionLoading === showDeleteConfirm.id ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Password reset link confirmation */}
-      {showPasswordReset && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-            <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowPasswordReset(null)} />
-          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--primary)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
-            <AppIcon name="shield" size={36} style={{ display: 'block', margin: '0 auto 12px' }} />
-            <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 4px' }}>Send Password Reset Link</h3>
-            <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '16px' }}>
-              For <strong style={{ color: 'var(--primary)' }}>{showPasswordReset.full_name || showPasswordReset.username || 'User'}</strong>
-              {showPasswordReset.email && <span style={{ display: 'block', color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '4px' }}>{showPasswordReset.email}</span>}
-            </p>
-            <p style={{ color: 'var(--text-muted)', fontSize: '12px' }}>The user will receive a secure reset link by email.</p>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowPasswordReset(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
-              <button onClick={handleAdminResetPassword} disabled={resetLoading} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', fontSize: '13px', fontWeight: 600, cursor: resetLoading ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-body)' }}>
-                {resetLoading ? 'Sending...' : 'Send reset link'}
               </button>
             </div>
           </div>
@@ -661,6 +556,18 @@ export default function UserManagement() {
             </div>
           </div>
         </div>
+      )}
+
+      {editingUser && isSuperAdmin && (
+        <UserAccountEditor
+          user={editingUser}
+          actorId={actor?.id}
+          isLastActiveSuperAdmin={editingUser.role === 'super_admin'
+            && editingUser.status === 'active'
+            && activeSuperAdminCount <= 1}
+          onClose={() => setEditingUser(null)}
+          onUpdated={fetchUsers}
+        />
       )}
 
       <style>{'@media (max-width: 768px) { .main-content { margin-left: 0 !important; } }'}</style>

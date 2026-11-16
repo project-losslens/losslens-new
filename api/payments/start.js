@@ -1,3 +1,5 @@
+/* global process */
+
 import { paymentsMode, startPremiumPayment } from '../_lib/payments.js'
 import { createClient } from '@supabase/supabase-js'
 
@@ -23,6 +25,20 @@ export default async function handler(req, res) {
   const { data: { user }, error: authError } = await adminClient().auth.getUser(token)
   if (authError || !user) return json(res, 401, { error: 'Unauthorized' })
 
+  const db = adminClient()
+  const { data: profile, error: profileError } = await db
+    .from('profiles')
+    .select('status, must_change_password')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (profileError) {
+    console.error('payments/start account status lookup failed', profileError)
+    return json(res, 503, { error: 'Account access could not be verified' })
+  }
+  if (!profile || profile.status === 'suspended' || profile.must_change_password) {
+    return json(res, 403, { error: 'Account access is restricted' })
+  }
+
   const { phone, plan = 'premium' } = req.body || {}
   if (plan !== 'premium') return json(res, 400, { error: 'Only Premium is self-serve' })
 
@@ -39,7 +55,6 @@ export default async function handler(req, res) {
     })
     if (!result.started) return json(res, 200, { mode, started: false })
 
-    const db = adminClient()
     const simulated = Boolean(result.simulated)
     const { data: payment, error } = await db.from('payments').insert({
       user_id: user.id,

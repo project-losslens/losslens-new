@@ -18,6 +18,7 @@ const PUBLIC_PATHS = [
   '/signup',
   '/forgot-password',
   '/reset-password',
+  '/change-temporary-password',
   '/pricing',
   '/family-join',
   '/protection',

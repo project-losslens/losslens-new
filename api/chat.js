@@ -69,7 +69,18 @@ async function getAuthenticatedUser(request) {
 
   if (!response.ok) return null
   const user = await response.json()
-  return user?.id ? { user, token, supabaseUrl, supabaseKey } : null
+  if (!user?.id) return null
+  const profileResponse = await fetchWithTimeout(`${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(user.id)}&select=status,must_change_password&limit=1`, {
+    headers: {
+      apikey: supabaseKey,
+      Authorization: 'Bearer ' + token,
+    },
+  }, REQUEST_TIMEOUT_MS)
+  if (!profileResponse.ok) return null
+  const profiles = await profileResponse.json()
+  const profile = profiles?.[0]
+  if (!profile || profile.status === 'suspended' || profile.must_change_password) return null
+  return { user, token, supabaseUrl, supabaseKey }
 }
 
 async function fetchUserContext(auth) {

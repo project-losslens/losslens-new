@@ -10,7 +10,7 @@ import { BrandLoader } from './Brand'
 
 export function RequireAuth({ role }) {
   const location = useLocation()
-  const { authStatus, isAdmin, isSuperAdmin, role: currentRole, status, retryProfile } = useAuthProfile()
+  const { authStatus, isAdmin, isSuperAdmin, role: currentRole, status, mustChangePassword, retryProfile } = useAuthProfile()
 
   useEffect(() => {
     if (authStatus === 'ready' && status === 'suspended') {
@@ -34,6 +34,9 @@ export function RequireAuth({ role }) {
   }
 
   const currentPath = `${location.pathname}${location.search}${location.hash}`
+  if (authStatus === 'ready' && mustChangePassword && location.pathname !== '/change-temporary-password') {
+    return <Navigate to="/change-temporary-password" replace />
+  }
   const decision = requireAuthDecision({ authStatus, role, currentRole, isAdmin, isSuperAdmin, status, path: currentPath })
   if (decision === 'loading') return <BrandLoader />
   if (decision === 'no-session') {

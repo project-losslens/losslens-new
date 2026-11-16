@@ -55,6 +55,25 @@ begin
   end loop;
 end $$;
 
+-- A former member promoted to staff must not retain direct RLS access to
+-- member recovery content. The restrictive policies preserve owner scoping
+-- while requiring the live profiles.role value to remain 'user'.
+do $$
+declare t text;
+begin
+  foreach t in array array[
+    'diary_entries','cbt_progress','chat_history',
+    'mirror_recordings','precious_pacts'
+  ] loop
+    execute format('drop policy if exists losslens_recovery_role_user on public.%I', t);
+    execute format(
+      'create policy losslens_recovery_role_user on public.%I as restrictive for all to authenticated '
+      'using (public.current_user_role() = ''user'') with check (public.current_user_role() = ''user'')',
+      t
+    );
+  end loop;
+end $$;
+
 -- ---------------------------------------------------------------------------
 -- profiles
 -- ---------------------------------------------------------------------------

@@ -3211,3 +3211,470 @@ create index if not exists account_deletion_log_user_idx on public.account_delet
 create index if not exists protection_events_membership_idx on public.protection_events (membership_id, created_at desc);
 create index if not exists crisis_alerts_user_idx on public.crisis_alerts (user_id, created_at desc);
 create index if not exists supporter_feedback_user_idx on public.supporter_feedback (user_id, created_at desc);
+
+-- Super-admin account lifecycle controls. These remain in script 08 so all
+-- portal and Protection tables referenced below have already been created.
+create table if not exists public.admin_user_update_attempts (
+  id bigint generated always as identity primary key,
+  actor_id uuid not null,
+  action text not null,
+  attempted_at timestamptz not null default now()
+);
+create index if not exists admin_user_update_attempts_actor_time_idx
+  on public.admin_user_update_attempts (actor_id, attempted_at desc);
+alter table public.admin_user_update_attempts enable row level security;
+revoke all on public.admin_user_update_attempts from public, anon, authenticated;
+
+create or replace function public.admin_consume_user_update_rate_limit(p_action text)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_actor uuid := auth.uid();
+  v_count integer;
+begin
+  if v_actor is null or not public.is_active_user() or not public.is_super_admin()
+     or p_action not in ('profile','set-role') then
+    raise exception 'Active super-admin access required';
+  end if;
+  perform pg_advisory_xact_lock(hashtext(v_actor::text), hashtext(p_action));
+  delete from public.admin_user_update_attempts
+   where attempted_at < now() - interval '1 day';
+  select count(*) into v_count
+    from public.admin_user_update_attempts
+   where actor_id = v_actor and action = p_action
+     and attempted_at >= now() - interval '15 minutes';
+  if v_count >= 5 then raise exception 'Too many account-management attempts; try again later'; end if;
+  insert into public.admin_user_update_attempts (actor_id, action) values (v_actor, p_action);
+end;
+$$;
+revoke execute on function public.admin_consume_user_update_rate_limit(text)
+  from public, anon;
+grant execute on function public.admin_consume_user_update_rate_limit(text)
+  to authenticated;
+
+create table if not exists public.admin_step_up_authorizations (
+  id uuid primary key default gen_random_uuid(),
+  actor_id uuid not null,
+  target_id uuid not null,
+  action text not null,
+  expires_at timestamptz not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists admin_step_up_authorizations_expiry_idx
+  on public.admin_step_up_authorizations (expires_at);
+alter table public.admin_step_up_authorizations enable row level security;
+revoke all on public.admin_step_up_authorizations from public, anon, authenticated;
+
+create or replace function public.admin_authorize_user_update(
+  p_actor_id uuid,
+  p_target_id uuid,
+  p_action text
+)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+begin
+  if coalesce(auth.role(), '') <> 'service_role'
+     or p_actor_id is null or p_target_id is null
+     or p_action not in ('profile-update','demote-super-admin','promote-super-admin') then
+    raise exception 'Service role required';
+  end if;
+  insert into public.admin_step_up_authorizations (actor_id, target_id, action, expires_at)
+  values (p_actor_id, p_target_id, p_action, now() + interval '2 minutes');
+end;
+$$;
+revoke execute on function public.admin_authorize_user_update(uuid,uuid,text)
+  from public, anon, authenticated;
+grant execute on function public.admin_authorize_user_update(uuid,uuid,text)
+  to service_role;
+
+create or replace function public.enforce_insurer_profile_link()
+returns trigger
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+begin
+  if new.role = 'insurer' and not exists (
+    select 1 from public.insurers i
+    where i.profile_id = new.id and i.status = 'active'
+  ) then
+    raise exception 'An active insurer organisation must be linked before assigning the insurer role';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists enforce_insurer_profile_link on public.profiles;
+create trigger enforce_insurer_profile_link
+  before insert or update of role on public.profiles
+  for each row execute function public.enforce_insurer_profile_link();
+
+create or replace function public.admin_check_user_update_rate_limit(
+  p_actor_id uuid,
+  p_action text
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_count integer;
+begin
+  if coalesce(auth.role(), '') <> 'service_role' or p_actor_id is null
+     or p_action not in ('set-email','set-phone','set-profile','send-reset-link','set-temporary-password','set-role','set-role-step-up') then
+    raise exception 'Service role required';
+  end if;
+  perform pg_advisory_xact_lock(hashtext(p_actor_id::text), hashtext(p_action));
+  delete from public.admin_user_update_attempts
+   where attempted_at < now() - interval '1 day';
+  select count(*) into v_count
+    from public.admin_user_update_attempts
+   where actor_id = p_actor_id and action = p_action
+     and attempted_at >= now() - interval '15 minutes';
+  if v_count >= 5 then return false; end if;
+  insert into public.admin_user_update_attempts (actor_id, action) values (p_actor_id, p_action);
+  return true;
+end;
+$$;
+revoke execute on function public.admin_check_user_update_rate_limit(uuid,text)
+  from public, anon, authenticated;
+grant execute on function public.admin_check_user_update_rate_limit(uuid,text) to service_role;
+
+create or replace function public.admin_revoke_user_sessions(p_user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog, public, auth
+as $$
+begin
+  if coalesce(auth.role(), '') <> 'service_role' and current_user <> 'postgres' then
+    raise exception 'Service role required';
+  end if;
+  delete from auth.sessions where user_id = p_user_id;
+end;
+$$;
+revoke execute on function public.admin_revoke_user_sessions(uuid)
+  from public, anon, authenticated;
+grant execute on function public.admin_revoke_user_sessions(uuid) to service_role;
+
+create or replace function public.admin_set_role(
+  p_user_id uuid,
+  p_new_role text,
+  p_reason text,
+  p_insurer_id uuid default null,
+  p_acknowledge_open_work boolean default false,
+  p_reassign_to uuid default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog, public, auth
+as $$
+declare
+  v_actor uuid := auth.uid();
+  v_old_role text;
+  v_target_status text;
+  v_previous_contact uuid;
+  v_previous_role text;
+  v_open_work integer;
+  v_authz_id uuid;
+  v_notification_title text;
+begin
+  if v_actor is null or not public.is_active_user() or not public.is_super_admin() then
+    raise exception 'Active super-admin access required';
+  end if;
+  perform public.admin_consume_user_update_rate_limit('set-role');
+  if p_user_id is null or p_user_id = v_actor then
+    raise exception 'A super-admin cannot change their own role';
+  end if;
+  if p_new_role not in ('user','admin','therapist','insurer','super_admin') then
+    raise exception 'Invalid role';
+  end if;
+  if length(btrim(coalesce(p_reason,''))) < 5 or length(p_reason) > 500 then
+    raise exception 'A reason of 5 to 500 characters is required';
+  end if;
+
+  select role, status into v_old_role, v_target_status
+    from public.profiles where id = p_user_id for update;
+  if not found then raise exception 'Target account not found'; end if;
+  if v_old_role = p_new_role then raise exception 'Account already has this role'; end if;
+
+  if v_old_role = 'super_admin' and v_new_role <> 'super_admin' then
+    delete from public.admin_step_up_authorizations
+     where actor_id = v_actor and target_id = p_user_id
+       and action = 'demote-super-admin' and expires_at > now()
+    returning id into v_authz_id;
+    if v_authz_id is null then
+      raise exception 'Step-up authentication required to demote another super-admin';
+    end if;
+  elsif p_new_role = 'super_admin' and v_old_role <> 'super_admin' then
+    delete from public.admin_step_up_authorizations
+     where actor_id = v_actor and target_id = p_user_id
+       and action = 'promote-super-admin' and expires_at > now()
+    returning id into v_authz_id;
+    if v_authz_id is null then
+      raise exception 'Step-up authentication required to promote a super-admin';
+    end if;
+  end if;
+
+  if v_old_role = 'user' and p_new_role in ('admin','super_admin') then
+    if exists (
+      select 1 from public.protection_policies pol
+      join public.protection_memberships m on m.id = pol.membership_id
+      where m.user_id = p_user_id
+        and pol.status in ('issued','pending_payment','active','grace')
+    ) then raise exception 'Account with an active Protection policy cannot become staff'; end if;
+    if exists (
+      select 1 from public.protection_claims c
+      join public.protection_memberships m on m.id = c.membership_id
+      where m.user_id = p_user_id
+        and c.status in ('draft','submitted','under_review','info_requested','approved','partially_approved','disputed')
+    ) then raise exception 'Account with an open claim cannot become staff'; end if;
+    if exists (
+      select 1 from public.provider_vouchers v
+      where v.user_id = p_user_id and v.status in ('pending','assigned','accepted')
+    ) then raise exception 'Account with an open therapist voucher cannot become staff'; end if;
+    if exists (
+      select 1 from public.pre_auth_vouchers v
+      where v.user_id = p_user_id and v.status in ('pending','assigned','accepted')
+    ) then raise exception 'Account with an open pre-authorisation voucher cannot become staff'; end if;
+    if exists (
+      select 1 from public.provider_claims c
+      join public.provider_vouchers v on v.id = c.voucher_id
+      where v.user_id = p_user_id
+        and (c.status in ('submitted','approved','disputed')
+             or (c.status = 'paid' and c.insurer_reimbursed_at is null))
+    ) then raise exception 'Account with an unsettled therapist claim cannot become staff'; end if;
+  end if;
+
+  if v_old_role = 'therapist' and p_new_role <> 'therapist' then
+    select count(*) into v_open_work
+      from public.provider_vouchers
+     where therapist_id = p_user_id and status in ('pending','assigned','accepted');
+    select v_open_work + count(*) into v_open_work
+      from public.provider_claims
+     where therapist_id = p_user_id
+       and (status in ('submitted','approved','disputed')
+            or (status = 'paid' and insurer_reimbursed_at is null));
+    select v_open_work + count(*) into v_open_work
+      from public.pre_auth_vouchers
+     where therapist_id = p_user_id and status in ('pending','assigned','accepted');
+    if v_open_work > 0 then
+      if not p_acknowledge_open_work or p_reassign_to is null
+         or p_reassign_to = p_user_id
+         or not exists (
+           select 1 from public.profiles p
+           join public.therapists t on t.id = p.id
+           where p.id = p_reassign_to and p.role = 'therapist'
+             and p.status = 'active' and t.status = 'active'
+         ) then
+        raise exception 'Open therapist vouchers or unsettled claims require acknowledgement and an active replacement therapist';
+      end if;
+      update public.provider_claims c set therapist_id = p_reassign_to
+       where c.therapist_id = p_user_id
+         and (c.status in ('submitted','approved','disputed')
+              or (c.status = 'paid' and c.insurer_reimbursed_at is null));
+      update public.provider_vouchers v set therapist_id = p_reassign_to, updated_at = now()
+       where v.therapist_id = p_user_id and v.status in ('pending','assigned','accepted');
+      update public.pre_auth_vouchers v set therapist_id = p_reassign_to, updated_at = now()
+       where v.therapist_id = p_user_id and v.status in ('pending','assigned','accepted');
+    end if;
+    update public.therapists
+       set status = 'suspended', verified_at = null, verified_by = null
+     where id = p_user_id;
+  end if;
+
+  if p_new_role = 'insurer' then
+    if p_insurer_id is null then raise exception 'Select an approved insurer organisation'; end if;
+    if exists (
+      select 1 from public.insurers
+       where profile_id = p_user_id and status = 'active' and id <> p_insurer_id
+    ) then
+      raise exception 'Target already represents another active insurer organisation';
+    end if;
+    select profile_id into v_previous_contact
+      from public.insurers where id = p_insurer_id and status = 'active' for update;
+    if not found then raise exception 'Selected insurer organisation is not active'; end if;
+    if v_previous_contact <> p_user_id then
+      select role into v_previous_role from public.profiles
+       where id = v_previous_contact for update;
+      if v_previous_role is distinct from 'insurer' then
+        raise exception 'Selected insurer contact is inconsistent; resolve it before reassignment';
+      end if;
+      if exists (
+        select 1 from public.insurers
+         where profile_id = v_previous_contact and status = 'active' and id <> p_insurer_id
+      ) then
+        raise exception 'Selected insurer contact also represents another active organisation';
+      end if;
+      update public.insurers set profile_id = p_user_id where id = p_insurer_id;
+      update public.profiles set role = 'user', is_super_admin = false
+       where id = v_previous_contact;
+      insert into public.audit_logs (actor_id, action, target_table, target_id, metadata)
+      values (v_actor, 'admin_role_changed', 'profiles', v_previous_contact::text,
+        jsonb_build_object('old_role','insurer','new_role','user','reason',btrim(p_reason),
+                           'insurer_id',p_insurer_id,'contact_reassigned_to',p_user_id));
+      perform public.admin_revoke_user_sessions(p_user_id => v_previous_contact);
+    end if;
+  elsif v_old_role = 'insurer' and exists (
+    select 1 from public.insurers where profile_id = p_user_id and status = 'active'
+  ) then
+    raise exception 'Reassign this active insurer contact before changing its role';
+  end if;
+
+  if p_new_role = 'therapist' then
+    insert into public.therapists (id, status, verified_at, verified_by)
+    values (p_user_id, 'pending', null, null)
+    on conflict (id) do update
+      set status = 'pending', verified_at = null, verified_by = null;
+  end if;
+
+  update public.profiles
+     set role = p_new_role, is_super_admin = (p_new_role = 'super_admin')
+   where id = p_user_id;
+  insert into public.audit_logs (actor_id, action, target_table, target_id, metadata)
+  values (v_actor, 'admin_role_changed', 'profiles', p_user_id::text,
+    jsonb_build_object('old_role',v_old_role,'new_role',p_new_role,'reason',btrim(p_reason),
+                       'insurer_id',p_insurer_id,'open_work_reassigned',v_open_work > 0,
+                       'reassigned_to',case when v_open_work > 0 then p_reassign_to end));
+  perform public.admin_revoke_user_sessions(p_user_id => p_user_id);
+
+  if v_old_role = 'super_admin' and p_new_role <> 'super_admin' then
+    v_notification_title := 'notifications.superAdminRoleChangedTitle';
+    insert into public.notifications (user_id, title, message, type)
+    select id, v_notification_title,
+      'notifications.superAdminRoleChangedMessage',
+      'security'
+    from public.profiles
+    where role = 'super_admin' and status = 'active' and id <> p_user_id;
+  elsif p_new_role = 'super_admin' and v_old_role <> 'super_admin' then
+    insert into public.notifications (user_id, title, message, type)
+    select id, 'notifications.superAdminRoleChangedTitle',
+      'notifications.superAdminRoleChangedMessage',
+      'security'
+    from public.profiles
+    where role = 'super_admin' and status = 'active' and id <> p_user_id;
+  end if;
+end;
+$$;
+revoke execute on function public.admin_set_role(uuid,text,text,uuid,boolean,uuid)
+  from public, anon;
+grant execute on function public.admin_set_role(uuid,text,text,uuid,boolean,uuid)
+  to authenticated;
+
+create or replace function public.admin_update_profile_fields(
+  p_user_id uuid,
+  p_username text,
+  p_full_name text,
+  p_phone text,
+  p_reason text
+)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog, public, auth
+as $$
+declare
+  v_actor uuid := auth.uid();
+  v_old_username text;
+  v_old_name text;
+  v_old_phone text;
+  v_new_username text;
+  v_new_phone text;
+  v_phone_input text;
+  v_authz_id uuid;
+begin
+  if v_actor is null or not public.is_active_user() or not public.is_super_admin() then
+    raise exception 'Active super-admin access required';
+  end if;
+  perform public.admin_consume_user_update_rate_limit('profile');
+  if p_user_id is null or length(btrim(coalesce(p_reason,''))) < 5 or length(p_reason) > 500 then
+    raise exception 'Target account and a reason of 5 to 500 characters are required';
+  end if;
+  select username, full_name, phone into v_old_username, v_old_name, v_old_phone
+    from public.profiles where id = p_user_id for update;
+  if not found then raise exception 'Target account not found'; end if;
+  delete from public.admin_step_up_authorizations
+   where actor_id = v_actor and target_id = p_user_id
+     and action = 'profile-update' and expires_at > now()
+  returning id into v_authz_id;
+  if v_authz_id is null then raise exception 'Step-up authentication required'; end if;
+  if p_phone is not null and (p_user_id = v_actor or exists (
+    select 1 from public.profiles where id = p_user_id and role = 'super_admin'
+  )) then
+    raise exception 'Phone cannot be changed for yourself or another super-admin';
+  end if;
+
+  if p_username is not null then
+    v_new_username := nullif(lower(btrim(p_username)), '');
+    if v_new_username is not null and
+       (length(v_new_username) < 3 or length(v_new_username) > 30
+        or v_new_username !~ '^[a-z0-9_]+$'
+        or v_new_username in ('admin','support','losslens','oloo','system')) then
+      raise exception 'Username must be 3-30 letters, numbers, or underscores and not reserved';
+    end if;
+  else v_new_username := v_old_username;
+  end if;
+
+  if p_phone is not null then
+    v_phone_input := regexp_replace(btrim(p_phone), '[[:space:]()-]', '', 'g');
+    if v_phone_input = '' then
+      v_new_phone := null;
+    elsif v_phone_input ~ '^0[17][0-9]{8}$' then
+      v_new_phone := '+254' || substr(v_phone_input, 2);
+    elsif v_phone_input ~ '^254[17][0-9]{8}$' then
+      v_new_phone := '+' || v_phone_input;
+    elsif v_phone_input ~ '^\+[1-9][0-9]{7,14}$' then
+      v_new_phone := v_phone_input;
+    else raise exception 'Phone must be a valid E.164 number (Kenyan numbers may start with 07, 01, or 254)';
+    end if;
+  else v_new_phone := v_old_phone;
+  end if;
+
+  if p_phone is not null and v_new_phone is distinct from v_old_phone then
+    update auth.users set phone = v_new_phone, phone_confirmed_at = null
+     where id = p_user_id;
+    if not found then raise exception 'Auth account not found'; end if;
+  end if;
+  update public.profiles set
+    username = case when p_username is null then username else v_new_username end,
+    full_name = case when p_full_name is null then full_name else nullif(btrim(p_full_name), '') end,
+    phone = case when p_phone is null then phone else v_new_phone end
+  where id = p_user_id;
+
+  insert into public.audit_logs (actor_id, action, target_table, target_id, metadata)
+  values (v_actor, 'admin_profile_updated', 'profiles', p_user_id::text,
+    jsonb_build_object(
+      'reason',btrim(p_reason),
+      'username',case when p_username is null then null else jsonb_build_object(
+        'old',case when v_old_username is null then null else left(v_old_username,1)||'***' end,
+        'new',case when v_new_username is null then null else left(v_new_username,1)||'***' end) end,
+      'full_name',case when p_full_name is null then null else jsonb_build_object(
+        'old',case when v_old_name is null then null else left(v_old_name,1)||'***' end,
+        'new',case when nullif(btrim(p_full_name),'') is null then null else left(btrim(p_full_name),1)||'***' end) end,
+      'phone',case when p_phone is null then null else jsonb_build_object(
+        'old',case when v_old_phone is null then null else left(v_old_phone,4)||'****'||right(v_old_phone,3) end,
+        'new',case when v_new_phone is null then null else left(v_new_phone,4)||'****'||right(v_new_phone,3) end) end
+    ));
+  if p_phone is not null and v_new_phone is distinct from v_old_phone then
+    perform public.admin_revoke_user_sessions(p_user_id => p_user_id);
+  end if;
+end;
+$$;
+revoke execute on function public.admin_update_profile_fields(uuid,text,text,text,text)
+  from public, anon;
+grant execute on function public.admin_update_profile_fields(uuid,text,text,text,text)
+  to authenticated;
+
+revoke execute on function public.admin_promote_therapist(uuid)
+  from public, anon, authenticated;
+revoke execute on function public.admin_revert_therapist(uuid)
+  from public, anon, authenticated;
+
+notify pgrst, 'reload schema';

@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, subscribeToNotifications } from '../lib/notifications'
 import { supabase } from '../lib/supabase'
 import AppIcon from './AppIcon'
+import { useI18n } from '../i18n'
 
 function NotificationBell() {
   const navigate = useNavigate()
+  const { t } = useI18n()
   const [notifications, setNotifications] = useState([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [open, setOpen] = useState(false)
@@ -187,7 +189,7 @@ function NotificationBell() {
                     </span>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 500, margin: '0 0 2px' }}>
-                        {n.title}
+                        {n.title.startsWith('notifications.') ? t(n.title) : n.title}
                         {!n.read && (
                           <span
                             aria-label="Unread"
@@ -199,7 +201,7 @@ function NotificationBell() {
                         )}
                       </p>
                       <p style={{ color: '#7DBDEE', fontSize: '12px', margin: '0 0 4px', lineHeight: '1.4' }}>
-                        {n.message}
+                        {n.message.startsWith('notifications.') ? t(n.message) : n.message}
                       </p>
                       <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>
                         {formatTime(n.created_at)}

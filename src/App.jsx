@@ -11,6 +11,7 @@ const Login = lazy(() => import('./pages/public/Login'))
 const Signup = lazy(() => import('./pages/public/Signup'))
 const ForgotPassword = lazy(() => import('./pages/public/ForgotPassword'))
 const ResetPassword = lazy(() => import('./pages/public/ResetPassword'))
+const ChangeTemporaryPassword = lazy(() => import('./pages/public/ChangeTemporaryPassword'))
 const Pricing = lazy(() => import('./pages/public/Pricing'))
 const FamilyJoin = lazy(() => import('./pages/public/FamilyJoin'))
 const Protection = lazy(() => import('./pages/public/Protection'))
@@ -91,6 +92,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
         </Route>
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/change-temporary-password" element={<ChangeTemporaryPassword />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/family-join" element={<FamilyJoin />} />
         <Route path="/protection" element={<Protection />} />

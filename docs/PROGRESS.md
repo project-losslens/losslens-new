@@ -226,3 +226,93 @@ SQL files exist or are required.
 - Supporter tokens now stored as md5 hashes only (token_hash column);
   raw token returned once at create/renew. Both create_supporter_invitation
   definitions updated (scripts 03, 06); legacy column backfilled+dropped.
+
+## Super-admin account management (2026-11-16)
+
+**Verification labels:** Code-read = inspected source only; Applied to
+disposable Supabase = executed on a disposable project; Not verified = no
+runtime/database execution. This work is code-read only; nothing was applied
+to a Supabase project.
+
+- [x] Step 0, code-read: authorization roles come from live `profiles.role`
+  and RLS/RPC queries, not role claims in JWT metadata. Therapist rows use
+  `pending | active | suspended`; insurer accounts use a required, unique
+  `insurers.profile_id` (one user per insurer row and one insurer row per user)
+  and `insurers.status`
+  (`active | suspended`). Auth email/phone and profile email/phone are stored
+  separately; signup copies contact data into `profiles`. `profiles.username`
+  has exact-case uniqueness; this change adds case-insensitive uniqueness and
+  reserves admin/support/losslens/oloo/system. Supabase Auth email/phone
+  uniqueness and production values were not verified.
+- [x] Script 01: adds `must_change_password`, auth-to-profile email/phone
+  synchronization, case-insensitive username uniqueness and reserved-name
+  protection. Existing case-insensitive duplicates or reserved usernames stop
+  migration with an explicit remediation error.
+- [x] Script 02: gates diary, CBT, chat, mirror, and pact RLS to member role;
+  changed-role staff cannot access these own-account recovery tables.
+- [x] Script 08: adds `admin_set_role`, `admin_update_profile_fields`,
+  step-up authorization, per-actor rate limiting, service-only session
+  revocation and active-insurer-role consistency. Protects last active
+  super-admin under the existing advisory-lock trigger. Super-admin
+  promotions and peer demotions require password step-up; peer role changes
+  notify other super-admins. Therapist work (provider/pre-auth vouchers and
+  unsettled claims) must be acknowledged and reassigned before role exit.
+  Active Protection policies/claims and therapist open work block relevant
+  staff role transitions. Legacy reason-free therapist promotion/reversion
+  RPC execution is revoked.
+- [x] Added `admin-user-update` Edge Function: database role lookup,
+  password step-up, typed confirmation, reasons, rate limiting, email
+  synchronization/compensation and old/new notices, reset-link flow,
+  one-time random temporary passwords, masked audit metadata and session
+  revocation. Temporary-password accounts are gated to a forced-change route;
+  authenticated chat, Oloo actions, crisis and payment API routes also reject
+  suspended or forced-change accounts server-side.
+- [x] Added super-admin-only editor in `/super-admin/users`; role, profile,
+  credential sections, per-user history, disabled own/last-super-admin role
+  controls, accessible responsive dialog, and English/Kiswahili strings.
+- [x] Exactly eight SQL scripts remain; SQL changes are inside scripts 01,
+  02 and 08. No test files were added.
+- [ ] Disposable Supabase integration tests: not verified (Docker unavailable).
+  No production SQL was run. No browser test, email delivery, Auth session
+  revocation, or live auth/profile consistency test was performed.
+- [x] Local checks: production build passed; existing tests passed (23/23);
+  English/Kiswahili dictionaries have 583 matching keys; exactly eight SQL
+  migration scripts remain. Scoped lint passed for the changed application
+  files except `NotificationBell.jsx`, which retains pre-existing hook lint
+  findings. Full `npm run lint` remains red at 223 errors and 18 warnings;
+  Deno was unavailable for Edge Function type-checking.
+- [ ] Owner setup: manually apply all eight scripts in order; deploy
+  `supabase/functions/admin-user-update`; configure `ALLOWED_ORIGIN`,
+  `RESEND_API_KEY`, and `EMAIL_FROM` with a verified sender; resolve any
+  migration preflight username collisions first. Test in a disposable project
+  before production.
+- [ ] MFA: recommend requiring TOTP for super-admins. Whether MFA/AAL2 can be
+  enforced safely in the deployed project is not verified; enforcement can
+  lock out an owner without a tested second super-admin and recovery process.
+  MFA was not enabled.
+
+### Static negative-test expectations (not executed)
+
+| Caller role | Targets: self, user, admin, therapist, insurer, other super-admin, last super-admin |
+|---|---|
+| user | Every role/profile/credential action denied by the Edge Function (`Active super-admin access required`) and both RPCs (`Active super-admin access required`). |
+| admin | Every role/profile/credential action denied by the Edge Function and both RPCs (`Active super-admin access required`). |
+| therapist | Every role/profile/credential action denied by the Edge Function and both RPCs (`Active super-admin access required`). |
+| insurer | Every role/profile/credential action denied by the Edge Function and both RPCs (`Active super-admin access required`). |
+| super_admin | See action matrix below; all outcomes are code-read expectations, not test results. |
+
+| Super-admin action | Self | User/admin/therapist/insurer | Other super-admin | Last active super-admin |
+|---|---|---|---|---|
+| Role change | Denied (`cannot change own role`) | Allowed only after role-specific claim/voucher/org checks; insurer requires an active linked organisation; peer promotion requires password step-up | Demotion requires password step-up and sends notices; promotion requires step-up | Demotion denied by `prevent_last_super_admin_removal` under advisory lock |
+| Username/name profile update | Allowed with step-up, reason, and valid confirmation | Allowed with step-up, reason, and valid confirmation | Allowed with step-up, reason, and valid confirmation | Allowed; no role/status change |
+| Phone update | Denied (`Phone cannot be changed for yourself`) | Allowed with step-up and E.164 validation; Auth/profile updates are transactional | Denied (`Phone cannot be changed for another super-admin`) | Denied (also a super-admin) |
+| Set email / temporary password | Denied for self | Allowed with step-up and reason | Denied for another super-admin | Denied (also a super-admin) |
+| Send reset link | Allowed with step-up and reason | Allowed with step-up and reason | Allowed with step-up and reason | Allowed with step-up and reason |
+
+Errors, transaction compensation, notification delivery, and actual target
+session revocation remain not verified until the owner runs the manual test
+matrix against disposable Supabase accounts. A session-only compromise cannot
+pass password step-up; a compromise that also obtains the super-admin's
+password can still demote another super-admin and then alter that account.
+Reset notices, audit history, peer notifications, role gates, and the
+last-super-admin lock reduce and expose that risk but do not eliminate it.
