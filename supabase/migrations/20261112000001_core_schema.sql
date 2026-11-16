@@ -144,15 +144,21 @@ begin
   ) then
     raise exception 'Resolve duplicate usernames ignoring case before applying this migration';
   end if;
+  -- Reserved usernames are prohibited for ordinary users. The only
+  -- exemption is a super_admin account (the role is assigned exclusively
+  -- through privileged RPCs guarded by enforce_profile_privilege_updates,
+  -- so it cannot be self-claimed). Other staff roles get no exemption.
   if exists (
     select 1 from public.profiles
     where lower(btrim(username)) in ('admin','support','losslens','oloo','system')
+      and role <> 'super_admin'
   ) then
-    raise exception 'Resolve reserved usernames before applying this migration';
+    raise exception 'Reserved usernames held by non-super-admin accounts must be resolved before applying this migration';
   end if;
 end $$;
-create unique index if not exists profiles_username_lower_unique_idx
-  on public.profiles(lower(username)) where username is not null;
+drop index if exists public.profiles_username_lower_unique_idx;
+create unique index profiles_username_lower_unique_idx
+  on public.profiles(lower(btrim(username))) where username is not null;
 do $$
 begin
   if not exists (
@@ -160,9 +166,13 @@ begin
     where conname = 'profiles_username_not_reserved'
       and conrelid = 'public.profiles'::regclass
   ) then
+    -- Super-admin accounts may hold a reserved username (e.g. the founding
+    -- admin account); every other role is blocked. Role changes are guarded
+    -- by enforce_profile_privilege_updates, so this cannot be self-claimed.
     alter table public.profiles add constraint profiles_username_not_reserved
-      check (username is null or lower(btrim(username)) not in
-        ('admin', 'support', 'losslens', 'oloo', 'system'));
+      check (username is null
+        or lower(btrim(username)) not in ('admin', 'support', 'losslens', 'oloo', 'system')
+        or role = 'super_admin');
   end if;
 end $$;
 

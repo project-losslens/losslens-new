@@ -3589,6 +3589,7 @@ declare
   v_new_phone text;
   v_phone_input text;
   v_authz_id uuid;
+  v_target_role text;
 begin
   if v_actor is null or not public.is_active_user() or not public.is_super_admin() then
     raise exception 'Active super-admin access required';
@@ -3597,7 +3598,7 @@ begin
   if p_user_id is null or length(btrim(coalesce(p_reason,''))) < 5 or length(p_reason) > 500 then
     raise exception 'Target account and a reason of 5 to 500 characters are required';
   end if;
-  select username, full_name, phone into v_old_username, v_old_name, v_old_phone
+  select username, full_name, phone, role into v_old_username, v_old_name, v_old_phone, v_target_role
     from public.profiles where id = p_user_id for update;
   if not found then raise exception 'Target account not found'; end if;
   delete from public.admin_step_up_authorizations
@@ -3616,7 +3617,8 @@ begin
     if v_new_username is not null and
        (length(v_new_username) < 3 or length(v_new_username) > 30
         or v_new_username !~ '^[a-z0-9_]+$'
-        or v_new_username in ('admin','support','losslens','oloo','system')) then
+        or (v_new_username in ('admin','support','losslens','oloo','system')
+            and v_target_role <> 'super_admin')) then
       raise exception 'Username must be 3-30 letters, numbers, or underscores and not reserved';
     end if;
   else v_new_username := v_old_username;
