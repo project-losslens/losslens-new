@@ -19,6 +19,7 @@ export default function ProtectionOps() {
   const [loading, setLoading] = useState(true)
   const [mode, setMode] = useState('concept')
   const [counts, setCounts] = useState({})
+  const [structureCounts, setStructureCounts] = useState({})
   const [pending, setPending] = useState([])
   const [partners, setPartners] = useState([])
   const [therapists, setTherapists] = useState([])
@@ -34,7 +35,7 @@ export default function ProtectionOps() {
     if (!user?.id) return
     const [{ data: setting }, { data: mems }, { data: parts }, { data: ths }, { data: ins }, { data: vers }, { data: pls }] = await Promise.all([
       supabase.from('system_settings').select('value').eq('key', 'protection_mode').maybeSingle(),
-      supabase.from('protection_memberships').select('status'),
+      supabase.from('protection_memberships').select('status, cover_structure'),
       supabase.from('insurer_partnerships').select('id, cohort_name, status, per_member_fee, member_count').order('created_at', { ascending: false }).limit(20),
       supabase.from('therapists').select('id, specialty, status, license_number').eq('status', 'pending').limit(20),
       supabase.from('insurers').select('id, name').eq('status', 'active').order('name'),
@@ -45,8 +46,13 @@ export default function ProtectionOps() {
     const v = setting?.value
     setMode(typeof v === 'string' ? v.replace(/"/g, '') : (v?.mode || 'concept'))
     const c = {}
-    for (const m of mems || []) c[m.status] = (c[m.status] || 0) + 1
+    const sc = {}
+    for (const m of mems || []) {
+      c[m.status] = (c[m.status] || 0) + 1
+      if (m.cover_structure) sc[m.cover_structure] = (sc[m.cover_structure] || 0) + 1
+    }
     setCounts(c)
+    setStructureCounts(sc)
     setPending((mems || []).filter(m => m.status === 'pending_verification').slice(0, 20))
     setPartners(parts || [])
     setTherapists(ths || [])
@@ -159,6 +165,11 @@ export default function ProtectionOps() {
             </article>
           ))}
         </div>
+        {(structureCounts.medical_rider || structureCounts.individual || structureCounts.group) && (
+          <p className="portal-notice" style={{ marginTop: '10px' }}>
+            By cover structure — Rider: {structureCounts.medical_rider || 0} · Individual: {structureCounts.individual || 0} · Group: {structureCounts.group || 0}
+          </p>
+        )}
       </section>
 
       <section className="portal-card">
