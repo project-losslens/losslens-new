@@ -35,7 +35,7 @@ middleware.js            Vercel Routing Middleware site gate
 supabase/
   migrations/           exactly eight consolidated SQL migration scripts
   functions/            edge functions (separate deploy units)
-docs/                   DATABASE.md, FEATURES.md, HISTORY.md
+docs/                   DATABASE.md, FEATURES.md, OPERATIONS.md, PROTECTION.md, VERIFICATION.md
 public/                 manifest, icons, service-worker.js
 ```
 
@@ -75,7 +75,7 @@ vercel dev         # serves api/ routes locally (Vercel CLI)
 
 1. `npm ci`
 2. Copy `.env.example` to `.env` and fill in the client variables.
-3. Apply the eight SQL scripts in numeric order (see `docs/MIGRATION_NOTES.md`)
+3. Apply the eight SQL scripts in numeric order (see `docs/OPERATIONS.md`)
    and deploy edge
    functions if working on auth flows.
 4. `npm run dev` for UI work; `vercel dev` to exercise `/api/chat`.
@@ -85,7 +85,7 @@ vercel dev         # serves api/ routes locally (Vercel CLI)
 Order matters:
 
 1. Apply the eight migration scripts in `supabase/migrations/` in numeric order.
-   See `docs/MIGRATION_NOTES.md` for the manual steps and `docs/DATABASE.md`
+   See `docs/OPERATIONS.md` for the manual steps and `docs/DATABASE.md`
    for the schema reference.
 2. Deploy edge functions: `supabase functions deploy send-invite delete-account`
    and set `ALLOWED_ORIGIN`.
@@ -126,7 +126,7 @@ The gate needs no environment variables — its configuration is hardcoded in
 
 - `docs/DATABASE.md` — migrations, env vars, verify queries, schema reference
 - `docs/FEATURES.md` — complete feature documentation
-- `docs/HISTORY.md` — condensed project history + open items
+- `docs/OPERATIONS.md` — SQL order, verification, go-live
 - `AGENTS.md` — contributor/agent notes
 
 ## LossLens Protection (concept/pilot stage)
@@ -142,4 +142,4 @@ in development — not an offer of insurance. See `docs/PROTECTION.md`.
 ## Database
 
 Exactly eight SQL migrations in `supabase/migrations/` applied in order on a
-fresh Supabase project — see `docs/DATABASE.md` and `docs/MIGRATION_NOTES.md`.
+fresh Supabase project — see `docs/DATABASE.md` and `docs/OPERATIONS.md`.

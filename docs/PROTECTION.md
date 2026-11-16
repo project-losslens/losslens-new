@@ -1,7 +1,7 @@
 # LossLens Protection — model, state machine, access matrix, gaps
 
 Database installation: **eight consolidated scripts** (`20261112000001`–`08`),
-see `docs/MIGRATION_NOTES.md`). `protection_mode` in `system_settings` gates
+see `docs/OPERATIONS.md`). `protection_mode` in `system_settings` gates
 the feature: `concept` (default), `pilot`, `live` — now enforced **inside the
 RPCs** (`protection_require_mode`), not only in the UI. Pilot/live copy lives
 in `src/pages/public/protectionContent.js` and is marked **pending legal
@@ -137,7 +137,7 @@ The entire fresh-install database is exactly scripts 01–08 in
 `supabase/migrations/`, applied in filename order. There is no separate
 baseline or Pass 2 installation step. Do not treat older migration filenames
 listed in consolidation notes as deployable. See `docs/DATABASE.md` for the
-script list and `docs/PROTECTION_TEST_PLAN.md` for disposable-project tests.
+script list in `docs/OPERATIONS.md`; run them twice on a disposable project.
 
 
 ## V2 additions (in script 08)

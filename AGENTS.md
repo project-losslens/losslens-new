@@ -43,7 +43,7 @@ Currently: `src/lib/crisisDetection.js` → `src/config/helplines.js`,
 Eight consolidated migrations in `supabase/migrations/`
 (`20261112000001`–`08`), applied in filename order on a fresh project.
 Full reference + verify queries: `docs/DATABASE.md`; mapping:
-`docs/MIGRATION_NOTES.md`. RLS on every table; helpers `is_admin()`,
+`docs/OPERATIONS.md`. RLS on every table; helpers `is_admin()`,
 `is_super_admin()`, `is_active_user()`, `is_recently_authenticated()`.
 `enforce_profile_privilege_updates` trigger blocks non-super-admin writes to
 privileged profile fields. New users get a `profiles` row from trigger —

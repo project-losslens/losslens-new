@@ -25,8 +25,7 @@ The scripts have **not** been applied to the live Supabase project. Apply and
 validate them only in a disposable project before considering production use.
 The owner runs SQL manually in the Supabase SQL editor; do not run migrations
 from the application or against production as part of local development.
-Detailed consolidation mapping and manual checks are in
-[`MIGRATION_NOTES.md`](./MIGRATION_NOTES.md).
+Manual steps are in [`OPERATIONS.md`](./OPERATIONS.md).
 
 ## Script responsibilities
 
@@ -61,6 +60,6 @@ Detailed consolidation mapping and manual checks are in
 
 After applying all eight scripts to a disposable Supabase project, run the
 read-only verification queries at the end of script 08 and follow the manual
-and negative-test cases in [`PROTECTION_TEST_PLAN.md`](./PROTECTION_TEST_PLAN.md).
+and the negative-test matrix in `docs/VERIFICATION.md`.
 These checks have not been run against the live database. Browser testing is
 also separate and is not represented as complete here.
