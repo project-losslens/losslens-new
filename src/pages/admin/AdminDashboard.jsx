@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCrisisAlertCount } from '../../context/CrisisAlertCountContext'
 import { useAuthProfile } from '../../context/AuthProfileContext'
+import { useI18n } from '../../i18n'
 import { supabase } from '../../lib/supabase'
 import { BrandLoader } from '../../components/Brand'
 import AppIcon from '../../components/AppIcon'
@@ -20,6 +21,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate()
   const { isSuperAdmin } = useAuthProfile()
   const openCrisisAlerts = useCrisisAlertCount()
+  const { t } = useI18n()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [stats, setStats] = useState({
@@ -29,6 +31,7 @@ export default function AdminDashboard() {
     circleMessagesToday: 0, supportersActive: 0,
   })
   const [alerts, setAlerts] = useState([])
+  const [alertsError, setAlertsError] = useState(null)
   const [recentUsers, setRecentUsers] = useState([])
   const [topTriggers, setTopTriggers] = useState([])
   const [contactRequests, setContactRequests] = useState([])
@@ -65,12 +68,18 @@ export default function AdminDashboard() {
     if (!alertPolling) return
     const interval = setInterval(async () => {
       try {
-        const { data } = await supabase.from('crisis_alerts').select('*, profiles(full_name, username)').eq('resolved', false).order('created_at', { ascending: false }).limit(5)
-        if (data) setAlerts(data)
+        const { data, error } = await supabase.from('crisis_alerts').select('*, profiles!user_id(full_name, username)').eq('resolved', false).order('created_at', { ascending: false }).limit(5)
+        if (error) {
+          console.error('crisis_alerts poll failed:', error.code, error.message)
+          setAlertsError(t('admin.crisis.loadFailed'))
+        } else {
+          setAlerts(data || [])
+          setAlertsError(null)
+        }
       } catch (err) { /* silent */ }
     }, 30000)
     return () => clearInterval(interval)
-  }, [alertPolling])
+  }, [alertPolling, t])
 
   //  Realtime crisis alerts
   useEffect(() => {
@@ -104,7 +113,7 @@ export default function AdminDashboard() {
         supabase.from('circle_messages').select('*', { count: 'exact', head: true }).gte('created_at', today),
         supabase.from('supporter_invitations').select('*', { count: 'exact', head: true }).eq('status', 'active'),
         supabase.from('profiles').select('id, full_name, username, email, risk_level, streak_days, last_active, created_at').order('created_at', { ascending: false }).limit(10),
-        supabase.from('crisis_alerts').select('*, profiles(full_name, username)').eq('resolved', false).order('created_at', { ascending: false }).limit(5),
+        supabase.from('crisis_alerts').select('*, profiles!user_id(full_name, username)').eq('resolved', false).order('created_at', { ascending: false }).limit(5),
         supabase.from('event_messages').select('*, events(title), profiles(full_name, phone, email)').order('created_at', { ascending: false }).limit(10),
         supabase.from('diary_entries').select('triggers').limit(200),
       ])
@@ -124,7 +133,14 @@ export default function AdminDashboard() {
         circleMessagesToday: circleRes.count || 0, supportersActive: supportersRes.count || 0,
       })
       setRecentUsers(recentUsersRes.data || [])
-      setAlerts(crisisAlertsRes.data || [])
+      if (crisisAlertsRes.error) {
+        console.error('crisis_alerts query failed:', crisisAlertsRes.error.code, crisisAlertsRes.error.message)
+        setAlertsError(t('admin.crisis.loadFailed'))
+        setAlerts([])
+      } else {
+        setAlerts(crisisAlertsRes.data || [])
+        setAlertsError(null)
+      }
       setTopTriggers(sortedTriggers)
       setContactRequests(contactRes.data || [])
     } catch (err) {
@@ -133,7 +149,7 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => { fetchAllData() }, [fetchAllData])
 
@@ -343,7 +359,12 @@ export default function AdminDashboard() {
                   <button onClick={() => navigate(ROUTES.CRISIS)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--text)', color: 'var(--text)', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Manage →</button>
                 </div>
               </div>
-              {alerts.length === 0 ? (
+              {alertsError ? (
+                <div style={{ textAlign: 'center', padding: '2rem' }}>
+                  <p style={{ color: 'var(--text)', fontSize: '13px', marginBottom: '10px' }}>{alertsError}</p>
+                  <button onClick={() => fetchAllData()} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--text)', color: 'var(--text)', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{t('admin.crisis.retry')}</button>
+                </div>
+              ) : alerts.length === 0 ? (
                 <p style={{ color: 'var(--primary)', fontSize: '13px', textAlign: 'center', padding: '2rem' }}> No open crisis alerts</p>
               ) : (
                 <div className="entries-list">

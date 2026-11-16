@@ -1,12 +1,14 @@
 import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
+import { useI18n } from '../../i18n'
 import AppIcon from '../../components/AppIcon'
 import { BrandLoader } from '../../components/Brand'
 
 const fmtTime = (d) => d ? new Date(d).toLocaleString('en-KE') : '—'
 
 export default function CrisisAlerts() {
+  const { t } = useI18n()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [alerts, setAlerts] = useState([])
@@ -21,18 +23,25 @@ export default function CrisisAlerts() {
     setLoading(true)
     setError(null)
     try {
-      const [{ data: open }, { data: done }] = await Promise.all([
-        supabase.from('crisis_alerts').select('*, profiles(full_name, username, email, phone, risk_level, streak_days)').eq('resolved', false).order('created_at', { ascending: false }),
-        supabase.from('crisis_alerts').select('*, profiles(full_name, username)').eq('resolved', true).order('resolved_at', { ascending: false }).limit(30),
+      const [openRes, doneRes] = await Promise.all([
+        supabase.from('crisis_alerts').select('*, profiles!user_id(full_name, username, email, phone, risk_level, streak_days)').eq('resolved', false).order('created_at', { ascending: false }),
+        supabase.from('crisis_alerts').select('*, profiles!user_id(full_name, username)').eq('resolved', true).order('resolved_at', { ascending: false }).limit(30),
       ])
-      setAlerts(open || [])
-      setResolved(done || [])
+      const failed = openRes.error || doneRes.error
+      if (failed) {
+        console.error('crisis_alerts query failed:', failed.code, failed.message)
+        setError(t('admin.crisis.loadFailed'))
+        return
+      }
+      setAlerts(openRes.data || [])
+      setResolved(doneRes.data || [])
     } catch (err) {
-      setError('Failed to load crisis alerts.')
+      console.error('crisis_alerts fetch threw:', err)
+      setError(t('admin.crisis.loadFailed'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
@@ -92,7 +101,7 @@ export default function CrisisAlerts() {
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <p style={{ color: 'var(--text)', marginBottom: '12px' }}>{error}</p>
-          <button onClick={fetchAll} style={btn('transparent', 'var(--text)', 'var(--text)')}>Retry</button>
+          <button onClick={fetchAll} style={btn('transparent', 'var(--text)', 'var(--text)')}>{t('admin.crisis.retry')}</button>
         </div>
       </div>
     )

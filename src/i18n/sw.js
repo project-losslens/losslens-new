@@ -601,4 +601,6 @@ export default {
   'oloo.chip.log': 'Andika siku yangu',
   'oloo.chip.talk': 'Tuongee tu',
   'oloo.needHelp': 'Unahitaji kuongea na mtu? Piga {name}',
+  'admin.crisis.loadFailed': 'Imeshindwa kupakia arifa za dharura. Tafadhali jaribu tena.',
+  'admin.crisis.retry': 'Jaribu tena',
 }

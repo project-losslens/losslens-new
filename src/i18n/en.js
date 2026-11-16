@@ -601,4 +601,6 @@ export default {
   'oloo.chip.log': 'Log my day',
   'oloo.chip.talk': 'Just talk',
   'oloo.needHelp': 'Need to talk to someone? Call {name}',
+  'admin.crisis.loadFailed': 'Failed to load crisis alerts. Please try again.',
+  'admin.crisis.retry': 'Retry',
 }
