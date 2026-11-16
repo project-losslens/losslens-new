@@ -181,3 +181,21 @@ SQL files exist or are required.
   benefit form gains milestone/effective-date fields.
 - src/lib/markov.js + tests/markov.test.mjs (6 tests, node --test, all pass).
 - NOT executed against any database; build-verified only.
+
+## SQL hardening pass (pre-migration)
+- Script 08: removed out-of-order DO block on protection_milestones (table is
+  created later in the same file; inline check already exists).
+- Script 08: consolidated negative regression checks into one result set
+  (check_name, offending_rows) — all must be 0.
+- All 8 scripts: wrapped auth.uid() as (select auth.uid()) in policies/RPCs.
+- Script 08: drop superseded 11-arg insurer_upsert_benefit overload; revoke
+  EXECUTE on internal protection helpers from public/anon/authenticated;
+  revoke TRUNCATE on audit_logs; ALTER DEFAULT PRIVILEGES so future functions
+  do not default to PUBLIC/anon execute.
+- Code-read only: NOT applied to any database. No disposable Supabase project
+  was available, so apply-twice-on-fresh-project remains UNVERIFIED — owner
+  must run scripts 01-08 twice in filename order on a scratch project first.
+- Still open: delete-account/schema reconciliation, company-code + supporter
+  token hardening, handle_new_user race, storage bucket policies, realtime
+  publication review, script 06 destructive guards, remaining unguarded
+  ADD CONSTRAINT statements (9 listed in commit report).

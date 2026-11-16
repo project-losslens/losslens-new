@@ -60,33 +60,33 @@ end $$;
 -- ---------------------------------------------------------------------------
 drop policy if exists lossless_profiles_self_select on public.profiles;
 create policy lossless_profiles_self_select on public.profiles for select to authenticated
-  using (id = auth.uid());
+  using (id = (select auth.uid()));
 drop policy if exists losslens_profiles_super_admin_select on public.profiles;
 create policy losslens_profiles_super_admin_select on public.profiles
   for select to authenticated using (public.is_super_admin());
 drop policy if exists lossless_profiles_self_update on public.profiles;
 create policy lossless_profiles_self_update on public.profiles for update to authenticated
-  using (id = auth.uid()) with check (id = auth.uid());
+  using (id = (select auth.uid())) with check (id = (select auth.uid()));
 drop policy if exists lossless_profiles_admin_update on public.profiles;
 drop policy if exists lossless_profiles_super_admin_delete on public.profiles;
 create policy lossless_profiles_super_admin_delete on public.profiles for delete to authenticated
-  using (public.is_super_admin() and id <> auth.uid());
+  using (public.is_super_admin() and id <> (select auth.uid()));
 
 -- ---------------------------------------------------------------------------
 -- Owner-only recovery data
 -- ---------------------------------------------------------------------------
 drop policy if exists lossless_diary_owner_all on public.diary_entries;
 create policy lossless_diary_owner_all on public.diary_entries for all to authenticated
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 drop policy if exists lossless_cbt_owner_all on public.cbt_progress;
 create policy lossless_cbt_owner_all on public.cbt_progress for all to authenticated
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 drop policy if exists lossless_chat_owner_all on public.chat_history;
 create policy lossless_chat_owner_all on public.chat_history for all to authenticated
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 drop policy if exists lossless_notifications_owner_all on public.notifications;
 create policy lossless_notifications_owner_all on public.notifications for all to authenticated
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 
 -- ---------------------------------------------------------------------------
 -- Public catalogues
@@ -157,13 +157,13 @@ create policy lossless_badges_admin_delete on public.badges for delete to authen
 -- ---------------------------------------------------------------------------
 drop policy if exists lossless_rsvps_owner_all on public.event_rsvps;
 create policy lossless_rsvps_owner_all on public.event_rsvps for all to authenticated
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 drop policy if exists lossless_event_rsvps_owner_update_v2 on public.event_rsvps;
 create policy lossless_event_rsvps_owner_update_v2 on public.event_rsvps for update to authenticated
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 drop policy if exists lossless_event_rsvps_owner_delete_v2 on public.event_rsvps;
 create policy lossless_event_rsvps_owner_delete_v2 on public.event_rsvps for delete to authenticated
-  using (user_id = auth.uid());
+  using (user_id = (select auth.uid()));
 
 drop policy if exists lossless_event_discussions_select on public.event_discussions;
 create policy lossless_event_discussions_select on public.event_discussions
@@ -173,7 +173,7 @@ drop policy if exists lossless_event_discussions_insert on public.event_discussi
 create policy lossless_event_discussions_insert on public.event_discussions
   for insert to authenticated
   with check (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     and is_admin_reply = false
     and exists (select 1 from public.events e where e.id = event_id and e.active = true)
   );
@@ -181,7 +181,7 @@ drop policy if exists lossless_event_discussions_admin_insert on public.event_di
 create policy lossless_event_discussions_admin_insert on public.event_discussions
   for insert to authenticated
   with check (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     and is_admin()
     and is_admin_reply = true
     and exists (select 1 from public.events e where e.id = event_id and e.active = true)
@@ -192,10 +192,10 @@ create policy lossless_event_discussions_admin_delete on public.event_discussion
 
 drop policy if exists lossless_event_messages_owner_select on public.event_messages;
 create policy lossless_event_messages_owner_select on public.event_messages for select to authenticated
-  using (user_id = auth.uid());
+  using (user_id = (select auth.uid()));
 drop policy if exists lossless_event_messages_owner_insert on public.event_messages;
 create policy lossless_event_messages_owner_insert on public.event_messages for insert to authenticated
-  with check (user_id = auth.uid());
+  with check (user_id = (select auth.uid()));
 drop policy if exists lossless_event_messages_admin_select on public.event_messages;
 create policy lossless_event_messages_admin_select on public.event_messages for select to authenticated
   using (public.is_admin());
@@ -211,10 +211,10 @@ create policy lossless_event_messages_admin_delete on public.event_messages for 
 -- ---------------------------------------------------------------------------
 drop policy if exists lossless_resource_ratings_owner_all on public.resource_ratings;
 create policy lossless_resource_ratings_owner_all on public.resource_ratings for all to authenticated
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 drop policy if exists lossless_resource_suggestions_owner_insert on public.resource_suggestions;
 create policy lossless_resource_suggestions_owner_insert on public.resource_suggestions for insert to authenticated
-  with check (user_id = auth.uid());
+  with check (user_id = (select auth.uid()));
 drop policy if exists lossless_resource_suggestions_admin_select on public.resource_suggestions;
 create policy lossless_resource_suggestions_admin_select on public.resource_suggestions for select to authenticated
   using (public.is_admin());
@@ -230,26 +230,26 @@ create policy lossless_resource_suggestions_admin_delete on public.resource_sugg
 -- ---------------------------------------------------------------------------
 drop policy if exists lossless_invitations_owner_all on public.supporter_invitations;
 create policy lossless_invitations_owner_all on public.supporter_invitations for all to authenticated
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 drop policy if exists lossless_supporter_messages_owner_select on public.supporter_messages;
 create policy lossless_supporter_messages_owner_select on public.supporter_messages for select to authenticated
   using (exists (
     select 1 from public.supporter_invitations i
-    where i.id = invitation_id and i.user_id = auth.uid()
+    where i.id = invitation_id and i.user_id = (select auth.uid())
   ));
 drop policy if exists lossless_supporter_messages_owner_insert on public.supporter_messages;
 create policy lossless_supporter_messages_owner_insert on public.supporter_messages for insert to authenticated
   with check (sender = 'user' and exists (
     select 1 from public.supporter_invitations i
-    where i.id = invitation_id and i.user_id = auth.uid()
+    where i.id = invitation_id and i.user_id = (select auth.uid())
   ));
 drop policy if exists lossless_supporter_feedback_owner_insert on public.supporter_feedback;
 create policy lossless_supporter_feedback_owner_insert on public.supporter_feedback for insert to authenticated
   with check (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     and exists (
       select 1 from public.supporter_invitations i
-      where i.id = invitation_id and i.user_id = auth.uid()
+      where i.id = invitation_id and i.user_id = (select auth.uid())
     )
   );
 
@@ -258,17 +258,17 @@ create policy lossless_supporter_feedback_owner_insert on public.supporter_feedb
 -- ---------------------------------------------------------------------------
 drop policy if exists lossless_circle_members_owner_select on public.circle_room_members;
 create policy lossless_circle_members_owner_select on public.circle_room_members for select to authenticated
-  using (user_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid()));
+  using (user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid())));
 drop policy if exists lossless_circle_members_owner_insert on public.circle_room_members;
 create policy lossless_circle_members_owner_insert on public.circle_room_members for insert to authenticated
-  with check (user_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid()));
+  with check (user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid())));
 drop policy if exists lossless_circle_members_owner_delete on public.circle_room_members;
 create policy lossless_circle_members_owner_delete on public.circle_room_members for delete to authenticated
-  using (user_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid()));
+  using (user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid())));
 drop policy if exists lossless_circle_members_owner_update_v2 on public.circle_room_members;
 create policy lossless_circle_members_owner_update_v2 on public.circle_room_members for update to authenticated
-  using (user_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid()))
-  with check (user_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid()));
+  using (user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid())))
+  with check (user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid())));
 
 drop policy if exists lossless_circle_messages_member_select on public.circle_messages;
 create policy lossless_circle_messages_member_select on public.circle_messages for select to authenticated
@@ -276,7 +276,7 @@ create policy lossless_circle_messages_member_select on public.circle_messages f
     (expires_at is null or expires_at > now())
     and exists (
       select 1 from public.circle_room_members m
-      join public.profiles p on p.id = auth.uid()
+      join public.profiles p on p.id = (select auth.uid())
       where m.room = circle_messages.room and m.user_hash = p.circle_user_hash
     )
   );
@@ -285,10 +285,10 @@ create policy lossless_circle_messages_owner_select_v2 on public.circle_messages
   using (
     (expires_at is null or expires_at > now())
     and (
-      user_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid())
+      user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
       or exists (
         select 1 from public.circle_room_members m
-        join public.profiles p on p.id = auth.uid()
+        join public.profiles p on p.id = (select auth.uid())
         where m.room = circle_messages.room and m.user_hash = p.circle_user_hash
       )
     )
@@ -296,23 +296,23 @@ create policy lossless_circle_messages_owner_select_v2 on public.circle_messages
 drop policy if exists lossless_circle_messages_member_insert on public.circle_messages;
 create policy lossless_circle_messages_member_insert on public.circle_messages for insert to authenticated
   with check (
-    user_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid())
+    user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
     and user_id is null
     and mentioned_user_id is null
     and exists (
       select 1 from public.circle_room_members m
       where m.room = circle_messages.room
-        and m.user_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid())
+        and m.user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
     )
   );
 drop policy if exists lossless_circle_messages_owner_update on public.circle_messages;
 create policy lossless_circle_messages_owner_update on public.circle_messages for update to authenticated
-  using (user_hash = (select circle_user_hash from public.profiles where id = auth.uid()))
-  with check (user_hash = (select circle_user_hash from public.profiles where id = auth.uid()));
+  using (user_hash = (select circle_user_hash from public.profiles where id = (select auth.uid())))
+  with check (user_hash = (select circle_user_hash from public.profiles where id = (select auth.uid())));
 drop policy if exists lossless_circle_messages_owner_delete on public.circle_messages;
 create policy lossless_circle_messages_owner_delete on public.circle_messages for delete to authenticated
   using (
-    user_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid())
+    user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
     or public.is_admin()
   );
 
@@ -330,27 +330,27 @@ create policy circle_reactions_member_select on public.circle_message_reactions
 drop policy if exists lossless_whispers_match_participant_select on public.whispers_matches;
 create policy lossless_whispers_match_participant_select on public.whispers_matches for select to authenticated
   using (
-    user1_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid())
-    or user2_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid())
+    user1_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
+    or user2_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
   );
 drop policy if exists lossless_whispers_match_insert_v2 on public.whispers_matches;
 create policy lossless_whispers_match_insert_v2 on public.whispers_matches for insert to authenticated
   with check (
-    user1_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid())
-    or user2_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid())
+    user1_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
+    or user2_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
   );
 drop policy if exists lossless_whispers_match_participant_delete on public.whispers_matches;
 create policy lossless_whispers_match_participant_delete on public.whispers_matches for delete to authenticated
   using (
-    user1_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid())
-    or user2_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid())
+    user1_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
+    or user2_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
   );
 
 drop policy if exists lossless_whispers_message_participant_select on public.whispers_messages;
 create policy lossless_whispers_message_participant_select on public.whispers_messages for select to authenticated
   using (exists (
     select 1 from public.whispers_matches wm
-    join public.profiles p on p.id = auth.uid()
+    join public.profiles p on p.id = (select auth.uid())
     where wm.id = whispers_messages.match_id
       and (wm.user1_hash = p.circle_user_hash or wm.user2_hash = p.circle_user_hash)
   ));
@@ -358,10 +358,10 @@ drop policy if exists lossless_whispers_message_participant_insert on public.whi
 create policy lossless_whispers_message_participant_insert on public.whispers_messages
   for insert to authenticated
   with check (
-    sender_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid())
+    sender_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
     and exists (
       select 1 from public.whispers_matches wm
-      join public.profiles p on p.id = auth.uid()
+      join public.profiles p on p.id = (select auth.uid())
       where wm.id = whispers_messages.match_id
         and wm.status = 'active'
         and (wm.user1_hash = p.circle_user_hash or wm.user2_hash = p.circle_user_hash)
@@ -371,15 +371,15 @@ drop policy if exists lossless_whispers_message_update_v2 on public.whispers_mes
 drop policy if exists lossless_whispers_message_sender_update on public.whispers_messages;
 drop policy if exists lossless_whispers_message_sender_delete on public.whispers_messages;
 create policy lossless_whispers_message_sender_delete on public.whispers_messages for delete to authenticated
-  using (sender_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid()));
+  using (sender_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid())));
 
 drop policy if exists lossless_whispers_report_owner_insert on public.whispers_reports;
 create policy lossless_whispers_report_owner_insert on public.whispers_reports for insert to authenticated
   with check (
-    reporter_hash = (select p.circle_user_hash from public.profiles p where p.id = auth.uid())
+    reporter_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
     and exists (
       select 1 from public.whispers_matches wm
-      join public.profiles p on p.id = auth.uid()
+      join public.profiles p on p.id = (select auth.uid())
       where wm.id = whispers_reports.match_id
         and (wm.user1_hash = p.circle_user_hash or wm.user2_hash = p.circle_user_hash)
     )
@@ -405,35 +405,35 @@ create policy lossless_whispers_report_admin_delete on public.whispers_reports f
 -- ---------------------------------------------------------------------------
 drop policy if exists lossless_mirror_owner_select on public.mirror_recordings;
 create policy lossless_mirror_owner_select on public.mirror_recordings for select to authenticated
-  using (user_id = auth.uid());
+  using (user_id = (select auth.uid()));
 drop policy if exists lossless_mirror_owner_insert on public.mirror_recordings;
 create policy lossless_mirror_owner_insert on public.mirror_recordings for insert to authenticated
-  with check (user_id = auth.uid());
+  with check (user_id = (select auth.uid()));
 drop policy if exists lossless_mirror_owner_insert_v2 on public.mirror_recordings;
 create policy lossless_mirror_owner_insert_v2 on public.mirror_recordings for insert to authenticated
-  with check (user_id = auth.uid());
+  with check (user_id = (select auth.uid()));
 drop policy if exists lossless_mirror_owner_update on public.mirror_recordings;
 create policy lossless_mirror_owner_update on public.mirror_recordings for update to authenticated
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 drop policy if exists lossless_mirror_owner_delete on public.mirror_recordings;
 create policy lossless_mirror_owner_delete on public.mirror_recordings for delete to authenticated
-  using (user_id = auth.uid());
+  using (user_id = (select auth.uid()));
 
 drop policy if exists lossless_pact_owner_select on public.precious_pacts;
 create policy lossless_pact_owner_select on public.precious_pacts for select to authenticated
-  using (user_id = auth.uid());
+  using (user_id = (select auth.uid()));
 drop policy if exists lossless_pact_owner_insert on public.precious_pacts;
 create policy lossless_pact_owner_insert on public.precious_pacts for insert to authenticated
-  with check (user_id = auth.uid());
+  with check (user_id = (select auth.uid()));
 drop policy if exists lossless_pact_owner_insert_v2 on public.precious_pacts;
 create policy lossless_pact_owner_insert_v2 on public.precious_pacts for insert to authenticated
-  with check (user_id = auth.uid());
+  with check (user_id = (select auth.uid()));
 drop policy if exists lossless_pact_owner_update on public.precious_pacts;
 create policy lossless_pact_owner_update on public.precious_pacts for update to authenticated
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 drop policy if exists lossless_pact_owner_delete on public.precious_pacts;
 create policy lossless_pact_owner_delete on public.precious_pacts for delete to authenticated
-  using (user_id = auth.uid());
+  using (user_id = (select auth.uid()));
 
 -- ---------------------------------------------------------------------------
 -- Crisis / broadcasts / business / audit
@@ -455,7 +455,7 @@ create policy lossless_broadcasts_admin_select on public.broadcasts for select t
   using (public.is_admin());
 drop policy if exists lossless_broadcasts_admin_insert on public.broadcasts;
 create policy lossless_broadcasts_admin_insert on public.broadcasts for insert to authenticated
-  with check (public.is_admin() and created_by = auth.uid());
+  with check (public.is_admin() and created_by = (select auth.uid()));
 drop policy if exists lossless_broadcasts_admin_update on public.broadcasts;
 create policy lossless_broadcasts_admin_update on public.broadcasts for update to authenticated
   using (public.is_admin()) with check (public.is_admin());
@@ -467,21 +467,21 @@ create policy lossless_b2b_super_admin_all on public.b2b_clients for all to auth
   using (public.is_super_admin()) with check (public.is_super_admin());
 drop policy if exists "Super admins can view B2B clients" on public.b2b_clients;
 create policy "Super admins can view B2B clients" on public.b2b_clients for select to authenticated
-  using (exists (select 1 from public.profiles where profiles.id = auth.uid() and profiles.is_super_admin = true));
+  using (exists (select 1 from public.profiles where profiles.id = (select auth.uid()) and profiles.is_super_admin = true));
 
 drop policy if exists lossless_grants_super_admin_all on public.grant_applications;
 create policy lossless_grants_super_admin_all on public.grant_applications for all to authenticated
   using (public.is_super_admin()) with check (public.is_super_admin());
 drop policy if exists "Super admins can view grant applications" on public.grant_applications;
 create policy "Super admins can view grant applications" on public.grant_applications for select to authenticated
-  using (exists (select 1 from public.profiles where profiles.id = auth.uid() and profiles.is_super_admin = true));
+  using (exists (select 1 from public.profiles where profiles.id = (select auth.uid()) and profiles.is_super_admin = true));
 
 drop policy if exists lossless_insurance_super_admin_all on public.insurance_partners;
 create policy lossless_insurance_super_admin_all on public.insurance_partners for all to authenticated
   using (public.is_super_admin()) with check (public.is_super_admin());
 drop policy if exists "Super admins can view insurance partners" on public.insurance_partners;
 create policy "Super admins can view insurance partners" on public.insurance_partners for select to authenticated
-  using (exists (select 1 from public.profiles where profiles.id = auth.uid() and profiles.is_super_admin = true));
+  using (exists (select 1 from public.profiles where profiles.id = (select auth.uid()) and profiles.is_super_admin = true));
 
 drop policy if exists lossless_settings_super_admin_all on public.system_settings;
 create policy lossless_settings_super_admin_all on public.system_settings for all to authenticated
@@ -492,11 +492,11 @@ create policy lossless_audit_super_admin_select on public.audit_logs for select 
   using (public.is_super_admin());
 drop policy if exists "Super admins can read audit logs" on public.audit_logs;
 create policy "Super admins can read audit logs" on public.audit_logs for select
-  using (exists (select 1 from public.profiles where profiles.id = auth.uid() and profiles.is_super_admin = true));
+  using (exists (select 1 from public.profiles where profiles.id = (select auth.uid()) and profiles.is_super_admin = true));
 
 drop policy if exists lossless_upgrade_owner_insert on public.upgrade_interest;
 create policy lossless_upgrade_owner_insert on public.upgrade_interest for insert to authenticated
-  with check (user_id = auth.uid());
+  with check (user_id = (select auth.uid()));
 drop policy if exists upgrade_interest_super_admin_select on public.upgrade_interest;
 create policy upgrade_interest_super_admin_select on public.upgrade_interest for select
   using (public.is_super_admin());
@@ -577,63 +577,63 @@ drop policy if exists "avatar owner read" on storage.objects;
 drop policy if exists "avatars public select" on storage.objects;
 drop policy if exists "avatar owner select" on storage.objects;
 create policy "avatar owner select" on storage.objects for select to authenticated
-  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text);
 drop policy if exists "avatar owner insert" on storage.objects;
 create policy "avatar owner insert" on storage.objects for insert to authenticated
-  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text);
 drop policy if exists "avatar owner update" on storage.objects;
 create policy "avatar owner update" on storage.objects for update to authenticated
-  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text)
-  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text)
+  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text);
 drop policy if exists "avatar owner delete" on storage.objects;
 create policy "avatar owner delete" on storage.objects for delete to authenticated
-  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text);
 
 drop policy if exists "mirror read" on storage.objects;
 create policy "mirror read" on storage.objects for select to authenticated
-  using (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = auth.uid()::text);
+  using (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = (select auth.uid())::text);
 drop policy if exists "mirror write" on storage.objects;
 create policy "mirror write" on storage.objects for insert to authenticated
-  with check (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = auth.uid()::text);
+  with check (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = (select auth.uid())::text);
 drop policy if exists "mirror update" on storage.objects;
 create policy "mirror update" on storage.objects for update to authenticated
-  using (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = auth.uid()::text)
-  with check (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = auth.uid()::text);
+  using (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = (select auth.uid())::text)
+  with check (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = (select auth.uid())::text);
 drop policy if exists "mirror delete" on storage.objects;
 create policy "mirror delete" on storage.objects for delete to authenticated
-  using (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = auth.uid()::text);
+  using (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = (select auth.uid())::text);
 
 drop policy if exists "pact read" on storage.objects;
 create policy "pact read" on storage.objects for select to authenticated
-  using (bucket_id = 'precious-pacts' and ((storage.foldername(name))[1] = auth.uid()::text));
+  using (bucket_id = 'precious-pacts' and ((storage.foldername(name))[1] = (select auth.uid())::text));
 drop policy if exists "pact write" on storage.objects;
 create policy "pact write" on storage.objects for insert to authenticated
-  with check (bucket_id = 'precious-pacts' and (storage.foldername(name))[1] = auth.uid()::text);
+  with check (bucket_id = 'precious-pacts' and (storage.foldername(name))[1] = (select auth.uid())::text);
 drop policy if exists "pact update" on storage.objects;
 create policy "pact update" on storage.objects for update to authenticated
-  using (bucket_id = 'precious-pacts' and (storage.foldername(name))[1] = auth.uid()::text)
-  with check (bucket_id = 'precious-pacts' and (storage.foldername(name))[1] = auth.uid()::text);
+  using (bucket_id = 'precious-pacts' and (storage.foldername(name))[1] = (select auth.uid())::text)
+  with check (bucket_id = 'precious-pacts' and (storage.foldername(name))[1] = (select auth.uid())::text);
 drop policy if exists "pact delete" on storage.objects;
 create policy "pact delete" on storage.objects for delete to authenticated
-  using (bucket_id = 'precious-pacts' and (storage.foldername(name))[1] = auth.uid()::text);
+  using (bucket_id = 'precious-pacts' and (storage.foldername(name))[1] = (select auth.uid())::text);
 
 drop policy if exists therapist_documents_read on storage.objects;
 create policy therapist_documents_read on storage.objects for select to authenticated
   using (bucket_id = 'therapist-documents'
-    and ((storage.foldername(name))[1] = auth.uid()::text or public.is_super_admin()));
+    and ((storage.foldername(name))[1] = (select auth.uid())::text or public.is_super_admin()));
 drop policy if exists therapist_documents_insert on storage.objects;
 create policy therapist_documents_insert on storage.objects for insert to authenticated
   with check (bucket_id = 'therapist-documents'
-    and (storage.foldername(name))[1] = auth.uid()::text);
+    and (storage.foldername(name))[1] = (select auth.uid())::text);
 drop policy if exists therapist_documents_update on storage.objects;
 create policy therapist_documents_update on storage.objects for update to authenticated
   using (bucket_id = 'therapist-documents'
-    and (storage.foldername(name))[1] = auth.uid()::text)
+    and (storage.foldername(name))[1] = (select auth.uid())::text)
   with check (bucket_id = 'therapist-documents'
-    and (storage.foldername(name))[1] = auth.uid()::text);
+    and (storage.foldername(name))[1] = (select auth.uid())::text);
 drop policy if exists therapist_documents_delete on storage.objects;
 create policy therapist_documents_delete on storage.objects for delete to authenticated
   using (bucket_id = 'therapist-documents'
-    and ((storage.foldername(name))[1] = auth.uid()::text or public.is_super_admin()));
+    and ((storage.foldername(name))[1] = (select auth.uid())::text or public.is_super_admin()));
 
 notify pgrst, 'reload schema';

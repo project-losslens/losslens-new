@@ -49,12 +49,6 @@ create table if not exists public.protection_claims (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'pm_ordinal_range_chk') then
-    alter table public.protection_milestones add constraint pm_ordinal_range_chk
-      check (ordinal between 1 and 52);
-  end if;
-end $$;
 create index if not exists pcl_policy_idx on public.protection_claims (policy_id, status);
 create index if not exists pcl_insurer_idx on public.protection_claims (insurer_id, status, created_at desc);
 create index if not exists pcl_membership_idx on public.protection_claims (membership_id, created_at desc);
@@ -102,7 +96,7 @@ create policy pcl_read on public.protection_claims for select to authenticated
     public.is_super_admin()
     or insurer_id = public.protection_insurer_id()
     or exists (select 1 from public.protection_memberships m
-               where m.id = membership_id and m.user_id = auth.uid())
+               where m.id = membership_id and m.user_id = (select auth.uid()))
   );
 drop policy if exists pce_read on public.protection_claim_events;
 create policy pce_read on public.protection_claim_events for select to authenticated
@@ -112,7 +106,7 @@ create policy pce_read on public.protection_claim_events for select to authentic
                where c.id = claim_id and c.insurer_id = public.protection_insurer_id())
     or exists (select 1 from public.protection_claims c
                join public.protection_memberships m on m.id = c.membership_id
-               where c.id = claim_id and m.user_id = auth.uid())
+               where c.id = claim_id and m.user_id = (select auth.uid()))
   );
 drop policy if exists pcev_read on public.protection_claim_evidence;
 create policy pcev_read on public.protection_claim_evidence for select to authenticated
@@ -122,7 +116,7 @@ create policy pcev_read on public.protection_claim_evidence for select to authen
                where c.id = claim_id and c.insurer_id = public.protection_insurer_id())
     or exists (select 1 from public.protection_claims c
                join public.protection_memberships m on m.id = c.membership_id
-               where c.id = claim_id and m.user_id = auth.uid())
+               where c.id = claim_id and m.user_id = (select auth.uid()))
   );
 
 revoke select on public.protection_claims from authenticated;
@@ -141,9 +135,9 @@ stable
 security definer
 set search_path = pg_catalog, public
 as $$
-  select auth.uid() is not null
+  select (select auth.uid()) is not null
     and cardinality(string_to_array(p_path, '/')) = 3
-    and split_part(p_path, '/', 1) = auth.uid()::text
+    and split_part(p_path, '/', 1) = (select auth.uid())::text
     and split_part(p_path, '/', 2) <> ''
     and split_part(p_path, '/', 3) not in ('', '.', '..')
     and exists (
@@ -152,7 +146,7 @@ as $$
       join public.protection_memberships m on m.id = c.membership_id
       join public.protection_claim_evidence e on e.claim_id = c.id
       where c.id::text = split_part(p_path, '/', 2)
-        and m.user_id = auth.uid()
+        and m.user_id = (select auth.uid())
         and e.storage_path = p_path
     );
 $$;
@@ -164,9 +158,9 @@ stable
 security definer
 set search_path = pg_catalog, public
 as $$
-  select auth.uid() is not null
+  select (select auth.uid()) is not null
     and cardinality(string_to_array(p_path, '/')) = 3
-    and split_part(p_path, '/', 1) = auth.uid()::text
+    and split_part(p_path, '/', 1) = (select auth.uid())::text
     and split_part(p_path, '/', 2) <> ''
     and split_part(p_path, '/', 3) not in ('', '.', '..')
     and exists (
@@ -174,8 +168,8 @@ as $$
       from public.protection_claims c
       join public.protection_memberships m on m.id = c.membership_id
       where c.id::text = split_part(p_path, '/', 2)
-        and m.user_id = auth.uid()
-        and c.created_by = auth.uid()
+        and m.user_id = (select auth.uid())
+        and c.created_by = (select auth.uid())
         and c.status in ('submitted','under_review','info_requested')
     );
 $$;
@@ -187,7 +181,7 @@ stable
 security definer
 set search_path = pg_catalog, public
 as $$
-  select auth.uid() is not null
+  select (select auth.uid()) is not null
     and public.protection_is_active_insurer()
     and cardinality(string_to_array(p_path, '/')) = 3
     and split_part(p_path, '/', 3) not in ('', '.', '..')
@@ -253,7 +247,7 @@ declare
   v_actor_role text;
   v_allowed_event text;
 begin
-  if auth.uid() is null then
+  if (select auth.uid()) is null then
     raise exception 'Not authenticated';
   end if;
 
@@ -274,7 +268,7 @@ begin
   if v_actor_role = 'user' then
     if not exists (
       select 1 from public.protection_memberships m
-      where m.id = v_claim.membership_id and m.user_id = auth.uid()
+      where m.id = v_claim.membership_id and m.user_id = (select auth.uid())
     ) then
       raise exception 'Member cannot append events to another member''s claim';
     end if;
@@ -303,7 +297,7 @@ begin
   insert into public.protection_claim_events (claim_id, actor_id, actor_role, event_type, detail)
   values (
     p_claim_id,
-    auth.uid(),
+    (select auth.uid()),
     v_actor_role,
     p_event_type,
     coalesce(p_detail, '{}'::jsonb)
@@ -362,7 +356,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_m public.protection_memberships;
   v_p public.protection_policies;
   v_v public.protection_plan_versions;
@@ -521,7 +515,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
   return coalesce((
@@ -751,7 +745,7 @@ begin
   update public.protection_claims
   set status = v_new_status,
       approved_amount = v_amount,
-      decision_by = auth.uid(),
+      decision_by = (select auth.uid()),
       decided_at = now(),
       decision_reason = nullif(left(btrim(coalesce(p_reason,'')), 2000), ''),
       updated_at = now()
@@ -760,7 +754,7 @@ begin
   perform public.protection_claim_event(p_claim_id, 'adjudicated',
     jsonb_build_object('decision', p_decision, 'approved_amount', v_amount));
   insert into public.protection_events (membership_id, insurer_id, actor_id, event_type, detail)
-  values (v_c.membership_id, v_insurer, auth.uid(), 'claim_adjudicated',
+  values (v_c.membership_id, v_insurer, (select auth.uid()), 'claim_adjudicated',
           jsonb_build_object('claim_id', p_claim_id, 'decision', p_decision));
   perform public.protection_log_access('adjudicate_claim', 'protection_claims', p_claim_id::text,
     'decision=' || p_decision);
@@ -810,7 +804,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
   update public.protection_claims c
@@ -880,7 +874,7 @@ create policy ppr_read on public.protection_premium_records for select to authen
     or insurer_id = public.protection_insurer_id()
     or exists (select 1 from public.protection_policies p
                join public.protection_memberships m on m.id = p.membership_id
-               where p.id = policy_id and m.user_id = auth.uid())
+               where p.id = policy_id and m.user_id = (select auth.uid()))
   );
 grant select on public.protection_premium_records to authenticated;
 
@@ -951,7 +945,7 @@ begin
     p_amount_received, v_status,
     nullif(left(btrim(coalesce(p_payment_ref,'')), 200), ''),
     nullif(left(btrim(coalesce(p_channel,'')), 60), ''),
-    case when v_status = 'confirmed' then auth.uid() else null end,
+    case when v_status = 'confirmed' then (select auth.uid()) else null end,
     case when v_status = 'confirmed' then now() else null end,
     'insurer'
   )
@@ -1164,11 +1158,11 @@ begin
     case when v_wait_days > 0
          then (p_commencement_date::timestamp + make_interval(days => v_wait_days))
          else null end,
-    p_policy_id, auth.uid()
+    p_policy_id, (select auth.uid())
   ) returning id into v_id;
 
   insert into public.protection_events (membership_id, insurer_id, actor_id, event_type, detail)
-  values (v_old.membership_id, v_insurer, auth.uid(), 'policy_renewed',
+  values (v_old.membership_id, v_insurer, (select auth.uid()), 'policy_renewed',
           jsonb_build_object('old_policy_id', p_policy_id, 'new_policy_id', v_id));
   perform public.protection_log_access('renew_policy', 'protection_policies', v_id::text, 'policy renewal');
   return v_id;
@@ -1186,7 +1180,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_m public.protection_memberships;
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
@@ -1697,7 +1691,7 @@ begin
   set status = 'superseded'
   where plan_id = v_plan_id and id <> p_version_id and status = 'approved';
   update public.protection_plan_versions
-  set status = 'approved', approved_by = auth.uid(), approved_at = now()
+  set status = 'approved', approved_by = (select auth.uid()), approved_at = now()
   where id = p_version_id;
   perform public.log_admin_action('plan_version_approved', 'protection_plan_versions',
     p_version_id::text,
@@ -1714,7 +1708,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_result jsonb;
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
@@ -1794,36 +1788,32 @@ revoke insert, update, delete on public.protection_claim_events from authenticat
 revoke insert, update, delete on public.protection_claim_evidence from authenticated;
 revoke insert, update, delete on public.protection_premium_records from authenticated;
 
--- Negative regression checks (run against a scratch database; they should return
--- zero rows if the hardening is in place).
--- A member must not append insurer-only events to another member's claim.
-select count(*) as member_forged_insurer_events
-from public.protection_claim_events e
-join public.protection_claims c on c.id = e.claim_id
-join public.protection_memberships m on m.id = c.membership_id
-where e.actor_role = 'user'
-  and e.event_type in ('adjudicated', 'settled');
--- Expect: 0.
-
--- A member must not use a foreign insurer or claim on another person's policy.
-select count(*) as member_cross_policy_claim_events
-from public.protection_claim_events e
-join public.protection_claims c on c.id = e.claim_id
-join public.protection_memberships m on m.id = c.membership_id
-where e.actor_role = 'user'
-  and e.actor_id <> m.user_id;
--- Expect: 0.
-
--- An invalid insurer selection must be rejected before a membership row is created.
-select count(*) as invalid_insurer_enrolments
-from public.protection_memberships m
-join public.insurers i on i.id = m.insurer_id
-where m.status in ('pending_verification', 'active')
-  and i.status <> 'active';
--- Expect: 0.
-
--- protection_claim_events: members may append via member flows? All writes
--- go through definer RPCs — revoke direct writes already covered above.
+-- Negative regression checks — consolidated into ONE result set so the SQL
+-- editor shows every check at once. Every count must be 0 on a hardened DB.
+select * from (
+  select 'member_forged_insurer_events' as check_name, count(*)::bigint as offending_rows
+  from public.protection_claim_events e
+  join public.protection_claims c on c.id = e.claim_id
+  join public.protection_memberships m on m.id = c.membership_id
+  where e.actor_role = 'user' and e.event_type in ('adjudicated', 'settled')
+  union all
+  select 'member_cross_policy_claim_events', count(*)::bigint
+  from public.protection_claim_events e
+  join public.protection_claims c on c.id = e.claim_id
+  join public.protection_memberships m on m.id = c.membership_id
+  where e.actor_role = 'user' and e.actor_id <> m.user_id
+  union all
+  select 'invalid_insurer_enrolments', count(*)::bigint
+  from public.protection_memberships m
+  join public.insurers i on i.id = m.insurer_id
+  where m.status in ('pending_verification', 'active') and i.status <> 'active'
+  union all
+  select 'client_writable_protection_claim_events', count(*)::bigint
+  from pg_policies
+  where schemaname = 'public' and tablename = 'protection_claim_events'
+    and cmd in ('INSERT', 'UPDATE', 'DELETE', 'ALL')
+) regression_checks
+order by check_name;
 
 -- ---------------------------------------------------------------------------
 -- Indexes for reporting paths.
@@ -1952,7 +1942,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_c public.protection_claims;
   v_id uuid;
   v_path_parts text[];
@@ -2087,7 +2077,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_claim_id uuid;
   v_status text;
   v_claim_user uuid;
@@ -2133,7 +2123,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
   if not exists (
@@ -2221,15 +2211,15 @@ alter table public.protection_treatment_episodes enable row level security;
 drop policy if exists pte_member_read on public.protection_treatment_episodes;
 create policy pte_member_read on public.protection_treatment_episodes for select to authenticated
   using (exists (select 1 from public.protection_memberships m
-    where m.id = membership_id and m.user_id = auth.uid()));
+    where m.id = membership_id and m.user_id = (select auth.uid())));
 drop policy if exists pte_therapist_read on public.protection_treatment_episodes;
 create policy pte_therapist_read on public.protection_treatment_episodes for select to authenticated
   using (
-    therapist_id = auth.uid()
+    therapist_id = (select auth.uid())
     and public.is_active_user()
     and public.current_user_role() = 'therapist'
     and exists (select 1 from public.therapists t
-                where t.id = auth.uid() and t.status = 'active')
+                where t.id = (select auth.uid()) and t.status = 'active')
   );
 drop policy if exists pte_insurer_read on public.protection_treatment_episodes;
 create policy pte_insurer_read on public.protection_treatment_episodes for select to authenticated
@@ -2266,15 +2256,15 @@ alter table public.protection_milestones enable row level security;
 drop policy if exists pm_member_read on public.protection_milestones;
 create policy pm_member_read on public.protection_milestones for select to authenticated
   using (exists (select 1 from public.protection_memberships m
-    where m.id = membership_id and m.user_id = auth.uid()));
+    where m.id = membership_id and m.user_id = (select auth.uid())));
 drop policy if exists pm_therapist_read on public.protection_milestones;
 create policy pm_therapist_read on public.protection_milestones for select to authenticated
   using (
-    verified_by = auth.uid()
+    verified_by = (select auth.uid())
     and public.is_active_user()
     and public.current_user_role() = 'therapist'
     and exists (select 1 from public.therapists t
-                where t.id = auth.uid() and t.status = 'active')
+                where t.id = (select auth.uid()) and t.status = 'active')
   );
 drop policy if exists pm_insurer_read on public.protection_milestones;
 create policy pm_insurer_read on public.protection_milestones for select to authenticated
@@ -2322,7 +2312,7 @@ create or replace function public.member_start_episode(
 returns uuid
 language plpgsql security definer set search_path = pg_catalog, public as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_pol public.protection_policies;
   v_membership_status text;
   v_ins uuid;
@@ -2367,7 +2357,7 @@ grant execute on function public.member_start_episode(uuid,uuid,text) to authent
 
 create or replace function public.member_list_my_milestones()
 returns jsonb language plpgsql security definer set search_path = pg_catalog, public as $$
-declare v_uid uuid := auth.uid(); begin
+declare v_uid uuid := (select auth.uid()); begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
   return jsonb_build_object(
     'episodes', coalesce((select jsonb_agg(jsonb_build_object(
@@ -2392,7 +2382,7 @@ grant execute on function public.member_list_my_milestones() to authenticated;
 
 create or replace function public.therapist_list_assigned_episodes()
 returns jsonb language plpgsql security definer set search_path = pg_catalog, public as $$
-declare v_uid uuid := auth.uid(); begin
+declare v_uid uuid := (select auth.uid()); begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
   if not public.is_active_user()
      or public.current_user_role() is distinct from 'therapist'
@@ -2422,7 +2412,7 @@ create or replace function public.therapist_verify_milestone(
 )
 returns uuid language plpgsql security definer set search_path = pg_catalog, public as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_ep public.protection_treatment_episodes;
   v_pol public.protection_policies;
   v_service_date date := coalesce(p_service_date, current_date);
@@ -2487,7 +2477,7 @@ grant execute on function public.therapist_verify_milestone(uuid,text,integer,da
 create or replace function public.member_submit_milestone_claim(p_milestone_id uuid)
 returns uuid language plpgsql security definer set search_path = pg_catalog, public as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_ms public.protection_milestones;
   v_pol public.protection_policies;
   v_ver record;
@@ -2641,7 +2631,7 @@ begin
     (model_version, scenario_label, methodology, params, dataset, outputs, created_by)
   values (left(btrim(p_model_version),40), left(coalesce(p_scenario_label,''),80),
           left(coalesce(p_methodology,''),2000), coalesce(p_params,'{}'::jsonb),
-          p_dataset, coalesce(p_outputs,'{}'::jsonb), auth.uid())
+          p_dataset, coalesce(p_outputs,'{}'::jsonb), (select auth.uid()))
   returning id into v_id;
   perform public.log_admin_action('actuarial_run_saved','protection_actuarial_runs',v_id::text,
     jsonb_build_object('model_version', p_model_version, 'scenario', p_scenario_label));
@@ -2662,6 +2652,10 @@ begin
 end $$;
 revoke execute on function public.admin_list_actuarial_runs() from public, anon;
 grant execute on function public.admin_list_actuarial_runs() to authenticated;
+
+-- Drop the superseded 11-argument overload defined in script 07; only the
+-- 15-argument version below is current.
+drop function if exists public.insurer_upsert_benefit(uuid, text, text, text, numeric, numeric, numeric, numeric, integer, integer, jsonb);
 
 create or replace function public.insurer_upsert_benefit(
   p_plan_version_id uuid, p_benefit_code text, p_name text, p_benefit_type text,
@@ -2789,7 +2783,7 @@ create table if not exists public.cbt_module_sessions (
 alter table public.cbt_module_sessions enable row level security;
 drop policy if exists cbt_module_sessions_owner_read on public.cbt_module_sessions;
 create policy cbt_module_sessions_owner_read on public.cbt_module_sessions
-  for select to authenticated using (user_id = auth.uid());
+  for select to authenticated using (user_id = (select auth.uid()));
 revoke all on public.cbt_module_sessions from anon, authenticated;
 grant select on public.cbt_module_sessions to authenticated;
 
@@ -2808,7 +2802,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_session public.cbt_module_sessions;
 begin
   if v_uid is null or not public.is_active_user()
@@ -2855,7 +2849,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_session public.cbt_module_sessions;
 begin
   if v_uid is null or not public.is_active_user()
@@ -2947,7 +2941,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_ticket_id uuid;
 begin
   if v_uid is null or not public.is_active_user()
@@ -2978,7 +2972,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_is_staff boolean := public.is_admin();
   v_result jsonb;
 begin
@@ -3023,7 +3017,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_ticket public.support_tickets;
   v_is_staff boolean := public.is_admin();
 begin
@@ -3059,7 +3053,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 begin
-  if auth.uid() is null or not public.is_active_user() or not public.is_admin() then
+  if (select auth.uid()) is null or not public.is_active_user() or not public.is_admin() then
     raise exception 'Administrator access required';
   end if;
   if p_ticket_id is null or p_status is null or p_status not in ('open','in_progress','closed') then
@@ -3075,3 +3069,23 @@ end;
 $$;
 revoke execute on function public.support_set_ticket_status(uuid,text) from public, anon;
 grant execute on function public.support_set_ticket_status(uuid,text) to authenticated;
+
+-- ===========================================================================
+-- FINAL HARDENING BLOCK (idempotent; safe to re-run)
+-- ===========================================================================
+-- Internal helpers must never be executable by end users. Revoke explicitly.
+revoke execute on function public.protection_refresh_policy_payment(uuid) from public, anon, authenticated;
+revoke execute on function public.protection_mode() from public, anon, authenticated;
+revoke execute on function public.protection_require_mode(text[]) from public, anon, authenticated;
+revoke execute on function public.protection_is_active_insurer() from public, anon, authenticated;
+revoke execute on function public.protection_insurer_eligible_for_enrolment(uuid) from public, anon, authenticated;
+revoke execute on function public.protection_benefit_used(uuid, uuid, integer) from public, anon, authenticated;
+revoke execute on function public.protection_claim_event(uuid, text, jsonb) from public, anon, authenticated;
+revoke execute on function public.protection_log_access(text, text, text, text) from public, anon, authenticated;
+-- audit_logs is append-only for clients: block TRUNCATE entirely.
+revoke truncate on public.audit_logs from public, anon, authenticated;
+-- Future functions must not default to PUBLIC/anon execute.
+alter default privileges for role postgres in schema public
+  revoke execute on functions from public, anon;
+alter default privileges for role postgres in schema public
+  grant execute on functions to authenticated;

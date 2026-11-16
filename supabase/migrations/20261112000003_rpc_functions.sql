@@ -21,7 +21,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_hash text;
 begin
   if v_uid is null then
@@ -56,7 +56,7 @@ stable
 security definer
 set search_path = pg_catalog, public, pg_temp
 as $$
-  select p.circle_user_hash from public.profiles p where p.id = auth.uid();
+  select p.circle_user_hash from public.profiles p where p.id = (select auth.uid());
 $$;
 revoke execute on function public.whispers_own_hash() from public, anon, authenticated;
 
@@ -124,7 +124,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_caller uuid := auth.uid();
+  v_caller uuid := (select auth.uid());
   v_caller_hash text;
   v_target uuid;
   v_recent int;
@@ -657,7 +657,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_count int;
   v_inv public.supporter_invitations;
 begin
@@ -705,13 +705,13 @@ as $$
 declare
   v_result jsonb;
 begin
-  if auth.uid() is null or not public.is_active_user() then
+  if (select auth.uid()) is null or not public.is_active_user() then
     raise exception 'Active sign-in required';
   end if;
   select coalesce(jsonb_agg(to_jsonb(i) order by i.created_at desc), '[]'::jsonb)
   into v_result
   from public.supporter_invitations i
-  where i.user_id = auth.uid();
+  where i.user_id = (select auth.uid());
   return v_result;
 end;
 $$;
@@ -729,11 +729,11 @@ as $$
 declare
   v_inv public.supporter_invitations;
 begin
-  if auth.uid() is null or not public.is_active_user() then
+  if (select auth.uid()) is null or not public.is_active_user() then
     raise exception 'Active sign-in required';
   end if;
   select * into v_inv from public.supporter_invitations
-  where id = p_invitation_id and user_id = auth.uid()
+  where id = p_invitation_id and user_id = (select auth.uid())
   for update;
   if not found then raise exception 'Invitation not found'; end if;
 
@@ -772,12 +772,12 @@ as $$
 declare
   v_messages jsonb;
 begin
-  if auth.uid() is null or not public.is_active_user() then
+  if (select auth.uid()) is null or not public.is_active_user() then
     raise exception 'Active sign-in required';
   end if;
   if not exists (
     select 1 from public.supporter_invitations
-    where id = p_invitation_id and user_id = auth.uid() and status = 'active'
+    where id = p_invitation_id and user_id = (select auth.uid()) and status = 'active'
   ) then raise exception 'Active invitation not found'; end if;
   select coalesce(jsonb_agg(to_jsonb(m) order by m.created_at), '[]'::jsonb)
   into v_messages
@@ -795,12 +795,12 @@ as $$
 declare
   v_message public.supporter_messages;
 begin
-  if auth.uid() is null or not public.is_active_user() then
+  if (select auth.uid()) is null or not public.is_active_user() then
     raise exception 'Active sign-in required';
   end if;
   if not exists (
     select 1 from public.supporter_invitations
-    where id = p_invitation_id and user_id = auth.uid() and status = 'active'
+    where id = p_invitation_id and user_id = (select auth.uid()) and status = 'active'
   ) then raise exception 'Active invitation not found'; end if;
   if p_content is null or length(btrim(p_content)) = 0 or length(p_content) > 500 then
     raise exception 'Message must be 1-500 characters';
@@ -821,15 +821,15 @@ as $$
 declare
   v_id uuid;
 begin
-  if auth.uid() is null or not public.is_active_user() then
+  if (select auth.uid()) is null or not public.is_active_user() then
     raise exception 'Active sign-in required';
   end if;
   if not exists (
     select 1 from public.supporter_invitations
-    where id = p_invitation_id and user_id = auth.uid()
+    where id = p_invitation_id and user_id = (select auth.uid())
   ) then raise exception 'Invitation not found'; end if;
   insert into public.supporter_feedback (user_id, invitation_id, felt_supported)
-  values (auth.uid(), p_invitation_id, p_felt_supported)
+  values ((select auth.uid()), p_invitation_id, p_felt_supported)
   returning id into v_id;
   return v_id;
 end;
@@ -870,7 +870,7 @@ begin
   exception when others then
     v_ip := null;
   end;
-  v_actor := coalesce(nullif(split_part(v_ip, ',', 1), ''), auth.uid()::text, 'anonymous');
+  v_actor := coalesce(nullif(split_part(v_ip, ',', 1), ''), (select auth.uid())::text, 'anonymous');
   perform pg_advisory_xact_lock(hashtext(v_actor));
   delete from public.company_code_validation_attempts
   where actor_key = v_actor and attempted_at < now() - interval '1 hour';
@@ -906,7 +906,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_code text := upper(btrim(coalesce(p_code, '')));
   v_client public.b2b_clients;
   v_used int;
@@ -956,7 +956,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_today date := (now() at time zone 'Africa/Nairobi')::date;
   v_profile public.profiles;
   v_streak int := 0;
@@ -1116,7 +1116,7 @@ as $$
   update public.precious_pacts
   set play_count = coalesce(play_count, 0) + 1
   where id = pact_id
-    and user_id = auth.uid();
+    and user_id = (select auth.uid());
 $$;
 revoke execute on function public.increment_pact_play_count(uuid) from public, anon;
 grant execute on function public.increment_pact_play_count(uuid) to authenticated;
@@ -1274,7 +1274,7 @@ begin
   update public.crisis_alerts
   set resolved = true,
       resolved_at = now(),
-      resolved_by = auth.uid(),
+      resolved_by = (select auth.uid()),
       admin_notes = coalesce(nullif(btrim(coalesce(p_notes, '')), ''), admin_notes)
   where id = p_alert_id
   returning * into v_row;
@@ -1306,7 +1306,7 @@ begin
   update public.crisis_alerts
   set escalated = true,
       escalated_at = now(),
-      escalated_by = auth.uid(),
+      escalated_by = (select auth.uid()),
       admin_notes = coalesce(admin_notes || E'\n', '') || v_note
   where id = p_alert_id
   returning * into v_row;
@@ -1379,7 +1379,7 @@ begin
   end if;
 
   insert into public.broadcasts (title, message, audience, sent_at, created_by)
-  values (btrim(p_title), btrim(p_message), v_audience, now(), auth.uid())
+  values (btrim(p_title), btrim(p_message), v_audience, now(), (select auth.uid()))
   returning * into v_broadcast;
 
   with recipients as (

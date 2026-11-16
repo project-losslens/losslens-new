@@ -60,7 +60,7 @@ as $$
   select i.id
   from public.insurers i
   join public.profiles p on p.id = i.profile_id
-  where i.profile_id = auth.uid()
+  where i.profile_id = (select auth.uid())
     and i.status = 'active'
     and p.role = 'insurer'
     and p.status = 'active'
@@ -147,7 +147,7 @@ begin
   end if;
   insert into public.audit_logs (actor_id, action, target_table, target_id, metadata)
   values (
-    auth.uid(),
+    (select auth.uid()),
     left('protection_access:' || p_action, 120),
     left(p_resource, 120),
     left(coalesce(p_resource_ref, ''), 120),
@@ -174,7 +174,7 @@ drop policy if exists protection_memberships_read on public.protection_membershi
 create policy protection_memberships_read on public.protection_memberships for select to authenticated
   using (
     public.is_super_admin()
-    or user_id = auth.uid()
+    or user_id = (select auth.uid())
     or insurer_id = public.protection_insurer_id()
   );
 
@@ -192,7 +192,7 @@ drop policy if exists protection_consents_member_select on public.protection_con
 create policy protection_consents_member_select on public.protection_consents for select to authenticated
   using (exists (
     select 1 from public.protection_memberships m
-    where m.id = membership_id and m.user_id = auth.uid()
+    where m.id = membership_id and m.user_id = (select auth.uid())
   ));
 -- No insert/update/delete policy for clients: member_set_consent is definer.
 
@@ -222,7 +222,7 @@ create policy protection_events_read on public.protection_events for select to a
     public.is_super_admin()
     or insurer_id = public.protection_insurer_id()
     or exists (select 1 from public.protection_memberships m
-               where m.id = membership_id and m.user_id = auth.uid())
+               where m.id = membership_id and m.user_id = (select auth.uid()))
   );
 
 -- ---------------------------------------------------------------------------
@@ -239,7 +239,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_id uuid;
   v_insurer public.insurers;
 begin
@@ -312,7 +312,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
   if p_scope not in ('status_updates', 'session_summaries', 'billing_contact') then
@@ -357,7 +357,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_m public.protection_memberships;
   v_insurer_id uuid := public.protection_insurer_id();
 begin
@@ -400,7 +400,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_report jsonb;
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
@@ -436,7 +436,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_m public.protection_memberships;
   v_id uuid;
 begin
@@ -584,7 +584,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_result jsonb;
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
@@ -823,7 +823,7 @@ create policy ppv_read on public.protection_plan_versions for select to authenti
     or exists (
       select 1 from public.protection_policies p
       join public.protection_memberships m on m.id = p.membership_id
-      where p.plan_version_id = protection_plan_versions.id and m.user_id = auth.uid()
+      where p.plan_version_id = protection_plan_versions.id and m.user_id = (select auth.uid())
     )
   );
 
@@ -837,7 +837,7 @@ create policy pb_read on public.protection_benefits for select to authenticated
         and (v.insurer_id = public.protection_insurer_id()
              or exists (select 1 from public.protection_policies p
                         join public.protection_memberships m on m.id = p.membership_id
-                        where p.plan_version_id = v.id and m.user_id = auth.uid()))
+                        where p.plan_version_id = v.id and m.user_id = (select auth.uid())))
     )
   );
 
@@ -847,7 +847,7 @@ create policy pp_read on public.protection_policies for select to authenticated
     public.is_super_admin()
     or insurer_id = public.protection_insurer_id()
     or exists (select 1 from public.protection_memberships m
-               where m.id = membership_id and m.user_id = auth.uid())
+               where m.id = membership_id and m.user_id = (select auth.uid()))
   );
 
 drop policy if exists proster_read on public.protection_roster_entries;
@@ -903,11 +903,11 @@ begin
   ) values (
     p_plan_id, v_insurer, v_version_no, 'draft', p_benefit_structure,
     coalesce(p_terms, '{}'::jsonb), p_premium_amount, p_premium_frequency,
-    p_effective_from, auth.uid()
+    p_effective_from, (select auth.uid())
   ) returning id into v_id;
 
   insert into public.protection_events (insurer_id, actor_id, event_type, detail)
-  values (v_insurer, auth.uid(), 'plan_version_created',
+  values (v_insurer, (select auth.uid()), 'plan_version_created',
           jsonb_build_object('plan_id', p_plan_id, 'version_id', v_id, 'version_no', v_version_no));
   perform public.protection_log_access('create_plan_version', 'protection_plan_versions', v_id::text, 'product configuration');
   return v_id;
@@ -1002,7 +1002,7 @@ begin
     raise exception 'Version has no active benefits';
   end if;
   update public.protection_plan_versions
-  set status = 'approved', approved_by = auth.uid(), approved_at = now()
+  set status = 'approved', approved_by = (select auth.uid()), approved_at = now()
   where id = p_version_id;
   update public.protection_plan_versions
   set status = 'superseded'
@@ -1069,11 +1069,11 @@ begin
     case when v_wait_days > 0
          then (coalesce(p_commencement_date, current_date)::timestamp + make_interval(days => v_wait_days))
          else null end,
-    auth.uid()
+    (select auth.uid())
   ) returning id into v_id;
 
   insert into public.protection_events (membership_id, insurer_id, actor_id, event_type, detail)
-  values (p_membership_id, v_insurer, auth.uid(), 'policy_issued',
+  values (p_membership_id, v_insurer, (select auth.uid()), 'policy_issued',
           jsonb_build_object('policy_id', v_id, 'policy_number', btrim(p_policy_number),
                              'plan_version_id', p_plan_version_id));
   perform public.protection_log_access('issue_policy', 'protection_policies', v_id::text, 'policy issuance');
@@ -1105,11 +1105,11 @@ begin
     raise exception 'Policy cannot be cancelled from status %', v_p.status;
   end if;
   update public.protection_policies
-  set status = 'cancelled', cancelled_at = now(), cancelled_by = auth.uid(),
+  set status = 'cancelled', cancelled_at = now(), cancelled_by = (select auth.uid()),
       cancellation_reason = left(btrim(p_reason), 500), updated_at = now()
   where id = p_policy_id;
   insert into public.protection_events (membership_id, insurer_id, actor_id, event_type, detail)
-  values (v_p.membership_id, v_insurer, auth.uid(), 'policy_cancelled',
+  values (v_p.membership_id, v_insurer, (select auth.uid()), 'policy_cancelled',
           jsonb_build_object('policy_id', p_policy_id, 'reason', left(btrim(p_reason), 200)));
   perform public.protection_log_access('cancel_policy', 'protection_policies', p_policy_id::text, 'policy cancellation');
 end;
@@ -1160,7 +1160,7 @@ begin
     insert into public.protection_roster_entries (
       insurer_id, member_reference, contact_email, uploaded_by
     ) values (
-      v_insurer, coalesce(v_ref, 'email:' || v_email), v_email, auth.uid()
+      v_insurer, coalesce(v_ref, 'email:' || v_email), v_email, (select auth.uid())
     );
 
     -- Match to a membership by member_reference (exact) — memberships are
@@ -1183,7 +1183,7 @@ begin
   end loop;
 
   insert into public.protection_events (insurer_id, actor_id, event_type, detail, is_demo)
-  values (v_insurer, auth.uid(), 'roster_uploaded',
+  values (v_insurer, (select auth.uid()), 'roster_uploaded',
           jsonb_build_object('received', v_received, 'matched', v_matched,
                              'unmatched', v_unmatched, 'rejected', v_rejected), false);
   perform public.protection_log_access('upload_roster', 'protection_roster_entries', null,
@@ -1205,7 +1205,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_result jsonb;
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
@@ -1349,7 +1349,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_m public.protection_memberships;
   v_p public.protection_policies;
   v_v public.protection_plan_versions;
@@ -1479,7 +1479,7 @@ begin
 
   update public.pre_auth_vouchers
   set insurer_decision = p_decision,
-      insurer_decided_by = auth.uid(),
+      insurer_decided_by = (select auth.uid()),
       insurer_decided_at = now(),
       insurer_decision_reason = nullif(left(btrim(coalesce(p_reason,'')), 1000), ''),
       authorised_fee = v_fee,
@@ -1498,7 +1498,7 @@ begin
   end if;
 
   insert into public.protection_events (membership_id, insurer_id, actor_id, event_type, detail)
-  values (v_pav.membership_id, v_insurer, auth.uid(), 'preauth_decided',
+  values (v_pav.membership_id, v_insurer, (select auth.uid()), 'preauth_decided',
           jsonb_build_object('preauth_id', p_preauth_id, 'decision', p_decision,
                              'fee', v_fee));
   perform public.protection_log_access('decide_preauth', 'pre_auth_vouchers', p_preauth_id::text,
@@ -1572,7 +1572,7 @@ declare
   v_decision text;
 begin
   if not public.is_active_user() or not exists (
-    select 1 from public.therapists where id = auth.uid() and status = 'active'
+    select 1 from public.therapists where id = (select auth.uid()) and status = 'active'
   ) then raise exception 'Active therapist verification required'; end if;
 
   select pav.insurer_decision into v_decision
@@ -1584,13 +1584,13 @@ begin
   end if;
 
   update public.provider_vouchers
-  set therapist_id = auth.uid(), status = 'accepted', updated_at = now()
+  set therapist_id = (select auth.uid()), status = 'accepted', updated_at = now()
   where id = p_voucher_id and expires_at > now()
-    and ((status = 'pending' and therapist_id is null) or (status = 'assigned' and therapist_id = auth.uid()))
+    and ((status = 'pending' and therapist_id is null) or (status = 'assigned' and therapist_id = (select auth.uid())))
   returning * into v_result;
   if not found then raise exception 'Voucher is unavailable'; end if;
   update public.pre_auth_vouchers
-  set therapist_id = auth.uid(), status = 'accepted', updated_at = now()
+  set therapist_id = (select auth.uid()), status = 'accepted', updated_at = now()
   where id = v_result.pre_auth_voucher_id;
   return v_result;
 end;

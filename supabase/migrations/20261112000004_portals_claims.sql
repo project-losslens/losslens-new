@@ -82,11 +82,11 @@ alter table public.provider_payouts enable row level security;
 
 drop policy if exists therapist_self_select on public.therapists;
 create policy therapist_self_select on public.therapists for select to authenticated
-  using (id = auth.uid() and public.is_active_user());
+  using (id = (select auth.uid()) and public.is_active_user());
 drop policy if exists therapist_self_update on public.therapists;
 create policy therapist_self_update on public.therapists for update to authenticated
-  using (id = auth.uid() and public.is_active_user())
-  with check (id = auth.uid() and public.is_active_user());
+  using (id = (select auth.uid()) and public.is_active_user())
+  with check (id = (select auth.uid()) and public.is_active_user());
 drop policy if exists active_therapists_public_select on public.therapists;
 create policy active_therapists_public_select on public.therapists for select to authenticated
   using (status = 'active' and public.is_active_user());
@@ -102,35 +102,35 @@ on conflict (id) do update set public = false;
 drop policy if exists therapist_documents_read on storage.objects;
 create policy therapist_documents_read on storage.objects for select to authenticated
   using (bucket_id = 'therapist-documents'
-    and ((storage.foldername(name))[1] = auth.uid()::text or public.is_super_admin()));
+    and ((storage.foldername(name))[1] = (select auth.uid())::text or public.is_super_admin()));
 drop policy if exists therapist_documents_insert on storage.objects;
 create policy therapist_documents_insert on storage.objects for insert to authenticated
   with check (bucket_id = 'therapist-documents'
-    and (storage.foldername(name))[1] = auth.uid()::text);
+    and (storage.foldername(name))[1] = (select auth.uid())::text);
 drop policy if exists therapist_documents_update on storage.objects;
 create policy therapist_documents_update on storage.objects for update to authenticated
   using (bucket_id = 'therapist-documents'
-    and (storage.foldername(name))[1] = auth.uid()::text)
+    and (storage.foldername(name))[1] = (select auth.uid())::text)
   with check (bucket_id = 'therapist-documents'
-    and (storage.foldername(name))[1] = auth.uid()::text);
+    and (storage.foldername(name))[1] = (select auth.uid())::text);
 
 drop policy if exists provider_vouchers_owner_select on public.provider_vouchers;
 create policy provider_vouchers_owner_select on public.provider_vouchers for select to authenticated
-  using ((user_id = auth.uid() or therapist_id = auth.uid()) and public.is_active_user());
+  using ((user_id = (select auth.uid()) or therapist_id = (select auth.uid())) and public.is_active_user());
 drop policy if exists provider_vouchers_super_admin_all on public.provider_vouchers;
 create policy provider_vouchers_super_admin_all on public.provider_vouchers for all to authenticated
   using (public.is_super_admin()) with check (public.is_super_admin());
 
 drop policy if exists provider_claims_therapist_select on public.provider_claims;
 create policy provider_claims_therapist_select on public.provider_claims for select to authenticated
-  using (therapist_id = auth.uid() and public.is_active_user());
+  using (therapist_id = (select auth.uid()) and public.is_active_user());
 drop policy if exists provider_claims_super_admin_all on public.provider_claims;
 create policy provider_claims_super_admin_all on public.provider_claims for all to authenticated
   using (public.is_super_admin()) with check (public.is_super_admin());
 
 drop policy if exists provider_payouts_therapist_select on public.provider_payouts;
 create policy provider_payouts_therapist_select on public.provider_payouts for select to authenticated
-  using (therapist_id = auth.uid() and public.is_active_user());
+  using (therapist_id = (select auth.uid()) and public.is_active_user());
 drop policy if exists provider_payouts_super_admin_all on public.provider_payouts;
 create policy provider_payouts_super_admin_all on public.provider_payouts for all to authenticated
   using (public.is_super_admin()) with check (public.is_super_admin());
@@ -165,7 +165,7 @@ begin
   update public.therapists
   set status = p_status,
       verified_at = case when p_status = 'active' then now() else null end,
-      verified_by = case when p_status = 'active' then auth.uid() else null end
+      verified_by = case when p_status = 'active' then (select auth.uid()) else null end
   where id = p_therapist_id;
   if not found then raise exception 'Therapist not found'; end if;
   perform public.log_admin_action('therapist_status_changed', 'therapists', p_therapist_id::text,
@@ -183,12 +183,12 @@ declare
   v_result public.provider_vouchers;
 begin
   if not public.is_active_user() or not exists (
-    select 1 from public.therapists where id = auth.uid() and status = 'active'
+    select 1 from public.therapists where id = (select auth.uid()) and status = 'active'
   ) then raise exception 'Active therapist verification required'; end if;
   update public.provider_vouchers
-  set therapist_id = auth.uid(), status = 'accepted', updated_at = now()
+  set therapist_id = (select auth.uid()), status = 'accepted', updated_at = now()
   where id = p_voucher_id and expires_at > now()
-    and (status = 'pending' or (status = 'assigned' and therapist_id = auth.uid()))
+    and (status = 'pending' or (status = 'assigned' and therapist_id = (select auth.uid())))
   returning * into v_result;
   if not found then raise exception 'Voucher is unavailable'; end if;
   return v_result;
@@ -209,10 +209,10 @@ declare
   v_count integer;
 begin
   if not public.is_active_user() or not exists (
-    select 1 from public.therapists where id = auth.uid() and status = 'active'
+    select 1 from public.therapists where id = (select auth.uid()) and status = 'active'
   ) then raise exception 'Active therapist verification required'; end if;
   select * into v_voucher from public.provider_vouchers
-  where id = p_voucher_id and therapist_id = auth.uid() and status = 'accepted'
+  where id = p_voucher_id and therapist_id = (select auth.uid()) and status = 'accepted'
   for update;
   if not found then raise exception 'Accepted voucher not found'; end if;
   if p_notes is null or length(btrim(p_notes)) = 0 or length(p_notes) > 4000 then
@@ -225,7 +225,7 @@ begin
   where voucher_id = p_voucher_id and status <> 'rejected';
   if v_count >= v_voucher.max_sessions then raise exception 'Voucher sessions are exhausted'; end if;
   insert into public.provider_claims (voucher_id, therapist_id, clinical_notes, icd_code, claim_amount)
-  values (p_voucher_id, auth.uid(), btrim(p_notes), nullif(btrim(coalesce(p_icd, '')), ''), p_amount)
+  values (p_voucher_id, (select auth.uid()), btrim(p_notes), nullif(btrim(coalesce(p_icd, '')), ''), p_amount)
   returning id into v_claim_id;
   return v_claim_id;
 end;
@@ -395,7 +395,7 @@ as $$
   select exists (
     select 1 from public.insurers i
     join public.profiles p on p.id = i.profile_id
-    where i.id = p_insurer_id and i.profile_id = auth.uid()
+    where i.id = p_insurer_id and i.profile_id = (select auth.uid())
       and i.status = 'active' and p.role = 'insurer' and p.status = 'active'
   );
 $$;
@@ -405,8 +405,8 @@ create policy insurers_super_admin_all on public.insurers for all to authenticat
   using (public.is_super_admin()) with check (public.is_super_admin());
 drop policy if exists insurers_self_select on public.insurers;
 create policy insurers_self_select on public.insurers for select to authenticated
-  using (profile_id = auth.uid() and status = 'active' and public.is_active_user()
-    and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'insurer'));
+  using (profile_id = (select auth.uid()) and status = 'active' and public.is_active_user()
+    and exists (select 1 from public.profiles p where p.id = (select auth.uid()) and p.role = 'insurer'));
 
 drop policy if exists insurer_partnerships_super_admin_all on public.insurer_partnerships;
 create policy insurer_partnerships_super_admin_all on public.insurer_partnerships for all to authenticated
@@ -457,7 +457,7 @@ declare
   v_insurer_id uuid;
 begin
   select i.id into v_insurer_id from public.insurers i
-  where i.profile_id = auth.uid() and i.status = 'active';
+  where i.profile_id = (select auth.uid()) and i.status = 'active';
   if v_insurer_id is null or not public.is_active_insurer(v_insurer_id) then
     raise exception 'Active insurer access required';
   end if;
@@ -480,17 +480,17 @@ declare
   v_insurer_id uuid;
 begin
   select id into v_insurer_id from public.insurers
-  where profile_id = auth.uid() and status = 'active';
+  where profile_id = (select auth.uid()) and status = 'active';
   if v_insurer_id is null or not public.is_active_insurer(v_insurer_id) then
     raise exception 'Active insurer access required';
   end if;
   update public.claim_submissions
   set insurer_status = 'approved', insurer_notes = nullif(left(btrim(coalesce(p_notes, '')), 2000), ''),
-      insurer_reviewed_at = now(), insurer_reviewed_by = auth.uid()
+      insurer_reviewed_at = now(), insurer_reviewed_by = (select auth.uid())
   where claim_id = p_claim_id and insurer_id = v_insurer_id and insurer_status = 'submitted';
   if not found then raise exception 'Submitted claim not found'; end if;
   insert into public.audit_logs (actor_id, action, target_table, target_id, metadata)
-  values (auth.uid(), 'insurer_claim_approved', 'claim_submissions', p_claim_id::text, '{}'::jsonb);
+  values ((select auth.uid()), 'insurer_claim_approved', 'claim_submissions', p_claim_id::text, '{}'::jsonb);
 end;
 $$;
 
@@ -504,18 +504,18 @@ declare
   v_insurer_id uuid;
 begin
   select id into v_insurer_id from public.insurers
-  where profile_id = auth.uid() and status = 'active';
+  where profile_id = (select auth.uid()) and status = 'active';
   if v_insurer_id is null or not public.is_active_insurer(v_insurer_id) then
     raise exception 'Active insurer access required';
   end if;
   if p_notes is null or length(btrim(p_notes)) = 0 then raise exception 'A rejection reason is required'; end if;
   update public.claim_submissions
   set insurer_status = 'rejected', insurer_notes = left(btrim(p_notes), 2000),
-      insurer_reviewed_at = now(), insurer_reviewed_by = auth.uid()
+      insurer_reviewed_at = now(), insurer_reviewed_by = (select auth.uid())
   where claim_id = p_claim_id and insurer_id = v_insurer_id and insurer_status = 'submitted';
   if not found then raise exception 'Submitted claim not found'; end if;
   insert into public.audit_logs (actor_id, action, target_table, target_id, metadata)
-  values (auth.uid(), 'insurer_claim_rejected', 'claim_submissions', p_claim_id::text,
+  values ((select auth.uid()), 'insurer_claim_rejected', 'claim_submissions', p_claim_id::text,
     jsonb_build_object('reason', left(btrim(p_notes), 2000)));
 end;
 $$;
@@ -594,7 +594,7 @@ as $$
 declare
   v_insurer_id uuid;
 begin
-  select id into v_insurer_id from public.insurers where profile_id = auth.uid() and status = 'active';
+  select id into v_insurer_id from public.insurers where profile_id = (select auth.uid()) and status = 'active';
   if not public.is_super_admin() and (v_insurer_id is null or not public.is_active_insurer(v_insurer_id)) then
     raise exception 'Active insurer or super admin access required';
   end if;
@@ -615,7 +615,7 @@ as $$
 declare
   v_insurer_id uuid;
 begin
-  select id into v_insurer_id from public.insurers where profile_id = auth.uid() and status = 'active';
+  select id into v_insurer_id from public.insurers where profile_id = (select auth.uid()) and status = 'active';
   if not public.is_super_admin() and (v_insurer_id is null or not public.is_active_insurer(v_insurer_id)) then
     raise exception 'Active insurer or super admin access required';
   end if;
@@ -768,10 +768,10 @@ create policy pre_auth_vouchers_super_admin_all on public.pre_auth_vouchers for 
   using (public.is_super_admin()) with check (public.is_super_admin());
 drop policy if exists pre_auth_vouchers_owner_select on public.pre_auth_vouchers;
 create policy pre_auth_vouchers_owner_select on public.pre_auth_vouchers for select to authenticated
-  using (user_id = auth.uid() and public.is_active_user());
+  using (user_id = (select auth.uid()) and public.is_active_user());
 drop policy if exists pre_auth_vouchers_therapist_select on public.pre_auth_vouchers;
 create policy pre_auth_vouchers_therapist_select on public.pre_auth_vouchers for select to authenticated
-  using (therapist_id = auth.uid() and public.is_active_user());
+  using (therapist_id = (select auth.uid()) and public.is_active_user());
 
 create or replace function public.pre_authorize_voucher(
   p_user_id uuid, p_crisis_alert_id uuid, p_max_sessions integer
@@ -787,7 +787,7 @@ declare
   v_insurer_id uuid;
   v_b2b_client_id uuid;
 begin
-  if auth.role() <> 'service_role' and auth.uid() is distinct from p_user_id then
+  if auth.role() <> 'service_role' and (select auth.uid()) is distinct from p_user_id then
     raise exception 'Only the user or a trusted service can authorize this voucher';
   end if;
   if p_max_sessions is null or p_max_sessions < 1 or p_max_sessions > 10 then
@@ -847,7 +847,7 @@ as $$
 declare
   v_alert_id uuid;
 begin
-  if auth.role() <> 'service_role' and auth.uid() is distinct from p_user_id then
+  if auth.role() <> 'service_role' and (select auth.uid()) is distinct from p_user_id then
     raise exception 'Only the user or a trusted service can record this crisis event';
   end if;
   if p_source is null or p_source not in ('chat', 'diary') then raise exception 'Invalid crisis source'; end if;
@@ -885,16 +885,16 @@ declare
   v_result public.provider_vouchers;
 begin
   if not public.is_active_user() or not exists (
-    select 1 from public.therapists where id = auth.uid() and status = 'active'
+    select 1 from public.therapists where id = (select auth.uid()) and status = 'active'
   ) then raise exception 'Active therapist verification required'; end if;
   update public.provider_vouchers
-  set therapist_id = auth.uid(), status = 'accepted', updated_at = now()
+  set therapist_id = (select auth.uid()), status = 'accepted', updated_at = now()
   where id = p_voucher_id and expires_at > now()
-    and ((status = 'pending' and therapist_id is null) or (status = 'assigned' and therapist_id = auth.uid()))
+    and ((status = 'pending' and therapist_id is null) or (status = 'assigned' and therapist_id = (select auth.uid())))
   returning * into v_result;
   if not found then raise exception 'Voucher is unavailable'; end if;
   update public.pre_auth_vouchers
-  set therapist_id = auth.uid(), status = 'accepted', updated_at = now()
+  set therapist_id = (select auth.uid()), status = 'accepted', updated_at = now()
   where id = v_result.pre_auth_voucher_id;
   return v_result;
 end;
@@ -989,10 +989,10 @@ declare
   v_claim_count integer;
 begin
   if not public.is_active_user() or not exists (
-    select 1 from public.therapists where id = auth.uid() and status = 'active'
+    select 1 from public.therapists where id = (select auth.uid()) and status = 'active'
   ) then raise exception 'Active therapist verification required'; end if;
   select * into v_voucher from public.provider_vouchers
-  where pre_auth_voucher_id = p_voucher_id and therapist_id = auth.uid()
+  where pre_auth_voucher_id = p_voucher_id and therapist_id = (select auth.uid())
     and status = 'accepted' and expires_at > now()
   for update;
   if not found then raise exception 'Accepted voucher not found'; end if;
@@ -1004,7 +1004,7 @@ begin
   where voucher_id = v_voucher.id and status <> 'rejected';
   if v_claim_count >= v_voucher.max_sessions then raise exception 'Voucher sessions are exhausted'; end if;
   insert into public.provider_claims (voucher_id, therapist_id, clinical_notes, icd_code, claim_amount)
-  values (v_voucher.id, auth.uid(), btrim(p_notes), nullif(left(btrim(coalesce(p_icd, '')), 20), ''), v_voucher.fee_per_session)
+  values (v_voucher.id, (select auth.uid()), btrim(p_notes), nullif(left(btrim(coalesce(p_icd, '')), 20), ''), v_voucher.fee_per_session)
   returning id into v_claim_id;
   if v_voucher.insurer_id is not null then
     insert into public.claim_submissions (claim_id, insurer_id)
@@ -1034,11 +1034,11 @@ declare
 begin
   select pre_auth_voucher_id, fee_per_session into v_pre_auth_voucher_id, v_fee
   from public.provider_vouchers
-  where id = p_voucher_id and therapist_id = auth.uid() and status = 'accepted';
+  where id = p_voucher_id and therapist_id = (select auth.uid()) and status = 'accepted';
   if not found then
     select pre_auth_voucher_id, fee_per_session into v_pre_auth_voucher_id, v_fee
     from public.provider_vouchers
-    where pre_auth_voucher_id = p_voucher_id and therapist_id = auth.uid() and status = 'accepted';
+    where pre_auth_voucher_id = p_voucher_id and therapist_id = (select auth.uid()) and status = 'accepted';
   end if;
   if v_pre_auth_voucher_id is null then raise exception 'Accepted voucher not found'; end if;
   if p_amount is distinct from v_fee then raise exception 'Claim amount must match the authorized session fee'; end if;
@@ -1111,7 +1111,7 @@ begin
   select profile_id into v_insurer_user_id from public.insurers
   where id = p_insurer_id and status = 'active';
   if not public.is_super_admin() and (v_insurer_user_id is null
-      or v_insurer_user_id <> auth.uid() or not public.is_active_insurer(p_insurer_id)) then
+      or v_insurer_user_id <> (select auth.uid()) or not public.is_active_insurer(p_insurer_id)) then
     raise exception 'Insurer or super admin access required';
   end if;
   select * into v_invoice from public.bulk_invoices
@@ -1128,7 +1128,7 @@ begin
     mpesa_or_ach_ref = nullif(left(btrim(coalesce(p_ref, '')), 200), '')
   where id = p_invoice_id;
   update public.claim_submissions s
-  set insurer_status = 'paid', insurer_reviewed_at = now(), insurer_reviewed_by = auth.uid()
+  set insurer_status = 'paid', insurer_reviewed_at = now(), insurer_reviewed_by = (select auth.uid())
   from public.bulk_invoice_claims bic
   where bic.invoice_id = p_invoice_id and bic.claim_id = s.id;
   update public.provider_claims c
@@ -1137,7 +1137,7 @@ begin
   join public.claim_submissions s on s.id = bic.claim_id
   where bic.invoice_id = p_invoice_id and c.id = s.claim_id;
   insert into public.audit_logs (actor_id, action, target_table, target_id, metadata)
-  values (auth.uid(), 'insurer_bulk_reimbursement', 'bulk_invoices', p_invoice_id::text,
+  values ((select auth.uid()), 'insurer_bulk_reimbursement', 'bulk_invoices', p_invoice_id::text,
     jsonb_build_object('insurer_id', p_insurer_id, 'amount', v_invoice.total_amount, 'reference', left(coalesce(p_ref, ''), 200)));
   return v_invoice.total_amount;
 end;
@@ -1153,7 +1153,7 @@ declare
   v_insurer_id uuid;
 begin
   select id into v_insurer_id from public.insurers
-  where profile_id = auth.uid() and status = 'active';
+  where profile_id = (select auth.uid()) and status = 'active';
   if v_insurer_id is null or not public.is_active_insurer(v_insurer_id) then
     raise exception 'Active insurer access required';
   end if;
@@ -1321,7 +1321,7 @@ declare
   v_insurer_id uuid;
 begin
   select id into v_insurer_id from public.insurers
-  where profile_id = auth.uid() and status = 'active';
+  where profile_id = (select auth.uid()) and status = 'active';
   if v_insurer_id is null or not public.is_active_insurer(v_insurer_id) then
     raise exception 'Active insurer access required';
   end if;
@@ -1373,7 +1373,7 @@ begin
       mpesa_or_ach_ref = left(btrim(p_reference), 200)
   where id = p_invoice_id;
   update public.claim_submissions s
-  set insurer_status = 'paid', insurer_reviewed_at = now(), insurer_reviewed_by = auth.uid()
+  set insurer_status = 'paid', insurer_reviewed_at = now(), insurer_reviewed_by = (select auth.uid())
   from public.bulk_invoice_claims bic
   where bic.invoice_id = p_invoice_id and bic.claim_id = s.id;
   update public.provider_claims c
@@ -1497,7 +1497,7 @@ begin
     raise exception 'Recently authenticated administrator access required';
   end if;
   insert into public.audit_logs (actor_id, action, target_table, target_id, metadata)
-  values (auth.uid(), left(p_action, 120), left(p_target_table, 120),
+  values ((select auth.uid()), left(p_action, 120), left(p_target_table, 120),
     left(p_target_id, 120), coalesce(p_metadata, '{}'::jsonb))
   returning id into v_id;
   return v_id;
@@ -1559,7 +1559,7 @@ begin
   update public.therapists
   set status = p_status,
       verified_at = case when p_status = 'active' then now() else null end,
-      verified_by = case when p_status = 'active' then auth.uid() else null end
+      verified_by = case when p_status = 'active' then (select auth.uid()) else null end
   where id = p_therapist_id;
   if not found then raise exception 'Therapist not found'; end if;
   perform public.log_admin_action('therapist_status_changed', 'therapists', p_therapist_id::text,
@@ -1599,10 +1599,10 @@ as $$
 declare
   v_profile jsonb;
 begin
-  if auth.uid() is null or not public.is_active_user() then
+  if (select auth.uid()) is null or not public.is_active_user() then
     raise exception 'Active sign-in required';
   end if;
-  select to_jsonb(t) into v_profile from public.therapists t where t.id = auth.uid();
+  select to_jsonb(t) into v_profile from public.therapists t where t.id = (select auth.uid());
   return v_profile;
 end;
 $$;

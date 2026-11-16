@@ -649,7 +649,7 @@ create or replace function public.current_user_role()
 returns text
 language sql stable security definer
 set search_path = pg_catalog, public, pg_temp
-as $$ select p.role from public.profiles p where p.id = auth.uid(); $$;
+as $$ select p.role from public.profiles p where p.id = (select auth.uid()); $$;
 
 create or replace function public.is_super_admin()
 returns boolean
@@ -658,7 +658,7 @@ set search_path = pg_catalog, public, pg_temp
 as $$
   select exists (
     select 1 from public.profiles p
-    where p.id = auth.uid()
+    where p.id = (select auth.uid())
       and p.role = 'super_admin'
   );
 $$;
@@ -670,7 +670,7 @@ set search_path = pg_catalog, public, pg_temp
 as $$
   select exists (
     select 1 from public.profiles p
-    where p.id = auth.uid()
+    where p.id = (select auth.uid())
       and p.role in ('admin', 'super_admin')
   );
 $$;
@@ -681,7 +681,7 @@ language sql stable security definer
 set search_path = pg_catalog, public, pg_temp
 as $$
   select coalesce(
-    (select p.status from public.profiles p where p.id = auth.uid()),
+    (select p.status from public.profiles p where p.id = (select auth.uid())),
     'active'
   ) <> 'suspended';
 $$;
@@ -727,7 +727,7 @@ begin
     raise exception 'Recently authenticated administrator access required';
   end if;
   insert into public.audit_logs (actor_id, action, target_table, target_id, metadata)
-  values (auth.uid(), left(p_action, 120), left(p_target_table, 120),
+  values ((select auth.uid()), left(p_action, 120), left(p_target_table, 120),
     left(p_target_id, 120), coalesce(p_metadata, '{}'::jsonb))
   returning id into v_id;
   return v_id;
@@ -814,7 +814,7 @@ begin
     return new;
   end if;
 
-  if new.id = auth.uid() then
+  if new.id = (select auth.uid()) then
     if old.circle_user_hash is not null
        and old.circle_user_hash is distinct from new.circle_user_hash then
       raise exception 'circle_user_hash is immutable once set';
@@ -922,7 +922,7 @@ begin
   end if;
 
   if old.role = 'super_admin' and old.status = 'active' then
-    if old.id = auth.uid() then
+    if old.id = (select auth.uid()) then
       raise exception 'A super_admin cannot delete their own account';
     end if;
     perform pg_advisory_xact_lock(19830716, 1);
@@ -950,7 +950,7 @@ as $$
 begin
   if tg_op = 'DELETE' then
     insert into public.audit_logs (actor_id, action, target_table, target_id, metadata)
-    values (auth.uid(), 'profiles.delete', 'profiles', old.id::text,
+    values ((select auth.uid()), 'profiles.delete', 'profiles', old.id::text,
             jsonb_build_object('role', old.role, 'status', old.status));
     return old;
   end if;
@@ -964,7 +964,7 @@ begin
     or old.b2b_client_id is distinct from new.b2b_client_id
   then
     insert into public.audit_logs (actor_id, action, target_table, target_id, metadata)
-    values (auth.uid(), 'profiles.privileged_update', 'profiles', new.id::text,
+    values ((select auth.uid()), 'profiles.privileged_update', 'profiles', new.id::text,
             jsonb_build_object(
               'role', jsonb_build_object('old', old.role, 'new', new.role),
               'status', jsonb_build_object('old', old.status, 'new', new.status),
@@ -1089,7 +1089,7 @@ create trigger whispers_matches_touch_updated_at
   for each row execute function public.touch_updated_at();
 
 -- Circle anonymity: scrub identity columns on insert; record real author
--- server-side from auth.uid().
+-- server-side from (select auth.uid()).
 create or replace function public.circle_messages_scrub_identity()
 returns trigger
 language plpgsql
@@ -1113,9 +1113,9 @@ security definer
 set search_path = pg_catalog, public
 as $$
 begin
-  if auth.uid() is not null then
+  if (select auth.uid()) is not null then
     insert into public.circle_message_authors (message_id, user_id)
-    values (new.id, auth.uid())
+    values (new.id, (select auth.uid()))
     on conflict (message_id) do nothing;
   end if;
   return new;
@@ -1147,7 +1147,7 @@ begin
 
   insert into public.audit_logs (actor_id, action, target_table, target_id, metadata)
   values (
-    auth.uid(),
+    (select auth.uid()),
     tg_table_name || '.' || lower(tg_op),
     tg_table_name,
     left(v_id, 120),

@@ -28,12 +28,12 @@ create index if not exists urge_toolkit_sessions_user_idx
 drop policy if exists urge_toolkit_sessions_owner_select on public.urge_toolkit_sessions;
 create policy urge_toolkit_sessions_owner_select on public.urge_toolkit_sessions
   for select to authenticated
-  using (user_id = auth.uid() and public.is_active_user());
+  using (user_id = (select auth.uid()) and public.is_active_user());
 
 drop policy if exists urge_toolkit_sessions_owner_insert on public.urge_toolkit_sessions;
 create policy urge_toolkit_sessions_owner_insert on public.urge_toolkit_sessions
   for insert to authenticated
-  with check (user_id = auth.uid() and public.is_active_user());
+  with check (user_id = (select auth.uid()) and public.is_active_user());
 
 grant select, insert on public.urge_toolkit_sessions to authenticated;
 

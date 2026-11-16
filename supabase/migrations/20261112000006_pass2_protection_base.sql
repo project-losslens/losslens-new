@@ -62,22 +62,22 @@ grant execute on function public.admin_revert_therapist(uuid) to authenticated;
 drop policy if exists therapist_self_select on public.therapists;
 create policy therapist_self_select on public.therapists for select to authenticated
   using (
-    id = auth.uid()
+    id = (select auth.uid())
     and public.is_active_user()
-    and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'therapist')
+    and exists (select 1 from public.profiles p where p.id = (select auth.uid()) and p.role = 'therapist')
   );
 
 drop policy if exists therapist_self_update on public.therapists;
 create policy therapist_self_update on public.therapists for update to authenticated
   using (
-    id = auth.uid()
+    id = (select auth.uid())
     and public.is_active_user()
-    and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'therapist')
+    and exists (select 1 from public.profiles p where p.id = (select auth.uid()) and p.role = 'therapist')
   )
   with check (
-    id = auth.uid()
+    id = (select auth.uid())
     and public.is_active_user()
-    and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'therapist')
+    and exists (select 1 from public.profiles p where p.id = (select auth.uid()) and p.role = 'therapist')
   );
 
 -- Phase 3: profile pictures are shown in the top bar and in admin, insurer
@@ -125,7 +125,7 @@ create index if not exists urge_challenges_user_idx on public.urge_challenges (u
 alter table public.urge_challenges enable row level security;
 drop policy if exists urge_challenges_owner_all on public.urge_challenges;
 create policy urge_challenges_owner_all on public.urge_challenges for all to authenticated
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 
 -- Phase 4 / Family supporters: supporter contact details (email, phone) are
 -- no longer collected — invitations are shared as links only. The columns
@@ -146,7 +146,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_count int;
   v_inv public.supporter_invitations;
 begin
@@ -229,7 +229,7 @@ create unique index if not exists payments_mpesa_checkout_unique
 alter table public.payments enable row level security;
 drop policy if exists payments_read on public.payments;
 create policy payments_read on public.payments for select to authenticated
-  using (public.is_super_admin() or user_id = auth.uid());
+  using (public.is_super_admin() or user_id = (select auth.uid()));
 
 -- Complete a Daraja-verified payment and activate its entitlement atomically.
 -- This RPC is callable only by the server's service-role client.
@@ -493,28 +493,28 @@ alter table public.protection_events enable row level security;
 drop policy if exists protection_memberships_read on public.protection_memberships;
 create policy protection_memberships_read on public.protection_memberships for select to authenticated
   using (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     or public.is_super_admin()
-    or exists (select 1 from public.insurers i where i.id = insurer_id and i.profile_id = auth.uid())
+    or exists (select 1 from public.insurers i where i.id = insurer_id and i.profile_id = (select auth.uid()))
   );
 drop policy if exists protection_memberships_member_write on public.protection_memberships;
 create policy protection_memberships_member_write on public.protection_memberships for insert to authenticated
-  with check (user_id = auth.uid());
+  with check (user_id = (select auth.uid()));
 drop policy if exists protection_memberships_member_update on public.protection_memberships;
 create policy protection_memberships_member_update on public.protection_memberships for update to authenticated
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 
 drop policy if exists protection_consents_member_all on public.protection_consents;
 create policy protection_consents_member_all on public.protection_consents for all to authenticated
-  using (exists (select 1 from public.protection_memberships m where m.id = membership_id and m.user_id = auth.uid()))
-  with check (exists (select 1 from public.protection_memberships m where m.id = membership_id and m.user_id = auth.uid()));
+  using (exists (select 1 from public.protection_memberships m where m.id = membership_id and m.user_id = (select auth.uid())))
+  with check (exists (select 1 from public.protection_memberships m where m.id = membership_id and m.user_id = (select auth.uid())));
 
 drop policy if exists protection_events_read on public.protection_events;
 create policy protection_events_read on public.protection_events for select to authenticated
   using (
     public.is_super_admin()
-    or exists (select 1 from public.insurers i where i.id = insurer_id and i.profile_id = auth.uid())
-    or exists (select 1 from public.protection_memberships m where m.id = membership_id and m.user_id = auth.uid())
+    or exists (select 1 from public.insurers i where i.id = insurer_id and i.profile_id = (select auth.uid()))
+    or exists (select 1 from public.protection_memberships m where m.id = membership_id and m.user_id = (select auth.uid()))
   );
 drop policy if exists protection_plans_read on public.protection_plans;
 create policy protection_plans_read on public.protection_plans for select to authenticated using (true);
@@ -532,7 +532,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_id uuid;
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
@@ -585,7 +585,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
   if not exists (select 1 from public.protection_memberships where id = p_membership_id and user_id = v_uid) then
@@ -617,7 +617,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_report jsonb;
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
@@ -648,7 +648,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_m public.protection_memberships;
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
@@ -680,7 +680,7 @@ grant execute on function public.insurer_verify_membership(uuid, text) to authen
 drop policy if exists pre_auth_vouchers_insurer_select on public.pre_auth_vouchers;
 create policy pre_auth_vouchers_insurer_select on public.pre_auth_vouchers for select to authenticated
   using (
-    insurer_id in (select i.id from public.insurers i where i.profile_id = auth.uid())
+    insurer_id in (select i.id from public.insurers i where i.profile_id = (select auth.uid()))
     and public.is_active_user()
   );
 
@@ -703,7 +703,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_m public.protection_memberships;
   v_id uuid;
 begin
@@ -739,7 +739,7 @@ security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_m public.protection_memberships;
 begin
   if v_uid is null then raise exception 'Not authenticated'; end if;
@@ -763,8 +763,8 @@ grant execute on function public.member_leave_protection(uuid) to authenticated;
 -- Insurer manages its own protection plans (Phase 6).
 drop policy if exists protection_plans_insurer_write on public.protection_plans;
 create policy protection_plans_insurer_write on public.protection_plans for all to authenticated
-  using (exists (select 1 from public.insurers i where i.id = insurer_id and i.profile_id = auth.uid()))
-  with check (exists (select 1 from public.insurers i where i.id = insurer_id and i.profile_id = auth.uid()));
+  using (exists (select 1 from public.insurers i where i.id = insurer_id and i.profile_id = (select auth.uid())))
+  with check (exists (select 1 from public.insurers i where i.id = insurer_id and i.profile_id = (select auth.uid())));
 
 -- Therapist portal: decline an assigned voucher, returning it to the pool.
 -- Object added: function public.therapist_decline_voucher(uuid).
@@ -775,13 +775,13 @@ security definer
 set search_path = pg_catalog, public
 as $$
 begin
-  if auth.uid() is null or not public.is_active_user() then
+  if (select auth.uid()) is null or not public.is_active_user() then
     raise exception 'Active sign-in required';
   end if;
   update public.provider_vouchers
   set status = 'pending', therapist_id = null, updated_at = now()
   where id = p_voucher_id
-    and therapist_id = auth.uid()
+    and therapist_id = (select auth.uid())
     and status = 'assigned';
   if not found then
     raise exception 'Voucher not found or not awaiting your response';
