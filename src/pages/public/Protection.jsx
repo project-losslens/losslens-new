@@ -131,6 +131,9 @@ function ProtectionInner() {
             )}
           </Section>
 
+          <p style={{ marginTop: 'var(--space-4)' }}>
+            <Link to="/protection/actuarial" className="ll-text-link">Read about the actuarial approach</Link>
+          </p>
           <p className="ll-crisis__note" style={{ marginTop: 'var(--space-7)' }}>{C.disclaimer}</p>
           <p style={{ marginTop: 'var(--space-4)' }}><Link to="/" className="ll-btn ll-btn--ghost">Back to LossLens</Link></p>
         </div>

@@ -95,6 +95,9 @@ function ProductPage({ slug }) {
             </div>
           </Block>
 
+          <p style={{ marginTop: 'var(--space-4)' }}>
+            <Link to="/protection/actuarial" className="ll-text-link">How the benefit package is priced (illustrative)</Link>
+          </p>
           <p className="ll-crisis__note" style={{ marginTop: 'var(--space-7)' }}>{PROTECTION_STATUS}</p>
           <p style={{ marginTop: 'var(--space-4)' }}><Link to="/protection" className="ll-btn ll-btn--ghost">Back to Protection overview</Link></p>
         </div>

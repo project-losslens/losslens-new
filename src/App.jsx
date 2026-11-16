@@ -16,6 +16,7 @@ const Pricing = lazy(() => import('./pages/public/Pricing'))
 const FamilyJoin = lazy(() => import('./pages/public/FamilyJoin'))
 const Protection = lazy(() => import('./pages/public/Protection'))
 const ProtectionProduct = lazy(() => import('./pages/public/ProtectionProduct'))
+const ProtectionActuarial = lazy(() => import('./pages/public/ProtectionActuarial'))
 const Privacy = lazy(() => import('./pages/public/Privacy'))
 const Terms = lazy(() => import('./pages/public/Terms'))
 const About = lazy(() => import('./pages/public/About'))
@@ -97,6 +98,7 @@ function App() {
         <Route path="/family-join" element={<FamilyJoin />} />
         <Route path="/protection" element={<Protection />} />
         <Route path="/protection/:structure" element={<ProtectionProduct />} />
+        <Route path="/protection/actuarial" element={<ProtectionActuarial />} />
         <Route path="/insurer/login" element={<InsurerLogin />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
