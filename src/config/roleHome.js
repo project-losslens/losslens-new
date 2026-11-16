@@ -72,6 +72,8 @@ const SUPER_ADMIN_PATHS = [
   '/super-admin/therapists',
   '/super-admin/insurers',
   '/super-admin/float',
+  '/super-admin/protection',
+  '/super-admin/actuarial',
 ]
 
 const LEGACY_SUPER_ADMIN_PATHS = [
@@ -91,7 +93,10 @@ const THERAPIST_PATHS = [
   '/therapist',
   '/therapist/onboarding',
   '/therapist/claims/new',
+  '/therapist/referrals',
   '/therapist/payouts',
+  '/therapist/sessions',
+  '/therapist/claims',
   '/therapist/milestones',
 ]
 
@@ -100,6 +105,9 @@ const INSURER_PATHS = [
   '/insurer/claims',
   '/insurer/invoices',
   '/insurer/analytics',
+  '/insurer/members',
+  '/insurer/pre-auths',
+  '/insurer/plans',
 ]
 
 function isWithinRoute(pathname, route) {
