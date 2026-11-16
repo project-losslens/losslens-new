@@ -199,3 +199,24 @@ SQL files exist or are required.
   token hardening, handle_new_user race, storage bucket policies, realtime
   publication review, script 06 destructive guards, remaining unguarded
   ADD CONSTRAINT statements (9 listed in commit report).
+
+## SQL hardening pass — continued (commits through 64f607f)
+- Script 03: validate_company_code trusts right-most XFF only; per-actor +
+  global per-code throttles; redeem_company_code locks b2b_clients FOR UPDATE.
+- Script 01: handle_new_user retries username collisions with a suffix;
+  supporter_invitations.token has a 24-byte random default; audit_logs kept
+  out of supabase_realtime (dropped if present).
+- Script 02: event-images bucket (public read, admin write, 5MB images);
+  storage_user_quota_ok() 500MB/user enforced in user-bucket insert policies.
+- Script 03: supporter_lookup throttled (hashed token key, 30/hr) and returns
+  uniform null for unknown/expired/revoked.
+- Script 08: grant sweep excludes internal helpers; FK re-target block makes
+  payments/protection/provider/pre-auth/bulk-invoice FKs to profiles
+  ON DELETE SET NULL with NOT NULL dropped (anonymisation, not cascade).
+- delete-account edge function: revokes protection_consents then ends +
+  anonymises protection_memberships before auth-user deletion.
+- Verified by code-read: insurer_aggregate_stats has cohort_size >= 25 and
+  no risk-band output; all SECURITY DEFINER profile writers validate caller.
+- Duplicate-function scan: no remaining differing-signature overloads.
+- STILL UNVERIFIED: no database available — apply-twice on fresh project,
+  deletion flow, realtime subscriber isolation, storage cross-user tests.
