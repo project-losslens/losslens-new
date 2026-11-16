@@ -297,7 +297,7 @@ export default function ProtectionPage() {
     return (
       <div className="page-root"><div className="page-content" style={{ padding: '2rem' }}>
         <h1 className="fs-20" style={{ color: '#FFFFFF' }}>LossLens Protection</h1>
-        <p style={{ color: 'rgba(255,255,255,0.6)' }}>Protection is not available yet. <a href="/protection" style={{ color: '#2DD4BF' }}>Learn more</a>.</p>
+        <p style={{ color: 'rgba(255,255,255,0.6)' }}>Protection is not available yet. <a href="/protection" style={{ color: '#2DD4BF' }}>Learn more</a> — including the proposed Medical Rider, Individual Cover and Group Cover structures.</p>
       </div></div>
     )
   }
