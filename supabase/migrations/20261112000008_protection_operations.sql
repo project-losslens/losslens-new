@@ -3166,3 +3166,32 @@ end $$;
 --   * storage objects are removed per bucket before the auth user is deleted;
 --   * actor_id on audit_logs is already ON DELETE SET NULL (see script 02) —
 --     audit rows are pseudonymised, not deleted, and TRUNCATE is revoked.
+
+-- ===========================================================================
+-- ANON LOCKDOWN (explicit allowlist)
+-- Revoke EXECUTE on EVERY public function from PUBLIC and anon, then restore
+-- service_role (edge functions/RPC internals) and re-grant only the six
+-- functions anon callers legitimately need. Authenticated keeps its existing
+-- per-function grants; internal helpers stay revoked.
+-- ===========================================================================
+do $$
+declare
+  r record;
+begin
+  for r in
+    select p.oid::regprocedure as sig
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public'
+  loop
+    execute format('revoke execute on function %s from public, anon', r.sig);
+    execute format('grant execute on function %s to service_role', r.sig);
+  end loop;
+end $$;
+
+-- Explicit anon allowlist (supporter portal + company-code validation).
+grant execute on function public.supporter_lookup(text) to anon;
+grant execute on function public.supporter_respond(text, boolean) to anon;
+grant execute on function public.supporter_get_summary(text) to anon;
+grant execute on function public.supporter_post_message(text, text) to anon;
+grant execute on function public.supporter_list_messages(text) to anon;
+grant execute on function public.validate_company_code(text) to anon;
