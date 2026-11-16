@@ -464,7 +464,20 @@ as $$
 declare
   v_inv public.supporter_invitations;
   v_name text;
+  v_attempts integer;
+  v_key text := 'sup:' || md5(coalesce(p_token, ''));
 begin
+  -- Failed-lookup throttle: tokens are secrets, so only their hash is stored.
+  -- >30 lookups per token per hour returns the same null as a bad token.
+  delete from public.company_code_validation_attempts
+  where actor_key = v_key and attempted_at < now() - interval '1 hour';
+  insert into public.company_code_validation_attempts(actor_key) values (v_key);
+  select count(*) into v_attempts from public.company_code_validation_attempts
+  where actor_key = v_key and attempted_at >= now() - interval '1 hour';
+  if v_attempts > 30 then
+    return null;
+  end if;
+
   select * into v_inv from public.supporter_invitations
   where token = p_token limit 1;
   -- Uniform response: unknown, expired and revoked tokens are

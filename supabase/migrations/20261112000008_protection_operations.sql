@@ -1770,7 +1770,13 @@ begin
       or p.proname like 'member\_%' or p.proname = 'admin_approve_plan_version'
       or p.proname = 'admin_actuarial_report'
     )
-    and p.proname not in ('protection_claim_event', 'protection_benefit_used', 'protection_log_access')
+    and p.proname not in (
+      -- Internal helpers: never client-executable (revoked again below).
+      'protection_claim_event', 'protection_benefit_used', 'protection_log_access',
+      'protection_refresh_policy_payment', 'protection_mode',
+      'protection_require_mode', 'protection_is_active_insurer',
+      'protection_insurer_eligible_for_enrolment', 'protection_lifecycle_sweep'
+    )
   loop
     execute format('revoke execute on function %s from public, anon', r.sig);
     execute format('grant execute on function %s to authenticated', r.sig);
