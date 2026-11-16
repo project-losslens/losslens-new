@@ -3206,16 +3206,37 @@ grant execute on function public.validate_company_code(text) to anon;
 -- Columns referenced by RLS policies, joins and cascades that lacked a
 -- covering index. All idempotent.
 -- ===========================================================================
-create index if not exists cm_user_hash_idx on public.circle_messages (user_hash, created_at desc);
-create index if not exists circle_room_members_hash_idx on public.circle_room_members (user_hash);
-create index if not exists circle_message_authors_hash_idx on public.circle_message_authors (user_hash);
-create index if not exists whispers_sender_hash_idx on public.whispers_messages (sender_hash, created_at desc);
-create index if not exists event_rsvps_user_idx on public.event_rsvps (user_id, event_id);
-create index if not exists cbt_module_sessions_user_idx on public.cbt_module_sessions (user_id, started_at desc);
-create index if not exists account_deletion_log_user_idx on public.account_deletion_log (user_id, created_at desc);
-create index if not exists protection_events_membership_idx on public.protection_events (membership_id, created_at desc);
-create index if not exists crisis_alerts_user_idx on public.crisis_alerts (user_id, created_at desc);
-create index if not exists supporter_feedback_user_idx on public.supporter_feedback (user_id, created_at desc);
+-- Circle/whisper hash columns only exist on databases built from the
+-- consolidated schema; legacy installs may have older column names. Create
+-- each index only when its column is present so upgraded databases don't
+-- fail with 42703.
+do $$
+declare
+  r record;
+begin
+  for r in
+    select * from (values
+      ('circle_messages', 'user_hash, created_at desc', 'cm_user_hash_idx'),
+      ('circle_room_members', 'user_hash', 'circle_room_members_hash_idx'),
+      ('circle_message_authors', 'user_hash', 'circle_message_authors_hash_idx'),
+      ('whispers_messages', 'sender_hash, created_at desc', 'whispers_sender_hash_idx'),
+      ('event_rsvps', 'user_id, event_id', 'event_rsvps_user_idx'),
+      ('cbt_module_sessions', 'user_id, started_at desc', 'cbt_module_sessions_user_idx'),
+      ('account_deletion_log', 'user_id, created_at desc', 'account_deletion_log_user_idx'),
+      ('protection_events', 'membership_id, created_at desc', 'protection_events_membership_idx'),
+      ('crisis_alerts', 'user_id, created_at desc', 'crisis_alerts_user_idx'),
+      ('supporter_feedback', 'user_id, created_at desc', 'supporter_feedback_user_idx')
+    ) as t(tbl, cols, idx)
+  loop
+    if exists (
+      select 1 from information_schema.columns c
+      where c.table_schema = 'public' and c.table_name = r.tbl
+        and c.column_name = split_part(r.cols, ',', 1)
+    ) then
+      execute format('create index if not exists %I on public.%I (%s)', r.idx, r.tbl, r.cols);
+    end if;
+  end loop;
+end $$;
 
 -- Super-admin account lifecycle controls. These remain in script 08 so all
 -- portal and Protection tables referenced below have already been created.
