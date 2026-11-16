@@ -1411,6 +1411,9 @@ revoke all on public.therapists from authenticated;
 grant select on public.therapists_public to authenticated;
 -- Re-grant the minimum self-service surface: RLS (therapist_self_select /
 -- therapist_self_update / therapist_super_admin_all) still limits rows and the
+-- The redefined view below changes column names, which CREATE OR REPLACE
+-- VIEW cannot do (42P16) — drop it first; grants are re-applied after.
+drop view if exists public.insurer_aggregate_stats;
 create or replace view public.insurer_aggregate_stats as
 with cohorts as (
   select i.id as insurer_id,
