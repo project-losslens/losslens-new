@@ -1444,8 +1444,13 @@ grant execute on function public.admin_actuarial_report(uuid) to authenticated;
 -- ---------------------------------------------------------------------------
 -- Redefine insurer_aggregate_stats: cohort now comes from PROTECTION
 -- policies/memberships, behavioural risk bands removed entirely.
+-- The script-04 definition has a different column list, and CREATE OR
+-- REPLACE VIEW cannot drop/rename/reorder columns (42P16) — drop first.
+-- Nothing depends on this view (verified: grants only, no view/function
+-- references); grants are re-applied below.
 -- ---------------------------------------------------------------------------
-create or replace view public.insurer_aggregate_stats as
+drop view if exists public.insurer_aggregate_stats;
+create view public.insurer_aggregate_stats as
 with cohorts as (
   select p.insurer_id,
          count(distinct m.user_id)::integer as cohort_size,
