@@ -66,6 +66,9 @@ Diary creates and updates one daily entry, lists recent entries, records mood, t
 ### CBT modules
 CBT modules retrieve member-owned progress and record lesson views through an authenticated RPC. Completion is written server-side only after all three lessons in the module have been recorded and at least 20 minutes have elapsed since the first lesson view. Authenticated clients have read-only access to completion rows; the RPC checks the member role and completion conditions. This enforcement is defined in migration 08 and must be applied before the client flow is enabled in a deployed environment.
 
+### Support requests
+Authenticated members can submit categorized support tickets and exchange replies with support staff. Ticket ownership and staff-only inbox/status operations are checked by RPCs; ticket and message tables have no direct client grants. This is general product support, not a crisis response channel.
+
 ### Urge Toolkit
 Urge Toolkit provides client-side coping exercises and controls, including timers, breathing, delay, grounding, and crisis access where implemented. This page should be treated as UI and interaction behavior backed by frontend state, rather than a complete server event audit.
 

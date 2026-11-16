@@ -2905,3 +2905,173 @@ end;
 $$;
 revoke execute on function public.member_complete_cbt_module(text) from public, anon;
 grant execute on function public.member_complete_cbt_module(text) to authenticated;
+
+-- Support tickets are private to the submitting account and support staff.
+create table if not exists public.support_tickets (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  subject text not null check (length(btrim(subject)) between 3 and 160),
+  category text not null check (category in ('account', 'technical', 'billing', 'protection', 'other')),
+  status text not null default 'open' check (status in ('open', 'in_progress', 'closed')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  closed_at timestamptz
+);
+create index if not exists support_tickets_user_updated_idx
+  on public.support_tickets(user_id, updated_at desc);
+create index if not exists support_tickets_status_updated_idx
+  on public.support_tickets(status, updated_at desc);
+
+create table if not exists public.support_ticket_messages (
+  id uuid primary key default gen_random_uuid(),
+  ticket_id uuid not null references public.support_tickets(id) on delete cascade,
+  sender_id uuid not null references public.profiles(id) on delete cascade,
+  body text not null check (length(btrim(body)) between 1 and 4000),
+  created_at timestamptz not null default now()
+);
+create index if not exists support_ticket_messages_ticket_created_idx
+  on public.support_ticket_messages(ticket_id, created_at);
+
+alter table public.support_tickets enable row level security;
+alter table public.support_ticket_messages enable row level security;
+revoke all on public.support_tickets, public.support_ticket_messages from anon, authenticated;
+
+create or replace function public.support_submit_ticket(
+  p_subject text,
+  p_category text,
+  p_body text
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_ticket_id uuid;
+begin
+  if v_uid is null or not public.is_active_user()
+     or public.current_user_role() is null then
+    raise exception 'Active account required';
+  end if;
+  if p_subject is null or length(btrim(p_subject)) not between 3 and 160
+     or p_category is null or p_category not in ('account','technical','billing','protection','other')
+     or p_body is null or length(btrim(p_body)) not between 1 and 4000 then
+    raise exception 'Enter a valid subject, category, and message';
+  end if;
+
+  insert into public.support_tickets (user_id, subject, category)
+  values (v_uid, btrim(p_subject), p_category)
+  returning id into v_ticket_id;
+  insert into public.support_ticket_messages (ticket_id, sender_id, body)
+  values (v_ticket_id, v_uid, btrim(p_body));
+  return v_ticket_id;
+end;
+$$;
+revoke execute on function public.support_submit_ticket(text,text,text) from public, anon;
+grant execute on function public.support_submit_ticket(text,text,text) to authenticated;
+
+create or replace function public.support_list_tickets()
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_is_staff boolean := public.is_admin();
+  v_result jsonb;
+begin
+  if v_uid is null or not public.is_active_user()
+     or public.current_user_role() is null then
+    raise exception 'Active account required';
+  end if;
+  select coalesce(jsonb_agg(ticket_data order by updated_at desc), '[]'::jsonb)
+  into v_result
+  from (
+    select t.updated_at,
+      jsonb_build_object(
+        'id', t.id,
+        'user_id', t.user_id,
+        'subject', t.subject,
+        'category', t.category,
+        'status', t.status,
+        'created_at', t.created_at,
+        'updated_at', t.updated_at,
+        'messages', coalesce((
+          select jsonb_agg(jsonb_build_object(
+            'id', m.id, 'sender_id', m.sender_id, 'body', m.body, 'created_at', m.created_at
+          ) order by m.created_at)
+          from public.support_ticket_messages m where m.ticket_id = t.id
+        ), '[]'::jsonb)
+      ) as ticket_data
+    from public.support_tickets t
+    where v_is_staff or t.user_id = v_uid
+    order by t.updated_at desc
+    limit 100
+  ) tickets;
+  return v_result;
+end;
+$$;
+revoke execute on function public.support_list_tickets() from public, anon;
+grant execute on function public.support_list_tickets() to authenticated;
+
+create or replace function public.support_add_message(p_ticket_id uuid, p_body text)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_ticket public.support_tickets;
+  v_is_staff boolean := public.is_admin();
+begin
+  if v_uid is null or not public.is_active_user()
+     or public.current_user_role() is null then
+    raise exception 'Active account required';
+  end if;
+  if p_ticket_id is null or p_body is null
+     or length(btrim(p_body)) not between 1 and 4000 then
+    raise exception 'Enter a valid ticket message';
+  end if;
+  select * into v_ticket from public.support_tickets
+  where id = p_ticket_id and (v_is_staff or user_id = v_uid)
+  for update;
+  if not found then raise exception 'Ticket not found'; end if;
+  if v_ticket.status = 'closed' then raise exception 'This ticket is closed'; end if;
+
+  insert into public.support_ticket_messages (ticket_id, sender_id, body)
+  values (p_ticket_id, v_uid, btrim(p_body));
+  update public.support_tickets
+  set status = case when v_is_staff then 'in_progress' else status end,
+      updated_at = now()
+  where id = p_ticket_id;
+end;
+$$;
+revoke execute on function public.support_add_message(uuid,text) from public, anon;
+grant execute on function public.support_add_message(uuid,text) to authenticated;
+
+create or replace function public.support_set_ticket_status(p_ticket_id uuid, p_status text)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+begin
+  if auth.uid() is null or not public.is_active_user() or not public.is_admin() then
+    raise exception 'Administrator access required';
+  end if;
+  if p_ticket_id is null or p_status is null or p_status not in ('open','in_progress','closed') then
+    raise exception 'Invalid ticket status';
+  end if;
+  update public.support_tickets
+  set status = p_status,
+      updated_at = now(),
+      closed_at = case when p_status = 'closed' then now() else null end
+  where id = p_ticket_id;
+  if not found then raise exception 'Ticket not found'; end if;
+end;
+$$;
+revoke execute on function public.support_set_ticket_status(uuid,text) from public, anon;
+grant execute on function public.support_set_ticket_status(uuid,text) to authenticated;

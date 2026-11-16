@@ -46,6 +46,7 @@ const USER_PATHS = [
   '/family-portal',
   '/subscription',
   '/protection-member',
+  '/support',
 ]
 
 const ADMIN_PATHS = [
@@ -56,6 +57,7 @@ const ADMIN_PATHS = [
   '/admin/analytics',
   '/admin/broadcast',
   '/admin/crisis',
+  '/admin/support',
 ]
 
 const SUPER_ADMIN_PATHS = [

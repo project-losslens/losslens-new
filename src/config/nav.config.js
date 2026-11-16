@@ -12,6 +12,7 @@ export const userNav = [
   { to: '/precious-pact', label: 'LossLens Pact', icon: 'document' },
   { to: '/profile', label: 'Profile', icon: 'profile' },
   { to: '/subscription', label: 'Subscription', icon: 'diamond' },
+  { to: '/support', label: 'Support requests', icon: 'chat' },
 ]
 
 // Grouped navigation for the user role (mobile bottom bar + desktop sidebar).
@@ -43,6 +44,7 @@ export const userNavGroups = [
       { to: '/precious-pact', label: 'LossLens Pact', icon: 'document' },
       { to: '/profile', label: 'Profile', icon: 'profile' },
       { to: '/subscription', label: 'Subscription', icon: 'diamond' },
+      { to: '/support', label: 'Support requests', icon: 'chat' },
     ],
   },
 ]
@@ -66,6 +68,7 @@ export const adminNav = [
   { to: '/admin/analytics', label: 'Analytics', icon: 'analytics' },
   { to: '/admin/broadcast', label: 'Broadcast', icon: 'broadcast' },
   { to: '/admin/crisis', label: 'Crisis Alerts', icon: 'alert' },
+  { to: '/admin/support', label: 'Support Inbox', icon: 'chat' },
 ]
 
 export const superAdminNav = [
