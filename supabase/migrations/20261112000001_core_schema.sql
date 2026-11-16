@@ -751,6 +751,7 @@ declare
   v_client_id uuid;
   v_max_users integer;
   v_used integer;
+  v_cname text;
 begin
   v_username := nullif(btrim(coalesce(new.raw_user_meta_data->>'username', '')), '');
   if v_username is not null and exists (
@@ -773,24 +774,54 @@ begin
     end if;
   end if;
 
-  insert into public.profiles (
-    id, full_name, username, email, phone, role, status,
-    plan_type, b2b_client_id, subscription_plan, subscription_status
-  )
-  values (
-    new.id,
-    coalesce(new.raw_user_meta_data->>'full_name', ''),
-    v_username,
-    new.email,
-    new.raw_user_meta_data->>'phone',
-    'user',
-    'active',
-    case when v_client_id is not null then 'company' else null end,
-    v_client_id,
-    case when v_client_id is not null then 'company' else null end,
-    case when v_client_id is not null then 'active' else null end
-  )
-  on conflict (id) do nothing;
+  -- Username uniqueness is enforced by a unique constraint; a concurrent
+  -- signup can win the race after the exists-check above. On a username
+  -- collision, retry once with a random suffix so both signups succeed.
+  begin
+    insert into public.profiles (
+      id, full_name, username, email, phone, role, status,
+      plan_type, b2b_client_id, subscription_plan, subscription_status
+    )
+    values (
+      new.id,
+      coalesce(new.raw_user_meta_data->>'full_name', ''),
+      v_username,
+      new.email,
+      new.raw_user_meta_data->>'phone',
+      'user',
+      'active',
+      case when v_client_id is not null then 'company' else null end,
+      v_client_id,
+      case when v_client_id is not null then 'company' else null end,
+      case when v_client_id is not null then 'active' else null end
+    )
+    on conflict (id) do nothing;
+  exception when unique_violation then
+    get stacked diagnostics v_cname = constraint_name;
+    if v_username is null or v_cname is null or v_cname not like '%username%' then
+      raise;
+    end if;
+    v_username := left(v_username, 20) || '_' ||
+      substr(replace(gen_random_uuid()::text, '-', ''), 1, 6);
+    insert into public.profiles (
+      id, full_name, username, email, phone, role, status,
+      plan_type, b2b_client_id, subscription_plan, subscription_status
+    )
+    values (
+      new.id,
+      coalesce(new.raw_user_meta_data->>'full_name', ''),
+      v_username,
+      new.email,
+      new.raw_user_meta_data->>'phone',
+      'user',
+      'active',
+      case when v_client_id is not null then 'company' else null end,
+      v_client_id,
+      case when v_client_id is not null then 'company' else null end,
+      case when v_client_id is not null then 'active' else null end
+    )
+    on conflict (id) do nothing;
+  end;
   return new;
 end;
 $$;
