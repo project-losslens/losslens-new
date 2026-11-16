@@ -637,6 +637,9 @@ begin
 end;
 $$;
 
+-- Column lists differ between this definition and the later redefinition
+-- below; CREATE OR REPLACE VIEW cannot rename columns (42P16) on re-runs.
+drop view if exists public.insurer_aggregate_stats;
 create or replace view public.insurer_aggregate_stats as
 with cohorts as (
   select
