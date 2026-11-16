@@ -512,6 +512,8 @@ order by tablename, policyname;
 -- ---------------------------------------------------------------------------
 -- Insurer: policyholder (membership) listing — whitelisted columns.
 -- ---------------------------------------------------------------------------
+-- Return type gained cover_structure; CREATE OR REPLACE cannot change it.
+drop function if exists public.insurer_list_memberships();
 create or replace function public.insurer_list_memberships()
 returns table (
   membership_id uuid,
@@ -1268,6 +1270,8 @@ grant execute on function public.member_list_my_cover() to authenticated;
 -- ---------------------------------------------------------------------------
 -- Insurer: policyholder list WITH policy summary (access-layer read).
 -- ---------------------------------------------------------------------------
+-- Return type gained cover_structure; CREATE OR REPLACE cannot change it.
+drop function if exists public.insurer_list_policyholders();
 create or replace function public.insurer_list_policyholders()
 returns table (
   membership_id uuid,
