@@ -2,12 +2,17 @@
 @import '@fontsource-variable/instrument-sans';
 
 :root {
-  --bg: #0B1220;
-  --surface: #111B2E;
-  --surface-2: #171E2B;
-  --surface-3: #1E2A40;
+  --bg: #0A1A12;
+  --bg-rgb: 10 26 18;
+  --surface: #102419;
+  --surface-rgb: 16 36 25;
+  --surface-2: #153021;
+  --surface-2-rgb: 21 48 33;
+  --surface-3: #1C3D2A;
+  --surface-3-rgb: 28 61 42;
   --accent-warm: #F2C879;
-  --accent-warm-soft: rgba(242, 200, 121, 0.14);
+  --accent-warm-rgb: 242 200 121;
+  --accent-warm-soft: rgb(var(--accent-warm-rgb) / 0.14);
   --font-display: 'Bricolage Grotesque Variable', 'Bricolage Grotesque', system-ui, sans-serif;
   --font-body: 'Instrument Sans Variable', 'Instrument Sans', system-ui, sans-serif;
   --step--1: clamp(0.8rem, 0.78rem + 0.1vw, 0.88rem);
@@ -37,19 +42,33 @@
   --border: rgba(255, 255, 255, 0.14);
   --text: #FFFFFF;
   --text-primary: var(--text);
-  --text-secondary: #D1D8E2;
-  --text-muted: #B8C2D1;
-  --danger: #EF4444;
-  --danger-soft: rgba(239, 68, 68, 0.16);
-  --warning: #F59E0B;
-  --warning-soft: rgba(245, 158, 11, 0.16);
-  --success: #22C55E;
-  --success-soft: rgba(34, 197, 94, 0.16);
-  --info: #2DD4BF;
-  --info-soft: rgba(45, 212, 191, 0.16);
-  --secondary: #7DBDEE;
-  --primary: #2DD4BF;
-  --primary-soft: rgba(45, 212, 191, 0.12);
+  --text-secondary: #DCE8E0;
+  --text-secondary-rgb: 220 232 224;
+  --text-muted: #C3D3C8;
+  --text-muted-rgb: 195 211 200;
+  --danger: #FF8A80;
+  --danger-rgb: 255 138 128;
+  --danger-soft: rgb(var(--danger-rgb) / 0.16);
+  --warning: #FBBF24;
+  --warning-rgb: 251 191 36;
+  --warning-soft: rgb(var(--warning-rgb) / 0.16);
+  --success: var(--primary);
+  --success-soft: var(--primary-soft);
+  --info: var(--primary);
+  --info-soft: var(--primary-soft);
+  --secondary: #86EFAC;
+  --secondary-rgb: 134 239 172;
+  --secondary-deep: #15803D;
+  --secondary-deep-rgb: 21 128 61;
+  --primary: #4ADE80;
+  --primary-rgb: 74 222 128;
+  --primary-deep: #166534;
+  --primary-deep-rgb: 22 101 52;
+  --primary-soft: rgb(var(--primary-rgb) / 0.12);
+  --on-primary: #06140C;
+  --on-primary-rgb: 6 20 12;
+  --topo-abyss: #03140B;
+  --topo-deep: #0A2417;
   --z-base: 1;
   --z-content: 10;
   --sidebar-w: 240px;
@@ -91,14 +110,14 @@
   --ll-radius-sm: 8px;
   --ll-radius-md: 12px;
   --ll-radius-lg: 18px;
-  --ll-shadow-sm: 0 4px 14px rgba(11, 18, 32, 0.18);
-  --ll-shadow-md: 0 14px 38px rgba(11, 18, 32, 0.28);
+  --ll-shadow-sm: 0 4px 14px rgb(var(--bg-rgb) / 0.18);
+  --ll-shadow-md: 0 14px 38px rgb(var(--bg-rgb) / 0.28);
 }
 
-/* Brand mark colors sampled from public/losslens-logo.png */
+/* Brand mark colors: green primary/secondary (was teal/blue) */
 :root {
-  --brand-teal: #2DD4BF;
-  --brand-blue: #7DBDEE;
+  --brand-teal: var(--primary);
+  --brand-blue: var(--secondary);
 }
 
 
@@ -149,7 +168,7 @@ textarea {
 
 ::selection {
   background: var(--primary);
-  color: var(--bg);
+  color: var(--on-primary);
 }
 
 /* Tabular numerals for stats, counters, phone numbers and tables */

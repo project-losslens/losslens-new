@@ -56,7 +56,7 @@
   cursor: pointer;
 }
 
-.btn-secondary:hover { border-color: #2DD4BF; color: #2DD4BF; }
+.btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
 
 .btn-quiet {
   display: inline-flex;
@@ -67,14 +67,14 @@
   padding: 8px 12px;
   border: 0;
   background: transparent;
-  color: #7DBDEE;
+  color: var(--secondary);
   font-family: var(--font-body);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
 }
 
-.btn-quiet:hover { color: #2DD4BF; }
+.btn-quiet:hover { color: var(--primary); }
 
 /* Standalone inputs outside .form-group */
 .input {
@@ -90,7 +90,7 @@
 }
 
 .input::placeholder { color: rgba(255, 255, 255, 0.4); }
-.input:focus { outline: 2px solid #7DBDEE; outline-offset: 1px; border-color: transparent; }
+.input:focus { outline: 2px solid var(--secondary); outline-offset: 1px; border-color: transparent; }
 
 /* Minimum touch target for icon-only / small controls */
 .tap-target {
@@ -138,11 +138,11 @@
   cursor: pointer;
 }
 .language-switcher__option--active {
-  background: #2DD4BF;
-  color: #0B1220;
+  background: var(--primary);
+  color: var(--on-primary);
 }
 .language-switcher__option:focus-visible {
-  outline: 2px solid #7DBDEE;
+  outline: 2px solid var(--secondary);
   outline-offset: 2px;
 }
 
@@ -164,14 +164,14 @@ html[data-low-data='true'] canvas:not([data-low-data-keep]) {
   position: fixed;
   inset: 0;
   z-index: var(--z-modal, 1000);
-  background: rgba(11, 18, 32, 0.72);
+  background: rgb(var(--bg-rgb) / 0.72);
 }
 .tour-highlight {
   position: fixed;
-  border: 2px solid #2DD4BF;
+  border: 2px solid var(--primary);
   border-radius: 12px;
   pointer-events: none;
-  box-shadow: 0 0 0 9999px rgba(11, 18, 32, 0.72);
+  box-shadow: 0 0 0 9999px rgb(var(--bg-rgb) / 0.72);
   transition: top 0.2s, left 0.2s, width 0.2s, height 0.2s;
 }
 .tour-card {
@@ -180,7 +180,7 @@ html[data-low-data='true'] canvas:not([data-low-data-keep]) {
   bottom: max(1rem, env(safe-area-inset-bottom));
   transform: translateX(-50%);
   width: min(92vw, 420px);
-  background: var(--surface-secondary, #141d33);
+  background: var(--surface-secondary, var(--surface-2));
   border: 1px solid var(--border, rgba(255,255,255,0.12));
   border-radius: 14px;
   padding: 1.25rem;

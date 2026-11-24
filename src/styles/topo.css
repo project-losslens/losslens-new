@@ -8,9 +8,9 @@
   overflow: hidden;
   pointer-events: none;
   background:
-    radial-gradient(120% 90% at 15% 0%, rgba(6, 59, 80, 0.55) 0%, transparent 55%),
-    radial-gradient(100% 80% at 85% 100%, rgba(22, 200, 211, 0.07) 0%, transparent 60%),
-    linear-gradient(180deg, #031027 0%, #06142B 55%, #031027 100%);
+    radial-gradient(120% 90% at 15% 0%, rgb(var(--primary-deep-rgb) / 0.5) 0%, transparent 55%),
+    radial-gradient(100% 80% at 85% 100%, rgb(var(--secondary-rgb) / 0.08) 0%, transparent 60%),
+    linear-gradient(180deg, var(--topo-abyss) 0%, var(--topo-deep) 55%, var(--topo-abyss) 100%);
 }
 
 .topo__lines {
@@ -21,32 +21,32 @@
 }
 
 .topo__line { stroke-width: 1; }
-.topo__line--1 { stroke: rgba(49, 214, 204, 0.16); }
-.topo__line--2 { stroke: rgba(22, 200, 211, 0.11); }
-.topo__line--3 { stroke: rgba(125, 189, 238, 0.09); }
-.topo__line--accent { stroke: rgba(49, 214, 204, 0.22); }
+.topo__line--1 { stroke: rgb(var(--primary-rgb) / 0.16); }
+.topo__line--2 { stroke: rgb(var(--secondary-rgb) / 0.11); }
+.topo__line--3 { stroke: rgb(var(--secondary-rgb) / 0.09); }
+.topo__line--accent { stroke: rgb(var(--primary-rgb) / 0.22); }
 
 /* Public/hero: most expressive */
-.topo--hero .topo__line--1 { stroke: rgba(49, 214, 204, 0.22); }
-.topo--hero .topo__line--2 { stroke: rgba(22, 200, 211, 0.15); }
-.topo--hero .topo__line--3 { stroke: rgba(125, 189, 238, 0.12); }
-.topo--hero .topo__line--accent { stroke: rgba(49, 214, 204, 0.3); }
+.topo--hero .topo__line--1 { stroke: rgb(var(--primary-rgb) / 0.22); }
+.topo--hero .topo__line--2 { stroke: rgb(var(--secondary-rgb) / 0.15); }
+.topo--hero .topo__line--3 { stroke: rgb(var(--secondary-rgb) / 0.12); }
+.topo--hero .topo__line--accent { stroke: rgb(var(--primary-rgb) / 0.3); }
 
 /* Member app: restrained */
-.topo--app .topo__line--1 { stroke: rgba(49, 214, 204, 0.10); }
-.topo--app .topo__line--2 { stroke: rgba(22, 200, 211, 0.07); }
-.topo--app .topo__line--3 { stroke: rgba(125, 189, 238, 0.05); }
-.topo--app .topo__line--accent { stroke: rgba(49, 214, 204, 0.12); }
+.topo--app .topo__line--1 { stroke: rgb(var(--primary-rgb) / 0.10); }
+.topo--app .topo__line--2 { stroke: rgb(var(--secondary-rgb) / 0.07); }
+.topo--app .topo__line--3 { stroke: rgb(var(--secondary-rgb) / 0.05); }
+.topo--app .topo__line--accent { stroke: rgb(var(--primary-rgb) / 0.12); }
 
 /* Admin/staff: most restrained */
-.topo--admin .topo__line--1 { stroke: rgba(49, 214, 204, 0.07); }
-.topo--admin .topo__line--2 { stroke: rgba(22, 200, 211, 0.05); }
-.topo--admin .topo__line--3 { stroke: rgba(125, 189, 238, 0.04); }
-.topo--admin .topo__line--accent { stroke: rgba(49, 214, 204, 0.08); }
+.topo--admin .topo__line--1 { stroke: rgb(var(--primary-rgb) / 0.07); }
+.topo--admin .topo__line--2 { stroke: rgb(var(--secondary-rgb) / 0.05); }
+.topo--admin .topo__line--3 { stroke: rgb(var(--secondary-rgb) / 0.04); }
+.topo--admin .topo__line--accent { stroke: rgb(var(--primary-rgb) / 0.08); }
 .topo--admin {
   background:
-    radial-gradient(120% 90% at 15% 0%, rgba(6, 59, 80, 0.35) 0%, transparent 55%),
-    linear-gradient(180deg, #031027 0%, #06142B 60%, #031027 100%);
+    radial-gradient(120% 90% at 15% 0%, rgb(var(--primary-deep-rgb) / 0.32) 0%, transparent 55%),
+    linear-gradient(180deg, var(--topo-abyss) 0%, var(--topo-deep) 60%, var(--topo-abyss) 100%);
 }
 
 @media (max-width: 640px) {
