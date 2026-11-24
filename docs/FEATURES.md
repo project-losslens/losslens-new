@@ -93,7 +93,7 @@ Crisis chat detection writes `crisis_alerts`; admins can review unresolved alert
 
 ## 5. AI companion and chat
 
-The `AIChat` component sends messages through the browser Groq integration. `src/lib/groq.js` retrieves profile and recovery context, injects crisis safeguards, calls a Groq chat-completions endpoint, and persists user/assistant history in `chat_history` using the current canonical `user_id`, `role`, `message`, `created_at` fields where supported by the migration package.
+The browser request helpers and immediate crisis-routing logic are inside `src/components/AIChat.jsx`. Normal messages go to the authenticated `/api/chat` route, which checks AI consent, retrieves permitted context, calls Groq with server-only credentials, and persists `chat_history`. Direct crisis disclosures open support immediately without waiting for Groq; the authenticated `/api/crisis` route handles the existing authorized internal escalation.
 
 The interface provides loading and error states, suggested prompts, voice recognition, speech synthesis, and text chat. Direct browser `VITE_GROQ_API_KEY` exposure is a security risk. Runtime integration success, provider availability, and exact database history behavior are unverified.
 

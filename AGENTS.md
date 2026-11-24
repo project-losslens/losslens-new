@@ -8,11 +8,14 @@ No TypeScript.
 
 - `npm run dev` — Vite dev server (frontend only; does NOT serve `api/`)
 - `npm run build` — primary verification; must pass
-- `npm run lint` — eslint; ~200 pre-existing errors/17 warnings is the
+- `npm run lint` — eslint; 150 pre-existing errors/17 warnings is the
   baseline, do not treat as regressions
 - `npm run preview` — preview the production build
 - `vercel dev` — serves `api/` routes locally
 - CLI: `npx supabase` (devDependency)
+- Automated test/QA files and their npm commands were intentionally removed.
+  Use the manual checklist in `docs/VERIFICATION.md`; keep temporary verification
+  harnesses and their output outside the repository.
 
 ## Architecture
 
@@ -23,7 +26,7 @@ No TypeScript.
 - Supabase singleton: `src/lib/supabase.js` always persists to localStorage.
   Session-only login uses a sessionStorage marker and clears local auth on the
   next app start if that marker is missing.
-- AI flow: `src/lib/groq.js#askGroq` → `POST /api/chat` (JWT) → Groq →
+- AI flow: `src/components/AIChat.jsx#askGroq` → `POST /api/chat` (JWT) → Groq →
   `chat_history`. Real prompt: `BASE_SYSTEM_PROMPT` in `api/chat.js`.
   Consent gate: `profiles.ai_data_consent_at`, enforced server-side.
 - Shared configs: `src/config/site.js` (contact + FACTS),
@@ -33,10 +36,11 @@ No TypeScript.
 
 ## Node-importable files rule
 
-Files reachable from `api/**` or from `node --test` via plain Node must stay
+Files reachable from `api/**` or any plain-Node consumer must stay
 plain JS: no JSX, no `import.meta.env`, no CSS imports, no `import.meta.glob`.
 Currently: `src/lib/crisisDetection.js` → `src/config/helplines.js`,
-`src/lib/loaderTiming.js`, `api/*.js`. Do not merge them into Vite-only files.
+`api/*.js`. Browser loader timing lives inside `src/components/Brand.jsx`;
+its former Node test consumer has been removed. Keep server imports plain JS.
 
 ## Database
 
@@ -65,8 +69,8 @@ don't create it manually.
 
 ## Cautions
 
-- `src/lib/groq.js` logs the first 10 chars of the session JWT — do not
-  extend it.
+- Oloo browser request helpers live inside `src/components/AIChat.jsx`.
+  Keep Groq credentials server-side; do not log JWTs, chat or assessment data.
 - Site gate is server-side in root `middleware.js` and `lib/gate.js`;
   temporary config is hardcoded as `GATE_ENABLED` / `GATE_PASSWORD` /
   `GATE_SECRET` constants in `lib/gate.js` — no env vars.

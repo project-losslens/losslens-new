@@ -1,5 +1,4 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { loaderMinVisibleRemaining, retryVisible, shouldShowLoader, stillLoadingVisible } from '../lib/loaderTiming'
 import { useI18n } from '../i18n'
 
 const VISUALLY_HIDDEN = {
@@ -173,4 +172,25 @@ export function LogoMark({ size = 72, className = '', petalClass = 'brand-petal'
       </g>
     </svg>
   )
+}
+
+// Pure timing helpers for BrandLoader visibility.
+// Show after `delayMs` of continuous loading; once shown, keep visible at
+// least `minVisibleMs` even if loading finishes.
+function shouldShowLoader({ elapsedMs, shownAtMs = null }) {
+  if (shownAtMs !== null) return true
+  return elapsedMs >= 150
+}
+
+function loaderMinVisibleRemaining({ shownAtMs, nowMs }) {
+  if (shownAtMs === null) return 0
+  return Math.max(0, shownAtMs + 300 - nowMs)
+}
+
+function stillLoadingVisible(elapsedMs) {
+  return elapsedMs >= 4000
+}
+
+function retryVisible(elapsedMs) {
+  return elapsedMs >= 15000
 }

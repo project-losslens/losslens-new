@@ -50,9 +50,9 @@ The final production build passed. Final repository lint returned the unchanged 
 
 ## Verification and deployment
 
-- `npm test`: database scoring, privacy/RLS, idempotency, reminder scheduling, hours and actual Oloo submission/API regression tests, alongside existing workflow tests. PGSI SQL tests execute migration 10 in PGlite PostgreSQL with synthetic auth/role fixtures; they are not a hosted Supabase/PostgREST test.
-- `npm run test:pgsi`: real React onboarding/dashboard/Oloo interactions in Chromium with synthetic Supabase/API fixtures, including failed saves, same-ID retry, new-login reminders, privacy preferences, raw 8 -> 30%, voluntary chooser only, direct/typo/negated/third-person crisis cases, failed API, pre-onboarding without AI consent, keyboard help priority and 320/360/390/768/1280 widths.
-- `npm run test:workflows`: wider existing route/mobile/admin mutation coverage using synthetic backend fixtures.
+- The retired automated suite covered database scoring, RLS/privacy, idempotency, reminders, hours and actual Oloo routing. Its local PostgreSQL fixtures did not constitute hosted Supabase/PostgREST verification.
+- Manually exercise onboarding, dashboard and Oloo with synthetic accounts: incomplete/failed saves, retries, new-login reminders, opt-in/revoke, raw 8 ? 30%, voluntary support only, and urgent chat guidance despite service failure.
+- Use `docs/VERIFICATION.md` for route, mobile and privileged mutation checks. Keep temporary browser harnesses and results outside the repository.
 - `npm run build` and `npm run lint`: production build must pass; repository lint has a pre-existing error baseline. No lint exceptions were added for the new PGSI implementation.
 
 Apply `20261124000010_private_pgsi.sql` after migration 09 in a disposable/staging Supabase project first, then through the owner's usual manual SQL deployment process. Existing 01-08 deployments also need forward migration 09. Do not rerun destructive base installation scripts. Deploy frontend and Vercel `/api/chat` + `/api/crisis` changes together. No new edge function or environment variable is required for PGSI; existing Supabase keys, Groq key for ordinary chat and server-only service key for the authorized escalation path remain in use. Prior workflow repairs still require their documented `delete-account` edge-function deployment.

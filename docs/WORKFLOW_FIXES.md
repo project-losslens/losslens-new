@@ -28,8 +28,8 @@ React, Supabase and icons are split into separate build chunks to avoid a single
 ## Reproducible checks
 
 - `npm run build` ? passes; the app entry chunk is approximately 98 kB before gzip, with React and Supabase cached separately.
-- `npm test` — calendar, roles, redirects, mutation denials, recording failures, sync concurrency, callback verification, activation failure and renewal races.
-- `npm run test:workflows` — requires the local Vite server and Chromium. Set `QA_BROWSER_PATH` to an existing Chromium executable if the Playwright browser revision is not installed. `QA_BASE_URL` defaults to `http://127.0.0.1:5173`; `QA_ROLE` optionally narrows the route sweep.
+- The former automated checks covered calendar boundaries, roles, redirects, mutation denials, recording failures, sync concurrency and payment races. Those test files were intentionally removed during consolidation.
+- For current verification, use `docs/VERIFICATION.md`, `npm run lint` and `npm run build`. Any disposable browser harness and its output belong outside the checkout.
 - Browser artifacts are written under ignored `test-results/`. The suite covers 60 routes at 360 and 1280 px, plus populated partner layouts at 320, 360, 390, 414 and 768 px, partner create/edit/delete, zero-row write failures, verified user suspension, mobile navigation and floating-control separation.
 - Browser/backend tests use explicit fixtures and intercepted services. They do not contact real payment, email or user accounts and do not establish that deployed RLS is correct.
 

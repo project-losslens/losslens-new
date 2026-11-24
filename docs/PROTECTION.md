@@ -156,7 +156,7 @@ script list in `docs/OPERATIONS.md`; run them twice on a disposable project.
   `therapist_verify_milestone`, `insurer_get_claim_milestone`.
 - `protection_actuarial_runs` (super-admin only) + `admin_save/list_actuarial_run`.
 - `insurer_upsert_benefit` extended with milestone/effective-date params.
-- Actuarial workbench: `src/lib/markov.js` (4-state CTMC, uniformization
+- Actuarial workbench: the named model functions inside `src/pages/superadmin/ActuarialWorkbench.jsx` (4-state CTMC, uniformization
   exp(Qt), occupancy, milestone-based claims, gross-premium build-up,
   scenarios) + `/super-admin/actuarial` page. It uses no member-level or
   behavioural data. Inputs are explicitly labelled synthetic/assumption-based
