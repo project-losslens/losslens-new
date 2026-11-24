@@ -139,7 +139,7 @@ export default function Whispers() {
             return newMsgs.length > 0 ? [...prev, ...newMsgs] : prev
           })
         }
-      } catch (err) { /* silent */ }
+      } catch  { /* silent */ }
     }, POLL_INTERVAL)
   }, [])
 
@@ -164,7 +164,7 @@ export default function Whispers() {
       setMatches(prev => [match, ...prev])
       toast.success('Request sent!', 3000)
       setActiveTab('sent')
-    } catch (err) { toast.error('Failed to send.', 2000) }
+    } catch  { toast.error('Failed to send.', 2000) }
     setSendingRequest(false)
   }
 
@@ -183,7 +183,7 @@ export default function Whispers() {
       setMatches(prev => prev.map(m => m.id === matchId ? match : m))
       setActiveMatch(match)
       toast.success('Chat opened!', 3000)
-    } catch (err) { toast.error('Failed to accept.', 2000) }
+    } catch  { toast.error('Failed to accept.', 2000) }
   }
 
   const rejectRequest = async (matchId) => {
@@ -196,7 +196,7 @@ export default function Whispers() {
       if (error) throw error
       toast.success('Declined.', 2000)
       fetchMatches(identity.hash)
-    } catch (err) { toast.error('Failed.', 2000) }
+    } catch  { toast.error('Failed.', 2000) }
   }
 
   const cancelRequest = async (matchId) => {
@@ -211,7 +211,7 @@ export default function Whispers() {
       if (error) throw error
       toast.success('Cancelled.', 2000)
       fetchMatches(identity.hash)
-    } catch (err) { toast.error('Failed.', 2000) }
+    } catch  { toast.error('Failed.', 2000) }
   }
 
   const handleSend = async (matchId) => {
@@ -246,7 +246,7 @@ export default function Whispers() {
       }).select().single()
       if (error || !data) throw error
       setMessages(prev => prev.map(m => m.id === tempId ? { ...data, sending: false } : m))
-    } catch (err) {
+    } catch  {
       setMessages(prev => prev.filter(m => m.id !== tempId))
       toast.error('Failed to send', 2000)
     }
@@ -269,7 +269,7 @@ export default function Whispers() {
       setReportReason('')
       setActiveMatch(null)
       setMessages([])
-    } catch (err) { toast.error('Failed to submit report.', 2000) }
+    } catch  { toast.error('Failed to submit report.', 2000) }
     setSubmittingReport(false)
   }
 
@@ -284,7 +284,7 @@ export default function Whispers() {
       if (error) throw error
       toast.success('Thank you ', 3000)
       fetchMatches(identity.hash)
-    } catch (err) { toast.error('Failed to submit.', 2000) }
+    } catch  { toast.error('Failed to submit.', 2000) }
     setShowFeedback(false)
     setActiveMatch(null)
     setMessages([])

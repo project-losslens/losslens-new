@@ -177,6 +177,25 @@ try {
   assert.equal(new URL(onboarding.page.url()).pathname,'/onboarding')
   await onboarding.context.close()
   console.log('Standalone onboarding heading and route: PASS')
+  // Auth state may update before Login's handler; retain the role-allowed destination.
+  const visitor = await setup(null)
+  visitor.state.profile.role = 'user'
+  const loginJwt = [Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT'})).toString('base64url'),Buffer.from(JSON.stringify({sub:actorId,role:'authenticated',exp:Math.floor(Date.now()/1000)+3600,session_id:'qa-homepage-login'})).toString('base64url'),'synthetic'].join('.')
+  await visitor.context.route(env.VITE_SUPABASE_URL+'/auth/v1/token**',route=>route.fulfill({json:{access_token:loginJwt,refresh_token:'qa-refresh',token_type:'bearer',expires_in:3600,expires_at:Math.floor(Date.now()/1000)+3600,user:{id:actorId,email:'actor@example.invalid',aud:'authenticated',role:'authenticated',app_metadata:{provider:'email'},user_metadata:{}}}}))
+  await visitor.page.goto(base)
+  await visitor.page.getByRole('link',{name:'Start a self-check',exact:true}).click()
+  await visitor.page.waitForURL('**/login')
+  assert.equal(await visitor.page.evaluate(()=>history.state.usr.from),'/onboarding')
+  await visitor.page.locator('input[type="email"]').fill('actor@example.invalid')
+  await visitor.page.locator('input[type="password"]').fill('Synthetic-password-123')
+  await visitor.page.locator('form button[type="submit"]').click()
+  await visitor.page.waitForURL('**/onboarding')
+  await visitor.page.getByRole('heading',{name:'Your gambling self-check',exact:true}).waitFor()
+  assert.equal(await visitor.page.locator('.pgsi-assessment fieldset').count(),9)
+  assert.deepEqual(visitor.errors,[])
+  await visitor.context.close()
+  console.log('Homepage self-check / password login / intended destination: PASS')
+
 } catch(error){failures.push({fatal:error.stack});console.error(error.stack)}
 finally{await browser.close();fs.writeFileSync('test-results/workflows.json',JSON.stringify({results,failures},null,2));console.log(`${results.length} route/viewport checks; ${failures.length} findings`)}
 if(failures.length)process.exitCode=1

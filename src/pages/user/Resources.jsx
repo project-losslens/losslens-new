@@ -1,6 +1,6 @@
 import SupportChoices from '../../components/SupportChoices'
 import { toast } from '../../components/ToastProvider'
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { readAndMigrateStorageItem } from '../../lib/storage'
@@ -158,7 +158,7 @@ export default function Resources() {
       setSuggestionSent(true)
       toast.success('Suggestion submitted!')
       setTimeout(() => { setShowSuggestionForm(false); setSuggestionSent(false); setSuggestion({ name: '', link: '', category: 'Crisis', notes: '' }) }, 1500)
-    } catch (err) { toast.error('Failed to submit.', 2000) }
+    } catch  { toast.error('Failed to submit.', 2000) }
     setSubmittingSuggestion(false)
   }
 

@@ -1,6 +1,6 @@
 import { BrandLoader } from '../../components/Brand'
 import { toast } from '../../components/ToastProvider'
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { createNotification } from '../../lib/notifications'
@@ -126,7 +126,7 @@ export default function Events() {
         setRsvps(prev => ({ ...prev, [eventId]: { id: data.id, attendance } }))
         toast.success(attendance === 'going' ? ' Confirmed!' : ' Marked as maybe', 2000)
       }
-    } catch (err) {
+    } catch  {
       // Rollback on failure
       setRsvps(prevRsvps)
       setAttendeeCounts(prevCounts)
@@ -147,7 +147,7 @@ export default function Events() {
       setDiscussions(prev => ({ ...prev, [eventId]: prev[eventId].map(m => m.id === tempId ? data : m) }))
       // Auto-scroll
       setTimeout(() => { if (discussionContainers.current[eventId]) discussionContainers.current[eventId].scrollTop = discussionContainers.current[eventId].scrollHeight }, 100)
-    } catch (err) {
+    } catch  {
       setDiscussions(prev => ({ ...prev, [eventId]: prev[eventId].filter(m => m.id !== tempId) }))
       toast.error('Failed to post. Try again.', 2000)
     } finally { setSubmittingQuestion(null) }
@@ -169,7 +169,7 @@ export default function Events() {
       toast.success('Message sent!', 3000)
       try { await createNotification(userId, { title: ' Message Sent', message: 'Admin will reply soon.', type: 'success', icon: '', link: '/events' }) } catch {}
       contactTimer.current = setTimeout(() => { setShowContactForm(null); setContactSent(false); setContactName(''); setContactPhone(''); setContactEmail(''); setContactMessage('') }, 2000)
-    } catch (err) { toast.error('Failed to send.', 2000) }
+    } catch  { toast.error('Failed to send.', 2000) }
     finally { setSendingContact(false) }
   }
 

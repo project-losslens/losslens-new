@@ -1,13 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useId } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { userNav } from '../config/nav.config'
 import { useAuthProfile } from './AuthProfileContext'
 import { supabase } from '../lib/supabase'
-import { claimLoginReminder, pgsiBand } from '../lib/pgsi'
-import RecoveryDialog from '../components/RecoveryDialog'
+import { claimLoginReminder, pgsiBand, PGSI_EXPLANATIONS, pgsiPercentage } from '../lib/pgsi'
 import PgsiAssessment from '../components/PgsiAssessment'
-import PgsiResult from '../components/PgsiResult'
 import SupportChoices from '../components/SupportChoices'
+import AppIcon from '../components/AppIcon'
 
 const Context = createContext(null)
 const EMPTY = { latest: null, due: false, loaded: false, personalization_enabled: false, error: '' }
@@ -104,4 +103,26 @@ export function usePgsi() {
   const context = useContext(Context)
   if (!context) throw new Error('usePgsi requires PgsiProvider')
   return context
+}
+
+function RecoveryDialog({ title, children, onClose }) {
+  const titleId = useId()
+  return <div className="pgsi-overlay">
+    <button type="button" className="modal-backdrop" aria-label="Close self-check dialog" onClick={onClose} />
+    <section className="pgsi-dialog" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <header className="pgsi-dialog__header"><h2 id={titleId}>{title}</h2><button type="button" className="btn-ghost" onClick={onClose} aria-label="Close dialog"><AppIcon name="close" size={20} /></button></header>
+      {children}
+    </section>
+  </div>
+}
+
+function PgsiResult({ result }) {
+  return <div className="pgsi-result">
+    <p><strong>{pgsiPercentage(result.raw_score)}% of maximum: {result.raw_score}/27 points</strong></p>
+    <p>Completed {new Date(result.completed_at).toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' })} (Nairobi time).</p>
+    <p>{PGSI_EXPLANATIONS[result.band]}</p>
+    <p>Your answers cover the past 12 months before this assessment. The percentage is your share of the 27 possible points. It is not a likelihood of addiction or a measure of how recovered you are.</p>
+    <p>This self-check cannot diagnose a condition. Support is an option at any score, and you decide whether to use it.</p>
+    <SupportChoices />
+  </div>
 }

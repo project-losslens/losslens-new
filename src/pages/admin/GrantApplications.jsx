@@ -59,7 +59,7 @@ export default function GrantApplications() {
         setShowRejectModal(null)
         setRejectReason('')
       }
-    } catch (err) { toast.error('Update failed.') }
+    } catch  { toast.error('Update failed.') }
     setActionLoading(null)
   }
 

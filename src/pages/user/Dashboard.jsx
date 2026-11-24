@@ -4,14 +4,12 @@ import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import PgsiDashboardCard from '../../components/PgsiDashboardCard'
 import NotificationBell from '../../components/NotificationBell'
 import AppIcon from '../../components/AppIcon'
-import { getRiskLevel, getRiskColor } from '../../lib/relapsePrediction'
 import SupportChoices from '../../components/SupportChoices'
 import { useI18n } from '../../i18n'
-import { explainRiskFactor } from '../../lib/riskExplanations'
-
+import { usePgsi } from '../../context/PgsiContext'
+import { pgsiPercentage } from '../../lib/pgsi'
 
 function triggerConfetti() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -49,7 +47,7 @@ function UsernamePrompt({ userId, onComplete }) {
     try {
       const { data } = await supabase.from('profiles').select('username').eq('username', val.toLowerCase().trim()).maybeSingle()
       setStatus(data ? 'taken' : 'available')
-    } catch (err) { setStatus('') }
+    } catch  { setStatus('') }
   }
 
   const handleChange = (val) => {
@@ -256,7 +254,7 @@ function Dashboard() {
       )}
 
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
-        <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
+        <div className="page-toolbar dashboard-summary plum-surface" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
           <div>
             <h2 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}>
               {new Date().getHours() < 12 ? t('dashboard.greeting.morning') : new Date().getHours() < 17 ? t('dashboard.greeting.afternoon') : t('dashboard.greeting.evening')}, <span style={{ color: 'var(--primary)' }}>{firstName}</span>
@@ -366,7 +364,6 @@ function Dashboard() {
             </div>
 
 
-
             <div className="dash-section">
               <div className="section-header"><h3>{t('dashboard.recentEntries')}</h3><button type="button" className="see-all clickable" onClick={() => navigate('/diary')}>{t('dashboard.seeAll')}</button></div>
               <div className="entries-list">
@@ -428,3 +425,215 @@ function Dashboard() {
 }
 
 export default Dashboard
+
+function PgsiDashboardCard() {
+  const pgsi = usePgsi()
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const changePersonalization = async event => {
+    const enabled = event.target.checked
+    setSaving(true); setError('')
+    try { await pgsi.setPersonalization(enabled) } catch { setError('Your personalization choice was not saved. Please retry.') }
+    finally { setSaving(false) }
+  }
+  return <section className="dash-section pgsi-dashboard" aria-label="PGSI self-check">
+    <h2>PGSI score &middot; % of maximum</h2>
+    {pgsi.error ? <p role="alert">{pgsi.error} <button type="button" className="btn-ghost" onClick={pgsi.refresh}>Retry self-check status</button></p> : !pgsi.loaded ? <p role="status">Loading your private self-check...</p> : pgsi.latest ? <>
+      <p className="pgsi-percentage">{pgsiPercentage(pgsi.latest.raw_score)}%</p>
+      <p>{pgsi.latest.raw_score}/27 points &middot; {new Date(pgsi.latest.completed_at).toLocaleDateString('en-KE', { timeZone: 'Africa/Nairobi', year: 'numeric', month: 'short', day: 'numeric' })}</p>
+      <button type="button" className="btn-ghost" onClick={pgsi.knowMore}>Know more</button>
+      <button type="button" className="btn-ghost" onClick={pgsi.startAssessment}>{pgsi.due ? 'Take your due self-check' : 'Take another self-check'}</button>
+    </> : <button type="button" className="btn-primary" onClick={pgsi.startAssessment}>Take your first self-check</button>}
+    <div className="pgsi-actions"><button type="button" className="btn-ghost" onClick={pgsi.showResources}>Find support at any score</button></div>
+    {pgsi.loaded && <label className="pgsi-personalization"><input type="checkbox" checked={pgsi.personalization_enabled} disabled={saving} onChange={changePersonalization} />Let Oloo use my latest PGSI band and completion date</label>}
+    <p className="pgsi-muted">Optional: this lets Oloo's AI provider use only your latest band and assessment date when you chat. Your answers are not shared. Turning it off applies to subsequent messages.</p>
+    {error && <p role="alert" className="portal-error">{error}</p>}
+  </section>
+}
+
+let riskWarningShown = false
+
+function warnRiskColumns(error) {
+  if (!riskWarningShown) {
+    console.warn('Risk profile columns are unavailable; using the safe low-risk fallback.', error?.message || error)
+    riskWarningShown = true
+  }
+}
+
+// Calculate risk score based on diary patterns
+async function calculateRiskScore(userId) {
+  if (!userId) return { score: 0, factors: [] }
+
+  const today = new Date()
+  const todayStr = recoveryDate(today)
+  const dayOfWeek = today.getDay()
+  const hourOfDay = today.getHours()
+
+  // Get recent diary entries (last 30 days)
+  const { data: entries, error: entriesError } = await supabase
+    .from('diary_entries')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('date', recoveryDate(new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)))
+    .order('date', { ascending: false })
+
+  if (entriesError) {
+    warnRiskColumns(entriesError)
+    return { score: 0, level: 'low', factors: [] }
+  }
+
+  if (!entries || entries.length < 3) {
+    return { score: 10, factors: ['Not enough data yet. Keep logging!'] }
+  }
+
+  let score = 0
+  const factors = []
+
+  // Factor 1: Day of week pattern
+  const sameDayEntries = entries.filter(e => new Date(e.date).getDay() === dayOfWeek)
+  const sameDayGambleRate = sameDayEntries.length > 0
+    ? sameDayEntries.filter(e => e.gambled).length / sameDayEntries.length
+    : 0
+  if (sameDayGambleRate > 0.5) {
+    score += 25
+    factors.push(`${dayOfWeek === 5 || dayOfWeek === 6 ? 'Weekend' : 'This day'} has been high-risk historically`)
+  }
+
+  // Factor 2: Recent gambling pattern (last 7 days)
+  const last7Days = entries.slice(0, 7)
+  const recentGambleRate = last7Days.filter(e => e.gambled).length / last7Days.length
+  if (recentGambleRate > 0.3) {
+    score += 20
+    factors.push('Recent gambling activity detected')
+  }
+
+  // Factor 3: Missed diary entries
+  const daysSinceLastEntry = entries.length > 0
+    ? Math.floor((today - new Date(entries[0].date)) / (1000 * 60 * 60 * 24))
+    : 7
+  if (daysSinceLastEntry > 2) {
+    score += 15
+    factors.push(`${daysSinceLastEntry} days since last diary entry`)
+  }
+
+  // Factor 4: Stress/mood pattern
+  const recentMoods = entries.slice(0, 7).map(e => e.mood)
+  const negativeMoods = recentMoods.filter(m =>
+    m && (m.includes('Stressed') || m.includes('Anxious') || m.includes('Depressed'))
+  ).length
+  if (negativeMoods >= 3) {
+    score += 20
+    factors.push('Elevated stress levels in recent entries')
+  }
+
+  // Factor 5: Payday detection
+  const dayOfMonth = today.getDate()
+  if (dayOfMonth >= 28 || dayOfMonth <= 3) {
+    score += 10
+    factors.push('Payday period - financial triggers may be higher')
+  }
+
+  // Factor 6: Weekend
+  if (dayOfWeek === 5 || dayOfWeek === 6) {
+    score += 5
+    factors.push('Weekend - historically higher gambling risk')
+  }
+
+  // Factor 7: Evening hours
+  if (hourOfDay >= 18 || hourOfDay <= 2) {
+    score += 5
+    factors.push('Evening hours - common trigger time')
+  }
+
+  score = Math.min(score, 100)
+
+  // Save to profile
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update({
+      daily_risk_score: score,
+      risk_factors: factors,
+      last_risk_check: todayStr,
+    })
+    .eq('id', userId)
+
+  if (updateError) {
+    warnRiskColumns(updateError)
+    return { score: 0, level: 'low', factors: [] }
+  }
+
+  return { score, factors }
+}
+
+
+async function getRiskLevel(userId) {
+  if (!userId) return { score: 0, level: 'low', factors: [] }
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('daily_risk_score, risk_factors, last_risk_check')
+    .eq('id', userId)
+    .single()
+
+  if (profileError || !profile) {
+    if (profileError) warnRiskColumns(profileError)
+    return { score: 0, level: 'low', factors: [] }
+  }
+
+  const today = recoveryDate()
+
+  if (profile.last_risk_check !== today) {
+    return await calculateRiskScore(userId)
+  }
+
+  const score = profile.daily_risk_score || 0
+  let level = 'low'
+  if (score >= 60) level = 'high'
+  else if (score >= 30) level = 'medium'
+
+  return {
+    score,
+    level,
+    factors: profile.risk_factors || [],
+  }
+}
+
+// Get risk color: high = danger, medium = warning, low = primary (never green for risk)
+function getRiskColor(score) {
+  if (score >= 60) return { bg: 'rgb(var(--danger-rgb) / 0.16)', color: 'var(--danger)', label: 'High Risk' }
+  if (score >= 30) return { bg: 'rgb(var(--warning-rgb) / 0.16)', color: 'var(--warning)', label: 'Medium Risk' }
+  return { bg: 'rgb(var(--primary-rgb) / 0.15)', color: 'var(--primary)', label: 'Low Risk' }
+}
+
+// Translate diary-risk factors separately from the PGSI assessment.
+
+const RULES = [
+  { match: /^Not enough data yet/, key: 'dashboard.riskFactor.noData' },
+  { match: /has been high-risk historically$/, key: 'dashboard.riskFactor.dayHigh', dayParam: true },
+  { match: /^Recent gambling activity detected$/, key: 'dashboard.riskFactor.recentGambling' },
+  { match: /^(\d+) days since last diary entry$/, key: 'dashboard.riskFactor.missedEntries', countParam: true },
+  { match: /^Elevated stress levels/, key: 'dashboard.riskFactor.stress' },
+  { match: /^Payday period/, key: 'dashboard.riskFactor.payday' },
+  { match: /^Weekend - historically/, key: 'dashboard.riskFactor.weekend' },
+  { match: /^Evening hours/, key: 'dashboard.riskFactor.evening' },
+]
+
+// Returns { key, params } for t(), or null when no translation exists.
+function explainRiskFactor(factor) {
+  if (typeof factor !== 'string') return null
+  for (const rule of RULES) {
+    if (!rule.match.test(factor)) continue
+    if (rule.countParam) {
+      const count = factor.match(/^(\d+)/)?.[1]
+      return { key: rule.key, params: { count } }
+    }
+    if (rule.dayParam) {
+      const day = factor.replace(/ has been high-risk historically$/, '')
+      // Diary-risk scoring emits 'Weekend' or 'This day' as the prefix.
+      const dayKey = day === 'Weekend' ? 'dashboard.riskFactor.weekendDay' : 'dashboard.riskFactor.thisDay'
+      return { key: rule.key, params: { day: dayKey } }
+    }
+    return { key: rule.key, params: {} }
+  }
+  return null
+}

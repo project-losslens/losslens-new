@@ -2740,3 +2740,343 @@ button:active {
 :is(.shell__content, .ll-landing, .pgsi-onboarding) textarea::placeholder {
   color: var(--text-muted);
 }
+
+/* ─── LossLens utility layer ──────────────────────────────────────────────
+   Shared type scale, spacing, buttons, chips and inputs.
+   Type scale: body 16px, secondary 14px, captions never below 12px.
+   Nothing below 14px should carry text a user must read to act.
+   ─────────────────────────────────────────────────────────────────────── */
+
+/* Type scale (px classes mirror the approved scale; use rem where practical) */
+.t-body     { font-size: 16px; line-height: var(--lh-body); }
+.t-secondary{ font-size: 14px; line-height: 1.5; }
+.t-caption  { font-size: 12px; line-height: 1.4; }
+.t-action   { font-size: 14px; font-weight: 600; }
+
+/* Exact-size helpers for migration of legacy inline fontSize values.
+   Sizes below 12px are clamped up to 12px per the type-scale rule. */
+.fs-12 { font-size: 12px; }
+.fs-13 { font-size: 13px; }
+.fs-14 { font-size: 14px; }
+.fs-15 { font-size: 15px; }
+.fs-16 { font-size: 16px; }
+.fs-18 { font-size: 18px; }
+.fs-20 { font-size: 20px; }
+.fs-22 { font-size: 22px; }
+.fs-24 { font-size: 24px; }
+.fs-28 { font-size: 28px; }
+.fs-32 { font-size: 32px; }
+.fs-40 { font-size: 40px; }
+.fs-48 { font-size: 48px; }
+.fs-60 { font-size: 60px; }
+
+/* Spacing utilities (4px base) */
+.u-mt-1 { margin-top: 4px; }  .u-mt-2 { margin-top: 8px; }
+.u-mt-3 { margin-top: 12px; } .u-mt-4 { margin-top: 16px; }
+.u-mt-5 { margin-top: 24px; } .u-mt-6 { margin-top: 32px; }
+.u-mb-1 { margin-bottom: 4px; }  .u-mb-2 { margin-bottom: 8px; }
+.u-mb-3 { margin-bottom: 12px; } .u-mb-4 { margin-bottom: 16px; }
+.u-mb-5 { margin-bottom: 24px; } .u-mb-6 { margin-bottom: 32px; }
+.u-gap-2 { gap: 8px; }  .u-gap-3 { gap: 12px; }
+.u-gap-4 { gap: 16px; } .u-gap-5 { gap: 24px; }
+.u-p-3 { padding: 12px; } .u-p-4 { padding: 16px; } .u-p-5 { padding: 24px; }
+
+/* Button hierarchy: primary (filled plum), secondary (outlined), quiet (text) */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid rgb(var(--primary-rgb) / 0.45);
+  background: transparent;
+  color: var(--primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-secondary:hover { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); }
+
+.btn-quiet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--secondary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-quiet:hover { color: var(--primary); }
+
+/* Standalone inputs outside .form-group */
+.input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+}
+
+.input::placeholder { color: var(--text-muted); }
+.input:focus { outline: 2px solid var(--secondary); outline-offset: 1px; border-color: transparent; }
+
+/* Minimum touch target for icon-only / small controls */
+.tap-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Unified app card (use alongside page-specific styling) */
+.card-app {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+/* Global reduced-motion: calm the whole app. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Language switcher */
+.language-switcher {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.language-switcher__option {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.language-switcher__option--active {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.language-switcher__option:focus-visible {
+  outline: 2px solid var(--secondary);
+  outline-offset: 2px;
+}
+
+/* Low-data mode: set by Profile preference (html[data-low-data="true"]) */
+html[data-low-data='true'] *,
+html[data-low-data='true'] *::before,
+html[data-low-data='true'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+html[data-low-data='true'] img:not([data-low-data-keep]),
+html[data-low-data='true'] video:not([data-low-data-keep]),
+html[data-low-data='true'] canvas:not([data-low-data-keep]) {
+  display: none !important;
+}
+
+/* Topographic-line backdrop — replaces aurora.css.
+   Fixed layer behind content; never intercepts pointer events. */
+
+.topo {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 15% 0%, rgb(var(--primary-deep-rgb) / 0.5) 0%, transparent 55%),
+    radial-gradient(100% 80% at 85% 100%, rgb(var(--secondary-rgb) / 0.08) 0%, transparent 60%),
+    linear-gradient(180deg, var(--topo-abyss) 0%, var(--topo-deep) 55%, var(--topo-abyss) 100%);
+}
+
+.topo__lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.topo__line { stroke-width: 1; }
+.topo__line--1 { stroke: rgb(var(--primary-rgb) / 0.16); }
+.topo__line--2 { stroke: rgb(var(--secondary-rgb) / 0.11); }
+.topo__line--3 { stroke: rgb(var(--secondary-rgb) / 0.09); }
+.topo__line--accent { stroke: rgb(var(--primary-rgb) / 0.22); }
+
+/* Public/hero: most expressive */
+.topo--hero .topo__line--1 { stroke: rgb(var(--primary-rgb) / 0.22); }
+.topo--hero .topo__line--2 { stroke: rgb(var(--secondary-rgb) / 0.15); }
+.topo--hero .topo__line--3 { stroke: rgb(var(--secondary-rgb) / 0.12); }
+.topo--hero .topo__line--accent { stroke: rgb(var(--primary-rgb) / 0.3); }
+
+/* Member app: restrained */
+.topo--app .topo__line--1 { stroke: rgb(var(--primary-rgb) / 0.10); }
+.topo--app .topo__line--2 { stroke: rgb(var(--secondary-rgb) / 0.07); }
+.topo--app .topo__line--3 { stroke: rgb(var(--secondary-rgb) / 0.05); }
+.topo--app .topo__line--accent { stroke: rgb(var(--primary-rgb) / 0.12); }
+
+/* Admin/staff: most restrained */
+.topo--admin .topo__line--1 { stroke: rgb(var(--primary-rgb) / 0.07); }
+.topo--admin .topo__line--2 { stroke: rgb(var(--secondary-rgb) / 0.05); }
+.topo--admin .topo__line--3 { stroke: rgb(var(--secondary-rgb) / 0.04); }
+.topo--admin .topo__line--accent { stroke: rgb(var(--primary-rgb) / 0.08); }
+.topo--admin {
+  background:
+    radial-gradient(120% 90% at 15% 0%, rgb(var(--primary-deep-rgb) / 0.32) 0%, transparent 55%),
+    linear-gradient(180deg, var(--topo-abyss) 0%, var(--topo-deep) 60%, var(--topo-abyss) 100%);
+}
+
+@media (max-width: 640px) {
+  .topo__line--3, .topo__line--accent { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topo__lines { display: none; }
+}
+
+/* Orchid brand: wisteria canvas, pale lilac content, blackberry structure. */
+.plum-surface,
+.ll-landing .ll-hero,
+.ll-landing .ll-header,
+.ll-landing .ll-footer,
+.sidebar,
+.shell__header {
+  --text: #FFFFFF;
+  --text-primary: #FFFFFF;
+  --text-secondary: #EAD9F3;
+  --text-muted: #C8A6E0;
+  --primary: #EAD9F3;
+  --primary-rgb: 234 217 243;
+  --secondary: #C8A6E0;
+  --primary-soft: #8736B0;
+  --on-primary: #351044;
+  --border: rgb(234 217 243 / 0.3);
+  --ll-text: #FFFFFF;
+  --ll-muted: #EAD9F3;
+  --ll-accent: #EAD9F3;
+  --ll-on-accent: #351044;
+  background: var(--plum);
+  color: #FFFFFF;
+}
+.plum-surface :focus-visible,
+.sidebar :focus-visible,
+.shell__header :focus-visible { outline-color: var(--lilac); }
+.sidebar__link:hover, .sidebar__logout:hover,
+.sidebar__link:focus-visible, .sidebar__logout:focus-visible { background: var(--purple); }
+.sidebar__link[aria-current="page"] { background: var(--purple); color: #FFFFFF; border-left: 3px solid var(--lilac); }
+.sidebar__brand, .sidebar__section-title, .sidebar__section h2 { color: var(--lilac); }
+.shell__header .shell__toggle { background: transparent; color: #FFFFFF; border-color: rgb(234 217 243 / 0.4); }
+.shell__account-menu,
+.ll-landing .ll-phone {
+  --text: #351044;
+  --text-primary: #351044;
+  --text-secondary: #351044;
+  --text-muted: #351044;
+  --primary: #8736B0;
+  --primary-rgb: 135 54 176;
+  --secondary: #8736B0;
+  --primary-soft: #C8A6E0;
+  --on-primary: #FFFFFF;
+  --border: rgb(53 16 68 / 0.16);
+  --ll-text: #351044;
+  --ll-muted: #351044;
+  --ll-accent: #8736B0;
+  background: var(--lilac);
+  color: var(--ink);
+}
+.dashboard-summary .risk-badge { background: var(--lilac); color: var(--ink); }
+/* Identical purple treatment for PGSI results at every score. */
+.pgsi-dashboard { background: var(--lilac); }
+.shell, .shell__main, .shell__content, .ll-landing { background-color: var(--canvas); }
+.topo { background: var(--canvas); }
+.card, .dash-section, .stat-card, .pgsi-dialog, .pgsi-onboarding > .card,
+.crisis-access__sheet, .mobile-nav__sheet { background-color: var(--lilac); }
+.mobile-nav { background: var(--plum); border-top-color: rgb(234 217 243 / 0.3); }
+.mobile-nav__item { color: var(--lilac); }
+.mobile-nav__item--active, .mobile-nav__item[aria-current] { color: #FFFFFF; background: var(--purple); }
+.mobile-nav__item:focus-visible { outline-color: var(--lilac); }
+/* White is confined to small editing surfaces on the light theme. */
+:is(.shell__content, .pgsi-onboarding, .ll-landing) input:not([type="radio"]):not([type="checkbox"]),
+:is(.shell__content, .pgsi-onboarding, .ll-landing) textarea,
+:is(.shell__content, .pgsi-onboarding, .ll-landing) select,
+.form-group input, .form-group textarea, .form-group select {
+  background-color: #FFFFFF !important;
+  color: var(--ink) !important;
+}
+.oloo-chat-panel { background: var(--lilac); }
+.oloo-conversation { background: var(--canvas); }
+.oloo-chat-header { color: #FFFFFF; }
+/* Public styles load with route chunks: these selectors intentionally outrank them. */
+.ll-landing .ll-header--solid { background: var(--plum); }
+.ll-landing .ll-menu { background: var(--plum); color: #FFFFFF; }
+.ll-landing .ll-hero { background: linear-gradient(110deg, var(--blackberry) 0%, var(--blackberry) 35%, var(--orchid) 100%); }
+.ll-landing .ll-hero .ll-btn--primary,
+.plum-surface .btn-primary { background: var(--lilac); color: var(--plum) !important; border-color: var(--lilac); }
+.ll-landing .ll-hero .ll-btn--primary:hover,
+.plum-surface .btn-primary:hover { background: var(--canvas); color: var(--plum) !important; }
+.ll-landing .ll-hero .ll-btn--ghost { color: #FFFFFF !important; border-color: var(--lilac); }
+.ll-landing .ll-hero .ll-lens { color: var(--lilac); }
+.ll-landing .ll-section { background-color: var(--canvas); }
+.ll-landing .ll-section--tint { background-color: var(--canvas); }
+.ll-landing .ll-fact, .ll-landing .ll-eco__item,
+.ll-landing .ll-protection__card, .ll-landing .ll-pricing__card,
+.ll-landing .ll-faq__item { background: var(--lilac); }
+.ll-landing .ll-oloo__panel { background: var(--plum); --ll-text: #FFFFFF; --ll-muted: #EAD9F3; --ll-accent: #EAD9F3; color: #FFFFFF; }
+.ll-landing .ll-oloo__panel p { color: #FFFFFF; }
+.ll-landing .ll-footer { background: var(--plum); }
+.ll-landing .protection-page { padding-top: 0 !important; padding-inline: 0; }
+.protection-hero { padding: var(--space-7) 0 var(--space-6); margin-bottom: var(--space-7); }
+.ll-landing .ll-protection-header { background: transparent; color: #FFFFFF !important; }
+.protection-hero .ll-crisis__note { color: var(--lilac); }
+/* Keep the score treatment consistent across every PGSI band. */
+.pgsi-dashboard .pgsi-percentage { color: var(--blackberry); }
+.shell .dashboard-summary { background: var(--plum) !important; }
+.footer { background: var(--plum); color: #FFFFFF; }
+.footer p, .footer a { color: var(--lilac); }
+.support-hours { color: var(--text-secondary); }
+.ll-landing .ll-oloo__panel li { color: #FFFFFF; }
+.ll-landing .ll-header .ll-btn--primary { background: var(--lilac); color: var(--plum) !important; }
+/* Small orchid links need pale lilac behind them: 4.94:1 rather than 3.14:1 on wisteria. */
+.ll-landing .ll-section a:not(.ll-btn),
+.ll-landing .ll-text-link,
+.shell__content a:not([class]),
+.shell__content .see-all { color: var(--orchid); background-color: var(--pale-lilac); }
+.ll-landing .ll-section--tint { background-color: var(--pale-lilac); }
+.ll-landing .ll-eyebrow { color: var(--blackberry); }
+.ll-landing .ll-hero .ll-eyebrow,
+.ll-landing .ll-header .ll-eyebrow,
+.ll-landing .protection-hero .ll-eyebrow { color: var(--pale-lilac); }
+.protection-hero { box-shadow: inset 0 -3px var(--orchid); }
+/* Hover/selection pairs stay readable without changing control geometry. */
+.btn-primary:hover, .ll-landing .ll-btn--primary:hover { background: var(--blackberry); color: #FFFFFF !important; }
+.btn-ghost:hover { background: var(--wisteria); color: var(--blackberry); }
+.ll-landing .ll-section a:not(.ll-btn):hover { color: var(--blackberry); }
+.ll-landing .ll-header .ll-btn--primary:hover { background: var(--wisteria); color: var(--blackberry) !important; }

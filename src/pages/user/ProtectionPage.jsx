@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { getProtectionMode, protectionModeAllows } from '../../lib/protectionMode'
 import NumberField from '../../components/NumberField'
 import { BrandLoader } from '../../components/Brand'
 import { toast } from '../../components/ToastProvider'
@@ -596,4 +595,23 @@ export default function ProtectionPage() {
         }} />
     </div></div>
   )
+}
+
+// Cache this page module's display mode; server RPCs still enforce access.
+let cached = null
+
+async function getProtectionMode() {
+  if (cached) return cached
+  try {
+    const { data } = await supabase.from('system_settings').select('value').eq('key', 'protection_mode').maybeSingle()
+    const v = data?.value
+    cached = typeof v === 'string' ? v.replace(/"/g, '') : (v?.mode || 'concept')
+  } catch {
+    cached = 'concept'
+  }
+  return cached
+}
+
+function protectionModeAllows(mode) {
+  return mode === 'pilot' || mode === 'live'
 }

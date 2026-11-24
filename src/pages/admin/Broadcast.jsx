@@ -59,7 +59,7 @@ export default function Broadcast() {
         supabase.from('broadcasts').select('*').order('created_at', { ascending: false }).limit(HISTORY_LIMIT),
       ])
       setHistory(broadcastHistory || [])
-    } catch (err) {
+    } catch  {
       setError('Failed to load broadcast data.')
     } finally { setLoading(false) }
   }, [])

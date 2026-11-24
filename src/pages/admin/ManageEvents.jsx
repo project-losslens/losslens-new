@@ -174,7 +174,7 @@ export default function ManageEvents() {
       toast.success('Reply posted!')
       setReplyInputs(prev => ({ ...prev, [discussionId]: '' }))
       fetchAll()
-    } catch (err) { toast.error('Failed to reply.') }
+    } catch  { toast.error('Failed to reply.') }
     setSendingReply(false)
   }
 

@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuthProfile } from '../../context/AuthProfileContext'
 import { BrandLoader } from '../../components/Brand'
 import { toast } from '../../components/ToastProvider'
-import { PROTECTION_MODES } from '../../lib/protectionStates'
+const PROTECTION_MODES = ['concept', 'pilot', 'live']
 import NumberField from '../../components/NumberField'
 
 //  Super-admin Protection Ops: pipeline counts, partner list, therapist

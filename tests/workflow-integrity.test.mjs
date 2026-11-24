@@ -5,7 +5,7 @@ import { recoveryDate } from '../src/lib/calendar.js'
 import { checkedMutation } from '../src/lib/mutations.js'
 import { recentlyAuthenticated } from '../supabase/functions/_shared/authFreshness.js'
 import { effectivePlan } from '../src/lib/entitlements.js'
-import { canAccessPath, safeInternalPath } from '../src/config/roleHome.js'
+import { canAccessPath, safeInternalPath, requireAuthDecision, publicOnlyDecision } from '../src/config/roleHome.js'
 
 for (const [value,expected] of [
   ['2026-11-24T00:30:00+03:00','2026-11-24'],
@@ -65,4 +65,30 @@ test('All literal RPC calls and relative server imports resolve',async()=>{
     for(const m of source.matchAll(/\.rpc\(['"]([^'"]+)['"]/g))assert.ok(functions.has(m[1]),file+': missing RPC '+m[1])
   }
   await import('../api/payments/mpesa-callback.js')
+})
+test('Consolidated route decisions retain suspension, session and role boundaries',()=>{
+  assert.equal(requireAuthDecision({authStatus:'ready',status:'suspended',currentRole:'user'}),'suspended')
+  for(const [authStatus,expected]of [['loading','loading'],['error','error'],['no-session','no-session']])assert.equal(requireAuthDecision({authStatus}),expected)
+  assert.equal(requireAuthDecision({authStatus:'ready',currentRole:'user',path:'/super-admin/users'}),'redirect')
+  assert.equal(requireAuthDecision({authStatus:'ready',currentRole:'insurer'}),'ready-other-role')
+  assert.equal(requireAuthDecision({authStatus:'ready',currentRole:'admin',role:'super_admin',isAdmin:true,isSuperAdmin:false}),'redirect')
+  assert.equal(requireAuthDecision({authStatus:'ready',currentRole:'user',path:'/dashboard'}),'allow')
+  assert.equal(publicOnlyDecision({authStatus:'ready',user:{id:'member'}}),'redirect')
+  assert.equal(publicOnlyDecision({authStatus:'no-session',user:null}),'allow')
+})
+
+test('Client and server relative imports exist with exact path casing',async()=>{
+  const {default:path}=await import('node:path')
+  async function walk(dir){let files=[];for(const e of await fs.readdir(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())files.push(...await walk(p));else if(/\.(?:js|jsx)$/.test(p))files.push(p)}return files}
+  const directoryNames=new Map()
+  async function exact(file){const absolute=path.resolve(file),relative=path.relative(process.cwd(),absolute);assert.ok(!relative.startsWith('..'),'Import escapes workspace: '+file);const parts=relative.split(path.sep);let parent=process.cwd();for(const part of parts){if(!directoryNames.has(parent))directoryNames.set(parent,await fs.readdir(parent));const entries=directoryNames.get(parent);assert.ok(entries.includes(part),'Wrong import path casing: '+file);parent=path.join(parent,part)}}
+  for(const file of [...await walk('src'),...await walk('api')]){
+    const source=await fs.readFile(file,'utf8')
+    for(const match of source.matchAll(/(?:\bfrom\s*|\bimport\s*\(?\s*)['"]([^'"]+)['"]/g)){
+      if(!match[1].startsWith('.'))continue
+      const base=path.resolve(path.dirname(file),match[1]),candidates=[base,base+'.js',base+'.jsx',path.join(base,'index.js')];let resolved
+      for(const candidate of candidates){try{if((await fs.stat(candidate)).isFile()){resolved=candidate;break}}catch{/* Try the next supported Vite file extension. */}}
+      assert.ok(resolved,file+': unresolved '+match[1]);await exact(resolved)
+    }
+  }
 })

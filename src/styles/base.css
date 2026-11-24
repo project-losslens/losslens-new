@@ -2,14 +2,23 @@
 @import '@fontsource-variable/instrument-sans';
 
 :root {
-  --bg: #FAF7F2;
-  --bg-rgb: 250 247 242;
-  --surface: #FFFFFF;
-  --surface-rgb: 255 255 255;
-  --surface-2: #F0E7F1;
-  --surface-2-rgb: 240 231 241;
-  --surface-3: #F0E7F1;
-  --surface-3-rgb: 240 231 241;
+  --blackberry: #351044;
+  --orchid: #8736B0;
+  --wisteria: #C8A6E0;
+  --pale-lilac: #EAD9F3;
+  --canvas: #C8A6E0;
+  --lilac: #EAD9F3;
+  --plum: #351044;
+  --purple: #8736B0;
+  --ink: #351044;
+  --bg: #C8A6E0;
+  --bg-rgb: 200 166 224;
+  --surface: #EAD9F3;
+  --surface-rgb: 234 217 243;
+  --surface-2: #EAD9F3;
+  --surface-2-rgb: 234 217 243;
+  --surface-3: #C8A6E0;
+  --surface-3-rgb: 200 166 224;
   --accent-warm: #B77932;
   --accent-warm-rgb: 183 121 50;
   --accent-warm-soft: rgb(var(--accent-warm-rgb) / 0.14);
@@ -39,13 +48,13 @@
   --radius-lg: 18px;
   --surface-primary: var(--surface);
   --surface-secondary: var(--surface-2);
-  --border: rgb(41 35 41 / 0.16);
-  --text: #292329;
+  --border: rgb(53 16 68 / 0.16);
+  --text: #351044;
   --text-primary: var(--text);
-  --text-secondary: #4B444B;
-  --text-secondary-rgb: 75 68 75;
-  --text-muted: #625B62;
-  --text-muted-rgb: 98 91 98;
+  --text-secondary: #351044;
+  --text-secondary-rgb: 53 16 68;
+  --text-muted: #351044;
+  --text-muted-rgb: 53 16 68;
   --danger: #A12E3E;
   --danger-rgb: 161 46 62;
   --danger-soft: rgb(var(--danger-rgb) / 0.16);
@@ -57,19 +66,19 @@
   --success-soft: var(--primary-soft);
   --info: var(--primary);
   --info-soft: var(--primary-soft);
-  --secondary: #653B60;
-  --secondary-rgb: 101 59 96;
-  --secondary-deep: #4F2D4B;
-  --secondary-deep-rgb: 79 45 75;
-  --primary: #653B60;
-  --primary-rgb: 101 59 96;
-  --primary-deep: #4F2D4B;
-  --primary-deep-rgb: 79 45 75;
-  --primary-soft: #F0E7F1;
+  --secondary: #8736B0;
+  --secondary-rgb: 135 54 176;
+  --secondary-deep: #351044;
+  --secondary-deep-rgb: 53 16 68;
+  --primary: #8736B0;
+  --primary-rgb: 135 54 176;
+  --primary-deep: #351044;
+  --primary-deep-rgb: 53 16 68;
+  --primary-soft: #EAD9F3;
   --on-primary: #FFFFFF;
   --on-primary-rgb: 255 255 255;
-  --topo-abyss: #FAF7F2;
-  --topo-deep: #F0E7F1;
+  --topo-abyss: #C8A6E0;
+  --topo-deep: #C8A6E0;
   --z-base: 1;
   --z-content: 10;
   --sidebar-w: 240px;
@@ -118,7 +127,7 @@
 /* Brand mark colors */
 :root {
   --brand-teal: var(--primary);
-  --brand-blue: var(--accent-warm);
+  --brand-blue: var(--wisteria);
 }
 
 

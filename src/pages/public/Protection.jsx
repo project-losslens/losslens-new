@@ -42,11 +42,16 @@ function ProtectionInner() {
   return (
     <div className="ll-landing">
       <TopographicBackground variant="hero" />
-      <main className="ll-band" style={{ paddingTop: 'var(--space-7)' }}>
-        <div className="ll-container ll-narrow">
+      <main className="ll-band protection-page" style={{ paddingTop: 'var(--space-7)' }}>
+        <header className="protection-hero plum-surface">
+          <div className="ll-container ll-narrow">
           <p className="ll-eyebrow">LossLens Protection</p>
           <h1 className="ll-h2 ll-protection-header" style={{ fontSize: 'var(--step-4)' }}>An idea we are working on</h1>
           <p className="ll-crisis__note" style={{ marginBottom: 'var(--space-6)' }}>{PROTECTION_STATUS}</p>
+
+          </div>
+        </header>
+        <div className="ll-container ll-narrow">
 
           <Section title="One treatment-benefit package. Three ways to access protection.">
             <p className="ll-lede" style={{ marginBottom: 'var(--space-4)' }}>

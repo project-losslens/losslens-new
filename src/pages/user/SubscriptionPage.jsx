@@ -180,7 +180,7 @@ export default function SubscriptionPage() {
       setShowJoinCompany(false)
       setCompanyCode('')
       toast.success(`Joined ${data.company_name}! You now have company-subsidized access.`)
-    } catch (err) {
+    } catch  {
       setJoinError('Failed to join. Try again.')
     }
     setJoinLoading(false)

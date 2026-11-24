@@ -225,7 +225,7 @@ export default function LossLensPactPage() {
 
         toast.success('Pact saved!')
 
-    } catch (err) {
+    } catch  {
       try {
         await saveLocalRecording(localStorage, `losslens_pacts_${session.user.id}`, blob, {
           userId: session.user.id, title: pactTitle || 'Untitled pact', duration: recordingTime,
@@ -291,7 +291,7 @@ export default function LossLensPactPage() {
     try {
       await supabase.rpc('increment_pact_play_count', { pact_id: pactId })
       fetchPacts()
-    } catch (err) {
+    } catch  {
       // Fallback: fetch-update-save
       const { data } = await supabase.from('precious_pacts').select('play_count').eq('id', pactId).single()
       if (data) {
@@ -321,7 +321,7 @@ export default function LossLensPactPage() {
       setPactTitle('')
       setShowWritten(false)
       fetchPacts()
-    } catch (err) { toast.error('Failed to save. Try again.', 2000) }
+    } catch  { toast.error('Failed to save. Try again.', 2000) }
   }
 
   const formatTime = (s) => {

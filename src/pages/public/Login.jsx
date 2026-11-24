@@ -170,7 +170,7 @@ function Login() {
           {/* Google Sign-In */}
           <button onClick={handleGoogleLogin} disabled={googleLoading || cooldown} style={{
             width: '100%', padding: '13px', borderRadius: '100px',
-            border: '2px solid var(--border)', background: '#FFFFFF',
+            border: '2px solid var(--border)', background: 'var(--surface)',
             color: 'var(--text)', fontSize: '14px', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             gap: '10px', marginBottom: '1.25rem', fontFamily: 'var(--font-body)',

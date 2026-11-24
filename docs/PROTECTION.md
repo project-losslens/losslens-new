@@ -87,8 +87,8 @@ consent (`protection_consents`).
 - `protection_plans` — per-insurer plan definitions (benefits/limits jsonb).
 - `protection_memberships` — member ↔ insurer link. States:
   `pending_verification → active → suspended → ended | rejected`
-  (transitions enforced client-side by `src/lib/protectionStates.js` and by
-  the status CHECK; RPCs enforce allowed transitions).
+  (the status CHECK restricts state names; the membership RPCs enforce
+  allowed transitions).
 - `protection_consents` — per-membership consent scopes
   (`status_updates`, `session_summaries`, `billing_contact`), revocable.
 - `protection_events` — audit timeline for enrolment/verification/consent.

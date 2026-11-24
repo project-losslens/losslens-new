@@ -649,7 +649,7 @@ function AIChat({ profile }) {
 
       {/* Chat Window */}
       {isOpen && (
-        <div style={{
+        <div className="oloo-chat-panel" style={{
           position: 'fixed', bottom: '8rem', right: '1.5rem',
           width: '380px', maxWidth: 'calc(100vw - 2rem)',
           height: '520px', maxHeight: 'calc(100vh - 10rem)',
@@ -660,8 +660,8 @@ function AIChat({ profile }) {
         }}>
 
           {/* Chat Header */}
-          <div style={{
-            background: 'var(--surface-2)',
+          <div className="oloo-chat-header plum-surface" style={{
+            background: 'var(--plum)',
             padding: '16px', borderBottom: '1px solid var(--border)',
             display: 'flex', alignItems: 'center', gap: '12px',
           }}>
@@ -684,7 +684,7 @@ function AIChat({ profile }) {
           </div>
 
           {/* Messages Area */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div className="oloo-conversation" style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {aiConsent !== true && (
               <div role="dialog" aria-labelledby="ai-consent-title" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px', color: 'var(--text)' }}>
                 <h3 id="ai-consent-title" style={{ fontSize: '14px', color: 'var(--primary)', marginBottom: '8px' }}>Before you chat with Oloo</h3>
@@ -728,8 +728,8 @@ function AIChat({ profile }) {
                       maxWidth: '80%',
                       padding: '10px 14px',
                       borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                      background: msg.crisis ? 'var(--danger)' : msg.role === 'user' ? 'var(--primary)' : 'var(--surface-2)',
-                      color: msg.role === 'user' || msg.crisis ? 'var(--on-primary)' : 'var(--text)',
+                      background: msg.crisis ? 'var(--danger)' : msg.role === 'user' ? 'var(--orchid)' : 'var(--surface-2)',
+                      color: msg.role === 'user' || msg.crisis ? '#FFFFFF' : 'var(--text)',
                       fontSize: '13px',
                       lineHeight: '1.6',
                       fontWeight: msg.role === 'user' ? 500 : 300,

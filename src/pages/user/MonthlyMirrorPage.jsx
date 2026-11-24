@@ -163,7 +163,7 @@ export default function MonthlyMirrorPage() {
       try {
         const stored = localStorage.getItem(localKey)
         if (stored) localData = JSON.parse(stored)
-      } catch (err) { /* corrupted data, ignore */ }
+      } catch  { /* corrupted data, ignore */ }
 
       const pending = localData.map((item, i) => ({
         id: `local_${activeMonth}_${i}`,
@@ -262,7 +262,7 @@ export default function MonthlyMirrorPage() {
     if (changed) {
       if (localData.length === 0) localStorage.removeItem(localKey)
       else {
-        try { localStorage.setItem(localKey, JSON.stringify(localData)) } catch (err) { /* storage full */ }
+        try { localStorage.setItem(localKey, JSON.stringify(localData)) } catch  { /* storage full */ }
       }
       if (mountedRef.current) loadAllRecordings()
     }
@@ -411,7 +411,7 @@ export default function MonthlyMirrorPage() {
       await query
       loadAllRecordings()
       toast.success('Deleted.', 2000)
-    } catch (err) { toast.error('Delete failed.', 2000) }
+    } catch  { toast.error('Delete failed.', 2000) }
   }
 
   const retryUpload = async (localIndex) => {
@@ -438,7 +438,7 @@ export default function MonthlyMirrorPage() {
         toast.success('Synced!')
         loadAllRecordings()
 
-    } catch (err) { toast.error('Sync failed. Try again.') }
+    } catch  { toast.error('Sync failed. Try again.') }
     setUploading(false)
   }
 

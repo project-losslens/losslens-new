@@ -1,6 +1,6 @@
 // Sitewide topographic-line backdrop. Fixed, non-interactive layer behind
 // page content. Intensity is controlled by the variant class
-// (see src/styles/topo.css). Replaces the retired Aurora component.
+// in src/styles/globals.css.
 export default function TopographicBackground({ variant = 'app', className = '' }) {
   return (
     <div

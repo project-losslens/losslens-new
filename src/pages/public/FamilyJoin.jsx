@@ -145,7 +145,7 @@ export default function FamilyJoin() {
       setInvitation(prev => ({ ...prev, status: 'active' }))
       await loadUserData({ ...invitation, status: 'active' })
       setStatus('view')
-    } catch (err) { setActError('Failed to accept. Please try again.') }
+    } catch  { setActError('Failed to accept. Please try again.') }
     finally { setActing(false) }
   }
 
@@ -156,7 +156,7 @@ export default function FamilyJoin() {
       const { error: declineError } = await supabase.rpc('supporter_respond', { p_token: token, p_accept: false })
       if (declineError) throw declineError
       setStatus('declined')
-    } catch (err) { setActError('Failed. Please try again.') }
+    } catch  { setActError('Failed. Please try again.') }
     finally { setActing(false) }
   }
 
@@ -168,7 +168,7 @@ export default function FamilyJoin() {
       if (stopError) throw stopError
       if (leaveData?.left === false) throw new Error('not_active')
       setStatus('declined')
-    } catch (err) { setActError('Failed. Please try again.') }
+    } catch  { setActError('Failed. Please try again.') }
     finally { setActing(false) }
   }
 
@@ -190,7 +190,7 @@ export default function FamilyJoin() {
       setMessageSent(true)
       if (messageTimer.current) clearTimeout(messageTimer.current)
       messageTimer.current = setTimeout(() => setMessageSent(false), 3000)
-    } catch (err) { setMessages(prev => prev.filter(m => m.id !== tempId)) }
+    } catch  { setMessages(prev => prev.filter(m => m.id !== tempId)) }
     finally { setSendingMessage(false) }
   }
 

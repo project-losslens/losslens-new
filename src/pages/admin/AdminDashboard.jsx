@@ -79,7 +79,7 @@ export default function AdminDashboard() {
           setAlerts(data || [])
           setAlertsError(null)
         }
-      } catch (err) { /* silent */ }
+      } catch  { /* silent */ }
     }, 30000)
     return () => clearInterval(interval)
   }, [alertPolling])

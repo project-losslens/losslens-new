@@ -230,7 +230,7 @@ function FamilyPortalPage() {
         await navigator.clipboard.writeText(text)
         toast.success('Invitation link copied with message!', 2000)
       }
-    } catch (err) {
+    } catch  {
       try {
         await navigator.clipboard.writeText(text)
         toast.success('Link copied!', 2000)

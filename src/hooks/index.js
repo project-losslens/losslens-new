@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-/* ---- useMediaQuery.js ---- */
 
 export function useMediaQuery(query) {
   const [matches, setMatches] = useState(() => window.matchMedia(query).matches)
@@ -17,7 +16,6 @@ export function useMediaQuery(query) {
   return matches
 }
 
-/* ---- useDocumentTitle.js ---- */
 
 export function useDocumentTitle(title) {
   useEffect(() => {

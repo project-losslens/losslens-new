@@ -205,7 +205,7 @@ export default function TheCircle() {
           counts[r.id] = c || 0
         }
         setMemberCounts(counts)
-      } catch (err) { /* silent */ }
+      } catch  { /* silent */ }
     }
     fetchPresence()
     presenceRef.current = setInterval(fetchPresence, PRESENCE_POLL_INTERVAL)
@@ -237,7 +237,7 @@ export default function TheCircle() {
       try {
         const { data } = await supabase.from('circle_messages').select('id, room, user_hash, display_name, avatar_animal, avatar_prefix, message, message_type, expires_at, reply_to_id, reply_to_name, created_at').eq('room', room).order('created_at', { ascending: true }).limit(150)
         if (data) setMessages(prev => mergeCirclePoll(prev, data))
-      } catch (err) { /* silent */ }
+      } catch  { /* silent */ }
     }, 10000)
   }
 
@@ -245,7 +245,7 @@ export default function TheCircle() {
     try {
       const { data } = await supabase.from('circle_messages').select('id, room, user_hash, display_name, avatar_animal, avatar_prefix, message, message_type, expires_at, reply_to_id, reply_to_name, created_at').eq('room', room).order('created_at', { ascending: true }).limit(150)
       if (data) setMessages(prev => mergeCirclePoll(prev, data))
-    } catch (err) { /* silent */ }
+    } catch  { /* silent */ }
   }
 
   const updatePresence = async (room) => {
@@ -253,7 +253,7 @@ export default function TheCircle() {
     try {
       const userHash = await ensureCircleHash(userId)
       await supabase.from('circle_room_members').upsert({ room, user_hash: userHash, last_seen: new Date().toISOString() }, { onConflict: 'room,user_hash' })
-    } catch (err) { /* silent */ }
+    } catch  { /* silent */ }
   }
 
   //  Map user_hash to user_id for notifications
@@ -265,7 +265,7 @@ export default function TheCircle() {
         setUserHashMap(prev => ({ ...prev, [displayName]: data.id }))
         return data.id
       }
-    } catch (err) { /* not found */ }
+    } catch  { /* not found */ }
     return null
   }
 
@@ -323,7 +323,7 @@ export default function TheCircle() {
         if (mentionedUserId && mentionedUserId !== userId) {
           try {
             await createNotification(mentionedUserId, { title: 'You were mentioned', message: `${identity.displayName} mentioned you in The Circle`, type: 'info', icon: 'users', link: '/circle' })
-          } catch (err) { /* silent */ }
+          } catch  { /* silent */ }
         }
       }
 
@@ -331,9 +331,9 @@ export default function TheCircle() {
       if (replyData?.userId && replyData.userId !== userId) {
         try {
           await createNotification(replyData.userId, { title: 'Someone replied to you', message: `${identity.displayName} replied in The Circle`, type: 'info', icon: 'chat', link: '/circle' })
-        } catch (err) { /* silent */ }
+        } catch  { /* silent */ }
       }
-    } catch (err) {
+    } catch  {
       setMessages(prev => prev.map(m => m.id === tempId ? { ...m, _sending: false, _failed: true } : m))
       toast.error('Failed to send', 3000)
     }
@@ -362,7 +362,7 @@ export default function TheCircle() {
     try {
       await supabase.from('circle_messages').delete().eq('id', msgId).eq('user_hash', identity?.hash)
       setMessages(prev => prev.filter(m => m.id !== msgId))
-    } catch (err) { /* silent */ }
+    } catch  { /* silent */ }
   }
 
   const formatTime = (d) => {

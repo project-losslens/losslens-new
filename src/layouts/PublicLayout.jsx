@@ -20,7 +20,16 @@ const NAV_LINKS = [
   { to: '/#crisis-help', label: 'Crisis help' },
 ]
 
-function Header() {
+const HOME_NAV_LINKS = [
+  { to: '/#features', label: 'How we can help' },
+  { to: '/#how-it-works', label: 'Your self-check' },
+  { to: '/protection', label: 'Protection' },
+  { to: '/about', label: 'About' },
+  { to: '/#crisis-help', label: 'Human support' },
+]
+
+function Header({ home = false }) {
+  const navLinks = home ? HOME_NAV_LINKS : NAV_LINKS
   const { pathname } = useLocation()
   const { authStatus, user, role } = useAuthProfile()
   const [open, setOpen] = useState(false)
@@ -87,7 +96,7 @@ function Header() {
           <span>Loss<span className="ll-brand__lens">Lens</span></span>
         </Link>
         <nav className="ll-nav" aria-label="Primary">
-          {NAV_LINKS.map((item) => (
+          {navLinks.map((item) => (
             <Link key={item.label} to={item.to} aria-current={pathname === item.to ? 'page' : undefined}>
               {item.label}
             </Link>
@@ -108,7 +117,7 @@ function Header() {
       </div>
       {open && (
         <nav className="ll-menu" id="ll-mobile-menu" ref={menuRef} aria-label="Mobile">
-          {NAV_LINKS.map((item) => (
+          {navLinks.map((item) => (
             <Link key={item.label} to={item.to} onClick={() => setOpen(false)}>{item.label}</Link>
           ))}
           {actions}
@@ -118,14 +127,14 @@ function Header() {
   )
 }
 
-function Footer() {
+function Footer({ home = false }) {
   return (
     <footer className="ll-footer">
       <div className="ll-footer__inner">
         <nav className="ll-footer__links" aria-label="Footer">
           <Link to="/login">Log in</Link>
           <Link to="/signup">Sign up</Link>
-          <Link to="/pricing">Pricing</Link>
+          <Link to="/pricing" id={home ? 'pricing' : undefined}>Pricing</Link>
           <Link to="/protection">Protection</Link>
           <Link to="/protection/medical-rider">Medical Rider</Link>
           <Link to="/protection/individual-cover">Individual Cover</Link>
@@ -214,23 +223,28 @@ function TalkToTeam() {
   )
 }
 
-export function PublicLayout({ children }) {
+export function PublicLayout({ children, home = false }) {
   const { hash } = useLocation()
 
   useEffect(() => {
     if (!hash) return
     const id = decodeURIComponent(hash.slice(1))
-    document.getElementById(id)?.scrollIntoView()
-  }, [hash])
+    const target = document.getElementById(id)
+    target?.scrollIntoView()
+    if (home && target) {
+      if (!target.matches('a, button, input, select, textarea, summary')) target.tabIndex = -1
+      target.focus({ preventScroll: true })
+    }
+  }, [hash, home])
 
   return (
-    <div className="ll-landing">
+    <div className={`ll-landing${home ? ' ll-homepage' : ''}`}>
       <TopographicBackground variant="hero" />
       <Link className="ll-skip" to="#public-main">Skip to content</Link>
-      <Header />
-      <div id="public-main">{children}</div>
-      <Footer />
-      <TalkToTeam />
+      <Header home={home} />
+      <div id="public-main" tabIndex={home ? -1 : undefined}>{children}</div>
+      <Footer home={home} />
+      {!home && <TalkToTeam />}
     </div>
   )
 }

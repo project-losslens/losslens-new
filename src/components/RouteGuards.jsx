@@ -2,8 +2,7 @@ import { useEffect } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { clearAuthStorage, supabase } from '../lib/supabase'
 import { useAuthProfile } from '../context/AuthProfileContext'
-import { roleHome } from '../config/roleHome'
-import { requireAuthDecision, publicOnlyDecision } from '../config/routeAccess'
+import { roleHome, requireAuthDecision, publicOnlyDecision, safeInternalPath, canAccessPath } from '../config/roleHome'
 import { BrandLoader } from './Brand'
 
 /* ---- RequireAuth ---- */
@@ -61,6 +60,7 @@ export function RequireAuth({ role }) {
 
 export function PublicOnly() {
   const { authStatus, user, role, retryProfile } = useAuthProfile()
+  const location = useLocation()
 
   const decision = publicOnlyDecision({ authStatus, user })
   if (decision === 'loading') return <BrandLoader />
@@ -73,6 +73,11 @@ export function PublicOnly() {
       </section>
     )
   }
-  if (decision === 'redirect') return <Navigate to={roleHome(role)} replace />
+  if (decision === 'redirect') {
+    // Auth state can update before Login finishes; both redirects must agree.
+    const requested = safeInternalPath(location.state?.from)
+    const destination = requested && canAccessPath(role, requested) ? requested : roleHome(role)
+    return <Navigate to={destination} replace />
+  }
   return <Outlet />
 }
