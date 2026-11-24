@@ -37,7 +37,7 @@ The lint baseline is pre-existing. The initial run had 219 errors and 17 warning
 
 ## Required database and deployment changes
 
-Apply `supabase/migrations/20261124000009_workflow_integrity.sql` after the original eight migrations. Existing installations should apply only 09, not rerun the base installation scripts. No SQL has been applied remotely by this task.
+Apply `supabase/migrations/20261124000009_workflow_integrity.sql` after the consolidated base migrations (it also contains the private-PGSI section). Existing installations that already applied the original ten scripts should apply only this file, not rerun the base installation scripts. No SQL has been applied remotely by this task.
 
 Migration 09 adds grant review fields, replaces token-issuance freshness with AMR authentication-event freshness, rejects missing profiles in the active-account guard, adds a restrictive storage account policy and plan-quota enforcement, adds safe username availability and company summary RPCs, repairs company redemption, adds privacy-preserving event attendance counts, and adds the authorized account-status RPC.
 

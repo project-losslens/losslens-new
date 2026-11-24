@@ -1,3 +1,5 @@
+-- Consolidated migration: absorbs 20261112000002_rls_storage_grants.sql and 20261112000003_rpc_functions.sql (applied in original order).
+
 -- 01_core_schema.sql — LossLens consolidated schema (part 1/8)
 -- Consolidated from: 20261110000001_core_schema.sql
 -- Apply first. Idempotent. See docs/MIGRATION_NOTES.md.
@@ -1382,5 +1384,2282 @@ on conflict (id) do update set
 
 -- Default privileges: new tables get no anon access.
 alter default privileges in schema public revoke all on tables from anon;
+
+notify pgrst, 'reload schema';
+
+-- ===== Absorbed: 20261112000002_rls_storage_grants.sql =====
+
+-- 02_rls_storage_grants.sql — LossLens consolidated RLS/grants/storage (part 2/8)
+-- Consolidated from: 20261110000002_rls_grants_storage.sql
+-- Depends on 01.
+
+-- ============================================================================
+-- 20261110000002_rls_grants_storage.sql — LossLens RLS, grants, storage (consolidated)
+-- ============================================================================
+-- Final policy set (every drop policy immediately before its create), table
+-- grants/revokes, default privileges and storage.objects policies.
+-- Depends on 20261110000001_core_schema.sql and
+-- 20261110000004_portals_claims.sql objects existing.
+-- Idempotent: safe to apply twice.
+-- ============================================================================
+
+-- Enable RLS on every application table.
+do $$
+declare t text;
+begin
+  foreach t in array array[
+    'profiles','badges','diary_entries','cbt_progress','chat_history','notifications',
+    'crisis_alerts','resources','resource_ratings','resource_suggestions',
+    'events','event_rsvps','event_messages','event_discussions','groups',
+    'broadcasts','supporter_invitations','supporter_messages','supporter_feedback',
+    'circle_room_members','circle_messages','circle_message_authors','circle_message_reactions',
+    'whispers_matches','whispers_messages','whispers_reports','whispers_declines',
+    'mirror_recordings','precious_pacts','b2b_clients','grant_applications',
+    'insurance_partners','system_settings','audit_logs','upgrade_interest',
+    'company_code_validation_attempts','account_deletion_log'
+    -- Portal/claims tables (therapists, provider_vouchers, provider_claims,
+    -- provider_payouts, insurers, insurer_partnerships, claim_submissions,
+    -- bulk_invoices, bulk_invoice_claims, claims_float,
+    -- claims_float_transactions, pre_auth_vouchers) are created in script 04,
+    -- which enables RLS on each of them. Do NOT reference them here.
+  ] loop
+    execute format('alter table public.%I enable row level security', t);
+  end loop;
+end $$;
+
+-- Restrictive suspension gate on user-data tables.
+do $$
+declare t text;
+begin
+  foreach t in array array[
+    'diary_entries','cbt_progress','chat_history',
+    'circle_messages','circle_room_members','circle_message_reactions',
+    'whispers_matches','whispers_messages',
+    'mirror_recordings','precious_pacts',
+    'event_rsvps','event_discussions',
+    'supporter_invitations','supporter_messages'
+  ] loop
+    execute format('drop policy if exists losslens_active_user on public.%I', t);
+    execute format(
+      'create policy losslens_active_user on public.%I as restrictive for all to authenticated '
+      'using (public.is_active_user()) with check (public.is_active_user())', t);
+  end loop;
+end $$;
+
+-- A former member promoted to staff must not retain direct RLS access to
+-- member recovery content. The restrictive policies preserve owner scoping
+-- while requiring the live profiles.role value to remain 'user'.
+do $$
+declare t text;
+begin
+  foreach t in array array[
+    'diary_entries','cbt_progress','chat_history',
+    'mirror_recordings','precious_pacts'
+  ] loop
+    execute format('drop policy if exists losslens_recovery_role_user on public.%I', t);
+    execute format(
+      'create policy losslens_recovery_role_user on public.%I as restrictive for all to authenticated '
+      'using (public.current_user_role() = ''user'') with check (public.current_user_role() = ''user'')',
+      t
+    );
+  end loop;
+end $$;
+
+-- ---------------------------------------------------------------------------
+-- profiles
+-- ---------------------------------------------------------------------------
+drop policy if exists lossless_profiles_self_select on public.profiles;
+create policy lossless_profiles_self_select on public.profiles for select to authenticated
+  using (id = (select auth.uid()));
+drop policy if exists losslens_profiles_super_admin_select on public.profiles;
+create policy losslens_profiles_super_admin_select on public.profiles
+  for select to authenticated using (public.is_super_admin());
+drop policy if exists lossless_profiles_self_update on public.profiles;
+create policy lossless_profiles_self_update on public.profiles for update to authenticated
+  using (id = (select auth.uid())) with check (id = (select auth.uid()));
+drop policy if exists lossless_profiles_admin_update on public.profiles;
+drop policy if exists lossless_profiles_super_admin_delete on public.profiles;
+create policy lossless_profiles_super_admin_delete on public.profiles for delete to authenticated
+  using (public.is_super_admin() and id <> (select auth.uid()));
+
+-- ---------------------------------------------------------------------------
+-- Owner-only recovery data
+-- ---------------------------------------------------------------------------
+drop policy if exists lossless_diary_owner_all on public.diary_entries;
+create policy lossless_diary_owner_all on public.diary_entries for all to authenticated
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+drop policy if exists lossless_cbt_owner_all on public.cbt_progress;
+create policy lossless_cbt_owner_all on public.cbt_progress for all to authenticated
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+drop policy if exists lossless_chat_owner_all on public.chat_history;
+create policy lossless_chat_owner_all on public.chat_history for all to authenticated
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+drop policy if exists lossless_notifications_owner_all on public.notifications;
+create policy lossless_notifications_owner_all on public.notifications for all to authenticated
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+
+-- ---------------------------------------------------------------------------
+-- Public catalogues
+-- ---------------------------------------------------------------------------
+drop policy if exists lossless_resources_public_select on public.resources;
+create policy lossless_resources_public_select on public.resources for select to anon, authenticated
+  using (active = true);
+drop policy if exists admin_select_any_resources on public.resources;
+create policy admin_select_any_resources on public.resources for select to authenticated
+  using (public.is_admin());
+drop policy if exists lossless_resources_admin_insert on public.resources;
+create policy lossless_resources_admin_insert on public.resources for insert to authenticated
+  with check (public.is_admin());
+drop policy if exists lossless_resources_admin_update on public.resources;
+create policy lossless_resources_admin_update on public.resources for update to authenticated
+  using (public.is_admin()) with check (public.is_admin());
+drop policy if exists lossless_resources_admin_delete on public.resources;
+create policy lossless_resources_admin_delete on public.resources for delete to authenticated
+  using (public.is_admin());
+
+drop policy if exists lossless_groups_public_select on public.groups;
+create policy lossless_groups_public_select on public.groups for select to authenticated
+  using (active = true);
+drop policy if exists lossless_groups_anon_public_select on public.groups;
+create policy lossless_groups_anon_public_select on public.groups for select to anon
+  using (active = true);
+drop policy if exists admin_select_any_groups on public.groups;
+create policy admin_select_any_groups on public.groups for select to authenticated
+  using (public.is_admin());
+drop policy if exists lossless_groups_admin_insert on public.groups;
+create policy lossless_groups_admin_insert on public.groups for insert to authenticated
+  with check (public.is_admin());
+drop policy if exists lossless_groups_admin_update on public.groups;
+create policy lossless_groups_admin_update on public.groups for update to authenticated
+  using (public.is_admin()) with check (public.is_admin());
+drop policy if exists lossless_groups_admin_delete on public.groups;
+create policy lossless_groups_admin_delete on public.groups for delete to authenticated
+  using (public.is_admin());
+
+drop policy if exists lossless_events_public_select on public.events;
+create policy lossless_events_public_select on public.events for select to anon, authenticated
+  using (active = true);
+drop policy if exists admin_select_any_events on public.events;
+create policy admin_select_any_events on public.events for select to authenticated
+  using (public.is_admin());
+drop policy if exists lossless_events_admin_insert on public.events;
+create policy lossless_events_admin_insert on public.events for insert to authenticated
+  with check (public.is_admin());
+drop policy if exists lossless_events_admin_update on public.events;
+create policy lossless_events_admin_update on public.events for update to authenticated
+  using (public.is_admin()) with check (public.is_admin());
+drop policy if exists lossless_events_admin_delete on public.events;
+create policy lossless_events_admin_delete on public.events for delete to authenticated
+  using (public.is_admin());
+
+drop policy if exists lossless_badges_public_select on public.badges;
+create policy lossless_badges_public_select on public.badges for select to anon, authenticated using (true);
+drop policy if exists lossless_badges_admin_insert on public.badges;
+create policy lossless_badges_admin_insert on public.badges for insert to authenticated with check (public.is_admin());
+drop policy if exists lossless_badges_admin_update on public.badges;
+create policy lossless_badges_admin_update on public.badges for update to authenticated
+  using (public.is_admin()) with check (public.is_admin());
+drop policy if exists lossless_badges_admin_delete on public.badges;
+create policy lossless_badges_admin_delete on public.badges for delete to authenticated using (public.is_admin());
+
+-- ---------------------------------------------------------------------------
+-- Event participation / discussions / messages
+-- ---------------------------------------------------------------------------
+drop policy if exists lossless_rsvps_owner_all on public.event_rsvps;
+create policy lossless_rsvps_owner_all on public.event_rsvps for all to authenticated
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+drop policy if exists lossless_event_rsvps_owner_update_v2 on public.event_rsvps;
+create policy lossless_event_rsvps_owner_update_v2 on public.event_rsvps for update to authenticated
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+drop policy if exists lossless_event_rsvps_owner_delete_v2 on public.event_rsvps;
+create policy lossless_event_rsvps_owner_delete_v2 on public.event_rsvps for delete to authenticated
+  using (user_id = (select auth.uid()));
+
+drop policy if exists lossless_event_discussions_select on public.event_discussions;
+create policy lossless_event_discussions_select on public.event_discussions
+  for select to authenticated
+  using (exists (select 1 from public.events e where e.id = event_id and e.active = true));
+drop policy if exists lossless_event_discussions_insert on public.event_discussions;
+create policy lossless_event_discussions_insert on public.event_discussions
+  for insert to authenticated
+  with check (
+    user_id = (select auth.uid())
+    and is_admin_reply = false
+    and exists (select 1 from public.events e where e.id = event_id and e.active = true)
+  );
+drop policy if exists lossless_event_discussions_admin_insert on public.event_discussions;
+create policy lossless_event_discussions_admin_insert on public.event_discussions
+  for insert to authenticated
+  with check (
+    user_id = (select auth.uid())
+    and is_admin()
+    and is_admin_reply = true
+    and exists (select 1 from public.events e where e.id = event_id and e.active = true)
+  );
+drop policy if exists lossless_event_discussions_admin_delete on public.event_discussions;
+create policy lossless_event_discussions_admin_delete on public.event_discussions for delete to authenticated
+  using (public.is_admin());
+
+drop policy if exists lossless_event_messages_owner_select on public.event_messages;
+create policy lossless_event_messages_owner_select on public.event_messages for select to authenticated
+  using (user_id = (select auth.uid()));
+drop policy if exists lossless_event_messages_owner_insert on public.event_messages;
+create policy lossless_event_messages_owner_insert on public.event_messages for insert to authenticated
+  with check (user_id = (select auth.uid()));
+drop policy if exists lossless_event_messages_admin_select on public.event_messages;
+create policy lossless_event_messages_admin_select on public.event_messages for select to authenticated
+  using (public.is_admin());
+drop policy if exists lossless_event_messages_admin_update on public.event_messages;
+create policy lossless_event_messages_admin_update on public.event_messages for update to authenticated
+  using (public.is_admin()) with check (public.is_admin());
+drop policy if exists lossless_event_messages_admin_delete on public.event_messages;
+create policy lossless_event_messages_admin_delete on public.event_messages for delete to authenticated
+  using (public.is_admin());
+
+-- ---------------------------------------------------------------------------
+-- Ratings / suggestions
+-- ---------------------------------------------------------------------------
+drop policy if exists lossless_resource_ratings_owner_all on public.resource_ratings;
+create policy lossless_resource_ratings_owner_all on public.resource_ratings for all to authenticated
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+drop policy if exists lossless_resource_suggestions_owner_insert on public.resource_suggestions;
+create policy lossless_resource_suggestions_owner_insert on public.resource_suggestions for insert to authenticated
+  with check (user_id = (select auth.uid()));
+drop policy if exists lossless_resource_suggestions_admin_select on public.resource_suggestions;
+create policy lossless_resource_suggestions_admin_select on public.resource_suggestions for select to authenticated
+  using (public.is_admin());
+drop policy if exists lossless_resource_suggestions_admin_update on public.resource_suggestions;
+create policy lossless_resource_suggestions_admin_update on public.resource_suggestions for update to authenticated
+  using (public.is_admin()) with check (public.is_admin());
+drop policy if exists lossless_resource_suggestions_admin_delete on public.resource_suggestions;
+create policy lossless_resource_suggestions_admin_delete on public.resource_suggestions for delete to authenticated
+  using (public.is_admin());
+
+-- ---------------------------------------------------------------------------
+-- Supporters
+-- ---------------------------------------------------------------------------
+drop policy if exists lossless_invitations_owner_all on public.supporter_invitations;
+create policy lossless_invitations_owner_all on public.supporter_invitations for all to authenticated
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+drop policy if exists lossless_supporter_messages_owner_select on public.supporter_messages;
+create policy lossless_supporter_messages_owner_select on public.supporter_messages for select to authenticated
+  using (exists (
+    select 1 from public.supporter_invitations i
+    where i.id = invitation_id and i.user_id = (select auth.uid())
+  ));
+drop policy if exists lossless_supporter_messages_owner_insert on public.supporter_messages;
+create policy lossless_supporter_messages_owner_insert on public.supporter_messages for insert to authenticated
+  with check (sender = 'user' and exists (
+    select 1 from public.supporter_invitations i
+    where i.id = invitation_id and i.user_id = (select auth.uid())
+  ));
+drop policy if exists lossless_supporter_feedback_owner_insert on public.supporter_feedback;
+create policy lossless_supporter_feedback_owner_insert on public.supporter_feedback for insert to authenticated
+  with check (
+    user_id = (select auth.uid())
+    and exists (
+      select 1 from public.supporter_invitations i
+      where i.id = invitation_id and i.user_id = (select auth.uid())
+    )
+  );
+
+-- ---------------------------------------------------------------------------
+-- Circle membership and messages
+-- ---------------------------------------------------------------------------
+drop policy if exists lossless_circle_members_owner_select on public.circle_room_members;
+create policy lossless_circle_members_owner_select on public.circle_room_members for select to authenticated
+  using (user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid())));
+drop policy if exists lossless_circle_members_owner_insert on public.circle_room_members;
+create policy lossless_circle_members_owner_insert on public.circle_room_members for insert to authenticated
+  with check (user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid())));
+drop policy if exists lossless_circle_members_owner_delete on public.circle_room_members;
+create policy lossless_circle_members_owner_delete on public.circle_room_members for delete to authenticated
+  using (user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid())));
+drop policy if exists lossless_circle_members_owner_update_v2 on public.circle_room_members;
+create policy lossless_circle_members_owner_update_v2 on public.circle_room_members for update to authenticated
+  using (user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid())))
+  with check (user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid())));
+
+drop policy if exists lossless_circle_messages_member_select on public.circle_messages;
+create policy lossless_circle_messages_member_select on public.circle_messages for select to authenticated
+  using (
+    (expires_at is null or expires_at > now())
+    and exists (
+      select 1 from public.circle_room_members m
+      join public.profiles p on p.id = (select auth.uid())
+      where m.room = circle_messages.room and m.user_hash = p.circle_user_hash
+    )
+  );
+drop policy if exists lossless_circle_messages_owner_select_v2 on public.circle_messages;
+create policy lossless_circle_messages_owner_select_v2 on public.circle_messages for select to authenticated
+  using (
+    (expires_at is null or expires_at > now())
+    and (
+      user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
+      or exists (
+        select 1 from public.circle_room_members m
+        join public.profiles p on p.id = (select auth.uid())
+        where m.room = circle_messages.room and m.user_hash = p.circle_user_hash
+      )
+    )
+  );
+drop policy if exists lossless_circle_messages_member_insert on public.circle_messages;
+create policy lossless_circle_messages_member_insert on public.circle_messages for insert to authenticated
+  with check (
+    user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
+    and user_id is null
+    and mentioned_user_id is null
+    and exists (
+      select 1 from public.circle_room_members m
+      where m.room = circle_messages.room
+        and m.user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
+    )
+  );
+drop policy if exists lossless_circle_messages_owner_update on public.circle_messages;
+create policy lossless_circle_messages_owner_update on public.circle_messages for update to authenticated
+  using (user_hash = (select circle_user_hash from public.profiles where id = (select auth.uid())))
+  with check (user_hash = (select circle_user_hash from public.profiles where id = (select auth.uid())));
+drop policy if exists lossless_circle_messages_owner_delete on public.circle_messages;
+create policy lossless_circle_messages_owner_delete on public.circle_messages for delete to authenticated
+  using (
+    user_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
+    or public.is_admin()
+  );
+
+drop policy if exists losslens_circle_authors_admin_select on public.circle_message_authors;
+create policy losslens_circle_authors_admin_select on public.circle_message_authors
+  for select to authenticated using (public.is_admin());
+
+drop policy if exists circle_reactions_member_select on public.circle_message_reactions;
+create policy circle_reactions_member_select on public.circle_message_reactions
+  for select to authenticated using (true);
+
+-- ---------------------------------------------------------------------------
+-- Whispers
+-- ---------------------------------------------------------------------------
+drop policy if exists lossless_whispers_match_participant_select on public.whispers_matches;
+create policy lossless_whispers_match_participant_select on public.whispers_matches for select to authenticated
+  using (
+    user1_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
+    or user2_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
+  );
+drop policy if exists lossless_whispers_match_insert_v2 on public.whispers_matches;
+create policy lossless_whispers_match_insert_v2 on public.whispers_matches for insert to authenticated
+  with check (
+    user1_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
+    or user2_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
+  );
+drop policy if exists lossless_whispers_match_participant_delete on public.whispers_matches;
+create policy lossless_whispers_match_participant_delete on public.whispers_matches for delete to authenticated
+  using (
+    user1_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
+    or user2_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
+  );
+
+drop policy if exists lossless_whispers_message_participant_select on public.whispers_messages;
+create policy lossless_whispers_message_participant_select on public.whispers_messages for select to authenticated
+  using (exists (
+    select 1 from public.whispers_matches wm
+    join public.profiles p on p.id = (select auth.uid())
+    where wm.id = whispers_messages.match_id
+      and (wm.user1_hash = p.circle_user_hash or wm.user2_hash = p.circle_user_hash)
+  ));
+drop policy if exists lossless_whispers_message_participant_insert on public.whispers_messages;
+create policy lossless_whispers_message_participant_insert on public.whispers_messages
+  for insert to authenticated
+  with check (
+    sender_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
+    and exists (
+      select 1 from public.whispers_matches wm
+      join public.profiles p on p.id = (select auth.uid())
+      where wm.id = whispers_messages.match_id
+        and wm.status = 'active'
+        and (wm.user1_hash = p.circle_user_hash or wm.user2_hash = p.circle_user_hash)
+    )
+  );
+drop policy if exists lossless_whispers_message_update_v2 on public.whispers_messages;
+drop policy if exists lossless_whispers_message_sender_update on public.whispers_messages;
+drop policy if exists lossless_whispers_message_sender_delete on public.whispers_messages;
+create policy lossless_whispers_message_sender_delete on public.whispers_messages for delete to authenticated
+  using (sender_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid())));
+
+drop policy if exists lossless_whispers_report_owner_insert on public.whispers_reports;
+create policy lossless_whispers_report_owner_insert on public.whispers_reports for insert to authenticated
+  with check (
+    reporter_hash = (select p.circle_user_hash from public.profiles p where p.id = (select auth.uid()))
+    and exists (
+      select 1 from public.whispers_matches wm
+      join public.profiles p on p.id = (select auth.uid())
+      where wm.id = whispers_reports.match_id
+        and (wm.user1_hash = p.circle_user_hash or wm.user2_hash = p.circle_user_hash)
+    )
+    and (
+      whispers_reports.message_id is null
+      or exists (
+        select 1 from public.whispers_messages wm
+        where wm.id = whispers_reports.message_id
+          and wm.match_id = whispers_reports.match_id
+      )
+    )
+  );
+drop policy if exists lossless_whispers_report_admin_select on public.whispers_reports;
+create policy lossless_whispers_report_admin_select on public.whispers_reports for select to authenticated using (public.is_admin());
+drop policy if exists lossless_whispers_report_admin_update on public.whispers_reports;
+create policy lossless_whispers_report_admin_update on public.whispers_reports for update to authenticated
+  using (public.is_admin()) with check (public.is_admin());
+drop policy if exists lossless_whispers_report_admin_delete on public.whispers_reports;
+create policy lossless_whispers_report_admin_delete on public.whispers_reports for delete to authenticated using (public.is_admin());
+
+-- ---------------------------------------------------------------------------
+-- Private media (owner-only)
+-- ---------------------------------------------------------------------------
+drop policy if exists lossless_mirror_owner_select on public.mirror_recordings;
+create policy lossless_mirror_owner_select on public.mirror_recordings for select to authenticated
+  using (user_id = (select auth.uid()));
+drop policy if exists lossless_mirror_owner_insert on public.mirror_recordings;
+create policy lossless_mirror_owner_insert on public.mirror_recordings for insert to authenticated
+  with check (user_id = (select auth.uid()));
+drop policy if exists lossless_mirror_owner_insert_v2 on public.mirror_recordings;
+create policy lossless_mirror_owner_insert_v2 on public.mirror_recordings for insert to authenticated
+  with check (user_id = (select auth.uid()));
+drop policy if exists lossless_mirror_owner_update on public.mirror_recordings;
+create policy lossless_mirror_owner_update on public.mirror_recordings for update to authenticated
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+drop policy if exists lossless_mirror_owner_delete on public.mirror_recordings;
+create policy lossless_mirror_owner_delete on public.mirror_recordings for delete to authenticated
+  using (user_id = (select auth.uid()));
+
+drop policy if exists lossless_pact_owner_select on public.precious_pacts;
+create policy lossless_pact_owner_select on public.precious_pacts for select to authenticated
+  using (user_id = (select auth.uid()));
+drop policy if exists lossless_pact_owner_insert on public.precious_pacts;
+create policy lossless_pact_owner_insert on public.precious_pacts for insert to authenticated
+  with check (user_id = (select auth.uid()));
+drop policy if exists lossless_pact_owner_insert_v2 on public.precious_pacts;
+create policy lossless_pact_owner_insert_v2 on public.precious_pacts for insert to authenticated
+  with check (user_id = (select auth.uid()));
+drop policy if exists lossless_pact_owner_update on public.precious_pacts;
+create policy lossless_pact_owner_update on public.precious_pacts for update to authenticated
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+drop policy if exists lossless_pact_owner_delete on public.precious_pacts;
+create policy lossless_pact_owner_delete on public.precious_pacts for delete to authenticated
+  using (user_id = (select auth.uid()));
+
+-- ---------------------------------------------------------------------------
+-- Crisis / broadcasts / business / audit
+-- ---------------------------------------------------------------------------
+drop policy if exists lossless_crisis_user_insert on public.crisis_alerts;
+drop policy if exists lossless_crisis_admin_select on public.crisis_alerts;
+create policy lossless_crisis_admin_select on public.crisis_alerts for select to authenticated using (public.is_admin());
+drop policy if exists lossless_crisis_admin_update on public.crisis_alerts;
+create policy lossless_crisis_admin_update on public.crisis_alerts for update to authenticated
+  using (public.is_admin()) with check (public.is_admin());
+
+drop policy if exists lossless_broadcasts_public_select on public.broadcasts;
+drop policy if exists broadcasts_anon_select on public.broadcasts;
+drop policy if exists losslens_broadcasts_authenticated_select on public.broadcasts;
+create policy losslens_broadcasts_authenticated_select on public.broadcasts
+  for select to authenticated using (sent_at is not null and sent_at <= now());
+drop policy if exists lossless_broadcasts_admin_select on public.broadcasts;
+create policy lossless_broadcasts_admin_select on public.broadcasts for select to authenticated
+  using (public.is_admin());
+drop policy if exists lossless_broadcasts_admin_insert on public.broadcasts;
+create policy lossless_broadcasts_admin_insert on public.broadcasts for insert to authenticated
+  with check (public.is_admin() and created_by = (select auth.uid()));
+drop policy if exists lossless_broadcasts_admin_update on public.broadcasts;
+create policy lossless_broadcasts_admin_update on public.broadcasts for update to authenticated
+  using (public.is_admin()) with check (public.is_admin());
+drop policy if exists lossless_broadcasts_admin_delete on public.broadcasts;
+create policy lossless_broadcasts_admin_delete on public.broadcasts for delete to authenticated using (public.is_admin());
+
+drop policy if exists lossless_b2b_super_admin_all on public.b2b_clients;
+create policy lossless_b2b_super_admin_all on public.b2b_clients for all to authenticated
+  using (public.is_super_admin()) with check (public.is_super_admin());
+drop policy if exists "Super admins can view B2B clients" on public.b2b_clients;
+create policy "Super admins can view B2B clients" on public.b2b_clients for select to authenticated
+  using (exists (select 1 from public.profiles where profiles.id = (select auth.uid()) and profiles.is_super_admin = true));
+
+drop policy if exists lossless_grants_super_admin_all on public.grant_applications;
+create policy lossless_grants_super_admin_all on public.grant_applications for all to authenticated
+  using (public.is_super_admin()) with check (public.is_super_admin());
+drop policy if exists "Super admins can view grant applications" on public.grant_applications;
+create policy "Super admins can view grant applications" on public.grant_applications for select to authenticated
+  using (exists (select 1 from public.profiles where profiles.id = (select auth.uid()) and profiles.is_super_admin = true));
+
+drop policy if exists lossless_insurance_super_admin_all on public.insurance_partners;
+create policy lossless_insurance_super_admin_all on public.insurance_partners for all to authenticated
+  using (public.is_super_admin()) with check (public.is_super_admin());
+drop policy if exists "Super admins can view insurance partners" on public.insurance_partners;
+create policy "Super admins can view insurance partners" on public.insurance_partners for select to authenticated
+  using (exists (select 1 from public.profiles where profiles.id = (select auth.uid()) and profiles.is_super_admin = true));
+
+drop policy if exists lossless_settings_super_admin_all on public.system_settings;
+create policy lossless_settings_super_admin_all on public.system_settings for all to authenticated
+  using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists lossless_audit_super_admin_select on public.audit_logs;
+create policy lossless_audit_super_admin_select on public.audit_logs for select to authenticated
+  using (public.is_super_admin());
+drop policy if exists "Super admins can read audit logs" on public.audit_logs;
+create policy "Super admins can read audit logs" on public.audit_logs for select
+  using (exists (select 1 from public.profiles where profiles.id = (select auth.uid()) and profiles.is_super_admin = true));
+
+drop policy if exists lossless_upgrade_owner_insert on public.upgrade_interest;
+create policy lossless_upgrade_owner_insert on public.upgrade_interest for insert to authenticated
+  with check (user_id = (select auth.uid()));
+drop policy if exists upgrade_interest_super_admin_select on public.upgrade_interest;
+create policy upgrade_interest_super_admin_select on public.upgrade_interest for select
+  using (public.is_super_admin());
+
+-- Service-only tables: no client policies at all (RLS denies everything).
+alter table public.company_code_validation_attempts enable row level security;
+alter table public.account_deletion_log enable row level security;
+drop policy if exists account_deletion_log_service_only on public.account_deletion_log;
+create policy account_deletion_log_service_only on public.account_deletion_log
+  for all to authenticated, anon using (false) with check (false);
+
+-- NOTE: portal/claims tables (therapists, insurers, vouchers, claims, invoices,
+-- float) are created in 20261110000004_portals_claims.sql and carry their own
+-- RLS/grants there — they intentionally do not appear in this file.
+
+-- ---------------------------------------------------------------------------
+-- Table grants
+-- ---------------------------------------------------------------------------
+revoke all on all tables in schema public from anon;
+grant usage on schema public to anon, authenticated;
+grant select on public.resources, public.events, public.groups, public.badges, public.broadcasts to anon;
+
+grant select on all tables in schema public to authenticated;
+grant insert, update, delete on
+  public.profiles, public.diary_entries, public.cbt_progress, public.chat_history,
+  public.notifications, public.resource_ratings, public.resource_suggestions,
+  public.events, public.event_rsvps, public.event_messages, public.event_discussions,
+  public.supporter_invitations, public.supporter_messages, public.supporter_feedback,
+  public.circle_room_members, public.circle_messages, public.whispers_matches,
+  public.whispers_messages, public.whispers_reports, public.mirror_recordings,
+  public.precious_pacts, public.crisis_alerts, public.upgrade_interest,
+  public.resources, public.groups, public.badges, public.broadcasts,
+  public.b2b_clients, public.grant_applications, public.insurance_partners,
+  public.system_settings
+  to authenticated;
+
+revoke insert, update, delete on public.audit_logs from anon, authenticated;
+grant select on public.audit_logs to authenticated;
+
+revoke all on public.circle_message_authors from anon;
+grant select on public.circle_message_authors to authenticated;
+
+-- audit_logs actor FK (NOT VALID then validate; idempotent via constraint check)
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'audit_logs_actor_id_fkey'
+      and conrelid = 'public.audit_logs'::regclass
+  ) then
+    alter table public.audit_logs
+      add constraint audit_logs_actor_id_fkey
+      foreign key (actor_id) references public.profiles(id) on delete set null
+      not valid;
+    alter table public.audit_logs validate constraint audit_logs_actor_id_fkey;
+  end if;
+end $$;
+
+revoke all on public.circle_message_authors from anon;
+grant select on public.circle_message_authors to authenticated;
+revoke all on public.circle_message_reactions from anon;
+grant select on public.circle_message_reactions to authenticated;
+revoke all on public.whispers_declines from anon, authenticated;
+revoke all on public.company_code_validation_attempts from anon, authenticated;
+revoke all on public.account_deletion_log from anon, authenticated;
+grant all on public.account_deletion_log to service_role;
+revoke all on public.admin_profiles_safe from anon;
+grant select on public.admin_profiles_safe to authenticated;
+revoke all on public.circle_messages_safe from anon;
+grant select on public.circle_messages_safe to authenticated;
+-- NOTE: grants for therapists_public and insurer_aggregate_stats live in
+-- 20261110000004_portals_claims.sql (views are created there).
+
+-- ---------------------------------------------------------------------------
+-- Storage policies (storage.objects)
+-- ---------------------------------------------------------------------------
+
+-- Event images: public-read bucket; only admins may write objects.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('event-images', 'event-images', true, 5242880,
+        array['image/jpeg','image/png','image/webp'])
+on conflict (id) do update set
+  public = true,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "event-images public read" on storage.objects;
+create policy "event-images public read" on storage.objects for select
+  using (bucket_id = 'event-images');
+drop policy if exists "event-images admin write" on storage.objects;
+create policy "event-images admin write" on storage.objects for insert to authenticated
+  with check (bucket_id = 'event-images' and public.is_super_admin());
+drop policy if exists "event-images admin update" on storage.objects;
+create policy "event-images admin update" on storage.objects for update to authenticated
+  using (bucket_id = 'event-images' and public.is_super_admin())
+  with check (bucket_id = 'event-images' and public.is_super_admin());
+drop policy if exists "event-images admin delete" on storage.objects;
+create policy "event-images admin delete" on storage.objects for delete to authenticated
+  using (bucket_id = 'event-images' and public.is_super_admin());
+
+-- Per-user storage quota (500 MB across all buckets). Checked inside the
+-- user-writable bucket INSERT policies below.
+create or replace function public.storage_user_quota_ok()
+returns boolean
+language sql
+stable
+security definer
+set search_path = pg_catalog, public
+as $$
+  select coalesce((
+    select sum(coalesce((o.metadata->>'size')::bigint, 0))
+    from storage.objects o
+    where o.owner = (select auth.uid())
+  ), 0) < 524288000;
+$$;
+revoke execute on function public.storage_user_quota_ok() from public, anon;
+grant execute on function public.storage_user_quota_ok() to authenticated;
+drop policy if exists "avatar owner read" on storage.objects;
+drop policy if exists "avatars public select" on storage.objects;
+drop policy if exists "avatar owner select" on storage.objects;
+create policy "avatar owner select" on storage.objects for select to authenticated
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text);
+drop policy if exists "avatar owner insert" on storage.objects;
+create policy "avatar owner insert" on storage.objects for insert to authenticated
+  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text and public.storage_user_quota_ok());
+drop policy if exists "avatar owner update" on storage.objects;
+create policy "avatar owner update" on storage.objects for update to authenticated
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text)
+  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text);
+drop policy if exists "avatar owner delete" on storage.objects;
+create policy "avatar owner delete" on storage.objects for delete to authenticated
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+drop policy if exists "mirror read" on storage.objects;
+create policy "mirror read" on storage.objects for select to authenticated
+  using (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = (select auth.uid())::text);
+drop policy if exists "mirror write" on storage.objects;
+create policy "mirror write" on storage.objects for insert to authenticated
+  with check (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = (select auth.uid())::text and public.storage_user_quota_ok());
+drop policy if exists "mirror update" on storage.objects;
+create policy "mirror update" on storage.objects for update to authenticated
+  using (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = (select auth.uid())::text)
+  with check (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = (select auth.uid())::text);
+drop policy if exists "mirror delete" on storage.objects;
+create policy "mirror delete" on storage.objects for delete to authenticated
+  using (bucket_id = 'mirror-recordings' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+drop policy if exists "pact read" on storage.objects;
+create policy "pact read" on storage.objects for select to authenticated
+  using (bucket_id = 'precious-pacts' and ((storage.foldername(name))[1] = (select auth.uid())::text));
+drop policy if exists "pact write" on storage.objects;
+create policy "pact write" on storage.objects for insert to authenticated
+  with check (bucket_id = 'precious-pacts' and (storage.foldername(name))[1] = (select auth.uid())::text and public.storage_user_quota_ok());
+drop policy if exists "pact update" on storage.objects;
+create policy "pact update" on storage.objects for update to authenticated
+  using (bucket_id = 'precious-pacts' and (storage.foldername(name))[1] = (select auth.uid())::text)
+  with check (bucket_id = 'precious-pacts' and (storage.foldername(name))[1] = (select auth.uid())::text);
+drop policy if exists "pact delete" on storage.objects;
+create policy "pact delete" on storage.objects for delete to authenticated
+  using (bucket_id = 'precious-pacts' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+drop policy if exists therapist_documents_read on storage.objects;
+create policy therapist_documents_read on storage.objects for select to authenticated
+  using (bucket_id = 'therapist-documents'
+    and ((storage.foldername(name))[1] = (select auth.uid())::text or public.is_super_admin()));
+drop policy if exists therapist_documents_insert on storage.objects;
+create policy therapist_documents_insert on storage.objects for insert to authenticated
+  with check (bucket_id = 'therapist-documents'
+    and (storage.foldername(name))[1] = (select auth.uid())::text
+    and public.storage_user_quota_ok());
+drop policy if exists therapist_documents_update on storage.objects;
+create policy therapist_documents_update on storage.objects for update to authenticated
+  using (bucket_id = 'therapist-documents'
+    and (storage.foldername(name))[1] = (select auth.uid())::text)
+  with check (bucket_id = 'therapist-documents'
+    and (storage.foldername(name))[1] = (select auth.uid())::text);
+drop policy if exists therapist_documents_delete on storage.objects;
+create policy therapist_documents_delete on storage.objects for delete to authenticated
+  using (bucket_id = 'therapist-documents'
+    and ((storage.foldername(name))[1] = (select auth.uid())::text or public.is_super_admin()));
+
+notify pgrst, 'reload schema';
+
+-- ===== Absorbed: 20261112000003_rpc_functions.sql =====
+
+-- 03_rpc_functions.sql — LossLens consolidated core RPCs (part 3/8)
+-- Consolidated from: 20261110000003_rpc_functions.sql
+-- Depends on 01-02.
+
+-- ============================================================================
+-- 20261110000003_rpc_functions.sql — LossLens RPCs (consolidated, user domain)
+-- ============================================================================
+-- All security-definer RPCs for circle, whispers, supporters, company codes,
+-- progress, crisis, broadcasts and admin user actions. Final bodies only.
+-- Every function: set search_path, revoke from public/anon, explicit grants.
+-- Depends on 20261110000001_core_schema.sql.
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------
+-- Circle identity + helpers
+-- ---------------------------------------------------------------------------
+create or replace function public.ensure_circle_identity()
+returns text
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := (select auth.uid());
+  v_hash text;
+begin
+  if v_uid is null then
+    raise exception 'Not authenticated';
+  end if;
+
+  select circle_user_hash into v_hash
+  from public.profiles
+  where id = v_uid;
+
+  if v_hash is null then
+    v_hash := replace(gen_random_uuid()::text, '-', '');
+    update public.profiles
+    set circle_user_hash = v_hash
+    where id = v_uid
+      and circle_user_hash is null;
+    select circle_user_hash into v_hash
+    from public.profiles
+    where id = v_uid;
+  end if;
+
+  return v_hash;
+end;
+$$;
+revoke execute on function public.ensure_circle_identity() from public, anon;
+grant execute on function public.ensure_circle_identity() to authenticated;
+
+create or replace function public.whispers_own_hash()
+returns text
+language sql
+stable
+security definer
+set search_path = pg_catalog, public, pg_temp
+as $$
+  select p.circle_user_hash from public.profiles p where p.id = (select auth.uid());
+$$;
+revoke execute on function public.whispers_own_hash() from public, anon, authenticated;
+
+create or replace function public.circle_toggle_reaction(p_message_id uuid, p_reaction text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_hash text;
+  v_count int := 0;
+begin
+  if not public.is_active_user() then raise exception 'Account is suspended'; end if;
+  v_hash := public.whispers_own_hash();
+  if v_hash is null then raise exception 'Circle identity not initialized'; end if;
+  if p_reaction not in ('support','love','fire','heart','star') then
+    raise exception 'Invalid reaction';
+  end if;
+  if not exists (
+    select 1 from public.circle_messages cm
+    join public.circle_room_members m on m.room = cm.room and m.user_hash = v_hash
+    where cm.id = p_message_id
+      and (cm.expires_at is null or cm.expires_at > now())
+  ) then
+    raise exception 'Message not found';
+  end if;
+
+  delete from public.circle_message_reactions
+  where message_id = p_message_id and user_hash = v_hash and reaction = p_reaction;
+  get diagnostics v_count = row_count;
+  if v_count = 0 then
+    insert into public.circle_message_reactions (message_id, user_hash, reaction)
+    values (p_message_id, v_hash, p_reaction);
+  end if;
+  select count(*) into v_count from public.circle_message_reactions
+  where message_id = p_message_id and reaction = p_reaction;
+  return jsonb_build_object('reaction', p_reaction, 'active', v_count > 0, 'count', v_count);
+end;
+$$;
+revoke execute on function public.circle_toggle_reaction(uuid, text) from public, anon;
+grant execute on function public.circle_toggle_reaction(uuid, text) to authenticated;
+
+create or replace function public.circle_room_counts()
+returns table (room text, online_count integer)
+language sql
+stable
+security definer
+set search_path = pg_catalog, public
+as $$
+  select room, count(*)::integer
+  from public.circle_room_members
+  where last_seen > now() - interval '5 minutes'
+  group by room;
+$$;
+revoke execute on function public.circle_room_counts() from public, anon;
+grant execute on function public.circle_room_counts() to authenticated;
+
+create or replace function public.circle_notify(
+  p_target_hash text, p_kind text, p_message_id uuid
+)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_caller uuid := (select auth.uid());
+  v_caller_hash text;
+  v_target uuid;
+  v_recent int;
+begin
+  if v_caller is null or not public.is_active_user() then return; end if;
+  v_caller_hash := public.whispers_own_hash();
+  if v_caller_hash is null or v_caller_hash = p_target_hash then return; end if;
+  if p_kind not in ('mention', 'reply') then return; end if;
+
+  select id into v_target from public.profiles where circle_user_hash = p_target_hash;
+  if v_target is null then return; end if;
+
+  select count(*) into v_recent from public.notifications
+  where user_id = v_target and created_at > now() - interval '1 hour';
+  if v_recent >= 20 then return; end if;
+
+  insert into public.notifications (user_id, title, message, type, link)
+  values (
+    v_target,
+    case when p_kind = 'mention' then 'You were mentioned in the Circle'
+         else 'Someone replied to your Circle message' end,
+    'Open the Circle to view it.',
+    'circle',
+    '/circle'
+  );
+end;
+$$;
+revoke execute on function public.circle_notify(text, text, uuid) from public, anon;
+grant execute on function public.circle_notify(text, text, uuid) to authenticated;
+
+create or replace function public.circle_purge_expired()
+returns integer
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_count int;
+begin
+  delete from public.circle_messages where expires_at is not null and expires_at < now();
+  get diagnostics v_count = row_count;
+  return v_count;
+end;
+$$;
+revoke execute on function public.circle_purge_expired() from public, anon, authenticated;
+-- Owner: schedule via pg_cron, e.g.
+-- select cron.schedule('circle-purge-expired', '*/15 * * * *',
+--   'select public.circle_purge_expired()');
+
+-- ---------------------------------------------------------------------------
+-- Whispers
+-- ---------------------------------------------------------------------------
+create or replace function public.whispers_request(p_peer_hash text default null, p_message text default null)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_hash text;
+  v_peer text := nullif(btrim(coalesce(p_peer_hash, '')), '');
+  v_msg text := nullif(btrim(coalesce(p_message, '')), '');
+  v_pending int;
+  v_active int;
+  v_row public.whispers_matches;
+begin
+  if not public.is_active_user() then
+    raise exception 'Account is suspended';
+  end if;
+  v_hash := public.whispers_own_hash();
+  if v_hash is null then
+    raise exception 'Circle identity not initialized';
+  end if;
+  if v_peer is not null and v_peer = v_hash then
+    raise exception 'Cannot whisper yourself';
+  end if;
+  if v_msg is not null and length(v_msg) > 140 then
+    v_msg := left(v_msg, 140);
+  end if;
+
+  select count(*) into v_pending
+  from public.whispers_matches
+  where status = 'pending' and user1_hash = v_hash;
+  if v_pending >= 3 then
+    raise exception 'Too many pending requests';
+  end if;
+
+  select count(*) into v_active
+  from public.whispers_matches
+  where status = 'active' and (user1_hash = v_hash or user2_hash = v_hash);
+  if v_active >= 3 then
+    raise exception 'Maximum active chats reached';
+  end if;
+
+  insert into public.whispers_matches
+    (user1_hash, user1_role, user2_hash, user2_role, status, request_message, request_type)
+  values
+    (v_hash, 'flexible',
+     case when v_peer is not null then v_peer end,
+     case when v_peer is not null then 'flexible' end,
+     'pending', v_msg, 'request')
+  returning * into v_row;
+
+  return to_jsonb(v_row);
+end;
+$$;
+revoke execute on function public.whispers_request(text, text) from public, anon;
+grant execute on function public.whispers_request(text, text) to authenticated;
+
+create or replace function public.whispers_list_open_requests()
+returns table (id uuid, request_message text, created_at timestamptz)
+language plpgsql
+security definer
+stable
+set search_path = pg_catalog, public
+as $$
+declare
+  v_hash text;
+begin
+  if not public.is_active_user() then
+    raise exception 'Account is suspended';
+  end if;
+  v_hash := public.whispers_own_hash();
+  if v_hash is null then
+    return;
+  end if;
+  return query
+  select m.id, m.request_message, m.created_at
+  from public.whispers_matches m
+  where m.status = 'pending'
+    and m.user2_hash is null
+    and m.user1_hash <> v_hash
+    and not exists (
+      select 1 from public.whispers_declines d
+      where d.match_id = m.id and d.user_hash = v_hash
+    )
+  order by m.created_at desc
+  limit 20;
+end;
+$$;
+revoke execute on function public.whispers_list_open_requests() from public, anon;
+grant execute on function public.whispers_list_open_requests() to authenticated;
+
+create or replace function public.whispers_respond(p_match_id uuid, p_accept boolean)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_hash text;
+  v_row public.whispers_matches;
+  v_active int;
+begin
+  if not public.is_active_user() then
+    raise exception 'Account is suspended';
+  end if;
+  v_hash := public.whispers_own_hash();
+  if v_hash is null then
+    raise exception 'Circle identity not initialized';
+  end if;
+
+  select * into v_row from public.whispers_matches
+  where id = p_match_id and status = 'pending'
+  for update;
+  if not found then
+    raise exception 'Pending match not found';
+  end if;
+
+  -- Owner cancelling their own still-open request.
+  if v_row.user1_hash = v_hash and v_row.user2_hash is null then
+    if p_accept then
+      raise exception 'Cannot accept your own request';
+    end if;
+    update public.whispers_matches set status = 'cancelled'
+    where id = p_match_id and status = 'pending' and user1_hash = v_hash
+    returning * into v_row;
+    return to_jsonb(v_row);
+  end if;
+
+  -- Open broadcast request: anyone except the requester may claim or decline.
+  if v_row.user2_hash is null and v_row.user1_hash <> v_hash then
+    if p_accept then
+      select count(*) into v_active
+      from public.whispers_matches
+      where status = 'active' and (user1_hash = v_hash or user2_hash = v_hash);
+      if v_active >= 3 then
+        raise exception 'Maximum active chats reached';
+      end if;
+      update public.whispers_matches
+      set user2_hash = v_hash, user2_role = 'flexible', status = 'active'
+      where id = p_match_id and user2_hash is null and status = 'pending'
+      returning * into v_row;
+      if not found then
+        raise exception 'This request was already taken';
+      end if;
+    else
+      insert into public.whispers_declines (match_id, user_hash)
+      values (p_match_id, v_hash)
+      on conflict do nothing;
+      update public.whispers_matches
+      set status = 'rejected', rejected_at = now(), rejected_by = v_hash
+      where id = p_match_id and user2_hash is null and status = 'pending'
+      returning * into v_row;
+    end if;
+    return to_jsonb(v_row);
+  end if;
+
+  -- Direct (non-open) pending request: only the invited user2 responds.
+  if v_row.user2_hash = v_hash then
+    if p_accept then
+      select count(*) into v_active
+      from public.whispers_matches
+      where status = 'active' and (user1_hash = v_hash or user2_hash = v_hash);
+      if v_active >= 3 then
+        raise exception 'Maximum active chats reached';
+      end if;
+    end if;
+    update public.whispers_matches
+    set status = case when p_accept then 'active' else 'rejected' end,
+        rejected_at = case when p_accept then rejected_at else now() end,
+        rejected_by = case when p_accept then rejected_by else v_hash end
+    where id = p_match_id and status = 'pending' and user2_hash = v_hash
+    returning * into v_row;
+    if not found then
+      raise exception 'Pending match changed before response';
+    end if;
+    return to_jsonb(v_row);
+  end if;
+
+  raise exception 'Not a participant or request is no longer open';
+end;
+$$;
+revoke execute on function public.whispers_respond(uuid, boolean) from public, anon;
+grant execute on function public.whispers_respond(uuid, boolean) to authenticated;
+
+create or replace function public.whispers_rate(p_match_id uuid, p_rating integer, p_feedback text default null)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_hash text;
+  v_row public.whispers_matches;
+begin
+  if p_rating is null or p_rating < 1 or p_rating > 5 then
+    raise exception 'Rating must be between 1 and 5';
+  end if;
+  if not public.is_active_user() then
+    raise exception 'Account is suspended';
+  end if;
+  v_hash := public.whispers_own_hash();
+
+  select * into v_row from public.whispers_matches where id = p_match_id for update;
+  if not found then
+    raise exception 'Match not found';
+  end if;
+  if v_row.user1_hash is distinct from v_hash and v_row.user2_hash is distinct from v_hash then
+    raise exception 'Not a participant';
+  end if;
+
+  if v_row.user1_hash = v_hash then
+    update public.whispers_matches
+    set user1_rating = p_rating,
+        user1_feedback = left(coalesce(p_feedback, user1_feedback), 500),
+        status = 'ended', ended_at = now()
+    where id = p_match_id
+    returning * into v_row;
+  else
+    update public.whispers_matches
+    set user2_rating = p_rating,
+        user2_feedback = left(coalesce(p_feedback, user2_feedback), 500),
+        status = 'ended', ended_at = now()
+    where id = p_match_id
+    returning * into v_row;
+  end if;
+  return to_jsonb(v_row);
+end;
+$$;
+revoke execute on function public.whispers_rate(uuid, integer, text) from public, anon;
+grant execute on function public.whispers_rate(uuid, integer, text) to authenticated;
+
+create or replace function public.whispers_report(
+  p_match_id uuid, p_reason text, p_message_id uuid default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_hash text;
+  v_row public.whispers_matches;
+begin
+  if not public.is_active_user() then
+    raise exception 'Account is suspended';
+  end if;
+  v_hash := public.whispers_own_hash();
+  if v_hash is null then
+    raise exception 'Circle identity not initialized';
+  end if;
+  if p_reason is null or length(btrim(p_reason)) = 0 or length(p_reason) > 500 then
+    raise exception 'A report reason is required (max 500 characters)';
+  end if;
+
+  select * into v_row from public.whispers_matches
+  where id = p_match_id
+    and (user1_hash = v_hash or user2_hash = v_hash)
+  for update;
+  if not found then
+    raise exception 'Not a participant';
+  end if;
+
+  insert into public.whispers_reports (match_id, reporter_hash, message_id, reason)
+  values (p_match_id, v_hash, p_message_id, left(btrim(p_reason), 500));
+
+  update public.whispers_matches
+  set status = 'ended', ended_at = now()
+  where id = p_match_id;
+
+  return jsonb_build_object('ok', true);
+end;
+$$;
+revoke execute on function public.whispers_report(uuid, text, uuid) from public, anon;
+grant execute on function public.whispers_report(uuid, text, uuid) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Supporter / family portal (token RPCs callable by anon supporters)
+-- ---------------------------------------------------------------------------
+create or replace function public.supporter_lookup(p_token text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_inv public.supporter_invitations;
+  v_name text;
+  v_attempts integer;
+  v_key text := 'sup:' || encode(extensions.digest(coalesce(p_token, ''),'sha256'),'hex');
+begin
+  -- Failed-lookup throttle: tokens are secrets, so only their hash is stored.
+  -- >30 lookups per token per hour returns the same null as a bad token.
+  delete from public.company_code_validation_attempts
+  where actor_key = v_key and attempted_at < now() - interval '1 hour';
+  insert into public.company_code_validation_attempts(actor_key) values (v_key);
+  select count(*) into v_attempts from public.company_code_validation_attempts
+  where actor_key = v_key and attempted_at >= now() - interval '1 hour';
+  if v_attempts > 30 then
+    return null;
+  end if;
+
+  select * into v_inv from public.supporter_invitations
+  where token_hash = encode(extensions.digest(p_token,'sha256'),'hex') limit 1;
+  -- Uniform response: unknown, expired and revoked tokens are
+  -- indistinguishable to the caller.
+  if not found
+     or v_inv.status = 'revoked'
+     or (v_inv.expires_at is not null and v_inv.expires_at <= now()) then
+    return null;
+  end if;
+
+  select full_name into v_name from public.profiles where id = v_inv.user_id;
+
+  return jsonb_build_object(
+    'id', v_inv.id,
+    'supporter_name', v_inv.supporter_name,
+    'supporter_relation', v_inv.supporter_relation,
+    'permissions', v_inv.permissions,
+    'anonymous_mode', v_inv.anonymous_mode,
+    'crisis_contact', v_inv.crisis_contact,
+    'status', v_inv.status,
+    'responded_at', v_inv.responded_at,
+    'expires_at', v_inv.expires_at,
+    'created_at', v_inv.created_at,
+    'user_name', case when v_inv.anonymous_mode then null else v_name end
+  );
+end;
+$$;
+revoke execute on function public.supporter_lookup(text) from public;
+grant execute on function public.supporter_lookup(text) to anon, authenticated;
+
+create or replace function public.supporter_respond(p_token text, p_accept boolean)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_inv public.supporter_invitations;
+begin
+  select * into v_inv from public.supporter_invitations
+  where token_hash = encode(extensions.digest(p_token,'sha256'),'hex') for update;
+  if not found then
+    raise exception 'Invalid invitation';
+  end if;
+  if v_inv.expires_at is not null and v_inv.expires_at <= now() then
+    raise exception 'Invitation expired';
+  end if;
+  if v_inv.status <> 'pending' then
+    raise exception 'Invitation already responded';
+  end if;
+
+  update public.supporter_invitations
+  set status = case when p_accept then 'active' else 'declined' end,
+      responded_at = now()
+  where id = v_inv.id
+  returning * into v_inv;
+
+  return jsonb_build_object('status', v_inv.status, 'responded_at', v_inv.responded_at);
+end;
+$$;
+revoke execute on function public.supporter_respond(text, boolean) from public;
+grant execute on function public.supporter_respond(text, boolean) to anon, authenticated;
+
+-- Supporter-initiated end of an ACTIVE relationship. Distinct from
+-- supporter_respond (which only handles pending invitations): revocation is
+-- permanent and cannot be undone by either party — a new invitation is
+-- required to reconnect.
+create or replace function public.supporter_leave(p_token text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_inv public.supporter_invitations;
+begin
+  select * into v_inv from public.supporter_invitations
+  where token_hash = encode(extensions.digest(p_token,'sha256'),'hex') for update;
+  if not found or v_inv.status <> 'active'
+     or (v_inv.expires_at is not null and v_inv.expires_at <= now()) then
+    -- Uniform response: do not reveal whether the token exists.
+    return jsonb_build_object('left', false);
+  end if;
+  update public.supporter_invitations
+  set status = 'revoked', responded_at = now()
+  where id = v_inv.id;
+  return jsonb_build_object('left', true);
+end;
+$$;
+revoke execute on function public.supporter_leave(text) from public;
+grant execute on function public.supporter_leave(text) to anon, authenticated;
+
+create or replace function public.supporter_get_summary(p_token text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_inv public.supporter_invitations;
+  v_perms jsonb;
+  v_profile public.profiles;
+  v_moods jsonb;
+  v_cbt int;
+begin
+  select * into v_inv from public.supporter_invitations
+  where token_hash = encode(extensions.digest(p_token,'sha256'),'hex');
+  if not found or v_inv.status <> 'active'
+     or (v_inv.expires_at is not null and v_inv.expires_at <= now()) then
+    raise exception 'Invitation is not active';
+  end if;
+
+  v_perms := coalesce(v_inv.permissions, '[]'::jsonb);
+  select * into v_profile from public.profiles where id = v_inv.user_id;
+  if not found then
+    raise exception 'User not found';
+  end if;
+
+  if v_perms ? 'Diary summary' or v_perms ? 'General mood' then
+    select coalesce(jsonb_agg(jsonb_build_object('date', d.date, 'mood', d.mood, 'gambled', d.gambled)
+                              order by d.date desc), '[]'::jsonb)
+    into v_moods
+    from (
+      select date, mood, gambled from public.diary_entries
+      where user_id = v_inv.user_id
+      order by date desc limit 7
+    ) d;
+  else
+    v_moods := '[]'::jsonb;
+  end if;
+
+  if v_perms ? 'Module progress' then
+    select count(*) into v_cbt from public.cbt_progress
+    where user_id = v_inv.user_id and completed = true;
+  else
+    v_cbt := null;
+  end if;
+
+  return jsonb_build_object(
+    'streak_days', case when v_perms ? 'Streak status' then v_profile.streak_days end,
+    'money_saved', case when v_perms ? 'Streak status' then v_profile.money_saved end,
+    'goal', case when v_perms ? 'Goal progress' then v_profile.goal end,
+    'risk_level', case when v_perms ? 'Risk level' then v_profile.risk_level end,
+    'recent_moods', v_moods,
+    'cbt_completed', v_cbt,
+    'full_name', case when v_inv.anonymous_mode then null else v_profile.full_name end
+  );
+end;
+$$;
+revoke execute on function public.supporter_get_summary(text) from public;
+grant execute on function public.supporter_get_summary(text) to anon, authenticated;
+
+create or replace function public.supporter_post_message(p_token text, p_content text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_inv public.supporter_invitations;
+  v_msg public.supporter_messages;
+begin
+  select * into v_inv from public.supporter_invitations
+  where token_hash = encode(extensions.digest(p_token,'sha256'),'hex');
+  if not found or v_inv.status <> 'active'
+     or (v_inv.expires_at is not null and v_inv.expires_at <= now()) then
+    raise exception 'Invitation is not active';
+  end if;
+  if p_content is null or length(btrim(p_content)) = 0 or length(p_content) > 500 then
+    raise exception 'Message must be 1-500 characters';
+  end if;
+
+  insert into public.supporter_messages (invitation_id, sender, content)
+  values (v_inv.id, 'supporter', btrim(p_content))
+  returning * into v_msg;
+  return to_jsonb(v_msg);
+end;
+$$;
+revoke execute on function public.supporter_post_message(text, text) from public;
+grant execute on function public.supporter_post_message(text, text) to anon, authenticated;
+
+create or replace function public.supporter_list_messages(p_token text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_inv public.supporter_invitations;
+  v_msgs jsonb;
+begin
+  select * into v_inv from public.supporter_invitations
+  where token_hash = encode(extensions.digest(p_token,'sha256'),'hex');
+  if not found or v_inv.status <> 'active'
+     or (v_inv.expires_at is not null and v_inv.expires_at <= now()) then
+    raise exception 'Invitation is not active';
+  end if;
+
+  select coalesce(jsonb_agg(to_jsonb(m) order by m.created_at), '[]'::jsonb)
+  into v_msgs
+  from public.supporter_messages m
+  where m.invitation_id = v_inv.id;
+  return v_msgs;
+end;
+$$;
+revoke execute on function public.supporter_list_messages(text) from public;
+grant execute on function public.supporter_list_messages(text) to anon, authenticated;
+
+create or replace function public.create_supporter_invitation(
+  p_supporter_name text,
+  p_supporter_email text default null,
+  p_supporter_phone text default null,
+  p_supporter_relation text default null,
+  p_permissions jsonb default '["Streak status","Goal progress","General mood"]'::jsonb,
+  p_anonymous_mode boolean default false,
+  p_crisis_contact boolean default false
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := (select auth.uid());
+  v_count int;
+  v_inv public.supporter_invitations;
+  v_raw_token text := encode(extensions.gen_random_bytes(24), 'hex');
+begin
+  if v_uid is null then
+    raise exception 'Not authenticated';
+  end if;
+  if not public.is_active_user() then
+    raise exception 'Account is suspended';
+  end if;
+  if p_supporter_name is null or length(btrim(p_supporter_name)) = 0 then
+    raise exception 'Supporter name is required';
+  end if;
+
+  select count(*) into v_count
+  from public.supporter_invitations
+  where user_id = v_uid and status in ('pending', 'active');
+  if v_count >= 5 then
+    raise exception 'Maximum 5 supporters allowed';
+  end if;
+
+  -- Only the hash is persisted; the raw token is returned once so the owner
+  -- can build the invite link. It is never stored or logged.
+  insert into public.supporter_invitations (
+    user_id, supporter_name, supporter_email, supporter_phone, supporter_relation,
+    permissions, anonymous_mode, crisis_contact, token_hash, status, expires_at
+  ) values (
+    v_uid, btrim(p_supporter_name), nullif(btrim(coalesce(p_supporter_email,'')), ''),
+    nullif(btrim(coalesce(p_supporter_phone,'')), ''), nullif(btrim(coalesce(p_supporter_relation,'')), ''),
+    coalesce(p_permissions, '[]'::jsonb), coalesce(p_anonymous_mode, false),
+    coalesce(p_crisis_contact, false),
+    encode(extensions.digest(v_raw_token,'sha256'),'hex'),
+    'pending', now() + interval '30 days'
+  ) returning * into v_inv;
+
+  return to_jsonb(v_inv) || jsonb_build_object('token', v_raw_token);
+end;
+$$;
+revoke execute on function public.create_supporter_invitation(text, text, text, text, jsonb, boolean, boolean) from public, anon;
+grant execute on function public.create_supporter_invitation(text, text, text, text, jsonb, boolean, boolean) to authenticated;
+
+create or replace function public.supporter_owner_list_invitations()
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_result jsonb;
+begin
+  if (select auth.uid()) is null or not public.is_active_user() then
+    raise exception 'Active sign-in required';
+  end if;
+  select coalesce(jsonb_agg(to_jsonb(i) order by i.created_at desc), '[]'::jsonb)
+  into v_result
+  from public.supporter_invitations i
+  where i.user_id = (select auth.uid());
+  return v_result;
+end;
+$$;
+
+create or replace function public.supporter_owner_manage(
+  p_invitation_id uuid,
+  p_action text,
+  p_value jsonb default '{}'::jsonb
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_inv public.supporter_invitations;
+  v_new_token text;
+begin
+  if (select auth.uid()) is null or not public.is_active_user() then
+    raise exception 'Active sign-in required';
+  end if;
+  select * into v_inv from public.supporter_invitations
+  where id = p_invitation_id and user_id = (select auth.uid())
+  for update;
+  if not found then raise exception 'Invitation not found'; end if;
+
+  if p_action = 'remove' then
+    -- Revoke rather than delete: keeps an audit record and every supporter
+    -- RPC already requires status = 'active', so access ends immediately.
+    update public.supporter_invitations set status = 'revoked' where id = v_inv.id returning * into v_inv;
+    return to_jsonb(v_inv) || jsonb_build_object('revoked', true);
+  elsif p_action = 'pause' then
+    if v_inv.status <> 'active' then raise exception 'Only active invitations can be paused'; end if;
+    update public.supporter_invitations set status = 'paused' where id = v_inv.id returning * into v_inv;
+  elsif p_action = 'resume' then
+    if v_inv.status <> 'paused' then raise exception 'Only paused invitations can be resumed'; end if;
+    update public.supporter_invitations set status = 'active' where id = v_inv.id returning * into v_inv;
+  elsif p_action = 'toggle_crisis' then
+    update public.supporter_invitations
+    set crisis_contact = coalesce((p_value ->> 'crisis_contact')::boolean, false)
+    where id = v_inv.id returning * into v_inv;
+  elsif p_action = 'renew' then
+    -- A revoked relationship can never be reactivated; a new invitation is
+    -- required instead.
+    if v_inv.status = 'revoked' then raise exception 'Revoked invitations cannot be renewed'; end if;
+    -- Rotate the token on renew so an old link cannot be reused. Only the
+    -- hash is stored; the new raw token is returned once to the owner.
+    v_new_token := encode(extensions.gen_random_bytes(24), 'hex');
+    update public.supporter_invitations
+    set expires_at = now() + interval '7 days', status = 'pending', responded_at = null,
+        token_hash = encode(extensions.digest(v_new_token,'sha256'),'hex')
+    where id = v_inv.id returning * into v_inv;
+  else
+    raise exception 'Unsupported invitation action';
+  end if;
+  return to_jsonb(v_inv)
+    || case when v_new_token is not null
+            then jsonb_build_object('token', v_new_token)
+            else '{}'::jsonb end;
+end;
+$$;
+
+create or replace function public.supporter_owner_list_messages(p_invitation_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_messages jsonb;
+begin
+  if (select auth.uid()) is null or not public.is_active_user() then
+    raise exception 'Active sign-in required';
+  end if;
+  if not exists (
+    select 1 from public.supporter_invitations
+    where id = p_invitation_id and user_id = (select auth.uid()) and status = 'active'
+  ) then raise exception 'Active invitation not found'; end if;
+  select coalesce(jsonb_agg(to_jsonb(m) order by m.created_at), '[]'::jsonb)
+  into v_messages
+  from public.supporter_messages m where m.invitation_id = p_invitation_id;
+  return v_messages;
+end;
+$$;
+
+create or replace function public.supporter_owner_post_message(p_invitation_id uuid, p_content text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_message public.supporter_messages;
+begin
+  if (select auth.uid()) is null or not public.is_active_user() then
+    raise exception 'Active sign-in required';
+  end if;
+  if not exists (
+    select 1 from public.supporter_invitations
+    where id = p_invitation_id and user_id = (select auth.uid()) and status = 'active'
+  ) then raise exception 'Active invitation not found'; end if;
+  if p_content is null or length(btrim(p_content)) = 0 or length(p_content) > 500 then
+    raise exception 'Message must be 1-500 characters';
+  end if;
+  insert into public.supporter_messages (invitation_id, sender, content)
+  values (p_invitation_id, 'user', btrim(p_content))
+  returning * into v_message;
+  return to_jsonb(v_message);
+end;
+$$;
+
+create or replace function public.supporter_owner_feedback(p_invitation_id uuid, p_felt_supported boolean)
+returns uuid
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_id uuid;
+begin
+  if (select auth.uid()) is null or not public.is_active_user() then
+    raise exception 'Active sign-in required';
+  end if;
+  if not exists (
+    select 1 from public.supporter_invitations
+    where id = p_invitation_id and user_id = (select auth.uid())
+  ) then raise exception 'Invitation not found'; end if;
+  insert into public.supporter_feedback (user_id, invitation_id, felt_supported)
+  values ((select auth.uid()), p_invitation_id, p_felt_supported)
+  returning id into v_id;
+  return v_id;
+end;
+$$;
+
+revoke execute on function public.supporter_owner_list_invitations() from public, anon;
+revoke execute on function public.supporter_owner_manage(uuid, text, jsonb) from public, anon;
+revoke execute on function public.supporter_owner_list_messages(uuid) from public, anon;
+revoke execute on function public.supporter_owner_post_message(uuid, text) from public, anon;
+revoke execute on function public.supporter_owner_feedback(uuid, boolean) from public, anon;
+grant execute on function public.supporter_owner_list_invitations() to authenticated;
+grant execute on function public.supporter_owner_manage(uuid, text, jsonb) to authenticated;
+grant execute on function public.supporter_owner_list_messages(uuid) to authenticated;
+grant execute on function public.supporter_owner_post_message(uuid, text) to authenticated;
+grant execute on function public.supporter_owner_feedback(uuid, boolean) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Company codes
+-- ---------------------------------------------------------------------------
+create or replace function public.validate_company_code(p_code text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_code text := upper(btrim(coalesce(p_code, '')));
+  v_client public.b2b_clients;
+  v_used integer := 0;
+  v_remaining integer;
+  v_actor text;
+  v_attempts integer;
+  v_code_attempts integer;
+  v_ip text;
+  v_ip_raw text;
+  v_xff text[];
+  v_valid boolean := false;
+begin
+  -- Trust only the right-most X-Forwarded-For entry: it is the value appended
+  -- by the closest proxy. Earlier entries are client-controlled and can be
+  -- spoofed to reset rate-limit counters.
+  begin
+    v_ip_raw := current_setting('request.headers', true)::jsonb->>'x-forwarded-for';
+  exception when others then
+    v_ip_raw := null;
+  end;
+  if v_ip_raw is not null and btrim(v_ip_raw) <> '' then
+    v_xff := string_to_array(v_ip_raw, ',');
+    v_ip := btrim(v_xff[array_length(v_xff, 1)]);
+  else
+    v_ip := null;
+  end if;
+  v_actor := coalesce(nullif(v_ip, ''), (select auth.uid())::text, 'anonymous');
+  perform pg_advisory_xact_lock(hashtext(v_actor));
+  delete from public.company_code_validation_attempts
+  where actor_key = v_actor and attempted_at < now() - interval '1 hour';
+  delete from public.company_code_validation_attempts
+  where actor_key = 'code:' || v_code and attempted_at < now() - interval '1 hour';
+  insert into public.company_code_validation_attempts(actor_key) values (v_actor);
+  insert into public.company_code_validation_attempts(actor_key) values ('code:' || v_code);
+  select count(*) into v_attempts from public.company_code_validation_attempts
+  where actor_key = v_actor and attempted_at >= now() - interval '1 hour';
+  select count(*) into v_code_attempts from public.company_code_validation_attempts
+  where actor_key = 'code:' || v_code and attempted_at >= now() - interval '1 hour';
+
+  select * into v_client from public.b2b_clients
+  where upper(company_code) = v_code and status = 'active'
+  limit 1;
+  select count(*) into v_used from public.profiles where b2b_client_id = v_client.id;
+  v_remaining := case when v_client.max_users is null then null
+    else greatest(v_client.max_users - v_used, 0) end;
+  v_valid := v_client.id is not null
+    and (v_client.max_users is null or v_remaining > 0);
+
+  perform pg_sleep(0.15);
+  -- Per-actor and global per-code throttles. Over-limit responses are
+  -- identical in shape to a normal negative result (no oracle).
+  if v_attempts > 20 or v_code_attempts > 200 then v_valid := false; end if;
+  return jsonb_build_object(
+    'valid', v_valid,
+    'company_name', case when v_valid then v_client.company_name else null end,
+    'seats_remaining', case when v_valid then v_remaining else null end
+  );
+end;
+$$;
+revoke execute on function public.validate_company_code(text) from public;
+grant execute on function public.validate_company_code(text) to anon, authenticated;
+
+create or replace function public.redeem_company_code(p_code text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := (select auth.uid());
+  v_code text := upper(btrim(coalesce(p_code, '')));
+  v_client public.b2b_clients;
+  v_used int;
+begin
+  if v_uid is null then
+    raise exception 'Not authenticated';
+  end if;
+  if not public.is_active_user() then
+    raise exception 'Account is suspended';
+  end if;
+  -- Lock the company row so seat counting and the profile update are atomic
+  -- across concurrent redeemers.
+  select * into v_client from public.b2b_clients
+  where upper(company_code) = v_code and status = 'active' limit 1 for update;
+  if not found then
+    raise exception 'Invalid or inactive company code';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext(v_client.id::text));
+  select count(*) into v_used from public.profiles where b2b_client_id = v_client.id;
+  if v_client.max_users is not null and v_used >= v_client.max_users then
+    raise exception 'No seats remaining for this company code';
+  end if;
+
+  update public.profiles
+  set b2b_client_id = v_client.id,
+      plan_type = 'company',
+      subscription_plan = coalesce(subscription_plan, 'company'),
+      subscription_status = coalesce(subscription_status, 'active')
+  where id = v_uid;
+
+  insert into public.audit_logs (actor_id, action, target_table, target_id, metadata)
+  values (v_uid, 'redeem_company_code', 'b2b_clients', v_client.id::text,
+    jsonb_build_object('code', v_code));
+
+  return jsonb_build_object('success', true, 'company_name', v_client.company_name);
+end;
+$$;
+revoke execute on function public.redeem_company_code(text) from public, anon;
+grant execute on function public.redeem_company_code(text) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Progress (idempotent, Nairobi-anchored)
+-- ---------------------------------------------------------------------------
+create or replace function public.recompute_progress()
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_uid uuid := (select auth.uid());
+  v_today date := (now() at time zone 'Africa/Nairobi')::date;
+  v_profile public.profiles;
+  v_streak int := 0;
+  v_cur date;
+  v_freeze_used boolean;
+  v_freeze_reset date;
+  v_freeze_activated boolean := false;
+  v_freeze_bridged date;
+  v_clean_since date;
+  v_money_saved numeric;
+  v_diary_count int;
+  v_clean_count int;
+  v_cbt_count int;
+  v_trigger_count int;
+  v_badges jsonb;
+  v_new_badges jsonb := '[]'::jsonb;
+  v_badge_row record;
+  v_earned text[];
+  v_day_count int;
+  v_day_clean boolean;
+begin
+  if v_uid is null then
+    raise exception 'Not authenticated';
+  end if;
+
+  select * into v_profile from public.profiles where id = v_uid;
+  if not found then
+    raise exception 'Profile not found';
+  end if;
+
+  v_freeze_used := coalesce(v_profile.streak_freeze_used, false);
+  v_freeze_reset := v_profile.streak_freeze_reset_date;
+  v_freeze_bridged := v_profile.streak_freeze_bridged_date;
+  if v_freeze_used and v_freeze_reset is not null and v_freeze_reset <= v_today then
+    v_freeze_used := false;
+    v_freeze_reset := null;
+    v_freeze_bridged := null;
+  end if;
+
+  if exists (select 1 from public.diary_entries where user_id = v_uid and date = v_today) then
+    v_cur := v_today;
+  elsif exists (select 1 from public.diary_entries where user_id = v_uid and date = v_today - 1) then
+    v_cur := v_today - 1;
+  else
+    v_cur := null;
+  end if;
+
+  while v_cur is not null loop
+    select count(*), bool_or(not d.gambled)
+    into v_day_count, v_day_clean
+    from public.diary_entries d
+    where d.user_id = v_uid and d.date = v_cur;
+
+    if v_day_count = 0 then
+      exit;
+    elsif v_day_clean then
+      v_streak := v_streak + 1;
+      v_cur := v_cur - 1;
+    else
+      if not v_freeze_used or v_freeze_bridged = v_cur then
+        if not v_freeze_used then
+          v_freeze_used := true;
+          v_freeze_reset := v_today + 30;
+          v_freeze_activated := true;
+        end if;
+        v_freeze_bridged := v_cur;
+        v_cur := v_cur - 1;
+      else
+        exit;
+      end if;
+    end if;
+  end loop;
+
+  v_clean_since := case when v_streak > 0 then v_cur + 1 else null end;
+
+  select coalesce(sum(d.money_spent), 0) into v_money_saved
+  from public.diary_entries d
+  where d.user_id = v_uid and d.gambled = false;
+
+  select count(*), count(*) filter (where not d.gambled)
+    into v_diary_count, v_clean_count
+  from public.diary_entries d where d.user_id = v_uid;
+
+  select count(*) into v_cbt_count
+  from public.cbt_progress c where c.user_id = v_uid and c.completed = true;
+
+  select count(distinct t) into v_trigger_count
+  from public.diary_entries d,
+       lateral jsonb_array_elements_text(coalesce(d.triggers, '[]'::jsonb)) t
+  where d.user_id = v_uid;
+
+  v_earned := coalesce(
+    (select array_agg(x) from jsonb_array_elements_text(coalesce(v_profile.badges, '[]'::jsonb)) x),
+    '{}'::text[]
+  );
+
+  for v_badge_row in
+    select * from (values
+      ('first_entry',     v_diary_count >= 1),
+      ('week_streak',     v_streak >= 7),
+      ('month_streak',    v_streak >= 30),
+      ('diary_10',        v_diary_count >= 10),
+      ('diary_30',        v_diary_count >= 30),
+      ('cbt_1',           v_cbt_count >= 1),
+      ('cbt_4',           v_cbt_count >= 4),
+      ('cbt_all',         v_cbt_count >= 8),
+      ('first_no',        v_clean_count >= 1),
+      ('trigger_master',  v_trigger_count >= 5),
+      ('saved_1000',      v_money_saved >= 1000),
+      ('saved_10000',     v_money_saved >= 10000)
+    ) as checks(badge_id, earned)
+    where checks.earned and not (checks.badge_id = any(v_earned))
+  loop
+    v_new_badges := v_new_badges || to_jsonb(v_badge_row.badge_id);
+    v_earned := v_earned || v_badge_row.badge_id;
+  end loop;
+
+  select coalesce(jsonb_agg(x order by ord), '[]'::jsonb) into v_badges
+  from (
+    select x, ord from (
+      select value as x, ordinality as ord
+      from jsonb_array_elements(coalesce(v_profile.badges, '[]'::jsonb)) with ordinality
+      union all
+      select value, 1000 + ordinality
+      from jsonb_array_elements(v_new_badges) with ordinality
+    ) s
+  ) t;
+
+  update public.profiles
+  set streak_days = v_streak,
+      money_saved = v_money_saved,
+      clean_since = v_clean_since,
+      streak_freeze_used = v_freeze_used,
+      streak_freeze_reset_date = v_freeze_reset,
+      streak_freeze_bridged_date = v_freeze_bridged,
+      badges = v_badges
+  where id = v_uid;
+
+  return jsonb_build_object(
+    'streak_days', v_streak,
+    'money_saved', v_money_saved,
+    'clean_since', v_clean_since,
+    'new_badges', v_new_badges,
+    'freeze_activated', v_freeze_activated
+  );
+end;
+$$;
+revoke execute on function public.recompute_progress() from public, anon;
+grant execute on function public.recompute_progress() to authenticated;
+
+create or replace function public.increment_pact_play_count(pact_id uuid)
+returns void
+language sql
+security invoker
+set search_path = pg_catalog, public
+as $$
+  update public.precious_pacts
+  set play_count = coalesce(play_count, 0) + 1
+  where id = pact_id
+    and user_id = (select auth.uid());
+$$;
+revoke execute on function public.increment_pact_play_count(uuid) from public, anon;
+grant execute on function public.increment_pact_play_count(uuid) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Crisis pipeline (service-role writers; admin resolvers)
+-- ---------------------------------------------------------------------------
+create or replace function public.record_crisis_event(
+  p_user_id uuid, p_context text, p_keywords text[], p_source text, p_max_sessions integer default 1
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_alert_id uuid;
+begin
+  if auth.role() <> 'service_role' then
+    raise exception 'Trusted service access required';
+  end if;
+  if p_source is null or p_source not in ('chat', 'diary') then
+    raise exception 'Invalid crisis source';
+  end if;
+  if p_context is null or length(btrim(p_context)) = 0 then
+    raise exception 'Crisis context is required';
+  end if;
+  if coalesce(array_length(p_keywords, 1), 0) = 0 then
+    raise exception 'At least one crisis keyword is required';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext(p_user_id::text), hashtext(p_source));
+  select id into v_alert_id from public.crisis_alerts
+  where user_id = p_user_id and source = p_source and resolved = false
+    and created_at >= now() - interval '24 hours'
+  order by created_at desc
+  limit 1
+  for update;
+  if v_alert_id is null then
+    insert into public.crisis_alerts (
+      user_id, keywords, message_context, severity, source, keyword, message
+    )
+    values (
+      p_user_id, p_keywords, left(p_context, 500), 'high', p_source,
+      left(p_keywords[1], 120), left(p_context, 500)
+    )
+    returning id into v_alert_id;
+  end if;
+
+  begin
+    perform public.pre_authorize_voucher(p_user_id, v_alert_id, p_max_sessions);
+  exception when others then
+    if sqlerrm <> 'An open voucher already exists for this user.' then raise; end if;
+  end;
+  return v_alert_id;
+end;
+$$;
+revoke execute on function public.record_crisis_event(uuid, text, text[], text, integer)
+  from authenticated, anon, public;
+grant execute on function public.record_crisis_event(uuid, text, text[], text, integer) to service_role;
+
+create or replace function public.pre_authorize_voucher(
+  p_user_id uuid, p_crisis_alert_id uuid, p_max_sessions integer
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_id uuid;
+  v_provider_voucher_id uuid;
+  v_insurer_id uuid;
+  v_b2b_client_id uuid;
+begin
+  if auth.role() <> 'service_role' then
+    raise exception 'Trusted service access required';
+  end if;
+  if p_max_sessions is null or p_max_sessions < 1 or p_max_sessions > 10 then
+    raise exception 'Invalid authorized session count';
+  end if;
+  if not exists (select 1 from public.profiles where id = p_user_id and status = 'active') then
+    raise exception 'Active user not found';
+  end if;
+  if p_crisis_alert_id is not null and not exists (
+    select 1 from public.crisis_alerts where id = p_crisis_alert_id and user_id = p_user_id
+  ) then
+    raise exception 'Crisis alert does not belong to this user';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext(p_user_id::text));
+  if exists (
+    select 1 from public.pre_auth_vouchers
+    where user_id = p_user_id
+      and status in ('pending', 'assigned', 'accepted')
+      and expires_at > now()
+  ) then
+    raise exception 'An open voucher already exists for this user.';
+  end if;
+
+  select b2b_client_id into v_b2b_client_id
+  from public.profiles where id = p_user_id;
+  if v_b2b_client_id is not null then
+    select ip.insurer_id into v_insurer_id
+    from public.insurer_partnerships ip
+    join public.insurers i on i.id = ip.insurer_id and i.status = 'active'
+    where ip.b2b_client_id = v_b2b_client_id and ip.status = 'active'
+      and (ip.contract_start is null or ip.contract_start <= current_date)
+      and (ip.contract_end is null or ip.contract_end >= current_date)
+    order by ip.created_at
+    limit 1;
+  end if;
+
+  insert into public.pre_auth_vouchers (user_id, crisis_alert_id, max_sessions, insurer_id)
+  values (p_user_id, p_crisis_alert_id, p_max_sessions, v_insurer_id)
+  on conflict (crisis_alert_id) where crisis_alert_id is not null do nothing
+  returning id into v_id;
+  if v_id is null and p_crisis_alert_id is not null then
+    select id into v_id from public.pre_auth_vouchers where crisis_alert_id = p_crisis_alert_id;
+  end if;
+  if v_id is null then raise exception 'Voucher authorization failed'; end if;
+
+  insert into public.provider_vouchers (
+    user_id, crisis_alert_id, pre_auth_voucher_id, insurer_id,
+    max_sessions, expires_at, fee_per_session, status
+  )
+  select user_id, crisis_alert_id, id, insurer_id, max_sessions, expires_at, 0, status
+  from public.pre_auth_vouchers where id = v_id
+  on conflict (pre_auth_voucher_id) where pre_auth_voucher_id is not null do nothing
+  returning id into v_provider_voucher_id;
+  if v_provider_voucher_id is null then
+    select id into v_provider_voucher_id
+    from public.provider_vouchers where pre_auth_voucher_id = v_id;
+  end if;
+  if v_provider_voucher_id is null then raise exception 'Provider voucher creation failed'; end if;
+  return v_id;
+end;
+$$;
+revoke execute on function public.pre_authorize_voucher(uuid, uuid, integer)
+  from authenticated, anon, public;
+grant execute on function public.pre_authorize_voucher(uuid, uuid, integer) to service_role;
+
+create or replace function public.crisis_resolve(p_alert_id uuid, p_notes text default null)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_row public.crisis_alerts;
+begin
+  if not public.is_admin() then
+    raise exception 'Only administrators can resolve crisis alerts';
+  end if;
+  update public.crisis_alerts
+  set resolved = true,
+      resolved_at = now(),
+      resolved_by = (select auth.uid()),
+      admin_notes = coalesce(nullif(btrim(coalesce(p_notes, '')), ''), admin_notes)
+  where id = p_alert_id
+  returning * into v_row;
+  if not found then
+    raise exception 'Alert not found';
+  end if;
+  perform public.log_admin_action('crisis_resolve', 'crisis_alerts', p_alert_id::text,
+    jsonb_build_object('notes', p_notes));
+  return to_jsonb(v_row);
+end;
+$$;
+revoke execute on function public.crisis_resolve(uuid, text) from public, anon;
+grant execute on function public.crisis_resolve(uuid, text) to authenticated;
+
+create or replace function public.crisis_escalate(p_alert_id uuid, p_notes text default null)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_row public.crisis_alerts;
+  v_note text := 'ESCALATED: ' || to_char(now() at time zone 'Africa/Nairobi', 'YYYY-MM-DD HH24:MI') ||
+                coalesce(' — ' || nullif(btrim(coalesce(p_notes, '')), ''), ' — Requires immediate counselor intervention.');
+begin
+  if not public.is_admin() then
+    raise exception 'Only administrators can escalate crisis alerts';
+  end if;
+  update public.crisis_alerts
+  set escalated = true,
+      escalated_at = now(),
+      escalated_by = (select auth.uid()),
+      admin_notes = coalesce(admin_notes || E'\n', '') || v_note
+  where id = p_alert_id
+  returning * into v_row;
+  if not found then
+    raise exception 'Alert not found';
+  end if;
+  perform public.log_admin_action('crisis_escalate', 'crisis_alerts', p_alert_id::text,
+    jsonb_build_object('notes', p_notes));
+  return to_jsonb(v_row);
+end;
+$$;
+revoke execute on function public.crisis_escalate(uuid, text) from public, anon;
+grant execute on function public.crisis_escalate(uuid, text) to authenticated;
+
+create or replace function public.crisis_get_contact(p_alert_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public, auth
+as $$
+declare
+  v_alert public.crisis_alerts;
+  v_email text;
+  v_phone text;
+begin
+  if not public.is_admin() then
+    raise exception 'Administrator access required';
+  end if;
+  select * into v_alert from public.crisis_alerts where id = p_alert_id;
+  if not found then
+    raise exception 'Alert not found';
+  end if;
+  if v_alert.user_id is not null then
+    select u.email into v_email from auth.users u where u.id = v_alert.user_id;
+    select p.phone into v_phone from public.profiles p where p.id = v_alert.user_id;
+  end if;
+  perform public.log_admin_action('crisis_view_contact', 'crisis_alerts', p_alert_id::text,
+    jsonb_build_object('alert_user_id', v_alert.user_id));
+  return jsonb_build_object('email', v_email, 'phone', v_phone);
+end;
+$$;
+revoke execute on function public.crisis_get_contact(uuid) from public, anon;
+grant execute on function public.crisis_get_contact(uuid) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Broadcasts
+-- ---------------------------------------------------------------------------
+create or replace function public.send_broadcast(p_title text, p_message text, p_audience text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_audience text := lower(btrim(coalesce(p_audience, 'all')));
+  v_broadcast public.broadcasts;
+  v_count int := 0;
+begin
+  if not public.is_admin() then
+    raise exception 'Only administrators can send broadcasts';
+  end if;
+  if p_title is null or length(btrim(p_title)) = 0 or length(p_title) > 100 then
+    raise exception 'Title is required (max 100 chars)';
+  end if;
+  if p_message is null or length(btrim(p_message)) = 0 or length(p_message) > 1000 then
+    raise exception 'Message is required (max 1000 chars)';
+  end if;
+  if v_audience not in ('all', 'active', 'inactive', 'high_risk', 'medium_risk', 'new_users') then
+    raise exception 'Unknown audience';
+  end if;
+
+  insert into public.broadcasts (title, message, audience, sent_at, created_by)
+  values (btrim(p_title), btrim(p_message), v_audience, now(), (select auth.uid()))
+  returning * into v_broadcast;
+
+  with recipients as (
+    select p.id
+    from public.profiles p
+    where coalesce(p.status, 'active') <> 'suspended'
+      and (
+        v_audience = 'all'
+        or (v_audience = 'active' and p.last_active >= now() - interval '7 days')
+        or (v_audience = 'inactive' and (p.last_active is null or p.last_active < now() - interval '7 days'))
+        or (v_audience = 'high_risk' and p.risk_level = 'high')
+        or (v_audience = 'medium_risk' and p.risk_level = 'medium')
+        or (v_audience = 'new_users' and p.created_at >= now() - interval '30 days')
+      )
+  ), inserted as (
+    insert into public.notifications (user_id, title, message, type, link, broadcast_id)
+    select r.id, left(v_broadcast.title, 200), left(v_broadcast.message, 500),
+           'broadcast', '/dashboard', v_broadcast.id
+    from recipients r
+    returning user_id
+  )
+  select count(*) into v_count from inserted;
+
+  update public.broadcasts set recipient_count = v_count where id = v_broadcast.id;
+  v_broadcast.recipient_count := v_count;
+
+  perform public.log_admin_action('send_broadcast', 'broadcasts', v_broadcast.id::text,
+    jsonb_build_object('title', v_broadcast.title, 'audience', v_audience, 'recipient_count', v_count));
+
+  return to_jsonb(v_broadcast);
+end;
+$$;
+revoke execute on function public.send_broadcast(text, text, text) from public, anon;
+grant execute on function public.send_broadcast(text, text, text) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Admin user actions + dashboard
+-- ---------------------------------------------------------------------------
+create or replace function public.admin_get_user_contact(p_user_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public, auth
+as $$
+declare
+  v_email text;
+  v_phone text;
+begin
+  if not public.is_super_admin() then
+    raise exception 'Only super_admin can view user contact details';
+  end if;
+
+  select u.email into v_email from auth.users u where u.id = p_user_id;
+  select p.phone into v_phone from public.profiles p where p.id = p_user_id;
+
+  perform public.log_admin_action('view_user_contact', 'profiles', p_user_id::text,
+    jsonb_build_object('target_user_id', p_user_id));
+
+  return jsonb_build_object('email', v_email, 'phone', v_phone);
+end;
+$$;
+revoke execute on function public.admin_get_user_contact(uuid) from public, anon;
+grant execute on function public.admin_get_user_contact(uuid) to authenticated;
+
+create or replace function public.admin_dashboard_stats()
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_nairobi date := (now() at time zone 'Africa/Nairobi')::date;
+  v_result jsonb;
+begin
+  if not public.is_admin() then
+    raise exception 'Administrator access required';
+  end if;
+
+  with top_triggers as (
+    select t.trigger, count(*)::int as uses
+    from public.diary_entries d,
+         lateral jsonb_array_elements_text(coalesce(d.triggers, '[]'::jsonb)) t(trigger)
+    where d.created_at >= now() - interval '30 days'
+    group by t.trigger
+    order by uses desc
+    limit 5
+  )
+  select jsonb_build_object(
+    'total_users', (select count(*) from public.profiles),
+    'active_today', (select count(*) from public.profiles
+      where (last_active at time zone 'Africa/Nairobi')::date = v_nairobi),
+    'high_risk_count', (select count(*) from public.profiles where risk_level = 'high'),
+    'active_events', (select count(*) from public.events where active = true),
+    'active_resources', (select count(*) from public.resources where active = true),
+    'cbt_completions_today', (select count(*) from public.cbt_progress
+      where completed = true and (completed_at at time zone 'Africa/Nairobi')::date = v_nairobi),
+    'diary_entries_today', (select count(*) from public.diary_entries where date = v_nairobi),
+    'circle_messages_today', (select count(*) from public.circle_messages
+      where (created_at at time zone 'Africa/Nairobi')::date = v_nairobi),
+    'active_supporters', (select count(*) from public.supporter_invitations where status = 'active'),
+    'top_5_triggers_30d', coalesce((select jsonb_object_agg(trigger, uses) from top_triggers), '{}'::jsonb)
+  ) into v_result;
+
+  return v_result;
+end;
+$$;
+revoke execute on function public.admin_dashboard_stats() from public, anon;
+grant execute on function public.admin_dashboard_stats() to authenticated;
 
 notify pgrst, 'reload schema';

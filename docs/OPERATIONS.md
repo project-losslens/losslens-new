@@ -2,25 +2,20 @@
 
 ## Applying the database
 
-Eight consolidated base scripts plus the workflow-repair and private-PGSI migrations in `supabase/migrations/` — apply **in filename
+Five consolidated scripts in `supabase/migrations/` — apply **in filename
 order** on a **fresh, disposable** Supabase project first:
 
 ```
 20261112000001_core_schema.sql
-20261112000002_rls_storage_grants.sql
-20261112000003_rpc_functions.sql
 20261112000004_portals_claims.sql
-20261112000005_urge_toolkit.sql
 20261112000006_pass2_protection_base.sql
-20261112000007_protection_core.sql
 20261112000008_protection_operations.sql
 20261124000009_workflow_integrity.sql
-20261124000010_private_pgsi.sql
 ```
 
-For an existing project with 01-08 applied, apply 09 then 10, skipping any migration already recorded as applied. Deploy the updated `delete-account` function and Vercel routes alongside the frontend. See [workflow verification](WORKFLOW_FIXES.md).
+For an existing project that already applied the original ten scripts, apply only `20261124000009_workflow_integrity.sql` (it contains the former 09 + 10 forward repairs), skipping anything already recorded as applied. Deploy the updated `delete-account` function and Vercel routes alongside the frontend. See [workflow verification](WORKFLOW_FIXES.md).
 
-- Apply forward migration 10 once through migration tracking; it creates private tables. Assessment submission retries are idempotent. Do not rerun the full installation set on a populated project.
+- Apply the workflow/PGSI section of `20261124000009_workflow_integrity.sql` once through migration tracking; it creates private tables. Assessment submission retries are idempotent. Do not rerun the full installation set on a populated project.
 - Script 06 contains guarded destructive cleanup (superseded subscription
   objects and removed circle rooms). It runs only on an empty database or
   when `losslens.allow_destructive_reset = 'on'` is set — **never** set that

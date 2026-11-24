@@ -2,22 +2,21 @@
 
 ## Fresh installation
 
-The database setup consists of eight consolidated base scripts and two forward migrations in
+The database setup consists of five consolidated scripts in
 `supabase/migrations/`. Apply them in filename order to a **fresh** Supabase
 project:
 
-1. `20261112000001_core_schema.sql`
-2. `20261112000002_rls_storage_grants.sql`
-3. `20261112000003_rpc_functions.sql`
-4. `20261112000004_portals_claims.sql`
-5. `20261112000005_urge_toolkit.sql`
-6. `20261112000006_pass2_protection_base.sql`
-7. `20261112000007_protection_core.sql`
-8. `20261112000008_protection_operations.sql`
-9. `20261124000009_workflow_integrity.sql`
-10. `20261124000010_private_pgsi.sql`
+1. `20261112000001_core_schema.sql` (core schema + RLS/grants/storage + core RPCs)
+2. `20261112000004_portals_claims.sql` (therapist/insurer portals, claims + urge toolkit)
+3. `20261112000006_pass2_protection_base.sql` (Protection base + core)
+4. `20261112000008_protection_operations.sql` (Protection claims/premiums/actuarial/audit)
+5. `20261124000009_workflow_integrity.sql` (workflow repairs + private PGSI)
 
-Existing projects with 01-08 already applied should apply 09 followed by 10 (skip migrations already recorded as applied). See [workflow repairs and verification](WORKFLOW_FIXES.md) for its changes and deployment requirements.
+Existing projects that already applied the original ten scripts should apply
+only `20261124000009_workflow_integrity.sql` (it contains the former 09 + 10
+forward repairs; skip anything already recorded as applied). See
+[workflow repairs and verification](WORKFLOW_FIXES.md) for its changes and
+deployment requirements.
 
 These are consolidated installation scripts, not a supplement to the earlier
 baseline or Pass 2 files. Do not mix the historical source scripts into this

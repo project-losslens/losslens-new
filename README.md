@@ -33,7 +33,7 @@ middleware.js            Vercel Routing Middleware site gate
   pages/{public,user,admin,insurer,therapist}
   styles/               base.css (tokens+reset), globals.css, landing.css
 supabase/
-  migrations/           exactly eight consolidated SQL migration scripts
+  migrations/           exactly five consolidated SQL migration scripts
   functions/            edge functions (separate deploy units)
 docs/                   DATABASE.md, FEATURES.md, OPERATIONS.md, PROTECTION.md, VERIFICATION.md
 public/                 manifest, icons, service-worker.js
@@ -84,7 +84,7 @@ vercel dev         # serves api/ routes locally (Vercel CLI)
 
 Order matters:
 
-1. Apply the eight migration scripts in `supabase/migrations/` in numeric order.
+1. Apply the five migration scripts in `supabase/migrations/` in numeric order.
    See `docs/OPERATIONS.md` for the manual steps and `docs/DATABASE.md`
    for the schema reference.
 2. Deploy edge functions: `supabase functions deploy send-invite delete-account`
@@ -141,5 +141,5 @@ in development — not an offer of insurance. See `docs/PROTECTION.md`.
 
 ## Database
 
-Exactly eight SQL migrations in `supabase/migrations/` applied in order on a
+Exactly five SQL migrations in `supabase/migrations/` applied in order on a
 fresh Supabase project — see `docs/DATABASE.md` and `docs/OPERATIONS.md`.

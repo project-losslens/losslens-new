@@ -44,8 +44,8 @@ its former Node test consumer has been removed. Keep server imports plain JS.
 
 ## Database
 
-Eight consolidated migrations in `supabase/migrations/`
-(`20261112000001`–`08`), applied in filename order on a fresh project.
+Five consolidated migrations in `supabase/migrations/`
+(`20261112000001`, `04`, `06`, `08`, `20261124000009`), applied in filename order on a fresh project.
 Full reference + verify queries: `docs/DATABASE.md`; mapping:
 `docs/OPERATIONS.md`. RLS on every table; helpers `is_admin()`,
 `is_super_admin()`, `is_active_user()`, `is_recently_authenticated()`.
