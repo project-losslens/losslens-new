@@ -10,7 +10,7 @@ import { enqueueOfflineItem, offlineQueueCount, onOfflineQueueChange } from '../
 
 
 function triggerConfetti() {
-  const colors = ['var(--primary)', 'var(--primary)', 'var(--primary)', '#FFFFFF', 'var(--secondary)', 'var(--secondary)']
+  const colors = ['var(--primary)', 'var(--primary)', 'var(--primary)', 'var(--text-muted)', 'var(--secondary)', 'var(--secondary)']
   for (let i = 0; i < 40; i++) {
     setTimeout(() => {
       const piece = document.createElement('div')
@@ -319,7 +319,7 @@ function Diary() {
               )}
 
               {saveError && (
-                <div className="fs-13" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', marginBottom: '1rem' }}>
+                <div className="fs-13" style={{ background: 'rgb(var(--danger-rgb) / 0.1)', border: '1px solid var(--danger)', borderRadius: '8px', padding: '10px 14px', color: 'var(--danger)', marginBottom: '1rem' }}>
                   {saveError}
                 </div>
               )}
@@ -352,9 +352,9 @@ function Diary() {
               <div className="dash-section">
                 <h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}> {t('diary.notesTitle')}</h3>
                 {voiceSupported && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', padding: '8px 12px', background: isListening ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.12)', borderRadius: '8px', border: `1px solid ${isListening ? '#FFFFFF' : 'var(--secondary)'}` }}>
-                    <button onClick={() => isListening ? stopListening() : startListening()} className="fs-16" style={{ width: '36px', height: '36px', borderRadius: '50%', border: 'none', background: isListening ? '#FFFFFF' : 'var(--primary)', color: 'var(--on-primary)', cursor: 'pointer', animation: isListening ? 'pulse 1.5s infinite' : 'none' }}></button>
-                    <span className="fs-12" style={{ flex: 1, color: isListening ? '#FFFFFF' : 'var(--primary)' }}>{isListening ? ` ${t('diary.listening')}` : ` ${t('diary.speak')}`}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', padding: '8px 12px', background: isListening ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.12)', borderRadius: '8px', border: `1px solid ${isListening ? 'var(--danger)' : 'var(--secondary)'}` }}>
+                    <button onClick={() => isListening ? stopListening() : startListening()} className="fs-16" style={{ width: '36px', height: '36px', borderRadius: '50%', border: 'none', background: isListening ? '#FFFFFF' : 'var(--primary)', color: isListening ? 'var(--danger)' : 'var(--on-primary)', cursor: 'pointer', animation: isListening ? 'pulse 1.5s infinite' : 'none' }}></button>
+                    <span className="fs-12" style={{ flex: 1, color: isListening ? 'var(--danger)' : 'var(--primary)' }}>{isListening ? ` ${t('diary.listening')}` : ` ${t('diary.speak')}`}</span>
                     {isListening && <button type="button" onClick={stopListening} className="fs-18" style={{ background: 'transparent', border: 'none', color: '#FFFFFF', cursor: 'pointer' }} aria-label={t('diary.listening')}>⏹</button>}
                   </div>
                 )}

@@ -16,12 +16,12 @@ const CONSENT_LABELS = {
   billing_contact: 'Share billing contact details',
 }
 const CLAIM_STATUS_COLOR = {
-  submitted: '#F2C879', under_review: 'var(--secondary)', info_requested: 'var(--secondary)',
+  submitted: 'var(--warning)', under_review: 'var(--secondary)', info_requested: 'var(--secondary)',
   approved: 'var(--primary)', partially_approved: 'var(--primary)', paid: 'var(--primary)',
   rejected: 'var(--danger)', disputed: 'var(--danger)', cancelled: 'rgba(255,255,255,0.4)',
 }
 const POLICY_STATUS_COLOR = {
-  issued: '#F2C879', pending_payment: '#F2C879', active: 'var(--primary)',
+  issued: 'var(--warning)', pending_payment: 'var(--warning)', active: 'var(--primary)',
   grace: 'var(--secondary)', lapsed: 'var(--danger)', cancelled: 'rgba(255,255,255,0.4)', expired: 'rgba(255,255,255,0.4)',
 }
 
@@ -298,7 +298,7 @@ export default function ProtectionPage() {
   if (!protectionModeAllows(mode)) {
     return (
       <div className="page-root"><div className="page-content" style={{ padding: '2rem' }}>
-        <h2 className="fs-20" style={{ color: '#FFFFFF' }}>LossLens Protection</h2>
+        <h2 className="fs-20 protection-page__heading" style={{ color: 'var(--text)' }}>LossLens Protection</h2>
         <p style={{ color: 'var(--text-muted)' }}>Protection is not available yet. <a href="/protection" style={{ color: 'var(--primary)' }}>Learn more</a> — including the proposed Medical Rider, Individual Cover and Group Cover structures.</p>
       </div></div>
     )
@@ -308,7 +308,7 @@ export default function ProtectionPage() {
 
   return (
     <div className="page-root"><div className="page-content" style={{ padding: '1.5rem' }}>
-      <h2 className="fs-20" style={{ color: '#FFFFFF', marginBottom: '4px' }}>LossLens Protection</h2>
+      <h2 className="fs-20 protection-page__heading" style={{ color: 'var(--text)', marginBottom: '4px' }}>LossLens Protection</h2>
       <p className="fs-13" style={{ color: 'var(--text-muted)', marginBottom: '1.25rem' }}>Insurance arranged through your insurer. LossLens is not the insurer — your insurer issues the policy, collects premiums and decides claims.</p>
 
       {!membership ? (
@@ -346,7 +346,7 @@ export default function ProtectionPage() {
           <div className="dash-section" style={{ marginBottom: '1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h2 className="fs-15" style={{ color: '#FFFFFF', margin: 0 }}>Your membership</h2>
-              <span style={{ color: '#F2C879', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase' }}>{membership.status.replace(/_/g, ' ')}</span>
+              <span style={{ color: 'var(--warning)', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase' }}>{membership.status.replace(/_/g, ' ')}</span>
             </div>
             {membership.status === 'pending_verification' && (
               <p className="fs-13" style={{ color: 'var(--text-muted)', marginTop: '8px' }}>Waiting for your insurer to verify your membership.</p>
@@ -374,7 +374,7 @@ export default function ProtectionPage() {
                 {' · '}Premium status: {activePolicy.premium_status.replace(/_/g, ' ')}
               </p>
               {activePolicy.waiting_period_ends_at && new Date(activePolicy.waiting_period_ends_at) > new Date() && (
-                <p className="fs-12" style={{ color: '#F2C879', marginTop: '4px' }}>
+                <p className="fs-12" style={{ color: 'var(--warning)', marginTop: '4px' }}>
                   Waiting period ends {new Date(activePolicy.waiting_period_ends_at).toLocaleDateString()}.
                 </p>
               )}

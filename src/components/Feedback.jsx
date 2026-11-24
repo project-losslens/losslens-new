@@ -23,7 +23,7 @@ export class ErrorBoundary extends Component {
       return (
         <div className="state-wrap" role="alert">
           <AppIcon name="alert" size={40} style={{ color: 'var(--secondary)', marginBottom: '12px' }} />
-          <h2 style={{ color: '#FFFFFF', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>Something went wrong</h2>
+          <h2 style={{ color: 'var(--text)', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>Something went wrong</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '16px', maxWidth: '320px' }}>
             This page hit an unexpected error. Your data is safe — try again.
           </p>
@@ -41,7 +41,7 @@ export function EmptyState({ icon = 'chat', title, children }) {
   return (
     <div className="state-wrap">
       <AppIcon name={icon} size={40} style={{ color: 'var(--secondary)', marginBottom: '12px' }} />
-      <h2 style={{ color: '#FFFFFF', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>{title}</h2>
+      <h2 style={{ color: 'var(--text)', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>{title}</h2>
       {children}
     </div>
   )
@@ -51,7 +51,7 @@ export function ErrorState({ message = 'Could not load this right now.', onRetry
   return (
     <div className="state-wrap" role="alert">
       <AppIcon name="alert" size={40} style={{ color: 'var(--secondary)', marginBottom: '12px' }} />
-      <h2 style={{ color: '#FFFFFF', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>Something went wrong</h2>
+      <h2 style={{ color: 'var(--text)', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>Something went wrong</h2>
       <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '16px', maxWidth: '320px' }}>{message}</p>
       {onRetry && (
         <button type="button" className="btn-primary" onClick={onRetry}>Try again</button>

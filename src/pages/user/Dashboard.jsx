@@ -17,7 +17,7 @@ function triggerConfetti() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const isMobile = window.innerWidth < 768
   const count = isMobile ? 25 : 50
-  const colors = ['var(--primary)', 'var(--primary)', 'var(--primary)', '#FFFFFF', 'var(--secondary)', 'var(--secondary)']
+  const colors = ['var(--primary)', 'var(--primary)', 'var(--primary)', 'var(--text-muted)', 'var(--secondary)', 'var(--secondary)']
   for (let i = 0; i < count; i++) {
     setTimeout(() => {
       const piece = document.createElement('div')
@@ -80,7 +80,7 @@ function UsernamePrompt({ userId, onComplete }) {
         <AppIcon name="users" size={40} style={{ display: 'block', margin: '0 auto 12px', color: 'var(--secondary)' }} />
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: '#FFFFFF', marginBottom: '8px', textAlign: 'center' }}>{t('dashboard.usernameTitle')}</h2>
         <p className="fs-13" style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', textAlign: 'center', lineHeight: 1.6 }}>{t('dashboard.usernameSub')}</p>
-        {error && <div className="fs-13" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', marginBottom: '1rem' }}>{error}</div>}
+        {error && <div className="fs-13" style={{ background: 'rgb(var(--danger-rgb) / 0.1)', border: '1px solid var(--danger)', borderRadius: '8px', padding: '10px 14px', color: 'var(--danger)', marginBottom: '1rem' }}>{error}</div>}
         <div className="form-group">
           <label>{t('dashboard.usernameLabel')}</label>
           <div style={{ position: 'relative' }}>

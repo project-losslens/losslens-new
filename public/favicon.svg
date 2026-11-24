@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
   <g>
-    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#4ADE80" opacity="0.9" transform="rotate(0 50 50)"/>
-    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#86EFAC" opacity="0.9" transform="rotate(45 50 50)"/>
-    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#4ADE80" opacity="0.9" transform="rotate(90 50 50)"/>
-    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#86EFAC" opacity="0.9" transform="rotate(135 50 50)"/>
-    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#4ADE80" opacity="0.9" transform="rotate(180 50 50)"/>
-    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#86EFAC" opacity="0.9" transform="rotate(225 50 50)"/>
-    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#4ADE80" opacity="0.9" transform="rotate(270 50 50)"/>
-    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#86EFAC" opacity="0.9" transform="rotate(315 50 50)"/>
-    <circle cx="50" cy="50" r="12" stroke="#86EFAC" stroke-width="3" fill="none"/>
-    <circle cx="50" cy="50" r="4" fill="#4ADE80"/>
+    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#653B60" opacity="0.9" transform="rotate(0 50 50)"/>
+    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#B77932" opacity="0.9" transform="rotate(45 50 50)"/>
+    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#653B60" opacity="0.9" transform="rotate(90 50 50)"/>
+    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#B77932" opacity="0.9" transform="rotate(135 50 50)"/>
+    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#653B60" opacity="0.9" transform="rotate(180 50 50)"/>
+    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#B77932" opacity="0.9" transform="rotate(225 50 50)"/>
+    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#653B60" opacity="0.9" transform="rotate(270 50 50)"/>
+    <ellipse cx="50" cy="26" rx="9" ry="20" fill="#B77932" opacity="0.9" transform="rotate(315 50 50)"/>
+    <circle cx="50" cy="50" r="12" stroke="#B77932" stroke-width="3" fill="none"/>
+    <circle cx="50" cy="50" r="4" fill="#653B60"/>
   </g>
 </svg>

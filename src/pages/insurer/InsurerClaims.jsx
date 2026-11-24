@@ -10,7 +10,7 @@ import NumberField from '../../components/NumberField'
 //  insurer_adjudicate_claim / insurer_mark_claim_settled — no clinical data.
 
 const PCL_STATUS_COLOR = {
-  submitted: '#F2C879', under_review: 'var(--secondary)', info_requested: 'var(--secondary)',
+  submitted: 'var(--warning)', under_review: 'var(--secondary)', info_requested: 'var(--secondary)',
   approved: 'var(--primary)', partially_approved: 'var(--primary)', paid: 'var(--primary)',
   rejected: 'var(--danger)', disputed: 'var(--danger)', cancelled: 'rgba(255,255,255,0.4)',
 }

@@ -158,9 +158,9 @@ function Login() {
           {error && (
             <div role="alert" aria-live="polite" style={{
               background: cooldown ? 'rgb(var(--primary-rgb) / 0.15)' : 'rgba(255,255,255,0.08)',
-              border: `1px solid ${cooldown ? 'var(--primary)' : '#FFFFFF'}`,
+              border: `1px solid ${cooldown ? 'var(--primary)' : 'var(--danger)'}`,
               borderRadius: '8px', padding: '10px 14px',
-              color: cooldown ? 'var(--primary)' : '#FFFFFF',
+              color: cooldown ? 'var(--primary)' : 'var(--danger)',
               fontSize: '13px', marginBottom: '1rem'
             }}>
               {cooldown ? `${t('login.errorCooldown')} ${t('common.wait', { time: formatCooldown() })}` : error}
@@ -170,8 +170,8 @@ function Login() {
           {/* Google Sign-In */}
           <button onClick={handleGoogleLogin} disabled={googleLoading || cooldown} style={{
             width: '100%', padding: '13px', borderRadius: '100px',
-            border: '2px solid rgba(255,255,255,0.12)', background: '#FFFFFF',
-            color: 'var(--on-primary)', fontSize: '14px', cursor: 'pointer',
+            border: '2px solid var(--border)', background: '#FFFFFF',
+            color: 'var(--text)', fontSize: '14px', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             gap: '10px', marginBottom: '1.25rem', fontFamily: 'var(--font-body)',
             fontWeight: 500, opacity: (googleLoading || cooldown) ? 0.7 : 1

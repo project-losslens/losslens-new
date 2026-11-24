@@ -279,7 +279,7 @@ export default function SubscriptionPage() {
               position: 'relative',
             }}>
               <span className="fs-12" style={{ position: 'absolute', top: '-10px', right: '16px', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 600, padding: '3px 10px', borderRadius: '100px' }}>Premium</span>
-              <AppIcon name="star" size={28} style={{ display: 'block', margin: '0 auto 8px', color: '#F2C879' }} />
+              <AppIcon name="star" size={28} style={{ display: 'block', margin: '0 auto 8px', color: 'var(--accent-warm)' }} />
               <h3 className="fs-15" style={{ color: '#FFFFFF', marginBottom: '4px' }}>Premium</h3>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: 'var(--primary)', margin: '0 0 4px' }}>
                 {premiumPrice == null ? 'Price to be announced' : `KES ${premiumPrice}`}

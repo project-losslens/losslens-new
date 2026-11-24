@@ -113,7 +113,7 @@ function ForgotPassword() {
               <p style={{ color: 'var(--primary)', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Check your <strong>spam/junk folder</strong>. Sometimes our emails end up there.</p>
             </div>
 
-            {error && <div role="alert" aria-live="polite" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
+            {error && <div role="alert" aria-live="polite" style={{ background: 'rgb(var(--danger-rgb) / 0.1)', border: '1px solid var(--danger)', borderRadius: '8px', padding: '10px 14px', color: 'var(--danger)', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
 
             <button onClick={handleResend} disabled={countdown > 0 || resending} style={{ width: '100%', padding: '13px', borderRadius: '100px', background: countdown > 0 ? 'rgba(255,255,255,0.12)' : 'var(--primary)', border: 'none', color: countdown > 0 ? 'rgba(255,255,255,0.4)' : 'var(--bg)', fontSize: '14px', fontWeight: 600, cursor: countdown > 0 ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-body)', marginBottom: '10px' }}>
               {resending ? 'Sending...' : countdown > 0 ? `Resend in ${formatCountdown()}` : 'Resend email'}
@@ -135,7 +135,7 @@ function ForgotPassword() {
           <h1 className="auth-title">Forgot password?</h1>
           <p className="auth-sub">Enter your email and we'll send you a reset link.</p>
 
-          {error && <div role="alert" aria-live="polite" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
+          {error && <div role="alert" aria-live="polite" style={{ background: 'rgb(var(--danger-rgb) / 0.1)', border: '1px solid var(--danger)', borderRadius: '8px', padding: '10px 14px', color: 'var(--danger)', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             <div className="form-group">

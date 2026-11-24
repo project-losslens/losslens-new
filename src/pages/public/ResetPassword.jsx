@@ -60,7 +60,7 @@ function ResetPassword() {
 
   const strengthInfo = useMemo(() => {
     const labels = ['', 'Weak', 'Fair', 'Good', 'Strong']
-    const colors = ['', '#FFFFFF', 'var(--secondary)', 'var(--primary)', 'var(--primary)']
+    const colors = ['', 'var(--text-muted)', 'var(--secondary)', 'var(--primary)', 'var(--primary)']
     return { label: labels[strength], color: colors[strength], pct: (strength / 4) * 100 }
   }, [strength])
 
@@ -146,7 +146,7 @@ function ResetPassword() {
           <h1 className="auth-title">Reset your password</h1>
           <p className="auth-sub">Choose a strong password you haven't used before.</p>
 
-          {error && <div role="alert" aria-live="polite" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
+          {error && <div role="alert" aria-live="polite" style={{ background: 'rgb(var(--danger-rgb) / 0.1)', border: '1px solid var(--danger)', borderRadius: '8px', padding: '10px 14px', color: 'var(--danger)', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             <div className="form-group">
@@ -193,7 +193,7 @@ function ResetPassword() {
                   placeholder="Re-enter your password"
                   value={confirmPassword}
                   onChange={e => { setConfirmPassword(e.target.value); if (error) setError('') }}
-                  style={{ paddingRight: 44, ...(confirmPassword && password !== confirmPassword ? { borderColor: '#FFFFFF' } : {}) }}
+                  style={{ paddingRight: 44, ...(confirmPassword && password !== confirmPassword ? { borderColor: 'var(--danger)' } : {}) }}
                 />
                 <button
                   type="button"
@@ -204,7 +204,7 @@ function ResetPassword() {
                   {showConfirmPw ? 'Hide' : 'Show'}
                 </button>
               </div>
-              {confirmPassword && password !== confirmPassword && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Passwords do not match</span>}
+              {confirmPassword && password !== confirmPassword && <span style={{ fontSize: '11px', color: 'var(--danger)' }}>Passwords do not match</span>}
               {confirmPassword && password === confirmPassword && <span style={{ fontSize: '11px', color: 'var(--primary)' }}>Passwords match </span>}
             </div>
 

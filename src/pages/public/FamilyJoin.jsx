@@ -28,8 +28,8 @@ const MOOD_LABELS = {
 }
 
 const MOOD_COLORS = {
-  Calm: 'var(--primary)', Happy: 'var(--secondary)', Stressed: '#F2C879',
-  Anxious: '#F2C879', Depressed: '#FFFFFF',
+  Calm: 'var(--success)', Happy: 'var(--accent-warm)', Stressed: 'var(--warning)',
+  Anxious: 'var(--warning)', Depressed: 'var(--danger)',
 }
 
 export default function FamilyJoin() {
@@ -194,7 +194,7 @@ export default function FamilyJoin() {
     finally { setSendingMessage(false) }
   }
 
-  const getMoodColor = (mood) => MOOD_COLORS[(mood || '').trim()] || 'rgba(255,255,255,0.4)'
+  const getMoodColor = (mood) => MOOD_COLORS[(mood || '').trim()] || 'var(--text-muted)'
 
   const getRisk = (level) => RISK_LABELS[level] || RISK_LABELS.low
 
@@ -254,7 +254,7 @@ export default function FamilyJoin() {
             </div>
           </div>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '24px', lineHeight: '1.5' }}> No account needed. Your access is private and secure.</p>
-          {actError && <div role="alert" aria-live="polite" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px', color: '#FFFFFF', fontSize: '13px', marginBottom: '16px' }}>{actError}</div>}
+          {actError && <div role="alert" aria-live="polite" style={{ background: 'rgb(var(--danger-rgb) / 0.1)', border: '1px solid var(--danger)', borderRadius: '8px', padding: '10px', color: 'var(--danger)', fontSize: '13px', marginBottom: '16px' }}>{actError}</div>}
           <div style={{ display: 'flex', gap: '10px' }}>
             <button onClick={handleDecline} disabled={acting} style={{ flex: 1, padding: '14px', borderRadius: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '14px', fontWeight: 500, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{acting ? '...' : 'Decline'}</button>
             <button onClick={handleAccept} disabled={acting} style={{ flex: 2, padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{acting ? 'Processing...' : ' Accept & View Progress'}</button>

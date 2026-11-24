@@ -9,7 +9,7 @@ import NumberField from '../../components/NumberField'
 //  insurer_decide_preauth RPC — recorded with actor, timestamp, reason.
 
 const STATUS_COLOR = {
-  pending: '#F2C879', assigned: 'var(--secondary)', accepted: 'var(--primary)',
+  pending: 'var(--warning)', assigned: 'var(--secondary)', accepted: 'var(--primary)',
   completed: 'var(--primary)', expired: 'rgba(255,255,255,0.4)', void: 'var(--danger)',
 }
 

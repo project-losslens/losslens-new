@@ -55,14 +55,14 @@ const OlooCharacter = ({ size = 40, emotion = 'calm' }) => {
             </g>
           )}
           {expr === 'happy' && (
-            <g fill="#F2C879" opacity="0.85">
+            <g fill="var(--accent-warm)" opacity="0.85">
               <ellipse cx="20" cy="34" rx="3.4" ry="2" />
               <ellipse cx="44" cy="34" rx="3.4" ry="2" />
             </g>
           )}
           {expr === 'celebrating' && (
             <g>
-              <path d="M14 18l1.6 3.4 3.4 1.6-3.4 1.6-1.6 3.4-1.6-3.4-3.4-1.6 3.4-1.6Z" fill="#F2C879" />
+              <path d="M14 18l1.6 3.4 3.4 1.6-3.4 1.6-1.6 3.4-1.6-3.4-3.4-1.6 3.4-1.6Z" fill="var(--accent-warm)" />
               <path d="M50 14l1.2 2.6 2.6 1.2-2.6 1.2-1.2 2.6-1.2-2.6-2.6-1.2 2.6-1.2Z" fill="var(--secondary)" />
             </g>
           )}
@@ -595,8 +595,8 @@ function AIChat({ profile }) {
                     sendMessage(opt);
                   }}
                   style={{
-                    background: 'rgba(255,255,255,0.12)',
-                    border: '1px solid var(--secondary)',
+                    background: 'var(--surface)',
+                    border: '1px solid var(--primary)',
                     color: 'var(--primary)',
                     padding: '6px 14px',
                     borderRadius: '100px',
@@ -605,8 +605,8 @@ function AIChat({ profile }) {
                     fontFamily: 'var(--font-body)',
                     transition: 'all 0.2s',
                   }}
-                  onMouseEnter={(e) => { e.target.style.background = 'var(--secondary)'; e.target.style.borderColor = 'var(--primary)'; }}
-                  onMouseLeave={(e) => { e.target.style.background = 'rgba(255,255,255,0.12)'; e.target.style.borderColor = 'var(--secondary)'; }}
+                  onMouseEnter={(e) => { e.target.style.background = 'var(--primary)'; e.target.style.borderColor = 'var(--primary)'; e.target.style.color = 'var(--on-primary)'; }}
+                  onMouseLeave={(e) => { e.target.style.background = 'var(--surface)'; e.target.style.borderColor = 'var(--primary)'; e.target.style.color = 'var(--primary)'; }}
                 >
                   {opt}
                 </button>
@@ -628,7 +628,7 @@ function AIChat({ profile }) {
           }}
           style={{
             width: '60px', height: '60px', borderRadius: '50%',
-            background: isOpen ? 'var(--surface-2)' : 'var(--primary)',
+            background: isOpen ? 'var(--primary-soft)' : 'var(--primary)',
             border: '2px solid var(--primary)', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 4px 20px rgb(var(--primary-rgb) / 0.4)',
@@ -639,7 +639,7 @@ function AIChat({ profile }) {
           onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgb(var(--primary-rgb) / 0.4)'; }}
         >
           {isOpen ? (
-            <span style={{ color: '#FFFFFF', fontSize: '24px' }}>{'\u00D7'}</span>
+            <span style={{ color: isOpen ? 'var(--primary)' : 'var(--on-primary)', fontSize: '24px' }}>{'\u00D7'}</span>
           ) : (
             <OlooCharacter size={36} />
           )}
@@ -653,7 +653,7 @@ function AIChat({ profile }) {
           position: 'fixed', bottom: '8rem', right: '1.5rem',
           width: '380px', maxWidth: 'calc(100vw - 2rem)',
           height: '520px', maxHeight: 'calc(100vh - 10rem)',
-          background: 'var(--surface-2)', border: '1px solid rgba(255,255,255,0.12)',
+          background: 'var(--surface)', border: '1px solid var(--border)',
           borderRadius: '16px', boxShadow: '0 12px 48px rgb(var(--bg-rgb) / 0.5)',
           display: 'flex', flexDirection: 'column', zIndex: 'var(--z-modal)',
           animation: 'chatSlideUp 0.3s ease-out', overflow: 'hidden',
@@ -661,24 +661,24 @@ function AIChat({ profile }) {
 
           {/* Chat Header */}
           <div style={{
-            background: 'var(--bg)',
-            padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.12)',
+            background: 'var(--surface-2)',
+            padding: '16px', borderBottom: '1px solid var(--border)',
             display: 'flex', alignItems: 'center', gap: '12px',
           }}>
             <OlooCharacter size={44} emotion={shownEmotion} />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--primary)', marginBottom: '2px' }}>Oloo</div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: loading ? 'var(--primary)' : isListening ? '#FFFFFF' : 'var(--primary)', display: 'inline-block', animation: (loading || isListening) ? 'pulse 1s infinite' : 'none' }} />
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: loading ? 'var(--primary)' : isListening ? 'var(--accent-warm)' : 'var(--primary)', display: 'inline-block', animation: (loading || isListening) ? 'pulse 1s infinite' : 'none' }} />
                 {isListening ? 'Listening...' : loading ? 'Typing...' : 'Online'}
               </div>
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.12)', padding: '4px 10px', borderRadius: '100px' }}>AI</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', background: 'var(--primary-soft)', padding: '4px 10px', borderRadius: '100px' }}>AI</div>
             <button
               onClick={() => { setIsOpen(false); stopSpeaking(); }}
               style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '20px', cursor: 'pointer', padding: '4px 8px', borderRadius: '8px' }}
-              onMouseEnter={(e) => { e.target.style.background = 'rgba(255,255,255,0.12)'; e.target.style.color = 'var(--primary)'; }}
-              onMouseLeave={(e) => { e.target.style.background = 'transparent'; e.target.style.color = 'rgba(255,255,255,0.4)'; }}
+              onMouseEnter={(e) => { e.target.style.background = 'var(--primary-soft)'; e.target.style.color = 'var(--primary)'; }}
+              onMouseLeave={(e) => { e.target.style.background = 'transparent'; e.target.style.color = 'var(--text-muted)'; }}
             aria-label="Close chat"
           ><AppIcon name="close" size={18} /></button>
           </div>
@@ -686,9 +686,9 @@ function AIChat({ profile }) {
           {/* Messages Area */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {aiConsent !== true && (
-              <div role="dialog" aria-labelledby="ai-consent-title" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '16px', color: '#FFFFFF' }}>
+              <div role="dialog" aria-labelledby="ai-consent-title" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px', color: 'var(--text)' }}>
                 <h3 id="ai-consent-title" style={{ fontSize: '14px', color: 'var(--primary)', marginBottom: '8px' }}>Before you chat with Oloo</h3>
-                <p style={{ fontSize: '12px', lineHeight: '1.6', color: 'rgba(255,255,255,0.7)' }}>Your messages and relevant recovery context may be sent to Groq, a US-based AI provider, to generate responses, and messages are saved in your chat history. Oloo is not a substitute for professional care.</p>
+                <p style={{ fontSize: '12px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>Your messages and relevant recovery context may be sent to Groq, a US-based AI provider, to generate responses, and messages are saved in your chat history. Oloo is not a substitute for professional care.</p>
                 {aiConsentError && <><p role="alert" style={{ fontSize: '12px', color: 'var(--danger)' }}>{aiConsentError}</p><button type="button" className="btn-ghost" onClick={fetchUserData}>Retry consent check</button></>}
                 <button className="btn-primary full" type="button" onClick={acceptAiConsent} disabled={aiConsentSaving || aiConsent === null} style={{ marginTop: '12px' }}>
                   {aiConsentSaving ? 'Saving...' : aiConsent === null ? 'Checking...' : 'I agree and continue'}
@@ -698,7 +698,7 @@ function AIChat({ profile }) {
             {(aiConsent === true || messages.some(message => message.crisis)) && (
             <>
             {userContext?.profile && (
-              <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: '12px', padding: '12px', marginBottom: '4px', display: 'flex', gap: '16px', fontSize: '12px', color: 'var(--primary)', flexWrap: 'wrap' }}>
+              <div style={{ background: 'var(--primary-soft)', borderRadius: '12px', padding: '12px', marginBottom: '4px', display: 'flex', gap: '16px', fontSize: '12px', color: 'var(--primary)', flexWrap: 'wrap' }}>
                 {userContext.profile.streak_days > 0 && <span> {userContext.profile.streak_days} days clean</span>}
                 {userContext.profile.money_saved > 0 && <span> KES {userContext.profile.money_saved.toLocaleString()} saved</span>}
                 {userContext.cbtCompleted > 0 && <span> {userContext.cbtCompleted} modules done</span>}
@@ -706,12 +706,12 @@ function AIChat({ profile }) {
             )}
 
             {messages.length === 1 && (
-              <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgb(var(--primary-rgb) / 0.25)', borderRadius: '14px', padding: '14px' }}>
+              <div style={{ background: 'var(--surface-2)', border: '1px solid rgb(var(--primary-rgb) / 0.25)', borderRadius: '14px', padding: '14px' }}>
                 <p style={{ fontSize: '14px', color: 'var(--primary)', fontWeight: 600, margin: '0 0 6px' }}>{greetingText}</p>
-                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', lineHeight: '1.5', margin: '0 0 12px', fontStyle: 'italic' }}>{thoughtText}</p>
+                <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: '0 0 12px', fontStyle: 'italic' }}>{thoughtText}</p>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {quickChips.map(key => (
-                    <button key={key} type="button" onClick={() => sendMessage(t(key))} style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid var(--secondary)', color: 'var(--primary)', padding: '6px 14px', borderRadius: '100px', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '36px' }}>{t(key)}</button>
+                    <button key={key} type="button" onClick={() => sendMessage(t(key))} style={{ background: 'var(--surface)', border: '1px solid var(--primary)', color: 'var(--primary)', padding: '6px 14px', borderRadius: '100px', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '36px' }}>{t(key)}</button>
                   ))}
                 </div>
               </div>
@@ -720,7 +720,24 @@ function AIChat({ profile }) {
               <div key={msg.id || i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start', animation: 'messageIn 0.3s ease-out' }}>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', flexDirection: msg.role === 'user' ? 'row-reverse' : 'row' }}>
                   {msg.role === 'assistant' && <OlooCharacter size={24} emotion={speakingId === msg.id ? 'speaking' : 'calm'} />}
-                  <div style={{ maxWidth: '80%', padding: '10px 14px', borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: msg.role === 'user' ? 'var(--primary)' : 'rgba(255,255,255,0.12)', color: msg.role === 'user' ? 'var(--bg)' : '#FFFFFF', fontSize: '13px', lineHeight: '1.6', fontWeight: msg.role === 'user' ? 500 : 300, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+                  <div
+                    className={msg.crisis ? 'oloo-message--crisis' : undefined}
+                    role={msg.crisis ? 'alert' : undefined}
+                    aria-label={msg.crisis ? 'Crisis support' : undefined}
+                    style={{
+                      maxWidth: '80%',
+                      padding: '10px 14px',
+                      borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                      background: msg.crisis ? 'var(--danger)' : msg.role === 'user' ? 'var(--primary)' : 'var(--surface-2)',
+                      color: msg.role === 'user' || msg.crisis ? 'var(--on-primary)' : 'var(--text)',
+                      fontSize: '13px',
+                      lineHeight: '1.6',
+                      fontWeight: msg.role === 'user' ? 500 : 300,
+                      wordBreak: 'break-word',
+                      whiteSpace: 'pre-wrap',
+                    }}
+                  >
+                    {msg.crisis && <strong style={{ display: 'block', marginBottom: '4px' }}>Crisis support</strong>}
                     {msg.content}
                   </div>
                 </div>
@@ -728,7 +745,7 @@ function AIChat({ profile }) {
                 {msg.role === 'assistant' && (
                   <div style={{ paddingLeft: '32px', marginTop: '2px', display: 'flex', gap: '6px' }}>
                     {speakingId === msg.id ? (
-                      <button onClick={stopSpeaking} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Stop</button>
+                      <button onClick={stopSpeaking} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Stop</button>
                     ) : (
                       <button onClick={() => speakText(msg.content, msg.id)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Listen</button>
                     )}
@@ -747,10 +764,10 @@ function AIChat({ profile }) {
                     ) : (
                       <>
                         <p style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 600, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{msg.pendingAction.state === 'failed' ? 'Action failed. Retry or cancel' : 'Please confirm'}</p>
-                        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.75)', margin: '0 0 8px', lineHeight: 1.5, wordBreak: 'break-word' }}>{msg.pendingAction.summary}</p>
+                        <p style={{ fontSize: '12px', color: 'var(--text)', margin: '0 0 8px', lineHeight: 1.5, wordBreak: 'break-word' }}>{msg.pendingAction.summary}</p>
                         <div style={{ display: 'flex', gap: '8px' }}>
                           <button type="button" onClick={() => resolvePendingAction(msg, true)} disabled={actionBusyId === msg.id} style={{ background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', padding: '6px 14px', borderRadius: '100px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Confirm</button>
-                          <button type="button" onClick={() => resolvePendingAction(msg, false)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--text-muted)', padding: '6px 14px', borderRadius: '100px', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+                          <button type="button" onClick={() => resolvePendingAction(msg, false)} style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)', padding: '6px 14px', borderRadius: '100px', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
                         </div>
                       </>
                     )}
@@ -771,10 +788,10 @@ function AIChat({ profile }) {
             {loading && (
               <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', animation: 'messageIn 0.3s ease-out' }}>
                 <OlooCharacter size={24} emotion="thinking" />
-                <div style={{ background: 'rgba(255,255,255,0.12)', padding: '12px 16px', borderRadius: '16px 16px 16px 4px' }}>
+                <div style={{ background: 'var(--surface-2)', padding: '12px 16px', borderRadius: '16px 16px 16px 4px' }}>
                   <div style={{ display: 'flex', gap: '4px' }}>
                     {[0, 1, 2].map(i => (
-                      <div key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'rgba(255,255,255,0.4)', animation: `typingDot 1.2s ${i * 0.2}s ease-in-out infinite` }} />
+                      <div key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)', animation: `typingDot 1.2s ${i * 0.2}s ease-in-out infinite` }} />
                     ))}
                   </div>
                 </div>
@@ -786,7 +803,7 @@ function AIChat({ profile }) {
           </div>
 
           {/* Input Area */}
-          <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.12)', display: 'flex', gap: '8px', background: 'var(--bg)', alignItems: 'center' }}>
+          <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', gap: '8px', background: 'var(--bg)', alignItems: 'center' }}>
             {/* Voice toggle button */}
             {voiceSupported && (
               <button
@@ -795,9 +812,9 @@ function AIChat({ profile }) {
                 title={voiceEnabled ? 'Voice replies ON' : 'Voice replies OFF'}
                 style={{
                   width: '36px', height: '36px', borderRadius: '50%',
-                  border: `1px solid ${voiceEnabled ? 'var(--primary)' : 'rgba(255,255,255,0.12)'}`,
-                  background: voiceEnabled ? 'rgba(255,255,255,0.12)' : 'transparent',
-                  color: voiceEnabled ? 'var(--primary)' : 'rgba(255,255,255,0.4)',
+                  border: `1px solid ${voiceEnabled ? 'var(--primary)' : 'var(--border)'}`,
+                  background: voiceEnabled ? 'var(--primary-soft)' : 'transparent',
+                  color: voiceEnabled ? 'var(--primary)' : 'var(--text-muted)',
                   fontSize: '14px', cursor: 'pointer', flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
@@ -818,12 +835,12 @@ function AIChat({ profile }) {
               aria-label="Message Oloo"
               placeholder={isListening ? 'Listening...' : 'Talk to Oloo...'}
               style={{
-                flex: 1, minWidth: 0, background: 'var(--surface-2)', border: `1px solid ${isListening ? '#FFFFFF' : 'rgba(255,255,255,0.12)'}`,
-                borderRadius: '100px', padding: '10px 16px', color: '#FFFFFF', fontSize: '13px',
+                flex: 1, minWidth: 0, background: 'var(--surface)', border: `1px solid ${isListening ? 'var(--primary)' : 'var(--border)'}`,
+                borderRadius: '100px', padding: '10px 16px', color: 'var(--text)', fontSize: '13px',
                 outline: 'none', fontFamily: 'var(--font-body)', transition: 'border-color 0.2s',
               }}
               onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
-              onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.12)'}
+              onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
               disabled={isListening}
             />
 
@@ -835,8 +852,8 @@ function AIChat({ profile }) {
                 style={{
                   width: '40px', height: '40px', borderRadius: '50%',
                   border: 'none',
-                  background: isListening ? '#FFFFFF' : 'rgba(255,255,255,0.12)',
-                  color: isListening ? 'var(--bg)' : 'var(--primary)',
+                  background: isListening ? 'var(--primary)' : 'var(--surface-2)',
+                  color: isListening ? 'var(--on-primary)' : 'var(--primary)',
                   fontSize: '18px', cursor: 'pointer', flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   animation: isListening ? 'pulse 1.5s infinite' : 'none',
@@ -850,8 +867,8 @@ function AIChat({ profile }) {
               disabled={(loading && !detectCrisis(input).crisis) || (!input.trim() && !isListening)}
               style={{
                 width: '40px', height: '40px', borderRadius: '50%',
-                background: loading || (!input.trim() && !isListening) ? 'rgba(255,255,255,0.12)' : 'var(--primary)',
-                border: 'none', color: loading || (!input.trim() && !isListening) ? 'rgba(255,255,255,0.4)' : 'var(--bg)',
+                background: loading || (!input.trim() && !isListening) ? 'var(--surface-2)' : 'var(--primary)',
+                border: 'none', color: loading || (!input.trim() && !isListening) ? 'var(--text-muted)' : 'var(--on-primary)',
                 fontSize: '18px', cursor: loading || (!input.trim() && !isListening) ? 'not-allowed' : 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                 transition: 'all 0.2s',
@@ -891,8 +908,8 @@ function ActionResultCard({ action, onNavigate }) {
 
   const cardStyle = {
     maxWidth: '85%', marginTop: '6px',
-    background: action.ok === false ? 'rgba(255,120,120,0.07)' : 'rgba(255,255,255,0.06)',
-    border: `1px solid ${action.ok === false ? 'rgba(255,120,120,0.3)' : 'rgb(var(--secondary-rgb) / 0.3)'}`,
+    background: action.ok === false ? 'rgb(var(--danger-rgb) / 0.08)' : 'var(--surface-2)',
+    border: `1px solid ${action.ok === false ? 'var(--danger)' : 'rgb(var(--primary-rgb) / 0.3)'}`,
     borderRadius: '12px', padding: '10px 12px',
   };
 
@@ -920,7 +937,7 @@ function ActionResultCard({ action, onNavigate }) {
       {events && events.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {events.slice(0, 5).map(ev => (
-            <div key={ev.id} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5 }}>
+            <div key={ev.id} style={{ fontSize: '12px', color: 'var(--text)', lineHeight: 1.5 }}>
               <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{ev.title}</span>
               <span style={{ color: 'var(--text-muted)' }}> — {ev.date ? new Date(ev.date).toLocaleDateString('en-KE', { weekday: 'short', day: 'numeric', month: 'short' }) : ''}{ev.location ? ` · ${ev.location}` : ''}{ev.my_rsvp ? ` · ${ev.my_rsvp}` : ''}</span>
             </div>
@@ -930,7 +947,7 @@ function ActionResultCard({ action, onNavigate }) {
       {registrations && registrations.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {registrations.slice(0, 5).map(r => (
-            <div key={r.event_id} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5 }}>
+            <div key={r.event_id} style={{ fontSize: '12px', color: 'var(--text)', lineHeight: 1.5 }}>
               <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{r.title}</span>
               <span style={{ color: 'var(--text-muted)' }}> — {r.date ? new Date(r.date).toLocaleDateString('en-KE', { day: 'numeric', month: 'short' }) : ''} · {r.attendance}</span>
             </div>
@@ -940,7 +957,7 @@ function ActionResultCard({ action, onNavigate }) {
       {diaryEntries && diaryEntries.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {diaryEntries.slice(0, 5).map((e, i) => (
-            <div key={e.date + i} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5 }}>
+            <div key={e.date + i} style={{ fontSize: '12px', color: 'var(--text)', lineHeight: 1.5 }}>
               <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{e.date}</span>
               <span style={{ color: 'var(--text-muted)' }}> — {e.gambled ? 'gambled' : 'clean day'}{e.mood ? ` · ${e.mood}` : ''}</span>
             </div>
@@ -948,7 +965,7 @@ function ActionResultCard({ action, onNavigate }) {
         </div>
       )}
       {!data.navigate && !events && !registrations && !diaryEntries && action.summary && (
-        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.5 }}>{action.summary}</p>
+        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>{action.summary}</p>
       )}
     </div>
   );

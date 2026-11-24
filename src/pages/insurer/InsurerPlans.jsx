@@ -170,7 +170,7 @@ export default function InsurerPlans() {
                   {v.terms?.waiting_period_days ? ` · ${v.terms.waiting_period_days}d wait` : ''}
                 </p>
               </div>
-              <span style={{ color: v.status === 'approved' ? 'var(--primary)' : v.status === 'draft' ? '#F2C879' : 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{v.status.replace(/_/g, ' ')}</span>
+              <span style={{ color: v.status === 'approved' ? 'var(--primary)' : v.status === 'draft' ? 'var(--warning)' : 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{v.status.replace(/_/g, ' ')}</span>
               {v.status === 'draft' && (
                 <>
                   <button type="button" className="btn-primary fs-11" style={{ padding: '4px 10px', minHeight: '30px' }} onClick={async () => {

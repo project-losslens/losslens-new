@@ -11,11 +11,11 @@ import { toCsv, downloadCsv } from '../../lib/csv'
 //  no user ids or clinical data are exposed to the insurer session.
 
 const STATUS_COLOR = {
-  pending_verification: '#F2C879', active: 'var(--primary)', suspended: 'var(--secondary)',
+  pending_verification: 'var(--warning)', active: 'var(--primary)', suspended: 'var(--secondary)',
   ended: 'rgba(255,255,255,0.4)', rejected: 'var(--danger)',
 }
 const POLICY_STATUS_COLOR = {
-  issued: '#F2C879', pending_payment: '#F2C879', active: 'var(--primary)',
+  issued: 'var(--warning)', pending_payment: 'var(--warning)', active: 'var(--primary)',
   grace: 'var(--secondary)', lapsed: 'var(--danger)', cancelled: 'rgba(255,255,255,0.4)', expired: 'rgba(255,255,255,0.4)',
 }
 

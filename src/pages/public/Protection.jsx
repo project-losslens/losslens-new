@@ -45,7 +45,7 @@ function ProtectionInner() {
       <main className="ll-band" style={{ paddingTop: 'var(--space-7)' }}>
         <div className="ll-container ll-narrow">
           <p className="ll-eyebrow">LossLens Protection</p>
-          <h1 className="ll-h2" style={{ fontSize: 'var(--step-4)' }}>An idea we are working on</h1>
+          <h1 className="ll-h2 ll-protection-header" style={{ fontSize: 'var(--step-4)' }}>An idea we are working on</h1>
           <p className="ll-crisis__note" style={{ marginBottom: 'var(--space-6)' }}>{PROTECTION_STATUS}</p>
 
           <Section title="One treatment-benefit package. Three ways to access protection.">
@@ -58,7 +58,7 @@ function ProtectionInner() {
               {STRUCTURE_ORDER.map((slug) => {
                 const s = STRUCTURES[slug]
                 return (
-                  <article key={slug} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: 'var(--space-4)' }}>
+                  <article key={slug} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: 'var(--space-4)' }}>
                     <h3 style={{ color: 'var(--primary)', fontSize: 'var(--step-1)', margin: '0 0 var(--space-2)' }}>{s.name}</h3>
                     <p className="ll-lede" style={{ marginBottom: 'var(--space-3)' }}>{s.tagline}</p>
                     <Link to={`/protection/${slug}`} className="ll-btn ll-btn--ghost" style={{ fontSize: 'var(--step--1)' }}>{s.cta}</Link>

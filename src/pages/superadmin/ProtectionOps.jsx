@@ -11,7 +11,7 @@ import NumberField from '../../components/NumberField'
 //  verification queue, protection_mode switch (confirmed + audited).
 
 const STATUS_COLOR = {
-  pending_verification: '#F2C879', active: 'var(--primary)', suspended: 'var(--secondary)',
+  pending_verification: 'var(--warning)', active: 'var(--primary)', suspended: 'var(--secondary)',
   ended: 'rgba(255,255,255,0.4)', rejected: 'var(--danger)',
 }
 
@@ -232,7 +232,7 @@ export default function ProtectionOps() {
                 {v.benefit_structure.replace(/_/g, ' ')} · KES {Number(v.premium_amount || 0).toLocaleString()}/{v.premium_frequency}
               </p>
             </div>
-            <span style={{ color: v.status === 'approved' ? 'var(--primary)' : '#F2C879', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{v.status.replace(/_/g, ' ')}</span>
+            <span style={{ color: v.status === 'approved' ? 'var(--primary)' : 'var(--warning)', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{v.status.replace(/_/g, ' ')}</span>
             {v.status === 'pending_approval' && (
               <>
                 <button type="button" className="btn-primary fs-11" style={{ padding: '6px 10px', minHeight: '32px' }} onClick={() => approveVersion(v)}>Approve</button>

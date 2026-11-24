@@ -95,7 +95,7 @@ export default function ChallengeWheel({ labels, landedIndex, spinning, onLanded
     <div style={{ position: 'relative', width: size, height: size, margin: '0 auto' }} role="img" aria-label="Challenge wheel">
       {/* pointer */}
       <div style={{ position: 'absolute', top: -6, left: '50%', transform: 'translateX(-50%)', zIndex: 2 }} aria-hidden="true">
-        <div style={{ width: 0, height: 0, borderLeft: '9px solid transparent', borderRight: '9px solid transparent', borderTop: '14px solid #F2C879', filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.5))' }} />
+        <div style={{ width: 0, height: 0, borderLeft: '9px solid transparent', borderRight: '9px solid transparent', borderTop: '14px solid var(--accent-warm)', filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.5))' }} />
       </div>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ display: 'block' }}>
         <g transform={`rotate(${rotation} ${cx} ${cy})`}>

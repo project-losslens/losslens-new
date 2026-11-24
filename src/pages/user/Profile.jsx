@@ -52,13 +52,13 @@ function buildEncryptedReportPage(payload) {
   const payloadJson = JSON.stringify(payload).replace(/</g, '\\u003c')
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LossLens Recovery Report (encrypted)</title>
-<style>body{font-family:system-ui,sans-serif;background:#0A1A12;color:#fff;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:1rem}main{max-width:420px;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:2rem;text-align:center}input{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:#0A1A12;color:#fff;font-size:16px;box-sizing:border-box;margin:12px 0}button{width:100%;padding:12px;border:none;border-radius:8px;background:#4ADE80;color:#06140C;font-weight:600;font-size:15px;cursor:pointer}#err{color:#FF8A80;font-size:13px;min-height:1.2em;margin-top:10px}</style></head><body>
-<main><h2 style="font-size:20px;color:#4ADE80;margin:0 0 8px">LossLens Recovery Report</h2>
-<p style="color:rgba(255,255,255,.6);font-size:13px;margin:0 0 16px">This report is encrypted. Enter the passphrase you were given to view it.</p>
+<style>body{font-family:system-ui,sans-serif;background:#FAF7F2;color:#292329;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:1rem}main{max-width:420px;width:100%;background:#FFFFFF;border:1px solid rgba(41,35,41,.16);border-radius:16px;padding:2rem;text-align:center}input{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(41,35,41,.16);background:#FFFFFF;color:#292329;font-size:16px;box-sizing:border-box;margin:12px 0}button{width:100%;padding:12px;border:none;border-radius:8px;background:#653B60;color:#FFFFFF;font-weight:600;font-size:15px;cursor:pointer}#err{color:#A12E3E;font-size:13px;min-height:1.2em;margin-top:10px}</style></head><body>
+<main><h2 style="font-size:20px;color:#653B60;margin:0 0 8px">LossLens Recovery Report</h2>
+<p style="color:#625B62;font-size:13px;margin:0 0 16px">This report is encrypted. Enter the passphrase you were given to view it.</p>
 <input id="pw" type="password" autocomplete="off" placeholder="Enter passphrase" aria-label="Report passphrase">
 <button id="go">Unlock report</button>
 <p id="err" role="alert"></p>
-<p style="color:rgba(255,255,255,.35);font-size:11px;margin-top:16px">Keep your passphrase private. It was shared with you separately from this file.</p>
+<p style="color:#625B62;font-size:11px;margin-top:16px">Keep your passphrase private. It was shared with you separately from this file.</p>
 </main>
 <script>
 const PAYLOAD = ${payloadJson};
@@ -270,33 +270,33 @@ export default function Profile() {
 <style>
   @page { margin: 1.8cm; }
   * { box-sizing: border-box; }
-  body { font-family: Arial, sans-serif; background: #fff; color: #1F3A29; line-height: 1.55; max-width: 820px; margin: auto; padding: 1.5rem; }
-  body:before { content: 'PRIVATE RECOVERY INFORMATION'; position: fixed; inset: 36% -10%; transform: rotate(-24deg); color: rgba(10,26,18,.045); font-size: clamp(24px, 6vw, 56px); font-weight: 700; letter-spacing: .12em; white-space: nowrap; pointer-events: none; z-index: -1; }
-  .header { display: flex; align-items: center; justify-content: center; gap: 12px; border-bottom: 3px solid #4ADE80; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+  body { font-family: Arial, sans-serif; background: #fff; color: #292329; line-height: 1.55; max-width: 820px; margin: auto; padding: 1.5rem; }
+  body:before { content: 'PRIVATE RECOVERY INFORMATION'; position: fixed; inset: 36% -10%; transform: rotate(-24deg); color: rgba(101,59,96,.05); font-size: clamp(24px, 6vw, 56px); font-weight: 700; letter-spacing: .12em; white-space: nowrap; pointer-events: none; z-index: -1; }
+  .header { display: flex; align-items: center; justify-content: center; gap: 12px; border-bottom: 3px solid #653B60; padding-bottom: 1rem; margin-bottom: 1.5rem; }
   .mark { width: 46px; height: 46px; flex: none; }
-  .header h1 { color: #06140C; margin: 0; font-size: 24px; }
-  .subtitle { color: #4A5F52; font-size: 12px; margin: 4px 0 0; }
-  .confidential { color: #3E5443; font-size: 10px; margin: 7px 0 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-  h2 { color: #06140C; border-bottom: 1px solid #C9D8CE; padding-bottom: 6px; font-size: 16px; margin: 1.5rem 0 .6rem; }
+  .header h1 { color: #292329; margin: 0; font-size: 24px; }
+  .subtitle { color: #625B62; font-size: 12px; margin: 4px 0 0; }
+  .confidential { color: #4B444B; font-size: 10px; margin: 7px 0 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+  h2 { color: #292329; border-bottom: 1px solid #D9D2DA; padding-bottom: 6px; font-size: 16px; margin: 1.5rem 0 .6rem; }
   .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
-  .info-item { padding: 5px 0; border-bottom: 1px dotted #C9D8CE; overflow-wrap: anywhere; }
-  .info-item strong { color: #3E5443; display: inline-block; min-width: 112px; }
+  .info-item { padding: 5px 0; border-bottom: 1px dotted #D9D2DA; overflow-wrap: anywhere; }
+  .info-item strong { color: #4B444B; display: inline-block; min-width: 112px; }
   .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: .8rem 0; }
-  .stat-card { background: #F1F7F3; border: 1px solid #C9D8CE; border-radius: 6px; padding: 12px 8px; text-align: center; }
-  .stat-card .value { font-size: 20px; font-weight: bold; color: #15803D; display: block; }
-  .stat-card .label { font-size: 9px; color: #3E5443; text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
+  .stat-card { background: #F0E7F1; border: 1px solid #D9D2DA; border-radius: 6px; padding: 12px 8px; text-align: center; }
+  .stat-card .value { font-size: 20px; font-weight: bold; color: #653B60; display: block; }
+  .stat-card .label { font-size: 9px; color: #4B444B; text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
   table { width: 100%; border-collapse: collapse; margin: .7rem 0; font-size: 11px; }
-  th { background: #E2EDE6; color: #06140C; padding: 8px; text-align: left; font-size: 10px; }
-  td { padding: 7px 8px; border-bottom: 1px solid #C9D8CE; }
-  tr:nth-child(even) { background: #F8FBF9; }
-  .empty { color: #4A5F52; font-style: italic; }
-  .footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #C9D8CE; text-align: center; }
-  .footer p { font-size: 10px; color: #4A5F52; margin: 3px 0; }
-  .badge { display: inline-block; background: #E7F6EC; color: #14532D; border: 1px solid #BBF7D0; padding: 3px 9px; border-radius: 4px; font-size: 10px; margin: 2px; }
+  th { background: #F0E7F1; color: #292329; padding: 8px; text-align: left; font-size: 10px; }
+  td { padding: 7px 8px; border-bottom: 1px solid #D9D2DA; }
+  tr:nth-child(even) { background: #FAF7F2; }
+  .empty { color: #625B62; font-style: italic; }
+  .footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #D9D2DA; text-align: center; }
+  .footer p { font-size: 10px; color: #625B62; margin: 3px 0; }
+  .badge { display: inline-block; background: #F0E7F1; color: #4F2D4B; border: 1px solid #D9D2DA; padding: 3px 9px; border-radius: 4px; font-size: 10px; margin: 2px; }
   @media print { body { padding: 0; } .stat-card { break-inside: avoid; } }
   @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } body { padding: 1rem; } }
 </style></head><body>
-<div class="header"><svg class="mark" viewBox="0 0 100 100" aria-label="LossLens mark">${Array.from({ length: 8 }, (_, i) => `<ellipse cx="50" cy="26" rx="9" ry="20" fill="${i % 2 === 0 ? '#4ADE80' : '#86EFAC'}" opacity=".9" transform="rotate(${i * 45} 50 50)"/>`).join('')}<circle cx="50" cy="50" r="12" stroke="#86EFAC" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="4" fill="#4ADE80"/></svg><div><h2>LossLens Recovery Report</h2><p class="subtitle">Generated ${today}</p><p class="confidential">Private recovery information · Share only with your consent</p></div></div>
+<div class="header"><svg class="mark" viewBox="0 0 100 100" aria-label="LossLens mark">${Array.from({ length: 8 }, (_, i) => `<ellipse cx="50" cy="26" rx="9" ry="20" fill="${i % 2 === 0 ? '#653B60' : '#B77932'}" opacity=".9" transform="rotate(${i * 45} 50 50)"/>`).join('')}<circle cx="50" cy="50" r="12" stroke="#B77932" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="4" fill="#653B60"/></svg><div><h2>LossLens Recovery Report</h2><p class="subtitle">Generated ${today}</p><p class="confidential">Private recovery information · Share only with your consent</p></div></div>
 <h2>Client Information</h2>
 <div class="info-grid">
   <div class="info-item"><strong>Full Name:</strong> ${reportName}</div>
@@ -596,7 +596,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
             <p className="fs-12" style={{ color: 'var(--secondary)', lineHeight: '1.5', marginBottom: '12px' }}>Your professional recovery report is encrypted with a passphrase. Share the passphrase separately from the file.</p>
             <div style={{ background: 'var(--bg)', border: '1px solid var(--secondary)', borderRadius: '10px', padding: '12px', marginBottom: '10px', textAlign: 'center' }}>
               <p className="fs-11" style={{ color: 'var(--text-muted)', margin: '0 0 6px' }}>Report passphrase</p>
-              <p className="fs-22" style={{ color: '#F2C879', fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: '3px', margin: '0 0 8px' }}>{reportPassphrase}</p>
+              <p className="fs-22" style={{ color: 'var(--accent-warm)', fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: '3px', margin: '0 0 8px' }}>{reportPassphrase}</p>
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                 <button type="button" onClick={() => { void copyPassphrase() }} disabled={!reportPassphrase} className="fs-11" style={{ padding: '6px 12px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '32px' }}>Copy</button>
                 <button type="button" onClick={generateNewReportPassphrase} disabled={!reportPassphrase} className="fs-11" style={{ padding: '6px 12px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--text-muted)', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '32px' }}>Generate new passphrase</button>
