@@ -1,3 +1,4 @@
+import { checkedMutation } from '../../lib/mutations'
 import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -36,7 +37,7 @@ export default function GrantApplications() {
       if (filter !== 'all') query = query.eq('status', filter)
       const { data, error: fetchError } = await query
       if (fetchError) throw fetchError
-      setApplications(data || [])
+      setApplications((data || []).map(row => ({ ...row, contact_email: row.email, purpose: row.notes })))
     } catch (err) {
       console.error('Grant fetch error:', err)
       setError('Failed to load applications.')
@@ -50,7 +51,7 @@ export default function GrantApplications() {
     try {
       const payload = { status: newStatus, reviewed_at: new Date().toISOString() }
       if (reason) payload.rejection_reason = reason
-      const { error: updateError } = await supabase.from('grant_applications').update(payload).eq('id', id)
+      const { error: updateError } = await checkedMutation(supabase.from('grant_applications').update(payload).eq('id', id).select('*'))
       if (updateError) throw updateError
       setApplications(prev => prev.map(a => a.id === id ? { ...a, status: newStatus, rejection_reason: reason } : a))
       toast.success(`Application ${newStatus.replace('_', ' ')}.`)
@@ -63,7 +64,7 @@ export default function GrantApplications() {
   }
 
   const formatCurrency = (amount) => {
-    if (!amount) return 'KSh 0'
+    if (amount == null) return 'Not provided'
     return `KSh ${Number(amount).toLocaleString()}`
   }
 
@@ -108,7 +109,7 @@ export default function GrantApplications() {
   if (loading) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
@@ -125,7 +126,7 @@ export default function GrantApplications() {
   if (error) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
@@ -142,7 +143,7 @@ export default function GrantApplications() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}> Grant Applications</h1>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}> Grant Applications</h2>
             <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>{applications.length} applications  · {counts.pending} pending</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -186,7 +187,7 @@ export default function GrantApplications() {
           </div>
 
           {filteredApplications.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
               <AppIcon name="document" size={48} style={{ display: 'block', margin: '0 auto 12px' }} />
               <p style={{ color: 'var(--primary)', fontSize: '14px' }}>{searchQuery ? 'No applications match your search.' : 'No applications found.'}</p>
             </div>
@@ -206,13 +207,13 @@ export default function GrantApplications() {
                             {statusConfig.icon} {statusConfig.label}
                           </span>
                         </div>
-                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '12px', margin: '0 0 4px' }}>
                           {a.contact_name}  · {a.contact_email}
                         </p>
                         <p style={{ color: 'var(--primary)', fontSize: '16px', fontWeight: 700, fontFamily: 'var(--font-display)', margin: '0 0 4px' }}>
                           {formatCurrency(a.amount_requested)}
                         </p>
-                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 4px' }}>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: '0 0 4px' }}>
                           Submitted: {formatDate(a.created_at)}
                           {a.reviewed_at && `  · Reviewed: ${formatDate(a.reviewed_at)}`}
                         </p>
@@ -266,7 +267,7 @@ export default function GrantApplications() {
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '16px' }}>
               <strong style={{ color: 'var(--primary)' }}>"{showRejectModal.organization_name}"</strong>  · {formatCurrency(showRejectModal.amount_requested)}
             </p>
-            <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Rejection Reason</label>
+            <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Rejection Reason</label>
             <textarea
               value={rejectReason}
               onChange={e => setRejectReason(e.target.value)}
@@ -275,7 +276,7 @@ export default function GrantApplications() {
               style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text)', fontSize: '13px', fontFamily: 'var(--font-body)', resize: 'vertical', boxSizing: 'border-box', outline: 'none', marginBottom: '16px' }}
             />
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => { setShowRejectModal(null); setRejectReason('') }} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={() => { setShowRejectModal(null); setRejectReason('') }} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
               <button onClick={() => updateStatus(showRejectModal.id, 'rejected', rejectReason.trim() || 'No reason provided')} disabled={!!actionLoading}
                 style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
                 {actionLoading === `${showRejectModal.id}-rejected` ? '...' : 'Confirm Reject'}

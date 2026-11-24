@@ -460,7 +460,7 @@ h1 em {
 
 .card p {
   font-size: 13px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   line-height: 1.5;
   font-weight: 300;
 }
@@ -488,7 +488,7 @@ h1 em {
 
 .stat-label {
   font-size: 13px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   line-height: 1.4;
 }
 
@@ -533,7 +533,7 @@ h1 em {
 
 .auth-sub {
   font-size: 14px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   margin-bottom: 2rem;
   font-weight: 300;
 }
@@ -572,7 +572,7 @@ h1 em {
 
 .forgot {
   font-size: 12px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   text-align: right;
   margin-bottom: 1.5rem;
   cursor: pointer;
@@ -591,7 +591,7 @@ h1 em {
 .auth-switch {
   text-align: center;
   font-size: 13px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   margin-top: 1.25rem;
 }
 
@@ -646,7 +646,7 @@ h1 em {
 
 .checkbox-group label {
   font-size: 13px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   line-height: 1.5;
   cursor: pointer;
 }
@@ -748,13 +748,13 @@ h1 em {
 
 .price-period {
   font-size: 13px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   margin-left: 4px;
 }
 
 .plan-desc {
   font-size: 13px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   line-height: 1.5;
   margin-bottom: 1.5rem;
   font-weight: 300;
@@ -819,7 +819,7 @@ h1 em {
 
 .dash-sub {
   font-size: 13px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   font-weight: 300;
 }
 
@@ -874,7 +874,7 @@ h1 em {
 
 .stat-label {
   font-size: 12px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
 }
 
 .dash-section {
@@ -912,7 +912,7 @@ h1 em {
 .tab {
   background: transparent;
   border: 1px solid rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   padding: 4px 12px;
   border-radius: 100px;
   font-size: 12px;
@@ -957,7 +957,7 @@ h1 em {
 
 .day-label {
   font-size: 11px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
 }
 
 .chart-legend {
@@ -971,7 +971,7 @@ h1 em {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
 }
 
 .dot {
@@ -1010,7 +1010,7 @@ h1 em {
 
 .entry-date {
   font-size: 12px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
 }
 
 .entry-status {
@@ -1038,7 +1038,7 @@ h1 em {
 
 .entry-note {
   font-size: 13px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   font-weight: 300;
   line-height: 1.4;
 }
@@ -1071,7 +1071,7 @@ h1 em {
   border-radius: 10px;
   border: 1px solid rgba(255,255,255,0.12);
   background: var(--bg);
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   font-size: 14px;
   cursor: pointer;
   font-family: var(--font-body);
@@ -1098,7 +1098,7 @@ h1 em {
 .chip {
   background: var(--bg);
   border: 1px solid rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   padding: 6px 14px;
   border-radius: 100px;
   font-size: 13px;
@@ -1235,13 +1235,13 @@ h1 em {
 
 .module-meta {
   font-size: 12px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   margin-bottom: 4px;
 }
 
 .module-desc {
   font-size: 13px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   font-weight: 300;
   line-height: 1.4;
 }
@@ -1325,7 +1325,7 @@ h1 em {
 
 .tool-desc {
   font-size: 12px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   font-weight: 300;
   line-height: 1.4;
 }
@@ -1371,7 +1371,7 @@ h1 em {
 
 .helpline-hours {
   font-size: 12px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
 }
 
 .toggle-row {
@@ -1448,7 +1448,7 @@ h1 em {
 
 .mirror-note {
   font-size: 12px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   font-weight: 300;
 }
 
@@ -1972,7 +1972,7 @@ button:active {
   padding: 24px;
   border: 1px solid var(--border);
   border-radius: 20px;
-  background: var(--surface-solid);
+  background: var(--surface);
   color: var(--text-primary);
   box-shadow: var(--ll-shadow-md);
 }
@@ -2312,13 +2312,13 @@ button:active {
 .brand-loader__label {
   margin-top: 10px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--text-muted);
 }
 
 .brand-loader__still {
   margin-top: 14px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--text-muted);
   animation: brand-fade-in 0.6s ease-out both;
 }
 
@@ -2468,7 +2468,7 @@ button:active {
   padding: 6px 4px;
   border: 0;
   background: transparent;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--text-muted);
   font-family: var(--font-body);
   font-size: 12px;
   font-weight: 500;
@@ -2565,7 +2565,7 @@ button:active {
   border-radius: 100px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: transparent;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-muted);
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;
@@ -2608,3 +2608,79 @@ button:active {
   font-size: 17px;
   border-radius: 14px;
 }
+
+/* Workflow audit: responsive containment, readable controls and modal layers. */
+.shell__content, .portal-page { overflow-wrap: anywhere; }
+.shell__content input, .shell__content select, .shell__content textarea { min-width: 0; max-width: 100%; }
+.shell__content button, .shell__content a { touch-action: manipulation; }
+.shell__content button:not(.modal-backdrop) { min-height: 36px; }
+.shell__content [role="dialog"] { max-height: 94dvh; overflow-y: auto; }
+.shell__content .page-toolbar { flex-wrap: wrap; gap: 12px; }
+.shell__content table { max-width: 100%; }
+.shell__content th, .shell__content td { overflow-wrap: normal; }
+.crisis-access__trigger { z-index: 30; }
+@media (max-width: 768px) {
+  .shell--mobile-nav .shell__content { padding-bottom: calc(150px + env(safe-area-inset-bottom)); }
+  .shell--mobile-nav .crisis-access__trigger { bottom: calc(80px + env(safe-area-inset-bottom)); }
+  .oloo-widget { bottom: calc(140px + env(safe-area-inset-bottom)) !important; right: 12px !important; }
+  .oloo-chat-panel { bottom: calc(140px + env(safe-area-inset-bottom)) !important; max-height: calc(100dvh - 160px - env(safe-area-inset-bottom)) !important; }
+  .shell__header { gap: 8px; }
+  .shell__header-leading { min-width: 0; }
+  .shell__content button:not(.modal-backdrop), .shell__content input, .shell__content select { min-height: 44px; }
+}
+@media (max-width: 480px) {
+  .shell__content [style*="grid-template-columns"] { grid-template-columns: minmax(0, 1fr) !important; }
+  .shell__content [style*="min-width: 200px"], .shell__content [style*="min-width: 250px"], .shell__content [style*="min-width: 300px"] { min-width: 0 !important; }
+  .shell__content .page-toolbar { padding: 12px !important; }
+  .shell__content [style*="padding: 2rem"] { padding: 16px !important; }
+  .shell__content [style*="padding: 1.5rem"] { padding: 12px !important; }
+  .shell__content [style*="position: fixed"][style*="inset: 0"] { padding: 8px !important; }
+}
+
+.shell__content label, .shell__content legend { font-size: 0.875rem !important; }
+@media (max-width: 768px) {
+  .shell__content input:not([type="checkbox"]):not([type="radio"]), .shell__content select, .shell__content textarea { font-size: 16px !important; }
+  .shell__content button:not(.modal-backdrop) { font-size: 14px; }
+}
+
+.shell__content a:not([class]) { color: var(--secondary); text-underline-offset: 0.2em; }
+@media (max-width: 480px) {
+  .shell__content [style*="min-width: 200px"], .shell__content [style*="min-width: 250px"], .shell__content [style*="min-width: 300px"] { flex-basis: 100% !important; }
+}
+
+/* Private PGSI flow and crisis help share the established brand and dialog layers. */
+:root { --z-crisis: 220; }
+.pgsi-overlay { position: fixed; inset: 0; z-index: var(--z-modal); display: grid; place-items: center; background: rgb(var(--bg-rgb) / 0.88); padding: 16px; }
+.pgsi-dialog { position: relative; z-index: 1; width: min(100%, 760px); max-height: calc(100dvh - 32px); overflow-y: auto; overscroll-behavior: contain; padding: 24px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.pgsi-dialog__header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+.pgsi-dialog__header h1, .pgsi-dialog__header h2 { margin: 0; color: var(--primary); }
+.pgsi-dialog__header button { flex-shrink: 0; }
+.pgsi-dialog p, .pgsi-onboarding p, .support-choices p { line-height: 1.6; }
+.pgsi-muted { color: var(--text-muted); font-size: 0.875rem; }
+.pgsi-assessment fieldset { margin: 20px 0; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-md); min-width: 0; }
+.pgsi-assessment legend { font-size: 1rem; font-weight: 600; padding: 0 4px; }
+.pgsi-answers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.pgsi-answers label { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 8px; font-size: 0.875rem; border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; }
+.pgsi-answers label:has(input:checked) { border-color: var(--primary); background: var(--primary-soft); }
+.pgsi-answers input[type=radio], .pgsi-personalization input[type=checkbox] { width: 20px; height: 20px; min-height: 20px !important; margin: 0; flex: 0 0 20px; accent-color: var(--primary); }
+.pgsi-personalization { display: flex; align-items: flex-start; gap: 10px; margin-top: 20px; line-height: 1.5; }
+.pgsi-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+.pgsi-actions a, .pgsi-actions button { min-height: 44px; }
+.pgsi-percentage { color: var(--primary); font-family: var(--font-display); font-size: 2rem; margin: 12px 0 0; }
+.pgsi-dashboard h2 { font-size: 1.125rem; }
+.pgsi-onboarding { position: relative; max-width: 800px; margin: 0 auto; padding: 24px 16px 220px; }
+.pgsi-onboarding > .card { position: relative; z-index: 1; background: var(--surface); padding: 24px; }
+.support-choices { display: grid; gap: 12px; }
+.support-choices .card { background: var(--surface-2); padding: 16px; }
+.support-choices h3 { color: var(--primary); margin-top: 0; }
+.support-hours { color: var(--accent-warm); }
+.crisis-access__trigger { z-index: var(--z-crisis); }
+.crisis-access__backdrop { z-index: calc(var(--z-crisis) + 1); }
+.crisis-access__sheet { max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; }
+.crisis-message { border: 1px solid var(--danger); border-radius: var(--radius-md); padding: 12px; margin-bottom: 12px; }
+@media (max-width: 768px) {
+  .crisis-access__trigger { bottom: calc(80px + env(safe-area-inset-bottom)); }
+  .pgsi-dialog { padding: 16px; }
+  .pgsi-dialog input, .pgsi-dialog select, .pgsi-onboarding select { font-size: 16px; }
+}
+@media (max-width: 400px) { .pgsi-answers { grid-template-columns: minmax(0, 1fr); } .pgsi-overlay { padding: 8px; } }

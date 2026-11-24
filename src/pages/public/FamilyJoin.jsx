@@ -271,7 +271,7 @@ export default function FamilyJoin() {
   return (
     <div style={{ minHeight: '100vh' }}>
       <TopographicBackground variant="hero" />
-      <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12), var(--secondary))', padding: '2rem 1.5rem', textAlign: 'center', borderBottom: '2px solid var(--primary)' }}>
+      <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgb(var(--secondary-rgb) / 0.12))', padding: '2rem 1.5rem', textAlign: 'center', borderBottom: '2px solid var(--primary)' }}>
         <AppIcon name="users" size={40} style={{ display: 'block', margin: '0 auto 8px', color: 'var(--primary)' }} />
         <h1 style={{ color: 'var(--primary)', fontFamily: 'var(--font-display)', fontSize: '22px', margin: '0 0 4px' }}>
           {invitation.anonymous_mode ? 'Supporting a Loved One' : `Supporting ${userProfile?.full_name || 'Someone'}`}

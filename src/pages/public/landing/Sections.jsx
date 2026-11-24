@@ -571,7 +571,7 @@ const FAQS = [
   },
   {
     q: 'What should I do if I need urgent help?',
-    a: 'Call a crisis helpline — Befrienders Kenya or NACADA — listed in the crisis section. They are available without an account and around the clock.',
+    a: 'Call a crisis helpline — Befrienders Kenya or NACADA — listed in the crisis section. You do not need an account. Check the published hours for each service.',
   },
 ]
 

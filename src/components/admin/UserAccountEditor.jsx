@@ -88,7 +88,7 @@ export default function UserAccountEditor({ user, actorId, isLastActiveSuperAdmi
         ...data,
       },
     })
-    if (error || response?.error) {
+    if (error || response?.error || response?.success !== true) {
       if (response?.temporaryPassword) setTemporaryPassword(response.temporaryPassword)
       toast.error(response?.error || error?.message || t('users.updateFailed'))
       setBusy(false)

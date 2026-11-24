@@ -9,7 +9,7 @@ function json(res, status, body) {
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') return json(res, 405, { error: 'Method not allowed' })
   const auth = req.headers.authorization || ''
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : req.query?.token
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null
   if (!token) return json(res, 401, { error: 'Unauthorized' })
 
   const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {

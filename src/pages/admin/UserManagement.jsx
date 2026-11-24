@@ -66,11 +66,11 @@ export default function UserManagement() {
     setActionLoading(userId)
     const newStatus = currentStatus === 'suspended' ? 'active' : 'suspended'
     try {
-      const { error: statusError } = await supabase.from('profiles').update({ status: newStatus }).eq('id', userId)
-      if (statusError) throw statusError
+      const { data: updated, error: statusError } = await supabase.rpc('admin_set_user_status', { p_user_id: userId, p_status: newStatus })
+      if (statusError || updated?.id !== userId || updated?.status !== newStatus) throw statusError || new Error('Status change could not be verified')
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: newStatus } : u))
       toast.success(`User ${newStatus === 'suspended' ? 'suspended' : 'reactivated'}.`)
-    } catch { toast.error('Failed to update.') }
+    } catch (error) { toast.error(error.message || 'Failed to update.') }
     setActionLoading(null)
     setShowSuspendConfirm(null)
   }
@@ -78,10 +78,10 @@ export default function UserManagement() {
   const deleteUser = async (userId) => {
     setActionLoading(userId)
     try {
-      const { error: delError } = await supabase.functions.invoke('delete-account', {
+      const { data: deletion, error: delError } = await supabase.functions.invoke('delete-account', {
         body: { action: 'admin-delete', userId },
       })
-      if (delError) throw delError
+      if (delError || deletion?.success !== true) throw delError || new Error('Deletion was not confirmed')
       setUsers(prev => prev.filter(u => u.id !== userId))
       toast.success('User deleted permanently.')
     } catch { toast.error('Delete failed.') }
@@ -137,9 +137,10 @@ export default function UserManagement() {
       })
       if (error) throw error
       const rows = Array.isArray(data) ? data : []
+      if (rows.length !== ids.length) throw new Error('Not all subscription updates were confirmed. Refresh to check the current state.')
       const byId = new Map(rows.map(r => [r.id, r]))
       setUsers(prev => prev.map(u => byId.has(u.id) ? { ...u, ...byId.get(u.id) } : u))
-      toast.success(`Subscription updated for ${rows.length || ids.length} user(s).`)
+      toast.success(`Subscription updated for ${rows.length} user(s).`)
       setSubModal(null)
     } catch (err) {
       console.error('Subscription update failed:', err)
@@ -207,7 +208,7 @@ export default function UserManagement() {
   const planBadge = (plan, planType) => {
     if (planType === 'company') return { bg: 'rgb(var(--primary-rgb) / 0.15)', color: 'var(--primary)', border: 'var(--primary)', label: 'Company' }
     if (plan === 'premium') return { bg: 'rgba(255,255,255,0.12)', color: 'var(--primary)', border: 'var(--primary)', label: 'Premium' }
-    return { bg: 'transparent', color: 'rgba(255,255,255,0.4)', border: 'rgba(255,255,255,0.12)', label: 'Free' }
+    return { bg: 'transparent', color: 'var(--text-muted)', border: 'rgba(255,255,255,0.12)', label: 'Free' }
   }
 
   const btn = (bg, color, border) => ({
@@ -219,7 +220,7 @@ export default function UserManagement() {
   if (loading) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <BrandLoader variant="section" />
         </div>
@@ -230,7 +231,7 @@ export default function UserManagement() {
   if (error) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--text)', marginBottom: '12px' }}>{error}</p>
@@ -247,9 +248,9 @@ export default function UserManagement() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}>
               {activeTab === 'users' ? 'User Management' : 'Payment Management'}
-            </h1>
+            </h2>
             <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>
               {activeTab === 'users'
                 ? `${users.length} total  ${highRiskCount} high risk  ${suspendedCount} suspended`
@@ -298,7 +299,7 @@ export default function UserManagement() {
               </div>
 
               {filtered.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
                   <AppIcon name="users" size={48} style={{ display: 'block', margin: '0 auto 12px' }} />
                   <p style={{ color: 'var(--primary)', fontSize: '14px' }}>{search ? 'No users match your search.' : 'No users found.'}</p>
                 </div>
@@ -312,14 +313,14 @@ export default function UserManagement() {
                     const hasPartner = u.accountability_partner_name || u.accountability_partner_phone
 
                     return (
-                      <div key={u.id} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid ' + (isSuspended ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.12)'), borderRadius: '12px', padding: '16px', opacity: isSuspended ? 0.7 : 1 }}>
+                      <div key={u.id} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid ' + (isSuspended ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.12)'), borderRadius: '12px', padding: '16px', opacity: 1 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
                           <div style={{ flex: 1, minWidth: '200px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
                               <UserAvatar reference={u.avatar_url} name={u.full_name || u.username} size={32} />
                               <span style={{ color: 'var(--text)', fontSize: '14px', fontWeight: 600 }}>
                                 {u.full_name || 'Unnamed'}
-                                {u.username && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: 400 }}> @{u.username}</span>}
+                                {u.username && <span style={{ color: 'var(--text-muted)', fontSize: '12px', fontWeight: 400 }}> @{u.username}</span>}
                               </span>
                               <span style={{ background: risk.bg, color: risk.color, border: '1px solid ' + risk.border, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{risk.label} Risk</span>
                               <span style={{ background: plan.bg, color: plan.color, border: '1px solid ' + plan.border, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{plan.label}</span>
@@ -333,11 +334,11 @@ export default function UserManagement() {
                             <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '4px' }}>
                               <span style={{ color: 'var(--primary)', fontSize: '11px' }}>
                                  {u.email || 'No email'}
-                                {u.email && <button onClick={() => { navigator.clipboard.writeText(u.email); toast.success('Email copied!') }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', marginLeft: '4px' }} title="Copy email"></button>}
+                                {u.email && <button onClick={async () => { try { await navigator.clipboard.writeText(u.email); toast.success('Email copied!') } catch { toast.error('Email could not be copied.') } }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '10px', cursor: 'pointer', marginLeft: '4px' }} title="Copy email">Copy</button>}
                               </span>
                               <span style={{ color: 'var(--primary)', fontSize: '11px' }}> {u.phone || 'No phone'}</span>
                               <span style={{ color: 'var(--primary)', fontSize: '11px' }}> {u.streak_days || 0}d streak</span>
-                              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Joined {fmt(u.created_at)}</span>
+                              <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>Joined {fmt(u.created_at)}</span>
                             </div>
 
                             {hasPartner && (
@@ -345,9 +346,9 @@ export default function UserManagement() {
                                 <span style={{ color: 'var(--primary)', fontSize: '11px', fontWeight: 600 }}> Partner:</span>
                                 {u.accountability_partner_name && <span style={{ color: 'var(--text)', fontSize: '12px' }}>{u.accountability_partner_name}</span>}
                                 {u.accountability_partner_phone && (
-                                  <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>
+                                  <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>
                                      {u.accountability_partner_phone}
-                                    <button onClick={() => { navigator.clipboard.writeText(u.accountability_partner_phone); toast.success('Partner phone copied!') }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', marginLeft: '4px' }}></button>
+                                    <button onClick={async () => { try { await navigator.clipboard.writeText(u.accountability_partner_phone); toast.success('Partner phone copied!') } catch { toast.error('Phone could not be copied.') } }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '10px', cursor: 'pointer', marginLeft: '4px' }}>Copy phone</button>
                                   </span>
                                 )}
                               </div>
@@ -361,7 +362,8 @@ export default function UserManagement() {
 
                         {isExpanded && (
                           <div style={{ marginTop: '14px', borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: '14px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                            <button onClick={() => setShowSuspendConfirm(u)} disabled={actionLoading === u.id}
+                            <button onClick={() => setShowSuspendConfirm(u)} disabled={actionLoading === u.id || u.id === actor?.id || u.role === 'super_admin'}
+                              title={u.id === actor?.id ? 'You cannot suspend your own account' : u.role === 'super_admin' ? 'Change this account role through the verified editor first' : undefined}
                               style={btn('transparent', isSuspended ? 'var(--primary)' : 'var(--info)', isSuspended ? 'var(--primary)' : 'var(--info)')}>
                               {actionLoading === u.id ? '...' : isSuspended ? 'Reactivate' : 'Suspend'}
                             </button>
@@ -415,13 +417,13 @@ export default function UserManagement() {
                   <div key={i} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
                     <span style={{ fontSize: '20px', display: 'block', marginBottom: '4px' }}>{s.icon}</span>
                     <span style={{ display: 'block', fontSize: '20px', fontWeight: 700, color: s.color }}>{s.value}</span>
-                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>{s.label}</span>
+                    <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{s.label}</span>
                   </div>
                 ))}
               </div>
 
               {filtered.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
                   <AppIcon name="users" size={48} style={{ display: 'block', margin: '0 auto 12px' }} />
                   <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No users match this filter.</p>
                 </div>
@@ -435,7 +437,7 @@ export default function UserManagement() {
                           <UserAvatar reference={u.avatar_url} name={u.full_name || u.username} size={32} />
                           <span style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500 }}>
                             {u.full_name || 'Unnamed'}
-                            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginLeft: '4px' }}>{u.email || ''}</span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '11px', marginLeft: '4px' }}>{u.email || ''}</span>
                           </span>
                           <span style={{ background: plan.bg, color: plan.color, border: '1px solid ' + plan.border, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{plan.label}</span>
                           {u.subscription_status === 'pending' && (
@@ -450,7 +452,7 @@ export default function UserManagement() {
                             </button>
                           )}
                           {u.plan_type === 'company' && (
-                            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Managed by employer</span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>Managed by employer</span>
                           )}
                         </div>
                       </div>
@@ -476,7 +478,7 @@ export default function UserManagement() {
               <strong style={{ color: 'var(--primary)' }}>"{showSuspendConfirm.full_name || showSuspendConfirm.username || 'User'}"</strong> will be {showSuspendConfirm.status === 'suspended' ? 'reactivated' : 'suspended'}.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowSuspendConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={() => setShowSuspendConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
               <button onClick={() => toggleStatus(showSuspendConfirm.id, showSuspendConfirm.status || 'active')} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: showSuspendConfirm.status === 'suspended' ? 'rgba(255,255,255,0.12)' : 'rgb(var(--primary-rgb) / 0.15)', border: 'none', color: showSuspendConfirm.status === 'suspended' ? 'var(--primary)' : 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
                 {showSuspendConfirm.status === 'suspended' ? 'Reactivate' : 'Suspend'}
               </button>
@@ -496,7 +498,7 @@ export default function UserManagement() {
               Permanently delete <strong style={{ color: 'var(--primary)' }}>"{showDeleteConfirm.full_name || 'User'}"</strong>? This cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
               <button onClick={() => deleteUser(showDeleteConfirm.id)} disabled={actionLoading === showDeleteConfirm.id} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
                 {actionLoading === showDeleteConfirm.id ? 'Deleting...' : 'Delete'}
               </button>
@@ -511,7 +513,7 @@ export default function UserManagement() {
           <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setSubModal(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '1.5rem', border: '1px solid var(--primary)', maxWidth: '440px', width: '100%', maxHeight: '85vh', overflowY: 'auto' }}>
             <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 4px' }}>Change subscription</h3>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', margin: '0 0 14px' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '12px', margin: '0 0 14px' }}>
               {subModal.users.length === 1
                 ? `For ${subModal.users[0].full_name || subModal.users[0].username || 'user'} — changes are written to subscription history.`
                 : `Applying to ${subModal.users.length} users (max 100) — atomic: all or nothing.`}
@@ -540,16 +542,16 @@ export default function UserManagement() {
             </div>
             {subHistory.length > 0 && (
               <div style={{ marginBottom: '12px' }}>
-                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', margin: '0 0 6px' }}>Recent history</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: '0 0 6px' }}>Recent history</p>
                 {subHistory.slice(0, 5).map(h => (
-                  <p key={h.id} style={{ color: 'rgba(255,255,255,0.45)', fontSize: '11px', margin: '2px 0' }}>
+                  <p key={h.id} style={{ color: 'var(--text-muted)', fontSize: '11px', margin: '2px 0' }}>
                     {new Date(h.created_at).toLocaleDateString()} — {h.old_plan || '—'} → {h.new_plan || '—'} ({h.new_status}){h.reason ? ` · ${h.reason}` : ''}
                   </p>
                 ))}
               </div>
             )}
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setSubModal(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={() => setSubModal(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
               <button onClick={saveSubscription} disabled={subSaving} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
                 {subSaving ? 'Saving…' : 'Save'}
               </button>

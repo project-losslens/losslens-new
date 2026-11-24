@@ -1,6 +1,8 @@
+import { submitOlooMessage } from '../lib/olooSubmission'
+import { publishCrisisSupport } from '../lib/crisisSupport'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { askGroq, runOlooAction } from '../lib/groq'
+import { askGroq, runOlooAction, reportOlooCrisis } from '../lib/groq'
 import { supabase } from '../lib/supabase'
 import AppIcon from './AppIcon'
 import { detectCrisis } from '../lib/crisisDetection'
@@ -168,6 +170,7 @@ function AIChat({ profile }) {
   const synthRef = useRef(typeof window !== 'undefined' ? window.speechSynthesis : null);
 
   const messagesEndRef = useRef(null);
+  const messageGeneration = useRef(0);
   const inactivityTimer = useRef(null);
   const proactiveQuestions = useRef(getProactiveQuestions(null));
   const inputRef = useRef(null);
@@ -248,10 +251,10 @@ function AIChat({ profile }) {
     proactiveQuestions.current = getProactiveQuestions(userData);
 
     if (userData.profile?.streak_days >= 7) {
-      setMessages([{
+      setMessages(current => current.length === 1 ? [{
         role: 'assistant',
         content: `Hi ${firstName}!  Welcome back!  ${userData.profile.streak_days} days gamble-free — that's amazing! How are you feeling today?`,
-      }]);
+      }] : current);
     }
   }, [firstName, userId]);
 
@@ -418,8 +421,9 @@ function AIChat({ profile }) {
   // ─── Send message ───
   const sendMessage = async (text) => {
     const content = (text || input).trim();
-    if (!content || loading) return;
-    if (aiConsent !== true) {
+    const safety = detectCrisis(content);
+    if (!content || (loading && !safety.crisis)) return;
+    if (aiConsent !== true && !safety.crisis) {
       setConsentState({
         userId,
         consent: aiConsent,
@@ -433,6 +437,7 @@ function AIChat({ profile }) {
     setShowNotification(false);
     resetInactivityTimer();
 
+    const generation = ++messageGeneration.current;
     const userMsg = { role: 'user', content, id: Date.now().toString() };
     const updatedMessages = [...messages, userMsg];
     setMessages(updatedMessages);
@@ -441,7 +446,24 @@ function AIChat({ profile }) {
     setOlooEmotion('thinking');
 
     try {
-      const res = await askGroq(content);
+      let immediateShown = false;
+      const res = await submitOlooMessage(content, {
+        ask: askGroq, report: reportOlooCrisis,
+        onImmediateReply: ({ reply }) => {
+          if (generation !== messageGeneration.current) return;
+          immediateShown = true;
+          setMessages([...updatedMessages, { role: 'assistant', content: reply, id: crypto.randomUUID(), crisis: true }]);
+          setLoading(false); setOlooEmotion('concerned');
+        },
+      });
+      if (generation !== messageGeneration.current) return;
+      if (res?.crisis) {
+        if (!immediateShown) {
+          setMessages([...updatedMessages, { role: 'assistant', content: res.reply, id: crypto.randomUUID(), crisis: true }]);
+          publishCrisisSupport({ requestId: crypto.randomUUID(), target: res.crisis.target || 'self', open: true, escalation: res.alertRecorded ? 'recorded' : 'unavailable' });
+        }
+        return;
+      }
       const replyId = (Date.now() + 1).toString();
       const replyMsg = {
         role: 'assistant',
@@ -458,13 +480,14 @@ function AIChat({ profile }) {
         setTimeout(() => speakText(replyMsg.content, replyId), 200);
       }
     } catch {
+      if (generation !== messageGeneration.current) return;
       setOlooEmotion('neutral');
       setMessages([...updatedMessages, {
         role: 'assistant',
         content: "I'm having trouble responding right now. Please try again. ",
       }]);
     } finally {
-      setLoading(false);
+      if (generation === messageGeneration.current) setLoading(false);
     }
   };
 
@@ -487,9 +510,11 @@ function AIChat({ profile }) {
         action: res?.ok ? { id: pa.id, ok: true, summary: res.summary, data: res.data } : { id: pa.id, ok: false, error: res?.error },
       };
       setMessages(prev => [
-        ...prev.map(m => m.id === msg.id ? { ...m, pendingAction: { ...pa, state: 'done' } } : m),
+        ...prev.map(m => m.id === msg.id ? { ...m, pendingAction: { ...pa, state: res?.ok ? 'done' : 'failed' } } : m),
         resultMsg,
       ]);
+    } catch {
+      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, pendingAction: { ...pa, state: 'failed' } } : m));
     } finally {
       setActionBusyId(null);
     }
@@ -526,11 +551,11 @@ function AIChat({ profile }) {
   return (
     <>
       {/* Floating Widget Container */}
-      <div style={{
+      <div className="oloo-widget" style={{
         position: 'fixed',
         bottom: '5rem',
         right: '1.5rem',
-        zIndex: 'var(--z-modal)',
+        zIndex: 30,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-end',
@@ -587,12 +612,13 @@ function AIChat({ profile }) {
                 </button>
               ))}
             </div>
-            <button onClick={() => setShowNotification(false)} style={{ position: 'absolute', top: '8px', right: '8px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '18px', cursor: 'pointer', padding: '0 4px' }}>{'\u00D7'}</button>
+            <button onClick={() => setShowNotification(false)} style={{ position: 'absolute', top: '8px', right: '8px', background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '18px', cursor: 'pointer', padding: '0 4px' }}>{'\u00D7'}</button>
           </div>
         )}
 
         {/* Floating Oloo Button */}
         <button
+          aria-label={isOpen ? 'Close Oloo' : 'Open Oloo'}
           onClick={() => {
             setIsOpen(!isOpen);
             setShowNotification(false);
@@ -606,7 +632,7 @@ function AIChat({ profile }) {
             border: '2px solid var(--primary)', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 4px 20px rgb(var(--primary-rgb) / 0.4)',
-            animation: 'floatButton 3s ease-in-out infinite',
+
             transition: 'all 0.3s ease', position: 'relative',
           }}
           onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.boxShadow = '0 6px 30px rgb(var(--primary-rgb) / 0.6)'; }}
@@ -642,15 +668,15 @@ function AIChat({ profile }) {
             <OlooCharacter size={44} emotion={shownEmotion} />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--primary)', marginBottom: '2px' }}>Oloo</div>
-              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: loading ? 'var(--primary)' : isListening ? '#FFFFFF' : 'var(--primary)', display: 'inline-block', animation: (loading || isListening) ? 'pulse 1s infinite' : 'none' }} />
                 {isListening ? 'Listening...' : loading ? 'Typing...' : 'Online'}
               </div>
             </div>
-            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.12)', padding: '4px 10px', borderRadius: '100px' }}>AI</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.12)', padding: '4px 10px', borderRadius: '100px' }}>AI</div>
             <button
               onClick={() => { setIsOpen(false); stopSpeaking(); }}
-              style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '20px', cursor: 'pointer', padding: '4px 8px', borderRadius: '8px' }}
+              style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '20px', cursor: 'pointer', padding: '4px 8px', borderRadius: '8px' }}
               onMouseEnter={(e) => { e.target.style.background = 'rgba(255,255,255,0.12)'; e.target.style.color = 'var(--primary)'; }}
               onMouseLeave={(e) => { e.target.style.background = 'transparent'; e.target.style.color = 'rgba(255,255,255,0.4)'; }}
             aria-label="Close chat"
@@ -659,16 +685,17 @@ function AIChat({ profile }) {
 
           {/* Messages Area */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {aiConsent !== true ? (
+            {aiConsent !== true && (
               <div role="dialog" aria-labelledby="ai-consent-title" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '16px', color: '#FFFFFF' }}>
                 <h3 id="ai-consent-title" style={{ fontSize: '14px', color: 'var(--primary)', marginBottom: '8px' }}>Before you chat with Oloo</h3>
                 <p style={{ fontSize: '12px', lineHeight: '1.6', color: 'rgba(255,255,255,0.7)' }}>Your messages and relevant recovery context may be sent to Groq, a US-based AI provider, to generate responses, and messages are saved in your chat history. Oloo is not a substitute for professional care.</p>
-                {aiConsentError && <p role="alert" style={{ fontSize: '12px', color: 'var(--danger)' }}>{aiConsentError}</p>}
+                {aiConsentError && <><p role="alert" style={{ fontSize: '12px', color: 'var(--danger)' }}>{aiConsentError}</p><button type="button" className="btn-ghost" onClick={fetchUserData}>Retry consent check</button></>}
                 <button className="btn-primary full" type="button" onClick={acceptAiConsent} disabled={aiConsentSaving || aiConsent === null} style={{ marginTop: '12px' }}>
                   {aiConsentSaving ? 'Saving...' : aiConsent === null ? 'Checking...' : 'I agree and continue'}
                 </button>
               </div>
-            ) : (
+            )}
+            {(aiConsent === true || messages.some(message => message.crisis)) && (
             <>
             {userContext?.profile && (
               <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: '12px', padding: '12px', marginBottom: '4px', display: 'flex', gap: '16px', fontSize: '12px', color: 'var(--primary)', flexWrap: 'wrap' }}>
@@ -703,7 +730,7 @@ function AIChat({ profile }) {
                     {speakingId === msg.id ? (
                       <button onClick={stopSpeaking} style={{ background: 'transparent', border: 'none', color: '#FFFFFF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Stop</button>
                     ) : (
-                      <button onClick={() => speakText(msg.content, msg.id)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Listen</button>
+                      <button onClick={() => speakText(msg.content, msg.id)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Listen</button>
                     )}
                     {detectCrisis(msg.content).crisis && (
                       <a href={`tel:${primaryHelpline.tel || primaryHelpline.phone.replace(/\s/g, '')}`} style={{ fontSize: '10px', color: 'var(--danger)', textDecoration: 'none', fontWeight: 600 }}>{t('oloo.needHelp', { name: primaryHelpline.name })}</a>
@@ -714,16 +741,16 @@ function AIChat({ profile }) {
                 {msg.pendingAction && (
                   <div style={{ maxWidth: '85%', marginTop: '6px', background: 'rgb(var(--primary-rgb) / 0.08)', border: '1px solid rgb(var(--primary-rgb) / 0.35)', borderRadius: '12px', padding: '10px 12px' }}>
                     {msg.pendingAction.state === 'cancelled' ? (
-                      <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)', margin: 0 }}>Cancelled.</p>
+                      <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0 }}>Cancelled.</p>
                     ) : msg.pendingAction.state === 'done' || msg.pendingAction.state === 'running' ? (
                       <p style={{ fontSize: '11px', color: 'var(--primary)', margin: 0 }}>{msg.pendingAction.state === 'running' ? 'Running…' : 'Completed.'}</p>
                     ) : (
                       <>
-                        <p style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 600, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Please confirm</p>
+                        <p style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 600, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{msg.pendingAction.state === 'failed' ? 'Action failed. Retry or cancel' : 'Please confirm'}</p>
                         <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.75)', margin: '0 0 8px', lineHeight: 1.5, wordBreak: 'break-word' }}>{msg.pendingAction.summary}</p>
                         <div style={{ display: 'flex', gap: '8px' }}>
                           <button type="button" onClick={() => resolvePendingAction(msg, true)} disabled={actionBusyId === msg.id} style={{ background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', padding: '6px 14px', borderRadius: '100px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Confirm</button>
-                          <button type="button" onClick={() => resolvePendingAction(msg, false)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)', padding: '6px 14px', borderRadius: '100px', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+                          <button type="button" onClick={() => resolvePendingAction(msg, false)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--text-muted)', padding: '6px 14px', borderRadius: '100px', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
                         </div>
                       </>
                     )}
@@ -735,7 +762,7 @@ function AIChat({ profile }) {
                   <ActionResultCard action={msg.action} onNavigate={(path) => { setIsOpen(false); navigate(path); }} />
                 )}
 
-                <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '4px', paddingLeft: msg.role === 'assistant' ? '32px' : '0' }}>
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px', paddingLeft: msg.role === 'assistant' ? '32px' : '0' }}>
                   {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
@@ -788,15 +815,16 @@ function AIChat({ profile }) {
                   sendMessage();
                 }
               }}
+              aria-label="Message Oloo"
               placeholder={isListening ? 'Listening...' : 'Talk to Oloo...'}
               style={{
-                flex: 1, background: 'var(--surface-2)', border: `1px solid ${isListening ? '#FFFFFF' : 'rgba(255,255,255,0.12)'}`,
+                flex: 1, minWidth: 0, background: 'var(--surface-2)', border: `1px solid ${isListening ? '#FFFFFF' : 'rgba(255,255,255,0.12)'}`,
                 borderRadius: '100px', padding: '10px 16px', color: '#FFFFFF', fontSize: '13px',
                 outline: 'none', fontFamily: 'var(--font-body)', transition: 'border-color 0.2s',
               }}
               onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
               onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.12)'}
-              disabled={isListening || aiConsent !== true}
+              disabled={isListening}
             />
 
             {/* Voice input button */}
@@ -819,7 +847,7 @@ function AIChat({ profile }) {
 
             <button
               onClick={() => sendMessage()}
-              disabled={aiConsent !== true || loading || (!input.trim() && !isListening)}
+              disabled={(loading && !detectCrisis(input).crisis) || (!input.trim() && !isListening)}
               style={{
                 width: '40px', height: '40px', borderRadius: '50%',
                 background: loading || (!input.trim() && !isListening) ? 'rgba(255,255,255,0.12)' : 'var(--primary)',
@@ -837,7 +865,7 @@ function AIChat({ profile }) {
       {/* CSS Animations */}
       <style>{`
         @media (max-width: 479px) {
-          .oloo-chat-panel { right: 1rem !important; bottom: 6rem !important; width: calc(100vw - 2rem) !important; max-height: calc(100vh - 10rem) !important; }
+          .oloo-chat-panel { right: 1rem !important; bottom: calc(140px + env(safe-area-inset-bottom)) !important; width: calc(100vw - 2rem) !important; max-height: calc(100dvh - 160px - env(safe-area-inset-bottom)) !important; }
         }
         .oloo-face { transform-origin: 32px 34px; animation: olooBreathe 4.5s ease-in-out infinite; }
         .oloo-eyes { transform-box: fill-box; transform-origin: center; animation: olooBlink 5s infinite; }
@@ -894,7 +922,7 @@ function ActionResultCard({ action, onNavigate }) {
           {events.slice(0, 5).map(ev => (
             <div key={ev.id} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5 }}>
               <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{ev.title}</span>
-              <span style={{ color: 'rgba(255,255,255,0.55)' }}> — {ev.date ? new Date(ev.date).toLocaleDateString('en-KE', { weekday: 'short', day: 'numeric', month: 'short' }) : ''}{ev.location ? ` · ${ev.location}` : ''}{ev.my_rsvp ? ` · ${ev.my_rsvp}` : ''}</span>
+              <span style={{ color: 'var(--text-muted)' }}> — {ev.date ? new Date(ev.date).toLocaleDateString('en-KE', { weekday: 'short', day: 'numeric', month: 'short' }) : ''}{ev.location ? ` · ${ev.location}` : ''}{ev.my_rsvp ? ` · ${ev.my_rsvp}` : ''}</span>
             </div>
           ))}
         </div>
@@ -904,7 +932,7 @@ function ActionResultCard({ action, onNavigate }) {
           {registrations.slice(0, 5).map(r => (
             <div key={r.event_id} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5 }}>
               <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{r.title}</span>
-              <span style={{ color: 'rgba(255,255,255,0.55)' }}> — {r.date ? new Date(r.date).toLocaleDateString('en-KE', { day: 'numeric', month: 'short' }) : ''} · {r.attendance}</span>
+              <span style={{ color: 'var(--text-muted)' }}> — {r.date ? new Date(r.date).toLocaleDateString('en-KE', { day: 'numeric', month: 'short' }) : ''} · {r.attendance}</span>
             </div>
           ))}
         </div>
@@ -914,7 +942,7 @@ function ActionResultCard({ action, onNavigate }) {
           {diaryEntries.slice(0, 5).map((e, i) => (
             <div key={e.date + i} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5 }}>
               <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{e.date}</span>
-              <span style={{ color: 'rgba(255,255,255,0.55)' }}> — {e.gambled ? 'gambled' : 'clean day'}{e.mood ? ` · ${e.mood}` : ''}</span>
+              <span style={{ color: 'var(--text-muted)' }}> — {e.gambled ? 'gambled' : 'clean day'}{e.mood ? ` · ${e.mood}` : ''}</span>
             </div>
           ))}
         </div>

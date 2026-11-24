@@ -1,3 +1,6 @@
+import { useAuthProfile } from './context/AuthProfileContext'
+import { useModalAccessibility } from './hooks/useModalAccessibility'
+import CrisisAccessButton from './components/CrisisAccessButton'
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { BrandLoader } from './components/Brand'
@@ -6,6 +9,7 @@ import { CrisisAlertCountProvider } from './context/CrisisAlertCountContext'
 import { ErrorBoundary } from './components/Feedback'
 import TopographicBackground from './components/TopographicBackground'
 
+const AIChat = lazy(() => import('./components/AIChat'))
 const Landing = lazy(() => import('./pages/public/Landing'))
 const Login = lazy(() => import('./pages/public/Login'))
 const Signup = lazy(() => import('./pages/public/Signup'))
@@ -80,9 +84,13 @@ const InsurerPlans = lazy(() => import('./pages/insurer/InsurerPlans'))
 const AppShell = lazy(() => import('./layouts/AppShell'))
 
 function App() {
+  useModalAccessibility()
+  const { profile, role, authStatus } = useAuthProfile()
+  const member = authStatus === 'ready' && role === 'user'
   return (
     <>
     <TopographicBackground />
+    {member && <><CrisisAccessButton /><Suspense fallback={null}><AIChat profile={profile} /></Suspense></>}
     <Suspense fallback={<BrandLoader />}>
       <ErrorBoundary>
       <Routes>

@@ -1,3 +1,4 @@
+import SupportChoices from '../../components/SupportChoices'
 import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -27,10 +28,6 @@ const DAILY_AFFIRMATIONS = [
   { text: "Rest is part of recovery. Be kind to yourself today.", day: 6 },
 ]
 
-const EMERGENCY_CONTACTS = [
-  { name: 'NACADA Helpline', number: '1192', desc: 'Free, confidential. 24/7.' },
-  { name: 'Befrienders Kenya', number: '0800 722 030', desc: 'Emotional support 24/7.' },
-]
 
 
 export default function Resources() {
@@ -223,19 +220,15 @@ export default function Resources() {
     <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
 
-        {/* Crisis Banner */}
-        <div style={{ background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '10px 1.5rem', fontSize: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 'var(--z-content)', flexWrap: 'wrap', gap: '4px' }}>
-          <span>🆘 In crisis? Call <a href={`tel:${EMERGENCY_CONTACTS[0].number}`} style={{ color: 'var(--secondary)', fontWeight: 700, textDecoration: 'none' }}>{EMERGENCY_CONTACTS[0].name} {EMERGENCY_CONTACTS[0].number}</a> — free, 24/7</span>
-          <span style={{ fontSize: '11px', opacity: 0.7 }}>You're not alone</span>
-        </div>
+        <SupportChoices />
 
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
-          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Resources</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{resources.length} resources available</p></div>
+          <div><h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Resources</h2><p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{resources.length} resources available</p></div>
         </div>
 
         <div style={{ padding: '1.5rem' }}>
           {/* Daily Affirmation */}
-          <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12), var(--secondary))', border: '1px solid var(--primary)', borderRadius: '12px', padding: '14px 16px', marginBottom: '1rem', textAlign: 'center' }}>
+          <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgb(var(--secondary-rgb) / 0.12))', border: '1px solid var(--primary)', borderRadius: '12px', padding: '14px 16px', marginBottom: '1rem', textAlign: 'center' }}>
             <p style={{ color: 'var(--primary)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}> Daily Affirmation</p>
             <p style={{ color: 'var(--primary)', fontSize: '14px', fontStyle: 'italic', margin: 0, lineHeight: '1.6' }}>"{affirmation.text}"</p>
           </div>
@@ -243,7 +236,7 @@ export default function Resources() {
           {/* Recently Viewed */}
           {recentlyViewed.length > 0 && (
             <div style={{ marginBottom: '1rem' }}>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>Recently viewed</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '11px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>Recently viewed</p>
               <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {recentlyViewed.map(r => (
                   <button key={r.id} onClick={() => handleVisit(r)} style={{ padding: '6px 12px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid var(--secondary)', color: 'var(--primary)', fontSize: '11px', whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: 'var(--font-body)', flexShrink: 0 }}><CatIcon category={r.category} /> {r.name}</button>
@@ -255,7 +248,7 @@ export default function Resources() {
           {/* Recommended */}
           {recommendedCats.length > 0 && (
             <div style={{ marginBottom: '1rem' }}>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>Recommended for you</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '11px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>Recommended for you</p>
               <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {recommendedCats.map(cat => (
                   <button key={cat} onClick={() => setActiveCategory(cat)} style={{ padding: '6px 12px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '11px', whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: 'var(--font-body)', flexShrink: 0 }}><CatIcon category={cat} /> {cat}</button>
@@ -269,7 +262,7 @@ export default function Resources() {
             <input type="text" placeholder=" Search resources..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
               style={{ width: '100%', padding: '10px 40px 10px 14px', borderRadius: '100px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '13px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} />
             {searchQuery && (
-              <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '16px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Clear search"></button>
+              <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '16px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Clear search"></button>
             )}
           </div>
 
@@ -327,12 +320,12 @@ export default function Resources() {
                         <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 500, margin: 0 }}>{r.name}</p>
                         {isOpenNow(r) ? <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)', flexShrink: 0 }} title="Open now" /> : <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'rgba(255,255,255,0.4)', flexShrink: 0 }} title="May be closed" />}
                       </div>
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '2px 0 0', lineHeight: '1.4' }}>{r.detail}</p>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '12px', margin: '2px 0 0', lineHeight: '1.4' }}>{r.detail}</p>
                     </div>
                     <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexShrink: 0 }}>
                       <button onClick={() => handleRate(r.id, true)} style={{ background: 'transparent', border: 'none', fontSize: '13px', cursor: 'pointer', padding: '4px' }} title="Helpful"></button>
                       <button onClick={() => toggleSave(r.id)} style={{ background: 'transparent', border: 'none', fontSize: '13px', cursor: 'pointer', padding: '4px', color: savedIds.includes(r.id) ? 'var(--primary)' : 'rgba(255,255,255,0.4)' }} title={savedIds.includes(r.id) ? 'Saved' : 'Save'}>{savedIds.includes(r.id) ? <AppIcon name="star" size={14} /> : null}</button>
-                      <button onClick={() => handleShare(r)} style={{ background: 'transparent', border: 'none', fontSize: '12px', cursor: 'pointer', padding: '4px', color: 'rgba(255,255,255,0.4)' }} title="Share"></button>
+                      <button onClick={() => handleShare(r)} style={{ background: 'transparent', border: 'none', fontSize: '12px', cursor: 'pointer', padding: '4px', color: 'var(--text-muted)' }} title="Share"></button>
                       <button onClick={() => handleVisit(r)} style={{ padding: '6px 12px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', border: '1px solid var(--secondary)', color: 'var(--primary)', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>{r.link ? 'Visit' : 'View'}</button>
                     </div>
                   </div>
@@ -375,7 +368,7 @@ export default function Resources() {
                   <button onClick={submitSuggestion} disabled={!suggestion.name.trim() || submittingSuggestion} className="btn-primary" style={{ flex: 1, padding: '10px', fontSize: '13px' }}>
                     {submittingSuggestion ? 'Submitting...' : 'Submit'}
                   </button>
-                  <button onClick={() => setShowSuggestionForm(false)} style={{ padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+                  <button onClick={() => setShowSuggestionForm(false)} style={{ padding: '10px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
                 </div>
               </div>
             )}
@@ -383,8 +376,6 @@ export default function Resources() {
         </div>
       </div>
 
-      {/* Floating Emergency Button */}
-      <a href={`tel:${EMERGENCY_CONTACTS[0].number}`} style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 'var(--z-modal)', background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '12px 18px', borderRadius: '100px', fontSize: '14px', fontWeight: 600, textDecoration: 'none', boxShadow: '0 4px 16px rgb(var(--bg-rgb) / 0.4)', border: '2px solid #FFFFFF', display: 'flex', alignItems: 'center', gap: '6px', paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }} className="mobile-only" aria-label={`Call ${EMERGENCY_CONTACTS[0].name} at ${EMERGENCY_CONTACTS[0].number}`}>🆘 Call {EMERGENCY_CONTACTS[0].number}</a>
 
       <style>{`
         @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:0.6} }

@@ -1,3 +1,4 @@
+import { recentlyAuthenticated } from '../_shared/authFreshness.js'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
 const allowedOrigin = Deno.env.get('ALLOWED_ORIGIN')
@@ -41,9 +42,8 @@ Deno.serve(async (req) => {
 
     // Destructive actions require a fresh sign-in (JWT iat within 15 minutes).
     try {
-      const payload = JSON.parse(atob(authHeader.replace(/^Bearer\s+/i, '').split('.')[1] || ''))
-      const iat = Number(payload?.iat)
-      if (!Number.isFinite(iat) || Date.now() / 1000 - iat > 900) {
+      const payload = JSON.parse(atob((authHeader.replace(/^Bearer\s+/i, '').split('.')[1] || '').replace(/-/g, '+').replace(/_/g, '/')))
+      if (!recentlyAuthenticated(payload)) {
         return json(403, { error: 'Recent sign-in required. Please sign out and back in.' })
       }
     } catch {
@@ -204,7 +204,7 @@ Deno.serve(async (req) => {
     })
     await runStep('soft-delete:therapist', async () => {
       const { error } = await admin.from('therapists')
-        .update({ status: 'deleted', license_number: null, license_document_path: null })
+        .update({ status: 'suspended', license_number: null, license_document_path: null })
         .eq('id', targetId)
       if (error) throw error
     })

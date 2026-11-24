@@ -111,13 +111,11 @@ function Signup() {
     if (username.length < 3) { setUsernameStatus(''); return }
     setUsernameStatus('checking')
     try {
-      const { data, error: checkError } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('username', username.toLowerCase().trim())
-        .maybeSingle()
+      const { data, error: checkError } = await supabase.rpc('username_available', {
+        p_username: username.toLowerCase().trim(),
+      })
       if (checkError) throw checkError
-      setUsernameStatus(data ? 'taken' : 'available')
+      setUsernameStatus(data === true ? 'available' : 'taken')
     } catch (err) {
       console.error('Username check error:', err)
       setUsernameStatus('')

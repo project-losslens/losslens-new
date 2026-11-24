@@ -350,8 +350,11 @@ export default function TheCircle() {
 
   const handleReaction = async (msgId, key) => {
     if (!identity || msgId.startsWith('temp_')) return
-    setMessages(prev => prev.map(m => m.id === msgId ? { ...m, [key]: (m[key] || 0) + 1 } : m))
-    try { await supabase.rpc('increment_reaction', { msg_id: msgId, reaction_col: key }) } catch (err) { /* silent */ }
+    const { data, error } = await supabase.rpc('circle_toggle_reaction', {
+      p_message_id: msgId, p_reaction: key.replace('reaction_', ''),
+    })
+    if (error || !data || !Number.isFinite(data.count)) { toast.error('Reaction could not be saved.'); return }
+    setMessages(prev => prev.map(m => m.id === msgId ? { ...m, [key]: data.count } : m))
   }
 
   const handleDeleteMessage = async (msgId) => {
@@ -375,7 +378,7 @@ export default function TheCircle() {
 
   if (initError) return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-      <p className="fs-14" style={{ color: 'rgba(255,255,255,0.55)', marginBottom: '12px' }}>Could not connect to The Circle.</p>
+      <p className="fs-14" style={{ color: 'var(--text-muted)', marginBottom: '12px' }}>Could not connect to The Circle.</p>
       <button type="button" className="btn-primary" onClick={initUser}>Try again</button>
     </div>
   )
@@ -391,8 +394,8 @@ export default function TheCircle() {
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', height: '100vh' }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', flexShrink: 0 }}>
           <div>
-            <h1 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}>The Circle</h1>
-            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{onlineCount} online  · You: {identity.displayName}</p>
+            <h2 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}>The Circle</h2>
+            <p className="fs-12" style={{ color: 'var(--text-muted)', margin: '2px 0 0' }}>{onlineCount} online  · You: {identity.displayName}</p>
           </div>
         </div>
 
@@ -421,7 +424,7 @@ export default function TheCircle() {
           )}
 
           {messages.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)' }}>
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
               <p className="fs-14" style={{ color: 'var(--primary)' }}>No messages yet</p>
               <p className="fs-12">Be the first to share in {activeRoomData?.name}.</p>
             </div>
@@ -435,13 +438,13 @@ export default function TheCircle() {
                 <div style={{ maxWidth: '78%' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexDirection: isOwn ? 'row-reverse' : 'row', marginBottom: '2px' }}>
                     <span className="fs-12" style={{ color: isOwn ? 'var(--primary)' : 'var(--primary)', fontWeight: 500 }}>{msg.display_name}</span>
-                    <span className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }} title={new Date(msg.created_at).toLocaleString('en-KE')}>{formatTime(msg.created_at)}</span>
+                    <span className="fs-12" style={{ color: 'var(--text-muted)' }} title={new Date(msg.created_at).toLocaleString('en-KE')}>{formatTime(msg.created_at)}</span>
                     {msg._sending && <span className="fs-12" style={{ color: 'var(--secondary)' }}>sending...</span>}
                     {msg._delivered && <AppIcon name="check" size={12} style={{ color: 'var(--primary)' }} />}
                     {msg._failed && <button type="button" className="clickable fs-12" onClick={() => retryMessage(msg)} style={{ color: '#FFFFFF', padding: 0 }}> Retry</button>}
                   </div>
                   {msg.reply_to && (
-                    <div className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '2px', padding: '4px 8px', background: 'var(--bg)', borderRadius: '6px', borderLeft: '2px solid var(--primary)' }}>
+                    <div className="fs-12" style={{ color: 'var(--text-muted)', marginBottom: '2px', padding: '4px 8px', background: 'var(--bg)', borderRadius: '6px', borderLeft: '2px solid var(--primary)' }}>
                       <AppIcon name="chat" size={12} style={{ flexShrink: 0 }} /> <strong>{msg.reply_to.name}</strong>: "{msg.reply_to.message}..."
                     </div>
                   )}
@@ -454,7 +457,7 @@ export default function TheCircle() {
                       {REACTIONS.filter(r => (msg[r.key] || 0) > 0).map(r => (
                         <button key={r.key} onClick={() => handleReaction(msg.id, r.key)} className="fs-12" style={{ background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '100px', padding: '2px 8px', color: 'var(--primary)', cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-label={`${r.label} (${msg[r.key]})`}>{msg[r.key]}</button>
                       ))}
-                      {isOwn && <button onClick={() => handleDeleteMessage(msg.id)} className="fs-12" style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', padding: '2px 4px', display: 'flex', alignItems: 'center' }} aria-label="Delete message"><AppIcon name="close" size={12} /></button>}
+                      {isOwn && <button onClick={() => handleDeleteMessage(msg.id)} className="fs-12" style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '2px 4px', display: 'flex', alignItems: 'center' }} aria-label="Delete message"><AppIcon name="close" size={12} /></button>}
                     </div>
                   )}
                 </div>
@@ -469,7 +472,7 @@ export default function TheCircle() {
           {replyTo && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: 'rgba(255,255,255,0.12)', borderRadius: '8px', marginBottom: '8px' }}>
               <AppIcon name="chat" size={12} style={{ flexShrink: 0 }} /><span style={{ color: 'var(--primary)', flex: 1 }}>Replying to <strong>{replyTo.name}</strong></span>
-              <button onClick={() => setReplyTo(null)} className="fs-16" style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', padding: '4px 8px' }} aria-label="Cancel reply"></button>
+              <button onClick={() => setReplyTo(null)} className="fs-16" style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px 8px' }} aria-label="Cancel reply"></button>
             </div>
           )}
           {showTemplates && (

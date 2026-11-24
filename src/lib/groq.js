@@ -73,6 +73,8 @@ export const askGroq = async (message) => {
       reply: data?.reply || "Hmm, I lost my train of thought. What were you saying?",
       pendingAction: data?.pendingAction || null,
       action: data?.action || null,
+      crisis: data?.crisis || null,
+      alertRecorded: data?.alertRecorded === true,
     }
   } catch (error) {
     return {
@@ -87,15 +89,40 @@ export const askGroq = async (message) => {
 export const runOlooAction = async (action, params = {}) => {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session?.access_token) return { ok: false, error: 'Please sign in to continue.' }
-  const response = await fetch('/api/actions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${session.access_token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ action, params, confirmed: true }),
-  })
-  const data = await response.json().catch(() => null)
-  if (!response.ok) return { ok: false, error: data?.error || 'Action failed' }
-  return data
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 35000)
+  try {
+    const response = await fetch('/api/actions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ action, params, confirmed: true }),
+      signal: controller.signal,
+    })
+    const data = await response.json().catch(() => null)
+    if (!response.ok) return { ok: false, error: data?.error || 'Action failed' }
+    return data?.ok === true ? data : { ok: false, error: data?.error || 'Action was not confirmed' }
+  } catch (error) {
+    return { ok: false, error: error.name === 'AbortError' ? 'Action timed out. Check the result before retrying.' : 'Connection failed. Check the result before retrying.' }
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+export async function reportOlooCrisis(message) {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.access_token) return { alertRecorded: false }
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 10000)
+  try {
+    const response = await fetch('/api/crisis', {
+      method: 'POST', headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, source: 'chat' }), signal: controller.signal,
+    })
+    const result = response.ok ? await response.json().catch(() => null) : null
+    return { alertRecorded: result?.alertRecorded === true }
+  } catch { return { alertRecorded: false } }
+  finally { clearTimeout(timer) }
 }

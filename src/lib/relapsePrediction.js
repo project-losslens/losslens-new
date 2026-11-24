@@ -1,3 +1,4 @@
+import { recoveryDate } from './calendar'
 import { supabase } from './supabase'
 
 let riskWarningShown = false
@@ -14,7 +15,7 @@ export async function calculateRiskScore(userId) {
   if (!userId) return { score: 0, factors: [] }
 
   const today = new Date()
-  const todayStr = today.toISOString().split('T')[0]
+  const todayStr = recoveryDate(today)
   const dayOfWeek = today.getDay()
   const hourOfDay = today.getHours()
 
@@ -23,7 +24,7 @@ export async function calculateRiskScore(userId) {
     .from('diary_entries')
     .select('*')
     .eq('user_id', userId)
-    .gte('date', new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+    .gte('date', recoveryDate(new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)))
     .order('date', { ascending: false })
 
   if (entriesError) {
@@ -129,7 +130,7 @@ export async function getRiskLevel(userId) {
     return { score: 0, level: 'low', factors: [] }
   }
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = recoveryDate()
 
   if (profile.last_risk_check !== today) {
     return await calculateRiskScore(userId)

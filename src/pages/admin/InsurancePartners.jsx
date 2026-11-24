@@ -1,9 +1,11 @@
+import { checkedMutation } from '../../lib/mutations'
 import { toast } from '../../components/ToastProvider'
 import NumberField from '../../components/NumberField'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '../../lib/supabase'
 import { BrandLoader } from '../../components/Brand'
 import AppIcon from '../../components/AppIcon'
+import { Link } from 'react-router-dom'
 
 //  Constants
 const COVERAGE_TYPES = ['Mental Health', 'Addiction Rehab', 'Inpatient', 'Outpatient', 'Counseling', 'Crisis Intervention', 'General Health', 'Employee Wellness', 'Other']
@@ -85,8 +87,8 @@ export default function InsurancePartners() {
     try {
       const payload = { ...form, commission_pct: form.commission_pct ? parseFloat(form.commission_pct) : null }
       const { error: saveError } = editingPartner
-        ? await supabase.from('insurance_partners').update(payload).eq('id', editingPartner.id)
-        : await supabase.from('insurance_partners').insert(payload)
+        ? await checkedMutation(supabase.from('insurance_partners').update(payload).eq('id', editingPartner.id).select('*'))
+        : await checkedMutation(supabase.from('insurance_partners').insert(payload).select('*'))
       if (saveError) throw saveError
       toast.success(editingPartner ? 'Partner updated!' : 'Partner added!')
       setShowForm(false)
@@ -100,7 +102,7 @@ export default function InsurancePartners() {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active'
     // Optimistic update
     setPartners(prev => prev.map(p => p.id === id ? { ...p, status: newStatus } : p))
-    const { error: toggleError } = await supabase.from('insurance_partners').update({ status: newStatus }).eq('id', id)
+    const { error: toggleError } = await checkedMutation(supabase.from('insurance_partners').update({ status: newStatus }).eq('id', id).select('*'))
     if (toggleError) {
       setPartners(prev => prev.map(p => p.id === id ? { ...p, status: currentStatus } : p))
       toast.error('Update failed.')
@@ -113,7 +115,7 @@ export default function InsurancePartners() {
 
   const deletePartner = async (id) => {
     setDeleting(true)
-    const { error: delError } = await supabase.from('insurance_partners').delete().eq('id', id)
+    const { error: delError } = await checkedMutation(supabase.from('insurance_partners').delete().eq('id', id).select('*'))
     if (delError) {
       toast.error('Delete failed.')
     } else {
@@ -144,7 +146,7 @@ export default function InsurancePartners() {
   if (loading) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
@@ -161,7 +163,7 @@ export default function InsurancePartners() {
   if (error) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
@@ -178,7 +180,7 @@ export default function InsurancePartners() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}>Insurance Partners</h1>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}>Insurance Partners</h2>
             <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>{partners.length} total  · {activeCount} active</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -188,6 +190,7 @@ export default function InsurancePartners() {
         </div>
 
         <div style={{ padding: '1.5rem', maxWidth: '1000px', margin: '0 auto' }}>
+          <p style={{ color: 'var(--text-muted)' }}>Manage partner contacts and commercial terms here. <Link to="/super-admin/insurers">Manage insurer portal accounts</Link>.</p>
           {/* Form Modal */}
           {showForm && (
             <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
@@ -196,25 +199,25 @@ export default function InsurancePartners() {
                 <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 1.25rem' }}>{editingPartner ? 'Edit Partner' : 'New Insurance Partner'}</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div>
-                    <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Company Name *</label>
+                    <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Company Name *</label>
                     <input type="text" value={form.company_name} onChange={e => { setForm(p => ({ ...p, company_name: e.target.value })); setFormErrors(p => ({ ...p, company_name: '' })) }} style={{ ...inputStyle, borderColor: formErrors.company_name ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="e.g. Jubilee Insurance" />
                     {formErrors.company_name && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{formErrors.company_name}</span>}
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '10px' }}>
                     <div>
-                      <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Contact Name</label>
+                      <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Contact Name</label>
                       <input type="text" value={form.contact_name} onChange={e => setForm(p => ({ ...p, contact_name: e.target.value }))} style={inputStyle} placeholder="e.g. John Kamau" />
                     </div>
                     <div>
-                      <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Contact Email *</label>
+                      <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Contact Email *</label>
                       <input type="email" value={form.contact_email} onChange={e => { setForm(p => ({ ...p, contact_email: e.target.value })); setFormErrors(p => ({ ...p, contact_email: '' })) }} style={{ ...inputStyle, borderColor: formErrors.contact_email ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="john@jubilee.co.ke" />
                       {formErrors.contact_email && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{formErrors.contact_email}</span>}
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '10px' }}>
                     <div>
                       <fieldset style={{ border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '10px' }}>
-                        <legend style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px' }}>Coverage categories</legend>
+                        <legend style={{ color: 'var(--text-muted)', fontSize: '11px' }}>Coverage categories</legend>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px' }}>
                           {COVERAGE_TYPES.map(type => (
                             <label key={type} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.75)', fontSize: '12px' }}>
@@ -231,13 +234,13 @@ export default function InsurancePartners() {
                       </fieldset>
                     </div>
                     <div>
-                      <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Commission % (0-100)</label>
+                      <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Commission % (0-100)</label>
                       <NumberField value={form.commission_pct} onChange={(commission_pct) => { setForm((current) => ({ ...current, commission_pct: commission_pct ?? '' })); setFormErrors((current) => ({ ...current, commission_pct: '' })) }} wrapperStyle={{ ...inputStyle, borderColor: formErrors.commission_pct ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="e.g. 10" inputMode="decimal" min={0} max={100} step={0.1} suffix="%" />
                       {formErrors.commission_pct && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{formErrors.commission_pct}</span>}
                     </div>
                   </div>
                   <div>
-                    <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Notes</label>
+                    <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Notes</label>
                     <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} rows={2} style={{ ...inputStyle, resize: 'vertical' }} />
                   </div>
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
@@ -262,14 +265,14 @@ export default function InsurancePartners() {
           </div>
 
           {filteredPartners.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
               <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>{<AppIcon name="shield" size={48} style={{display:"block",margin:"0 auto 12px"}} />}</span>
               <p style={{ color: 'var(--primary)', fontSize: '14px' }}>{searchQuery || statusFilter !== 'all' ? 'No partners match your filters.' : 'No insurance partners yet.'}</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {filteredPartners.map(p => (
-                <div key={p.id} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${p.status === 'active' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '12px', padding: '16px', opacity: p.status === 'active' ? 1 : 0.6, transition: 'border-color 0.2s' }}
+                <div key={p.id} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${p.status === 'active' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '12px', padding: '16px', opacity: 1, transition: 'border-color 0.2s' }}
                   onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
                   onMouseLeave={e => e.currentTarget.style.borderColor = p.status === 'active' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.08)'}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
@@ -278,8 +281,8 @@ export default function InsurancePartners() {
                         <span style={{ color: 'var(--text)', fontSize: '14px', fontWeight: 600 }}>{p.company_name}</span>
                         <span style={{ background: p.status === 'active' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.08)', color: p.status === 'active' ? 'var(--primary)' : 'var(--text)', border: `1px solid ${p.status === 'active' ? 'var(--primary)' : 'rgba(255,255,255,0.08)'}`, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{p.status}</span>
                       </div>
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>{p.contact_name}  · {p.contact_email}</p>
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: 0 }}>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '12px', margin: '0 0 4px' }}>{p.contact_name}  · {p.contact_email}</p>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '12px', margin: 0 }}>
                         {(p.coverage_types || []).join(', ') || 'Coverage not specified'}  · {p.commission_pct ?? 0}% commission
                         {p.notes && <span style={{ display: 'block', marginTop: '4px', color: 'var(--info)', fontSize: '11px', fontStyle: 'italic' }}>{<AppIcon name="document" size={12} />} {p.notes.substring(0, 80)}{p.notes.length > 80 ? '...' : ''}</span>}
                       </p>
@@ -313,7 +316,7 @@ export default function InsurancePartners() {
               <strong style={{ color: 'var(--primary)' }}>"{showToggleConfirm.company_name}"</strong> will be {showToggleConfirm.status === 'active' ? 'deactivated' : 'reactivated'}.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowToggleConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={() => setShowToggleConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
               <button onClick={() => toggleStatus(showToggleConfirm.id, showToggleConfirm.status)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: showToggleConfirm.status === 'active' ? 'rgb(var(--primary-rgb) / 0.15)' : 'rgba(255,255,255,0.12)', border: 'none', color: showToggleConfirm.status === 'active' ? 'var(--primary)' : 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
                 {showToggleConfirm.status === 'active' ? 'Deactivate' : 'Activate'}
               </button>
@@ -333,7 +336,7 @@ export default function InsurancePartners() {
               Permanently delete <strong style={{ color: 'var(--primary)' }}>"{showDeleteConfirm.company_name}"</strong>? This cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
               <button onClick={() => deletePartner(showDeleteConfirm.id)} disabled={deleting} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{deleting ? 'Deleting...' : 'Delete'}</button>
             </div>
           </div>

@@ -1,31 +1,21 @@
-// Single source of truth for crisis helplines shown across the site.
-// TODO(owner): verify by calling before the site goes public.
-//
-// NOTE: an earlier draft also listed "+254 722 178 177" for Befrienders Kenya
-// in a few places; the toll-free line below is the canonical one going forward.
-// TODO(owner): Ministry of Health gambling helpline — add a slot here if the
-// owner supplies a verified number. Do not invent one.
-
+// Provider-published details checked 2026-11-24. Published hours do not guarantee a response.
 export const HELPLINES = [
   {
-    id: 'befrienders',
-    name: 'Befrienders Kenya',
-    phone: '0800 722 030',
-    tel: '0800722030',
-    hours: '24/7',
-    priority: true,
-    verifiedOn: null, // TODO(owner): verify by calling
+    id: 'befrienders', name: 'Befrienders Kenya', phone: '+254 722 178177', tel: '+254722178177',
+    hours: 'Monday-Friday, 9 a.m.-5 p.m. (Africa/Nairobi)', priority: true, verifiedOn: '2026-11-24',
+    url: 'https://lifeline-international.com/member/kenya/',
+    source: 'https://lifeline-international.com/member/kenya/',
   },
   {
-    id: 'nacada',
-    name: 'NACADA',
-    phone: '1192',
-    tel: '1192',
-    hours: '24/7',
-    priority: false,
-    verifiedOn: null, // TODO(owner): verify by calling
+    id: 'gamhelp', name: 'Gamhelp Kenya', phone: '+254 726 883 960', tel: '+254726883960',
+    hours: 'Published 24/7 telephone and online counselling', priority: false, verifiedOn: '2026-11-24',
+    url: 'https://gamhelpkenya.com/gambling-addiction-treatment/',
+    source: 'https://gamhelpkenya.com/gambling-addiction-treatment/',
   },
-  // TODO(owner): Ministry of Health gambling helpline number goes here when supplied.
+  {
+    id: 'nacada', name: 'NACADA', phone: '1192', tel: '1192',
+    hours: 'Published hours not verified', priority: false, verifiedOn: null,
+  },
 ]
-
-export const primaryHelpline = HELPLINES.find((h) => h.priority) || HELPLINES[0]
+export const primaryHelpline = HELPLINES.find(line => line.priority) || HELPLINES[0]
+export const SUPPORT_SERVICES = HELPLINES.filter(line => ['befrienders', 'gamhelp'].includes(line.id))

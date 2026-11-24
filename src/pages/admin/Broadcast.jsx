@@ -93,7 +93,8 @@ export default function Broadcast() {
         p_audience: form.target,
       })
       if (sendError) throw sendError
-      const recipientCount = data?.recipient_count ?? userCount
+      if (!Number.isInteger(data?.recipient_count)) throw new Error('Broadcast delivery could not be verified')
+      const recipientCount = data.recipient_count
 
       toast.success(`Broadcast sent to ${recipientCount.toLocaleString()} ${targetLabel.toLowerCase()}!`)
       setForm({ title: '', body: '', target: 'all' })
@@ -124,7 +125,7 @@ export default function Broadcast() {
   if (loading) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
@@ -141,7 +142,7 @@ export default function Broadcast() {
   if (error) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
@@ -158,7 +159,7 @@ export default function Broadcast() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}> Broadcast</h1>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}> Broadcast</h2>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{userCount.toLocaleString()} {targetLabel.toLowerCase()} reachable</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -173,7 +174,7 @@ export default function Broadcast() {
 
             {/* Templates */}
             <div style={{ marginBottom: '1rem' }}>
-              <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', display: 'block', marginBottom: '6px' }}>Quick Templates</label>
+              <label style={{ color: 'var(--text-muted)', fontSize: '12px', display: 'block', marginBottom: '6px' }}>Quick Templates</label>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                 {TEMPLATES.map(t => (
                   <button key={t.label} onClick={() => applyTemplate(t)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgb(var(--primary-rgb) / 0.15)', color: 'var(--info)', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{t.label}</button>
@@ -191,7 +192,7 @@ export default function Broadcast() {
                 <label style={{ color: 'var(--primary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Message *</label>
                 <textarea value={form.body} onChange={e => setForm(p => ({ ...p, body: e.target.value.substring(0, MAX_BODY_LENGTH) }))} rows={5} style={{ ...inputStyle, resize: 'vertical' }} placeholder="Write your message to users..." />
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>{form.body.length}/{MAX_BODY_LENGTH} characters</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: 0 }}>{form.body.length}/{MAX_BODY_LENGTH} characters</p>
                   {isOverSMSLimit && <p style={{ color: 'var(--info)', fontSize: '11px', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}><AppIcon name="alert" size={12} /> Over SMS limit ({SMS_MAX_LENGTH} chars)</p>}
                 </div>
               </div>
@@ -203,14 +204,14 @@ export default function Broadcast() {
                     <option key={key} value={key}>{config.label}</option>
                   ))}
                 </select>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '4px' }}>{targetDescription}</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '11px', marginTop: '4px' }}>{targetDescription}</p>
               </div>
 
               <div style={{ background: 'var(--bg)', borderRadius: '10px', padding: '14px', border: '1px solid rgba(255,255,255,0.12)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <span style={{ color: 'var(--primary)', fontSize: '13px', fontWeight: 500 }}>Estimated Recipients</span>
-                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '2px 0 0' }}>{targetLabel}</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: '2px 0 0' }}>{targetLabel}</p>
                   </div>
                   <span style={{ color: 'var(--primary)', fontSize: '22px', fontWeight: 700, fontFamily: 'var(--font-display)' }}>{userCount.toLocaleString()}</span>
                 </div>
@@ -229,7 +230,7 @@ export default function Broadcast() {
                   <p style={{ color: 'var(--primary)', fontSize: '11px', fontWeight: 600, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '1px' }}> User Preview — {targetLabel}</p>
                   <p style={{ color: 'var(--text)', fontSize: '15px', fontWeight: 600, margin: '0 0 8px' }}>{form.title || 'Untitled'}</p>
                   <p style={{ color: 'var(--primary)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>{form.body}</p>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '12px' }}>— LossLens Team </p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '10px', marginTop: '12px' }}>— LossLens Team </p>
                 </div>
               )}
             </div>
@@ -238,7 +239,7 @@ export default function Broadcast() {
           {/* History */}
           <h3 style={{ color: 'var(--text)', fontSize: '15px', margin: '0 0 0.75rem' }}> Broadcast History</h3>
           {history.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
+            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
               <AppIcon name="broadcast" size={40} style={{ display: 'block', margin: '0 auto 8px' }} />
               <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No broadcasts sent yet.</p>
             </div>
@@ -253,9 +254,9 @@ export default function Broadcast() {
                       <span style={{ color: 'var(--text)', fontSize: '14px', fontWeight: 600 }}>{b.title}</span>
                       <span style={{ background: 'rgba(255,255,255,0.12)', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{b.audience || 'all'}</span>
                     </div>
-                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', whiteSpace: 'nowrap' }}>{fmtTime(b.sent_at)}</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '11px', whiteSpace: 'nowrap' }}>{fmtTime(b.sent_at)}</span>
                   </div>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 8px', lineHeight: '1.5' }}>{b.message?.substring(0, 200)}{b.message?.length > 200 ? '…' : ''}</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '12px', margin: '0 0 8px', lineHeight: '1.5' }}>{b.message?.substring(0, 200)}{b.message?.length > 200 ? '…' : ''}</p>
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                     <span style={{ color: 'var(--primary)', fontSize: '11px' }}> {b.recipient_count?.toLocaleString() || '0'} recipients</span>
                     <span style={{ color: 'var(--info)', fontSize: '11px' }}>in-app</span>
@@ -277,9 +278,9 @@ export default function Broadcast() {
             <p style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '16px', lineHeight: '1.6' }}>
               Send <strong style={{ color: 'var(--primary)' }}>"{form.title}"</strong> to <strong style={{ color: 'var(--primary)' }}>{userCount.toLocaleString()} {targetLabel.toLowerCase()}</strong>?
             </p>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '20px' }}>{targetDescription}</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '11px', marginBottom: '20px' }}>{targetDescription}</p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowConfirm(false)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={() => setShowConfirm(false)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
               <button onClick={send} style={{ flex: 2, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Send Broadcast</button>
             </div>
           </div>

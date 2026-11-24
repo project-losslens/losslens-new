@@ -123,9 +123,9 @@ function ChatViewer() {
 
         }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}>
               Chat Viewer
-            </h1>
+            </h2>
             <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>
               {users.length} users with chat history
             </p>
@@ -157,7 +157,7 @@ function ChatViewer() {
             {loading ? (
               <BrandLoader variant="section" />
             ) : filteredUsers.length === 0 ? (
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textAlign: 'center', padding: '1rem' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '12px', textAlign: 'center', padding: '1rem' }}>
                 {search ? 'No users found' : 'No chat history yet'}
               </p>
             ) : (
@@ -184,7 +184,7 @@ function ChatViewer() {
                       <p style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500, margin: 0 }}>
                         {u.full_name}
                       </p>
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '2px 0 0' }}>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: '2px 0 0' }}>
                         {u.id.slice(0, 8)}
                       </p>
                     </div>
@@ -219,15 +219,15 @@ function ChatViewer() {
             )}
 
             {!selectedUser ? (
-              <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'rgba(255,255,255,0.4)' }}>
-                <AppIcon name="chat" size={48} style={{ display: 'block', margin: '0 auto 12px', color: 'rgba(255,255,255,0.4)' }} />
+              <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'var(--text-muted)' }}>
+                <AppIcon name="chat" size={48} style={{ display: 'block', margin: '0 auto 12px', color: 'var(--text-muted)' }} />
                 <p style={{ color: 'var(--primary)', fontSize: '14px' }}>Select a user to view their conversations</p>
                 <p style={{ fontSize: '12px' }}>All chats are read-only</p>
               </div>
             ) : chatLoading ? (
               <BrandLoader variant="section" />
             ) : conversations.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)' }}>
+              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
                 <p style={{ fontSize: '13px' }}>No conversations found for this user.</p>
               </div>
             ) : (
@@ -271,7 +271,7 @@ function ChatViewer() {
                             {msg.message}
                           </div>
                           <span style={{
-                            fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '2px',
+                            fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px',
                             display: 'block', textAlign: msg.role === 'user' ? 'right' : 'left',
                           }}>
                             {formatTime(msg.created_at)}

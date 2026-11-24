@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from './oloo/server.js'
 //  Payments adapter — Premium only (insurance/Protection is handled
 //  separately). Modes: off | sandbox | live (default off).
 //  Live mode uses M-Pesa Daraja STK push; sandbox simulates success.
@@ -28,7 +29,7 @@ async function mpesaStkPush({ phone, amount, accountRef, description }) {
   if (!consumerKey || !consumerSecret || !businessShortCode || !passkey || !callbackUrl) {
     throw new Error('M-Pesa credentials are not configured')
   }
-  const tokenRes = await fetch(`${base}/oauth/v1/generate?grant_type=client_credentials`, {
+  const tokenRes = await fetchWithTimeout(`${base}/oauth/v1/generate?grant_type=client_credentials`, {
     headers: { Authorization: 'Basic ' + Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64') },
   })
   const { access_token } = await tokenRes.json()
@@ -36,7 +37,7 @@ async function mpesaStkPush({ phone, amount, accountRef, description }) {
 
   const timestamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)
   const password = Buffer.from(`${businessShortCode}${passkey}${timestamp}`).toString('base64')
-  const stkRes = await fetch(`${base}/mpesa/stkpush/v1/processrequest`, {
+  const stkRes = await fetchWithTimeout(`${base}/mpesa/stkpush/v1/processrequest`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -72,7 +73,7 @@ export async function queryMpesaStkStatus(checkoutRequestId) {
     throw new Error('M-Pesa credentials are not configured')
   }
 
-  const tokenRes = await fetch(`${base}/oauth/v1/generate?grant_type=client_credentials`, {
+  const tokenRes = await fetchWithTimeout(`${base}/oauth/v1/generate?grant_type=client_credentials`, {
     headers: { Authorization: 'Basic ' + Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64') },
   })
   const tokenBody = await tokenRes.json()
@@ -80,7 +81,7 @@ export async function queryMpesaStkStatus(checkoutRequestId) {
 
   const timestamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)
   const password = Buffer.from(`${businessShortCode}${passkey}${timestamp}`).toString('base64')
-  const queryRes = await fetch(`${base}/mpesa/stkpushquery/v1/query`, {
+  const queryRes = await fetchWithTimeout(`${base}/mpesa/stkpushquery/v1/query`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${tokenBody.access_token}`,

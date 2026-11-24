@@ -1,6 +1,7 @@
 import { BrandLoader } from '../../components/Brand'
 import { toast } from '../../components/ToastProvider'
-import { useState, useEffect } from 'react'
+import { effectivePlan } from '../../lib/entitlements'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
@@ -13,6 +14,8 @@ const PLANS = {
 
 export default function SubscriptionPage() {
   const navigate = useNavigate()
+  const pollGeneration = useRef(0)
+  useEffect(() => () => { pollGeneration.current += 1 }, [])
   const [loading, setLoading] = useState(null)
   const [profile, setProfile] = useState(null)
   const [companyInfo, setCompanyInfo] = useState(null)
@@ -50,34 +53,31 @@ export default function SubscriptionPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { setPageLoading(false); return }
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
-        .select('subscription_plan, subscription_status, plan_type, b2b_client_id')
+        .select('subscription_plan, subscription_status, subscription_expires_at, plan_type, b2b_client_id')
         .eq('id', session.user.id)
         .single()
 
+      if (error || !data) throw error || new Error('Profile could not be loaded')
       if (data) {
         setProfile(data)
 
-        // If user belongs to a company, fetch company info
         if (data.b2b_client_id) {
-          const { data: client } = await supabase
-            .from('b2b_clients')
-            .select('company_name, plan, company_code')
-            .eq('id', data.b2b_client_id)
-            .single()
-          if (client) setCompanyInfo(client)
-        }
+          const { data: membership, error: membershipError } = await supabase.rpc('member_company_summary')
+          if (membershipError) throw membershipError
+          setCompanyInfo(membership)
+        } else setCompanyInfo(null)
       }
     } catch (err) { console.error('Profile fetch error:', err); setPageError(true) }
     finally { setPageLoading(false) }
   }
 
   const handleUpgrade = async (plan) => {
-    const currentPlan = profile?.subscription_plan || PLANS.FREE
+    const currentPlan = effectivePlan(profile)
 
     // If already on company plan, show info
-    if (profile?.plan_type === 'company') {
+    if (effectivePlan(profile) === 'company') {
       toast.info('You\'re on a company-subsidized plan! All Premium features are included.')
       return
     }
@@ -93,7 +93,7 @@ export default function SubscriptionPage() {
       if (session) {
         await supabase.from('upgrade_interest').insert({
           user_id: session.user.id,
-          plan,
+          interested_plan: plan,
           created_at: new Date().toISOString(),
         }).select().single()
       }
@@ -123,7 +123,7 @@ export default function SubscriptionPage() {
           }
           setPayRef(data.reference || '')
           setPayStatus('waiting')
-          pollPaymentStatus(session.access_token)
+          pollPaymentStatus(data.reference)
           setLoading(null)
           return
         }
@@ -139,24 +139,30 @@ export default function SubscriptionPage() {
     setShowComingSoon(true)
   }
 
-  const pollPaymentStatus = async (token) => {
+  const pollPaymentStatus = async (reference) => {
+    const generation = ++pollGeneration.current
     const deadline = Date.now() + 3 * 60 * 1000
-    while (Date.now() < deadline) {
+    while (Date.now() < deadline && generation === pollGeneration.current) {
       await new Promise(r => setTimeout(r, 5000))
+      if (generation !== pollGeneration.current) return
       try {
-        const res = await fetch(`/api/payments/status${payRef ? `?reference=${encodeURIComponent(payRef)}` : ''}`, {
-          headers: { Authorization: `Bearer ${token}` },
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) throw new Error('Session expired')
+        const res = await fetch(`/api/payments/status?reference=${encodeURIComponent(reference)}`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
         })
         const data = await res.json().catch(() => ({}))
+        if (generation !== pollGeneration.current) return
         if (data.status === 'success') {
           setPayStatus('success')
           await fetchProfile()
           return
         }
+        if (generation !== pollGeneration.current) return
         if (data.status === 'failed') { setPayStatus('failed'); return }
       } catch { /* keep polling */ }
     }
-    setPayStatus('failed')
+    if (generation === pollGeneration.current) setPayStatus('pending')
   }
 
   const handleJoinCompany = async () => {
@@ -168,50 +174,12 @@ export default function SubscriptionPage() {
     setJoinError('')
 
     try {
-      // Validate code
-      const { data: client, error: codeError } = await supabase
-        .from('b2b_clients')
-        .select('id, company_name, seats, status')
-        .eq('company_code', companyCode.toUpperCase().trim())
-        .eq('status', 'active')
-        .maybeSingle()
-
-      if (codeError) throw codeError
-      if (!client) {
-        setJoinError('Invalid company code')
-        setJoinLoading(false)
-        return
-      }
-
-      // Check seats
-      const { count } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('b2b_client_id', client.id)
-
-      if (client.seats && count >= client.seats) {
-        setJoinError('All seats are currently full')
-        setJoinLoading(false)
-        return
-      }
-
-      // Update profile
-      const { data: { session } } = await supabase.auth.getSession()
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          b2b_client_id: client.id,
-          plan_type: 'company',
-        })
-        .eq('id', session.user.id)
-
-      if (updateError) throw updateError
-
-      setProfile(prev => ({ ...prev, b2b_client_id: client.id, plan_type: 'company' }))
-      setCompanyInfo({ company_name: client.company_name, plan: client.plan, company_code: companyCode.toUpperCase().trim() })
+      const { data, error } = await supabase.rpc('redeem_company_code', { p_code: companyCode.trim() })
+      if (error || data?.success !== true) throw error || new Error('Company membership was not saved')
+      await fetchProfile()
       setShowJoinCompany(false)
       setCompanyCode('')
-      toast.success(`Joined ${client.company_name}! You now have company-subsidized access.`)
+      toast.success(`Joined ${data.company_name}! You now have company-subsidized access.`)
     } catch (err) {
       setJoinError('Failed to join. Try again.')
     }
@@ -223,8 +191,8 @@ export default function SubscriptionPage() {
     setInterestRegistered(true)
   }
 
-  const isCompanyPlan = profile?.plan_type === 'company'
-  const currentPlan = isCompanyPlan ? 'company' : (profile?.subscription_plan === PLANS.PREMIUM ? PLANS.PREMIUM : PLANS.FREE)
+  const isCompanyPlan = effectivePlan(profile) === 'company'
+  const currentPlan = effectivePlan(profile)
 
   if (pageLoading) {
     return (
@@ -237,7 +205,7 @@ export default function SubscriptionPage() {
   if (pageError) {
     return (
       <div className="page-root" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-        <p className="fs-14" style={{ color: 'rgba(255,255,255,0.55)', marginBottom: '12px' }}>Could not load your subscription.</p>
+        <p className="fs-14" style={{ color: 'var(--text-muted)', marginBottom: '12px' }}>Could not load your subscription.</p>
         <button type="button" className="btn-primary" onClick={() => { setPageLoading(true); fetchProfile() }}>Try again</button>
       </div>
     )
@@ -281,7 +249,7 @@ export default function SubscriptionPage() {
             <p className="fs-12" style={{ color: 'var(--primary)', margin: 0 }}>
               {companyInfo.plan?.charAt(0).toUpperCase() + companyInfo.plan?.slice(1)} Plan  · Subsidized Access
             </p>
-            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', marginTop: '8px' }}>
+            <p className="fs-12" style={{ color: 'var(--text-muted)', marginTop: '8px' }}>
                Your employer covers most of the cost. You get all Premium features while your personal data stays private.
             </p>
           </div>
@@ -298,14 +266,14 @@ export default function SubscriptionPage() {
               <AppIcon name="coin" size={28} style={{ display: 'block', margin: '0 auto 8px', color: 'var(--secondary)' }} />
               <h3 className="fs-15" style={{ color: '#FFFFFF', marginBottom: '4px' }}>Free</h3>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: 'var(--primary)', margin: '0 0 4px' }}>KES 0</p>
-              <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>Forever</p>
+              <p className="fs-12" style={{ color: 'var(--text-muted)' }}>Forever</p>
               {currentPlan === PLANS.FREE && (
                 <span className="fs-12" style={{ display: 'inline-block', marginTop: '8px', background: 'rgba(255,255,255,0.12)', color: 'var(--primary)', padding: '3px 10px', borderRadius: '100px', border: '1px solid var(--primary)' }}>Current Plan</span>
               )}
             </div>
 
             <div style={{
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.12), var(--secondary))',
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgb(var(--secondary-rgb) / 0.12))',
               border: `2px solid ${currentPlan === PLANS.PREMIUM ? 'var(--primary)' : 'rgb(var(--primary-rgb) / 0.2)'}`,
               borderRadius: '14px', padding: '1.5rem', textAlign: 'center',
               position: 'relative',
@@ -316,7 +284,7 @@ export default function SubscriptionPage() {
               <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: 'var(--primary)', margin: '0 0 4px' }}>
                 {premiumPrice == null ? 'Price to be announced' : `KES ${premiumPrice}`}
               </p>
-              <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>/month</p>
+              <p className="fs-12" style={{ color: 'var(--text-muted)' }}>/month</p>
               {currentPlan === PLANS.PREMIUM && (
                 <span className="fs-12" style={{ display: 'inline-block', marginTop: '8px', background: 'var(--primary)', color: 'var(--on-primary)', padding: '3px 10px', borderRadius: '100px', fontWeight: 600 }}>Current Plan</span>
               )}
@@ -357,7 +325,7 @@ export default function SubscriptionPage() {
           <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '1.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>
             <AppIcon name="building" size={24} style={{ display: 'block', margin: '0 auto 8px', color: 'var(--secondary)' }} />
             <h4 className="fs-14" style={{ color: '#FFFFFF', margin: '0 0 6px' }}>Have a company code?</h4>
-            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '0 0 12px' }}>
+            <p className="fs-12" style={{ color: 'var(--text-muted)', margin: '0 0 12px' }}>
               If your employer offers LossLens, enter your code for subsidized Premium access.
             </p>
             {!showJoinCompany ? (
@@ -397,7 +365,7 @@ export default function SubscriptionPage() {
                 </div>
                 {joinError && <p className="fs-12" style={{ color: '#FFFFFF', margin: 0 }}>{joinError}</p>}
                 <button onClick={() => { setShowJoinCompany(false); setJoinError(''); setCompanyCode('') }}
-                  className="fs-12" style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', marginTop: '4px' }}>
+                  className="fs-12" style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginTop: '4px' }}>
                   Cancel
                 </button>
               </div>
@@ -410,7 +378,7 @@ export default function SubscriptionPage() {
           <button
             className="btn-primary full fs-15"
             onClick={() => handleUpgrade(PLANS.PREMIUM)}
-            disabled={loading === PLANS.PREMIUM || payStatus === 'waiting'}
+            disabled={loading === PLANS.PREMIUM || ['waiting', 'pending'].includes(payStatus)}
             style={{ padding: '14px', marginBottom: '0.75rem' }}
           >
             {loading === PLANS.PREMIUM ? <BrandLoader variant="inline" showWordmark={false} /> : payStatus === 'waiting' ? 'Waiting for M-Pesa…' : 'Upgrade to Premium'}
@@ -425,7 +393,7 @@ export default function SubscriptionPage() {
             <div className="dash-section" style={{ textAlign: 'center', marginBottom: '1rem' }}>
               <BrandLoader variant="inline" showWordmark={false} />
               <p className="fs-13" style={{ color: 'var(--primary)', marginTop: '8px' }}>Check your phone and enter your M-Pesa PIN to complete payment.</p>
-              {payRef && <p className="fs-11" style={{ color: 'rgba(255,255,255,0.4)' }}>Reference: {payRef}</p>}
+              {payRef && <p className="fs-11" style={{ color: 'var(--text-muted)' }}>Reference: {payRef}</p>}
             </div>
           )}
           {payStatus === 'success' && (
@@ -434,6 +402,7 @@ export default function SubscriptionPage() {
               <button className="btn-ghost fs-12" onClick={() => setPayStatus('idle')}>Done</button>
             </div>
           )}
+          {payStatus === 'pending' && <p role="status">Payment confirmation is still pending. Check your payment before starting another attempt.</p>}
           {payStatus === 'failed' && (
             <div className="dash-section" style={{ textAlign: 'center', marginBottom: '1rem', borderColor: 'var(--danger)' }}>
               <p className="fs-14" style={{ color: 'var(--danger)' }}>Payment did not complete. You can try again.</p>
@@ -446,7 +415,7 @@ export default function SubscriptionPage() {
           <div style={{ textAlign: 'center', padding: '1rem', background: 'rgba(255,255,255,0.12)', borderRadius: '12px', border: '1px solid var(--primary)', marginBottom: '1rem' }}>
             <AppIcon name="check" size={24} style={{ display: 'block', margin: '0 auto 8px', color: 'var(--primary)' }} />
             <p className="fs-14" style={{ color: 'var(--primary)', fontWeight: 500, margin: 0 }}>Thanks for your interest!</p>
-            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>We'll notify you when Premium launches.</p>
+            <p className="fs-12" style={{ color: 'var(--text-muted)', marginTop: '4px' }}>We'll notify you when Premium launches.</p>
           </div>
         )}
 
@@ -462,7 +431,7 @@ export default function SubscriptionPage() {
           ].map((faq, i) => (
             <div key={i} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '12px 14px' }}>
               <p className="fs-12" style={{ color: '#FFFFFF', fontWeight: 500, margin: '0 0 4px' }}>{faq.q}</p>
-              <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: '1.5' }}>{faq.a}</p>
+              <p className="fs-12" style={{ color: 'var(--text-muted)', margin: 0, lineHeight: '1.5' }}>{faq.a}</p>
             </div>
           ))}
         </div>
@@ -482,7 +451,7 @@ export default function SubscriptionPage() {
             <p className="fs-13" style={{ color: 'var(--primary)', marginBottom: '20px', lineHeight: '1.6' }}>
               M-Pesa payments are being set up. During testing, <strong style={{ color: 'var(--primary)' }}>all features are free</strong>.
             </p>
-            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '16px' }}>
+            <p className="fs-12" style={{ color: 'var(--text-muted)', marginBottom: '16px' }}>
               We've noted your interest — you'll be the first to know when Premium launches!
             </p>
             <button onClick={handleCloseComingSoon} className="btn-primary full fs-14" style={{ padding: '12px' }}>

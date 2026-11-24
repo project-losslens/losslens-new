@@ -1,3 +1,4 @@
+import SupportChoices from '../../components/SupportChoices'
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { BrandLoader } from '../../components/Brand'
@@ -86,7 +87,8 @@ export default function SupportPage() {
   return (
     <section className="portal-page">
       <header className="portal-page__heading">
-        <div><p className="portal-page__eyebrow">Help</p><h1>Support requests</h1></div>
+        <div><p className="portal-page__eyebrow">Help</p><h2>Support requests</h2>
+      <SupportChoices /></div>
       </header>
       <p className="portal-notice">For urgent safety concerns, use the crisis support options instead of this form.</p>
       {error && <p className="portal-error" role="alert">{error} <button type="button" onClick={() => { void loadTickets() }}>Retry</button></p>}

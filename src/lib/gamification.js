@@ -15,10 +15,10 @@ export async function recomputeProgress() {
 // ─── Check and award badges ───
 // Badge evaluation now happens inside recompute_progress(); this helper
 // recomputes and returns details for newly earned badges only.
-export async function checkBadges(userId) {
+export async function checkBadges(userId, progress) {
   if (!userId) return []
 
-  const result = await recomputeProgress()
+  const result = progress || await recomputeProgress()
   const newIds = result?.new_badges || []
   if (!Array.isArray(newIds) || newIds.length === 0) return []
 

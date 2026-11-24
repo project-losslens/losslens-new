@@ -117,7 +117,7 @@ export default function CrisisAlerts() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}>🆘 Crisis Alerts</h1>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}>🆘 Crisis Alerts</h2>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{alerts.length} open  · {resolved.length} resolved</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -140,7 +140,7 @@ export default function CrisisAlerts() {
 
           {activeTab === 'open' && (
             alerts.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)' }}>
+              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
                 <AppIcon name="shield" size={48} style={{ display: 'block', margin: '0 auto 12px' }} />
                 <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No open crisis alerts. All clear.</p>
               </div>
@@ -157,7 +157,7 @@ export default function CrisisAlerts() {
                       )}
                     </div>
                     <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '4px' }}>
-                      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}> {fmtTime(a.created_at)}</span>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}> {fmtTime(a.created_at)}</span>
                       {a.profiles?.streak_days !== undefined && <span style={{ color: 'var(--info)', fontSize: '11px' }}> {a.profiles.streak_days}d streak</span>}
                     </div>
                   </div>
@@ -171,7 +171,7 @@ export default function CrisisAlerts() {
 
                 {a.message_context && (
                   <div style={{ background: 'var(--bg)', borderRadius: '8px', padding: '10px 14px', marginBottom: '10px' }}>
-                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontStyle: 'italic', margin: 0, lineHeight: '1.5' }}>"{a.message_context}"</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '12px', fontStyle: 'italic', margin: 0, lineHeight: '1.5' }}>"{a.message_context}"</p>
                   </div>
                 )}
 
@@ -210,7 +210,7 @@ export default function CrisisAlerts() {
 
           {activeTab === 'resolved' && (
             resolved.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)' }}>
+              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
                 <AppIcon name="shield" size={48} style={{ display: 'block', margin: '0 auto 12px' }} />
                 <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No resolved alerts yet.</p>
               </div>
@@ -219,12 +219,12 @@ export default function CrisisAlerts() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
                   <div>
                     <p style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500, margin: '0 0 4px' }}>{a.profiles?.full_name || `User #${a.user_id?.slice(0, 8)}`}</p>
-                    {a.keyword && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>Keyword: "{a.keyword}"</p>}
+                    {a.keyword && <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: 0 }}>Keyword: "{a.keyword}"</p>}
                     {a.admin_notes && <p style={{ color: 'var(--info)', fontSize: '11px', margin: '4px 0 0' }}> {a.admin_notes}</p>}
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <span style={{ background: 'rgba(255,255,255,0.12)', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>Resolved</span>
-                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '4px 0 0' }}>{fmtTime(a.resolved_at)}</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: '4px 0 0' }}>{fmtTime(a.resolved_at)}</p>
                   </div>
                 </div>
               </div>

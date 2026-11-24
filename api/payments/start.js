@@ -76,11 +76,12 @@ export default async function handler(req, res) {
 
     if (simulated) {
       const expiresAt = new Date(Date.now() + 30 * 86400000).toISOString()
-      await db.from('profiles').update({
+      const { data: activated, error: activationError } = await db.from('profiles').update({
         subscription_plan: plan,
         subscription_status: 'active',
         subscription_expires_at: expiresAt,
-      }).eq('id', user.id)
+      }).eq('id', user.id).select('id').single()
+      if (activationError || !activated?.id) return json(res, 503, { error: 'Payment recorded, but subscription activation is pending. Contact support before retrying.' })
       await db.from('audit_logs').insert({
         actor_id: null,
         action: 'subscription_change',

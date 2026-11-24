@@ -204,7 +204,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
@@ -221,7 +221,7 @@ export default function AdminDashboard() {
   if (error) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
@@ -238,7 +238,7 @@ export default function AdminDashboard() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}> Admin Dashboard</h1>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}> Admin Dashboard</h2>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{stats.totalUsers} users  · {stats.activeToday} active today</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -270,7 +270,7 @@ export default function AdminDashboard() {
                     onMouseLeave={e => { if (s.path) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = s.urgent ? '0 0 16px rgba(255,255,255,0.3)' : 'none' } }}>
                     <span style={{ fontSize: '24px', display: 'block', marginBottom: '6px' }}>{s.icon}</span>
                     <span style={{ display: 'block', fontSize: '22px', fontWeight: 700, color: s.color, fontFamily: 'var(--font-display)' }}>{s.value.toLocaleString()}</span>
-                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>{s.label}</span>
+                    <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{s.label}</span>
                   </button>
                 ))}
               </div>
@@ -283,7 +283,7 @@ export default function AdminDashboard() {
                       onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
                       onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'translateY(0)' }}>
                       <span style={{ fontSize: '24px', flexShrink: 0 }}><AppIcon name="alert" size={20} /></span>
-                      <div><p style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500, margin: '0 0 2px' }}>{a.label}</p><p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>{a.desc}</p></div>
+                      <div><p style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500, margin: '0 0 2px' }}>{a.label}</p><p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: 0 }}>{a.desc}</p></div>
                     </button>
                   ))}
                 </div>
@@ -320,7 +320,7 @@ export default function AdminDashboard() {
                   <thead>
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
                       {['User', 'Email', 'Risk', 'Streak', 'Last Active', 'Joined'].map(h => (
-                        <th key={h} style={{ padding: '10px 8px', textAlign: 'left', color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 500 }}>{h}</th>
+                        <th key={h} style={{ padding: '10px 8px', textAlign: 'left', color: 'var(--text-muted)', fontSize: '11px', fontWeight: 500 }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -332,7 +332,7 @@ export default function AdminDashboard() {
                           onMouseEnter={e => e.currentTarget.style.background = 'var(--bg)'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                           <td style={{ padding: '10px 8px', color: 'var(--text)' }}>{u.full_name || u.username || 'Anonymous'}</td>
-                          <td style={{ padding: '10px 8px', color: 'rgba(255,255,255,0.4)', fontSize: '11px', cursor: 'pointer' }}
+                          <td style={{ padding: '10px 8px', color: 'var(--text-muted)', fontSize: '11px', cursor: 'pointer' }}
                             onClick={() => toggleReveal('email', u.id)} title="Click to reveal">
                             {revealedEmails[u.id] ? u.email : maskEmail(u.email)}
                           </td>
@@ -342,8 +342,8 @@ export default function AdminDashboard() {
                             </span>
                           </td>
                           <td style={{ padding: '10px 8px', color: 'var(--primary)', fontWeight: 600 }}> {u.streak_days || 0}</td>
-                          <td style={{ padding: '10px 8px', color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{fmtTime(u.last_active)}</td>
-                          <td style={{ padding: '10px 8px', color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{fmtDate(u.created_at)}</td>
+                          <td style={{ padding: '10px 8px', color: 'var(--text-muted)', fontSize: '11px' }}>{fmtTime(u.last_active)}</td>
+                          <td style={{ padding: '10px 8px', color: 'var(--text-muted)', fontSize: '11px' }}>{fmtDate(u.created_at)}</td>
                         </tr>
                       )
                     })}
@@ -379,7 +379,7 @@ export default function AdminDashboard() {
                         <span className="entry-status gambled"> Crisis</span>
                       </div>
                       {a.keyword && <p style={{ color: 'var(--text)', fontSize: '11px', margin: '4px 0' }}>Keyword: "{a.keyword}"</p>}
-                      <p className="entry-note" style={{ color: 'rgba(255,255,255,0.4)' }}>{fmtTime(a.created_at)}</p>
+                      <p className="entry-note" style={{ color: 'var(--text-muted)' }}>{fmtTime(a.created_at)}</p>
                     </div>
                   ))}
                 </div>
@@ -392,7 +392,7 @@ export default function AdminDashboard() {
             <div className="dash-section">
               <h3 style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '1rem' }}> Recent Contact Requests</h3>
               {contactRequests.length === 0 ? (
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', textAlign: 'center', padding: '2rem' }}>No contact requests yet</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '13px', textAlign: 'center', padding: '2rem' }}>No contact requests yet</p>
               ) : (
                 <div className="entries-list">
                   {contactRequests.map((c, i) => (
@@ -401,7 +401,7 @@ export default function AdminDashboard() {
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                       <div className="entry-top">
                         <span className="entry-date">{c.name || c.profiles?.full_name || 'User'}</span>
-                        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>{fmtDate(c.created_at)}</span>
+                        <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{fmtDate(c.created_at)}</span>
                       </div>
                       <p className="entry-note">{c.message?.substring(0, 100)}</p>
                       <div style={{ display: 'flex', gap: '12px', marginTop: '4px' }}>

@@ -206,7 +206,7 @@ export default function InsurerMembers() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                 <div style={{ flex: 1, minWidth: 140 }}>
                   <p style={{ color: '#FFFFFF', fontSize: '13px', margin: 0 }}>{m.member_reference || 'No reference'}</p>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: 0 }}>
                     {m.policy_number ? `${m.policy_number} · ${m.product_name || ''}` : 'No policy yet'}
                   </p>
                 </div>
@@ -243,26 +243,26 @@ export default function InsurerMembers() {
               </div>
               {canIssue && (
                 <div style={{ marginTop: '10px', display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'end' }}>
-                  <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Product version
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Product version
                     <select value={f.version_id || ''} onChange={e => setIssueForm(p => ({ ...p, [m.membership_id]: { ...f, version_id: e.target.value } }))}
                       style={{ display: 'block', marginTop: '4px', background: 'var(--bg)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '6px 8px' }}>
                       <option value="">Select…</option>
                       {versions.map(v => <option key={v.id} value={v.id}>v{v.version_no} · {v.premium_frequency} · KES {Number(v.premium_amount || 0).toLocaleString()}</option>)}
                     </select>
                   </label>
-                  <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Policy number
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Policy number
                     <input value={f.policy_number || ''} onChange={e => setIssueForm(p => ({ ...p, [m.membership_id]: { ...f, policy_number: e.target.value } }))}
                       style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px', width: '150px' }} />
                   </label>
-                  <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Commencement
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Commencement
                     <input type="date" value={f.commencement || ''} onChange={e => setIssueForm(p => ({ ...p, [m.membership_id]: { ...f, commencement: e.target.value } }))}
                       style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px' }} />
                   </label>
-                  <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Expiry
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Expiry
                     <input type="date" value={f.expiry || ''} onChange={e => setIssueForm(p => ({ ...p, [m.membership_id]: { ...f, expiry: e.target.value } }))}
                       style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px' }} />
                   </label>
-                  <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Premium (KES)
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Premium (KES)
                     <NumberField value={f.premium ?? ''} onChange={v => setIssueForm(p => ({ ...p, [m.membership_id]: { ...f, premium: v } }))} min={0} />
                   </label>
                   <button type="button" className="btn-primary fs-11" style={{ padding: '6px 12px', minHeight: '32px' }} disabled={working === m.membership_id} onClick={() => issuePolicy(m)}>
@@ -272,28 +272,28 @@ export default function InsurerMembers() {
               )}
               {m.policy_id && ['issued', 'pending_payment', 'active', 'grace'].includes(m.policy_status) && (
                 <div style={{ marginTop: '10px', display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'end' }}>
-                  <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Period start
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Period start
                     <input type="date" value={premiumForm[m.policy_id]?.period_start || ''}
                       onChange={e => setPremiumForm(p => ({ ...p, [m.policy_id]: { ...p[m.policy_id], period_start: e.target.value } }))}
                       style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px' }} />
                   </label>
-                  <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Period end
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Period end
                     <input type="date" value={premiumForm[m.policy_id]?.period_end || ''}
                       onChange={e => setPremiumForm(p => ({ ...p, [m.policy_id]: { ...p[m.policy_id], period_end: e.target.value } }))}
                       style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px' }} />
                   </label>
-                  <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Due (KES)
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Due (KES)
                     <NumberField value={premiumForm[m.policy_id]?.amount_due ?? ''} onChange={v => setPremiumForm(p => ({ ...p, [m.policy_id]: { ...p[m.policy_id], amount_due: v } }))} min={0} />
                   </label>
-                  <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Received (KES)
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Received (KES)
                     <NumberField value={premiumForm[m.policy_id]?.amount_received ?? ''} onChange={v => setPremiumForm(p => ({ ...p, [m.policy_id]: { ...p[m.policy_id], amount_received: v } }))} min={0} />
                   </label>
-                  <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Payment ref
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Payment ref
                     <input value={premiumForm[m.policy_id]?.payment_ref || ''}
                       onChange={e => setPremiumForm(p => ({ ...p, [m.policy_id]: { ...p[m.policy_id], payment_ref: e.target.value } }))}
                       style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px', width: '110px' }} />
                   </label>
-                  <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Channel
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Channel
                     <input value={premiumForm[m.policy_id]?.channel || ''} placeholder="mpesa/bank"
                       onChange={e => setPremiumForm(p => ({ ...p, [m.policy_id]: { ...p[m.policy_id], channel: e.target.value } }))}
                       style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px', width: '90px' }} />

@@ -3,6 +3,7 @@ import { toast } from '../../components/ToastProvider'
 import NumberField from '../../components/NumberField'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { recoveryDate } from '../../lib/calendar'
 import { supabase } from '../../lib/supabase'
 import { useI18n } from '../../i18n'
 import { enqueueOfflineItem, offlineQueueCount, onOfflineQueueChange } from '../../lib/offlineQueue'
@@ -85,13 +86,10 @@ function Diary() {
     recognition.continuous = true
     recognition.interimResults = true
     recognition.lang = 'en-KE'
+    const initialNotes = notes.trim()
     recognition.onresult = (event) => {
-      let transcript = ''
-      for (let i = event.resultIndex; i < event.results.length; i++) transcript += event.results[i][0].transcript
-      setNotes(prev => {
-        if (event.results[event.results.length - 1].isFinal) return (prev || '') + ' ' + transcript.trim()
-        return transcript
-      })
+      const transcript = Array.from(event.results, result => result[0].transcript.trim()).join(' ')
+      setNotes([initialNotes, transcript].filter(Boolean).join(' '))
     }
     recognition.onerror = () => { setIsListening(false) }
     recognition.onend = () => setIsListening(false)
@@ -120,12 +118,13 @@ function Diary() {
   }
 
   const fetchTodayEntry = async (uid) => {
-    const today = new Date().toISOString().split('T')[0]
+    const today = recoveryDate()
     const { data } = await supabase.from('diary_entries').select('*').eq('user_id', uid).eq('date', today).maybeSingle()
     if (data) {
       setTodayEntry(data)
       setGambled(data.gambled)
       setMood((data.mood || '').trim())
+      setUrgeLevel(data.urge_level ?? null)
       setTriggers(data.triggers || [])
       setCoping(data.coping || [])
       setNotes(data.notes || '')
@@ -170,7 +169,7 @@ function Diary() {
     if (!userId) { toast.error(t('diary.loginAgain'), 2000); return }
 
     setLoading(true)
-    const today = new Date().toISOString().split('T')[0]
+    const today = recoveryDate()
 
     const payload = {
       user_id: userId,
@@ -190,18 +189,27 @@ function Diary() {
     let error = null
 
     if (todayEntry) {
-      const { error: updateError } = await supabase.from('diary_entries').update(payload).eq('id', todayEntry.id)
+      const { data, error: updateError } = await supabase.from('diary_entries').update(payload).eq('id', todayEntry.id).select().single()
       error = updateError
+      if (data) setTodayEntry(data)
     } else {
-      const { error: insertError } = await supabase.from('diary_entries').insert(payload)
+      const { data, error: insertError } = await supabase.from('diary_entries').upsert(payload, { onConflict: 'user_id,date' }).select().single()
       error = insertError
+      if (data) setTodayEntry(data)
     }
 
     if (error) {
       console.error('Save error:', error)
       const offline = typeof navigator !== 'undefined' && !navigator.onLine
       if (offline || /fetch|network|Failed to fetch|Load failed/i.test(error.message || '')) {
-        await enqueueOfflineItem('diary_entry', payload)
+        try {
+          await enqueueOfflineItem('diary_entry', payload)
+        } catch (storageError) {
+          setLoading(false)
+          setSaveError(storageError.message || 'Offline storage is unavailable. Keep this page open and retry.')
+          toast.error('The entry could not be saved on this device. Keep the page open and retry.', 5000)
+          return
+        }
         setPendingSync(await offlineQueueCount())
         setLoading(false)
         setSaved(true)
@@ -244,7 +252,7 @@ function Diary() {
       if (recomputed?.freeze_activated) {
         toast.success(t('diary.freezeActivated'), 4000)
       }
-      const earnedBadges = await checkBadges(userId) || []
+      const earnedBadges = await checkBadges(userId, recomputed) || []
       if (earnedBadges.length > 0) {
         triggerConfetti()
         earnedBadges.forEach(b => toast.success(t('diary.badgeEarned', { name: b.name }), 4000))
@@ -284,8 +292,8 @@ function Diary() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
           <div>
-            <h1 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> {t('diary.title')}</h1>
-            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{new Date().toLocaleDateString('en-KE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+            <h2 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> {t('diary.title')}</h2>
+            <p className="fs-12" style={{ color: 'var(--text-muted)', margin: '2px 0 0' }}>{new Date().toLocaleDateString('en-KE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
           </div>
         </div>
         <div style={{ padding: '1.5rem' }}>
@@ -336,7 +344,7 @@ function Diary() {
                 </div>
               )}
 
-              <div className="dash-section"><h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}> {t('diary.urgeTitle')} <span className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>{t('diary.urgeHint')}</span></h3><div className="chip-group">{Array.from({ length: 11 }, (_, i) => <button key={i} type="button" className={`chip ${urgeLevel === i ? 'chip-active' : ''}`} onClick={() => setUrgeLevel(urgeLevel === i ? null : i)}>{i}</button>)}</div></div>
+              <div className="dash-section"><h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}> {t('diary.urgeTitle')} <span className="fs-12" style={{ color: 'var(--text-muted)', fontWeight: 400 }}>{t('diary.urgeHint')}</span></h3><div className="chip-group">{Array.from({ length: 11 }, (_, i) => <button key={i} type="button" className={`chip ${urgeLevel === i ? 'chip-active' : ''}`} onClick={() => setUrgeLevel(urgeLevel === i ? null : i)}>{i}</button>)}</div></div>
               <div className="dash-section"><h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>{t('diary.moodTitle')}</h3><div className="chip-group">{moods.map(m => <button key={m} className={`chip ${mood.trim() === m ? 'chip-active' : ''}`} onClick={() => setMood(m)}>{t(`diary.mood.${m}`)}</button>)}</div></div>
               <div className="dash-section"><h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>{t('diary.triggersTitle')}</h3><div className="chip-group">{triggerOptions.map(trigger => <button key={trigger} className={`chip ${triggers.includes(trigger) ? 'chip-active' : ''}`} onClick={() => toggleItem(trigger, triggers, setTriggers)}>{t(`diary.trigger.${trigger}`)}</button>)}</div></div>
               <div className="dash-section"><h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>{t('diary.copingTitle')}</h3><div className="chip-group">{copingOptions.map(c => <button key={c} className={`chip ${coping.includes(c) ? 'chip-active' : ''}`} onClick={() => toggleItem(c, coping, setCoping)}>{t(`diary.coping.${c}`)}</button>)}</div></div>
@@ -370,8 +378,8 @@ function Diary() {
               <div className="dash-section">
                 <div className="section-header"><h3>{t('diary.allEntries')}</h3></div>
                 {historyLoading ? <BrandLoader variant="inline" showWordmark={false} /> :
-                 historyError ? <div style={{ textAlign: 'center', padding: '1.5rem' }}><p className="fs-13" style={{ color: 'rgba(255,255,255,0.55)', marginBottom: '10px' }}>{t('diary.loadError')}</p><button type="button" className="btn-primary" onClick={() => fetchHistory(userId)}>{t('common.retry')}</button></div> :
-                 historyEntries.length === 0 ? <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '1.5rem' }}>{t('diary.noEntriesHistory')}</p> :
+                 historyError ? <div style={{ textAlign: 'center', padding: '1.5rem' }}><p className="fs-13" style={{ color: 'var(--text-muted)', marginBottom: '10px' }}>{t('diary.loadError')}</p><button type="button" className="btn-primary" onClick={() => fetchHistory(userId)}>{t('common.retry')}</button></div> :
+                 historyEntries.length === 0 ? <p className="fs-13" style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '1.5rem' }}>{t('diary.noEntriesHistory')}</p> :
                  <div className="entries-list">{(showAllHistory ? historyEntries : historyEntries.slice(0, 5)).map((e, i) => (
                    <div className="entry-item" key={i} style={{ animation: `fadeIn 0.3s ease-out ${i * 0.05}s both` }}>
                      <div className="entry-top"><span className="entry-date">{new Date(e.date).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric' })}</span><span className={`entry-status ${e.gambled ? 'gambled' : 'clean'}`}>{e.gambled ? t('diary.gambledStatus') : t('diary.cleanStatus')}</span></div>

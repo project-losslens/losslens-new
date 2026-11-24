@@ -49,12 +49,15 @@ export default function Events() {
       if (!session) { setSessionExpired(true); setPageLoading(false); return }
       setUserId(session.user.id)
 
-      const [profileRes, eventsRes, rsvpRes] = await Promise.all([
+      const [profileRes, eventsRes, rsvpRes, countRes] = await Promise.all([
         supabase.from('profiles').select('full_name, phone').eq('id', session.user.id).single(),
         supabase.from('events').select('*').eq('active', true).order('date', { ascending: true }).limit(50),
-        supabase.from('event_rsvps').select('*')
+        supabase.from('event_rsvps').select('*').eq('user_id', session.user.id),
+        supabase.rpc('event_attendance_counts')
       ])
 
+      const loadError = profileRes.error || eventsRes.error || rsvpRes.error || countRes.error
+      if (loadError) throw loadError
       setUserProfile(profileRes.data)
       setEvents(eventsRes.data || [])
 
@@ -62,8 +65,9 @@ export default function Events() {
       const counts = {}
       ;(rsvpRes.data || []).forEach(r => {
         if (r.user_id === session.user.id) rsvpMap[r.event_id] = { id: r.id, attendance: r.attendance || 'going' }
-        if (r.attendance === 'going') counts[r.event_id] = (counts[r.event_id] || 0) + 1
+
       })
+      ;(countRes.data || []).forEach(row => { counts[row.event_id] = Number(row.going) })
       setRsvps(rsvpMap)
       setAttendeeCounts(counts)
     } catch (err) { console.error('Events fetch error:', err); setEventsError(true) }
@@ -210,8 +214,8 @@ export default function Events() {
 
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Events</h1>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{events.length} events  · {Object.keys(rsvps).length} responded</p>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Events</h2>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{events.length} events  · {Object.keys(rsvps).length} responded</p>
           </div>
         </div>
 
@@ -229,7 +233,7 @@ export default function Events() {
 
           {!pageLoading && eventsError && (
             <div className="dash-section" style={{ textAlign: 'center', padding: '3rem' }}>
-              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', marginBottom: '12px' }}>Could not load events.</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '12px' }}>Could not load events.</p>
               <button type="button" className="btn-primary" onClick={fetchEvents}>Try again</button>
             </div>
           )}
@@ -257,7 +261,7 @@ export default function Events() {
               return (
                 <div key={e.id} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${myRsvp ? 'var(--primary)' : 'rgba(255,255,255,0.12)'}`, borderRadius: '14px', overflow: 'hidden', animation: 'fadeIn 0.3s ease-out', opacity: isPast ? 0.7 : 1 }}>
 
-                  <div style={{ width: '100%', height: '170px', background: e.image_url ? `url(${e.image_url}) center/cover` : 'linear-gradient(135deg, rgba(255,255,255,0.12), var(--secondary))', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '10px', position: 'relative' }}>
+                  <div style={{ width: '100%', height: '170px', background: e.image_url ? `url(${e.image_url}) center/cover` : 'linear-gradient(135deg, rgba(255,255,255,0.08), rgb(var(--secondary-rgb) / 0.12))', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '10px', position: 'relative' }}>
                     {!e.image_url && <AppIcon name="calendar" size={48} style={{ opacity: 0.3, position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', color: '#FFFFFF' }} />}
                     <span style={{ background: 'rgba(255,255,255,0.9)', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', color: 'var(--primary)', position: 'relative', zIndex: 'var(--z-base)' }}>{e.type || 'Event'}</span>
                     <span style={{ background: 'rgba(255,255,255,0.9)', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', color: daysUntil === 'Today' ? '#FFFFFF' : isPast ? 'rgba(255,255,255,0.4)' : 'var(--primary)', position: 'relative', zIndex: 'var(--z-base)' }}>{daysUntil}</span>
@@ -269,7 +273,7 @@ export default function Events() {
                       else { setExpandedEvent(e.id); loadDiscussions(e.id) }
                     }}>{e.title}</button></h3>
 
-                    <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '14px' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '14px' }}>
                       <span> {formatDate(e.date)}</span>
                       {e.time && <span> {e.time}</span>}
                       {e.location && <span> {e.location}</span>}
@@ -299,11 +303,11 @@ export default function Events() {
                         <button onClick={() => {
                           if (expandedEvent === e.id) setExpandedEvent(null)
                           else { setExpandedEvent(e.id); loadDiscussions(e.id) }
-                        }} style={{ padding: '10px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.12)', background: 'transparent', color: 'rgba(255,255,255,0.4)', fontSize: '14px', cursor: 'pointer' }} aria-expanded={isExpanded}>{isExpanded ? '▲' : '▼'}</button>
+                        }} style={{ padding: '10px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.12)', background: 'transparent', color: 'var(--text-muted)', fontSize: '14px', cursor: 'pointer' }} aria-expanded={isExpanded}>{isExpanded ? '▲' : '▼'}</button>
                       </div>
                     )}
                     {isPast && (
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textAlign: 'center', marginBottom: '10px' }}>This event has passed</p>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '12px', textAlign: 'center', marginBottom: '10px' }}>This event has passed</p>
                     )}
 
                     {rsvpLoading === e.id && <BrandLoader variant="inline" showWordmark={false} />}
@@ -314,7 +318,7 @@ export default function Events() {
                           {[{ label: ' Going', count: attendeeCounts[e.id] || 0, color: 'var(--primary)' }, { label: ' Discussion', count: discussionOn ? eventDiscussions.length : '', color: discussionOn ? 'var(--primary)' : '#FFFFFF' }].map((s, i) => (
                             <div key={i} style={{ flex: 1, background: 'var(--bg)', borderRadius: '8px', padding: '8px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.12)' }}>
                               <div style={{ fontSize: '16px', fontWeight: 700, color: s.color, fontFamily: 'Georgia, serif' }}>{s.count}</div>
-                              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>{s.label}</div>
+                              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{s.label}</div>
                             </div>
                           ))}
                         </div>
@@ -331,19 +335,19 @@ export default function Events() {
                             {!discussionOn ? (
                               <div style={{ textAlign: 'center', padding: '1.5rem', background: 'var(--bg)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)' }}>
                                 <p style={{ fontSize: '20px', marginBottom: '6px' }}></p>
-                                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', margin: 0 }}>Discussion is closed for this event.</p>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0 }}>Discussion is closed for this event.</p>
                               </div>
                             ) : discussionsLoading[e.id] ? (
                               <BrandLoader variant="section" />
                             ) : (
                               <>
-                                {eventDiscussions.length === 0 && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '10px' }}>No messages yet. Be the first!</p>}
+                                {eventDiscussions.length === 0 && <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '10px' }}>No messages yet. Be the first!</p>}
                                 <div ref={el => discussionContainers.current[e.id] = el} style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                   {eventDiscussions.map(d => (
                                     <div key={d.id} style={{ padding: '10px', background: 'var(--bg)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)' }}>
                                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                                         <span style={{ color: 'var(--primary)', fontSize: '11px', fontWeight: 500 }}>{d.profiles?.full_name || 'Anonymous'}{d.is_admin_reply && <span style={{ color: 'var(--primary)', marginLeft: '6px', fontSize: '10px' }}>ADMIN</span>}</span>
-                                        <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{new Date(d.created_at).toLocaleDateString('en-KE')}</span>
+                                        <span style={{ color: 'var(--text-muted)', fontSize: '10px' }}>{new Date(d.created_at).toLocaleDateString('en-KE')}</span>
                                       </div>
                                       <p style={{ color: 'var(--secondary)', fontSize: '12px', margin: 0, lineHeight: '1.5', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{d.message}</p>
                                     </div>
@@ -360,11 +364,11 @@ export default function Events() {
 
                         {currentTab === EXPANDED_TABS.MESSAGE && (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: 0 }}>Send a private message to the admin about this event.</p>
-                            <div><label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Your Name</label><input type="text" value={contactName} onChange={ev => setContactName(ev.target.value)} placeholder={userProfile?.full_name || 'Full name'} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} /></div>
-                            <div><label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Phone</label><input type="tel" value={contactPhone} onChange={ev => setContactPhone(ev.target.value)} placeholder={userProfile?.phone || '+254 7XX XXX XXX'} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} /></div>
-                            <div><label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Email (optional)</label><input type="email" value={contactEmail} onChange={ev => setContactEmail(ev.target.value)} placeholder="you@example.com" style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} /></div>
-                            <div><label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Message *</label><textarea value={contactMessage} onChange={ev => setContactMessage(ev.target.value)} rows={3} placeholder="What would you like to ask?" style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', resize: 'vertical', boxSizing: 'border-box' }} /></div>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '12px', margin: 0 }}>Send a private message to the admin about this event.</p>
+                            <div><label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Your Name</label><input type="text" value={contactName} onChange={ev => setContactName(ev.target.value)} placeholder={userProfile?.full_name || 'Full name'} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} /></div>
+                            <div><label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Phone</label><input type="tel" value={contactPhone} onChange={ev => setContactPhone(ev.target.value)} placeholder={userProfile?.phone || '+254 7XX XXX XXX'} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} /></div>
+                            <div><label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Email (optional)</label><input type="email" value={contactEmail} onChange={ev => setContactEmail(ev.target.value)} placeholder="you@example.com" style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} /></div>
+                            <div><label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Message *</label><textarea value={contactMessage} onChange={ev => setContactMessage(ev.target.value)} rows={3} placeholder="What would you like to ask?" style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', resize: 'vertical', boxSizing: 'border-box' }} /></div>
                             <button onClick={() => handleContactAdmin(e.id)} disabled={sendingContact || !contactMessage.trim()} style={{ width: '100%', padding: '10px', borderRadius: '10px', background: contactMessage.trim() ? 'var(--primary)' : 'rgba(255,255,255,0.12)', border: 'none', color: contactMessage.trim() ? 'var(--bg)' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: 600, cursor: contactMessage.trim() ? 'pointer' : 'not-allowed', fontFamily: 'var(--font-body)' }}>{sendingContact ? 'Sending...' : ' Send to Admin'}</button>
                           </div>
                         )}

@@ -2,7 +2,7 @@
 
 ## Fresh installation
 
-The complete database setup is exactly these eight executable SQL scripts in
+The database setup consists of eight consolidated base scripts and two forward migrations in
 `supabase/migrations/`. Apply them in filename order to a **fresh** Supabase
 project:
 
@@ -14,6 +14,10 @@ project:
 6. `20261112000006_pass2_protection_base.sql`
 7. `20261112000007_protection_core.sql`
 8. `20261112000008_protection_operations.sql`
+9. `20261124000009_workflow_integrity.sql`
+10. `20261124000010_private_pgsi.sql`
+
+Existing projects with 01-08 already applied should apply 09 followed by 10 (skip migrations already recorded as applied). See [workflow repairs and verification](WORKFLOW_FIXES.md) for its changes and deployment requirements.
 
 These are consolidated installation scripts, not a supplement to the earlier
 baseline or Pass 2 files. Do not mix the historical source scripts into this
@@ -39,6 +43,10 @@ Manual steps are in [`OPERATIONS.md`](./OPERATIONS.md).
 | 06 | Subscription cleanup and Protection base schema/workflows |
 | 07 | Protection security, access layer, products, policies, and pre-authorisation |
 | 08 | Protection claims/evidence, premiums, actuarial reporting, and final safeguards |
+| 09 | Verified mutations, support/admin workflow repairs and privileges |
+| 10 | Private PGSI assessments, trusted scoring, seven-day due time and optional own-user Oloo context |
+
+See [PGSI and Oloo verification](PGSI_AND_OLOO.md) for privacy boundaries, sources and deployment checks.
 
 ## Database boundaries
 

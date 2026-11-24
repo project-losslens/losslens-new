@@ -156,8 +156,8 @@ function NotificationBell() {
           {/* List */}
           {notifications.length === 0 ? (
             <div style={{ padding: '2rem', textAlign: 'center' }}>
-              <AppIcon name="bell" size={32} style={{ display: 'block', margin: '0 auto 8px', color: 'rgba(255,255,255,0.4)' }} />
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>No notifications yet</p>
+              <AppIcon name="bell" size={32} style={{ display: 'block', margin: '0 auto 8px', color: 'var(--text-muted)' }} />
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>No notifications yet</p>
             </div>
           ) : (
             notifications.map(n => {
@@ -203,7 +203,7 @@ function NotificationBell() {
                       <p style={{ color: 'var(--secondary)', fontSize: '12px', margin: '0 0 4px', lineHeight: '1.4' }}>
                         {n.message.startsWith('notifications.') ? t(n.message) : n.message}
                       </p>
-                      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '10px' }}>
                         {formatTime(n.created_at)}
                       </span>
                     </div>

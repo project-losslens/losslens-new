@@ -2,7 +2,7 @@
 
 ## Applying the database
 
-Eight consolidated scripts in `supabase/migrations/` — apply **in filename
+Eight consolidated base scripts plus the workflow-repair and private-PGSI migrations in `supabase/migrations/` — apply **in filename
 order** on a **fresh, disposable** Supabase project first:
 
 ```
@@ -14,15 +14,21 @@ order** on a **fresh, disposable** Supabase project first:
 20261112000006_pass2_protection_base.sql
 20261112000007_protection_core.sql
 20261112000008_protection_operations.sql
+20261124000009_workflow_integrity.sql
+20261124000010_private_pgsi.sql
 ```
 
-- All scripts are idempotent — run the whole set **twice** to prove it.
+For an existing project with 01-08 applied, apply 09 then 10, skipping any migration already recorded as applied. Deploy the updated `delete-account` function and Vercel routes alongside the frontend. See [workflow verification](WORKFLOW_FIXES.md).
+
+- Apply forward migration 10 once through migration tracking; it creates private tables. Assessment submission retries are idempotent. Do not rerun the full installation set on a populated project.
 - Script 06 contains guarded destructive cleanup (superseded subscription
   objects and removed circle rooms). It runs only on an empty database or
   when `losslens.allow_destructive_reset = 'on'` is set — **never** set that
   on a populated/production database.
 - The owner applies SQL manually in the Supabase SQL editor. Agents never
   run migrations against production.
+
+See [PGSI and Oloo verification](PGSI_AND_OLOO.md) before releasing migration 10 and the updated `/api/chat`, `/api/crisis` and frontend together.
 
 ## Verification after applying
 

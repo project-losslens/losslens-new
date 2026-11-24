@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
+import { PgsiProvider } from './context/PgsiContext'
 import { AuthProfileProvider } from './context/AuthProfileContext'
 import { GlobalLoaderHost } from './components/Brand'
 import { ToastProvider } from './components/ToastProvider'
@@ -28,8 +29,10 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <AuthProfileProvider>
         <ToastProvider>
-          <GlobalLoaderHost />
-          <App />
+          <PgsiProvider>
+            <GlobalLoaderHost />
+            <App />
+          </PgsiProvider>
         </ToastProvider>
       </AuthProfileProvider>
     </BrowserRouter>

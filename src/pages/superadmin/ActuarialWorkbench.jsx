@@ -166,7 +166,7 @@ export default function ActuarialWorkbench() {
                   <td style={{ padding: '4px 8px', color: '#fff' }}>{STATES[i]}</td>
                   {row.map((c, j) => (
                     <td key={j} style={{ padding: '4px 4px' }}>
-                      {i === j ? <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> : (
+                      {i === j ? <span style={{ color: 'var(--text-muted)' }}>—</span> : (
                         <NumberField value={c} min={0} onChange={v => {
                           setCounts(current => current.map((r, ri) => r.map((value, ci) => ri === i && ci === j ? v ?? 0 : value)))
                         }} />
@@ -290,7 +290,7 @@ export default function ActuarialWorkbench() {
             </div>
             {runs.length === 0 && <p className="portal-notice">No saved runs yet.</p>}
             {runs.map(r => (
-              <p key={r.id} className="fs-12" style={{ color: 'rgba(255,255,255,0.6)', margin: '4px 0' }}>
+              <p key={r.id} className="fs-12" style={{ color: 'var(--text-muted)', margin: '4px 0' }}>
                 {r.model_version} · {r.scenario_label || 'custom'} · {r.dataset?.type || 'data basis unavailable'} · {new Date(r.created_at).toLocaleString()}
               </p>
             ))}

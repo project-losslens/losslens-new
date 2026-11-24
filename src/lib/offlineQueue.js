@@ -40,10 +40,10 @@ function tx(db, mode, fn) {
 
 export async function enqueueOfflineItem(kind, payload) {
   const db = await openDb()
-  if (!db) return null
+  if (!db) throw new Error('Offline storage is unavailable. Keep this page open and retry when connected.')
   const item = {
     kind,
-    payload,
+    payload: ['urge_session', 'urge_challenge'].includes(kind) ? { ...payload, id: payload.id || crypto.randomUUID() } : payload,
     createdAt: new Date().toISOString(),
     attempts: 0,
   }

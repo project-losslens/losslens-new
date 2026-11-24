@@ -1,3 +1,4 @@
+import { checkedMutation } from '../../lib/mutations'
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuthProfile } from '../../context/AuthProfileContext'
@@ -68,10 +69,10 @@ export default function ProtectionOps() {
     if (next === mode) return
     if (!confirm(`Switch protection_mode from "${mode}" to "${next}"? This changes what users see.`)) return
     setSaving(true)
-    const { error } = await supabase.from('system_settings').upsert(
+    const { error } = await checkedMutation(supabase.from('system_settings').upsert(
       { key: 'protection_mode', value: next, updated_at: new Date().toISOString(), updated_by: user.id },
       { onConflict: 'key' }
-    )
+    ).select('*'))
     if (error) { toast.error('Could not update protection mode.'); setSaving(false); return }
     // Audit (best-effort; requires recent auth)
     try { await supabase.rpc('log_admin_action', { p_action: 'protection_mode_change', p_metadata: { from: mode, to: next } }) } catch { /* non-fatal */ }
@@ -83,13 +84,13 @@ export default function ProtectionOps() {
   const createPartner = async () => {
     if (!partnerForm.insurer_id || !partnerForm.cohort_name.trim()) { toast.error('Insurer and cohort name are required.'); return }
     setSaving(true)
-    const { error } = await supabase.from('insurer_partnerships').insert({
+    const { error } = await checkedMutation(supabase.from('insurer_partnerships').insert({
       insurer_id: partnerForm.insurer_id,
       cohort_name: partnerForm.cohort_name.trim(),
       per_member_fee: Number(partnerForm.per_member_fee) || 0,
       contract_start: partnerForm.contract_start || null,
       status: 'active',
-    })
+    }).select('*'))
     setSaving(false)
     if (error) { toast.error(error.message || 'Could not create partnership.'); return }
     toast.success('Partnership created.')
@@ -105,7 +106,7 @@ export default function ProtectionOps() {
       const { data, error } = await supabase.functions.invoke('send-invite', {
         body: { action: 'invite', email: inviteEmail.trim(), role: 'therapist' },
       })
-      if (error || data?.error) {
+      if (error || data?.error || data?.success !== true) {
         console.error('Therapist invitation failed:', error || data?.error)
         toast.error('Could not send the therapist invite.')
       } else {
@@ -227,7 +228,7 @@ export default function ProtectionOps() {
               <p style={{ color: '#FFFFFF', fontSize: '13px', margin: 0 }}>
                 {planNames[v.plan_id] || 'Product'} · v{v.version_no}
               </p>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: 0 }}>
                 {v.benefit_structure.replace(/_/g, ' ')} · KES {Number(v.premium_amount || 0).toLocaleString()}/{v.premium_frequency}
               </p>
             </div>

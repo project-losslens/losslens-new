@@ -298,8 +298,8 @@ export default function ProtectionPage() {
   if (!protectionModeAllows(mode)) {
     return (
       <div className="page-root"><div className="page-content" style={{ padding: '2rem' }}>
-        <h1 className="fs-20" style={{ color: '#FFFFFF' }}>LossLens Protection</h1>
-        <p style={{ color: 'rgba(255,255,255,0.6)' }}>Protection is not available yet. <a href="/protection" style={{ color: 'var(--primary)' }}>Learn more</a> — including the proposed Medical Rider, Individual Cover and Group Cover structures.</p>
+        <h2 className="fs-20" style={{ color: '#FFFFFF' }}>LossLens Protection</h2>
+        <p style={{ color: 'var(--text-muted)' }}>Protection is not available yet. <a href="/protection" style={{ color: 'var(--primary)' }}>Learn more</a> — including the proposed Medical Rider, Individual Cover and Group Cover structures.</p>
       </div></div>
     )
   }
@@ -308,14 +308,14 @@ export default function ProtectionPage() {
 
   return (
     <div className="page-root"><div className="page-content" style={{ padding: '1.5rem' }}>
-      <h1 className="fs-20" style={{ color: '#FFFFFF', marginBottom: '4px' }}>LossLens Protection</h1>
-      <p className="fs-13" style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '1.25rem' }}>Insurance arranged through your insurer. LossLens is not the insurer — your insurer issues the policy, collects premiums and decides claims.</p>
+      <h2 className="fs-20" style={{ color: '#FFFFFF', marginBottom: '4px' }}>LossLens Protection</h2>
+      <p className="fs-13" style={{ color: 'var(--text-muted)', marginBottom: '1.25rem' }}>Insurance arranged through your insurer. LossLens is not the insurer — your insurer issues the policy, collects premiums and decides claims.</p>
 
       {!membership ? (
         <div className="dash-section">
           <h2 className="fs-15" style={{ color: 'var(--primary)', marginBottom: '12px' }}>Enrol with your insurer</h2>
           {insurers.length === 0 ? (
-            <p className="fs-13" style={{ color: 'rgba(255,255,255,0.5)' }}>No insurers are currently offering Protection. Check back soon.</p>
+            <p className="fs-13" style={{ color: 'var(--text-muted)' }}>No insurers are currently offering Protection. Check back soon.</p>
           ) : (
             <>
               <div className="form-group"><label>Insurer</label>
@@ -349,13 +349,13 @@ export default function ProtectionPage() {
               <span style={{ color: '#F2C879', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase' }}>{membership.status.replace(/_/g, ' ')}</span>
             </div>
             {membership.status === 'pending_verification' && (
-              <p className="fs-13" style={{ color: 'rgba(255,255,255,0.55)', marginTop: '8px' }}>Waiting for your insurer to verify your membership.</p>
+              <p className="fs-13" style={{ color: 'var(--text-muted)', marginTop: '8px' }}>Waiting for your insurer to verify your membership.</p>
             )}
             {membership.status === 'active' && !activePolicy && (
-              <p className="fs-13" style={{ color: 'rgba(255,255,255,0.55)', marginTop: '8px' }}>Your membership is active. Your insurer will issue your policy once premiums are arranged.</p>
+              <p className="fs-13" style={{ color: 'var(--text-muted)', marginTop: '8px' }}>Your membership is active. Your insurer will issue your policy once premiums are arranged.</p>
             )}
-            {membership.status === 'ended' && <p className="fs-13" style={{ color: 'rgba(255,255,255,0.55)', marginTop: '8px' }}>This membership has ended.</p>}
-            {membership.status === 'rejected' && <p className="fs-13" style={{ color: 'rgba(255,255,255,0.55)', marginTop: '8px' }}>Your enrolment was not approved. Contact your insurer.</p>}
+            {membership.status === 'ended' && <p className="fs-13" style={{ color: 'var(--text-muted)', marginTop: '8px' }}>This membership has ended.</p>}
+            {membership.status === 'rejected' && <p className="fs-13" style={{ color: 'var(--text-muted)', marginTop: '8px' }}>Your enrolment was not approved. Contact your insurer.</p>}
           </div>
 
           {activePolicy && (
@@ -367,7 +367,7 @@ export default function ProtectionPage() {
                 </p>
                 <span style={{ color: POLICY_STATUS_COLOR[activePolicy.status] || '#fff', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{activePolicy.status.replace(/_/g, ' ')}</span>
               </div>
-              <p className="fs-12" style={{ color: 'rgba(255,255,255,0.55)', marginTop: '6px' }}>
+              <p className="fs-12" style={{ color: 'var(--text-muted)', marginTop: '6px' }}>
                 {activePolicy.commencement_date && `Cover from ${activePolicy.commencement_date}`}
                 {activePolicy.expiry_date && ` to ${activePolicy.expiry_date}`}
                 {' · '}Premium {fmtKes(activePolicy.premium_amount)}/{activePolicy.premium_frequency}
@@ -387,7 +387,7 @@ export default function ProtectionPage() {
                   ))}
                 </div>
               )}
-              <p className="fs-11" style={{ color: 'rgba(255,255,255,0.4)', marginTop: '8px' }}>Confirm cover details with your insurer. LossLens is not the insurer.</p>
+              <p className="fs-11" style={{ color: 'var(--text-muted)', marginTop: '8px' }}>Confirm cover details with your insurer. LossLens is not the insurer.</p>
             </div>
           )}
 
@@ -398,10 +398,10 @@ export default function ProtectionPage() {
                 <label key={c.scope} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', color: 'rgba(255,255,255,0.75)', fontSize: '13px', cursor: 'pointer' }}>
                   <input type="checkbox" checked={Boolean(c.granted)} onChange={e => toggleConsent(c.scope, e.target.checked)} />
                   {CONSENT_LABELS[c.scope] || c.scope}
-                  {c.wording_version && <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '10px' }}>v{c.wording_version}</span>}
+                  {c.wording_version && <span style={{ color: 'var(--text-muted)', fontSize: '10px' }}>v{c.wording_version}</span>}
                 </label>
               ))}
-              <p className="fs-11" style={{ color: 'rgba(255,255,255,0.4)', marginTop: '8px' }}>Your diary, chats and clinical records are never shared with your insurer or therapist.</p>
+              <p className="fs-11" style={{ color: 'var(--text-muted)', marginTop: '8px' }}>Your diary, chats and clinical records are never shared with your insurer or therapist.</p>
             </div>
           )}
 
@@ -413,7 +413,7 @@ export default function ProtectionPage() {
                   <AppIcon name="clock" size={14} style={{ color: 'var(--primary)', flexShrink: 0, marginTop: '2px' }} />
                   <div>
                     <p className="fs-13" style={{ color: '#FFFFFF', margin: 0 }}>{String(ev.event_type).replace(/_/g, ' ')}</p>
-                    <p className="fs-11" style={{ color: 'rgba(255,255,255,0.4)', margin: 0 }}>{new Date(ev.created_at).toLocaleString()}</p>
+                    <p className="fs-11" style={{ color: 'var(--text-muted)', margin: 0 }}>{new Date(ev.created_at).toLocaleString()}</p>
                   </div>
                 </div>
               ))}
@@ -423,7 +423,7 @@ export default function ProtectionPage() {
           {membership.status === 'active' && activePolicy?.status === 'active' && (
             <div className="dash-section" style={{ marginBottom: '1rem' }}>
               <h2 className="fs-15" style={{ color: 'var(--primary)', marginBottom: '10px' }}>Request pre-authorisation</h2>
-              <p className="fs-12" style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '10px' }}>Ask your insurer to approve therapy sessions before you book.</p>
+              <p className="fs-12" style={{ color: 'var(--text-muted)', marginBottom: '10px' }}>Ask your insurer to approve therapy sessions before you book.</p>
               <div className="form-group"><label>Sessions needed</label>
                 <NumberField value={preauthSessions} onChange={v => setPreauthSessions(v ?? 1)} min={1} max={24} />
               </div>
@@ -460,24 +460,24 @@ export default function ProtectionPage() {
           {(milestones.milestones?.length > 0 || milestones.episodes?.length > 0) && (
             <div className="dash-section" style={{ marginBottom: '1rem' }}>
               <h2 className="fs-15" style={{ color: 'var(--primary)', marginBottom: '10px' }}>Treatment milestones</h2>
-              <p className="fs-11" style={{ color: 'rgba(255,255,255,0.45)', marginBottom: '8px' }}>
+              <p className="fs-11" style={{ color: 'var(--text-muted)', marginBottom: '8px' }}>
                 Your clinician verifies treatment milestones. A verified milestone can be claimed once — the insurer decides the claim.
               </p>
               {(milestones.episodes || []).map(e => (
-                <p key={e.id} className="fs-12" style={{ color: 'rgba(255,255,255,0.6)', margin: '4px 0' }}>
+                <p key={e.id} className="fs-12" style={{ color: 'var(--text-muted)', margin: '4px 0' }}>
                   Treatment episode · {e.status}{e.specialty ? ` · ${e.specialty}` : ''} · started {e.started_at}
                 </p>
               ))}
               {activePolicy && ['active','grace'].includes(activePolicy.status) && therapists.length > 0 && (
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'end', margin: '8px 0' }}>
-                  <label className="fs-11" style={{ color: 'rgba(255,255,255,0.6)' }}>Clinician
+                  <label className="fs-11" style={{ color: 'var(--text-muted)' }}>Clinician
                     <select value={episodeForm.therapist_id} onChange={e => setEpisodeForm({ ...episodeForm, therapist_id: e.target.value })}
                       style={{ display: 'block', marginTop: '4px', background: 'var(--bg)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '6px 8px' }}>
                       <option value="">Select…</option>
                       {therapists.map(t => <option key={t.therapist_ref} value={t.therapist_ref}>{t.specialty || 'Therapist'}{t.county ? ` · ${t.county}` : ''}</option>)}
                     </select>
                   </label>
-                  <label className="fs-11" style={{ color: 'rgba(255,255,255,0.6)' }}>Treatment plan ref
+                  <label className="fs-11" style={{ color: 'var(--text-muted)' }}>Treatment plan ref
                     <input value={episodeForm.plan_ref} onChange={e => setEpisodeForm({ ...episodeForm, plan_ref: e.target.value })} maxLength={80}
                       style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px', width: '140px' }} />
                   </label>
@@ -513,7 +513,7 @@ export default function ProtectionPage() {
                     </p>
                     <span style={{ color: CLAIM_STATUS_COLOR[c.status] || '#fff', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{c.status.replace(/_/g, ' ')}</span>
                   </div>
-                  <p className="fs-11" style={{ color: 'rgba(255,255,255,0.45)', margin: '2px 0 0' }}>
+                  <p className="fs-11" style={{ color: 'var(--text-muted)', margin: '2px 0 0' }}>
                     {c.event_description}{c.event_date ? ` · ${c.event_date}` : ''}
                     {c.decision_reason ? ` · ${c.decision_reason}` : ''}
                   </p>
@@ -537,9 +537,9 @@ export default function ProtectionPage() {
                         <p role="alert" className="fs-11" style={{ color: 'var(--danger)', margin: '0 0 6px' }}>{evidence[c.id].error}</p>
                       )}
                       {evidence[c.id]?.busy && !evidence[c.id]?.progress && (
-                        <p className="fs-11" style={{ color: 'rgba(255,255,255,0.55)', margin: '0 0 6px' }}>Loading evidence…</p>
+                        <p className="fs-11" style={{ color: 'var(--text-muted)', margin: '0 0 6px' }}>Loading evidence…</p>
                       )}
-                      {(evidence[c.id].items || []).length === 0 && <p className="fs-11" style={{ color: 'rgba(255,255,255,0.45)', margin: 0 }}>No evidence attached yet.</p>}
+                      {(evidence[c.id].items || []).length === 0 && <p className="fs-11" style={{ color: 'var(--text-muted)', margin: 0 }}>No evidence attached yet.</p>}
                       {(evidence[c.id].items || []).map(ev => (
                         <div key={ev.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', padding: '4px 0' }}>
                           <p className="fs-11" style={{ color: 'rgba(255,255,255,0.7)', margin: 0 }}>
@@ -574,7 +574,7 @@ export default function ProtectionPage() {
               {therapists.map(t => (
                 <div key={t.therapist_ref} style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                   <p className="fs-13" style={{ color: '#FFFFFF', margin: 0 }}>{t.specialty || 'Therapist'}</p>
-                  <p className="fs-11" style={{ color: 'rgba(255,255,255,0.45)', margin: '2px 0 0' }}>
+                  <p className="fs-11" style={{ color: 'var(--text-muted)', margin: '2px 0 0' }}>
                     {[t.county, (t.languages || []).join(', ')].filter(Boolean).join(' · ')}
                     {t.telehealth ? ' · Telehealth available' : ''}
                     {t.session_fee ? ` · ${fmtKes(t.session_fee)}/session` : ''}

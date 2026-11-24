@@ -1,4 +1,4 @@
-import { paymentsMode, queryMpesaStkStatus } from '../../_lib/payments.js'
+import { paymentsMode, queryMpesaStkStatus } from '../_lib/payments.js'
 import { createClient } from '@supabase/supabase-js'
 
 function json(res, status, body) {
@@ -22,7 +22,6 @@ export default async function handler(req, res) {
   const cb = req.body?.Body?.stkCallback || req.body?.stkCallback || {}
   const items = cb.CallbackMetadata?.Item || []
   const get = (name) => items.find(i => i.Name === name)?.Value
-  const resultCode = cb.ResultCode
   const checkoutRequestId = cb.CheckoutRequestID
   const merchantRequestId = cb.MerchantRequestID
   if (typeof checkoutRequestId !== 'string' || typeof merchantRequestId !== 'string') {
@@ -53,10 +52,6 @@ export default async function handler(req, res) {
     return json(res, 200, { ok: true, matched: false })
   }
 
-  if (String(resultCode) !== '0') {
-    return json(res, 200, { ok: true, status: 'pending' })
-  }
-
   let verification
   try {
     verification = await queryMpesaStkStatus(checkoutRequestId)
@@ -65,10 +60,16 @@ export default async function handler(req, res) {
     return json(res, 503, { error: 'Payment verification is temporarily unavailable' })
   }
 
-  if (String(verification.ResultCode) !== '0'
-      || verification.CheckoutRequestID !== checkoutRequestId
+  if (verification.CheckoutRequestID !== checkoutRequestId
       || verification.MerchantRequestID !== expectedMerchantRequestId) {
-    return json(res, 200, { ok: true, status: 'pending' })
+    return json(res, 503, { error: 'Payment identifiers could not be verified' })
+  }
+  if (String(verification.ResultCode) !== '0') {
+    if (verification.ResultCode == null) return json(res, 503, { error: 'Payment confirmation is pending' })
+    const { error } = await db.from('payments').update({ status: 'failed' })
+      .eq('id', payment.id).eq('status', 'pending')
+    if (error) return json(res, 503, { error: 'Payment outcome could not be recorded' })
+    return json(res, 200, { ok: true, status: 'failed' })
   }
 
   const { data, error } = await db.rpc('service_confirm_mpesa_payment', {

@@ -1,11 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { sessionLoginKey } from '../lib/pgsi'
 import { clearSupabaseStorage, supabase } from '../lib/supabase'
 
 const AuthProfileContext = createContext(null)
-const PROFILE_COLUMNS = 'id, username, avatar_url, role, status, must_change_password, onboarding_completed, onboarding_skipped'
+const PROFILE_COLUMNS = 'id, full_name, username, avatar_url, role, status, must_change_password, onboarding_completed, onboarding_skipped'
 
 export function AuthProfileProvider({ children }) {
   const [authState, setAuthState] = useState({ status: 'loading', user: null, profile: null, error: null })
+  const [loginKey, setLoginKey] = useState(null)
   const mountedRef = useRef(false)
   const requestIdRef = useRef(0)
   const persistenceCheckRef = useRef(null)
@@ -45,6 +47,7 @@ export function AuthProfileProvider({ children }) {
         if (mountedRef.current) setAuthState({ status: 'error', user: null, profile: null, error })
         return null
       }
+      setLoginKey(sessionLoginKey(session))
       user = session?.user || null
     }
     return loadProfile(user)
@@ -76,6 +79,7 @@ export function AuthProfileProvider({ children }) {
         await ensureSessionPersistence()
         if (!active) return
         const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+          setLoginKey(sessionLoginKey(session))
           void loadProfile(session?.user || null)
         })
         subscription = authSubscription
@@ -112,6 +116,7 @@ export function AuthProfileProvider({ children }) {
     const avatarUrl = profile?.avatar_url || authState.user?.user_metadata?.avatar_url || null
     return {
       ...authState,
+      loginKey,
       authStatus: authState.status,
       loading: authState.status === 'loading',
       role: profile?.role || null,
@@ -125,7 +130,7 @@ export function AuthProfileProvider({ children }) {
       refreshProfile,
       retryProfile,
     }
-  }, [authState, refreshProfile, retryProfile])
+  }, [authState, loginKey, refreshProfile, retryProfile])
 
   return <AuthProfileContext.Provider value={value}>{children}</AuthProfileContext.Provider>
 }

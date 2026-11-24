@@ -6,7 +6,6 @@ import MobileNav from '../components/MobileNav'
 import CommunityTabs from '../components/CommunityTabs'
 import AppIcon from '../components/AppIcon'
 import UserAvatar from '../components/UserAvatar'
-import CrisisAccessButton from '../components/CrisisAccessButton'
 import { useAuthProfile } from '../context/AuthProfileContext'
 import { useMediaQuery } from '../hooks'
 import { adminNav, communityPaths, getPageTitle, insurerNav, superAdminNav, therapistNav, userNav, userNavGroups } from '../config/nav.config'
@@ -136,7 +135,7 @@ export default function AppShell({ admin = false }) {
         </div>
       </main>
       {isUserRole && isMobile && <MobileNav onSignOut={handleSignOut} />}
-      {isUserRole && <CrisisAccessButton />}
+
     </div>
   )
 }

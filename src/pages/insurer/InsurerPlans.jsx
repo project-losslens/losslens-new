@@ -164,7 +164,7 @@ export default function InsurerPlans() {
                 <p style={{ color: '#FFFFFF', fontSize: '13px', margin: 0 }}>
                   {plans.find(p => p.id === v.plan_id)?.name || 'Product'} · v{v.version_no}
                 </p>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>
+                <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: 0 }}>
                   {v.benefit_structure.replace(/_/g, ' ')} · KES {Number(v.premium_amount || 0).toLocaleString()}/{v.premium_frequency}
                   {v.terms?.policy_term_months ? ` · ${v.terms.policy_term_months}mo term` : ''}
                   {v.terms?.waiting_period_days ? ` · ${v.terms.waiting_period_days}d wait` : ''}
@@ -187,7 +187,7 @@ export default function InsurerPlans() {
               )}
             </div>
             {versionBenefits(v.id).length > 0 && (
-              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '11px', margin: '6px 0 0' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: '6px 0 0' }}>
                 {versionBenefits(v.id).map(b => `${b.benefit_code}: ${b.benefit_type.replace(/_/g, ' ')}`).join(' · ')}
               </p>
             )}

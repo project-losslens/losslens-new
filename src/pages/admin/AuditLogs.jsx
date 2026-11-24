@@ -150,7 +150,7 @@ export default function AuditLogs() {
   if (loading) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
@@ -167,7 +167,7 @@ export default function AuditLogs() {
   if (error) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
@@ -184,7 +184,7 @@ export default function AuditLogs() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}> Audit Logs</h1>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}> Audit Logs</h2>
             <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>{logs.length} events  · Live monitoring</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -216,7 +216,7 @@ export default function AuditLogs() {
           <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
             {/* Table filter */}
             <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
-              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginRight: '4px' }}>Table:</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: '11px', marginRight: '4px' }}>Table:</span>
               {TABLES.map(t => (
                 <button key={t} onClick={() => setFilter(t)} style={btnStyle(filter === t, 'var(--primary)')}>
                   {t === 'all' ? 'All' : t.replace(/_/g, ' ')}
@@ -225,7 +225,7 @@ export default function AuditLogs() {
             </div>
             {/* Action filter */}
             <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
-              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginRight: '4px' }}>Action:</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: '11px', marginRight: '4px' }}>Action:</span>
               {ACTIONS.map(a => (
                 <button key={a} onClick={() => setActionFilter(a)} style={btnStyle(actionFilter === a, actionColor(a).color)}>
                   {a === 'all' ? 'All' : a}
@@ -236,7 +236,7 @@ export default function AuditLogs() {
 
           {/* Log list */}
           {filteredLogs.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
               <AppIcon name="document" size={48} style={{ display: 'block', margin: '0 auto 12px' }} />
               <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No logs found.</p>
             </div>
@@ -253,8 +253,8 @@ export default function AuditLogs() {
                           {log.action}
                         </span>
                         <span style={{ color: 'var(--primary)', fontSize: '12px', fontWeight: 500 }}>{log.target_table?.replace(/_/g, ' ')}</span>
-                        {log.target_id && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontFamily: 'monospace' }}>ID: {log.target_id.slice(0, 12)}</span>}
-                        <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{fmtDateTime(log.created_at)}</span>
+                        {log.target_id && <span style={{ color: 'var(--text-muted)', fontSize: '11px', fontFamily: 'monospace' }}>ID: {log.target_id.slice(0, 12)}</span>}
+                        <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{fmtDateTime(log.created_at)}</span>
                       </div>
                       <button onClick={() => toggleExpand(log.id)} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
                         {isExpanded ? '▲ Hide' : '▼ Details'}
@@ -265,7 +265,7 @@ export default function AuditLogs() {
                         {log.actor_id && <span style={{ color: 'var(--primary)', fontSize: '11px' }}> {log.actor_id}</span>}
                         {log.metadata && (
                           <div style={{ flex: 1, minWidth: '200px' }}>
-                            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 500 }}> Metadata:</span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '11px', fontWeight: 500 }}> Metadata:</span>
                             <pre style={{ color: 'var(--info)', fontSize: '11px', margin: '4px 0 0', whiteSpace: 'pre-wrap', wordBreak: 'break-all', background: 'var(--bg)', padding: '8px 10px', borderRadius: '6px', maxHeight: '200px', overflowY: 'auto' }}>
                               {JSON.stringify(log.metadata, null, 2)}
                             </pre>

@@ -290,12 +290,12 @@ function CBTModules() {
                 <span style={{ color: badgeEarned.color, fontSize: '16px', fontWeight: 600 }}>{badgeEarned.name} Badge!</span>
               </div>
             )}
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '20px' }}>Tap anywhere to dismiss</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '11px', marginTop: '20px' }}>Tap anywhere to dismiss</p>
           </div>
         )}
 
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
-          <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> CBT Modules</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{allCompleted ? 'All complete! ' : `${completedCount} of ${modules.length} completed`}</p></div>
+          <div><h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> CBT Modules</h2><p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{allCompleted ? 'All complete! ' : `${completedCount} of ${modules.length} completed`}</p></div>
           <span style={{ fontSize: '14px', color: 'var(--primary)', fontWeight: 600 }}>{Math.round((completedCount / modules.length) * 100)}%</span>
         </div>
 
@@ -305,7 +305,7 @@ function CBTModules() {
             Progress is checked and saved securely.
           </p>
           <div className="dash-section" style={{ marginBottom: '1rem' }}><div className="progress-bar-wrap"><div className="progress-bar"><div className="progress-fill" style={{ width: `${(completedCount / modules.length) * 100}%`, transition: 'width 0.8s ease' }} /></div><span className="progress-label">{Math.round((completedCount / modules.length) * 100)}%</span></div>
-            {progressError && <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', marginTop: '8px', textAlign: 'center' }}>Could not load your progress.             <button type="button" className="clickable" onClick={() => { void fetchProgress() }} style={{ color: 'var(--secondary)', padding: 0, font: 'inherit' }}>Try again</button></p>}
+            {progressError && <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginTop: '8px', textAlign: 'center' }}>Could not load your progress.             <button type="button" className="clickable" onClick={() => { void fetchProgress() }} style={{ color: 'var(--secondary)', padding: 0, font: 'inherit' }}>Try again</button></p>}
           </div>
 
           {allCompleted && (
@@ -344,14 +344,14 @@ function CBTModules() {
                         <p className="module-meta">{m.duration}  · {m.lessons.length} lessons</p>
                         <p className="module-desc">{completed ? m.description : m.preview}</p>
                       </div>
-                      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '18px', transition: 'transform 0.2s', transform: isActive ? 'rotate(180deg)' : 'rotate(0)' }}>▼</span>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '18px', transition: 'transform 0.2s', transform: isActive ? 'rotate(180deg)' : 'rotate(0)' }}>▼</span>
                     </div>
 
                     {isActive && !isLessonActive && (
                       <div className="module-expanded" style={{ animation: 'fadeIn 0.3s ease-out' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginBottom: '12px' }}>
-                          <div style={{ background: 'var(--bg)', padding: '12px', borderRadius: '8px' }}><p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginBottom: '4px', textTransform: 'uppercase' }}>How this helps</p><p style={{ fontSize: '12px', color: 'var(--secondary)', lineHeight: '1.5', margin: 0 }}>{m.howItHelps}</p></div>
-                          <div style={{ background: 'var(--bg)', padding: '12px', borderRadius: '8px' }}><p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginBottom: '4px', textTransform: 'uppercase' }}>After this module</p><p style={{ fontSize: '12px', color: 'var(--secondary)', lineHeight: '1.5', margin: 0 }}>{m.outcome}</p></div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '10px', marginBottom: '12px' }}>
+                          <div style={{ background: 'var(--bg)', padding: '12px', borderRadius: '8px' }}><p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>How this helps</p><p style={{ fontSize: '12px', color: 'var(--secondary)', lineHeight: '1.5', margin: 0 }}>{m.howItHelps}</p></div>
+                          <div style={{ background: 'var(--bg)', padding: '12px', borderRadius: '8px' }}><p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>After this module</p><p style={{ fontSize: '12px', color: 'var(--secondary)', lineHeight: '1.5', margin: 0 }}>{m.outcome}</p></div>
                         </div>
                         <div className="lessons-list">{m.lessons.map((l, i) => (
                           <div key={i} className="lesson-item" style={{ cursor: 'pointer', padding: '10px', borderRadius: '8px' }}
@@ -361,7 +361,7 @@ function CBTModules() {
                             role="button" tabIndex={0}
                             onKeyDown={e => { if (e.key === 'Enter') void openLesson(m.id, i) }}
                           >
-                            <span className="lesson-num">{i + 1}</span><div style={{ flex: 1 }}><span className="lesson-text">{l.title}</span><span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', display: 'block' }}>{l.readTime}</span></div><span style={{ color: 'rgba(255,255,255,0.4)' }}>→</span>
+                            <span className="lesson-num">{i + 1}</span><div style={{ flex: 1 }}><span className="lesson-text">{l.title}</span><span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>{l.readTime}</span></div><span style={{ color: 'var(--text-muted)' }}>→</span>
                           </div>
                         ))}</div>
                         {!completed && (() => {
@@ -394,7 +394,7 @@ function CBTModules() {
                       <div className="module-expanded" style={{ animation: 'fadeIn 0.3s ease-out' }}>
                         <button onClick={() => setActiveLesson(null)} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontSize: '13px', cursor: 'pointer' }}>← Back</button>
                         <div style={{ background: 'var(--bg)', borderRadius: '12px', padding: '20px', border: '1px solid rgba(255,255,255,0.12)', margin: '12px 0' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}><span style={{ fontSize: '11px', color: 'var(--primary)' }}>Lesson {activeLesson.lessonIndex + 1}/{m.lessons.length}</span><span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>{m.lessons[activeLesson.lessonIndex].readTime}</span></div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}><span style={{ fontSize: '11px', color: 'var(--primary)' }}>Lesson {activeLesson.lessonIndex + 1}/{m.lessons.length}</span><span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{m.lessons[activeLesson.lessonIndex].readTime}</span></div>
                           <h3 style={{ color: '#FFFFFF', fontSize: '16px', marginBottom: '16px', fontFamily: 'var(--font-display)' }}>{m.lessons[activeLesson.lessonIndex].title}</h3>
                           <div style={{ color: 'var(--secondary)', fontSize: '13px', lineHeight: '1.8', fontWeight: 300, whiteSpace: 'pre-line' }}>{m.lessons[activeLesson.lessonIndex].content}</div>
                           <div style={{ marginTop: '20px', padding: '14px', background: 'rgba(255,255,255,0.12)', borderRadius: '8px', border: '1px dashed var(--secondary)' }}><p style={{ fontSize: '11px', color: 'var(--primary)', marginBottom: '6px' }}> Reflection</p><p style={{ fontSize: '13px', color: 'var(--primary)', lineHeight: '1.6', fontStyle: 'italic', margin: 0 }}>{m.lessons[activeLesson.lessonIndex].reflection}</p></div>

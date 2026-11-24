@@ -53,7 +53,7 @@ function buildEncryptedReportPage(payload) {
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LossLens Recovery Report (encrypted)</title>
 <style>body{font-family:system-ui,sans-serif;background:#0A1A12;color:#fff;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:1rem}main{max-width:420px;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:2rem;text-align:center}input{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:#0A1A12;color:#fff;font-size:16px;box-sizing:border-box;margin:12px 0}button{width:100%;padding:12px;border:none;border-radius:8px;background:#4ADE80;color:#06140C;font-weight:600;font-size:15px;cursor:pointer}#err{color:#FF8A80;font-size:13px;min-height:1.2em;margin-top:10px}</style></head><body>
-<main><h1 style="font-size:20px;color:#4ADE80;margin:0 0 8px">LossLens Recovery Report</h1>
+<main><h2 style="font-size:20px;color:#4ADE80;margin:0 0 8px">LossLens Recovery Report</h2>
 <p style="color:rgba(255,255,255,.6);font-size:13px;margin:0 0 16px">This report is encrypted. Enter the passphrase you were given to view it.</p>
 <input id="pw" type="password" autocomplete="off" placeholder="Enter passphrase" aria-label="Report passphrase">
 <button id="go">Unlock report</button>
@@ -296,7 +296,7 @@ export default function Profile() {
   @media print { body { padding: 0; } .stat-card { break-inside: avoid; } }
   @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } body { padding: 1rem; } }
 </style></head><body>
-<div class="header"><svg class="mark" viewBox="0 0 100 100" aria-label="LossLens mark">${Array.from({ length: 8 }, (_, i) => `<ellipse cx="50" cy="26" rx="9" ry="20" fill="${i % 2 === 0 ? '#4ADE80' : '#86EFAC'}" opacity=".9" transform="rotate(${i * 45} 50 50)"/>`).join('')}<circle cx="50" cy="50" r="12" stroke="#86EFAC" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="4" fill="#4ADE80"/></svg><div><h1>LossLens Recovery Report</h1><p class="subtitle">Generated ${today}</p><p class="confidential">Private recovery information · Share only with your consent</p></div></div>
+<div class="header"><svg class="mark" viewBox="0 0 100 100" aria-label="LossLens mark">${Array.from({ length: 8 }, (_, i) => `<ellipse cx="50" cy="26" rx="9" ry="20" fill="${i % 2 === 0 ? '#4ADE80' : '#86EFAC'}" opacity=".9" transform="rotate(${i * 45} 50 50)"/>`).join('')}<circle cx="50" cy="50" r="12" stroke="#86EFAC" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="4" fill="#4ADE80"/></svg><div><h2>LossLens Recovery Report</h2><p class="subtitle">Generated ${today}</p><p class="confidential">Private recovery information · Share only with your consent</p></div></div>
 <h2>Client Information</h2>
 <div class="info-grid">
   <div class="info-item"><strong>Full Name:</strong> ${reportName}</div>
@@ -478,15 +478,15 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
     if (deleteInput !== 'DELETE') { toast.error('Type DELETE to confirm', 2000); return }
     setDeletingAccount(true)
     try {
-      const { error: deleteError } = await supabase.functions.invoke('delete-account', { body: { action: 'self-delete' } })
-      if (deleteError) throw deleteError
+      const { data: deletion, error: deleteError } = await supabase.functions.invoke('delete-account', { body: { action: 'self-delete' } })
+      if (deleteError || deletion?.success !== true) throw deleteError || new Error('Account deletion was not confirmed')
       const { error: signOutError } = await supabase.auth.signOut({ scope: 'local' })
       clearAuthStorage()
       if (signOutError) console.error('Account was deleted, but local sign-out returned an error:', signOutError)
       navigate('/', { replace: true })
     } catch (err) {
       console.error('Account deletion failed:', err)
-      toast.error('Delete failed. Try again.', 2000)
+      toast.error(err.message || 'Deletion could not be completed. Contact support before retrying.', 5000)
       setDeletingAccount(false)
     }
   }
@@ -535,7 +535,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
   if (profileError) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-        <p className="fs-14" style={{ color: 'rgba(255,255,255,0.55)', marginBottom: '12px' }}>Could not load your profile.</p>
+        <p className="fs-14" style={{ color: 'var(--text-muted)', marginBottom: '12px' }}>Could not load your profile.</p>
         <button type="button" className="btn-primary" onClick={() => { setLoadingProfile(true); setProfileError(false); fetchAllData() }}>Try again</button>
       </div>
     )
@@ -547,8 +547,8 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
 
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem',  }}>
           <div>
-            <h1 className="fs-16" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}>My Profile</h1>
-            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{fullName || 'Complete your profile'}</p>
+            <h2 className="fs-16" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}>My Profile</h2>
+            <p className="fs-12" style={{ color: 'var(--text-muted)', margin: '2px 0 0' }}>{fullName || 'Complete your profile'}</p>
           </div>
         </div>
 
@@ -565,7 +565,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
               <div className="stat-card" key={i} style={{ padding: '10px 8px', textAlign: 'center', minHeight: '70px' }}>
                 <span className="fs-16">{s.icon}</span>
                 <span className="fs-14" style={{ display: 'block', fontWeight: 700, color: 'var(--primary)', fontFamily: 'var(--font-display)' }}>{s.value}</span>
-                <span className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>{s.label}</span>
+                <span className="fs-12" style={{ color: 'var(--text-muted)' }}>{s.label}</span>
               </div>
             ))}
           </div>
@@ -595,13 +595,13 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
 
             <p className="fs-12" style={{ color: 'var(--secondary)', lineHeight: '1.5', marginBottom: '12px' }}>Your professional recovery report is encrypted with a passphrase. Share the passphrase separately from the file.</p>
             <div style={{ background: 'var(--bg)', border: '1px solid var(--secondary)', borderRadius: '10px', padding: '12px', marginBottom: '10px', textAlign: 'center' }}>
-              <p className="fs-11" style={{ color: 'rgba(255,255,255,0.5)', margin: '0 0 6px' }}>Report passphrase</p>
+              <p className="fs-11" style={{ color: 'var(--text-muted)', margin: '0 0 6px' }}>Report passphrase</p>
               <p className="fs-22" style={{ color: '#F2C879', fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: '3px', margin: '0 0 8px' }}>{reportPassphrase}</p>
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                 <button type="button" onClick={() => { void copyPassphrase() }} disabled={!reportPassphrase} className="fs-11" style={{ padding: '6px 12px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '32px' }}>Copy</button>
-                <button type="button" onClick={generateNewReportPassphrase} disabled={!reportPassphrase} className="fs-11" style={{ padding: '6px 12px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '32px' }}>Generate new passphrase</button>
+                <button type="button" onClick={generateNewReportPassphrase} disabled={!reportPassphrase} className="fs-11" style={{ padding: '6px 12px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--text-muted)', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '32px' }}>Generate new passphrase</button>
               </div>
-              <p className="fs-10" style={{ color: 'rgba(255,255,255,0.4)', margin: '8px 0 0' }}>Share this passphrase in person or by phone, not in the same message as the file.</p>
+              <p className="fs-10" style={{ color: 'var(--text-muted)', margin: '8px 0 0' }}>Share this passphrase in person or by phone, not in the same message as the file.</p>
             </div>
             <button onClick={() => { void downloadRecoveryReport() }} disabled={generatingReport || !reportPassphrase} className="fs-12" style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
               {generatingReport ? <BrandLoader variant="inline" showWordmark={false} /> : 'Download Report'}
@@ -622,7 +622,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
                 <div style={{ position: 'relative', display: 'inline-block' }}>
                   <button type="button" className="card-action" aria-label="Change avatar" onClick={() => fileInputRef.current?.click()} style={{ borderRadius: '50%' }} />
                   {avatarUrl && avatarUrl.startsWith('http') ? <img src={avatarUrl} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }} />
-                  : <div className="fs-28" style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), var(--secondary))', border: '2px solid var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: 'var(--primary)', fontFamily: 'var(--font-display)' }}>{initials}</div>}
+                  : <div className="fs-28" style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgb(var(--secondary-rgb) / 0.12))', border: '2px solid var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: 'var(--primary)', fontFamily: 'var(--font-display)' }}>{initials}</div>}
                   <div className="fs-12" style={{ position: 'absolute', bottom: '0', right: '0', background: 'var(--primary)', color: 'var(--on-primary)', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--bg)' }}><AppIcon name="camera" size={12} /></div>
                 </div>
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarFileSelect} style={{ display: 'none' }} />
@@ -657,7 +657,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
               </div>
               <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
                 <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Appearance</h3>
-                <div className="toggle-row"><span className="toggle-label">{t('profile.lowData')}<br /><span className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('profile.lowDataHint')}</span></span><input type="checkbox" className="toggle-check" checked={prefs.low_data_mode} onChange={e => setPrefs(prev => ({ ...prev, low_data_mode: e.target.checked }))} /></div>
+                <div className="toggle-row"><span className="toggle-label">{t('profile.lowData')}<br /><span className="fs-12" style={{ color: 'var(--text-muted)' }}>{t('profile.lowDataHint')}</span></span><input type="checkbox" className="toggle-check" checked={prefs.low_data_mode} onChange={e => setPrefs(prev => ({ ...prev, low_data_mode: e.target.checked }))} /></div>
               </div>
               <button className="btn-primary full fs-12" onClick={savePrefs} disabled={savingPrefs} style={{ padding: '10px', minHeight: '44px' }}>{savingPrefs ? 'Saving...' : 'Save preferences'}</button>
             </>
@@ -667,7 +667,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
           {activeTab === TABS.SECURITY && (
             <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
               <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Change password</h3>
-              <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '0.75rem' }}>Enter your current password and set a new one.</p>
+              <p className="fs-12" style={{ color: 'var(--text-muted)', marginBottom: '0.75rem' }}>Enter your current password and set a new one.</p>
               {['current','next','confirm'].map(field => (
                 <div className="form-group" key={field}><label>{field === 'current' ? 'Current' : field === 'next' ? 'New (min 8 chars)' : 'Confirm'}</label><input type="password" placeholder="Enter password" value={passwords[field]} onChange={e => setPasswords({ ...passwords, [field]: e.target.value })} /></div>
               ))}
@@ -679,7 +679,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
               ) : mfaEnrollment ? (
                 <div>
                   {mfaEnrollment.totp?.qr_code && <img src={mfaEnrollment.totp.qr_code} alt="Scan this QR code with your authenticator app" style={{ display: 'block', width: '160px', maxWidth: '100%', margin: '12px auto', background: '#FFFFFF', padding: '8px', borderRadius: '8px' }} />}
-                  <p className="fs-12" style={{ color: 'rgba(255,255,255,0.6)', wordBreak: 'break-all' }}>Manual setup key: {mfaEnrollment.totp?.secret}</p>
+                  <p className="fs-12" style={{ color: 'var(--text-muted)', wordBreak: 'break-all' }}>Manual setup key: {mfaEnrollment.totp?.secret}</p>
                   <div className="form-group"><label htmlFor="mfa-code">6-digit authenticator code</label><input id="mfa-code" inputMode="numeric" autoComplete="one-time-code" value={mfaCode} onChange={event => setMfaCode(event.target.value)} /></div>
                   <button className="btn-primary full" type="button" onClick={verifyMfaEnrollment} disabled={mfaLoading || !mfaCode.trim()}>{mfaLoading ? 'Verifying...' : 'Verify and enable'}</button>
                 </div>
@@ -694,7 +694,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
           {activeTab === TABS.DATA && (
             <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: 'rgba(255,255,255,0.08)' }}>
               <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Delete my data</h3>
-              <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', lineHeight: '1.5', marginBottom: '0.75rem' }}>Permanently delete your profile, diary entries ({stats.totalEntries}), and all data.</p>
+              <p className="fs-12" style={{ color: 'var(--text-muted)', lineHeight: '1.5', marginBottom: '0.75rem' }}>Permanently delete your profile, diary entries ({stats.totalEntries}), and all data.</p>
               {!showDeleteConfirm ? (
                 <button className="btn-danger full fs-12" style={{ padding: '10px', minHeight: '44px' }} onClick={() => setShowDeleteConfirm(true)}>I want to delete my data</button>
               ) : (

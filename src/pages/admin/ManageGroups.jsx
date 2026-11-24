@@ -1,3 +1,4 @@
+import { checkedMutation } from '../../lib/mutations'
 import { toast } from '../../components/ToastProvider'
 import NumberField from '../../components/NumberField'
 import { useState, useEffect, useCallback, useMemo } from 'react'
@@ -88,8 +89,8 @@ export default function ManageGroups() {
     }
     try {
       const { error: saveError } = editingGroup
-        ? await supabase.from('groups').update(payload).eq('id', editingGroup.id)
-        : await supabase.from('groups').insert(payload)
+        ? await checkedMutation(supabase.from('groups').update(payload).eq('id', editingGroup.id).select('*'))
+        : await checkedMutation(supabase.from('groups').insert(payload).select('*'))
       if (saveError) throw saveError
       toast.success(editingGroup ? 'Group updated!' : 'Group created!')
       setShowForm(false)
@@ -102,7 +103,7 @@ export default function ManageGroups() {
     const newActive = !g.active
     //  Optimistic update
     setGroups(prev => prev.map(item => item.id === g.id ? { ...item, active: newActive } : item))
-    const { error: toggleError } = await supabase.from('groups').update({ active: newActive }).eq('id', g.id)
+    const { error: toggleError } = await checkedMutation(supabase.from('groups').update({ active: newActive }).eq('id', g.id).select('*'))
     if (toggleError) {
       setGroups(prev => prev.map(item => item.id === g.id ? { ...item, active: !newActive } : item))
       toast.error('Update failed.')
@@ -113,7 +114,7 @@ export default function ManageGroups() {
 
   const handleDelete = async (id) => {
     setDeleting(true)
-    const { error: delError } = await supabase.from('groups').delete().eq('id', id)
+    const { error: delError } = await checkedMutation(supabase.from('groups').delete().eq('id', id).select('*'))
     if (delError) {
       toast.error('Delete failed.')
     } else {
@@ -147,7 +148,7 @@ export default function ManageGroups() {
   if (loading) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
@@ -164,7 +165,7 @@ export default function ManageGroups() {
   if (error) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
@@ -181,7 +182,7 @@ export default function ManageGroups() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}> Manage Groups</h1>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}> Manage Groups</h2>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{groups.length} total  · {activeCount} active</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -198,17 +199,17 @@ export default function ManageGroups() {
               <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 1.25rem' }}>{editingGroup ? ' Edit Group' : ' New Group'}</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div>
-                  <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Group Name *</label>
+                  <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Group Name *</label>
                   <input type="text" value={form.name} onChange={e => { setForm(p => ({ ...p, name: e.target.value })); setFormErrors(p => ({ ...p, name: '' })) }} style={{ ...inputStyle, borderColor: formErrors.name ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="e.g. Nairobi Recovery Circle" />
                   {formErrors.name && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{formErrors.name}</span>}
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
                   <div>
-                    <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Facilitator</label>
+                    <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Facilitator</label>
                     <input type="text" value={form.facilitator} onChange={e => setForm(p => ({ ...p, facilitator: e.target.value }))} style={inputStyle} placeholder="Full name" />
                   </div>
                   <div>
-                    <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Category</label>
+                    <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Category</label>
                     <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} style={{ ...inputStyle, cursor: 'pointer' }}>
                       <option value="">General</option>
                       <option value="Mens">Men's Group</option>
@@ -222,26 +223,26 @@ export default function ManageGroups() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
                   <div>
-                    <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Meeting Schedule</label>
+                    <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Meeting Schedule</label>
                     <input type="text" value={form.meets} onChange={e => setForm(p => ({ ...p, meets: e.target.value }))} style={inputStyle} placeholder="e.g. Every Saturday 2pm" />
                   </div>
                   <div>
-                    <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Max Members</label>
+                    <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Max Members</label>
                     <NumberField value={form.max_members} onChange={(max_members) => { setForm((current) => ({ ...current, max_members: max_members ?? '' })); setFormErrors((current) => ({ ...current, max_members: '' })) }} wrapperStyle={{ ...inputStyle, borderColor: formErrors.max_members ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="e.g. 20" inputMode="numeric" min={1} step={1} />
                     {formErrors.max_members && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{formErrors.max_members}</span>}
                   </div>
                 </div>
                 <div>
-                  <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Location / Link</label>
+                  <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Location / Link</label>
                   <input type="text" value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))} style={inputStyle} placeholder="Zoom link or physical address" />
                 </div>
                 <div>
-                  <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Description</label>
+                  <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Description</label>
                   <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3} style={{ ...inputStyle, resize: 'vertical' }} placeholder="What this group is about..." />
                 </div>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input type="checkbox" checked={form.active} onChange={e => setForm(p => ({ ...p, active: e.target.checked }))} style={{ accentColor: 'var(--primary)', width: '16px', height: '16px' }} />
-                  <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Active</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>Active</span>
                 </label>
                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                   <button onClick={() => setShowForm(false)} style={btnStyle('transparent', 'rgba(255,255,255,0.4)', 'rgba(255,255,255,0.12)')}>Cancel</button>
@@ -257,7 +258,7 @@ export default function ManageGroups() {
           <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <div style={{ position: 'relative', flex: '0 0 auto' }}>
               <input type="text" placeholder=" Search groups..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ ...inputStyle, width: '240px', paddingRight: '32px', borderRadius: '100px' }} />
-              {searchQuery && <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '14px', padding: '4px 6px' }}></button>}
+              {searchQuery && <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '14px', padding: '4px 6px' }}></button>}
             </div>
             <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{ ...inputStyle, width: 'auto', minWidth: '120px', cursor: 'pointer', borderRadius: '100px' }}>
               <option value={SORT_OPTIONS.NEWEST}>Newest</option>
@@ -267,7 +268,7 @@ export default function ManageGroups() {
           </div>
 
           {filteredGroups.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
               <AppIcon name="users" size={48} style={{ display: 'block', margin: '0 auto 12px' }} />
               <p style={{ color: 'var(--primary)', fontSize: '14px' }}>{debouncedSearch ? 'No groups match your search.' : 'No groups yet. Create your first support group.'}</p>
               {debouncedSearch && <button onClick={() => setSearchQuery('')} style={{ marginTop: '10px', padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Clear search</button>}
@@ -285,14 +286,14 @@ export default function ManageGroups() {
                         <span style={{ background: g.active ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.08)', color: g.active ? 'var(--primary)' : 'var(--text)', border: `1px solid ${g.active ? 'var(--primary)' : 'rgba(255,255,255,0.08)'}`, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{g.active ? 'Active' : 'Inactive'}</span>
                         {g.category && <span style={{ background: 'var(--bg)', color: 'var(--info)', border: '1px solid rgb(var(--primary-rgb) / 0.15)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{g.category}</span>}
                       </div>
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '12px', margin: '0 0 4px' }}>
                          {g.facilitator || 'No facilitator'}  ·  {g.meets || 'Schedule TBD'}
                       </p>
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '12px', margin: '0 0 4px' }}>
                          {g.location || 'Location TBD'}  ·  {g.max_members ? `${g.max_members} max` : 'Unlimited'}
                       </p>
                       {g.description && (
-                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '4px 0 0', lineHeight: '1.4' }}>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: '4px 0 0', lineHeight: '1.4' }}>
                           {g.description.length > 120 ? (
                             <span title={g.description}>{g.description.substring(0, 120)}"¦</span>
                           ) : g.description}
@@ -325,7 +326,7 @@ export default function ManageGroups() {
               Permanently delete <strong style={{ color: 'var(--primary)' }}>"{showDeleteConfirm.name}"</strong>? This cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
               <button onClick={() => handleDelete(showDeleteConfirm.id)} disabled={deleting} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{deleting ? 'Deleting...' : 'Delete'}</button>
             </div>
           </div>

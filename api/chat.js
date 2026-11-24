@@ -1,6 +1,7 @@
+import { crisisOutcome } from './_lib/crisis.js'
 /* global process */
 
-import { detectCrisis, CRISIS_HELPLINE } from '../src/lib/crisisDetection.js'
+import { detectCrisis } from '../src/lib/crisisDetection.js'
 import { getEntitlements } from '../src/lib/entitlements.js'
 import { OLOO_KNOWLEDGE, OLOO_ACTION_PROTOCOL } from './_lib/oloo/knowledge.js'
 import { extractAction } from './_lib/oloo/protocol.js'
@@ -18,8 +19,6 @@ const QUOTA_PER_DAY = Number(process.env.CHAT_QUOTA_PER_DAY || 150)
 const QUOTA_PRIORITY_PER_HOUR = Number(process.env.CHAT_QUOTA_PRIORITY_PER_HOUR || 90)
 const QUOTA_PRIORITY_PER_DAY = Number(process.env.CHAT_QUOTA_PRIORITY_PER_DAY || 400)
 
-// TODO(owner): verify the helpline numbers below are current before release.
-const CRISIS_REPLY = `I'm really concerned about you. If you may be in immediate danger, please reach out now — ${CRISIS_HELPLINE}, or NACADA at 1192. You can also use the crisis resources inside LossLens. You matter and you are not alone.`
 
 const BASE_SYSTEM_PROMPT = `You are Oloo, a warm, perceptive gambling-recovery companion built into LossLens in Kenya.
 
@@ -143,6 +142,21 @@ async function fetchUserContext(auth) {
     const modules = await cbtResponse.json()
     if (modules?.length) context += ` CBT modules completed: ${modules.length}.`
   }
+  let pgsi = null
+  try {
+    const response = await fetchWithTimeout(`${auth.supabaseUrl}/rest/v1/rpc/pgsi_oloo_context`, {
+      method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: '{}',
+    }, 5000)
+    if (response.ok) {
+      const value = await response.json()
+      if (['none','low','moderate','high'].includes(value?.band) && Number.isFinite(Date.parse(value.completed_at))) {
+        pgsi = { band: value.band, completed_at: new Date(value.completed_at).toISOString() }
+      }
+    }
+  } catch { /* Fail closed for PGSI personalization; never log assessment data. */ }
+  context += pgsi
+    ? ` Optional PGSI context explicitly enabled by the member: band=${pgsi.band}, completed=${pgsi.completed_at}. Use this lightly for tone and relevant support. Listen to the current message. Do not bring up the score every time, repeat the questionnaire, infer a diagnosis, compare weekly changes, decide cover eligibility, or notify anyone.`
+    : ' PGSI personalization is off or unavailable. Do not use or infer stored PGSI information from earlier conversation history. Respond to what the person says now.'
   return context
 }
 
@@ -343,38 +357,6 @@ async function fetchChatHistory(auth) {
 }
 
 // Crisis responses are returned only after the alert and voucher pipeline succeeds.
-async function recordCrisisAlert(auth, message, keywords) {
-  try {
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    if (!serviceKey) throw new Error('CRISIS_PIPELINE_NOT_CONFIGURED')
-    const key = serviceKey
-    const token = serviceKey
-    const headers = {
-      apikey: key,
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    }
-    const alertResponse = await fetchWithTimeout(`${auth.supabaseUrl}/rest/v1/rpc/record_crisis_event`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        p_user_id: auth.user.id,
-        p_keywords: keywords,
-        p_context: String(message).slice(0, 500),
-        p_source: 'chat',
-        p_max_sessions: 1,
-      }),
-    }, REQUEST_TIMEOUT_MS)
-    if (!alertResponse.ok) {
-      console.error('crisis event recording failed:', alertResponse.status, await alertResponse.text())
-      throw new Error('CRISIS_EVENT_RECORDING_FAILED')
-    }
-  } catch (error) {
-    console.error('crisis event recording failed:', error?.message || error)
-    throw error
-  }
-}
-
 export default async function handler(request, response) {
   if (request.method !== 'POST') {
     response.setHeader('Allow', 'POST')
@@ -382,9 +364,6 @@ export default async function handler(request, response) {
   }
 
   try {
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return json(response, 500, { error: 'crisis pipeline not configured' })
-    }
 
     const authorization = request.headers.authorization || ''
     const token = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : ''
@@ -410,6 +389,10 @@ export default async function handler(request, response) {
   }
   const message = body.message.trim().slice(0, MAX_MESSAGE_LENGTH)
   if (!message) return json(response, 400, { error: 'A message is required' })
+
+  // Urgent human help is independent of the AI service, consent, history, or quotas.
+  const triage = detectCrisis(message)
+  if (triage.crisis) return json(response, 200, await crisisOutcome(auth, message, triage, 'chat'))
 
   // Consent gate: AI chat sends user context to Groq (US). Require explicit opt-in.
   let profile
@@ -469,19 +452,7 @@ export default async function handler(request, response) {
   let reply
   let pendingAction = null
   let actionPayload = null
-  const crisis = detectCrisis(message)
-  if (crisis.crisis) {
-    reply = CRISIS_REPLY
-    try {
-      await recordCrisisAlert(auth, message, crisis.keywords)
-    } catch (error) {
-      return json(response, 500, {
-        error: error.message === 'CRISIS_PIPELINE_NOT_CONFIGURED'
-          ? 'crisis pipeline not configured'
-          : 'Crisis support could not be activated',
-      })
-    }
-  } else {
+  {
     if (!process.env.GROQ_API_KEY) {
       console.error('Oloo configuration error:', {
         operation: 'chat.groq',

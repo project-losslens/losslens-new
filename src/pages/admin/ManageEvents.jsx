@@ -1,3 +1,4 @@
+import { checkedMutation } from '../../lib/mutations'
 import { toast } from '../../components/ToastProvider'
 import NumberField from '../../components/NumberField'
 import { useState, useEffect, useCallback, useMemo } from 'react'
@@ -107,8 +108,8 @@ export default function ManageEvents() {
     try {
       const payload = { ...form, spots: form.spots ? parseInt(form.spots) : null }
       const { error: saveError } = editingEvent
-        ? await supabase.from('events').update(payload).eq('id', editingEvent.id)
-        : await supabase.from('events').insert(payload)
+        ? await checkedMutation(supabase.from('events').update(payload).eq('id', editingEvent.id).select('*'))
+        : await checkedMutation(supabase.from('events').insert(payload).select('*'))
       if (saveError) throw saveError
       toast.success(editingEvent ? 'Event updated!' : 'Event created!')
       setShowForm(false)
@@ -120,7 +121,7 @@ export default function ManageEvents() {
   const toggleActive = async (ev) => {
     const newActive = !ev.active
     setEvents(prev => prev.map(e => e.id === ev.id ? { ...e, active: newActive } : e))
-    const { error: toggleError } = await supabase.from('events').update({ active: newActive }).eq('id', ev.id)
+    const { error: toggleError } = await checkedMutation(supabase.from('events').update({ active: newActive }).eq('id', ev.id).select('*'))
     if (toggleError) {
       setEvents(prev => prev.map(e => e.id === ev.id ? { ...e, active: !newActive } : e))
       toast.error('Update failed.')
@@ -133,7 +134,7 @@ export default function ManageEvents() {
     setTogglingDiscussion(ev.id)
     const newVal = ev.discussion_enabled === false ? true : false
     setEvents(prev => prev.map(e => e.id === ev.id ? { ...e, discussion_enabled: newVal } : e))
-    const { error } = await supabase.from('events').update({ discussion_enabled: newVal }).eq('id', ev.id)
+    const { error } = await checkedMutation(supabase.from('events').update({ discussion_enabled: newVal }).eq('id', ev.id).select('*'))
     if (error) {
       setEvents(prev => prev.map(e => e.id === ev.id ? { ...e, discussion_enabled: !newVal } : e))
       toast.error('Failed to update.')
@@ -147,13 +148,7 @@ export default function ManageEvents() {
   const deleteEvent = async (id) => {
     setDeleting(true)
     try {
-      // Delete related records first
-      await Promise.all([
-        supabase.from('event_rsvps').delete().eq('event_id', id),
-        supabase.from('event_discussions').delete().eq('event_id', id),
-        supabase.from('event_messages').delete().eq('event_id', id),
-      ])
-      const { error: delError } = await supabase.from('events').delete().eq('id', id)
+      const { error: delError } = await checkedMutation(supabase.from('events').delete().eq('id', id).select('*'))
       if (delError) throw delError
       setEvents(prev => prev.filter(e => e.id !== id))
       toast.success('Event deleted.')
@@ -169,12 +164,12 @@ export default function ManageEvents() {
     setSendingReply(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      const { error: replyError } = await supabase.from('event_discussions').insert({
+      const { error: replyError } = await checkedMutation(supabase.from('event_discussions').insert({
         event_id: eventId,
         user_id: session?.user?.id || null,
         message: reply,
         is_admin_reply: true,
-      })
+      }).select('*'))
       if (replyError) throw replyError
       toast.success('Reply posted!')
       setReplyInputs(prev => ({ ...prev, [discussionId]: '' }))
@@ -184,19 +179,19 @@ export default function ManageEvents() {
   }
 
   const deleteDiscussion = async (id) => {
-    const { error: delError } = await supabase.from('event_discussions').delete().eq('id', id)
+    const { error: delError } = await checkedMutation(supabase.from('event_discussions').delete().eq('id', id).select('*'))
     if (delError) { toast.error('Delete failed.') }
     else { setDiscussions(prev => prev.filter(d => d.id !== id)); toast.success('Message deleted.') }
   }
 
   const deleteContact = async (id) => {
-    const { error: delError } = await supabase.from('event_messages').delete().eq('id', id)
+    const { error: delError } = await checkedMutation(supabase.from('event_messages').delete().eq('id', id).select('*'))
     if (delError) { toast.error('Delete failed.') }
     else { setContacts(prev => prev.filter(c => c.id !== id)); toast.success('Message deleted.') }
   }
 
   const markContactRead = async (id) => {
-    const { error: readError } = await supabase.from('event_messages').update({ read: true }).eq('id', id)
+    const { error: readError } = await checkedMutation(supabase.from('event_messages').update({ read: true }).eq('id', id).select('*'))
     if (!readError) setContacts(prev => prev.map(c => c.id === id ? { ...c, read: true } : c))
   }
 
@@ -222,7 +217,7 @@ export default function ManageEvents() {
   if (loading) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
@@ -239,7 +234,7 @@ export default function ManageEvents() {
   if (error) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
@@ -257,7 +252,7 @@ export default function ManageEvents() {
 
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}> Manage Events</h1>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}> Manage Events</h2>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{events.length} events  · {contacts.length} messages{unreadContacts > 0 ? `  · ${unreadContacts} unread` : ''}</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -273,51 +268,51 @@ export default function ManageEvents() {
               <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 1.25rem' }}>{editingEvent ? ' Edit Event' : ' New Event'}</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div>
-                  <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Title *</label>
+                  <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Title *</label>
                   <input type="text" value={form.title} onChange={e => { setForm(p => ({ ...p, title: e.target.value })); setFormErrors(p => ({ ...p, title: '' })) }} style={{ ...inputStyle, borderColor: formErrors.title ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="e.g. Weekly Support Group" />
                   {formErrors.title && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{formErrors.title}</span>}
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '10px' }}>
                   <div>
-                    <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Date & Time *</label>
+                    <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Date & Time *</label>
                     <input type="datetime-local" value={form.date} onChange={e => { setForm(p => ({ ...p, date: e.target.value })); setFormErrors(p => ({ ...p, date: '' })) }} style={{ ...inputStyle, borderColor: formErrors.date ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} />
                     {formErrors.date && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{formErrors.date}</span>}
                   </div>
                   <div>
-                    <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Type</label>
+                    <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Type</label>
                     <select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))} style={{ ...inputStyle, cursor: 'pointer' }}>
                       {EVENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '10px' }}>
                   <div>
-                    <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Location</label>
+                    <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Location</label>
                     <input type="text" value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))} style={inputStyle} placeholder="e.g. Nairobi CBD" />
                   </div>
                   <div>
-                    <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Spots (min 1)</label>
+                    <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Spots (min 1)</label>
                     <NumberField value={form.spots} onChange={(spots) => { setForm((current) => ({ ...current, spots: spots ?? '' })); setFormErrors((current) => ({ ...current, spots: '' })) }} wrapperStyle={{ ...inputStyle, borderColor: formErrors.spots ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="e.g. 50" inputMode="numeric" min={1} step={1} />
                     {formErrors.spots && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{formErrors.spots}</span>}
                   </div>
                 </div>
                 <div>
-                  <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Image URL</label>
+                  <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Image URL</label>
                   <input type="text" value={form.image_url} onChange={e => { setForm(p => ({ ...p, image_url: e.target.value })); setFormErrors(p => ({ ...p, image_url: '' })) }} style={{ ...inputStyle, borderColor: formErrors.image_url ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="https://..." />
                   {formErrors.image_url && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{formErrors.image_url}</span>}
                 </div>
                 <div>
-                  <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Description</label>
+                  <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Description</label>
                   <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={4} style={{ ...inputStyle, resize: 'vertical' }} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input type="checkbox" checked={form.active} onChange={e => setForm(p => ({ ...p, active: e.target.checked }))} style={{ accentColor: 'var(--primary)', width: '16px', height: '16px' }} />
-                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Active (visible to users)</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>Active (visible to users)</span>
                   </label>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input type="checkbox" checked={form.discussion_enabled} onChange={e => setForm(p => ({ ...p, discussion_enabled: e.target.checked }))} style={{ accentColor: 'var(--primary)', width: '16px', height: '16px' }} />
-                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Discussion enabled</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>Discussion enabled</span>
                   </label>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
@@ -340,7 +335,7 @@ export default function ManageEvents() {
                 Permanently delete <strong style={{ color: 'var(--primary)' }}>"{showDeleteConfirm.title}"</strong> and ALL its RSVPs, discussions, and messages? This cannot be undone.
               </p>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+                <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
                 <button onClick={() => deleteEvent(showDeleteConfirm.id)} disabled={deleting} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{deleting ? 'Deleting...' : 'Delete All'}</button>
               </div>
             </div>
@@ -366,13 +361,13 @@ export default function ManageEvents() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '8px', flexWrap: 'wrap' }}>
                 <div style={{ position: 'relative' }}>
                   <input type="text" placeholder=" Search events..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ ...inputStyle, width: '260px', borderRadius: '100px', paddingRight: '32px' }} />
-                  {searchQuery && <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '14px', padding: '4px 6px' }}></button>}
+                  {searchQuery && <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '14px', padding: '4px 6px' }}></button>}
                 </div>
                 <button onClick={openCreate} style={btnStyle('var(--primary)', 'var(--bg)', 'var(--primary)')}> New Event</button>
               </div>
 
               {filteredEvents.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
                   <AppIcon name="calendar" size={40} style={{ display: 'block', margin: '0 auto 12px' }} />
                   <p style={{ color: 'var(--primary)', fontSize: '14px' }}>{searchQuery ? 'No events match your search.' : 'No events yet.'}</p>
                   {searchQuery && <button onClick={() => setSearchQuery('')} style={{ marginTop: '10px', padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Clear search</button>}
@@ -394,8 +389,8 @@ export default function ManageEvents() {
                               {ev.type && <span style={badge('var(--info)', 'rgb(var(--primary-rgb) / 0.15)', 'var(--info)')}>{ev.type}</span>}
                               <span style={badge(discussionOn ? 'var(--primary)' : 'var(--text)', discussionOn ? 'var(--bg)' : 'var(--bg)', discussionOn ? 'var(--primary)' : 'var(--text)')}>{discussionOn ? ' Chat' : ' Chat off'}</span>
                             </div>
-                            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 4px' }}> {ev.location || 'No location'}  ·  {fmtTime(ev.date)}{ev.spots ? `  ·  ${ev.spots} spots` : ''}</p>
-                            {ev.description && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '4px 0 0', lineHeight: '1.5' }}>{isExpanded ? ev.description : ev.description.substring(0, 120)}{!isExpanded && ev.description.length > 120 ? '"¦' : ''}</p>}
+                            <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: '0 0 4px' }}> {ev.location || 'No location'}  ·  {fmtTime(ev.date)}{ev.spots ? `  ·  ${ev.spots} spots` : ''}</p>
+                            {ev.description && <p style={{ color: 'var(--text-muted)', fontSize: '12px', margin: '4px 0 0', lineHeight: '1.5' }}>{isExpanded ? ev.description : ev.description.substring(0, 120)}{!isExpanded && ev.description.length > 120 ? '"¦' : ''}</p>}
                             <div style={{ display: 'flex', gap: '16px', marginTop: '10px', flexWrap: 'wrap' }}>
                               <span style={{ color: 'var(--primary)', fontSize: '12px' }}> {r.going.length} Going</span>
                               <span style={{ color: 'var(--info)', fontSize: '12px' }}> {r.maybe.length} Maybe</span>
@@ -412,14 +407,14 @@ export default function ManageEvents() {
                           </div>
                         </div>
                         {isExpanded && (
-                          <div style={{ marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: '14px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                          <div style={{ marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: '14px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '12px' }}>
                             {[{ label: ' Going', list: r.going, color: 'var(--primary)' }, { label: ' Maybe', list: r.maybe, color: 'var(--info)' }, { label: " Can't", list: r.cant, color: 'var(--text)' }].map(({ label, list, color }) => (
                               <div key={label}>
                                 <p style={{ color, fontSize: '12px', fontWeight: 600, margin: '0 0 6px' }}>{label} ({list.length})</p>
-                                {list.length === 0 ? <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>None</p> : list.map((u, i) => (
+                                {list.length === 0 ? <p style={{ color: 'var(--text-muted)', fontSize: '11px' }}>None</p> : list.map((u, i) => (
                                   <div key={i} style={{ padding: '4px 0', borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
                                     <p style={{ color: 'var(--text)', fontSize: '12px', margin: 0 }}>{u.full_name || u.username || 'Attendee'}</p>
-                                    {u.email && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', margin: '2px 0 0' }}>{u.email}</p>}
+                                    {u.email && <p style={{ color: 'var(--text-muted)', fontSize: '10px', margin: '2px 0 0' }}>{u.email}</p>}
                                     {u.phone && <p style={{ color: 'var(--primary)', fontSize: '10px' }}> {u.phone}</p>}
                                   </div>
                                 ))}
@@ -439,7 +434,7 @@ export default function ManageEvents() {
           {activeTab === TABS.RSVPS && (
             <div>
               {rsvpEvents.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
                   <AppIcon name="calendar" size={40} style={{ display: 'block', margin: '0 auto 12px' }} />
                   <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No RSVPs yet.</p>
                 </div>
@@ -471,7 +466,7 @@ export default function ManageEvents() {
                         {list.map((u, i) => (
                           <div key={i} style={{ display: 'flex', gap: '12px', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.12)', flexWrap: 'wrap' }}>
                             <span style={{ color: 'var(--text)', fontSize: '13px' }}>{u.full_name || u.username || 'Attendee'}</span>
-                            {u.email && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{u.email}</span>}
+                            {u.email && <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{u.email}</span>}
                             {u.phone && <span style={{ color: 'var(--primary)', fontSize: '11px' }}> {u.phone}</span>}
                           </div>
                         ))}
@@ -487,7 +482,7 @@ export default function ManageEvents() {
           {activeTab === TABS.DISCUSSIONS && (
             <div>
               {discussions.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
                   <AppIcon name="chat" size={40} style={{ display: 'block', margin: '0 auto 12px' }} />
                   <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No discussions yet.</p>
                 </div>
@@ -498,7 +493,7 @@ export default function ManageEvents() {
                       <span style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500 }}>{d.profiles?.full_name || d.profiles?.username || 'Anonymous'}</span>
                       {d.is_admin_reply && <span style={badge('var(--primary)', 'rgb(var(--primary-rgb) / 0.15)', 'var(--primary)')}>ADMIN</span>}
                     </div>
-                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{fmtTime(d.created_at)}</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{fmtTime(d.created_at)}</span>
                   </div>
                   {d.events?.title && <p style={{ color: 'var(--primary)', fontSize: '11px', margin: '0 0 6px' }}>Re: {d.events.title}</p>}
                   <p style={{ color: 'var(--info)', fontSize: '12px', margin: '0 0 10px', lineHeight: '1.5' }}>{d.message}</p>
@@ -520,7 +515,7 @@ export default function ManageEvents() {
           {activeTab === TABS.CONTACTS && (
             <div>
               {contacts.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
                   <AppIcon name="chat" size={40} style={{ display: 'block', margin: '0 auto 12px' }} />
                   <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No messages yet.</p>
                 </div>
@@ -531,7 +526,7 @@ export default function ManageEvents() {
                       <span style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500 }}>{c.name || 'User'}</span>
                       {!c.read && <span style={badge('var(--primary)', 'rgb(var(--primary-rgb) / 0.15)', 'var(--primary)')}>New</span>}
                     </div>
-                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{fmtTime(c.created_at)}</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{fmtTime(c.created_at)}</span>
                   </div>
                   {c.events?.title && <p style={{ color: 'var(--primary)', fontSize: '11px', margin: '0 0 6px' }}>Re: {c.events.title}</p>}
                   <p style={{ color: 'var(--info)', fontSize: '13px', margin: '0 0 10px', lineHeight: '1.6' }}>{c.message}</p>

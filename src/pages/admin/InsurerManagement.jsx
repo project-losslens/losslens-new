@@ -1,3 +1,4 @@
+import { checkedMutation } from '../../lib/mutations'
 import NumberField from '../../components/NumberField'
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
@@ -52,13 +53,13 @@ export default function InsurerManagement() {
     event.preventDefault()
     setSaving(true)
     setError('')
-    const { error: saveError } = await supabase.from('insurers').insert({
+    const { error: saveError } = await checkedMutation(supabase.from('insurers').insert({
       profile_id: form.profile_id,
       name: form.name.trim(),
       license_number: form.license_number.trim() || null,
       contact_email: form.contact_email.trim() || null,
       contact_phone: form.contact_phone.trim() || null,
-    })
+    }).select('*'))
     if (saveError) {
       console.error('Insurer account creation failed:', saveError)
       setError('Could not associate this insurer. Confirm the selected account is not already linked.')
@@ -70,7 +71,7 @@ export default function InsurerManagement() {
   }
 
   const setStatus = async (insurer, status) => {
-    const { error: updateError } = await supabase.from('insurers').update({ status }).eq('id', insurer.id)
+    const { error: updateError } = await checkedMutation(supabase.from('insurers').update({ status }).eq('id', insurer.id).select('*'))
     if (updateError) {
       console.error('Insurer status update failed:', updateError)
       setError('Could not update insurer status.')
@@ -86,7 +87,7 @@ export default function InsurerManagement() {
       const { data, error: inviteError } = await supabase.functions.invoke('send-invite', {
         body: { action: 'invite', email: inviteEmail.trim(), role: 'user' },
       })
-      if (inviteError || data?.error) {
+      if (inviteError || data?.error || data?.success !== true) {
         console.error('Insurer invitation failed:', inviteError || data?.error)
         setError('Could not send the insurer invitation.')
       } else {
@@ -106,14 +107,14 @@ export default function InsurerManagement() {
     event.preventDefault()
     setSaving(true)
     setError('')
-    const { error: partnershipError } = await supabase.from('insurer_partnerships').insert({
+    const { error: partnershipError } = await checkedMutation(supabase.from('insurer_partnerships').insert({
       insurer_id: partnership.insurer_id,
       b2b_client_id: partnership.b2b_client_id,
       cohort_name: partnership.cohort_name.trim(),
       per_member_fee: Number(partnership.per_member_fee),
       contract_start: partnership.contract_start || null,
       contract_end: partnership.contract_end || null,
-    })
+    }).select('*'))
     if (partnershipError) {
       console.error('Insurer partnership creation failed:', partnershipError)
       setError('Could not create this insurer partnership.')

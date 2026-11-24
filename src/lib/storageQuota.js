@@ -8,8 +8,13 @@ import { supabase } from './supabase'
 const QUOTA_BUCKETS = ['mirror-recordings', 'precious-pacts']
 
 async function folderBytes(bucket, folderPath, depth = 0) {
-  const { data, error } = await supabase.storage.from(bucket).list(folderPath, { limit: 1000 })
-  if (error || !data) return 0
+  const data = []
+  for (let offset = 0; ; offset += 1000) {
+    const { data: page, error } = await supabase.storage.from(bucket).list(folderPath, { limit: 1000, offset })
+    if (error) throw error
+    data.push(...(page || []))
+    if (!page || page.length < 1000) break
+  }
   let total = 0
   for (const item of data) {
     if (item.id) {
@@ -30,14 +35,14 @@ export async function getStorageUsageMb(userId) {
   return bytes / (1024 * 1024)
 }
 
-// Returns { allowed, usedMb, quotaMb }. Fails open on listing errors so a
-// storage API hiccup never blocks recovery recordings.
+// Returns { allowed, usedMb, quotaMb, error? }. Preserve the local recording
+// when usage cannot be verified; the database enforces the actual plan quota.
 export async function checkStorageQuota(userId, quotaMb, extraMb = 0) {
   const quota = Number.isFinite(quotaMb) ? quotaMb : 0
   try {
     const usedMb = await getStorageUsageMb(userId)
     return { allowed: usedMb + extraMb <= quota, usedMb, quotaMb: quota }
   } catch {
-    return { allowed: true, usedMb: 0, quotaMb: quota }
+    return { allowed: false, usedMb: null, quotaMb: quota, error: 'Storage usage could not be verified. Please retry.' }
   }
 }

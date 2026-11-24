@@ -3,7 +3,7 @@
 // - Never caches /api/, Supabase, or auth endpoints.
 // - Offline fallback page lists crisis helplines (works with no network).
 
-const CACHE_VERSION = 'losslens-v6'
+const CACHE_VERSION = 'losslens-v7'
 const CACHE_NAME = `${CACHE_VERSION}-precache`
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`
 
@@ -16,7 +16,9 @@ const PRECACHE_URLS = [
   '/favicon.svg',
 ]
 
-const OFFLINE_HTML = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LossLens — Offline</title><style>body{background:#0A1A12;color:#fff;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:2rem;text-align:center}h1{color:#4ADE80}a{color:#86EFAC}</style></head><body><div><h1>You are offline</h1><p>LossLens needs a connection for most features. If you or someone else is in crisis, these numbers work without internet being required to remember them:</p><p><strong>Befrienders Kenya:</strong> 0800 722 030<br><strong>NACADA:</strong> 1192<br><strong>Emergency:</strong> 999 / 112</p><p><a href="/">Try again</a></p></div></body></html>`
+const OFFLINE_SERVICES = /* VERIFIED_SUPPORT_SERVICES */ []
+
+const OFFLINE_HTML = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LossLens — Offline</title><style>body{background:#0A1A12;color:#fff;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:2rem;text-align:center}h1{color:#4ADE80}a{color:#86EFAC}</style></head><body><div><h1>You are offline</h1><p>LossLens needs a connection for most features. If you or someone else is in crisis, these numbers work without internet being required to remember them:</p><p>${OFFLINE_SERVICES.map(service => `<strong>${service.name}:</strong> <a href="tel:${service.tel}">${service.phone}</a><br>${service.hours}<br>`).join('')}</p><p>Published hours do not guarantee an immediate response.</p><p><strong>Emergency:</strong> 999 / 112</p><p><a href="/">Try again</a></p></div></body></html>`
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

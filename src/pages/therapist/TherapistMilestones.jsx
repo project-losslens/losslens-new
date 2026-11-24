@@ -63,7 +63,7 @@ export default function TherapistMilestones() {
               Episode {ep.status} · started {ep.started_at}{ep.plan_ref ? ` · plan ${ep.plan_ref}` : ''}
             </p>
             {ep.milestones?.length > 0 && (
-              <p className="fs-12" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              <p className="fs-12" style={{ color: 'var(--text-muted)' }}>
                 Verified: {ep.milestones.map(m => `${m.milestone_type}#${m.ordinal}`).join(', ') || 'none'}
               </p>
             )}

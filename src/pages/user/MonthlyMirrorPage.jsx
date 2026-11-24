@@ -1,6 +1,9 @@
+import { saveLocalRecording } from '../../lib/localRecordings'
 import { toast } from '../../components/ToastProvider'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { recoveryDate } from '../../lib/calendar'
+import { saveRecording } from '../../lib/recordings'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
 import { BrandLoader } from '../../components/Brand'
@@ -39,6 +42,12 @@ export default function MonthlyMirrorPage() {
   const [userRole, setUserRole] = useState('user')
   const [reviewMode, setReviewMode] = useState(false)
   const [reviewBlob, setReviewBlob] = useState(null)
+  useEffect(() => {
+    if (!reviewBlob || !reviewVideoRef.current) return
+    const url = URL.createObjectURL(reviewBlob)
+    reviewVideoRef.current.src = url
+    return () => URL.revokeObjectURL(url)
+  }, [reviewBlob, reviewMode])
   const [syncStatus, setSyncStatus] = useState({})
   const [retryCount, setRetryCount] = useState({})
   const { entitlements } = useEntitlements()
@@ -47,7 +56,7 @@ export default function MonthlyMirrorPage() {
     const extraMb = (blob?.size || 0) / (1024 * 1024)
     const quota = await checkStorageQuota(userId, entitlements.storageQuotaMb, extraMb)
     if (!quota.allowed) {
-      toast.error(`Storage limit reached — your plan includes ${quota.quotaMb} MB. Delete old recordings or upgrade for more space.`, 6000)
+      toast.error(quota.error || `Storage limit reached — your plan includes ${quota.quotaMb} MB. Delete old recordings or upgrade for more space.`, 6000)
       return false
     }
     return true
@@ -63,7 +72,7 @@ export default function MonthlyMirrorPage() {
   const syncInProgressRef = useRef(false)
   const mountedRef = useRef(true)
 
-  const currentMonthKey = new Date().toISOString().substring(0, 7)
+  const currentMonthKey = recoveryDate().substring(0, 7)
   const isCurrentMonth = activeMonth === currentMonthKey
 
   const prompts = [
@@ -149,7 +158,7 @@ export default function MonthlyMirrorPage() {
         }))
 
       // Pending from localStorage
-      const localKey = `mirror_fallback_${activeMonth}`
+      const localKey = `mirror_fallback_${session.user.id}_${activeMonth}`
       let localData = []
       try {
         const stored = localStorage.getItem(localKey)
@@ -227,15 +236,14 @@ export default function MonthlyMirrorPage() {
               setSyncStatus(prev => ({ ...prev, [i]: 'Storage limit reached' }))
               break
             }
-            const fileName = `${session.user.id}/${activeMonth}/${Date.now()}.webm`
-            const { error } = await supabase.storage.from('mirror-recordings').upload(fileName, blob)
-            if (!error) {
-              await supabase.from('mirror_recordings').insert({
+            const fileName = `${session.user.id}/${activeMonth}/${crypto.randomUUID()}.${blob.type.includes('mp4') ? 'mp4' : 'webm'}`
+            await saveRecording('mirror-recordings', 'mirror_recordings', fileName, blob, {
                 user_id: session.user.id, month: activeMonth, storage_path: fileName,
                 type: 'video', duration_seconds: item.duration || 0, prompt: prompts[currentPrompt]?.q || 'Reflection',
               })
+
               success = true
-            }
+
             retries++
           } catch (err) { retries++; if (retries >= UPLOAD_RETRY_MAX) throw err }
         }
@@ -272,8 +280,8 @@ export default function MonthlyMirrorPage() {
       if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.muted = true; await videoRef.current.play() }
 
       //  Feature-detect mime type
-      const mimeType = MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : 'video/mp4'
-      const mediaRecorder = new MediaRecorder(stream, { mimeType })
+      const mimeType = ['video/webm', 'video/mp4'].find(type => MediaRecorder.isTypeSupported(type))
+      const mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined)
       mediaRecorderRef.current = mediaRecorder
       chunksRef.current = []
 
@@ -295,7 +303,8 @@ export default function MonthlyMirrorPage() {
         })
       }, 1000)
     } catch (err) {
-      toast.error('Camera/Microphone access denied.')
+      cleanup()
+      toast.error('Camera or microphone recording is unavailable. Check permissions and browser support.')
       console.error('Recording start error:', err)
     }
   }
@@ -303,7 +312,7 @@ export default function MonthlyMirrorPage() {
   const handleRecordingStop = async () => {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
 
-    const blob = new Blob(chunksRef.current, { type: 'video/webm' })
+    const blob = new Blob(chunksRef.current, { type: mediaRecorderRef.current?.mimeType || 'video/webm' })
 
     //  Size check before upload
     if (blob.size > MAX_STORAGE_SIZE) {
@@ -327,25 +336,23 @@ export default function MonthlyMirrorPage() {
     setUploadProgress(0)
 
     const { data: { session } } = await supabase.auth.getSession()
-    if (!session) { setUploading(false); return }
+    if (!session) { setUploading(false); setReviewMode(true); toast.error('Please sign in before saving.'); return }
 
     const blob = reviewBlob
-    if (!(await quotaAllows(session.user.id, blob))) { setReviewBlob(null); setUploading(false); return }
-    const fileName = `${session.user.id}/${activeMonth}/${Date.now()}.webm`
+    if (!(await quotaAllows(session.user.id, blob))) { setReviewMode(true); setUploading(false); return }
+    const fileName = `${session.user.id}/${activeMonth}/${crypto.randomUUID()}.${blob.type.includes('mp4') ? 'mp4' : 'webm'}`
     setReviewBlob(null)
 
     //  Retry with exponential backoff
     let retries = 0
-    let error = null
     while (retries < UPLOAD_RETRY_MAX) {
       try {
         setUploadProgress(Math.round((retries / UPLOAD_RETRY_MAX) * 100))
-        const { error: uploadError } = await supabase.storage.from('mirror-recordings').upload(fileName, blob)
-        if (!uploadError) {
-          await supabase.from('mirror_recordings').insert({
+        await saveRecording('mirror-recordings', 'mirror_recordings', fileName, blob, {
             user_id: session.user.id, month: activeMonth, storage_path: fileName,
             type: 'video', duration_seconds: recordingTime, prompt: prompts[currentPrompt]?.q || 'Reflection',
           })
+
           toast.success('Reflection saved!')
           setUploading(false)
           setRecorded(true)
@@ -353,29 +360,19 @@ export default function MonthlyMirrorPage() {
           cleanup()
           await loadAllRecordings()
           return
-        }
-        error = uploadError
-        retries++
-      } catch (err) { error = err; retries++ }
+
+      } catch { retries++ }
     }
 
-    //  Fallback to localStorage — but check size first
-    if (blob.size < MAX_STORAGE_SIZE) {
-      try {
-        const reader = new FileReader()
-        reader.readAsDataURL(blob)
-        reader.onloadend = () => {
-          try {
-            const key = `mirror_fallback_${activeMonth}`
-            const saved = JSON.parse(localStorage.getItem(key) || '[]')
-            saved.push({ url: reader.result, type: 'video', duration: recordingTime, date: new Date().toISOString() })
-            localStorage.setItem(key, JSON.stringify(saved))
-            toast.success('Saved locally. Will sync later.')
-          } catch (err) { toast.error('Failed to save. Video may be too large.') }
-        }
-      } catch (err) { toast.error('Failed to save. Video may be too large.') }
-    } else {
-      toast.error('Video too large to save locally. Please try again.')
+    try {
+      await saveLocalRecording(localStorage, `mirror_fallback_${session.user.id}_${activeMonth}`, blob, {
+        userId: session.user.id, type: 'video', duration: recordingTime, date: new Date().toISOString(),
+      })
+      toast.success('Saved on this device. Will sync when you revisit this month online.')
+    } catch {
+      setReviewBlob(blob)
+      setReviewMode(true)
+      toast.error('This recording could not be saved. Keep the page open and retry.')
     }
 
     setUploading(false)
@@ -419,7 +416,7 @@ export default function MonthlyMirrorPage() {
 
   const retryUpload = async (localIndex) => {
     setUploading(true)
-    const localKey = `mirror_fallback_${activeMonth}`
+    const localKey = `mirror_fallback_${session.user.id}_${activeMonth}`
     let localData = []
     try { localData = JSON.parse(localStorage.getItem(localKey) || '[]') } catch { localData = [] }
     const item = localData[localIndex]
@@ -429,19 +426,18 @@ export default function MonthlyMirrorPage() {
     try {
       const blob = await (await fetch(item.url)).blob()
       if (!(await quotaAllows(session.user.id, blob))) { setUploading(false); return }
-      const fileName = `${session.user.id}/${activeMonth}/${Date.now()}.webm`
-      const { error } = await supabase.storage.from('mirror-recordings').upload(fileName, blob)
-      if (!error) {
-        await supabase.from('mirror_recordings').insert({
+      const fileName = `${session.user.id}/${activeMonth}/${crypto.randomUUID()}.${blob.type.includes('mp4') ? 'mp4' : 'webm'}`
+      await saveRecording('mirror-recordings', 'mirror_recordings', fileName, blob, {
           user_id: session.user.id, month: activeMonth, storage_path: fileName,
           type: 'video', duration_seconds: item.duration || 0, prompt: prompts[currentPrompt]?.q || 'Reflection',
         })
+
         localData.splice(localIndex, 1)
         if (localData.length === 0) localStorage.removeItem(localKey)
         else localStorage.setItem(localKey, JSON.stringify(localData))
         toast.success('Synced!')
         loadAllRecordings()
-      } else { toast.error('Sync failed. Try again.') }
+
     } catch (err) { toast.error('Sync failed. Try again.') }
     setUploading(false)
   }
@@ -480,8 +476,8 @@ export default function MonthlyMirrorPage() {
       <div style={{ flex: 1, minWidth: 0, overflowX: 'hidden' }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Monthly Mirror</h1>
-            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{syncedRecordings.length + pendingRecordings.length} recordings</p>
+            <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> Monthly Mirror</h2>
+            <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{syncedRecordings.length + pendingRecordings.length} recordings</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <button onClick={() => navigateMonth(-1)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--primary)', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', minWidth: '36px' }} aria-label="Previous month">←</button>
@@ -494,7 +490,7 @@ export default function MonthlyMirrorPage() {
         {milestone && (
           <div style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid var(--primary)', padding: '10px 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ color: 'var(--primary)', fontSize: '12px' }}>{milestone.text}</span>
-            <button onClick={() => { setMilestone(null); if (milestoneTimerRef.current) clearTimeout(milestoneTimerRef.current) }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '16px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Dismiss milestone"></button>
+            <button onClick={() => { setMilestone(null); if (milestoneTimerRef.current) clearTimeout(milestoneTimerRef.current) }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '16px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Dismiss milestone"></button>
           </div>
         )}
 
@@ -505,9 +501,9 @@ export default function MonthlyMirrorPage() {
             <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: 'var(--primary)', textAlign: 'center' }}>
               <h3 style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '0.75rem' }}> Review Your Recording</h3>
               <div style={{ background: 'var(--bg)', borderRadius: '10px', overflow: 'hidden', marginBottom: '0.75rem' }}>
-                <video ref={reviewVideoRef} src={URL.createObjectURL(reviewBlob)} controls style={{ width: '100%', maxHeight: '300px' }} />
+                <video ref={reviewVideoRef} controls style={{ width: '100%', maxHeight: '300px' }} />
               </div>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '0.75rem' }}>Duration: {formatTime(recordingTime)}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '0.75rem' }}>Duration: {formatTime(recordingTime)}</p>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button onClick={handleRetake} className="btn-ghost" style={{ flex: 1, padding: '10px', fontSize: '13px' }}> Retake</button>
                 <button onClick={confirmSave} className="btn-primary" style={{ flex: 1, padding: '10px', fontSize: '13px' }}> Save</button>
@@ -535,13 +531,13 @@ export default function MonthlyMirrorPage() {
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
                     <div style={{ flex: 1 }}>
                       <span style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: currentPrompt === i ? 600 : 400 }}>{p.q}</span>
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '4px 0 0', lineHeight: '1.4' }}>{p.hint}</p>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: '4px 0 0', lineHeight: '1.4' }}>{p.hint}</p>
                     </div>
                     {currentPrompt === i && <span style={{ color: 'var(--primary)', fontSize: '9px', fontWeight: 600, background: 'rgba(255,255,255,0.12)', padding: '2px 8px', borderRadius: '100px', flexShrink: 0 }}>SELECTED</span>}
                   </div>
                   {currentPrompt === i && (
                     <div style={{ marginTop: '10px', padding: '10px 12px', background: 'rgba(255,255,255,0.06)', borderRadius: '8px', border: '1px dashed var(--secondary)' }}>
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}> Example</p>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '10px', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}> Example</p>
                       <p style={{ color: 'var(--primary)', fontSize: '11px', lineHeight: '1.5', fontStyle: 'italic', margin: 0 }}>{p.example}</p>
                     </div>
                   )}
@@ -562,7 +558,7 @@ export default function MonthlyMirrorPage() {
                   <div style={{ background: 'var(--bg)', borderRadius: '10px', minHeight: '180px', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
                     <AppIcon name="camera" size={40} style={{ display: 'block', margin: '0 auto', color: 'var(--secondary)' }} />
                     <p style={{ color: 'var(--primary)', fontSize: '12px', marginTop: '6px' }}>Camera preview will appear here</p>
-                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '4px' }}>Record up to {Math.floor(MAX_RECORDING_DURATION / 60)} minutes</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '10px', marginTop: '4px' }}>Record up to {Math.floor(MAX_RECORDING_DURATION / 60)} minutes</p>
                   </div>
                 )}
                 <button className="btn-primary full" onClick={startRecording} disabled={uploading} style={{ fontSize: '13px', padding: '10px' }}>
@@ -592,7 +588,7 @@ export default function MonthlyMirrorPage() {
           {/* Pending Recordings */}
           {loadError && (
             <div className="dash-section" style={{ textAlign: 'center', padding: '2rem' }}>
-              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', marginBottom: '10px' }}>Could not load your recordings.</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '10px' }}>Could not load your recordings.</p>
               <button type="button" className="btn-primary" onClick={() => { setLoadError(false); loadAllRecordings() }}>Try again</button>
             </div>
           )}
@@ -651,7 +647,7 @@ export default function MonthlyMirrorPage() {
                         <p style={{ color: '#FFFFFF', fontSize: '11px', fontWeight: 500, margin: 0 }}>{new Date(r.created_at).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
                           <span style={{ color: 'var(--primary)', fontSize: '9px', background: 'rgba(255,255,255,0.12)', padding: '1px 6px', borderRadius: '100px' }}> Synced</span>
-                          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{formatTime(r.duration_seconds)}</span>
+                          <span style={{ color: 'var(--text-muted)', fontSize: '10px' }}>{formatTime(r.duration_seconds)}</span>
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '3px', flexShrink: 0 }}>
@@ -679,13 +675,13 @@ export default function MonthlyMirrorPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: recordingsPerMonth.length > 0 ? '10px' : '0' }}>
               <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--bg)', border: '2px solid var(--primary)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <span style={{ color: 'var(--primary)', fontSize: '18px', fontWeight: 700 }}>{totalRecordings}</span>
-                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '8px' }}>videos</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '8px' }}>videos</span>
               </div>
               <div>
                 <p style={{ color: 'var(--secondary)', fontSize: '11px', margin: 0 }}>
                   {totalRecordings === 0 ? 'No recordings yet. Start today!' : totalRecordings === 1 ? 'Your journey starts here.' : `You've recorded ${totalRecordings} reflections.`}
                 </p>
-                {firstRecordingDate && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', margin: '3px 0 0' }}>Since {new Date(firstRecordingDate).toLocaleDateString('en-KE', { month: 'long', year: 'numeric' })}</p>}
+                {firstRecordingDate && <p style={{ color: 'var(--text-muted)', fontSize: '10px', margin: '3px 0 0' }}>Since {new Date(firstRecordingDate).toLocaleDateString('en-KE', { month: 'long', year: 'numeric' })}</p>}
               </div>
             </div>
             {recordingsPerMonth.length > 0 && (

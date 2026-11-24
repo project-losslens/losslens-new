@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { readAndMigrateStorageItem } from '../../lib/storage'
 import AppIcon from '../../components/AppIcon'
 import ChallengeWheel from '../../components/ChallengeWheel'
-import { HELPLINES as CONFIG_HELPLINES } from '../../config/helplines'
+import SupportChoices from '../../components/SupportChoices'
 import { useI18n, translate, getLanguage } from '../../i18n'
 import { enqueueOfflineItem } from '../../lib/offlineQueue'
 
@@ -43,14 +43,6 @@ const DISTRACTION_CHALLENGES = [
 const EMOTIONS = ['Anxious', 'Bored', 'Stressed', 'Excited', 'Hopeless', 'Restless', 'Sad']
 const NEW_EMOTIONS = ['Calmer', 'In control', 'Still struggling', 'Relieved', 'Empowered', 'Hopeful']
 
-// Crisis numbers come only from src/config/helplines.js.
-const HELPLINES = CONFIG_HELPLINES.map(h => ({
-  name: h.name,
-  number: h.phone,
-  tel: h.tel,
-  hours: h.hours,
-  free: true,
-}))
 
 const TOOLS = [
   { id: 'timer', icon: 'clock', titleKey: 'toolkit.timerTitle', descKey: 'toolkit.timerDesc', color: 'var(--primary)' },
@@ -87,16 +79,6 @@ const BreathingOrb = ({ phase, size = 200 }) => {
   )
 }
 
-function isOpenNow(hours) {
-  if (!hours) return false
-  if (hours.toLowerCase().includes('24/7')) return true
-  const now = new Date()
-  const kenyaHour = now.getUTCHours() + 3
-  const day = now.getDay()
-  if (hours.toLowerCase().includes('mon-fri') && day >= 1 && day <= 5 && kenyaHour >= 8 && kenyaHour < 17) return true
-  if (hours.toLowerCase().includes('8am-5pm') && kenyaHour >= 8 && kenyaHour < 17) return true
-  return false
-}
 
 export default function UrgeToolkitPage() {
   const navigate = useNavigate()
@@ -153,7 +135,10 @@ export default function UrgeToolkitPage() {
     const uid = userIdRef.current
     if (!uid) return
     const payload = { user_id: uid, tool, completed: true, metadata: extra }
-    const offline = () => enqueueOfflineItem('urge_session', payload).then(() => toast.success(translate(getLanguage(), 'toolkit.sessionSaved'), 3000))
+    const offline = async () => {
+      try { await enqueueOfflineItem('urge_session', payload); toast.success('Session saved on this device for sync.', 3000) }
+      catch { toast.error('Session could not be saved on this device. Please retry when connected.') }
+    }
     if (typeof navigator !== 'undefined' && !navigator.onLine) { await offline(); return }
     const { error } = await supabase.from('urge_toolkit_sessions').insert(payload)
     if (error) await offline()
@@ -200,30 +185,42 @@ export default function UrgeToolkitPage() {
 
   const saveChallenge = async (index) => {
     const challengeText = translate(getLanguage(), `toolkit.challenge.${index}`)
-    const optimistic = { id: 'tmp_' + Date.now(), challenge: challengeText, status: 'doing', chosen_at: new Date().toISOString() }
+    const optimistic = { id: crypto.randomUUID(), challenge: challengeText, status: 'doing', chosen_at: new Date().toISOString(), _pending: true }
     setChallenges(prev => [optimistic, ...prev])
-    const payload = { user_id: userIdRef.current, challenge: challengeText, status: 'doing' }
-    const offline = () => enqueueOfflineItem('urge_challenge', payload).then(() => setChallenges(prev => prev.map(c => c.id === optimistic.id ? { ...c, _pending: true } : c)))
-    if (typeof navigator !== 'undefined' && !navigator.onLine) { await offline(); return }
+    const payload = { id: optimistic.id, user_id: userIdRef.current, challenge: challengeText, status: 'doing' }
+    const offline = async () => {
+      try { await enqueueOfflineItem('urge_challenge', payload); return true }
+      catch { setChallenges(prev => prev.filter(c => c.id !== optimistic.id)); toast.error('Challenge could not be saved. Please retry when connected.'); return false }
+    }
+    if (typeof navigator !== 'undefined' && !navigator.onLine) { return offline() }
     const { data, error } = await supabase.from('urge_challenges').insert(payload).select().single()
     if (error || !data) { await offline(); return }
     setChallenges(prev => prev.map(c => c.id === optimistic.id ? data : c))
+    return true
   }
 
   const updateChallengeStatus = async (ch, status) => {
     const patch = { status, ...(status === 'done' ? { completed_at: new Date().toISOString() } : {}) }
-    setChallenges(prev => prev.map(c => c.id === ch.id ? { ...c, ...patch } : c))
-    if (String(ch.id).startsWith('tmp_')) return
-    const offline = () => enqueueOfflineItem('urge_challenge', { id: ch.id, ...patch })
-    if (typeof navigator !== 'undefined' && !navigator.onLine) { await offline(); return }
-    const { error } = await supabase.from('urge_challenges').update(patch).eq('id', ch.id)
-    if (error) await offline()
+    const offline = async () => {
+      try {
+        await enqueueOfflineItem('urge_challenge', {
+          id: ch.id, user_id: userIdRef.current, challenge: ch.challenge, chosen_at: ch.chosen_at, ...patch,
+        })
+        setChallenges(prev => prev.map(c => c.id === ch.id ? { ...c, ...patch, _pending: true } : c))
+        return true
+      } catch { toast.error('Challenge progress could not be saved. Please retry.'); return false }
+    }
+    if (navigator.onLine === false || ch._pending) return offline()
+    const { data, error } = await supabase.from('urge_challenges').update(patch).eq('id', ch.id).select().single()
+    if (error || !data) return offline()
+    setChallenges(prev => prev.map(c => c.id === ch.id ? data : c))
+    return true
   }
 
-  const handleChallengeDone = (ch) => {
-    void updateChallengeStatus(ch, 'done')
+  const handleChallengeDone = async (ch) => {
+    if (!await updateChallengeStatus(ch, 'done')) return
     triggerConfetti()
-    toast.success(`${translate(getLanguage(), 'toolkit.challengeComplete')}`, 3000)
+    toast.success(translate(getLanguage(), 'toolkit.challengeComplete'), 3000)
     void logSession('distraction', { challenge: ch.challenge, status: 'done' })
   }
 
@@ -269,7 +266,7 @@ export default function UrgeToolkitPage() {
     <div className="page-root" style={{ display: 'flex', minHeight: '100vh' }}>
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
-          <div><h1 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> {t('toolkit.title')}</h1><p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{t('toolkit.subtitle')}</p></div>
+          <div><h2 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> {t('toolkit.title')}</h2><p className="fs-12" style={{ color: 'var(--text-muted)', margin: '2px 0 0' }}>{t('toolkit.subtitle')}</p></div>
         </div>
         <div style={{ padding: '1.5rem' }}>
           {!activeTool && (
@@ -277,7 +274,7 @@ export default function UrgeToolkitPage() {
               <button type="button" className="btn-primary urge-hero__start" onClick={() => { setActiveTool('timer'); setTimerComplete(false); setTimer(TIMER_DURATION); setTimerRunning(true) }}>
                 {t('toolkit.heroTitle')}
               </button>
-              <p className="fs-13" style={{ color: 'rgba(255,255,255,0.55)', textAlign: 'center', margin: '10px 0 0' }}>{t('toolkit.heroSub')}</p>
+              <p className="fs-13" style={{ color: 'var(--text-muted)', textAlign: 'center', margin: '10px 0 0' }}>{t('toolkit.heroSub')}</p>
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '14px', flexWrap: 'wrap' }}>
                 <button type="button" className="btn-secondary" onClick={() => { setActiveTool('breathing'); setBreathPhase('inhale'); setBreathRounds(0); setBreathingActive(true) }}>{t('toolkit.breathe')}</button>
                 <button type="button" className="btn-secondary" onClick={() => { setActiveTool('helpline') }}>{t('toolkit.callSupport')}</button>
@@ -320,7 +317,7 @@ export default function UrgeToolkitPage() {
           {activeTool === 'timer' && (
             <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out', borderRadius: '16px', padding: '1.5rem', background: timerRunning ? 'radial-gradient(circle at 50% 40%, rgb(var(--primary-rgb) / 0.10), transparent 65%)' : undefined, transition: 'background 1s ease' }}>
               <h3 className="fs-16" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>{t('toolkit.timerHeading')}</h3>
-              <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem' }}>{t('toolkit.timerSub')}</p>
+              <p className="fs-13" style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{t('toolkit.timerSub')}</p>
               <div style={{ position: 'relative', width: '200px', height: '200px', margin: '0 auto' }} role="timer" aria-label={`Countdown timer: ${formatTime(timer)} remaining`}>
                 <svg width="200" height="200" viewBox="0 0 200 200" style={{ transform: 'rotate(-90deg)' }}>
                   <defs>
@@ -335,7 +332,7 @@ export default function UrgeToolkitPage() {
                 </svg>
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', textAlign: 'center' }}>
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: timerComplete ? '1rem' : '2.5rem', color: timerComplete ? 'var(--primary)' : 'var(--primary)', fontWeight: 700 }}>{timerComplete ? ` ${t('toolkit.done')}` : formatTime(timer)}</div>
-                  {!timerComplete && <div className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>{timerRunning ? t('toolkit.hangOn') : t('toolkit.pressStart')}</div>}
+                  {!timerComplete && <div className="fs-12" style={{ color: 'var(--text-muted)', marginTop: '4px' }}>{timerRunning ? t('toolkit.hangOn') : t('toolkit.pressStart')}</div>}
                 </div>
               </div>
               <div className="toggle-group" style={{ marginTop: '1.5rem', justifyContent: 'center' }}>
@@ -358,7 +355,7 @@ export default function UrgeToolkitPage() {
           {activeTool === 'breathing' && (
             <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out' }}>
               <h3 className="fs-16" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>{t('toolkit.breathingHeading')}</h3>
-              <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem' }}>{t('toolkit.breathingSub')}</p>
+              <p className="fs-13" style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{t('toolkit.breathingSub')}</p>
               <BreathingOrb phase={breathPhase} size={200} />
               <div style={{ marginTop: '1rem' }}>
                 <p className="fs-14" style={{ color: 'var(--primary)', fontWeight: 500 }} aria-live="polite">{t('toolkit.round', { count: breathRounds + 1 })}</p>
@@ -374,7 +371,7 @@ export default function UrgeToolkitPage() {
           {activeTool === 'thought' && (
             <div className="dash-section" style={{ animation: 'fadeIn 0.3s ease-out' }}>
               <h3 className="fs-16" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>{t('toolkit.thoughtRecord')}</h3>
-              <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1rem' }}>{t('toolkit.thoughtFromCbt')}</p>
+              <p className="fs-13" style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>{t('toolkit.thoughtFromCbt')}</p>
               <div style={{ display: 'flex', gap: '4px', marginBottom: '1.5rem' }}>
                 {['situation', 'thought', 'evidence', 'balance'].map((step, i) => (
                   <div key={i} style={{ flex: 1, height: '6px', borderRadius: '3px', background: thoughtStep >= i ? 'var(--primary)' : 'rgba(255,255,255,0.12)', transition: 'background 0.3s' }} />
@@ -407,9 +404,9 @@ export default function UrgeToolkitPage() {
                   {thoughtRecord.balancedThought && (
                     <div style={{marginTop:'1rem',padding:'16px',background:'rgba(255,255,255,0.12)',borderRadius:'12px',border:'1px solid var(--secondary)'}}>
                       <p className="fs-12" style={{color:'var(--primary)',marginBottom:'8px',textTransform:'uppercase'}}> {t('toolkit.copingCard')}</p>
-                      <p className="fs-12" style={{color:'rgba(255,255,255,0.4)'}}><strong>{t('toolkit.oldThought')}</strong> "{thoughtRecord.automaticThought}"</p>
+                      <p className="fs-12" style={{color:'var(--text-muted)'}}><strong>{t('toolkit.oldThought')}</strong> "{thoughtRecord.automaticThought}"</p>
                       <p className="fs-12" style={{color:'var(--primary)'}}><strong>{t('toolkit.newThought')}</strong> "{thoughtRecord.balancedThought}"</p>
-                      <p className="fs-12" style={{color:'rgba(255,255,255,0.4)',marginTop:'4px'}}><strong>{t('toolkit.feeling')}</strong> {thoughtRecord.emotion ? t(`toolkit.emotion.${thoughtRecord.emotion}`) : '...'} → {thoughtRecord.newEmotion ? t(`toolkit.newEmotion.${thoughtRecord.newEmotion}`) : '...'}</p>
+                      <p className="fs-12" style={{color:'var(--text-muted)',marginTop:'4px'}}><strong>{t('toolkit.feeling')}</strong> {thoughtRecord.emotion ? t(`toolkit.emotion.${thoughtRecord.emotion}`) : '...'} → {thoughtRecord.newEmotion ? t(`toolkit.newEmotion.${thoughtRecord.newEmotion}`) : '...'}</p>
                       <button className="btn-primary" style={{width:'100%',marginTop:'12px'}} onClick={()=>{
                         const newCard = { id: Date.now(), date: new Date().toISOString(), ...thoughtRecord }
                         const updated = [newCard, ...copingCards].slice(0, 20)
@@ -449,7 +446,7 @@ export default function UrgeToolkitPage() {
           {activeTool === 'distraction' && (
             <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out' }}>
               <h3 className="fs-16" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>{t('toolkit.distractionTitle')}</h3>
-              <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem' }}>{t('toolkit.spinDesc')}</p>
+              <p className="fs-13" style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{t('toolkit.spinDesc')}</p>
               <ChallengeWheel
                 labels={Array.from({ length: 8 }, (_, i) => t(`toolkit.wheelLabel.${i}`))}
                 landedIndex={randomChallenge}
@@ -467,7 +464,7 @@ export default function UrgeToolkitPage() {
                   </div>
                   {!challengeAccepted ? (
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className="btn-primary" style={{ flex: 1 }} onClick={async () => { setChallengeAccepted(true); await saveChallenge(randomChallenge); toast.success(`${t('toolkit.challengeSaved')}`, 2500) }}>{t('toolkit.imDoingIt')}</button>
+                      <button className="btn-primary" style={{ flex: 1 }} onClick={async () => { if (await saveChallenge(randomChallenge)) { setChallengeAccepted(true); toast.success(t('toolkit.challengeSaved'), 2500) } }}>{t('toolkit.imDoingIt')}</button>
                       <button className="btn-ghost" style={{ flex: 1 }} onClick={() => { setSpinning(true); wheelSpinRef.current?.() }} disabled={spinning}> {t('toolkit.spinAgain')}</button>
                     </div>
                   ) : (
@@ -480,7 +477,7 @@ export default function UrgeToolkitPage() {
               <div style={{ marginTop: '1.5rem', textAlign: 'left', borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: '1rem' }}>
                 <h4 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '10px' }}>{t('toolkit.myChallenges')}</h4>
                 {challenges.filter(c => c.status !== 'dropped').length === 0 ? (
-                  <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('toolkit.noChallenges')}</p>
+                  <p className="fs-13" style={{ color: 'var(--text-muted)' }}>{t('toolkit.noChallenges')}</p>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {challenges.filter(c => c.status !== 'dropped').map(ch => (
@@ -507,17 +504,7 @@ export default function UrgeToolkitPage() {
           {activeTool === 'helpline' && (
             <div className="dash-section" style={{ animation: 'fadeIn 0.3s ease-out' }}>
               <h3 className="fs-16" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>{t('toolkit.helplineTitle')} </h3>
-              {HELPLINES.map((h, i) => (
-                <div key={i} className="helpline-card" style={{ marginBottom: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <p className="helpline-name" style={{ margin: 0 }}>{h.name}</p>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isOpenNow(h.hours) ? 'var(--primary)' : 'rgba(255,255,255,0.4)', flexShrink: 0 }} title={isOpenNow(h.hours) ? t('toolkit.availableNow') : t('toolkit.mayBeClosed')} />
-                  </div>
-                  <p className="helpline-num">{h.number}</p>
-                  <p className="helpline-hours">{h.hours}  · {h.free ? t('toolkit.free') : ` ${t('toolkit.chargesMayApply')}`}</p>
-                  <a href={`tel:${h.tel || h.number.replace(/\s/g,'')}`} className="fs-13" style={{ display: 'block', textAlign: 'center', background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '10px', borderRadius: '8px', textDecoration: 'none', fontWeight: 500, marginTop: '8px' }}> {t('toolkit.callNumber', { number: h.number })}</a>
-                </div>
-              ))}
+              <SupportChoices />
               <div style={{ marginTop: '1rem', padding: '16px', background: 'var(--bg)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
                 <h4 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '8px' }}> {t('toolkit.accountabilityPartner')}</h4>
                 {accountabilityPartner ? (

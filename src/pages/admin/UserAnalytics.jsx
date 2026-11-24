@@ -149,14 +149,14 @@ export default function UserAnalytics() {
       {icon && <span style={{ fontSize: '20px', display: 'block', marginBottom: '4px' }}>{icon}</span>}
       <span style={{ display: 'block', fontSize: '24px', fontWeight: 700, color, fontFamily: 'var(--font-display)', marginBottom: '4px' }}>{value}</span>
       <span style={{ display: 'block', fontSize: '11px', color: 'var(--primary)' }}>{label}</span>
-      {sub && <span style={{ display: 'block', fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>{sub}</span>}
+      {sub && <span style={{ display: 'block', fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>{sub}</span>}
     </div>
   )
 
   if (loading) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
@@ -173,7 +173,7 @@ export default function UserAnalytics() {
   if (error) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
@@ -190,7 +190,7 @@ export default function UserAnalytics() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}> Analytics</h1>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}> Analytics</h2>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>Platform insights  · {stats.totalUsers} total users</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -217,7 +217,7 @@ export default function UserAnalytics() {
           <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '20px', marginBottom: '1.5rem' }}>
             <h3 style={{ color: 'var(--text)', fontSize: '15px', margin: '0 0 1rem' }}> Risk Level Breakdown</h3>
             {stats.totalUsers === 0 ? (
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', textAlign: 'center', padding: '1rem' }}>No user data available yet.</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', textAlign: 'center', padding: '1rem' }}>No user data available yet.</p>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
                 {riskBreakdown.map(r => (
@@ -228,7 +228,7 @@ export default function UserAnalytics() {
                     <div style={{ marginTop: '10px', height: '6px', background: 'rgba(255,255,255,0.12)', borderRadius: '3px', overflow: 'hidden' }}>
                       <div style={{ width: `${stats.totalUsers ? (r.count / stats.totalUsers) * 100 : 0}%`, height: '100%', background: r.color, borderRadius: '3px', transition: 'width 0.6s' }} />
                     </div>
-                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '4px', display: 'block' }}>{stats.totalUsers ? Math.round((r.count / stats.totalUsers) * 100) : 0}% of users</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '11px', marginTop: '4px', display: 'block' }}>{stats.totalUsers ? Math.round((r.count / stats.totalUsers) * 100) : 0}% of users</span>
                   </div>
                 ))}
               </div>
@@ -239,7 +239,7 @@ export default function UserAnalytics() {
           <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '20px', marginBottom: '1.5rem' }}>
             <h3 style={{ color: 'var(--text)', fontSize: '15px', margin: '0 0 1rem' }}> Feature Usage (All Time)</h3>
             {featureUsage.length === 0 ? (
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', textAlign: 'center', padding: '1rem' }}>No usage data available.</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', textAlign: 'center', padding: '1rem' }}>No usage data available.</p>
             ) : (
               featureUsage.map((f, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
@@ -258,7 +258,7 @@ export default function UserAnalytics() {
           <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '20px', marginBottom: '1.5rem' }}>
             <h3 style={{ color: 'var(--text)', fontSize: '15px', margin: '0 0 1rem' }}> Diary Activity (Last 7 Days)</h3>
             {weeklyActivity.every(w => w.entries === 0) ? (
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', textAlign: 'center', padding: '1rem' }}>No diary entries this week.</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', textAlign: 'center', padding: '1rem' }}>No diary entries this week.</p>
             ) : (
               <div>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', height: '120px', padding: '0 0 20px 0' }}>
@@ -320,7 +320,7 @@ export default function UserAnalytics() {
                 {recentSignups.map((u, i) => (
                   <div key={i} style={{ background: 'var(--bg)', borderRadius: '10px', padding: '12px 16px', border: '1px solid rgba(255,255,255,0.12)', minWidth: '180px', flex: 1 }}>
                     <p style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500, margin: '0 0 4px' }}>{u.full_name || 'Anonymous'}</p>
-                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>{new Date(u.created_at).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: 0 }}>{new Date(u.created_at).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                   </div>
                 ))}
               </div>

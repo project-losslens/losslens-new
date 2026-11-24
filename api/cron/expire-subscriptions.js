@@ -6,13 +6,13 @@ import { createClient } from '@supabase/supabase-js'
 //  so the change appears in subscription history. The client entitlement
 //  check also treats expired plans as free, so this is a belt-and-braces
 //  tidy-up even if the cron is not enabled.
-//  Enable in vercel.json under "crons" — see docs/MIGRATION_NOTES.md.
+//  Enable in vercel.json under "crons" — see docs/OPERATIONS.md.
 
 export default async function handler(req, res) {
   const secret = process.env.CRON_SECRET
   const auth = req.headers.authorization || ''
-  // Vercel Cron cannot set headers, so it also accepts ?secret= matching
-  // CRON_SECRET. Prefer the bearer header for external schedulers.
+  // Vercel sends CRON_SECRET as a bearer token. The query fallback remains
+  // for existing external schedulers; prefer the bearer header.
   const querySecret = req.query?.secret
   const ok = secret && (auth === `Bearer ${secret}` || querySecret === secret)
   if (!ok) {
@@ -35,13 +35,15 @@ export default async function handler(req, res) {
 
   let count = 0
   for (const row of expired || []) {
-    const { error: updateError } = await db.from('profiles')
+    const { data: updated, error: updateError } = await db.from('profiles')
       .update({ subscription_status: 'expired' })
-      .eq('id', row.id)
+      .eq('id', row.id).eq('subscription_expires_at', row.subscription_expires_at)
+      .eq('subscription_status', row.subscription_status).select('id')
     if (updateError) {
       console.error('expire-subscriptions update failed', row.id, updateError)
       continue
     }
+    if (!updated?.length) continue
     await db.from('audit_logs').insert({
       actor_id: null,
       action: 'subscription_change',

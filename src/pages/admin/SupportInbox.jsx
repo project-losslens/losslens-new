@@ -69,7 +69,7 @@ export default function SupportInbox() {
   return (
     <section className="portal-page">
       <header className="portal-page__heading">
-        <div><p className="portal-page__eyebrow">Administration</p><h1>Support inbox</h1></div>
+        <div><p className="portal-page__eyebrow">Administration</p><h2>Support inbox</h2></div>
       </header>
       {error && <p className="portal-error" role="alert">{error} <button type="button" onClick={() => { void loadTickets() }}>Retry</button></p>}
       {tickets.length === 0 ? <p className="portal-notice">No support requests.</p> : (

@@ -1,20 +1,17 @@
+import { recoveryDate } from '../../lib/calendar'
 import { BrandLoader } from '../../components/Brand'
 import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import AIChat from '../../components/AIChat'
+import PgsiDashboardCard from '../../components/PgsiDashboardCard'
 import NotificationBell from '../../components/NotificationBell'
 import AppIcon from '../../components/AppIcon'
 import { getRiskLevel, getRiskColor } from '../../lib/relapsePrediction'
-import { HELPLINES } from '../../config/helplines'
+import SupportChoices from '../../components/SupportChoices'
 import { useI18n } from '../../i18n'
 import { explainRiskFactor } from '../../lib/riskExplanations'
 
-// Crisis Contacts (single source: src/config/helplines.js)
-const CRISIS_CONTACTS = HELPLINES.map((h) => ({
-  name: h.name, phone: h.phone, hours: `${h.hours} free`, priority: h.priority,
-}))
 
 function triggerConfetti() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -82,7 +79,7 @@ function UsernamePrompt({ userId, onComplete }) {
       <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '400px' }}>
         <AppIcon name="users" size={40} style={{ display: 'block', margin: '0 auto 12px', color: 'var(--secondary)' }} />
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: '#FFFFFF', marginBottom: '8px', textAlign: 'center' }}>{t('dashboard.usernameTitle')}</h2>
-        <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem', textAlign: 'center', lineHeight: 1.6 }}>{t('dashboard.usernameSub')}</p>
+        <p className="fs-13" style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', textAlign: 'center', lineHeight: 1.6 }}>{t('dashboard.usernameSub')}</p>
         {error && <div className="fs-13" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', marginBottom: '1rem' }}>{error}</div>}
         <div className="form-group">
           <label>{t('dashboard.usernameLabel')}</label>
@@ -94,7 +91,7 @@ function UsernamePrompt({ userId, onComplete }) {
           </div>
           {status === 'taken' && <span className="fs-12" style={{ color: '#FFFFFF' }}>{t('dashboard.usernameTaken')}</span>}
           {status === 'available' && <span className="fs-12" style={{ color: 'var(--primary)' }}>{t('dashboard.usernameAvailable')}</span>}
-          <span className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('dashboard.usernameRules')}</span>
+          <span className="fs-12" style={{ color: 'var(--text-muted)' }}>{t('dashboard.usernameRules')}</span>
         </div>
         <button className="btn-primary full" onClick={handleSave} disabled={loading || status === 'taken' || status === 'checking'}>{loading ? <BrandLoader variant="inline" showWordmark={false} /> : `${t('dashboard.usernameSave')} →`}</button>
       </div>
@@ -109,6 +106,7 @@ function Dashboard() {
   const [entries, setEntries] = useState([])
   const [weekData, setWeekData] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const [sessionExpired, setSessionExpired] = useState(false)
   const [cbtCount, setCbtCount] = useState(0)
   const [refreshing, setRefreshing] = useState(false)
@@ -127,62 +125,71 @@ function Dashboard() {
   const [showInstallPrompt, setShowInstallPrompt] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState(null)
 
-  useEffect(() => { return () => { mountedRef.current = false } }, [])
+  useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false } }, [])
 
   const fetchData = useCallback(async () => {
     fetchIdRef.current += 1
     const currentFetchId = fetchIdRef.current
-
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      if (mountedRef.current && currentFetchId === fetchIdRef.current) { setSessionExpired(true); setLoading(false) }
-      return
-    }
-    const uid = session.user.id
-    if (mountedRef.current) { setUserId(uid); setSessionExpired(false) }
-
-    const [profileRes, entriesRes, cbtRes, circleRes, whispersRes] = await Promise.all([
-      supabase.from('profiles').select('*').eq('id', uid).single(),
-      supabase.from('diary_entries').select('*').eq('user_id', uid).order('date', { ascending: false }).limit(7),
-      supabase.from('cbt_progress').select('*', { count: 'exact', head: true }).eq('user_id', uid).eq('completed', true),
-      supabase.from('circle_room_members').select('*', { count: 'exact', head: true }).gte('last_seen', new Date(Date.now() - 5 * 60 * 1000).toISOString()),
-      supabase.from('whispers_matches').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-    ])
-
-    if (!mountedRef.current || currentFetchId !== fetchIdRef.current) return
-
-    const profileData = profileRes.data
-    const entriesData = entriesRes.data || []
-
-    if (!profileData) {
-      const { data: newProfile } = await supabase.from('profiles').upsert({ id: uid, full_name: session.user.user_metadata?.full_name || '', username: null, streak_days: 0, risk_level: 'low' }).select().single()
-      if (mountedRef.current) { setProfile(newProfile); setShowUsernamePrompt(true); setLoading(false) }
-      return
-    }
-
-    setProfile(profileData)
-    if (!profileData.username) { setShowUsernamePrompt(true); setLoading(false); return }
-    if (sessionStorage.getItem('losslens_new_signup') === uid && profileData.onboarding_completed !== true && profileData.onboarding_skipped !== true) {
-      navigate('/onboarding', { replace: true })
-      return
-    }
-
-    setEntries(entriesData); setCbtCount(cbtRes.count || 0); setCircleOnline(circleRes.count || 0); setWhispersActive(whispersRes.count || 0)
-
     try {
-      const risk = await getRiskLevel(uid)
-      if (mountedRef.current) setRiskData(risk)
-    } catch (err) { console.error('Risk fetch error:', err) }
 
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    const today = new Date()
-    const week = days.map((day, i) => {
-      const d = new Date(today); d.setDate(today.getDate() - (6 - i))
-      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-      const entry = entriesData.find(e => e.date === dateStr)
-      return { day, gambled: entry ? entry.gambled : false, mood: entry ? entry.mood : null }
-    })
-    setWeekData(week); setLoading(false)
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      if (sessionError) throw sessionError
+      if (mountedRef.current && currentFetchId === fetchIdRef.current) setLoadError('')
+      if (!session) {
+        if (mountedRef.current && currentFetchId === fetchIdRef.current) { setSessionExpired(true); setLoading(false) }
+        return
+      }
+      const uid = session.user.id
+      if (mountedRef.current) { setUserId(uid); setSessionExpired(false) }
+
+      const [profileRes, entriesRes, cbtRes, circleRes, whispersRes] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', uid).single(),
+        supabase.from('diary_entries').select('*').eq('user_id', uid).order('date', { ascending: false }).limit(7),
+        supabase.from('cbt_progress').select('*', { count: 'exact', head: true }).eq('user_id', uid).eq('completed', true),
+        supabase.from('circle_room_members').select('*', { count: 'exact', head: true }).gte('last_seen', new Date(Date.now() - 5 * 60 * 1000).toISOString()),
+        supabase.from('whispers_matches').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+      ])
+
+      if (!mountedRef.current || currentFetchId !== fetchIdRef.current) return
+
+      const profileData = profileRes.data
+      const entriesData = entriesRes.data || []
+
+      const failure = profileRes.error || entriesRes.error || cbtRes.error || circleRes.error || whispersRes.error
+      if (failure || !profileData) throw failure || new Error('Your profile could not be loaded')
+
+      setProfile(profileData)
+      if (!profileData.username) { setShowUsernamePrompt(true); setLoading(false); return }
+      if (sessionStorage.getItem('losslens_new_signup') === uid && profileData.onboarding_completed !== true && profileData.onboarding_skipped !== true) {
+        navigate('/onboarding', { replace: true })
+        return
+      }
+
+      setEntries(entriesData); setCbtCount(cbtRes.count || 0); setCircleOnline(circleRes.count || 0); setWhispersActive(whispersRes.count || 0)
+
+      try {
+        const risk = await getRiskLevel(uid)
+        if (mountedRef.current) setRiskData(risk)
+      } catch (err) { console.error('Risk fetch error:', err) }
+
+      const today = new Date(recoveryDate() + 'T12:00:00+03:00')
+      const week = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(today); d.setUTCDate(today.getUTCDate() - (6 - i))
+        const dateStr = recoveryDate(d)
+        const day = d.toLocaleDateString('en-KE', { weekday: 'short', timeZone: 'Africa/Nairobi' })
+        const entry = entriesData.find(e => e.date === dateStr)
+        return { day, gambled: entry ? entry.gambled : false, mood: entry ? entry.mood : null }
+      })
+      if (!mountedRef.current || currentFetchId !== fetchIdRef.current) return false
+      setWeekData(week); setLoading(false)
+      return true
+    } catch (error) {
+      if (mountedRef.current && currentFetchId === fetchIdRef.current) {
+        setLoadError(error.message || 'Dashboard could not be loaded. Please retry.')
+        setLoading(false)
+      }
+      return false
+    }
   }, [navigate])
 
   useEffect(() => { fetchData() }, [fetchData])
@@ -205,7 +212,7 @@ function Dashboard() {
 
   const handleTouchStart = (e) => { if (window.scrollY === 0) touchStartY.current = e.touches[0].clientY }
   const handleTouchMove = (e) => { if (touchStartY.current === 0) return; const distance = e.touches[0].clientY - touchStartY.current; if (distance > 0 && window.scrollY === 0) { setPullDistance(Math.min(distance * 0.4, 120)) } }
-  const handleTouchEnd = async () => { if (pullDistance >= pullThreshold && !refreshing) { setRefreshing(true); await fetchData(); toast.success(t('dashboard.refreshToast'), 2000); setRefreshing(false) } touchStartY.current = 0; setPullDistance(0) }
+  const handleTouchEnd = async () => { if (pullDistance >= pullThreshold && !refreshing) { setRefreshing(true); const refreshed = await fetchData(); if (refreshed) toast.success(t('dashboard.refreshToast'), 2000); setRefreshing(false) } touchStartY.current = 0; setPullDistance(0) }
 
   const [moneyInfoOpen, setMoneyInfoOpen] = useState(false)
   const stats = [
@@ -223,6 +230,10 @@ function Dashboard() {
         <BrandLoader variant="section" />
       </div>
     )
+  }
+
+  if (loadError) {
+    return <section role="alert" className="card"><h2>Dashboard could not be loaded</h2><p>{loadError}</p><button type="button" className="btn-primary" onClick={() => { setLoading(true); void fetchData() }}>Retry</button></section>
   }
 
   if (sessionExpired) {
@@ -247,10 +258,10 @@ function Dashboard() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
           <div>
-            <h1 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}>
+            <h2 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}>
               {new Date().getHours() < 12 ? t('dashboard.greeting.morning') : new Date().getHours() < 17 ? t('dashboard.greeting.afternoon') : t('dashboard.greeting.evening')}, <span style={{ color: 'var(--primary)' }}>{firstName}</span>
-            </h1>
-            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{profile?.streak_days ? t('dashboard.streakDays', { count: profile.streak_days }) : t('dashboard.startStreak')}</p>
+            </h2>
+            <p className="fs-12" style={{ color: 'var(--text-muted)', margin: '2px 0 0' }}>{profile?.streak_days ? t('dashboard.streakDays', { count: profile.streak_days }) : t('dashboard.startStreak')}</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <NotificationBell />
@@ -263,7 +274,7 @@ function Dashboard() {
             <AppIcon name="download" size={36} style={{ flexShrink: 0, color: 'var(--primary)' }} />
             <div style={{ flex: 1, minWidth: '200px' }}><p className="fs-14" style={{ color: 'var(--primary)', fontWeight: 600, margin: '0 0 4px' }}>{t('dashboard.installTitle')}</p><p className="fs-12" style={{ color: '#FFFFFF', margin: 0, lineHeight: '1.5' }}>{t('dashboard.installSub')}</p></div>
             <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-              <button onClick={() => { setShowInstallPrompt(false); sessionStorage.setItem('pwa_install_dismissed', 'true') }} className="fs-12" style={{ padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>{t('dashboard.installNotNow')}</button>
+              <button onClick={() => { setShowInstallPrompt(false); sessionStorage.setItem('pwa_install_dismissed', 'true') }} className="fs-12" style={{ padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.4)', color: 'var(--text-muted)', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>{t('dashboard.installNotNow')}</button>
               <button onClick={installPWA} className="fs-12" style={{ padding: '8px 20px', borderRadius: '100px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>{t('dashboard.install')} </button>
             </div>
           </div>
@@ -279,6 +290,7 @@ function Dashboard() {
           )}
 
           <div className="dashboard" style={{ padding: '1.5rem' }}>
+            <PgsiDashboardCard />
             <div className="stats-grid">
               {stats.map((s, i) => {
                 const inner = (<>
@@ -296,7 +308,7 @@ function Dashboard() {
             </div>
 
             {moneyInfoOpen && (
-              <p className="fs-12" style={{ color: 'rgba(255,255,255,0.55)', margin: '-0.5rem 0 1rem', lineHeight: 1.6 }}>
+              <p className="fs-12" style={{ color: 'var(--text-muted)', margin: '-0.5rem 0 1rem', lineHeight: 1.6 }}>
                 {t('dashboard.moneyFormula')}
               </p>
             )}
@@ -306,7 +318,7 @@ function Dashboard() {
                 <AppIcon name="diary" size={28} style={{ color: 'var(--primary)', flexShrink: 0 }} />
                 <div style={{ flex: 1 }}>
                   <h3 className="fs-15" style={{ color: '#FFFFFF', margin: 0 }}>{t('dashboard.checkinTitle')}</h3>
-                  <p className="fs-12" style={{ color: 'rgba(255,255,255,0.55)', margin: '2px 0 0' }}>{t('dashboard.checkinSub')}</p>
+                  <p className="fs-12" style={{ color: 'var(--text-muted)', margin: '2px 0 0' }}>{t('dashboard.checkinSub')}</p>
                 </div>
                 <span className="fs-13" style={{ color: 'var(--primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>{t('dashboard.checkinStart')}</span>
               </div>
@@ -333,13 +345,13 @@ function Dashboard() {
               <AppIcon name="brain" size={28} style={{ color: 'var(--secondary)', flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
                 <h3 className="fs-15" style={{ color: '#FFFFFF', margin: 0 }}>{t('dashboard.continue')}</h3>
-                <p className="fs-12" style={{ color: 'rgba(255,255,255,0.55)', margin: '2px 0 0' }}>{cbtCount > 0 ? t(cbtCount === 1 ? 'dashboard.continueModule' : 'dashboard.continueModules', { count: cbtCount }) : t('dashboard.continueFirst')}</p>
+                <p className="fs-12" style={{ color: 'var(--text-muted)', margin: '2px 0 0' }}>{cbtCount > 0 ? t(cbtCount === 1 ? 'dashboard.continueModule' : 'dashboard.continueModules', { count: cbtCount }) : t('dashboard.continueFirst')}</p>
               </div>
               <span className="fs-13" style={{ color: 'var(--secondary)', fontWeight: 600 }}>{t('dashboard.continueOpen')}</span>
             </Link>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '1rem' }}>
-              <Link to="/circle" className="clickable" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, var(--secondary) 100%)', border: '1px solid var(--primary)', borderRadius: '12px', padding: '1rem', display: 'block', textDecoration: 'none' }}>
+              <Link to="/circle" className="clickable" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgb(var(--secondary-rgb) / 0.12))', border: '1px solid var(--primary)', borderRadius: '12px', padding: '1rem', display: 'block', textDecoration: 'none' }}>
                 <AppIcon name="users" size={24} style={{ color: 'var(--primary)' }} /><h3 className="fs-13" style={{ color: 'var(--primary)', margin: '6px 0 4px' }}>The Circle</h3><p className="fs-12" style={{ color: 'var(--primary)', fontWeight: 300, margin: 0 }}>{circleOnline > 0 ? t('dashboard.circleOnline', { count: circleOnline }) : t('dashboard.circleJoin')}</p>
               </Link>
               <Link to="/whispers" className="clickable" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '1rem', display: 'block', textDecoration: 'none' }}>
@@ -353,13 +365,13 @@ function Dashboard() {
               <div className="chart-legend"><span className="legend-item"><span className="dot clean"></span> {t('dashboard.legendClean')}</span><span className="legend-item"><span className="dot gambled"></span> {t('dashboard.legendGambled')}</span></div>
             </div>
 
-            <AIChat profile={profile} />
+
 
             <div className="dash-section">
               <div className="section-header"><h3>{t('dashboard.recentEntries')}</h3><button type="button" className="see-all clickable" onClick={() => navigate('/diary')}>{t('dashboard.seeAll')}</button></div>
               <div className="entries-list">
                 {entries.length === 0 ? (
-                  <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '1.5rem' }}>{t('dashboard.noEntries')}</p>
+                  <p className="fs-13" style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '1.5rem' }}>{t('dashboard.noEntries')}</p>
                 ) : entries.slice(0, 3).map((e) => (
                   <div className="entry-item" key={e.id || e.date}>
                     <div className="entry-top"><span className="entry-date">{new Date(e.date).toLocaleDateString(lang === 'sw' ? 'sw-KE' : 'en-KE', { weekday: 'short', month: 'short', day: 'numeric' })}</span><span className={`entry-status ${e.gambled ? 'gambled' : 'clean'}`}>{e.gambled ? t('dashboard.entryGambled') : t('dashboard.entryClean')}</span></div>
@@ -390,35 +402,14 @@ function Dashboard() {
       {showCrisisModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.95)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowCrisisModal(false)} />
-          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '2px solid var(--danger)', maxWidth: '450px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div style={{ background: 'var(--surface)', borderRadius: '16px', padding: '2rem', border: '2px solid var(--danger)', maxWidth: '450px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
               <AppIcon name="alert" size={48} style={{ display: 'block', margin: '0 auto 8px', color: 'var(--danger)' }} />
               <h2 style={{ color: '#FFFFFF', fontFamily: 'var(--font-display)', fontSize: '1.5rem', margin: '0 0 8px' }}>{t('dashboard.crisisTitle')}</h2>
               <p className="fs-13" style={{ color: 'var(--danger)', lineHeight: '1.6', margin: 0 }}>{t('dashboard.crisisSub')}</p>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '1.5rem' }}>
-              {CRISIS_CONTACTS.map((contact, i) => (
-                <a key={i} href={`tel:${contact.phone.replace(/\s/g, '')}`} style={{
-                  textDecoration: 'none', background: contact.priority ? 'rgb(var(--danger-rgb) / 0.14)' : 'var(--bg)',
-                  border: contact.priority ? '2px solid var(--danger)' : '1px solid rgba(255,255,255,0.12)',
-                  borderRadius: '12px', padding: contact.priority ? '18px' : '14px',
-                  display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.2s'
-                }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--danger)'; e.currentTarget.style.transform = 'scale(1.02)' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = contact.priority ? 'var(--danger)' : 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'scale(1)' }}>
-                  {contact.priority && <AppIcon name="star" size={20} style={{ flexShrink: 0, color: '#F2C879' }} />}
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <span style={{ color: contact.priority ? '#FFFFFF' : '#FFFFFF', fontSize: contact.priority ? '15px' : '13px', fontWeight: 600 }}>{contact.name}</span>
-                      {contact.priority && <span className="fs-12" style={{ background: 'var(--surface-2)', color: 'var(--text-muted)', padding: '2px 8px', borderRadius: '100px', fontWeight: 600 }}>{t('dashboard.crisisFirstCall')}</span>}
-                    </div>
-                    <p className="fs-12" style={{ color: 'var(--danger)', margin: '2px 0 0' }}>{contact.phone}  · {contact.hours}</p>
-                  </div>
-                  <span className="fs-18" style={{ color: contact.priority ? '#FFFFFF' : 'rgba(255,255,255,0.4)' }}>→</span>
-                </a>
-              ))}
-            </div>
-            <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', marginBottom: '1rem' }}>{t('dashboard.crisisFootnote')}</p>
+            <SupportChoices />
+            <p className="fs-12" style={{ color: 'var(--text-muted)', textAlign: 'center', marginBottom: '1rem' }}>{t('dashboard.crisisFootnote')}</p>
             <button onClick={() => setShowCrisisModal(false)} className="btn-primary full fs-14" style={{ padding: '12px' }}>{t('dashboard.crisisClose')}</button>
           </div>
         </div>

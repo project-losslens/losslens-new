@@ -1,3 +1,5 @@
+import { saveLocalRecording } from '../../lib/localRecordings'
+import { saveRecording } from '../../lib/recordings'
 import { toast } from '../../components/ToastProvider'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -33,6 +35,12 @@ export default function LossLensPactPage() {
   const [totalPacts, setTotalPacts] = useState(0)
   const [reviewMode, setReviewMode] = useState(false)
   const [reviewBlob, setReviewBlob] = useState(null)
+  useEffect(() => {
+    if (!reviewBlob || !reviewAudioRef.current) return
+    const url = URL.createObjectURL(reviewBlob)
+    reviewAudioRef.current.src = url
+    return () => URL.revokeObjectURL(url)
+  }, [reviewBlob, reviewMode])
   const { entitlements } = useEntitlements()
 
   const mediaRecorderRef = useRef(null)
@@ -145,7 +153,8 @@ export default function LossLensPactPage() {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       streamRef.current = stream
 
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+      const mimeType = ['audio/webm', 'audio/mp4'].find(type => MediaRecorder.isTypeSupported(type))
+      const mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined)
       mediaRecorderRef.current = mediaRecorder
       chunksRef.current = []
 
@@ -167,7 +176,8 @@ export default function LossLensPactPage() {
         })
       }, 1000)
     } catch (err) {
-      toast.error('Microphone access denied.')
+      cleanup()
+      toast.error('Microphone recording is unavailable. Check your permissions and browser.')
       console.error('Recording start error:', err)
     }
   }
@@ -175,7 +185,7 @@ export default function LossLensPactPage() {
   const handleRecordingStop = async () => {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
 
-    const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
+    const blob = new Blob(chunksRef.current, { type: mediaRecorderRef.current?.mimeType || 'audio/webm' })
 
     //  Enter review mode
     setReviewBlob(blob)
@@ -190,54 +200,43 @@ export default function LossLensPactPage() {
     setUploading(true)
 
     const { data: { session } } = await supabase.auth.getSession()
-    if (!session) { setUploading(false); return }
+    if (!session) { setUploading(false); setReviewMode(true); toast.error('Please sign in before saving.'); return }
 
     const blob = reviewBlob
     const extraMb = (blob?.size || 0) / (1024 * 1024)
     const quota = await checkStorageQuota(session.user.id, entitlements.storageQuotaMb, extraMb)
     if (!quota.allowed) {
-      toast.error(`Storage limit reached — your plan includes ${quota.quotaMb} MB. Delete old recordings or upgrade for more space.`, 6000)
-      setReviewBlob(null)
+      toast.error(quota.error || `Storage limit reached — your plan includes ${quota.quotaMb} MB. Delete old recordings or upgrade for more space.`, 6000)
+      setReviewMode(true)
       setUploading(false)
       return
     }
-    const fileName = `${session.user.id}/${Date.now()}.webm`
+    const fileName = `${session.user.id}/${crypto.randomUUID()}.${blob.type.includes('mp4') ? 'mp4' : 'webm'}`
     setReviewBlob(null)
 
     try {
-      const { error } = await supabase.storage.from('precious-pacts').upload(fileName, blob)
-      if (!error) {
-        await supabase.from('precious_pacts').insert({
+      await saveRecording('precious-pacts', 'precious_pacts', fileName, blob, {
           user_id: session.user.id,
           storage_path: fileName,
           title: pactTitle || `Pact ${new Date().toLocaleDateString('en-KE')}`,
           duration_seconds: recordingTime,
           prompt: prompts[activePrompt].q,
         })
+
         toast.success('Pact saved!')
-      } else {
-        throw error
-      }
+
     } catch (err) {
-      //  Fallback to localStorage
       try {
-        const reader = new FileReader()
-        reader.readAsDataURL(blob)
-        reader.onloadend = () => {
-          const localKey = `losslens_pacts_${session.user.id}`
-          const legacyKey = `precious_pacts_${session.user.id}`
-          const localPacts = JSON.parse(readAndMigrateStorageItem(localKey, legacyKey) || '[]')
-          localPacts.push({
-            url: reader.result,
-            title: pactTitle || `Pact ${new Date().toLocaleDateString('en-KE')}`,
-            duration: recordingTime,
-            prompt: prompts[activePrompt].q,
-            date: new Date().toISOString(),
-          })
-          try { localStorage.setItem(localKey, JSON.stringify(localPacts)) } catch {}
-          toast.success('Saved on this device.')
-        }
-      } catch {}
+        await saveLocalRecording(localStorage, `losslens_pacts_${session.user.id}`, blob, {
+          userId: session.user.id, title: pactTitle || 'Untitled pact', duration: recordingTime,
+          prompt: prompts[activePrompt].q, date: new Date().toISOString(),
+        })
+        toast.success('Saved on this device.')
+      } catch {
+        setReviewBlob(blob)
+        setReviewMode(true)
+        toast.error('This recording could not be saved. Keep the page open and retry.')
+      }
     }
 
     setUploading(false)
@@ -343,8 +342,8 @@ export default function LossLensPactPage() {
 
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> The LossLens Pact</h1>
-            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{totalPacts} pacts  · A promise to your future self</p>
+            <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}> The LossLens Pact</h2>
+            <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{totalPacts} pacts  · A promise to your future self</p>
           </div>
         </div>
 
@@ -367,8 +366,8 @@ export default function LossLensPactPage() {
           {reviewMode && reviewBlob && (
             <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: 'var(--primary)', textAlign: 'center' }}>
               <h3 style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '0.75rem' }}> Review Your Recording</h3>
-              <audio ref={reviewAudioRef} src={URL.createObjectURL(reviewBlob)} controls style={{ width: '100%', marginBottom: '0.75rem' }} />
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '0.75rem' }}>Duration: {formatTime(recordingTime)}</p>
+              <audio ref={reviewAudioRef} controls style={{ width: '100%', marginBottom: '0.75rem' }} />
+              <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '0.75rem' }}>Duration: {formatTime(recordingTime)}</p>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button onClick={handleRetake} className="btn-ghost" style={{ flex: 1, padding: '10px', fontSize: '13px' }}> Retake</button>
                 <button onClick={confirmSave} className="btn-primary" style={{ flex: 1, padding: '10px', fontSize: '13px' }}> Save</button>
@@ -393,7 +392,7 @@ export default function LossLensPactPage() {
                     <span style={{ color: activePrompt === i ? 'var(--primary)' : 'var(--secondary)', fontSize: '12px', fontFamily: 'var(--font-body)' }}>{p.q}</span>
                     {activePrompt === i && <span style={{ color: 'var(--primary)', fontSize: '9px', fontWeight: 600 }}>SELECTED</span>}
                   </div>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', margin: '3px 0 0', lineHeight: '1.3' }}>{p.hint}</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '10px', margin: '3px 0 0', lineHeight: '1.3' }}>{p.hint}</p>
                 </button>
               ))}
             </div>
@@ -446,7 +445,7 @@ export default function LossLensPactPage() {
               <h3 style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '0.75rem' }}>Write your pact</h3>
               <textarea value={writtenPact} onChange={e => setWrittenPact(e.target.value.slice(0, MAX_WRITTEN_LENGTH))} placeholder="Dear future me, when you read this, remember..." rows={5}
                 style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', resize: 'vertical', lineHeight: '1.6', boxSizing: 'border-box' }} />
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '4px' }}>{writtenPact.length}/{MAX_WRITTEN_LENGTH}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '10px', marginTop: '4px' }}>{writtenPact.length}/{MAX_WRITTEN_LENGTH}</p>
               <button className="btn-primary full" style={{ marginTop: '8px', padding: '10px', fontSize: '12px' }} onClick={saveWrittenPact} disabled={!writtenPact.trim()}>Save written pact </button>
             </div>
           )}
@@ -465,10 +464,10 @@ export default function LossLensPactPage() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: 0 }}>{pact.title || `Pact`}</p>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '3px' }}>
-                          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{new Date(pact.created_at).toLocaleDateString('en-KE', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                          {pact.duration_seconds > 0 && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{formatTime(pact.duration_seconds)}</span>}
+                          <span style={{ color: 'var(--text-muted)', fontSize: '10px' }}>{new Date(pact.created_at).toLocaleDateString('en-KE', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                          {pact.duration_seconds > 0 && <span style={{ color: 'var(--text-muted)', fontSize: '10px' }}>{formatTime(pact.duration_seconds)}</span>}
                           {pact._pending ? <span style={{ color: 'var(--secondary)', fontSize: '9px', background: 'rgb(var(--primary-rgb) / 0.15)', padding: '1px 6px', borderRadius: '100px' }}>Local</span> : <span style={{ color: 'var(--primary)', fontSize: '9px', background: 'rgba(255,255,255,0.12)', padding: '1px 6px', borderRadius: '100px' }}> Saved</span>}
-                          {pact.play_count > 0 && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '9px' }}>{pact.play_count} plays</span>}
+                          {pact.play_count > 0 && <span style={{ color: 'var(--text-muted)', fontSize: '9px' }}>{pact.play_count} plays</span>}
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '3px', flexShrink: 0 }}>
@@ -508,13 +507,13 @@ export default function LossLensPactPage() {
 
           {pactsError && (
             <div style={{ textAlign: 'center', padding: '2rem' }}>
-              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', marginBottom: '10px' }}>Could not load your pacts.</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '10px' }}>Could not load your pacts.</p>
               <button type="button" className="btn-primary" onClick={fetchPacts}>Try again</button>
             </div>
           )}
 
           {pacts.length === 0 && !pactsError && !reviewMode && !uploading && (
-            <div style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.4)' }}>
+            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
               <AppIcon name="mic" size={40} style={{ display: 'block', margin: '0 auto 8px', color: 'var(--primary)' }} />
               <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No pacts yet. Record your first promise to your future self.</p>
             </div>
@@ -523,7 +522,7 @@ export default function LossLensPactPage() {
           {/* Privacy */}
           <div className="dash-section" style={{ marginTop: '0.75rem' }}>
             <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.75rem' }}> Privacy</h3>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', lineHeight: '1.5', margin: 0 }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '11px', lineHeight: '1.5', margin: 0 }}>
               Your pacts are stored securely and only accessible to you. Delete them anytime.
             </p>
           </div>
@@ -540,7 +539,7 @@ export default function LossLensPactPage() {
             <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '14px', padding: '1.5rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '340px', width: '100%', textAlign: 'center' }}>
               <AppIcon name="alert" size={32} style={{ display: 'block', margin: '0 auto 8px', color: '#FFFFFF' }} />
               <h3 style={{ color: '#FFFFFF', fontSize: '15px', marginBottom: '6px' }}>Delete this pact?</h3>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '14px' }}>This cannot be undone.</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '11px', marginBottom: '14px' }}>This cannot be undone.</p>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button onClick={() => setDeleteConfirm(null)} className="btn-ghost" style={{ flex: 1, padding: '8px', fontSize: '12px' }}>Cancel</button>
                 <button onClick={() => handleDelete(deleteConfirm.id, deleteConfirm.path, deleteConfirm.isLocal, deleteConfirm.localIndex)} className="btn-danger" style={{ flex: 1, padding: '8px', fontSize: '12px' }}>Delete</button>

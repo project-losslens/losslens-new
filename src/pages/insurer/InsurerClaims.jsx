@@ -115,7 +115,7 @@ function ProtectionClaims() {
             <p style={{ color: '#FFFFFF', fontSize: '13px', margin: 0 }}>
               {c.policy_number || 'Policy'} · {c.member_reference} · {c.claim_type === 'fixed_sum' ? 'Fixed sum' : 'Treatment'}
             </p>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: 0 }}>
               KES {Number(c.claimed_amount).toLocaleString()}{c.approved_amount != null ? ` · approved KES ${Number(c.approved_amount).toLocaleString()}` : ''} · {c.event_date || ''}
             </p>
           </div>
@@ -128,7 +128,7 @@ function ProtectionClaims() {
           <p style={{ color: '#FFFFFF', fontSize: '13px', margin: '0 0 6px' }}>
             {detail.member_reference} · {detail.claim_type === 'fixed_sum' ? 'Fixed sum' : 'Treatment'} · claimed KES {Number(detail.claimed_amount).toLocaleString()}
           </p>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 10px' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: '0 0 10px' }}>
             Benefit: {detail.benefit_name || detail.benefit_code || '—'} · Status: {detail.status.replace(/_/g, ' ')}
             {detail.milestone && <> · Milestone: {detail.milestone.type} #{detail.milestone.ordinal} · service {detail.milestone.service_date} · verified {detail.milestone.verified_at ? new Date(detail.milestone.verified_at).toLocaleDateString() : '—'}</>}
           </p>
@@ -139,7 +139,7 @@ function ProtectionClaims() {
             {evidenceError && <p role="alert" className="portal-notice" style={{ marginTop: '6px', color: 'var(--danger)' }}>{evidenceError}</p>}
             {evidenceFiles && evidenceFiles.length === 0 && <p className="portal-notice" style={{ marginTop: '6px' }}>No evidence attached.</p>}
             {evidenceFiles?.map(ev => (
-              <p key={ev.id} className="fs-11" style={{ color: 'rgba(255,255,255,0.6)', margin: '4px 0 0' }}>
+              <p key={ev.id} className="fs-11" style={{ color: 'var(--text-muted)', margin: '4px 0 0' }}>
                 {ev.evidence_type || 'document'} · {new Date(ev.created_at).toLocaleDateString()}
                 {ev.url && <> · <a href={ev.url} target="_blank" rel="noreferrer" style={{ color: 'var(--secondary)' }}>Open (5 min)</a></>}
                 {ev.urlError && <> · <span role="alert" style={{ color: 'var(--danger)' }}>{ev.urlError}</span></>}
@@ -149,7 +149,7 @@ function ProtectionClaims() {
           {['submitted', 'under_review', 'info_requested'].includes(detail.status) && (
             <>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Decision
+                <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Decision
                   <select value={decision.decision} onChange={e => setDecision({ ...decision, decision: e.target.value })}
                     style={{ display: 'block', marginTop: '4px', background: 'var(--bg)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '6px 8px' }}>
                     <option value="approved">Approve</option>
@@ -159,7 +159,7 @@ function ProtectionClaims() {
                   </select>
                 </label>
                 {['approved', 'partially_approved'].includes(decision.decision) && (
-                  <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Approved amount (KES)
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Approved amount (KES)
                     <NumberField value={decision.amount} onChange={v => setDecision({ ...decision, amount: v ?? '' })} min={0} />
                   </label>
                 )}

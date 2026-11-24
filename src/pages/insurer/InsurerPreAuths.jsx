@@ -73,7 +73,7 @@ export default function InsurerPreAuths() {
                   <p style={{ color: '#FFFFFF', fontSize: '13px', margin: 0 }}>
                     {r.member_reference} · {r.max_sessions} session(s)
                   </p>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: 0 }}>
                     Requested {new Date(r.created_at).toLocaleDateString()}
                     {r.expires_at ? ` · expires ${new Date(r.expires_at).toLocaleDateString()}` : ''}
                   </p>
@@ -88,7 +88,7 @@ export default function InsurerPreAuths() {
               {awaitDecision && (
                 <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>
+                    <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                       Decision
                       <select value={d.decision || 'approved'} onChange={e => setDecisions(p => ({ ...p, [r.preauth_id]: { ...d, decision: e.target.value } }))}
                         style={{ display: 'block', marginTop: '4px', background: 'var(--bg)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '6px 8px' }}>
@@ -98,7 +98,7 @@ export default function InsurerPreAuths() {
                       </select>
                     </label>
                     {d.decision !== 'rejected' && (
-                      <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                         Authorised fee per session (KES)
                         <NumberField value={d.fee ?? ''} onChange={v => setDecisions(p => ({ ...p, [r.preauth_id]: { ...d, fee: v } }))} min={0} />
                       </label>

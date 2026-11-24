@@ -1,3 +1,4 @@
+import { checkedMutation } from '../../lib/mutations'
 import { toast } from '../../components/ToastProvider'
 import NumberField from '../../components/NumberField'
 import { useState, useEffect, useCallback, useMemo } from 'react'
@@ -49,7 +50,11 @@ export default function B2BClients() {
     try {
       const { data, error: fetchError } = await supabase.from('b2b_clients').select('*').order('created_at', { ascending: false })
       if (fetchError) throw fetchError
-      const clientData = data || []
+      const clientData = (data || []).map(client => ({
+        ...client, contact_email: client.email || '', contact_phone: client.phone || '',
+        seats: client.max_users, notes: client.settings?.notes || '',
+        website: client.settings?.website || '', address: client.settings?.address || '',
+      }))
       setClients(clientData)
 
       // Fetch member counts for each client
@@ -94,7 +99,7 @@ export default function B2BClients() {
     setForm({
       company_name: c.company_name || '', contact_email: c.contact_email || '',
       contact_name: c.contact_name || '', contact_phone: c.contact_phone || '',
-      seats: c.seats || '', plan: c.plan || PLANS.STANDARD, status: c.status || 'active',
+      seats: c.max_users ?? c.seats ?? '', plan: c.plan || PLANS.STANDARD, status: c.status || 'active',
       notes: c.notes || '', website: c.website || '', address: c.address || ''
     })
     setFormErrors({})
@@ -116,13 +121,16 @@ export default function B2BClients() {
     setSaving(true)
     try {
       const payload = {
-        ...form,
-        seats: parseInt(form.seats) || 0,
-        company_code: editingClient ? editingClient.company_code : generateCompanyCode(form.company_name)
+        company_name: form.company_name.trim(), contact_name: form.contact_name.trim(),
+        email: form.contact_email.trim(), phone: form.contact_phone.trim(),
+        max_users: form.seats ? parseInt(form.seats) : null,
+        plan: form.plan, status: form.status,
+        settings: { ...editingClient?.settings, notes: form.notes, website: form.website, address: form.address },
+        company_code: editingClient ? editingClient.company_code : generateCompanyCode(form.company_name),
       }
       const { error: saveError } = editingClient
-        ? await supabase.from('b2b_clients').update(payload).eq('id', editingClient.id)
-        : await supabase.from('b2b_clients').insert(payload)
+        ? await checkedMutation(supabase.from('b2b_clients').update(payload).eq('id', editingClient.id).select('*'))
+        : await checkedMutation(supabase.from('b2b_clients').insert(payload).select('*'))
       if (saveError) throw saveError
       toast.success(editingClient ? 'Client updated!' : 'Client added!')
       setShowForm(false)
@@ -135,7 +143,7 @@ export default function B2BClients() {
     setActionLoading(id)
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active'
     setClients(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : c))
-    const { error: toggleError } = await supabase.from('b2b_clients').update({ status: newStatus }).eq('id', id)
+    const { error: toggleError } = await checkedMutation(supabase.from('b2b_clients').update({ status: newStatus }).eq('id', id).select('*'))
     if (toggleError) {
       setClients(prev => prev.map(c => c.id === id ? { ...c, status: currentStatus } : c))
       toast.error('Update failed.')
@@ -148,7 +156,7 @@ export default function B2BClients() {
 
   const deleteClient = async (id) => {
     setDeleting(true)
-    const { error: delError } = await supabase.from('b2b_clients').delete().eq('id', id)
+    const { error: delError } = await checkedMutation(supabase.from('b2b_clients').delete().eq('id', id).select('*'))
     if (delError) {
       toast.error('Delete failed.')
     } else {
@@ -159,9 +167,9 @@ export default function B2BClients() {
     setShowDeleteConfirm(null)
   }
 
-  const copyCode = (code) => {
-    navigator.clipboard.writeText(code)
-    toast.success('Company code copied!')
+  const copyCode = async (code) => {
+    try { await navigator.clipboard.writeText(code); toast.success('Company code copied!') }
+    catch { toast.error('Clipboard access was denied. Select and copy the code manually.') }
   }
 
   const filteredClients = useMemo(() => {
@@ -185,7 +193,7 @@ export default function B2BClients() {
   if (loading) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
@@ -202,7 +210,7 @@ export default function B2BClients() {
   if (error) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-  
+
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="page-content">
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '12px' }}>{error}</p>
@@ -219,7 +227,7 @@ export default function B2BClients() {
       <div style={{ flex: 1, minWidth: 0 }} className="page-content">
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}> B2B Clients</h1>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}> B2B Clients</h2>
             <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>{clients.length} total  · {activeCount} active</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -237,39 +245,39 @@ export default function B2BClients() {
                 <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 1.25rem' }}>{editingClient ? ' Edit Client' : ' New B2B Client'}</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div>
-                    <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Company Name *</label>
+                    <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Company Name *</label>
                     <input type="text" value={form.company_name} onChange={e => { setForm(p => ({ ...p, company_name: e.target.value })); setFormErrors(p => ({ ...p, company_name: '' })) }} style={{ ...inputStyle, borderColor: formErrors.company_name ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="e.g. Acme Corp" />
                     {formErrors.company_name && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{formErrors.company_name}</span>}
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '10px' }}>
                     <div>
-                      <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Contact Name</label>
+                      <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Contact Name</label>
                       <input type="text" value={form.contact_name} onChange={e => setForm(p => ({ ...p, contact_name: e.target.value }))} style={inputStyle} placeholder="e.g. Jane Doe" />
                     </div>
                     <div>
-                      <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Contact Email *</label>
+                      <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Contact Email *</label>
                       <input type="email" value={form.contact_email} onChange={e => { setForm(p => ({ ...p, contact_email: e.target.value })); setFormErrors(p => ({ ...p, contact_email: '' })) }} style={{ ...inputStyle, borderColor: formErrors.contact_email ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="jane@acme.com" />
                       {formErrors.contact_email && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{formErrors.contact_email}</span>}
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '10px' }}>
                     <div>
-                      <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Contact Phone</label>
+                      <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Contact Phone</label>
                       <input type="text" value={form.contact_phone} onChange={e => setForm(p => ({ ...p, contact_phone: e.target.value }))} style={inputStyle} placeholder="+254 7XX XXX XXX" />
                     </div>
                     <div>
-                      <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Website</label>
+                      <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Website</label>
                       <input type="url" value={form.website} onChange={e => setForm(p => ({ ...p, website: e.target.value }))} style={inputStyle} placeholder="https://acme.com" />
                     </div>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px' }}>
                     <div>
-                      <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Seats</label>
+                      <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Seats</label>
                       <NumberField value={form.seats} onChange={(seats) => { setForm((current) => ({ ...current, seats: seats ?? '' })); setFormErrors((current) => ({ ...current, seats: '' })) }} wrapperStyle={{ ...inputStyle, borderColor: formErrors.seats ? 'var(--text)' : 'rgba(255,255,255,0.12)' }} placeholder="e.g. 50" inputMode="numeric" min={1} step={1} />
                       {formErrors.seats && <span style={{ fontSize: '11px', color: 'var(--text)' }}>{formErrors.seats}</span>}
                     </div>
                     <div>
-                      <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Plan</label>
+                      <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Plan</label>
                       <select value={form.plan} onChange={e => setForm(p => ({ ...p, plan: e.target.value }))} style={{ ...inputStyle, cursor: 'pointer' }}>
                         <option value={PLANS.STANDARD}>Standard</option>
                         <option value={PLANS.ENTERPRISE}>Enterprise</option>
@@ -278,11 +286,11 @@ export default function B2BClients() {
                     </div>
                   </div>
                   <div>
-                    <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Address</label>
+                    <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Address</label>
                     <input type="text" value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} style={inputStyle} placeholder="Nairobi, Kenya" />
                   </div>
                   <div>
-                    <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Notes</label>
+                    <label style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Notes</label>
                     <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} rows={2} style={{ ...inputStyle, resize: 'vertical' }} />
                   </div>
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
@@ -312,7 +320,7 @@ export default function B2BClients() {
           </div>
 
           {filteredClients.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
               <AppIcon name="building" size={48} style={{ display: 'block', margin: '0 auto 12px' }} />
               <p style={{ color: 'var(--primary)', fontSize: '14px' }}>{searchQuery || planFilter !== 'all' || statusFilter !== 'all' ? 'No clients match your filters.' : 'No B2B clients yet.'}</p>
             </div>
@@ -326,7 +334,7 @@ export default function B2BClients() {
                 const seatColor = usagePercent >= 90 ? 'var(--text)' : usagePercent >= 70 ? 'var(--info)' : 'var(--primary)'
 
                 return (
-                  <div key={c.id} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${c.status === 'active' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '12px', padding: '16px', opacity: c.status === 'active' ? 1 : 0.6, transition: 'border-color 0.2s' }}
+                  <div key={c.id} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${c.status === 'active' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '12px', padding: '16px', opacity: 1, transition: 'border-color 0.2s' }}
                     onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
                     onMouseLeave={e => e.currentTarget.style.borderColor = c.status === 'active' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.08)'}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
@@ -336,12 +344,12 @@ export default function B2BClients() {
                           <span style={{ background: planColor.bg, color: planColor.color, padding: '2px 8px', borderRadius: '100px', fontSize: '10px', border: `1px solid ${planColor.color}33` }}>{planColor.label}</span>
                           <span style={{ background: c.status === 'active' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.08)', color: c.status === 'active' ? 'var(--primary)' : 'var(--text)', border: `1px solid ${c.status === 'active' ? 'var(--primary)' : 'rgba(255,255,255,0.08)'}`, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{c.status}</span>
                         </div>
-                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>{c.contact_name && `${c.contact_name}  · `}{c.contact_email}</p>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '12px', margin: '0 0 4px' }}>{c.contact_name && `${c.contact_name}  · `}{c.contact_email}</p>
 
                         {/* Company Code */}
                         {c.company_code && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Code:</span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>Code:</span>
                             <code style={{ background: 'var(--bg)', padding: '3px 8px', borderRadius: '4px', color: 'var(--primary)', fontSize: '12px', fontFamily: 'monospace', letterSpacing: '1px' }}>{c.company_code}</code>
                             <button onClick={() => copyCode(c.company_code)} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontSize: '11px', cursor: 'pointer', padding: '2px 4px' }} title="Copy code"></button>
                           </div>
@@ -351,7 +359,7 @@ export default function B2BClients() {
                         {seatsTotal > 0 && (
                           <div style={{ marginTop: '6px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
-                              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}> Seats</span>
+                              <span style={{ color: 'var(--text-muted)', fontSize: '10px' }}> Seats</span>
                               <span style={{ color: seatColor, fontSize: '10px', fontWeight: 500 }}>{memberCount} / {seatsTotal}</span>
                             </div>
                             <div style={{ height: '4px', background: 'rgba(255,255,255,0.12)', borderRadius: '2px', overflow: 'hidden' }}>
@@ -360,7 +368,7 @@ export default function B2BClients() {
                           </div>
                         )}
 
-                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '6px 0 0' }}>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: '6px 0 0' }}>
                           Joined {new Date(c.created_at).toLocaleDateString('en-KE')}
                           {c.notes && <span style={{ display: 'block', marginTop: '4px', color: 'var(--info)', fontSize: '11px', fontStyle: 'italic' }}> {c.notes.substring(0, 80)}{c.notes.length > 80 ? '"¦' : ''}</span>}
                         </p>
@@ -390,17 +398,17 @@ export default function B2BClients() {
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '600px', width: '100%', maxHeight: '80vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: 0 }}> {showMembers.client.company_name} — Members</h3>
-              <button onClick={() => setShowMembers(null)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '20px', cursor: 'pointer' }}></button>
+              <button onClick={() => setShowMembers(null)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '20px', cursor: 'pointer' }}></button>
             </div>
             {showMembers.members.length === 0 ? (
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', textAlign: 'center', padding: '2rem' }}>No members yet. Share the company code <strong style={{ color: 'var(--primary)' }}>{showMembers.client.company_code}</strong> with employees.</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', textAlign: 'center', padding: '2rem' }}>No members yet. Share the company code <strong style={{ color: 'var(--primary)' }}>{showMembers.client.company_code}</strong> with employees.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {showMembers.members.map(m => (
                   <div key={m.id} style={{ background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                     <span style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500 }}>{m.full_name || 'Unnamed member'}</span>
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '10px' }}>
                         Joined {new Date(m.created_at).toLocaleDateString('en-KE')}
                       </span>
                       <span style={{ color: 'var(--primary)', fontSize: '10px' }}>{m.status || 'active'}</span>
@@ -426,7 +434,7 @@ export default function B2BClients() {
               <strong style={{ color: 'var(--primary)' }}>"{showToggleConfirm.company_name}"</strong> will be {showToggleConfirm.status === 'active' ? 'deactivated' : 'reactivated'}.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowToggleConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={() => setShowToggleConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
               <button onClick={() => toggleStatus(showToggleConfirm.id, showToggleConfirm.status)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: showToggleConfirm.status === 'active' ? 'rgb(var(--primary-rgb) / 0.15)' : 'rgba(255,255,255,0.12)', border: 'none', color: showToggleConfirm.status === 'active' ? 'var(--primary)' : 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
                 {showToggleConfirm.status === 'active' ? 'Deactivate' : 'Activate'}
               </button>
@@ -446,7 +454,7 @@ export default function B2BClients() {
               Permanently delete <strong style={{ color: 'var(--primary)' }}>"{showDeleteConfirm.company_name}"</strong>? This cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
+              <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
               <button onClick={() => deleteClient(showDeleteConfirm.id)} disabled={deleting} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{deleting ? 'Deleting...' : 'Delete'}</button>
             </div>
           </div>
