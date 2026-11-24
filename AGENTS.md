@@ -54,7 +54,7 @@ don't create it manually.
 - Styling: tokens in `src/styles/base.css` (`--*` vars), `globals.css`
   (`.btn-primary`, `.card`, `.form-group`), `landing.css` (`ll-` public pages),
   inline style objects elsewhere. No Tailwind utilities.
-- Brand: bg `#0B1220`, teal `#2DD4BF`, blue `#7DBDEE`, warm accent `#F2C879`.
+- Brand: bg `#0A1A12`, primary green `#4ADE80`, secondary green `#86EFAC`, warm accent `#F2C879`.
 - Fonts: `--font-display` (Bricolage Grotesque), `--font-body` (Instrument
   Sans) — self-hosted via fontsource packages. Public pages (`.ll-landing`)
   use Jost 300/500 woff2 from `public/fonts` for headings; body is system-ui.
