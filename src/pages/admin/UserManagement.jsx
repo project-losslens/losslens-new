@@ -199,13 +199,13 @@ export default function UserManagement() {
   const activeSuperAdminCount = users.filter(u => u.role === 'super_admin' && u.status === 'active').length
 
   const riskBadge = (risk) => {
-    if (risk === 'high') return { bg: 'rgba(255,255,255,0.08)', color: 'var(--text)', border: 'var(--text)', label: 'High' }
-    if (risk === 'medium') return { bg: 'rgba(45,212,191,0.15)', color: 'var(--info)', border: 'var(--info)', label: 'Medium' }
-    return { bg: 'rgba(255,255,255,0.12)', color: 'var(--primary)', border: 'var(--primary)', label: 'Low' }
+    if (risk === 'high') return { bg: 'rgb(var(--danger-rgb) / 0.16)', color: 'var(--danger)', border: 'var(--danger)', label: 'High' }
+    if (risk === 'medium') return { bg: 'rgb(var(--warning-rgb) / 0.16)', color: 'var(--warning)', border: 'var(--warning)', label: 'Medium' }
+    return { bg: 'rgb(var(--primary-rgb) / 0.15)', color: 'var(--primary)', border: 'var(--primary)', label: 'Low' }
   }
 
   const planBadge = (plan, planType) => {
-    if (planType === 'company') return { bg: 'rgba(45,212,191,0.15)', color: 'var(--primary)', border: 'var(--primary)', label: 'Company' }
+    if (planType === 'company') return { bg: 'rgb(var(--primary-rgb) / 0.15)', color: 'var(--primary)', border: 'var(--primary)', label: 'Company' }
     if (plan === 'premium') return { bg: 'rgba(255,255,255,0.12)', color: 'var(--primary)', border: 'var(--primary)', label: 'Premium' }
     return { bg: 'transparent', color: 'rgba(255,255,255,0.4)', border: 'rgba(255,255,255,0.12)', label: 'Free' }
   }
@@ -266,11 +266,11 @@ export default function UserManagement() {
           {/* Main Tabs: Users | Payments */}
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)', overflowX: 'auto' }}>
             <button onClick={() => { setActiveTab('users'); setSearch(''); setFilter('all') }}
-              style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'users' ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeTab === 'users' ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === 'users' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
+              style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'users' ? 'rgb(var(--primary-rgb) / 0.15)' : 'transparent', color: activeTab === 'users' ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === 'users' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
               Users
             </button>
             <button onClick={() => { setActiveTab('payments'); setSearch(''); setPaymentFilter('all') }}
-              style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'payments' ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeTab === 'payments' ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === 'payments' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
+              style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'payments' ? 'rgb(var(--primary-rgb) / 0.15)' : 'transparent', color: activeTab === 'payments' ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === 'payments' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
               Payments
             </button>
             {activeTab === 'payments' && filtered.length > 0 && filtered.length <= 100 && (
@@ -290,7 +290,7 @@ export default function UserManagement() {
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {['all', 'high', 'medium', 'low'].map(f => (
                     <button key={f} onClick={() => setFilter(f)}
-                      style={{ padding: '6px 14px', borderRadius: '100px', border: '1px solid ' + (filter === f ? 'var(--primary)' : 'rgba(255,255,255,0.12)'), background: filter === f ? 'rgba(45,212,191,0.15)' : 'transparent', color: filter === f ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: filter === f ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
+                      style={{ padding: '6px 14px', borderRadius: '100px', border: '1px solid ' + (filter === f ? 'var(--primary)' : 'rgba(255,255,255,0.12)'), background: filter === f ? 'rgb(var(--primary-rgb) / 0.15)' : 'transparent', color: filter === f ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: filter === f ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
                       {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1) + ' Risk'}
                     </button>
                   ))}
@@ -323,7 +323,7 @@ export default function UserManagement() {
                               </span>
                               <span style={{ background: risk.bg, color: risk.color, border: '1px solid ' + risk.border, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{risk.label} Risk</span>
                               <span style={{ background: plan.bg, color: plan.color, border: '1px solid ' + plan.border, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{plan.label}</span>
-                              <span style={{ background: 'rgba(45,212,191,0.15)', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>
+                              <span style={{ background: 'rgb(var(--primary-rgb) / 0.15)', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>
                                 {t(({ super_admin: 'users.roleSuperAdmin', admin: 'users.roleAdmin', therapist: 'users.roleTherapist', insurer: 'users.roleInsurer', user: 'users.roleUser' })[u.role] || 'users.roleUser')}
                               </span>
                               {isSuspended && (
@@ -341,7 +341,7 @@ export default function UserManagement() {
                             </div>
 
                             {hasPartner && (
-                              <div style={{ background: 'var(--bg)', border: '1px solid rgba(45,212,191,0.2)', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                              <div style={{ background: 'var(--bg)', border: '1px solid rgb(var(--primary-rgb) / 0.2)', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                                 <span style={{ color: 'var(--primary)', fontSize: '11px', fontWeight: 600 }}> Partner:</span>
                                 {u.accountability_partner_name && <span style={{ color: 'var(--text)', fontSize: '12px' }}>{u.accountability_partner_name}</span>}
                                 {u.accountability_partner_phone && (
@@ -395,7 +395,7 @@ export default function UserManagement() {
                   <button key={tab.id} onClick={() => setPaymentFilter(tab.id)}
                     style={{
                       padding: '8px 16px', borderRadius: '100px', border: '1px solid ' + (paymentFilter === tab.id ? 'var(--primary)' : 'rgba(255,255,255,0.12)'),
-                      background: paymentFilter === tab.id ? 'rgba(45,212,191,0.15)' : 'transparent',
+                      background: paymentFilter === tab.id ? 'rgb(var(--primary-rgb) / 0.15)' : 'transparent',
                       color: paymentFilter === tab.id ? 'var(--primary)' : 'rgba(255,255,255,0.4)',
                       fontSize: '12px', fontWeight: paymentFilter === tab.id ? 600 : 400,
                       cursor: 'pointer', fontFamily: 'var(--font-body)'
@@ -439,7 +439,7 @@ export default function UserManagement() {
                           </span>
                           <span style={{ background: plan.bg, color: plan.color, border: '1px solid ' + plan.border, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{plan.label}</span>
                           {u.subscription_status === 'pending' && (
-                            <span style={{ background: 'rgba(45,212,191,0.15)', color: 'var(--info)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', border: '1px solid var(--info)' }}>Pending</span>
+                            <span style={{ background: 'rgb(var(--primary-rgb) / 0.15)', color: 'var(--info)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', border: '1px solid var(--info)' }}>Pending</span>
                           )}
                         </div>
                         <div style={{ display: 'flex', gap: '6px' }}>
@@ -465,7 +465,7 @@ export default function UserManagement() {
 
       {/* Suspend Modal */}
       {showSuspendConfirm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowSuspendConfirm(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid ' + (showSuspendConfirm.status === 'suspended' ? 'var(--primary)' : 'var(--info)'), maxWidth: '380px', width: '100%', textAlign: 'center' }}>
             <AppIcon name={showSuspendConfirm.status === 'suspended' ? 'check' : 'clock'} size={36} style={{ display: 'block', margin: '0 auto 12px' }} />
@@ -477,7 +477,7 @@ export default function UserManagement() {
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setShowSuspendConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
-              <button onClick={() => toggleStatus(showSuspendConfirm.id, showSuspendConfirm.status || 'active')} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: showSuspendConfirm.status === 'suspended' ? 'rgba(255,255,255,0.12)' : 'rgba(45,212,191,0.15)', border: 'none', color: showSuspendConfirm.status === 'suspended' ? 'var(--primary)' : 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+              <button onClick={() => toggleStatus(showSuspendConfirm.id, showSuspendConfirm.status || 'active')} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: showSuspendConfirm.status === 'suspended' ? 'rgba(255,255,255,0.12)' : 'rgb(var(--primary-rgb) / 0.15)', border: 'none', color: showSuspendConfirm.status === 'suspended' ? 'var(--primary)' : 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
                 {showSuspendConfirm.status === 'suspended' ? 'Reactivate' : 'Suspend'}
               </button>
             </div>
@@ -487,7 +487,7 @@ export default function UserManagement() {
 
       {/* Delete Modal */}
       {showDeleteConfirm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowDeleteConfirm(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
             <AppIcon name="close" size={36} style={{ display: 'block', margin: '0 auto 12px' }} />
@@ -507,7 +507,7 @@ export default function UserManagement() {
 
       {/* Change Subscription Modal (single or bulk) */}
       {subModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setSubModal(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '1.5rem', border: '1px solid var(--primary)', maxWidth: '440px', width: '100%', maxHeight: '85vh', overflowY: 'auto' }}>
             <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 4px' }}>Change subscription</h3>
@@ -550,7 +550,7 @@ export default function UserManagement() {
             )}
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setSubModal(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
-              <button onClick={saveSubscription} disabled={subSaving} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+              <button onClick={saveSubscription} disabled={subSaving} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
                 {subSaving ? 'Saving…' : 'Save'}
               </button>
             </div>

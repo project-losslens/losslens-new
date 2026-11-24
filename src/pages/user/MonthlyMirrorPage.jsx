@@ -484,16 +484,16 @@ export default function MonthlyMirrorPage() {
             <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{syncedRecordings.length + pendingRecordings.length} recordings</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <button onClick={() => navigateMonth(-1)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', minWidth: '36px' }} aria-label="Previous month">←</button>
-            <span style={{ color: '#2DD4BF', fontSize: '12px', fontWeight: 500, minWidth: '90px', textAlign: 'center' }}>{monthLabel}</span>
-            <button onClick={() => navigateMonth(1)} disabled={isCurrentMonth} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: isCurrentMonth ? '#7DBDEE' : '#2DD4BF', padding: '6px 10px', borderRadius: '6px', cursor: isCurrentMonth ? 'default' : 'pointer', fontSize: '14px', minWidth: '36px', opacity: isCurrentMonth ? 0.4 : 1 }} aria-label="Next month">→</button>
+            <button onClick={() => navigateMonth(-1)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--primary)', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', minWidth: '36px' }} aria-label="Previous month">←</button>
+            <span style={{ color: 'var(--primary)', fontSize: '12px', fontWeight: 500, minWidth: '90px', textAlign: 'center' }}>{monthLabel}</span>
+            <button onClick={() => navigateMonth(1)} disabled={isCurrentMonth} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: isCurrentMonth ? 'var(--secondary)' : 'var(--primary)', padding: '6px 10px', borderRadius: '6px', cursor: isCurrentMonth ? 'default' : 'pointer', fontSize: '14px', minWidth: '36px', opacity: isCurrentMonth ? 0.4 : 1 }} aria-label="Next month">→</button>
           </div>
         </div>
 
         {/* Milestone Banner */}
         {milestone && (
-          <div style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid #2DD4BF', padding: '10px 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: '#2DD4BF', fontSize: '12px' }}>{milestone.text}</span>
+          <div style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid var(--primary)', padding: '10px 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: 'var(--primary)', fontSize: '12px' }}>{milestone.text}</span>
             <button onClick={() => { setMilestone(null); if (milestoneTimerRef.current) clearTimeout(milestoneTimerRef.current) }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '16px', cursor: 'pointer', padding: '4px 8px' }} aria-label="Dismiss milestone"></button>
           </div>
         )}
@@ -502,9 +502,9 @@ export default function MonthlyMirrorPage() {
 
           {/* Review Mode */}
           {reviewMode && reviewBlob && (
-            <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: '#2DD4BF', textAlign: 'center' }}>
-              <h3 style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '0.75rem' }}> Review Your Recording</h3>
-              <div style={{ background: '#0B1220', borderRadius: '10px', overflow: 'hidden', marginBottom: '0.75rem' }}>
+            <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: 'var(--primary)', textAlign: 'center' }}>
+              <h3 style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '0.75rem' }}> Review Your Recording</h3>
+              <div style={{ background: 'var(--bg)', borderRadius: '10px', overflow: 'hidden', marginBottom: '0.75rem' }}>
                 <video ref={reviewVideoRef} src={URL.createObjectURL(reviewBlob)} controls style={{ width: '100%', maxHeight: '300px' }} />
               </div>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '0.75rem' }}>Duration: {formatTime(recordingTime)}</p>
@@ -518,31 +518,31 @@ export default function MonthlyMirrorPage() {
           {/* Uploading Progress */}
           {uploading && (
             <div className="dash-section" style={{ marginBottom: '0.75rem', textAlign: 'center' }}>
-              <p style={{ color: '#7DBDEE', fontSize: '13px', marginBottom: '8px' }}><BrandLoader variant="inline" showWordmark={false} /></p>
+              <p style={{ color: 'var(--secondary)', fontSize: '13px', marginBottom: '8px' }}><BrandLoader variant="inline" showWordmark={false} /></p>
               <div style={{ height: '4px', background: 'rgba(255,255,255,0.12)', borderRadius: '2px', overflow: 'hidden' }}>
-                <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#2DD4BF', transition: 'width 0.3s ease' }} />
+                <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'var(--primary)', transition: 'width 0.3s ease' }} />
               </div>
             </div>
           )}
 
           {/* Prompts */}
           <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-            <p style={{ color: '#2DD4BF', fontSize: '11px', marginBottom: '10px', letterSpacing: '0.05em', fontWeight: 600 }}> CHOOSE YOUR REFLECTION PROMPT</p>
+            <p style={{ color: 'var(--primary)', fontSize: '11px', marginBottom: '10px', letterSpacing: '0.05em', fontWeight: 600 }}> CHOOSE YOUR REFLECTION PROMPT</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {prompts.map((p, i) => (
                 <button key={i} onClick={() => setCurrentPrompt(i)} role="radio" aria-checked={currentPrompt === i}
-                  style={{ background: currentPrompt === i ? 'rgba(45,212,191,0.08)' : '#0B1220', border: `1px solid ${currentPrompt === i ? '#2DD4BF' : 'rgba(255,255,255,0.12)'}`, borderRadius: '10px', padding: currentPrompt === i ? '14px' : '12px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s' }}>
+                  style={{ background: currentPrompt === i ? 'rgb(var(--primary-rgb) / 0.08)' : 'var(--bg)', border: `1px solid ${currentPrompt === i ? 'var(--primary)' : 'rgba(255,255,255,0.12)'}`, borderRadius: '10px', padding: currentPrompt === i ? '14px' : '12px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
                     <div style={{ flex: 1 }}>
                       <span style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: currentPrompt === i ? 600 : 400 }}>{p.q}</span>
                       <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '4px 0 0', lineHeight: '1.4' }}>{p.hint}</p>
                     </div>
-                    {currentPrompt === i && <span style={{ color: '#2DD4BF', fontSize: '9px', fontWeight: 600, background: 'rgba(255,255,255,0.12)', padding: '2px 8px', borderRadius: '100px', flexShrink: 0 }}>SELECTED</span>}
+                    {currentPrompt === i && <span style={{ color: 'var(--primary)', fontSize: '9px', fontWeight: 600, background: 'rgba(255,255,255,0.12)', padding: '2px 8px', borderRadius: '100px', flexShrink: 0 }}>SELECTED</span>}
                   </div>
                   {currentPrompt === i && (
-                    <div style={{ marginTop: '10px', padding: '10px 12px', background: 'rgba(255,255,255,0.06)', borderRadius: '8px', border: '1px dashed #7DBDEE' }}>
+                    <div style={{ marginTop: '10px', padding: '10px 12px', background: 'rgba(255,255,255,0.06)', borderRadius: '8px', border: '1px dashed var(--secondary)' }}>
                       <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}> Example</p>
-                      <p style={{ color: '#2DD4BF', fontSize: '11px', lineHeight: '1.5', fontStyle: 'italic', margin: 0 }}>{p.example}</p>
+                      <p style={{ color: 'var(--primary)', fontSize: '11px', lineHeight: '1.5', fontStyle: 'italic', margin: 0 }}>{p.example}</p>
                     </div>
                   )}
                 </button>
@@ -551,17 +551,17 @@ export default function MonthlyMirrorPage() {
           </div>
 
           {/* Record Section */}
-          <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: (syncedRecordings.length + pendingRecordings.length) > 0 ? 'rgba(255,255,255,0.12)' : '#2DD4BF' }}>
-            <h3 style={{ color: (syncedRecordings.length + pendingRecordings.length) > 0 ? 'rgba(255,255,255,0.4)' : '#2DD4BF', fontSize: '13px', marginBottom: '0.75rem' }}>
+          <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: (syncedRecordings.length + pendingRecordings.length) > 0 ? 'rgba(255,255,255,0.12)' : 'var(--primary)' }}>
+            <h3 style={{ color: (syncedRecordings.length + pendingRecordings.length) > 0 ? 'rgba(255,255,255,0.4)' : 'var(--primary)', fontSize: '13px', marginBottom: '0.75rem' }}>
               {(syncedRecordings.length + pendingRecordings.length) > 0 ? '+ Add another reflection' : ` Record your ${monthLabel} reflection`}
             </h3>
 
             {!recording && !reviewMode && !uploading && (
               <>
                 {(syncedRecordings.length + pendingRecordings.length) === 0 && (
-                  <div style={{ background: '#0B1220', borderRadius: '10px', minHeight: '180px', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                    <AppIcon name="camera" size={40} style={{ display: 'block', margin: '0 auto', color: '#7DBDEE' }} />
-                    <p style={{ color: '#2DD4BF', fontSize: '12px', marginTop: '6px' }}>Camera preview will appear here</p>
+                  <div style={{ background: 'var(--bg)', borderRadius: '10px', minHeight: '180px', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                    <AppIcon name="camera" size={40} style={{ display: 'block', margin: '0 auto', color: 'var(--secondary)' }} />
+                    <p style={{ color: 'var(--primary)', fontSize: '12px', marginTop: '6px' }}>Camera preview will appear here</p>
                     <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '4px' }}>Record up to {Math.floor(MAX_RECORDING_DURATION / 60)} minutes</p>
                   </div>
                 )}
@@ -573,14 +573,14 @@ export default function MonthlyMirrorPage() {
 
             {recording && (
               <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
-                <div style={{ background: '#0B1220', borderRadius: '10px', overflow: 'hidden', minHeight: '200px', position: 'relative' }}>
+                <div style={{ background: 'var(--bg)', borderRadius: '10px', overflow: 'hidden', minHeight: '200px', position: 'relative' }}>
                   <video ref={videoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 <div style={{ position: 'absolute', top: '8px', left: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#FFFFFF', animation: 'pulse 1s infinite' }} aria-hidden="true" />
                   <span style={{ color: '#FFFFFF', fontSize: '11px', fontWeight: 600 }} aria-label="Recording in progress">Recording...</span>
                 </div>
-                <span style={{ position: 'absolute', top: '8px', right: '8px', color: '#FFFFFF', fontSize: '14px', fontWeight: 600, background: 'rgba(11,18,32,0.5)', padding: '2px 8px', borderRadius: '4px' }}>{formatTime(recordingTime)} / {formatTime(MAX_RECORDING_DURATION)}</span>
+                <span style={{ position: 'absolute', top: '8px', right: '8px', color: '#FFFFFF', fontSize: '14px', fontWeight: 600, background: 'rgb(var(--bg-rgb) / 0.5)', padding: '2px 8px', borderRadius: '4px' }}>{formatTime(recordingTime)} / {formatTime(MAX_RECORDING_DURATION)}</span>
                 <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
                   <button className="btn-primary" style={{ flex: 1, fontSize: '12px', padding: '10px' }} onClick={stopRecording}>⏹ Stop</button>
                   <button className="btn-ghost" style={{ flex: 1, fontSize: '12px', padding: '10px' }} onClick={() => { stopRecording(); cleanup(); setRecording(false); setReviewBlob(null) }}>Cancel</button>
@@ -598,31 +598,31 @@ export default function MonthlyMirrorPage() {
           )}
 
           {!loadError && pendingRecordings.length > 0 && (
-            <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: '#7DBDEE' }}>
+            <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: 'var(--secondary)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <h3 style={{ color: '#7DBDEE', fontSize: '12px', margin: 0 }}>Pending sync ({pendingRecordings.length})</h3>
+                <h3 style={{ color: 'var(--secondary)', fontSize: '12px', margin: 0 }}>Pending sync ({pendingRecordings.length})</h3>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {pendingRecordings.map(r => (
-                  <div key={r.id} style={{ background: '#0B1220', border: '1px solid #7DBDEE', borderRadius: '8px', overflow: 'hidden' }}>
+                  <div key={r.id} style={{ background: 'var(--bg)', border: '1px solid var(--secondary)', borderRadius: '8px', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px' }}>
-                      <div style={{ width: '64px', height: '44px', borderRadius: '4px', background: '#0B1220', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                        <AppIcon name="clock" size={20} style={{ color: '#7DBDEE' }} />
+                      <div style={{ width: '64px', height: '44px', borderRadius: '4px', background: 'var(--bg)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                        <AppIcon name="clock" size={20} style={{ color: 'var(--secondary)' }} />
                         <button type="button" className="card-action" aria-label="Preview recording" onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ color: '#FFFFFF', fontSize: '11px', fontWeight: 500, margin: 0 }}>{new Date(r.created_at).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-                        <p style={{ color: '#7DBDEE', fontSize: '10px', margin: '2px 0' }}>
+                        <p style={{ color: 'var(--secondary)', fontSize: '10px', margin: '2px 0' }}>
                           {syncStatus[r._localIndex] || 'Waiting to sync'}  · {formatTime(r.duration_seconds)}
                         </p>
                       </div>
                       <button onClick={() => retryUpload(r._localIndex)} disabled={uploading}
-                        style={{ padding: '8px 14px', borderRadius: '100px', background: '#7DBDEE', border: 'none', color: '#0B1220', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', minWidth: '60px', minHeight: '44px' }}>
+                        style={{ padding: '8px 14px', borderRadius: '100px', background: 'var(--secondary)', border: 'none', color: 'var(--on-primary)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', minWidth: '60px', minHeight: '44px' }}>
                         {uploading ? '...' : 'Sync'}
                       </button>
                     </div>
                     {expandedPlayer === r.id && (
-                      <div style={{ borderTop: '1px solid #7DBDEE', background: '#0B1220' }}>
+                      <div style={{ borderTop: '1px solid var(--secondary)', background: 'var(--bg)' }}>
                         <video controls style={{ width: '100%', display: 'block', maxHeight: '250px' }} src={r._localUrl} />
                       </div>
                     )}
@@ -638,11 +638,11 @@ export default function MonthlyMirrorPage() {
               <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.75rem' }}> Your recordings ({syncedRecordings.length})</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {syncedRecordings.map(r => (
-                  <div key={r.id} style={{ background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', overflow: 'hidden' }}>
+                  <div key={r.id} style={{ background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px' }}>
-                      <div style={{ width: '64px', height: '44px', borderRadius: '4px', background: '#0B1220', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
+                      <div style={{ width: '64px', height: '44px', borderRadius: '4px', background: 'var(--bg)', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
                         <video src={r._signedUrl || undefined} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} preload="metadata" muted playsInline />
-                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(11,18,32,0.3)' }}>
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgb(var(--bg-rgb) / 0.3)' }}>
                           <AppIcon name="camera" size={16} style={{ color: '#FFFFFF' }} />
                         </div>
                         <button type="button" className="card-action" aria-label="Play recording" onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)} />
@@ -650,18 +650,18 @@ export default function MonthlyMirrorPage() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ color: '#FFFFFF', fontSize: '11px', fontWeight: 500, margin: 0 }}>{new Date(r.created_at).toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                          <span style={{ color: '#2DD4BF', fontSize: '9px', background: 'rgba(255,255,255,0.12)', padding: '1px 6px', borderRadius: '100px' }}> Synced</span>
+                          <span style={{ color: 'var(--primary)', fontSize: '9px', background: 'rgba(255,255,255,0.12)', padding: '1px 6px', borderRadius: '100px' }}> Synced</span>
                           <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{formatTime(r.duration_seconds)}</span>
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '3px', flexShrink: 0 }}>
-                        <button onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)} style={{ background: expandedPlayer === r.id ? 'rgba(255,255,255,0.12)' : 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label={expandedPlayer === r.id ? 'Collapse video' : 'Expand video'}>{expandedPlayer === r.id ? '▼' : '▶'}</button>
-                        <button onClick={() => handleDownload(r._signedUrl, `precious-${activeMonth}-reflection.webm`)} disabled={!r._signedUrl} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: r._signedUrl ? 'pointer' : 'not-allowed', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title={r._signedUrl ? 'Download' : 'Secure file link unavailable'} aria-label="Download recording"><AppIcon name="download" size={14} /></button>
+                        <button onClick={() => setExpandedPlayer(expandedPlayer === r.id ? null : r.id)} style={{ background: expandedPlayer === r.id ? 'rgba(255,255,255,0.12)' : 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--primary)', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label={expandedPlayer === r.id ? 'Collapse video' : 'Expand video'}>{expandedPlayer === r.id ? '▼' : '▶'}</button>
+                        <button onClick={() => handleDownload(r._signedUrl, `precious-${activeMonth}-reflection.webm`)} disabled={!r._signedUrl} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--primary)', width: '32px', height: '32px', borderRadius: '4px', cursor: r._signedUrl ? 'pointer' : 'not-allowed', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title={r._signedUrl ? 'Download' : 'Secure file link unavailable'} aria-label="Download recording"><AppIcon name="download" size={14} /></button>
                         <button onClick={() => handleDelete(r.id, r.storage_path)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Delete" aria-label="Delete recording"></button>
                       </div>
                     </div>
                     {expandedPlayer === r.id && (
-                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.12)', background: '#0B1220' }}>
+                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.12)', background: 'var(--bg)' }}>
                         {r._signedUrl
                           ? <video controls autoPlay style={{ width: '100%', display: 'block', maxHeight: '300px' }} src={r._signedUrl} />
                           : <p role="alert" className="portal-notice">{r._signedUrlError || 'Could not create a secure link for this recording.'}</p>}
@@ -677,12 +677,12 @@ export default function MonthlyMirrorPage() {
           <div className="dash-section">
             <h3 style={{ color: '#FFFFFF', fontSize: '12px', marginBottom: '0.5rem' }}> Your journey</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: recordingsPerMonth.length > 0 ? '10px' : '0' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#0B1220', border: '2px solid #2DD4BF', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ color: '#2DD4BF', fontSize: '18px', fontWeight: 700 }}>{totalRecordings}</span>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--bg)', border: '2px solid var(--primary)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ color: 'var(--primary)', fontSize: '18px', fontWeight: 700 }}>{totalRecordings}</span>
                 <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '8px' }}>videos</span>
               </div>
               <div>
-                <p style={{ color: '#7DBDEE', fontSize: '11px', margin: 0 }}>
+                <p style={{ color: 'var(--secondary)', fontSize: '11px', margin: 0 }}>
                   {totalRecordings === 0 ? 'No recordings yet. Start today!' : totalRecordings === 1 ? 'Your journey starts here.' : `You've recorded ${totalRecordings} reflections.`}
                 </p>
                 {firstRecordingDate && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', margin: '3px 0 0' }}>Since {new Date(firstRecordingDate).toLocaleDateString('en-KE', { month: 'long', year: 'numeric' })}</p>}
@@ -692,12 +692,12 @@ export default function MonthlyMirrorPage() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: '3px', height: '30px' }}>
                   {recordingsPerMonth.map(([month, count]) => (
-                    <div key={month} style={{ flex: 1, height: `${(count/sparkMax)*26+4}px`, background: month === activeMonth ? '#2DD4BF' : '#2DD4BF', borderRadius: '2px 2px 0 0', opacity: 0.8 }} title={`${count} recording${count !== 1 ? 's' : ''}`} />
+                    <div key={month} style={{ flex: 1, height: `${(count/sparkMax)*26+4}px`, background: month === activeMonth ? 'var(--primary)' : 'var(--primary)', borderRadius: '2px 2px 0 0', opacity: 0.8 }} title={`${count} recording${count !== 1 ? 's' : ''}`} />
                   ))}
                 </div>
                 <div style={{ display: 'flex', gap: '3px', marginTop: '3px' }}>
                   {recordingsPerMonth.map(([month]) => (
-                    <div key={month} style={{ flex: 1, textAlign: 'center', color: '#7DBDEE', fontSize: '8px' }}>
+                    <div key={month} style={{ flex: 1, textAlign: 'center', color: 'var(--secondary)', fontSize: '8px' }}>
                       {new Date(month+'-01').toLocaleDateString('en-KE',{month:'short'}).substring(0,3)}
                     </div>
                   ))}
@@ -706,7 +706,7 @@ export default function MonthlyMirrorPage() {
             )}
           </div>
 
-          <p style={{ color: '#7DBDEE', fontSize: '10px', textAlign: 'center', fontStyle: 'italic', padding: '0.75rem 0 0' }}>
+          <p style={{ color: 'var(--secondary)', fontSize: '10px', textAlign: 'center', fontStyle: 'italic', padding: '0.75rem 0 0' }}>
              The mirror doesn't judge — it just shows how far you've come.
           </p>
         </div>

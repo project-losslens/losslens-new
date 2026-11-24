@@ -133,7 +133,7 @@ export default function AuditLogs() {
   const actionColor = (action) => {
     if (action === 'DELETE') return { color: 'var(--text)', bg: 'rgba(255,255,255,0.13)' }
     if (action === 'INSERT') return { color: 'var(--primary)', bg: 'rgba(255,255,255,0.04)' }
-    if (action === 'UPDATE') return { color: 'var(--primary)', bg: 'rgba(45,212,191,0.13)' }
+    if (action === 'UPDATE') return { color: 'var(--primary)', bg: 'rgb(var(--primary-rgb) / 0.13)' }
     return { color: 'var(--info)', bg: 'transparent' }
   }
 

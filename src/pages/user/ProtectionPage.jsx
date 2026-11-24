@@ -16,13 +16,13 @@ const CONSENT_LABELS = {
   billing_contact: 'Share billing contact details',
 }
 const CLAIM_STATUS_COLOR = {
-  submitted: '#F2C879', under_review: '#7DBDEE', info_requested: '#7DBDEE',
-  approved: '#2DD4BF', partially_approved: '#2DD4BF', paid: '#2DD4BF',
-  rejected: '#ff9b9b', disputed: '#ff9b9b', cancelled: 'rgba(255,255,255,0.4)',
+  submitted: '#F2C879', under_review: 'var(--secondary)', info_requested: 'var(--secondary)',
+  approved: 'var(--primary)', partially_approved: 'var(--primary)', paid: 'var(--primary)',
+  rejected: 'var(--danger)', disputed: 'var(--danger)', cancelled: 'rgba(255,255,255,0.4)',
 }
 const POLICY_STATUS_COLOR = {
-  issued: '#F2C879', pending_payment: '#F2C879', active: '#2DD4BF',
-  grace: '#7DBDEE', lapsed: '#ff9b9b', cancelled: 'rgba(255,255,255,0.4)', expired: 'rgba(255,255,255,0.4)',
+  issued: '#F2C879', pending_payment: '#F2C879', active: 'var(--primary)',
+  grace: 'var(--secondary)', lapsed: 'var(--danger)', cancelled: 'rgba(255,255,255,0.4)', expired: 'rgba(255,255,255,0.4)',
 }
 
 export default function ProtectionPage() {
@@ -299,7 +299,7 @@ export default function ProtectionPage() {
     return (
       <div className="page-root"><div className="page-content" style={{ padding: '2rem' }}>
         <h1 className="fs-20" style={{ color: '#FFFFFF' }}>LossLens Protection</h1>
-        <p style={{ color: 'rgba(255,255,255,0.6)' }}>Protection is not available yet. <a href="/protection" style={{ color: '#2DD4BF' }}>Learn more</a> — including the proposed Medical Rider, Individual Cover and Group Cover structures.</p>
+        <p style={{ color: 'rgba(255,255,255,0.6)' }}>Protection is not available yet. <a href="/protection" style={{ color: 'var(--primary)' }}>Learn more</a> — including the proposed Medical Rider, Individual Cover and Group Cover structures.</p>
       </div></div>
     )
   }
@@ -313,7 +313,7 @@ export default function ProtectionPage() {
 
       {!membership ? (
         <div className="dash-section">
-          <h2 className="fs-15" style={{ color: '#2DD4BF', marginBottom: '12px' }}>Enrol with your insurer</h2>
+          <h2 className="fs-15" style={{ color: 'var(--primary)', marginBottom: '12px' }}>Enrol with your insurer</h2>
           {insurers.length === 0 ? (
             <p className="fs-13" style={{ color: 'rgba(255,255,255,0.5)' }}>No insurers are currently offering Protection. Check back soon.</p>
           ) : (
@@ -360,7 +360,7 @@ export default function ProtectionPage() {
 
           {activePolicy && (
             <div className="dash-section" style={{ marginBottom: '1rem' }}>
-              <h2 className="fs-15" style={{ color: '#2DD4BF', marginBottom: '10px' }}>Your policy</h2>
+              <h2 className="fs-15" style={{ color: 'var(--primary)', marginBottom: '10px' }}>Your policy</h2>
               <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
                 <p className="fs-13" style={{ color: '#FFFFFF', margin: 0 }}>
                   {activePolicy.policy_number || 'Policy pending number'} · {activePolicy.product_name || ''}
@@ -393,7 +393,7 @@ export default function ProtectionPage() {
 
           {consents.length > 0 && membership.status !== 'ended' && (
             <div className="dash-section" style={{ marginBottom: '1rem' }}>
-              <h2 className="fs-15" style={{ color: '#2DD4BF', marginBottom: '10px' }}>What you share</h2>
+              <h2 className="fs-15" style={{ color: 'var(--primary)', marginBottom: '10px' }}>What you share</h2>
               {consents.map(c => (
                 <label key={c.scope} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', color: 'rgba(255,255,255,0.75)', fontSize: '13px', cursor: 'pointer' }}>
                   <input type="checkbox" checked={Boolean(c.granted)} onChange={e => toggleConsent(c.scope, e.target.checked)} />
@@ -407,10 +407,10 @@ export default function ProtectionPage() {
 
           {events.length > 0 && (
             <div className="dash-section" style={{ marginBottom: '1rem' }}>
-              <h2 className="fs-15" style={{ color: '#2DD4BF', marginBottom: '10px' }}>Status timeline</h2>
+              <h2 className="fs-15" style={{ color: 'var(--primary)', marginBottom: '10px' }}>Status timeline</h2>
               {events.map((ev, i) => (
                 <div key={i} style={{ display: 'flex', gap: '8px', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                  <AppIcon name="clock" size={14} style={{ color: '#2DD4BF', flexShrink: 0, marginTop: '2px' }} />
+                  <AppIcon name="clock" size={14} style={{ color: 'var(--primary)', flexShrink: 0, marginTop: '2px' }} />
                   <div>
                     <p className="fs-13" style={{ color: '#FFFFFF', margin: 0 }}>{String(ev.event_type).replace(/_/g, ' ')}</p>
                     <p className="fs-11" style={{ color: 'rgba(255,255,255,0.4)', margin: 0 }}>{new Date(ev.created_at).toLocaleString()}</p>
@@ -422,7 +422,7 @@ export default function ProtectionPage() {
 
           {membership.status === 'active' && activePolicy?.status === 'active' && (
             <div className="dash-section" style={{ marginBottom: '1rem' }}>
-              <h2 className="fs-15" style={{ color: '#2DD4BF', marginBottom: '10px' }}>Request pre-authorisation</h2>
+              <h2 className="fs-15" style={{ color: 'var(--primary)', marginBottom: '10px' }}>Request pre-authorisation</h2>
               <p className="fs-12" style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '10px' }}>Ask your insurer to approve therapy sessions before you book.</p>
               <div className="form-group"><label>Sessions needed</label>
                 <NumberField value={preauthSessions} onChange={v => setPreauthSessions(v ?? 1)} min={1} max={24} />
@@ -435,7 +435,7 @@ export default function ProtectionPage() {
 
           {membership.status === 'active' && activePolicy?.status === 'active' && policyBenefits.length > 0 && (
             <div className="dash-section" style={{ marginBottom: '1rem' }}>
-              <h2 className="fs-15" style={{ color: '#2DD4BF', marginBottom: '10px' }}>Submit a claim</h2>
+              <h2 className="fs-15" style={{ color: 'var(--primary)', marginBottom: '10px' }}>Submit a claim</h2>
               <div className="form-group"><label>Benefit</label>
                 <select value={claimForm.benefit_code} onChange={e => {
                   const b = policyBenefits.find(x => x.benefit_code === e.target.value)
@@ -459,7 +459,7 @@ export default function ProtectionPage() {
 
           {(milestones.milestones?.length > 0 || milestones.episodes?.length > 0) && (
             <div className="dash-section" style={{ marginBottom: '1rem' }}>
-              <h2 className="fs-15" style={{ color: '#2DD4BF', marginBottom: '10px' }}>Treatment milestones</h2>
+              <h2 className="fs-15" style={{ color: 'var(--primary)', marginBottom: '10px' }}>Treatment milestones</h2>
               <p className="fs-11" style={{ color: 'rgba(255,255,255,0.45)', marginBottom: '8px' }}>
                 Your clinician verifies treatment milestones. A verified milestone can be claimed once — the insurer decides the claim.
               </p>
@@ -472,14 +472,14 @@ export default function ProtectionPage() {
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'end', margin: '8px 0' }}>
                   <label className="fs-11" style={{ color: 'rgba(255,255,255,0.6)' }}>Clinician
                     <select value={episodeForm.therapist_id} onChange={e => setEpisodeForm({ ...episodeForm, therapist_id: e.target.value })}
-                      style={{ display: 'block', marginTop: '4px', background: '#0B1220', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '6px 8px' }}>
+                      style={{ display: 'block', marginTop: '4px', background: 'var(--bg)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '6px 8px' }}>
                       <option value="">Select…</option>
                       {therapists.map(t => <option key={t.therapist_ref} value={t.therapist_ref}>{t.specialty || 'Therapist'}{t.county ? ` · ${t.county}` : ''}</option>)}
                     </select>
                   </label>
                   <label className="fs-11" style={{ color: 'rgba(255,255,255,0.6)' }}>Treatment plan ref
                     <input value={episodeForm.plan_ref} onChange={e => setEpisodeForm({ ...episodeForm, plan_ref: e.target.value })} maxLength={80}
-                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '12px', width: '140px' }} />
+                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px', width: '140px' }} />
                   </label>
                   <button type="button" className="btn-primary fs-11" style={{ padding: '6px 12px', minHeight: '32px' }} disabled={saving} onClick={startEpisode}>Start episode</button>
                 </div>
@@ -489,9 +489,9 @@ export default function ProtectionPage() {
                   <p className="fs-13" style={{ color: '#FFFFFF', margin: 0, flex: 1, minWidth: 160 }}>
                     {m.milestone_type === 'entry' ? 'Entry' : m.milestone_type === 'course' ? `Course stage ${m.ordinal}` : 'Re-engagement'} · {m.service_date}
                   </p>
-                  <span style={{ color: '#7DBDEE', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{m.status}</span>
+                  <span style={{ color: 'var(--secondary)', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{m.status}</span>
                   {m.claim_id
-                    ? <span className="fs-11" style={{ color: '#2DD4BF' }}>Claim submitted</span>
+                    ? <span className="fs-11" style={{ color: 'var(--primary)' }}>Claim submitted</span>
                     : m.status === 'verified' && (
                       <button className="btn-primary fs-11" style={{ padding: '4px 10px', minHeight: '30px' }} disabled={saving} onClick={() => claimMilestone(m.id)}>
                         Claim milestone
@@ -504,7 +504,7 @@ export default function ProtectionPage() {
 
           {claims.length > 0 && (
             <div className="dash-section" style={{ marginBottom: '1rem' }}>
-              <h2 className="fs-15" style={{ color: '#2DD4BF', marginBottom: '10px' }}>Your claims</h2>
+              <h2 className="fs-15" style={{ color: 'var(--primary)', marginBottom: '10px' }}>Your claims</h2>
               {claims.map(c => (
                 <div key={c.id} style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
@@ -534,7 +534,7 @@ export default function ProtectionPage() {
                         </div>
                       )}
                       {evidence[c.id]?.error && (
-                        <p role="alert" className="fs-11" style={{ color: '#ff9b9b', margin: '0 0 6px' }}>{evidence[c.id].error}</p>
+                        <p role="alert" className="fs-11" style={{ color: 'var(--danger)', margin: '0 0 6px' }}>{evidence[c.id].error}</p>
                       )}
                       {evidence[c.id]?.busy && !evidence[c.id]?.progress && (
                         <p className="fs-11" style={{ color: 'rgba(255,255,255,0.55)', margin: '0 0 6px' }}>Loading evidence…</p>
@@ -544,8 +544,8 @@ export default function ProtectionPage() {
                         <div key={ev.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', padding: '4px 0' }}>
                           <p className="fs-11" style={{ color: 'rgba(255,255,255,0.7)', margin: 0 }}>
                             {ev.evidence_type || 'document'}{ev.has_document ? ' · file attached' : ''} · {new Date(ev.created_at).toLocaleDateString()}
-                            {ev.url && <> · <a href={ev.url} target="_blank" rel="noreferrer" style={{ color: '#7DBDEE' }}>Open (5 min)</a></>}
-                            {ev.urlError && <> · <span role="alert" style={{ color: '#ff9b9b' }}>{ev.urlError}</span></>}
+                            {ev.url && <> · <a href={ev.url} target="_blank" rel="noreferrer" style={{ color: 'var(--secondary)' }}>Open (5 min)</a></>}
+                            {ev.urlError && <> · <span role="alert" style={{ color: 'var(--danger)' }}>{ev.urlError}</span></>}
                           </p>
                           {['submitted', 'under_review', 'info_requested'].includes(c.status) && (
                             <button className="btn-ghost fs-11" style={{ padding: '2px 8px' }} disabled={evidence[c.id]?.busy}
@@ -570,7 +570,7 @@ export default function ProtectionPage() {
 
           {therapists.length > 0 && membership.status === 'active' && (
             <div className="dash-section" style={{ marginBottom: '1rem' }}>
-              <h2 className="fs-15" style={{ color: '#2DD4BF', marginBottom: '10px' }}>Find a verified therapist</h2>
+              <h2 className="fs-15" style={{ color: 'var(--primary)', marginBottom: '10px' }}>Find a verified therapist</h2>
               {therapists.map(t => (
                 <div key={t.therapist_ref} style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                   <p className="fs-13" style={{ color: '#FFFFFF', margin: 0 }}>{t.specialty || 'Therapist'}</p>

@@ -159,7 +159,7 @@ export default function ActuarialWorkbench() {
         <p className="portal-notice">Transition counts (rows = from-state, cols = to-state in order {STATES.join(', ')}). Only allowed transitions may be non-zero: {Object.entries(ALLOWED).map(([k, v]) => `${k}→{${v.join(',')}}`).join(' · ')}</p>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ borderCollapse: 'collapse', fontSize: '12px' }}>
-            <thead><tr><th></th>{STATES.map(s => <th key={s} style={{ padding: '4px 8px', color: '#7DBDEE' }}>{s}</th>)}</tr></thead>
+            <thead><tr><th></th>{STATES.map(s => <th key={s} style={{ padding: '4px 8px', color: 'var(--secondary)' }}>{s}</th>)}</tr></thead>
             <tbody>
               {counts.map((row, i) => (
                 <tr key={i}>
@@ -238,12 +238,12 @@ export default function ActuarialWorkbench() {
               <table style={{ borderCollapse: 'collapse', fontSize: '12px', minWidth: '680px' }}>
                 <thead>
                   <tr>
-                    <th style={{ padding: '4px 8px', color: '#7DBDEE' }}>Scenario</th>
-                    <th style={{ padding: '4px 8px', color: '#7DBDEE' }}>Utilisation multipliers (entry / course / re-entry)</th>
-                    <th style={{ padding: '4px 8px', color: '#7DBDEE' }}>Benefit multiplier</th>
-                    <th style={{ padding: '4px 8px', color: '#7DBDEE' }}>Acceptance</th>
-                    <th style={{ padding: '4px 8px', color: '#7DBDEE' }}>Expected claims (KES)</th>
-                    <th style={{ padding: '4px 8px', color: '#7DBDEE' }}>Gross premium (KES/member-year)</th>
+                    <th style={{ padding: '4px 8px', color: 'var(--secondary)' }}>Scenario</th>
+                    <th style={{ padding: '4px 8px', color: 'var(--secondary)' }}>Utilisation multipliers (entry / course / re-entry)</th>
+                    <th style={{ padding: '4px 8px', color: 'var(--secondary)' }}>Benefit multiplier</th>
+                    <th style={{ padding: '4px 8px', color: 'var(--secondary)' }}>Acceptance</th>
+                    <th style={{ padding: '4px 8px', color: 'var(--secondary)' }}>Expected claims (KES)</th>
+                    <th style={{ padding: '4px 8px', color: 'var(--secondary)' }}>Gross premium (KES/member-year)</th>
                   </tr>
                 </thead>
                 <tbody>

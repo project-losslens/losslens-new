@@ -123,9 +123,9 @@ export default function Pricing() {
           <div className="pill">Pricing</div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', marginBottom: '0.75rem' }}>
             {planType === 'individual' ? (
-              <>Free for individuals.<br /><em style={{ color: '#2DD4BF' }}>Premium when you're ready.</em></>
+              <>Free for individuals.<br /><em style={{ color: 'var(--primary)' }}>Premium when you're ready.</em></>
             ) : (
-              <>Subsidized by your employer.<br /><em style={{ color: '#2DD4BF' }}>Premium features, lower cost.</em></>
+              <>Subsidized by your employer.<br /><em style={{ color: 'var(--primary)' }}>Premium features, lower cost.</em></>
             )}
           </h1>
           <p className="sub" style={{ maxWidth: '520px', margin: '0 auto 1.5rem' }}>
@@ -140,8 +140,8 @@ export default function Pricing() {
               onClick={() => setPlanType('individual')}
               style={{
                 padding: '10px 24px', borderRadius: '100px', border: 'none',
-                background: planType === 'individual' ? '#2DD4BF' : 'transparent',
-                color: planType === 'individual' ? '#0B1220' : 'rgba(255,255,255,0.4)',
+                background: planType === 'individual' ? 'var(--primary)' : 'transparent',
+                color: planType === 'individual' ? 'var(--bg)' : 'rgba(255,255,255,0.4)',
                 fontSize: '13px', fontWeight: planType === 'individual' ? 600 : 400,
                 cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.2s'
               }}>
@@ -151,8 +151,8 @@ export default function Pricing() {
               onClick={() => setPlanType('company')}
               style={{
                 padding: '10px 24px', borderRadius: '100px', border: 'none',
-                background: planType === 'company' ? '#2DD4BF' : 'transparent',
-                color: planType === 'company' ? '#0B1220' : 'rgba(255,255,255,0.4)',
+                background: planType === 'company' ? 'var(--primary)' : 'transparent',
+                color: planType === 'company' ? 'var(--bg)' : 'rgba(255,255,255,0.4)',
                 fontSize: '13px', fontWeight: planType === 'company' ? 600 : 400,
                 cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.2s'
               }}>
@@ -170,7 +170,7 @@ export default function Pricing() {
                 className={`pricing-card ${plan.featured ? 'featured' : ''}`}
                 style={{
                   background: 'rgba(255,255,255,0.06)',
-                  border: plan.featured ? '2px solid #2DD4BF' : '1px solid rgba(255,255,255,0.12)',
+                  border: plan.featured ? '2px solid var(--primary)' : '1px solid rgba(255,255,255,0.12)',
                   borderRadius: '16px',
                   padding: '2rem',
                   position: 'relative',
@@ -181,7 +181,7 @@ export default function Pricing() {
                 {plan.featured && (
                   <span className="popular-tag" style={{
                     position: 'absolute', top: '-12px', right: '20px',
-                    background: '#2DD4BF', color: '#0B1220', fontSize: '11px',
+                    background: 'var(--primary)', color: 'var(--on-primary)', fontSize: '11px',
                     fontWeight: 600, padding: '4px 12px', borderRadius: '100px',
                   }}>
                     {plan.badge}
@@ -192,8 +192,8 @@ export default function Pricing() {
                   display: 'inline-block', fontSize: '11px', fontWeight: 500,
                   letterSpacing: '1.5px', textTransform: 'uppercase',
                   padding: '4px 12px', borderRadius: '100px', marginBottom: '1rem',
-                  background: plan.featured ? '#2DD4BF' : 'rgba(255,255,255,0.12)',
-                  color: plan.featured ? '#0B1220' : '#2DD4BF',
+                  background: plan.featured ? 'var(--primary)' : 'rgba(255,255,255,0.12)',
+                  color: plan.featured ? 'var(--bg)' : 'var(--primary)',
                 }}>
                   {plan.id === 'free' ? 'Free' : 'Premium'}
                 </div>
@@ -207,7 +207,7 @@ export default function Pricing() {
 
                 <ul className="plan-features" style={{ listStyle: 'none', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
                   {plan.features.map((f, i) => (
-                    <li key={i} style={{ fontSize: '13px', color: '#7DBDEE', fontWeight: 300 }}>{f}</li>
+                    <li key={i} style={{ fontSize: '13px', color: 'var(--secondary)', fontWeight: 300 }}>{f}</li>
                   ))}
                 </ul>
 
@@ -232,7 +232,7 @@ export default function Pricing() {
               className="pricing-card featured"
               style={{
                 background: 'rgba(255,255,255,0.06)',
-                border: '2px solid #2DD4BF',
+                border: '2px solid var(--primary)',
                 borderRadius: '16px',
                 padding: '2rem',
                 position: 'relative',
@@ -242,7 +242,7 @@ export default function Pricing() {
             >
               <span className="popular-tag" style={{
                 position: 'absolute', top: '-12px', right: '20px',
-                background: '#2DD4BF', color: '#0B1220', fontSize: '11px',
+                background: 'var(--primary)', color: 'var(--on-primary)', fontSize: '11px',
                 fontWeight: 600, padding: '4px 12px', borderRadius: '100px',
               }}>
                 {companyPlan.badge}
@@ -252,7 +252,7 @@ export default function Pricing() {
                 display: 'inline-block', fontSize: '11px', fontWeight: 500,
                 letterSpacing: '1.5px', textTransform: 'uppercase',
                 padding: '4px 12px', borderRadius: '100px', marginBottom: '1rem',
-                background: '#2DD4BF', color: '#0B1220',
+                background: 'var(--primary)', color: 'var(--on-primary)',
               }}>
                 Company
               </div>
@@ -266,13 +266,13 @@ export default function Pricing() {
 
               <ul className="plan-features" style={{ listStyle: 'none', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
                 {companyPlan.features.map((f, i) => (
-                  <li key={i} style={{ fontSize: '13px', color: '#7DBDEE', fontWeight: 300 }}>{f}</li>
+                  <li key={i} style={{ fontSize: '13px', color: 'var(--secondary)', fontWeight: 300 }}>{f}</li>
                 ))}
               </ul>
 
-              <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: '8px', padding: '10px 14px', marginBottom: '1rem', border: '1px solid rgba(45,212,191,0.2)' }}>
-                <p style={{ color: '#2DD4BF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>
-                   <strong style={{ color: '#2DD4BF' }}>How it works:</strong> Your employer gives you a company code. Enter it during signup to unlock the subsidized rate.
+              <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: '8px', padding: '10px 14px', marginBottom: '1rem', border: '1px solid rgb(var(--primary-rgb) / 0.2)' }}>
+                <p style={{ color: 'var(--primary)', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>
+                   <strong style={{ color: 'var(--primary)' }}>How it works:</strong> Your employer gives you a company code. Enter it during signup to unlock the subsidized rate.
                 </p>
               </div>
 
@@ -288,14 +288,14 @@ export default function Pricing() {
             </article>
 
             <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginTop: '1rem' }}>
-              Don't have a company code? <button type="button" className="clickable" onClick={() => setPlanType('individual')} style={{ color: '#2DD4BF', textDecoration: 'underline', padding: 0, font: 'inherit' }}>View individual plans</button>
+              Don't have a company code? <button type="button" className="clickable" onClick={() => setPlanType('individual')} style={{ color: 'var(--primary)', textDecoration: 'underline', padding: 0, font: 'inherit' }}>View individual plans</button>
             </p>
           </section>
         )}
 
         {/* FAQ Section */}
         <section style={{ padding: '2rem', maxWidth: '700px', margin: '0 auto' }} aria-label="Frequently asked questions">
-          <h2 style={{ textAlign: 'center', color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '1.6rem', marginBottom: '1.5rem' }}>Frequently Asked Questions</h2>
+          <h2 style={{ textAlign: 'center', color: 'var(--primary)', fontFamily: 'var(--font-display)', fontSize: '1.6rem', marginBottom: '1.5rem' }}>Frequently Asked Questions</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {FAQS.map((faq, i) => (
               <div key={i} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', overflow: 'hidden' }}>
@@ -305,10 +305,10 @@ export default function Pricing() {
                   aria-expanded={expandedFaq === i}
                 >
                   {faq.q}
-                  <span style={{ color: '#2DD4BF', fontSize: '18px', transition: 'transform 0.2s', transform: expandedFaq === i ? 'rotate(180deg)' : 'rotate(0)' }}>▼</span>
+                  <span style={{ color: 'var(--primary)', fontSize: '18px', transition: 'transform 0.2s', transform: expandedFaq === i ? 'rotate(180deg)' : 'rotate(0)' }}>▼</span>
                 </button>
                 {expandedFaq === i && (
-                  <div style={{ padding: '0 16px 16px', color: '#2DD4BF', fontSize: '13px', lineHeight: '1.7', fontWeight: 300 }}>
+                  <div style={{ padding: '0 16px 16px', color: 'var(--primary)', fontSize: '13px', lineHeight: '1.7', fontWeight: 300 }}>
                     {faq.a}
                   </div>
                 )}
@@ -327,7 +327,7 @@ export default function Pricing() {
               { label: 'Account deletion available' },
               { label: 'Free forever for individuals' },
             ].map((t, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#2DD4BF', fontSize: '12px' }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary)', fontSize: '12px' }}>
                 <span>{t.label}</span>
               </div>
             ))}

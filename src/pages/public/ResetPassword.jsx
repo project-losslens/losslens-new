@@ -60,7 +60,7 @@ function ResetPassword() {
 
   const strengthInfo = useMemo(() => {
     const labels = ['', 'Weak', 'Fair', 'Good', 'Strong']
-    const colors = ['', '#FFFFFF', '#7DBDEE', '#2DD4BF', '#2DD4BF']
+    const colors = ['', '#FFFFFF', 'var(--secondary)', 'var(--primary)', 'var(--primary)']
     return { label: labels[strength], color: colors[strength], pct: (strength / 4) * 100 }
   }, [strength])
 
@@ -112,7 +112,7 @@ function ResetPassword() {
       <PublicLayout>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}><AppIcon name="clock" size={40} style={{ display: 'block', margin: '0 auto 16px', color: '#7DBDEE' }} /></span>
+            <span style={{ fontSize: '56px', display: 'block', marginBottom: '16px' }}><AppIcon name="clock" size={40} style={{ display: 'block', margin: '0 auto 16px', color: 'var(--secondary)' }} /></span>
             <h1 className="auth-title">Link expired</h1>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>{tokenError}</p>
             <Link className="btn-primary full" to="/forgot-password">Request a new link</Link>
@@ -128,7 +128,7 @@ function ResetPassword() {
       <PublicLayout>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
-            <AppIcon name="check" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
+            <AppIcon name="check" size={56} style={{ display: 'block', margin: '0 auto 16px', color: 'var(--primary)' }} />
             <h1 className="auth-title">Password updated!</h1>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>Your password has been changed. You'll be redirected to the login page.</p>
             <button className="btn-primary full" onClick={() => { if (redirectTimer.current) clearTimeout(redirectTimer.current); navigate('/login') }}>Go to login now</button>
@@ -205,14 +205,14 @@ function ResetPassword() {
                 </button>
               </div>
               {confirmPassword && password !== confirmPassword && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>Passwords do not match</span>}
-              {confirmPassword && password === confirmPassword && <span style={{ fontSize: '11px', color: '#2DD4BF' }}>Passwords match </span>}
+              {confirmPassword && password === confirmPassword && <span style={{ fontSize: '11px', color: 'var(--primary)' }}>Passwords match </span>}
             </div>
 
             {/* Password Requirements Checklist */}
-            <div id="password-requirements" style={{ background: '#0B1220', border: '1px solid #7DBDEE', borderRadius: '8px', padding: '12px', marginBottom: '1.25rem' }}>
+            <div id="password-requirements" style={{ background: 'var(--bg)', border: '1px solid var(--secondary)', borderRadius: '8px', padding: '12px', marginBottom: '1.25rem' }}>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Requirements</p>
               {requirements.map((req, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', fontSize: '12px', color: req.met ? '#2DD4BF' : 'rgba(255,255,255,0.4)' }}>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', fontSize: '12px', color: req.met ? 'var(--primary)' : 'rgba(255,255,255,0.4)' }}>
                   <span style={{ fontSize: '12px', minWidth: '16px' }}>{req.met ? '' : ''}</span>
                   <span>{req.text}</span>
                 </div>

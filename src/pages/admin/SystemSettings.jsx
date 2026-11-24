@@ -241,7 +241,7 @@ export default function SystemSettings() {
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)', overflowX: 'auto' }}>
             {SECTION_TABS.map(s => (
               <button key={s.id} onClick={() => setActiveSection(s.id)}
-                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeSection === s.id ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeSection === s.id ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeSection === s.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', minWidth: '80px', transition: 'background 0.2s, color 0.2s' }}>{s.label}</button>
+                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeSection === s.id ? 'rgb(var(--primary-rgb) / 0.15)' : 'transparent', color: activeSection === s.id ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeSection === s.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', minWidth: '80px', transition: 'background 0.2s, color 0.2s' }}>{s.label}</button>
             ))}
           </div>
 
@@ -366,7 +366,7 @@ export default function SystemSettings() {
 
       {/* Confirmation Modals */}
       {showConfirm === 'maintenance' && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+        <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowConfirm(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--text)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>{<AppIcon name="alert" size={40} style={{display:"block",margin:"0 auto 12px"}} />}</span>
@@ -383,7 +383,7 @@ export default function SystemSettings() {
       )}
 
       {showConfirm === 'signups' && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+        <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowConfirm(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--info)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>{<AppIcon name="shield" size={40} style={{display:"block",margin:"0 auto 12px"}} />}</span>
@@ -393,7 +393,7 @@ export default function SystemSettings() {
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setShowConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
-              <button onClick={doSave} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(45,212,191,0.15)', border: 'none', color: 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Disable</button>
+              <button onClick={doSave} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgb(var(--primary-rgb) / 0.15)', border: 'none', color: 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Disable</button>
             </div>
           </div>
         </div>

@@ -264,11 +264,11 @@ function FamilyPortalPage() {
 
   const getStatusBadge = (status) => {
     const map = {
-      pending: { color: '#7DBDEE', bg: 'rgba(45,212,191,0.15)', label: 'Pending' },
-      active: { color: '#2DD4BF', bg: 'rgba(255,255,255,0.12)', label: 'Active' },
+      pending: { color: 'var(--secondary)', bg: 'rgb(var(--primary-rgb) / 0.15)', label: 'Pending' },
+      active: { color: 'var(--primary)', bg: 'rgba(255,255,255,0.12)', label: 'Active' },
       declined: { color: '#FFFFFF', bg: 'rgba(255,255,255,0.08)', label: 'Declined' },
-      expired: { color: 'rgba(255,255,255,0.4)', bg: '#0B1220', label: 'Expired' },
-      paused: { color: 'rgba(255,255,255,0.4)', bg: '#0B1220', label: 'Sharing paused' },
+      expired: { color: 'rgba(255,255,255,0.4)', bg: 'var(--bg)', label: 'Expired' },
+      paused: { color: 'rgba(255,255,255,0.4)', bg: 'var(--bg)', label: 'Sharing paused' },
       revoked: { color: '#FFFFFF', bg: 'rgba(255,255,255,0.08)', label: 'Revoked' },
     }
     return map[status] || map.pending
@@ -290,12 +290,12 @@ function FamilyPortalPage() {
           <div><h1 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}>Family Portal</h1><p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{activeSupporters.length} active  · {invitations.length} total</p></div>
         </div>
         <div style={{ padding: '1.5rem' }}>
-          <div className="dash-section" style={{ marginBottom: '1rem', borderColor: '#2DD4BF' }}>
-            <div style={{ display: 'flex', gap: '12px' }}><AppIcon name="heart" size={28} style={{ flexShrink: 0, color: '#2DD4BF' }} /><div><h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '6px' }}>Why invite a supporter?</h3><p style={{ color: '#7DBDEE', fontSize: '13px', lineHeight: '1.6', fontWeight: 300, margin: 0 }}>Recovery is easier with support. Invite trusted family or friends to follow your journey. They see only what you choose — no account needed.</p></div></div>
+          <div className="dash-section" style={{ marginBottom: '1rem', borderColor: 'var(--primary)' }}>
+            <div style={{ display: 'flex', gap: '12px' }}><AppIcon name="heart" size={28} style={{ flexShrink: 0, color: 'var(--primary)' }} /><div><h3 style={{ color: 'var(--primary)', fontSize: '14px', marginBottom: '6px' }}>Why invite a supporter?</h3><p style={{ color: 'var(--secondary)', fontSize: '13px', lineHeight: '1.6', fontWeight: 300, margin: 0 }}>Recovery is easier with support. Invite trusted family or friends to follow your journey. They see only what you choose — no account needed.</p></div></div>
           </div>
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)' }}>
             {[{ id: 'supporters', label: ` Supporters` }, { id: 'resources', label: ' Resources' }, { id: 'privacy', label: ' Privacy' }].map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{tab.label}</button>
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{tab.label}</button>
             ))}
           </div>
 
@@ -308,13 +308,13 @@ function FamilyPortalPage() {
               )}
               {showForm && (
                 <div className="dash-section" style={{ marginBottom: '1rem' }}>
-                  <h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '1rem' }}>Invite a supporter</h3>
+                  <h3 style={{ color: 'var(--primary)', fontSize: '14px', marginBottom: '1rem' }}>Invite a supporter</h3>
                   <div className="form-group"><label>Name *</label><input type="text" value={form.supporter_name} onChange={e => setForm({ ...form, supporter_name: e.target.value })} placeholder="e.g. Mum" /></div>
                   <div className="form-group"><label>Relationship</label><input type="text" value={form.supporter_relation} onChange={e => setForm({ ...form, supporter_relation: e.target.value })} placeholder="e.g. Mother" /></div>
                   <div className="form-group"><label>What they can see</label><div className="chip-group">{ALL_PERMISSIONS.map(p => <button key={p} className={`chip ${form.permissions.includes(p) ? 'chip-active' : ''}`} onClick={() => togglePermission(p)}>{p}</button>)}</div></div>
                   <div style={{ display: 'flex', gap: '12px', marginBottom: '1rem' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#2DD4BF', cursor: 'pointer' }}><input type="checkbox" checked={form.anonymous_mode} onChange={e => setForm({ ...form, anonymous_mode: e.target.checked })} />Anonymous</label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#7DBDEE', cursor: 'pointer' }}><input type="checkbox" checked={form.crisis_contact} onChange={e => setForm({ ...form, crisis_contact: e.target.checked })} />Crisis contact</label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--primary)', cursor: 'pointer' }}><input type="checkbox" checked={form.anonymous_mode} onChange={e => setForm({ ...form, anonymous_mode: e.target.checked })} />Anonymous</label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--secondary)', cursor: 'pointer' }}><input type="checkbox" checked={form.crisis_contact} onChange={e => setForm({ ...form, crisis_contact: e.target.checked })} />Crisis contact</label>
                   </div>
                   <button className="btn-primary full" onClick={handleInvite} disabled={saving || !form.supporter_name.trim()}>
                     {saving ? <BrandLoader variant="inline" showWordmark={false} /> : 'Create invitation'}
@@ -326,31 +326,31 @@ function FamilyPortalPage() {
               {invitations.map(inv => {
                 const status = getStatusBadge(inv.status)
                 return (
-                  <div key={inv.id} style={{ padding: '12px', background: '#0B1220', borderRadius: '10px', marginBottom: '6px', border: '1px solid rgba(255,255,255,0.12)' }}>
+                  <div key={inv.id} style={{ padding: '12px', background: 'var(--bg)', borderRadius: '10px', marginBottom: '6px', border: '1px solid rgba(255,255,255,0.12)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #2DD4BF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', color: '#2DD4BF' }}>{inv.supporter_name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)}</div>
+                        <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), var(--secondary))', border: '2px solid var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', color: 'var(--primary)' }}>{inv.supporter_name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)}</div>
                         <div>
-                          <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 500, margin: 0 }}>{inv.anonymous_mode ? 'A loved one' : inv.supporter_name}{inv.crisis_contact && <span style={{ fontSize: '10px', color: '#7DBDEE', marginLeft: '6px' }}><AppIcon name="alert" size={12} /></span>}</p>
+                          <p style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 500, margin: 0 }}>{inv.anonymous_mode ? 'A loved one' : inv.supporter_name}{inv.crisis_contact && <span style={{ fontSize: '10px', color: 'var(--secondary)', marginLeft: '6px' }}><AppIcon name="alert" size={12} /></span>}</p>
                           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{inv.supporter_relation || 'Supporter'}</p>
                         </div>
                       </div>
                       <span style={{ background: status.bg, color: status.color, padding: '2px 8px', borderRadius: '100px', fontSize: '10px', whiteSpace: 'nowrap' }}>{status.label}</span>
                     </div>
-                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '6px' }}>{(inv.permissions || []).slice(0, 3).map(p => <span key={p} style={{ fontSize: '9px', background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '1px 6px', borderRadius: '100px' }}>{p}</span>)}</div>
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '6px' }}>{(inv.permissions || []).slice(0, 3).map(p => <span key={p} style={{ fontSize: '9px', background: 'rgba(255,255,255,0.12)', color: 'var(--primary)', padding: '1px 6px', borderRadius: '100px' }}>{p}</span>)}</div>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                      {inv.status === 'active' && <button onClick={() => loadMessages(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', gap: '4px' }}><AppIcon name="chat" size={12} /> Messages</button>}
-                      {(inv.status === 'pending' || inv.status === 'expired') && <button onClick={() => handleShare(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Share</button>}
-                      {(inv.status === 'pending' || inv.status === 'expired') && <button onClick={() => handleResend(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Renew</button>}
-                      {inv.status === 'active' && <button onClick={() => handleTogglePause(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#7DBDEE', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Pause sharing</button>}
-                      {inv.status === 'paused' && <button onClick={() => handleTogglePause(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Resume sharing</button>}
+                      {inv.status === 'active' && <button onClick={() => loadMessages(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--primary)', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', gap: '4px' }}><AppIcon name="chat" size={12} /> Messages</button>}
+                      {(inv.status === 'pending' || inv.status === 'expired') && <button onClick={() => handleShare(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--primary)', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Share</button>}
+                      {(inv.status === 'pending' || inv.status === 'expired') && <button onClick={() => handleResend(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Renew</button>}
+                      {inv.status === 'active' && <button onClick={() => handleTogglePause(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--secondary)', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Pause sharing</button>}
+                      {inv.status === 'paused' && <button onClick={() => handleTogglePause(inv)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--primary)', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Resume sharing</button>}
                       {inv.status !== 'revoked' && <button onClick={() => handleRemove(inv.id)} style={{ padding: '5px 10px', borderRadius: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', fontSize: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Revoke</button>}
                     </div>
                   </div>
                 )
               })}
               {invitations.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)' }}><AppIcon name="users" size={48} style={{ display: 'block', margin: '0 auto 8px', color: '#2DD4BF' }} /><p style={{ color: '#2DD4BF', fontSize: '14px' }}>No supporters yet.</p></div>
+                <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.4)' }}><AppIcon name="users" size={48} style={{ display: 'block', margin: '0 auto 8px', color: 'var(--primary)' }} /><p style={{ color: 'var(--primary)', fontSize: '14px' }}>No supporters yet.</p></div>
 
               )}
             </>
@@ -358,30 +358,30 @@ function FamilyPortalPage() {
 
           {activeTab === 'resources' && (
             <div className="dash-section">
-              <h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '1rem' }}>For supporters</h3>
-              {SUPPORTER_RESOURCES.map((r, i) => <div key={i} style={{ padding: '12px', background: '#0B1220', borderRadius: '8px', marginBottom: '8px' }}><h4 style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '4px' }}>{r.title}</h4><p style={{ color: '#7DBDEE', fontSize: '12px', lineHeight: '1.5', margin: 0 }}>{r.content}</p></div>)}
+              <h3 style={{ color: 'var(--primary)', fontSize: '14px', marginBottom: '1rem' }}>For supporters</h3>
+              {SUPPORTER_RESOURCES.map((r, i) => <div key={i} style={{ padding: '12px', background: 'var(--bg)', borderRadius: '8px', marginBottom: '8px' }}><h4 style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '4px' }}>{r.title}</h4><p style={{ color: 'var(--secondary)', fontSize: '12px', lineHeight: '1.5', margin: 0 }}>{r.content}</p></div>)}
             </div>
           )}
 
           {activeTab === 'privacy' && (
-            <div className="dash-section"><h3 style={{ color: '#2DD4BF', fontSize: '14px', marginBottom: '1rem' }}> Your privacy</h3>
-              {['Supporters never see diary content, money, or locations unless you allow it.', 'They see only what you choose to share — change anytime.', 'Change permissions or revoke access anytime.', 'Anonymous mode hides your identity.', 'Supporters don\'t need an account — they view via a secure link.'].map((t, i) => <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}><span style={{ color: '#2DD4BF' }}>•</span><span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>{t}</span></div>)}
+            <div className="dash-section"><h3 style={{ color: 'var(--primary)', fontSize: '14px', marginBottom: '1rem' }}> Your privacy</h3>
+              {['Supporters never see diary content, money, or locations unless you allow it.', 'They see only what you choose to share — change anytime.', 'Change permissions or revoke access anytime.', 'Anonymous mode hides your identity.', 'Supporters don\'t need an account — they view via a secure link.'].map((t, i) => <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}><span style={{ color: 'var(--primary)' }}>•</span><span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>{t}</span></div>)}
             </div>
           )}
         </div>
       </div>
 
       {selectedInvitation && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.8)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={() => setSelectedInvitation(null)}>
-          <div style={{ background: '#0B1220', border: '1px solid #2DD4BF', borderRadius: '16px', padding: '1.5rem', maxWidth: '440px', width: '100%', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.8)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={() => setSelectedInvitation(null)}>
+          <div style={{ background: 'var(--bg)', border: '1px solid var(--primary)', borderRadius: '16px', padding: '1.5rem', maxWidth: '440px', width: '100%', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <h3 style={{ color: '#2DD4BF', fontSize: '16px', margin: 0 }}>Messages — {selectedInvitation.anonymous_mode ? 'A loved one' : selectedInvitation.supporter_name}</h3>
+              <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: 0 }}>Messages — {selectedInvitation.anonymous_mode ? 'A loved one' : selectedInvitation.supporter_name}</h3>
               <button onClick={() => setSelectedInvitation(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '18px', cursor: 'pointer' }} aria-label="Close messages">×</button>
             </div>
             <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '10px', minHeight: '120px' }}>
               {messages.length === 0 && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textAlign: 'center', marginTop: '1rem' }}>No messages yet. Say hello.</p>}
               {messages.map(m => (
-                <div key={m.id} style={{ alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%', background: m.sender === 'user' ? 'rgba(45,212,191,0.15)' : 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px 10px' }}>
+                <div key={m.id} style={{ alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%', background: m.sender === 'user' ? 'rgb(var(--primary-rgb) / 0.15)' : 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px 10px' }}>
                   <p style={{ color: '#FFFFFF', fontSize: '12px', margin: 0, whiteSpace: 'pre-wrap' }}>{m.content}</p>
                   <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '9px', margin: '4px 0 0', textAlign: 'right' }}>{m.sender === 'user' ? 'You' : 'Supporter'} · {m.created_at ? new Date(m.created_at).toLocaleString() : ''}</p>
                 </div>
@@ -393,10 +393,10 @@ function FamilyPortalPage() {
             </div>
             <div style={{ display: 'flex', gap: '8px', marginTop: '10px', justifyContent: 'center' }}>
               {feedbackGiven[selectedInvitation.id] ? (
-                <span style={{ color: '#2DD4BF', fontSize: '11px' }}>Feedback: {feedbackGiven[selectedInvitation.id] === 'yes' ? 'Feeling supported' : 'Could be better'}</span>
+                <span style={{ color: 'var(--primary)', fontSize: '11px' }}>Feedback: {feedbackGiven[selectedInvitation.id] === 'yes' ? 'Feeling supported' : 'Could be better'}</span>
               ) : (
                 <>
-                  <button onClick={() => giveFeedback(selectedInvitation.id, 'yes')} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '100px', color: '#2DD4BF', fontSize: '10px', padding: '4px 10px', cursor: 'pointer' }}>Feeling supported</button>
+                  <button onClick={() => giveFeedback(selectedInvitation.id, 'yes')} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '100px', color: 'var(--primary)', fontSize: '10px', padding: '4px 10px', cursor: 'pointer' }}>Feeling supported</button>
                   <button onClick={() => giveFeedback(selectedInvitation.id, 'no')} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '100px', color: 'rgba(255,255,255,0.5)', fontSize: '10px', padding: '4px 10px', cursor: 'pointer' }}>Could be better</button>
                 </>
               )}
@@ -406,9 +406,9 @@ function FamilyPortalPage() {
       )}
 
       {shareInvite && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.8)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={() => setShareInvite(null)}>
-          <div style={{ background: '#0B1220', border: '1px solid #2DD4BF', borderRadius: '16px', padding: '1.5rem', maxWidth: '380px', width: '100%' }} onClick={e => e.stopPropagation()}>
-            <h3 style={{ color: '#2DD4BF', fontSize: '16px', margin: '0 0 6px' }}>Share invitation link</h3>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.8)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={() => setShareInvite(null)}>
+          <div style={{ background: 'var(--bg)', border: '1px solid var(--primary)', borderRadius: '16px', padding: '1.5rem', maxWidth: '380px', width: '100%' }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 6px' }}>Share invitation link</h3>
             <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '12px', margin: '0 0 14px', wordBreak: 'break-all' }}>{buildShareText(shareInvite)?.link || 'Link unavailable — renew the invitation to generate a new one.'}</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <button className="btn-primary full" onClick={() => void shareVia('copy')}>Copy link</button>

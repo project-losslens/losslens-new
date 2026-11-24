@@ -147,9 +147,9 @@ export async function getRiskLevel(userId) {
   }
 }
 
-// Get risk color
+// Get risk color: high = danger, medium = warning, low = primary (never green for risk)
 export function getRiskColor(score) {
-  if (score >= 60) return { bg: 'rgba(255,255,255,0.08)', color: '#FFFFFF', label: 'High Risk' }
-  if (score >= 30) return { bg: 'rgba(45,212,191,0.15)', color: '#7DBDEE', label: 'Medium Risk' }
-  return { bg: 'rgba(255,255,255,0.12)', color: '#2DD4BF', label: 'Low Risk' }
+  if (score >= 60) return { bg: 'rgb(var(--danger-rgb) / 0.16)', color: 'var(--danger)', label: 'High Risk' }
+  if (score >= 30) return { bg: 'rgb(var(--warning-rgb) / 0.16)', color: 'var(--warning)', label: 'Medium Risk' }
+  return { bg: 'rgb(var(--primary-rgb) / 0.15)', color: 'var(--primary)', label: 'Low Risk' }
 }

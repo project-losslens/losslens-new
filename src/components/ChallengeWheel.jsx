@@ -109,8 +109,8 @@ export default function ChallengeWheel({ labels, landedIndex, spinning, onLanded
               <g key={i}>
                 <path
                   d={segmentPath(cx, cy, rOuter, rInner, a0, a1)}
-                  fill={i % 2 === 0 ? '#1E3A5F' : '#14324A'}
-                  stroke={landed ? '#2DD4BF' : 'rgba(255,255,255,0.15)'}
+                  fill={i % 2 === 0 ? 'var(--surface-3)' : 'var(--surface-2)'}
+                  stroke={landed ? 'var(--primary)' : 'rgba(255,255,255,0.15)'}
                   strokeWidth={landed ? 3 : 1}
                 />
                 <text
@@ -119,7 +119,7 @@ export default function ChallengeWheel({ labels, landedIndex, spinning, onLanded
                   dominantBaseline="middle"
                   transform={`rotate(${mid + 90} ${tx} ${ty})`}
                   fontSize="10"
-                  fill={landed ? '#2DD4BF' : 'rgba(255,255,255,0.85)'}
+                  fill={landed ? 'var(--primary)' : 'rgba(255,255,255,0.85)'}
                   fontFamily="var(--font-body)"
                   fontWeight={landed ? 700 : 500}
                 >
@@ -129,7 +129,7 @@ export default function ChallengeWheel({ labels, landedIndex, spinning, onLanded
             )
           })}
         </g>
-        <circle cx={cx} cy={cy} r={rInner - 4} fill="#0B1220" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+        <circle cx={cx} cy={cy} r={rInner - 4} fill="var(--bg)" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
       </svg>
     </div>
   )

@@ -9,8 +9,8 @@ import NumberField from '../../components/NumberField'
 //  insurer_decide_preauth RPC — recorded with actor, timestamp, reason.
 
 const STATUS_COLOR = {
-  pending: '#F2C879', assigned: '#7DBDEE', accepted: '#2DD4BF',
-  completed: '#2DD4BF', expired: 'rgba(255,255,255,0.4)', void: '#ff9b9b',
+  pending: '#F2C879', assigned: 'var(--secondary)', accepted: 'var(--primary)',
+  completed: 'var(--primary)', expired: 'rgba(255,255,255,0.4)', void: 'var(--danger)',
 }
 
 export default function InsurerPreAuths() {
@@ -80,7 +80,7 @@ export default function InsurerPreAuths() {
                 </div>
                 <span style={{ color: STATUS_COLOR[r.status] || '#fff', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{r.status}</span>
                 {r.insurer_decision && (
-                  <span style={{ color: '#7DBDEE', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>
+                  <span style={{ color: 'var(--secondary)', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>
                     {r.insurer_decision.replace(/_/g, ' ')}
                   </span>
                 )}
@@ -91,7 +91,7 @@ export default function InsurerPreAuths() {
                     <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>
                       Decision
                       <select value={d.decision || 'approved'} onChange={e => setDecisions(p => ({ ...p, [r.preauth_id]: { ...d, decision: e.target.value } }))}
-                        style={{ display: 'block', marginTop: '4px', background: '#0B1220', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '6px 8px' }}>
+                        style={{ display: 'block', marginTop: '4px', background: 'var(--bg)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '6px 8px' }}>
                         <option value="approved">Approve</option>
                         <option value="partially_approved">Partially approve</option>
                         <option value="rejected">Reject</option>
@@ -109,7 +109,7 @@ export default function InsurerPreAuths() {
                     placeholder={d.decision === 'rejected' ? 'Rejection reason (required)' : 'Reason / notes (optional)'}
                     value={d.reason || ''}
                     onChange={e => setDecisions(p => ({ ...p, [r.preauth_id]: { ...d, reason: e.target.value } }))}
-                    style={{ padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '13px' }}
+                    style={{ padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '13px' }}
                   />
                   <div>
                     <button type="button" className="btn-primary fs-12" disabled={working === r.preauth_id} onClick={() => decide(r)}>

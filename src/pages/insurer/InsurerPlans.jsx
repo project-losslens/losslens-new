@@ -146,7 +146,7 @@ export default function InsurerPlans() {
             <div style={{ flex: 1, minWidth: 140 }}>
               <p style={{ color: '#FFFFFF', fontSize: '13px', margin: 0 }}>{p.name}{p.code ? ` · ${p.code}` : ''}</p>
             </div>
-            <span style={{ color: p.active ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 600 }}>{p.active ? 'ACTIVE' : 'INACTIVE'}</span>
+            <span style={{ color: p.active ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 600 }}>{p.active ? 'ACTIVE' : 'INACTIVE'}</span>
             <button type="button" className="btn-ghost fs-11" style={{ padding: '6px 10px', minHeight: '32px' }} onClick={() => toggleActive(p)}>
               {p.active ? 'Deactivate' : 'Activate'}
             </button>
@@ -170,7 +170,7 @@ export default function InsurerPlans() {
                   {v.terms?.waiting_period_days ? ` · ${v.terms.waiting_period_days}d wait` : ''}
                 </p>
               </div>
-              <span style={{ color: v.status === 'approved' ? '#2DD4BF' : v.status === 'draft' ? '#F2C879' : 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{v.status.replace(/_/g, ' ')}</span>
+              <span style={{ color: v.status === 'approved' ? 'var(--primary)' : v.status === 'draft' ? '#F2C879' : 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{v.status.replace(/_/g, ' ')}</span>
               {v.status === 'draft' && (
                 <>
                   <button type="button" className="btn-primary fs-11" style={{ padding: '4px 10px', minHeight: '30px' }} onClick={async () => {

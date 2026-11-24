@@ -351,12 +351,12 @@ export default function LossLensPactPage() {
         <div style={{ padding: '1rem', maxWidth: '650px', margin: '0 auto' }}>
 
           {/* Explanation Card */}
-          <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: '#2DD4BF' }}>
+          <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: 'var(--primary)' }}>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-              <AppIcon name="heart" size={28} style={{ flexShrink: 0, color: '#2DD4BF' }} />
+              <AppIcon name="heart" size={28} style={{ flexShrink: 0, color: 'var(--primary)' }} />
               <div>
-                <h3 style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '4px' }}>What is the LossLens Pact?</h3>
-                <p style={{ color: '#7DBDEE', fontSize: '12px', lineHeight: '1.5', fontWeight: 300, margin: 0 }}>
+                <h3 style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '4px' }}>What is the LossLens Pact?</h3>
+                <p style={{ color: 'var(--secondary)', fontSize: '12px', lineHeight: '1.5', fontWeight: 300, margin: 0 }}>
                   Record a message to your future self when you're feeling strong. When you're struggling, play it back to remember why you started.
                 </p>
               </div>
@@ -365,8 +365,8 @@ export default function LossLensPactPage() {
 
           {/* Review Mode */}
           {reviewMode && reviewBlob && (
-            <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: '#2DD4BF', textAlign: 'center' }}>
-              <h3 style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '0.75rem' }}> Review Your Recording</h3>
+            <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: 'var(--primary)', textAlign: 'center' }}>
+              <h3 style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '0.75rem' }}> Review Your Recording</h3>
               <audio ref={reviewAudioRef} src={URL.createObjectURL(reviewBlob)} controls style={{ width: '100%', marginBottom: '0.75rem' }} />
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '0.75rem' }}>Duration: {formatTime(recordingTime)}</p>
               <div style={{ display: 'flex', gap: '8px' }}>
@@ -377,21 +377,21 @@ export default function LossLensPactPage() {
           )}
 
           {uploading && (
-            <div style={{ textAlign: 'center', padding: '10px', color: '#7DBDEE', fontSize: '12px', marginBottom: '0.5rem' }}>
+            <div style={{ textAlign: 'center', padding: '10px', color: 'var(--secondary)', fontSize: '12px', marginBottom: '0.5rem' }}>
               Saving your pact...
             </div>
           )}
 
           {/* Prompts */}
           <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-            <p style={{ color: '#2DD4BF', fontSize: '10px', marginBottom: '8px', letterSpacing: '0.05em', fontWeight: 600 }}> CHOOSE YOUR PROMPT</p>
+            <p style={{ color: 'var(--primary)', fontSize: '10px', marginBottom: '8px', letterSpacing: '0.05em', fontWeight: 600 }}> CHOOSE YOUR PROMPT</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {prompts.map((p, i) => (
                 <button key={i} onClick={() => setActivePrompt(i)} role="radio" aria-checked={activePrompt === i}
-                  style={{ background: activePrompt === i ? 'rgba(45,212,191,0.08)' : '#0B1220', border: `1px solid ${activePrompt === i ? '#2DD4BF' : 'rgba(255,255,255,0.12)'}`, borderRadius: '8px', padding: '10px 12px', cursor: 'pointer', textAlign: 'left' }}>
+                  style={{ background: activePrompt === i ? 'rgb(var(--primary-rgb) / 0.08)' : 'var(--bg)', border: `1px solid ${activePrompt === i ? 'var(--primary)' : 'rgba(255,255,255,0.12)'}`, borderRadius: '8px', padding: '10px 12px', cursor: 'pointer', textAlign: 'left' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ color: activePrompt === i ? '#2DD4BF' : '#7DBDEE', fontSize: '12px', fontFamily: 'var(--font-body)' }}>{p.q}</span>
-                    {activePrompt === i && <span style={{ color: '#2DD4BF', fontSize: '9px', fontWeight: 600 }}>SELECTED</span>}
+                    <span style={{ color: activePrompt === i ? 'var(--primary)' : 'var(--secondary)', fontSize: '12px', fontFamily: 'var(--font-body)' }}>{p.q}</span>
+                    {activePrompt === i && <span style={{ color: 'var(--primary)', fontSize: '9px', fontWeight: 600 }}>SELECTED</span>}
                   </div>
                   <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', margin: '3px 0 0', lineHeight: '1.3' }}>{p.hint}</p>
                 </button>
@@ -401,14 +401,14 @@ export default function LossLensPactPage() {
 
           {/* Title Input */}
           <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-            <label style={{ color: '#2DD4BF', fontSize: '11px', marginBottom: '6px', display: 'block' }}>Give your pact a title (optional)</label>
-            <input value={pactTitle} onChange={e => setPactTitle(e.target.value)} placeholder="e.g. My reason to stay strong" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} />
+            <label style={{ color: 'var(--primary)', fontSize: '11px', marginBottom: '6px', display: 'block' }}>Give your pact a title (optional)</label>
+            <input value={pactTitle} onChange={e => setPactTitle(e.target.value)} placeholder="e.g. My reason to stay strong" style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} />
           </div>
 
           {/* Record Section */}
           {!reviewMode && !uploading && (
             <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-              <h3 style={{ color: '#2DD4BF', fontSize: '13px', marginBottom: '0.75rem' }}> Record your pact</h3>
+              <h3 style={{ color: 'var(--primary)', fontSize: '13px', marginBottom: '0.75rem' }}> Record your pact</h3>
 
               {!recording && (
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -419,7 +419,7 @@ export default function LossLensPactPage() {
 
               {recording && (
                 <div>
-                  <div style={{ background: '#0B1220', borderRadius: '12px', padding: '2rem', textAlign: 'center', marginBottom: '10px', border: '2px solid #FFFFFF' }}>
+                  <div style={{ background: 'var(--bg)', borderRadius: '12px', padding: '2rem', textAlign: 'center', marginBottom: '10px', border: '2px solid #FFFFFF' }}>
                     <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'pulse 1s infinite' }}>
                       <AppIcon name="mic" size={24} style={{ color: '#FFFFFF' }} />
                     </div>
@@ -445,7 +445,7 @@ export default function LossLensPactPage() {
             <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
               <h3 style={{ color: '#FFFFFF', fontSize: '13px', marginBottom: '0.75rem' }}>Write your pact</h3>
               <textarea value={writtenPact} onChange={e => setWrittenPact(e.target.value.slice(0, MAX_WRITTEN_LENGTH))} placeholder="Dear future me, when you read this, remember..." rows={5}
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', resize: 'vertical', lineHeight: '1.6', boxSizing: 'border-box' }} />
+                style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', resize: 'vertical', lineHeight: '1.6', boxSizing: 'border-box' }} />
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '4px' }}>{writtenPact.length}/{MAX_WRITTEN_LENGTH}</p>
               <button className="btn-primary full" style={{ marginTop: '8px', padding: '10px', fontSize: '12px' }} onClick={saveWrittenPact} disabled={!writtenPact.trim()}>Save written pact </button>
             </div>
@@ -457,33 +457,33 @@ export default function LossLensPactPage() {
               <h3 style={{ color: '#FFFFFF', fontSize: '13px', margin: '0 0 0.75rem' }}> Your pacts ({pacts.length})</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {pacts.map((pact) => (
-                  <div key={pact.id} style={{ background: '#0B1220', border: `1px solid ${pact._pending ? '#7DBDEE' : 'rgba(255,255,255,0.12)'}`, borderRadius: '8px', overflow: 'hidden' }}>
+                  <div key={pact.id} style={{ background: 'var(--bg)', border: `1px solid ${pact._pending ? 'var(--secondary)' : 'rgba(255,255,255,0.12)'}`, borderRadius: '8px', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px' }}>
-                      <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: pact._pending ? 'rgba(45,212,191,0.15)' : pact.storage_path === STORAGE_PATH_WRITTEN ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.12)', border: `2px solid ${pact._pending ? '#7DBDEE' : pact.storage_path === STORAGE_PATH_WRITTEN ? 'rgba(255,255,255,0.4)' : '#2DD4BF'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <AppIcon name={pact.storage_path === STORAGE_PATH_WRITTEN ? 'document' : pact._pending ? 'clock' : 'mic'} size={20} style={{ color: pact._pending ? '#7DBDEE' : 'rgba(255,255,255,0.7)' }} />
+                      <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: pact._pending ? 'rgb(var(--primary-rgb) / 0.15)' : pact.storage_path === STORAGE_PATH_WRITTEN ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.12)', border: `2px solid ${pact._pending ? 'var(--secondary)' : pact.storage_path === STORAGE_PATH_WRITTEN ? 'rgba(255,255,255,0.4)' : 'var(--primary)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <AppIcon name={pact.storage_path === STORAGE_PATH_WRITTEN ? 'document' : pact._pending ? 'clock' : 'mic'} size={20} style={{ color: pact._pending ? 'var(--secondary)' : 'rgba(255,255,255,0.7)' }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 500, margin: 0 }}>{pact.title || `Pact`}</p>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '3px' }}>
                           <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{new Date(pact.created_at).toLocaleDateString('en-KE', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                           {pact.duration_seconds > 0 && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{formatTime(pact.duration_seconds)}</span>}
-                          {pact._pending ? <span style={{ color: '#7DBDEE', fontSize: '9px', background: 'rgba(45,212,191,0.15)', padding: '1px 6px', borderRadius: '100px' }}>Local</span> : <span style={{ color: '#2DD4BF', fontSize: '9px', background: 'rgba(255,255,255,0.12)', padding: '1px 6px', borderRadius: '100px' }}> Saved</span>}
+                          {pact._pending ? <span style={{ color: 'var(--secondary)', fontSize: '9px', background: 'rgb(var(--primary-rgb) / 0.15)', padding: '1px 6px', borderRadius: '100px' }}>Local</span> : <span style={{ color: 'var(--primary)', fontSize: '9px', background: 'rgba(255,255,255,0.12)', padding: '1px 6px', borderRadius: '100px' }}> Saved</span>}
                           {pact.play_count > 0 && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '9px' }}>{pact.play_count} plays</span>}
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '3px', flexShrink: 0 }}>
                         {pact.storage_path !== STORAGE_PATH_WRITTEN && (
-                          <button onClick={() => setExpandedPlayer(expandedPlayer === pact.id ? null : pact.id)} style={{ background: expandedPlayer === pact.id ? 'rgba(255,255,255,0.12)' : 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          <button onClick={() => setExpandedPlayer(expandedPlayer === pact.id ? null : pact.id)} style={{ background: expandedPlayer === pact.id ? 'rgba(255,255,255,0.12)' : 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--primary)', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             aria-label={expandedPlayer === pact.id ? 'Collapse' : 'Expand'}>{expandedPlayer === pact.id ? '▼' : '▶'}</button>
                         )}
                         {pact.storage_path === STORAGE_PATH_WRITTEN && (
-                          <button onClick={() => setExpandedPlayer(expandedPlayer === pact.id ? null : pact.id)} style={{ background: expandedPlayer === pact.id ? 'rgba(255,255,255,0.12)' : 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px' }}
+                          <button onClick={() => setExpandedPlayer(expandedPlayer === pact.id ? null : pact.id)} style={{ background: expandedPlayer === pact.id ? 'rgba(255,255,255,0.12)' : 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--primary)', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px' }}
                             aria-label={expandedPlayer === pact.id ? 'Collapse' : 'Expand'}>{expandedPlayer === pact.id ? '▲' : ''}</button>
                         )}
                         {!pact._pending && pact.storage_path !== STORAGE_PATH_WRITTEN && (
                           pact._signedUrl
-                            ? <a href={pact._signedUrl} download style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: '#2DD4BF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }} aria-label="Download"><AppIcon name="download" size={14} /></a>
-                            : <span role="alert" title={pact._signedUrlError || 'Secure file link unavailable'} style={{ color: '#ff9b9b', fontSize: '10px' }}>Link unavailable</span>
+                            ? <a href={pact._signedUrl} download style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--primary)', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }} aria-label="Download"><AppIcon name="download" size={14} /></a>
+                            : <span role="alert" title={pact._signedUrlError || 'Secure file link unavailable'} style={{ color: 'var(--danger)', fontSize: '10px' }}>Link unavailable</span>
                         )}
                         <button onClick={() => setDeleteConfirm({ id: pact.id, path: pact.storage_path, isLocal: pact._pending, localIndex: pact._localIndex })} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF', width: '32px', height: '32px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px' }} aria-label="Delete"></button>
                       </div>
@@ -498,7 +498,7 @@ export default function LossLensPactPage() {
                       </div>
                     )}
                     {expandedPlayer === pact.id && pact.storage_path === STORAGE_PATH_WRITTEN && (
-                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.12)', padding: '14px 16px', color: '#7DBDEE', fontSize: '13px', lineHeight: '1.7', fontStyle: 'italic' }}>"{pact.prompt}"</div>
+                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.12)', padding: '14px 16px', color: 'var(--secondary)', fontSize: '13px', lineHeight: '1.7', fontStyle: 'italic' }}>"{pact.prompt}"</div>
                     )}
                   </div>
                 ))}
@@ -515,8 +515,8 @@ export default function LossLensPactPage() {
 
           {pacts.length === 0 && !pactsError && !reviewMode && !uploading && (
             <div style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.4)' }}>
-              <AppIcon name="mic" size={40} style={{ display: 'block', margin: '0 auto 8px', color: '#2DD4BF' }} />
-              <p style={{ color: '#2DD4BF', fontSize: '14px' }}>No pacts yet. Record your first promise to your future self.</p>
+              <AppIcon name="mic" size={40} style={{ display: 'block', margin: '0 auto 8px', color: 'var(--primary)' }} />
+              <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No pacts yet. Record your first promise to your future self.</p>
             </div>
           )}
 
@@ -528,14 +528,14 @@ export default function LossLensPactPage() {
             </p>
           </div>
 
-          <p style={{ color: '#7DBDEE', fontSize: '10px', textAlign: 'center', fontStyle: 'italic', padding: '0.75rem 0 0' }}>
+          <p style={{ color: 'var(--secondary)', fontSize: '10px', textAlign: 'center', fontStyle: 'italic', padding: '0.75rem 0 0' }}>
              Your future self will thank you.
           </p>
         </div>
 
         {/* Delete Confirmation Modal */}
         {deleteConfirm && (
-          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgb(var(--bg-rgb) / 0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setDeleteConfirm(null)} />
             <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '14px', padding: '1.5rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '340px', width: '100%', textAlign: 'center' }}>
               <AppIcon name="alert" size={32} style={{ display: 'block', margin: '0 auto 8px', color: '#FFFFFF' }} />

@@ -160,10 +160,10 @@ export default function UserAccountEditor({ user, actorId, isLastActiveSuperAdmi
       : ''
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-modal)', background: 'rgba(11,18,32,0.94)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0.5rem' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-modal)', background: 'rgb(var(--bg-rgb) / 0.94)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0.5rem' }}>
       <button type="button" className="modal-backdrop" aria-label={t('users.closeEditor')} onClick={onClose} />
       <section role="dialog" aria-modal="true" aria-labelledby="account-editor-title"
-        style={{ position: 'relative', zIndex: 1, background: '#0B1220', border: '1px solid rgba(45,212,191,0.4)', borderRadius: '14px', width: '100%', maxWidth: '620px', maxHeight: '94vh', overflowY: 'auto', padding: 'clamp(14px, 4vw, 24px)' }}>
+        style={{ position: 'relative', zIndex: 1, background: 'var(--bg)', border: '1px solid rgb(var(--primary-rgb) / 0.4)', borderRadius: '14px', width: '100%', maxWidth: '620px', maxHeight: '94vh', overflowY: 'auto', padding: 'clamp(14px, 4vw, 24px)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
           <div>
             <h2 id="account-editor-title" style={{ color: 'var(--primary)', margin: 0 }}>{t('users.editUserTitle')}</h2>
@@ -178,7 +178,7 @@ export default function UserAccountEditor({ user, actorId, isLastActiveSuperAdmi
           {['role', 'profile', 'credentials'].map((item) => (
             <button type="button" key={item} onClick={() => setSection(item)}
               aria-current={section === item ? 'page' : undefined}
-              style={{ flex: '1 0 auto', minHeight: 44, padding: '8px 12px', borderRadius: 8, color: section === item ? '#0B1220' : 'var(--primary)', background: section === item ? 'var(--primary)' : 'transparent', border: '1px solid var(--primary)' }}>
+              style={{ flex: '1 0 auto', minHeight: 44, padding: '8px 12px', borderRadius: 8, color: section === item ? 'var(--bg)' : 'var(--primary)', background: section === item ? 'var(--primary)' : 'transparent', border: '1px solid var(--primary)' }}>
               {t(`users.${item}Section`)}
             </button>
           ))}

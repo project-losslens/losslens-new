@@ -100,22 +100,22 @@ function ForgotPassword() {
       <PublicLayout>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
-            <AppIcon name="mail" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#7DBDEE' }} />
+            <AppIcon name="mail" size={56} style={{ display: 'block', margin: '0 auto 16px', color: 'var(--secondary)' }} />
             <h1 className="auth-title">Check your inbox</h1>
             <p className="auth-sub" style={{ lineHeight: '1.6' }}>
-              We've sent password reset instructions to <strong style={{ color: '#2DD4BF' }}>{email}</strong>
+              We've sent password reset instructions to <strong style={{ color: 'var(--primary)' }}>{email}</strong>
             </p>
-            <p style={{ color: '#2DD4BF', fontSize: '13px', margin: '16px 0', lineHeight: '1.6' }}>
+            <p style={{ color: 'var(--primary)', fontSize: '13px', margin: '16px 0', lineHeight: '1.6' }}>
               Click the link in the email to reset your password. The link expires in 60 minutes.
             </p>
-            <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: '8px', padding: '12px', marginBottom: '20px', border: '1px solid #2DD4BF' }}>
-              <p style={{ color: '#2DD4BF', fontSize: '13px', fontWeight: 600, margin: '0 0 4px' }}> Didn't receive it?</p>
-              <p style={{ color: '#2DD4BF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Check your <strong>spam/junk folder</strong>. Sometimes our emails end up there.</p>
+            <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: '8px', padding: '12px', marginBottom: '20px', border: '1px solid var(--primary)' }}>
+              <p style={{ color: 'var(--primary)', fontSize: '13px', fontWeight: 600, margin: '0 0 4px' }}> Didn't receive it?</p>
+              <p style={{ color: 'var(--primary)', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>Check your <strong>spam/junk folder</strong>. Sometimes our emails end up there.</p>
             </div>
 
             {error && <div role="alert" aria-live="polite" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', fontSize: '13px', marginBottom: '1rem' }}>{error}</div>}
 
-            <button onClick={handleResend} disabled={countdown > 0 || resending} style={{ width: '100%', padding: '13px', borderRadius: '100px', background: countdown > 0 ? 'rgba(255,255,255,0.12)' : '#2DD4BF', border: 'none', color: countdown > 0 ? 'rgba(255,255,255,0.4)' : '#0B1220', fontSize: '14px', fontWeight: 600, cursor: countdown > 0 ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-body)', marginBottom: '10px' }}>
+            <button onClick={handleResend} disabled={countdown > 0 || resending} style={{ width: '100%', padding: '13px', borderRadius: '100px', background: countdown > 0 ? 'rgba(255,255,255,0.12)' : 'var(--primary)', border: 'none', color: countdown > 0 ? 'rgba(255,255,255,0.4)' : 'var(--bg)', fontSize: '14px', fontWeight: 600, cursor: countdown > 0 ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-body)', marginBottom: '10px' }}>
               {resending ? 'Sending...' : countdown > 0 ? `Resend in ${formatCountdown()}` : 'Resend email'}
             </button>
 

@@ -11,10 +11,10 @@ import { useI18n } from '../../i18n'
 // Shared Google Icon
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 48 48">
-    <path fill="#2DD4BF" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/>
-    <path fill="#7DBDEE" d="M6.3 14.7l6.6 4.8C14.6 15.1 18.9 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.4 6.3 14.7z"/>
-    <path fill="#2DD4BF" d="M24 44c5.2 0 10-1.9 13.6-5.1l-6.3-5.2C29.4 35.5 26.8 36 24 36c-5.2 0-9.6-3-11.3-7.3l-6.6 5.1C9.5 39.4 16.3 44 24 44z"/>
-    <path fill="#7DBDEE" d="M43.6 20H24v8h11.3c-.9 2.4-2.5 4.4-4.6 5.8l6.3 5.2C41 35.7 44 30.3 44 24c0-1.3-.1-2.7-.4-4z"/>
+    <path fill="var(--primary)" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/>
+    <path fill="var(--secondary)" d="M6.3 14.7l6.6 4.8C14.6 15.1 18.9 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.4 6.3 14.7z"/>
+    <path fill="var(--primary)" d="M24 44c5.2 0 10-1.9 13.6-5.1l-6.3-5.2C29.4 35.5 26.8 36 24 36c-5.2 0-9.6-3-11.3-7.3l-6.6 5.1C9.5 39.4 16.3 44 24 44z"/>
+    <path fill="var(--secondary)" d="M43.6 20H24v8h11.3c-.9 2.4-2.5 4.4-4.6 5.8l6.3 5.2C41 35.7 44 30.3 44 24c0-1.3-.1-2.7-.4-4z"/>
   </svg>
 );
 
@@ -157,10 +157,10 @@ function Login() {
 
           {error && (
             <div role="alert" aria-live="polite" style={{
-              background: cooldown ? 'rgba(45,212,191,0.15)' : 'rgba(255,255,255,0.08)',
-              border: `1px solid ${cooldown ? '#2DD4BF' : '#FFFFFF'}`,
+              background: cooldown ? 'rgb(var(--primary-rgb) / 0.15)' : 'rgba(255,255,255,0.08)',
+              border: `1px solid ${cooldown ? 'var(--primary)' : '#FFFFFF'}`,
               borderRadius: '8px', padding: '10px 14px',
-              color: cooldown ? '#2DD4BF' : '#FFFFFF',
+              color: cooldown ? 'var(--primary)' : '#FFFFFF',
               fontSize: '13px', marginBottom: '1rem'
             }}>
               {cooldown ? `${t('login.errorCooldown')} ${t('common.wait', { time: formatCooldown() })}` : error}
@@ -171,7 +171,7 @@ function Login() {
           <button onClick={handleGoogleLogin} disabled={googleLoading || cooldown} style={{
             width: '100%', padding: '13px', borderRadius: '100px',
             border: '2px solid rgba(255,255,255,0.12)', background: '#FFFFFF',
-            color: '#0B1220', fontSize: '14px', cursor: 'pointer',
+            color: 'var(--on-primary)', fontSize: '14px', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             gap: '10px', marginBottom: '1.25rem', fontFamily: 'var(--font-body)',
             fontWeight: 500, opacity: (googleLoading || cooldown) ? 0.7 : 1
@@ -201,7 +201,7 @@ function Login() {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <input type="checkbox" id="remember" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} style={{ accentColor: '#2DD4BF', width: '15px', height: '15px', cursor: 'pointer' }} />
+                <input type="checkbox" id="remember" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} style={{ accentColor: 'var(--primary)', width: '15px', height: '15px', cursor: 'pointer' }} />
                 <label htmlFor="remember" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>{t('login.remember')}</label>
               </div>
               <button type="button" className="forgot" onClick={() => navigate('/forgot-password')} style={{ background: 'none', border: 'none', fontSize: '12px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'var(--font-body)', margin: 0, padding: 0 }}>{t('login.forgot')}</button>
@@ -215,8 +215,8 @@ function Login() {
           <p className="auth-switch">{t('login.noAccount')} <Link to="/signup">{t('login.signUp')}</Link></p>
           <p className="auth-switch">{t('login.insurer')} <Link to="/insurer/login">{t('login.insurerLogin')}</Link></p>
 
-          <div style={{ marginTop: '1.25rem', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', borderRadius: 8, padding: '10px 14px', textAlign: 'center' }}>
-            <p style={{ fontSize: 12, color: '#2DD4BF' }}>{t('login.crisis', { name: primaryHelpline.name, phone: primaryHelpline.phone, hours: primaryHelpline.hours })}</p>
+          <div style={{ marginTop: '1.25rem', background: 'rgba(255,255,255,0.12)', border: '1px solid var(--secondary)', borderRadius: 8, padding: '10px 14px', textAlign: 'center' }}>
+            <p style={{ fontSize: 12, color: 'var(--primary)' }}>{t('login.crisis', { name: primaryHelpline.name, phone: primaryHelpline.phone, hours: primaryHelpline.hours })}</p>
           </div>
         </div>
       </div>

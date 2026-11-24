@@ -9,7 +9,7 @@ import { enqueueOfflineItem, offlineQueueCount, onOfflineQueueChange } from '../
 
 
 function triggerConfetti() {
-  const colors = ['#2DD4BF', '#2DD4BF', '#2DD4BF', '#FFFFFF', '#7DBDEE', '#7DBDEE']
+  const colors = ['var(--primary)', 'var(--primary)', 'var(--primary)', '#FFFFFF', 'var(--secondary)', 'var(--secondary)']
   for (let i = 0; i < 40; i++) {
     setTimeout(() => {
       const piece = document.createElement('div')
@@ -290,23 +290,23 @@ function Diary() {
         </div>
         <div style={{ padding: '1.5rem' }}>
           {pendingSync > 0 && (
-            <p className="fs-13" role="status" style={{ background: 'rgba(125,189,238,0.12)', border: '1px solid #7DBDEE', borderRadius: '8px', padding: '10px 14px', color: '#7DBDEE', marginBottom: '1rem' }}>
+            <p className="fs-13" role="status" style={{ background: 'rgb(var(--secondary-rgb) / 0.12)', border: '1px solid var(--secondary)', borderRadius: '8px', padding: '10px 14px', color: 'var(--secondary)', marginBottom: '1rem' }}>
               {pendingSync} {t('common.offlineSaved')}
             </p>
           )}
           <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)' }}>
-            <button onClick={() => setActiveView('today')} className="fs-13" style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeView === 'today' ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeView === 'today' ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontWeight: activeView === 'today' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> {t('diary.today')}</button>
-            <button onClick={() => setActiveView('history')} className="fs-13" style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeView === 'history' ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeView === 'history' ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontWeight: activeView === 'history' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> {t('diary.history')} {stats.totalEntries > 0 ? `(${stats.totalEntries})` : ''}</button>
+            <button onClick={() => setActiveView('today')} className="fs-13" style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeView === 'today' ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeView === 'today' ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontWeight: activeView === 'today' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> {t('diary.today')}</button>
+            <button onClick={() => setActiveView('history')} className="fs-13" style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeView === 'history' ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeView === 'history' ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontWeight: activeView === 'history' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> {t('diary.history')} {stats.totalEntries > 0 ? `(${stats.totalEntries})` : ''}</button>
           </div>
 
           {activeView === 'today' && (
             <>
               {showCheckmark && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem', marginBottom: '1rem' }}>
-                  <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(255,255,255,0.12)', border: '3px solid #2DD4BF', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'checkmarkPop 0.5s ease-out' }}>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2DD4BF" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                  <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(255,255,255,0.12)', border: '3px solid var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'checkmarkPop 0.5s ease-out' }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
                   </div>
-                  <p className="fs-14" style={{ color: '#2DD4BF', marginTop: '12px', fontWeight: 500 }}>{gambled ? t('diary.checkSaved') : t('diary.checkClean')}</p>
+                  <p className="fs-14" style={{ color: 'var(--primary)', marginTop: '12px', fontWeight: 500 }}>{gambled ? t('diary.checkSaved') : t('diary.checkClean')}</p>
                 </div>
               )}
 
@@ -344,9 +344,9 @@ function Diary() {
               <div className="dash-section">
                 <h3 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '1rem' }}> {t('diary.notesTitle')}</h3>
                 {voiceSupported && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', padding: '8px 12px', background: isListening ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.12)', borderRadius: '8px', border: `1px solid ${isListening ? '#FFFFFF' : '#7DBDEE'}` }}>
-                    <button onClick={() => isListening ? stopListening() : startListening()} className="fs-16" style={{ width: '36px', height: '36px', borderRadius: '50%', border: 'none', background: isListening ? '#FFFFFF' : '#2DD4BF', color: '#0B1220', cursor: 'pointer', animation: isListening ? 'pulse 1.5s infinite' : 'none' }}></button>
-                    <span className="fs-12" style={{ flex: 1, color: isListening ? '#FFFFFF' : '#2DD4BF' }}>{isListening ? ` ${t('diary.listening')}` : ` ${t('diary.speak')}`}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', padding: '8px 12px', background: isListening ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.12)', borderRadius: '8px', border: `1px solid ${isListening ? '#FFFFFF' : 'var(--secondary)'}` }}>
+                    <button onClick={() => isListening ? stopListening() : startListening()} className="fs-16" style={{ width: '36px', height: '36px', borderRadius: '50%', border: 'none', background: isListening ? '#FFFFFF' : 'var(--primary)', color: 'var(--on-primary)', cursor: 'pointer', animation: isListening ? 'pulse 1.5s infinite' : 'none' }}></button>
+                    <span className="fs-12" style={{ flex: 1, color: isListening ? '#FFFFFF' : 'var(--primary)' }}>{isListening ? ` ${t('diary.listening')}` : ` ${t('diary.speak')}`}</span>
                     {isListening && <button type="button" onClick={stopListening} className="fs-18" style={{ background: 'transparent', border: 'none', color: '#FFFFFF', cursor: 'pointer' }} aria-label={t('diary.listening')}>⏹</button>}
                   </div>
                 )}
@@ -363,7 +363,7 @@ function Diary() {
             <>
               <div className="stats-grid" style={{ marginBottom: '1rem' }}>
                 {[{ icon: '', value: stats.totalEntries, label: t('diary.total') }, { icon: '', value: `${stats.cleanRate}%`, label: t('diary.cleanRate'), hl: stats.cleanRate >= 70 }, { icon: '', value: stats.cleanDays, label: t('diary.cleanDays') }, { icon: '', value: stats.gambleDays, label: t('diary.gambleDays') }].map((s, i) => (
-                  <div className="stat-card" key={i} style={s.hl ? { borderColor: '#2DD4BF' } : {}}><span className="stat-icon">{s.icon}</span><span className="stat-value" style={s.hl ? { color: '#2DD4BF' } : {}}>{s.value}</span><span className="stat-label">{s.label}</span></div>
+                  <div className="stat-card" key={i} style={s.hl ? { borderColor: 'var(--primary)' } : {}}><span className="stat-icon">{s.icon}</span><span className="stat-value" style={s.hl ? { color: 'var(--primary)' } : {}}>{s.value}</span><span className="stat-label">{s.label}</span></div>
                 ))}
               </div>
               <div className="dash-section" style={{ marginBottom: '1rem' }}><div className="progress-bar-wrap"><div className="progress-bar"><div className="progress-fill" style={{ width: `${stats.cleanRate}%` }} /></div><span className="progress-label">{stats.cleanRate}%</span></div></div>

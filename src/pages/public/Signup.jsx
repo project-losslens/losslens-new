@@ -10,10 +10,10 @@ import { useI18n } from '../../i18n'
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 48 48">
-    <path fill="#2DD4BF" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/>
-    <path fill="#7DBDEE" d="M6.3 14.7l6.6 4.8C14.6 15.1 18.9 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.4 6.3 14.7z"/>
-    <path fill="#2DD4BF" d="M24 44c5.2 0 10-1.9 13.6-5.1l-6.3-5.2C29.4 35.5 26.8 36 24 36c-5.2 0-9.6-3-11.3-7.3l-6.6 5.1C9.5 39.4 16.3 44 24 44z"/>
-    <path fill="#7DBDEE" d="M43.6 20H24v8h11.3c-.9 2.4-2.5 4.4-4.6 5.8l6.3 5.2C41 35.7 44 30.3 44 24c0-1.3-.1-2.7-.4-4z"/>
+    <path fill="var(--primary)" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/>
+    <path fill="var(--secondary)" d="M6.3 14.7l6.6 4.8C14.6 15.1 18.9 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.4 6.3 14.7z"/>
+    <path fill="var(--primary)" d="M24 44c5.2 0 10-1.9 13.6-5.1l-6.3-5.2C29.4 35.5 26.8 36 24 36c-5.2 0-9.6-3-11.3-7.3l-6.6 5.1C9.5 39.4 16.3 44 24 44z"/>
+    <path fill="var(--secondary)" d="M43.6 20H24v8h11.3c-.9 2.4-2.5 4.4-4.6 5.8l6.3 5.2C41 35.7 44 30.3 44 24c0-1.3-.1-2.7-.4-4z"/>
   </svg>
 );
 
@@ -60,7 +60,7 @@ function Signup() {
 
   const strength = useMemo(() => {
     const labels = ['', t('signup.strength.1'), t('signup.strength.2'), t('signup.strength.3'), t('signup.strength.4')]
-    const colors = ['', '#FFFFFF', '#7DBDEE', '#2DD4BF', '#2DD4BF']
+    const colors = ['', '#FFFFFF', 'var(--secondary)', 'var(--primary)', 'var(--primary)']
     return { label: labels[passwordStrength], color: colors[passwordStrength] }
   }, [passwordStrength, t])
 
@@ -245,21 +245,21 @@ function Signup() {
       <PublicLayout>
         <div className="auth-container">
           <div className="auth-card" style={{ textAlign: 'center' }}>
-            <AppIcon name="mail" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#7DBDEE' }} />
+            <AppIcon name="mail" size={56} style={{ display: 'block', margin: '0 auto 16px', color: 'var(--secondary)' }} />
             <h1 className="auth-title">{t('signup.checkEmail')}</h1>
-            <p className="auth-sub" style={{ lineHeight: '1.6' }}>{t('signup.sentTo')} <strong style={{ color: '#2DD4BF' }}>{signedUpEmail}</strong></p>
+            <p className="auth-sub" style={{ lineHeight: '1.6' }}>{t('signup.sentTo')} <strong style={{ color: 'var(--primary)' }}>{signedUpEmail}</strong></p>
             {signupType === 'company' && companyValidation?.company_name && (
-              <p style={{ color: '#2DD4BF', fontSize: '13px', marginTop: '8px' }}>
+              <p style={{ color: 'var(--primary)', fontSize: '13px', marginTop: '8px' }}>
                  {t('signup.linkedTo')} <strong>{companyValidation.company_name}</strong>
               </p>
             )}
-            <p style={{ color: '#2DD4BF', fontSize: '13px', margin: '16px 0', lineHeight: '1.6' }}>{t('signup.activate')}</p>
-            <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: '8px', padding: '12px', marginBottom: '20px', border: '1px solid #2DD4BF' }}>
-              <p style={{ color: '#2DD4BF', fontSize: '13px', fontWeight: 600, margin: '0 0 4px' }}> {t('signup.noEmail')}</p>
-              <p style={{ color: '#2DD4BF', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>{t('signup.spam')}</p>
+            <p style={{ color: 'var(--primary)', fontSize: '13px', margin: '16px 0', lineHeight: '1.6' }}>{t('signup.activate')}</p>
+            <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: '8px', padding: '12px', marginBottom: '20px', border: '1px solid var(--primary)' }}>
+              <p style={{ color: 'var(--primary)', fontSize: '13px', fontWeight: 600, margin: '0 0 4px' }}> {t('signup.noEmail')}</p>
+              <p style={{ color: 'var(--primary)', fontSize: '12px', margin: 0, lineHeight: '1.5' }}>{t('signup.spam')}</p>
             </div>
             <Link className="btn-primary full" to="/login">{t('signup.goToLogin')}</Link>
-            <button onClick={handleResendEmail} disabled={resending || resendSent} style={{ width: '100%', marginTop: '10px', padding: '10px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: resendSent ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+            <button onClick={handleResendEmail} disabled={resending || resendSent} style={{ width: '100%', marginTop: '10px', padding: '10px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: resendSent ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
               {resendSent ? ` ${t('signup.resendSent')}` : resending ? t('signup.sending') : ` ${t('signup.resend')}`}
             </button>
           </div>
@@ -287,9 +287,9 @@ function Signup() {
             <button
               onClick={() => { setSignupType('individual'); setCompanyCode(''); setCompanyValidation(null); setFieldErrors(p => ({ ...p, company_code: '' })) }}
               style={{
-                flex: 1, padding: '10px', borderRadius: '10px', border: signupType === 'individual' ? '2px solid #2DD4BF' : '1px solid rgba(255,255,255,0.12)',
-                background: signupType === 'individual' ? 'rgba(45,212,191,0.15)' : 'transparent',
-                color: signupType === 'individual' ? '#2DD4BF' : 'rgba(255,255,255,0.4)',
+                flex: 1, padding: '10px', borderRadius: '10px', border: signupType === 'individual' ? '2px solid var(--primary)' : '1px solid rgba(255,255,255,0.12)',
+                background: signupType === 'individual' ? 'rgb(var(--primary-rgb) / 0.15)' : 'transparent',
+                color: signupType === 'individual' ? 'var(--primary)' : 'rgba(255,255,255,0.4)',
                 fontSize: '12px', fontWeight: signupType === 'individual' ? 600 : 400,
                 cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.2s'
               }}>
@@ -298,9 +298,9 @@ function Signup() {
             <button
               onClick={() => setSignupType('company')}
               style={{
-                flex: 1, padding: '10px', borderRadius: '10px', border: signupType === 'company' ? '2px solid #2DD4BF' : '1px solid rgba(255,255,255,0.12)',
-                background: signupType === 'company' ? 'rgba(45,212,191,0.15)' : 'transparent',
-                color: signupType === 'company' ? '#2DD4BF' : 'rgba(255,255,255,0.4)',
+                flex: 1, padding: '10px', borderRadius: '10px', border: signupType === 'company' ? '2px solid var(--primary)' : '1px solid rgba(255,255,255,0.12)',
+                background: signupType === 'company' ? 'rgb(var(--primary-rgb) / 0.15)' : 'transparent',
+                color: signupType === 'company' ? 'var(--primary)' : 'rgba(255,255,255,0.4)',
                 fontSize: '12px', fontWeight: signupType === 'company' ? 600 : 400,
                 cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.2s'
               }}>
@@ -312,7 +312,7 @@ function Signup() {
           <button onClick={handleGoogleSignup} disabled={googleLoading} style={{
             width: '100%', padding: '13px', borderRadius: '100px',
             border: '2px solid rgba(255,255,255,0.12)', background: '#FFFFFF',
-            color: '#0B1220', fontSize: '14px', cursor: 'pointer',
+            color: 'var(--on-primary)', fontSize: '14px', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             gap: '10px', marginBottom: '1.25rem', fontFamily: 'var(--font-body)',
             fontWeight: 500, opacity: googleLoading ? 0.7 : 1
@@ -340,21 +340,21 @@ function Signup() {
                     onChange={e => handleCodeChange(e.target.value)}
                     style={{
                       ...(fieldErrors.company_code ? { borderColor: '#FFFFFF' } : {}),
-                      ...(companyValidation?.valid ? { borderColor: '#2DD4BF' } : {}),
+                      ...(companyValidation?.valid ? { borderColor: 'var(--primary)' } : {}),
                       paddingRight: 80
                     }}
                     aria-invalid={!!fieldErrors.company_code}
                   />
-                  {validatingCode && <AppIcon name="clock" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#7DBDEE' }} />}
+                  {validatingCode && <AppIcon name="clock" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--secondary)' }} />}
                   {!validatingCode && companyValidation?.valid && (
-                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#2DD4BF', fontSize: '12px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}><AppIcon name="check" size={14} />{t('signup.valid')}</span>
+                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)', fontSize: '12px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}><AppIcon name="check" size={14} />{t('signup.valid')}</span>
                   )}
                   {!validatingCode && companyValidation && !companyValidation.valid && !companyValidation.validation_error && (
                     <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FFFFFF', fontSize: '12px' }}>{t('signup.invalid')}</span>
                   )}
                 </div>
                 {companyValidation?.valid && (
-                  <span style={{ fontSize: '11px', color: '#2DD4BF' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--primary)' }}>
                     {companyValidation.company_name} — {companyValidation.seats_remaining === null ? t('signup.unlimitedSeats') : t('signup.seatsAvailable', { count: companyValidation.seats_remaining })}
                   </span>
                 )}
@@ -376,12 +376,12 @@ function Signup() {
               <label htmlFor="username">{t('signup.usernameLabel')} *</label>
               <div style={{ position: 'relative' }}>
                 <input id="username" type="text" autoComplete="username" required placeholder="e.g. amina_w" value={form.username} onChange={e => handleUsernameChange(e.target.value)} style={{ paddingRight: 40, ...(fieldErrors.username ? { borderColor: '#FFFFFF' } : {}) }} />
-                {usernameStatus === 'checking' && <AppIcon name="clock" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#7DBDEE' }} />}
-                {usernameStatus === 'available' && <AppIcon name="check" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#2DD4BF' }} />}
+                {usernameStatus === 'checking' && <AppIcon name="clock" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--secondary)' }} />}
+                {usernameStatus === 'available' && <AppIcon name="check" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />}
                 {usernameStatus === 'taken' && <AppIcon name="close" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FFFFFF' }} />}
               </div>
               {usernameStatus === 'taken' && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{t('signup.usernameTakenMsg')}</span>}
-              {usernameStatus === 'available' && <span style={{ fontSize: '11px', color: '#2DD4BF' }}>{t('signup.usernameAvailableMsg')}</span>}
+              {usernameStatus === 'available' && <span style={{ fontSize: '11px', color: 'var(--primary)' }}>{t('signup.usernameAvailableMsg')}</span>}
               {fieldErrors.username && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.username}</span>}
             </div>
 
@@ -410,10 +410,10 @@ function Signup() {
                 <div style={{ marginTop: '6px' }}>
                   <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
                     {[1, 2, 3, 4].map(level => (
-                      <div key={level} style={{ flex: 1, height: '4px', borderRadius: '2px', background: passwordStrength >= level ? (passwordStrength === 4 ? '#2DD4BF' : strength.color) : 'rgba(255,255,255,0.12)', transition: 'background 0.3s ease' }} />
+                      <div key={level} style={{ flex: 1, height: '4px', borderRadius: '2px', background: passwordStrength >= level ? (passwordStrength === 4 ? 'var(--primary)' : strength.color) : 'rgba(255,255,255,0.12)', transition: 'background 0.3s ease' }} />
                     ))}
                   </div>
-                  <span style={{ fontSize: '11px', color: passwordStrength === 4 ? '#2DD4BF' : (strength.color || 'rgba(255,255,255,0.4)') }}>{passwordStrength === 4 ? `${t('signup.strength.4')} ` : (strength.label || t('signup.typePassword'))}</span>
+                  <span style={{ fontSize: '11px', color: passwordStrength === 4 ? 'var(--primary)' : (strength.color || 'rgba(255,255,255,0.4)') }}>{passwordStrength === 4 ? `${t('signup.strength.4')} ` : (strength.label || t('signup.typePassword'))}</span>
                 </div>
               )}
               {fieldErrors.password && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.password}</span>}
@@ -426,7 +426,7 @@ function Signup() {
                 <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} aria-label={showConfirmPw ? t('signup.hidePwAria') : t('signup.showPwAria')} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: 12, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showConfirmPw ? t('signup.hide') : t('signup.show')}</button>
               </div>
               {form.confirmPassword && form.password !== form.confirmPassword && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{t('signup.mismatch')}</span>}
-              {form.confirmPassword && form.password === form.confirmPassword && <span style={{ fontSize: '11px', color: '#2DD4BF' }}>{t('signup.match')} </span>}
+              {form.confirmPassword && form.password === form.confirmPassword && <span style={{ fontSize: '11px', color: 'var(--primary)' }}>{t('signup.match')} </span>}
               {fieldErrors.confirmPassword && <span style={{ fontSize: '11px', color: '#FFFFFF' }}>{fieldErrors.confirmPassword}</span>}
             </div>
 
@@ -449,12 +449,12 @@ function Signup() {
 
           <p className="auth-switch">{t('signup.alreadyHave')} <Link to="/login">{t('signup.logIn')}</Link></p>
 
-          <p style={{ color: '#7DBDEE', fontSize: '11px', textAlign: 'center', marginTop: '0.75rem' }}>
+          <p style={{ color: 'var(--secondary)', fontSize: '11px', textAlign: 'center', marginTop: '0.75rem' }}>
              {t('signup.privacyNote')}
           </p>
 
-          <div style={{ marginTop: '1.25rem', background: 'rgba(255,255,255,0.12)', border: '1px solid #7DBDEE', borderRadius: 8, padding: '10px 14px', textAlign: 'center' }}>
-            <p style={{ fontSize: 12, color: '#2DD4BF' }}>{t('signup.crisis', { name: primaryHelpline.name, phone: primaryHelpline.phone, hours: primaryHelpline.hours })}</p>
+          <div style={{ marginTop: '1.25rem', background: 'rgba(255,255,255,0.12)', border: '1px solid var(--secondary)', borderRadius: 8, padding: '10px 14px', textAlign: 'center' }}>
+            <p style={{ fontSize: 12, color: 'var(--primary)' }}>{t('signup.crisis', { name: primaryHelpline.name, phone: primaryHelpline.phone, hours: primaryHelpline.hours })}</p>
           </div>
         </div>
       </div>

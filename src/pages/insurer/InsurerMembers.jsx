@@ -11,12 +11,12 @@ import { toCsv, downloadCsv } from '../../lib/csv'
 //  no user ids or clinical data are exposed to the insurer session.
 
 const STATUS_COLOR = {
-  pending_verification: '#F2C879', active: '#2DD4BF', suspended: '#7DBDEE',
-  ended: 'rgba(255,255,255,0.4)', rejected: '#ff9b9b',
+  pending_verification: '#F2C879', active: 'var(--primary)', suspended: 'var(--secondary)',
+  ended: 'rgba(255,255,255,0.4)', rejected: 'var(--danger)',
 }
 const POLICY_STATUS_COLOR = {
-  issued: '#F2C879', pending_payment: '#F2C879', active: '#2DD4BF',
-  grace: '#7DBDEE', lapsed: '#ff9b9b', cancelled: 'rgba(255,255,255,0.4)', expired: 'rgba(255,255,255,0.4)',
+  issued: '#F2C879', pending_payment: '#F2C879', active: 'var(--primary)',
+  grace: 'var(--secondary)', lapsed: 'var(--danger)', cancelled: 'rgba(255,255,255,0.4)', expired: 'rgba(255,255,255,0.4)',
 }
 
 export default function InsurerMembers() {
@@ -188,7 +188,7 @@ export default function InsurerMembers() {
           <h3 style={{ margin: 0 }}>Policyholders ({rows.filter(m => !structureFilter || m.cover_structure === structureFilter).length})</h3>
           {rows.length > 0 && (
             <select value={structureFilter} onChange={e => setStructureFilter(e.target.value)}
-              style={{ padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '12px' }}>
+              style={{ padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px' }}>
               <option value="">All structures</option>
               <option value="medical_rider">Medical Rider</option>
               <option value="individual">Individual</option>
@@ -212,7 +212,7 @@ export default function InsurerMembers() {
                 </div>
                 <span style={{ color: STATUS_COLOR[m.membership_status] || '#fff', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{m.membership_status.replace(/_/g, ' ')}</span>
                 {m.cover_structure && (
-                  <span style={{ color: '#7DBDEE', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase' }}>
+                  <span style={{ color: 'var(--secondary)', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase' }}>
                     {m.cover_structure === 'medical_rider' ? 'Rider' : m.cover_structure === 'group' ? 'Group' : 'Individual'}
                   </span>
                 )}
@@ -226,10 +226,10 @@ export default function InsurerMembers() {
                     <input type="text" value={verifyRef[m.membership_id] ?? m.member_reference ?? ''}
                       onChange={e => setVerifyRef(p => ({ ...p, [m.membership_id]: e.target.value }))}
                       placeholder="Member ref"
-                      style={{ width: '110px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '12px' }} />
+                      style={{ width: '110px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px' }} />
                     <select value={verifyStructure[m.membership_id] ?? m.cover_structure ?? ''}
                       onChange={e => setVerifyStructure(p => ({ ...p, [m.membership_id]: e.target.value }))}
-                      style={{ padding: '6px 6px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '11px' }}>
+                      style={{ padding: '6px 6px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '11px' }}>
                       <option value="">Structure…</option>
                       <option value="medical_rider">Rider</option>
                       <option value="individual">Individual</option>
@@ -245,22 +245,22 @@ export default function InsurerMembers() {
                 <div style={{ marginTop: '10px', display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'end' }}>
                   <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Product version
                     <select value={f.version_id || ''} onChange={e => setIssueForm(p => ({ ...p, [m.membership_id]: { ...f, version_id: e.target.value } }))}
-                      style={{ display: 'block', marginTop: '4px', background: '#0B1220', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '6px 8px' }}>
+                      style={{ display: 'block', marginTop: '4px', background: 'var(--bg)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '6px 8px' }}>
                       <option value="">Select…</option>
                       {versions.map(v => <option key={v.id} value={v.id}>v{v.version_no} · {v.premium_frequency} · KES {Number(v.premium_amount || 0).toLocaleString()}</option>)}
                     </select>
                   </label>
                   <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Policy number
                     <input value={f.policy_number || ''} onChange={e => setIssueForm(p => ({ ...p, [m.membership_id]: { ...f, policy_number: e.target.value } }))}
-                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '12px', width: '150px' }} />
+                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px', width: '150px' }} />
                   </label>
                   <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Commencement
                     <input type="date" value={f.commencement || ''} onChange={e => setIssueForm(p => ({ ...p, [m.membership_id]: { ...f, commencement: e.target.value } }))}
-                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '12px' }} />
+                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px' }} />
                   </label>
                   <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Expiry
                     <input type="date" value={f.expiry || ''} onChange={e => setIssueForm(p => ({ ...p, [m.membership_id]: { ...f, expiry: e.target.value } }))}
-                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '12px' }} />
+                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px' }} />
                   </label>
                   <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Premium (KES)
                     <NumberField value={f.premium ?? ''} onChange={v => setIssueForm(p => ({ ...p, [m.membership_id]: { ...f, premium: v } }))} min={0} />
@@ -275,12 +275,12 @@ export default function InsurerMembers() {
                   <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Period start
                     <input type="date" value={premiumForm[m.policy_id]?.period_start || ''}
                       onChange={e => setPremiumForm(p => ({ ...p, [m.policy_id]: { ...p[m.policy_id], period_start: e.target.value } }))}
-                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '12px' }} />
+                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px' }} />
                   </label>
                   <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Period end
                     <input type="date" value={premiumForm[m.policy_id]?.period_end || ''}
                       onChange={e => setPremiumForm(p => ({ ...p, [m.policy_id]: { ...p[m.policy_id], period_end: e.target.value } }))}
-                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '12px' }} />
+                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px' }} />
                   </label>
                   <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Due (KES)
                     <NumberField value={premiumForm[m.policy_id]?.amount_due ?? ''} onChange={v => setPremiumForm(p => ({ ...p, [m.policy_id]: { ...p[m.policy_id], amount_due: v } }))} min={0} />
@@ -291,12 +291,12 @@ export default function InsurerMembers() {
                   <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Payment ref
                     <input value={premiumForm[m.policy_id]?.payment_ref || ''}
                       onChange={e => setPremiumForm(p => ({ ...p, [m.policy_id]: { ...p[m.policy_id], payment_ref: e.target.value } }))}
-                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '12px', width: '110px' }} />
+                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px', width: '110px' }} />
                   </label>
                   <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Channel
                     <input value={premiumForm[m.policy_id]?.channel || ''} placeholder="mpesa/bank"
                       onChange={e => setPremiumForm(p => ({ ...p, [m.policy_id]: { ...p[m.policy_id], channel: e.target.value } }))}
-                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '12px', width: '90px' }} />
+                      style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px', width: '90px' }} />
                   </label>
                   <button type="button" className="btn-primary fs-11" style={{ padding: '6px 12px', minHeight: '32px' }} disabled={working === m.policy_id} onClick={() => recordPremium(m.policy_id)}>
                     {working === m.policy_id ? 'Saving…' : 'Record premium'}

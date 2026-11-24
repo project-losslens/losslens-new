@@ -20,7 +20,7 @@ function triggerConfetti() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const isMobile = window.innerWidth < 768
   const count = isMobile ? 25 : 50
-  const colors = ['#2DD4BF', '#2DD4BF', '#2DD4BF', '#FFFFFF', '#7DBDEE', '#7DBDEE']
+  const colors = ['var(--primary)', 'var(--primary)', 'var(--primary)', '#FFFFFF', 'var(--secondary)', 'var(--secondary)']
   for (let i = 0; i < count; i++) {
     setTimeout(() => {
       const piece = document.createElement('div')
@@ -53,10 +53,10 @@ const HELPLINES = CONFIG_HELPLINES.map(h => ({
 }))
 
 const TOOLS = [
-  { id: 'timer', icon: 'clock', titleKey: 'toolkit.timerTitle', descKey: 'toolkit.timerDesc', color: '#2DD4BF' },
-  { id: 'breathing', icon: 'heart', titleKey: 'toolkit.breathingTitle', descKey: 'toolkit.breathingDesc', color: '#2DD4BF' },
-  { id: 'thought', icon: 'brain', titleKey: 'toolkit.thoughtTitle', descKey: 'toolkit.thoughtDesc', color: '#7DBDEE' },
-  { id: 'distraction', icon: 'star', titleKey: 'toolkit.distractionTitle', descKey: 'toolkit.distractionDesc', color: '#2DD4BF' },
+  { id: 'timer', icon: 'clock', titleKey: 'toolkit.timerTitle', descKey: 'toolkit.timerDesc', color: 'var(--primary)' },
+  { id: 'breathing', icon: 'heart', titleKey: 'toolkit.breathingTitle', descKey: 'toolkit.breathingDesc', color: 'var(--primary)' },
+  { id: 'thought', icon: 'brain', titleKey: 'toolkit.thoughtTitle', descKey: 'toolkit.thoughtDesc', color: 'var(--secondary)' },
+  { id: 'distraction', icon: 'star', titleKey: 'toolkit.distractionTitle', descKey: 'toolkit.distractionDesc', color: 'var(--primary)' },
   { id: 'helpline', icon: 'phone', titleKey: 'toolkit.helplineTitle', descKey: 'toolkit.helplineDesc', color: '#FFFFFF' },
 ]
 
@@ -71,18 +71,18 @@ const BreathingOrb = ({ phase, size = 200 }) => {
   return (
     <svg width={size} height={size} viewBox="0 0 200 200" role="img" aria-label={translate(getLanguage(), 'toolkit.breathingAria', { phase: label })} style={{ display: 'block', margin: '0 auto' }}>
       <circle cx="100" cy="100" r="86" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" />
-      <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(125,219,238,0.35)" strokeWidth="1.5" strokeDasharray="4 6" />
+      <circle cx="100" cy="100" r="60" fill="none" stroke="rgb(var(--secondary-rgb) / 0.35)" strokeWidth="1.5" strokeDasharray="4 6" />
       <g style={{ transformOrigin: '100px 100px', transform: `scale(${scale})`, transition: reduced ? 'none' : `transform ${dur} ease-in-out` }}>
-        <circle cx="100" cy="100" r="52" fill="rgba(45,212,191,0.14)" stroke="#2DD4BF" strokeWidth="2.5" />
-        <circle cx="100" cy="100" r="38" fill="rgba(125,219,238,0.10)" stroke="#7DBDEE" strokeWidth="1.5" opacity="0.8" />
+        <circle cx="100" cy="100" r="52" fill="rgb(var(--primary-rgb) / 0.14)" stroke="var(--primary)" strokeWidth="2.5" />
+        <circle cx="100" cy="100" r="38" fill="rgb(var(--secondary-rgb) / 0.10)" stroke="var(--secondary)" strokeWidth="1.5" opacity="0.8" />
         {/* simple face: two eyes + calm mouth */}
         <circle cx="84" cy="92" r="4" fill="#FFFFFF" opacity="0.9" />
         <circle cx="116" cy="92" r="4" fill="#FFFFFF" opacity="0.9" />
         <path d="M88 112 Q100 120 112 112" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" opacity="0.85" />
         {/* leaf sprout on top — calm, alive feel */}
-        <path d="M100 44 q-10 -12 -2 -18 q10 6 2 18" fill="#2DD4BF" opacity="0.85" />
+        <path d="M100 44 q-10 -12 -2 -18 q10 6 2 18" fill="var(--primary)" opacity="0.85" />
       </g>
-      <text x="100" y="172" textAnchor="middle" fontSize="15" fill="#2DD4BF" fontFamily="var(--font-body)" fontWeight="600">{label}</text>
+      <text x="100" y="172" textAnchor="middle" fontSize="15" fill="var(--primary)" fontFamily="var(--font-body)" fontWeight="600">{label}</text>
     </svg>
   )
 }
@@ -318,23 +318,23 @@ export default function UrgeToolkitPage() {
 
           {/* ─── TIMER ─── */}
           {activeTool === 'timer' && (
-            <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out', borderRadius: '16px', padding: '1.5rem', background: timerRunning ? 'radial-gradient(circle at 50% 40%, rgba(45,212,191,0.10), transparent 65%)' : undefined, transition: 'background 1s ease' }}>
+            <div className="dash-section" style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-out', borderRadius: '16px', padding: '1.5rem', background: timerRunning ? 'radial-gradient(circle at 50% 40%, rgb(var(--primary-rgb) / 0.10), transparent 65%)' : undefined, transition: 'background 1s ease' }}>
               <h3 className="fs-16" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>{t('toolkit.timerHeading')}</h3>
               <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem' }}>{t('toolkit.timerSub')}</p>
               <div style={{ position: 'relative', width: '200px', height: '200px', margin: '0 auto' }} role="timer" aria-label={`Countdown timer: ${formatTime(timer)} remaining`}>
                 <svg width="200" height="200" viewBox="0 0 200 200" style={{ transform: 'rotate(-90deg)' }}>
                   <defs>
                     <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#2DD4BF" /><stop offset="100%" stopColor="#7DBDEE" />
+                      <stop offset="0%" stopColor="var(--primary)" /><stop offset="100%" stopColor="var(--secondary)" />
                     </linearGradient>
                   </defs>
                   <circle cx="100" cy="100" r="88" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="10" />
-                  <circle cx="100" cy="100" r="88" fill="none" stroke={timerComplete ? '#2DD4BF' : 'url(#timerGradient)'} strokeWidth="10" strokeLinecap="round"
+                  <circle cx="100" cy="100" r="88" fill="none" stroke={timerComplete ? 'var(--primary)' : 'url(#timerGradient)'} strokeWidth="10" strokeLinecap="round"
                     strokeDasharray={`${2 * Math.PI * 88}`} strokeDashoffset={`${2 * Math.PI * 88 * (1 - getTimerProgress() / 100)}`}
-                    style={{ transition: 'stroke-dashoffset 1s linear', filter: timerRunning ? 'drop-shadow(0 0 8px rgba(45,212,191,0.5))' : 'none' }} />
+                    style={{ transition: 'stroke-dashoffset 1s linear', filter: timerRunning ? 'drop-shadow(0 0 8px rgb(var(--primary-rgb) / 0.5))' : 'none' }} />
                 </svg>
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', textAlign: 'center' }}>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: timerComplete ? '1rem' : '2.5rem', color: timerComplete ? '#2DD4BF' : '#2DD4BF', fontWeight: 700 }}>{timerComplete ? ` ${t('toolkit.done')}` : formatTime(timer)}</div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: timerComplete ? '1rem' : '2.5rem', color: timerComplete ? 'var(--primary)' : 'var(--primary)', fontWeight: 700 }}>{timerComplete ? ` ${t('toolkit.done')}` : formatTime(timer)}</div>
                   {!timerComplete && <div className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>{timerRunning ? t('toolkit.hangOn') : t('toolkit.pressStart')}</div>}
                 </div>
               </div>
@@ -346,7 +346,7 @@ export default function UrgeToolkitPage() {
                   </>
                 ) : (
                   <div style={{ width: '100%' }}>
-                    <p className="fs-14" style={{ color: '#2DD4BF', marginBottom: '1rem' }}> {t('toolkit.proved')}</p>
+                    <p className="fs-14" style={{ color: 'var(--primary)', marginBottom: '1rem' }}> {t('toolkit.proved')}</p>
                     <button className="btn-primary" onClick={() => { setTimer(TIMER_DURATION); setTimerRunning(false); setTimerComplete(false) }} style={{ width: '100%' }}>{t('toolkit.newTimer')}</button>
                   </div>
                 )}
@@ -361,8 +361,8 @@ export default function UrgeToolkitPage() {
               <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem' }}>{t('toolkit.breathingSub')}</p>
               <BreathingOrb phase={breathPhase} size={200} />
               <div style={{ marginTop: '1rem' }}>
-                <p className="fs-14" style={{ color: '#2DD4BF', fontWeight: 500 }} aria-live="polite">{t('toolkit.round', { count: breathRounds + 1 })}</p>
-                {breathRounds >= 3 && <p className="fs-14" style={{ color: '#2DD4BF', marginTop: '0.5rem' }}> {t('toolkit.roundComplete', { count: breathRounds })}</p>}
+                <p className="fs-14" style={{ color: 'var(--primary)', fontWeight: 500 }} aria-live="polite">{t('toolkit.round', { count: breathRounds + 1 })}</p>
+                {breathRounds >= 3 && <p className="fs-14" style={{ color: 'var(--primary)', marginTop: '0.5rem' }}> {t('toolkit.roundComplete', { count: breathRounds })}</p>}
               </div>
               <button className="toggle-btn active-primary" onClick={() => setBreathingActive(!breathingActive)} style={{ marginTop: '1rem', minWidth: '120px' }}>
                 {breathingActive ? `${t('toolkit.pause')}` : `${t('toolkit.start')}`}
@@ -377,7 +377,7 @@ export default function UrgeToolkitPage() {
               <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1rem' }}>{t('toolkit.thoughtFromCbt')}</p>
               <div style={{ display: 'flex', gap: '4px', marginBottom: '1.5rem' }}>
                 {['situation', 'thought', 'evidence', 'balance'].map((step, i) => (
-                  <div key={i} style={{ flex: 1, height: '6px', borderRadius: '3px', background: thoughtStep >= i ? '#2DD4BF' : 'rgba(255,255,255,0.12)', transition: 'background 0.3s' }} />
+                  <div key={i} style={{ flex: 1, height: '6px', borderRadius: '3px', background: thoughtStep >= i ? 'var(--primary)' : 'rgba(255,255,255,0.12)', transition: 'background 0.3s' }} />
                 ))}
               </div>
               {thoughtStep === 0 && (
@@ -405,10 +405,10 @@ export default function UrgeToolkitPage() {
                   <div className="form-group"><label htmlFor="balancedThought">{t('toolkit.balancedThoughtLabel')}</label><textarea id="balancedThought" className="diary-textarea" placeholder={t('toolkit.balancedThoughtPlaceholder')} value={thoughtRecord.balancedThought} onChange={e => setThoughtRecord({ ...thoughtRecord, balancedThought: e.target.value })} rows={2} /></div>
                   <div className="form-group" style={{marginTop:'12px'}}><label>{t('toolkit.feelingNowLabel')}</label><div className="chip-group">{NEW_EMOTIONS.map(e => <button key={e} className={`chip ${thoughtRecord.newEmotion===e?'chip-active':''}`} onClick={()=>setThoughtRecord({...thoughtRecord,newEmotion:e})}>{t(`toolkit.newEmotion.${e}`)}</button>)}</div></div>
                   {thoughtRecord.balancedThought && (
-                    <div style={{marginTop:'1rem',padding:'16px',background:'rgba(255,255,255,0.12)',borderRadius:'12px',border:'1px solid #7DBDEE'}}>
-                      <p className="fs-12" style={{color:'#2DD4BF',marginBottom:'8px',textTransform:'uppercase'}}> {t('toolkit.copingCard')}</p>
+                    <div style={{marginTop:'1rem',padding:'16px',background:'rgba(255,255,255,0.12)',borderRadius:'12px',border:'1px solid var(--secondary)'}}>
+                      <p className="fs-12" style={{color:'var(--primary)',marginBottom:'8px',textTransform:'uppercase'}}> {t('toolkit.copingCard')}</p>
                       <p className="fs-12" style={{color:'rgba(255,255,255,0.4)'}}><strong>{t('toolkit.oldThought')}</strong> "{thoughtRecord.automaticThought}"</p>
-                      <p className="fs-12" style={{color:'#2DD4BF'}}><strong>{t('toolkit.newThought')}</strong> "{thoughtRecord.balancedThought}"</p>
+                      <p className="fs-12" style={{color:'var(--primary)'}}><strong>{t('toolkit.newThought')}</strong> "{thoughtRecord.balancedThought}"</p>
                       <p className="fs-12" style={{color:'rgba(255,255,255,0.4)',marginTop:'4px'}}><strong>{t('toolkit.feeling')}</strong> {thoughtRecord.emotion ? t(`toolkit.emotion.${thoughtRecord.emotion}`) : '...'} → {thoughtRecord.newEmotion ? t(`toolkit.newEmotion.${thoughtRecord.newEmotion}`) : '...'}</p>
                       <button className="btn-primary" style={{width:'100%',marginTop:'12px'}} onClick={()=>{
                         const newCard = { id: Date.now(), date: new Date().toISOString(), ...thoughtRecord }
@@ -430,13 +430,13 @@ export default function UrgeToolkitPage() {
                   <h4 className="fs-13" style={{ color: '#FFFFFF', marginBottom: '8px' }}> {t('toolkit.copingCards', { count: copingCards.length })}</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {copingCards.slice(0, 5).map(card => (
-                      <div key={card.id} className="fs-12" style={{ background: '#0B1220', borderRadius: '8px', padding: '10px', border: '1px solid rgba(255,255,255,0.12)' }}>
+                      <div key={card.id} className="fs-12" style={{ background: 'var(--bg)', borderRadius: '8px', padding: '10px', border: '1px solid rgba(255,255,255,0.12)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                          <span style={{ color: '#2DD4BF', fontWeight: 500 }}>{new Date(card.date).toLocaleDateString(lang === 'sw' ? 'sw-KE' : 'en-KE')}</span>
+                          <span style={{ color: 'var(--primary)', fontWeight: 500 }}>{new Date(card.date).toLocaleDateString(lang === 'sw' ? 'sw-KE' : 'en-KE')}</span>
                           <button onClick={() => { const updated = copingCards.filter(c => c.id !== card.id); setCopingCards(updated); try { localStorage.setItem('losslens_coping_cards', JSON.stringify(updated)) } catch {} }} className="fs-12" style={{ background: 'transparent', border: 'none', color: '#FFFFFF', cursor: 'pointer', padding: '4px 8px' }} aria-label={t('toolkit.deleteCard')}></button>
                         </div>
                         <p style={{ color: '#FFFFFF', margin: '0 0 2px', textDecoration: 'line-through' }}>"{card.automaticThought}"</p>
-                        <p style={{ color: '#2DD4BF', margin: 0 }}>→ "{card.balancedThought}"</p>
+                        <p style={{ color: 'var(--primary)', margin: 0 }}>→ "{card.balancedThought}"</p>
                       </div>
                     ))}
                   </div>
@@ -461,9 +461,9 @@ export default function UrgeToolkitPage() {
                 <button className="btn-primary fs-16" style={{ padding: '16px 32px', marginTop: '1rem' }} onClick={() => { setSpinning(true); wheelSpinRef.current?.() }} disabled={spinning}>{spinning ? ` ${t('toolkit.spinning')}` : ` ${t('toolkit.spinWheel')}`}</button>
               ) : (
                 <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
-                  <div style={{ background: '#0B1220', border: '2px solid #2DD4BF', borderRadius: '16px', padding: '24px', margin: '1rem 0' }}>
+                  <div style={{ background: 'var(--bg)', border: '2px solid var(--primary)', borderRadius: '16px', padding: '24px', margin: '1rem 0' }}>
                     <p className="fs-16" style={{ color: '#FFFFFF', fontWeight: 500, marginBottom: '8px' }}>{t(`toolkit.challenge.${randomChallenge}`)}</p>
-                    <span className="fs-12" style={{ background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', padding: '4px 12px', borderRadius: '100px' }}>{t(`toolkit.category.${DISTRACTION_CHALLENGES[randomChallenge]}`)}</span>
+                    <span className="fs-12" style={{ background: 'rgba(255,255,255,0.12)', color: 'var(--primary)', padding: '4px 12px', borderRadius: '100px' }}>{t(`toolkit.category.${DISTRACTION_CHALLENGES[randomChallenge]}`)}</span>
                   </div>
                   {!challengeAccepted ? (
                     <div style={{ display: 'flex', gap: '8px' }}>
@@ -471,7 +471,7 @@ export default function UrgeToolkitPage() {
                       <button className="btn-ghost" style={{ flex: 1 }} onClick={() => { setSpinning(true); wheelSpinRef.current?.() }} disabled={spinning}> {t('toolkit.spinAgain')}</button>
                     </div>
                   ) : (
-                    <p className="fs-14" style={{ color: '#2DD4BF' }}> {t('toolkit.challengeSaved')}</p>
+                    <p className="fs-14" style={{ color: 'var(--primary)' }}> {t('toolkit.challengeSaved')}</p>
                   )}
                 </div>
               )}
@@ -484,10 +484,10 @@ export default function UrgeToolkitPage() {
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {challenges.filter(c => c.status !== 'dropped').map(ch => (
-                      <div key={ch.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '10px 12px' }}>
+                      <div key={ch.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '10px 12px' }}>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p className="fs-13" style={{ color: '#FFFFFF', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{ch.challenge}</p>
-                          <span className="fs-11" style={{ color: ch.status === 'done' ? '#2DD4BF' : 'rgba(255,255,255,0.4)' }}>{ch._pending ? '…' : t(`toolkit.status${ch.status === 'doing' ? 'Doing' : 'Done'}`)}</span>
+                          <span className="fs-11" style={{ color: ch.status === 'done' ? 'var(--primary)' : 'rgba(255,255,255,0.4)' }}>{ch._pending ? '…' : t(`toolkit.status${ch.status === 'doing' ? 'Doing' : 'Done'}`)}</span>
                         </div>
                         {ch.status === 'doing' && (
                           <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
@@ -511,19 +511,19 @@ export default function UrgeToolkitPage() {
                 <div key={i} className="helpline-card" style={{ marginBottom: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <p className="helpline-name" style={{ margin: 0 }}>{h.name}</p>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isOpenNow(h.hours) ? '#2DD4BF' : 'rgba(255,255,255,0.4)', flexShrink: 0 }} title={isOpenNow(h.hours) ? t('toolkit.availableNow') : t('toolkit.mayBeClosed')} />
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isOpenNow(h.hours) ? 'var(--primary)' : 'rgba(255,255,255,0.4)', flexShrink: 0 }} title={isOpenNow(h.hours) ? t('toolkit.availableNow') : t('toolkit.mayBeClosed')} />
                   </div>
                   <p className="helpline-num">{h.number}</p>
                   <p className="helpline-hours">{h.hours}  · {h.free ? t('toolkit.free') : ` ${t('toolkit.chargesMayApply')}`}</p>
                   <a href={`tel:${h.tel || h.number.replace(/\s/g,'')}`} className="fs-13" style={{ display: 'block', textAlign: 'center', background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', padding: '10px', borderRadius: '8px', textDecoration: 'none', fontWeight: 500, marginTop: '8px' }}> {t('toolkit.callNumber', { number: h.number })}</a>
                 </div>
               ))}
-              <div style={{ marginTop: '1rem', padding: '16px', background: '#0B1220', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
+              <div style={{ marginTop: '1rem', padding: '16px', background: 'var(--bg)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.12)' }}>
                 <h4 className="fs-14" style={{ color: '#FFFFFF', marginBottom: '8px' }}> {t('toolkit.accountabilityPartner')}</h4>
                 {accountabilityPartner ? (
                   <div>
                     <p className="fs-14" style={{ color: '#FFFFFF' }}>{accountabilityPartner.name}</p>
-                    {accountabilityPartner.phone && <a href={`tel:${accountabilityPartner.phone}`} className="fs-13" style={{ display: 'block', textAlign: 'center', background: '#2DD4BF', color: '#0B1220', padding: '10px', borderRadius: '8px', textDecoration: 'none', fontWeight: 500, marginTop: '8px' }}> {t('toolkit.callNumber', { number: accountabilityPartner.name })}</a>}
+                    {accountabilityPartner.phone && <a href={`tel:${accountabilityPartner.phone}`} className="fs-13" style={{ display: 'block', textAlign: 'center', background: 'var(--primary)', color: 'var(--on-primary)', padding: '10px', borderRadius: '8px', textDecoration: 'none', fontWeight: 500, marginTop: '8px' }}> {t('toolkit.callNumber', { number: accountabilityPartner.name })}</a>}
                     <button className="btn-ghost fs-12" style={{ width: '100%', marginTop: '8px' }} onClick={() => setShowAddPartner(true)}> {t('toolkit.change')}</button>
                   </div>
                 ) : (

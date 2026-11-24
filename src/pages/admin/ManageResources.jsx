@@ -170,7 +170,7 @@ export default function ManageResources() {
 
         {/* Form Modal */}
         {showForm && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+          <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowForm(false)} />
             <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '500px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
               <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 1.25rem' }}>{editing ? ' Edit Resource' : ' Add Resource'}</h3>
@@ -281,7 +281,7 @@ export default function ManageResources() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowDeleteConfirm(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '360px', width: '100%', textAlign: 'center' }}>
             <AppIcon name="alert" size={36} style={{ display: 'block', margin: '0 auto 12px' }} />

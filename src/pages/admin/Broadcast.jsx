@@ -176,7 +176,7 @@ export default function Broadcast() {
               <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', display: 'block', marginBottom: '6px' }}>Quick Templates</label>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                 {TEMPLATES.map(t => (
-                  <button key={t.label} onClick={() => applyTemplate(t)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(45,212,191,0.15)', color: 'var(--info)', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{t.label}</button>
+                  <button key={t.label} onClick={() => applyTemplate(t)} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgb(var(--primary-rgb) / 0.15)', color: 'var(--info)', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{t.label}</button>
                 ))}
               </div>
             </div>
@@ -269,7 +269,7 @@ export default function Broadcast() {
 
       {/* Confirmation Modal */}
       {showConfirm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowConfirm(false)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid var(--primary)', maxWidth: '450px', width: '100%', textAlign: 'center' }}>
             <AppIcon name="alert" size={40} style={{ display: 'block', margin: '0 auto 12px' }} />
@@ -280,7 +280,7 @@ export default function Broadcast() {
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '20px' }}>{targetDescription}</p>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setShowConfirm(false)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
-              <button onClick={send} style={{ flex: 2, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Send Broadcast</button>
+              <button onClick={send} style={{ flex: 2, padding: '12px', borderRadius: '10px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Send Broadcast</button>
             </div>
           </div>
         </div>

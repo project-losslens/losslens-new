@@ -7,7 +7,7 @@ import { BrandLoader } from '../../components/Brand'
 
 //  Constants
 const STATUS_CONFIG = {
-  pending: { color: 'var(--info)', bg: 'rgba(45,212,191,0.15)', label: 'Pending', icon: '' },
+  pending: { color: 'var(--info)', bg: 'rgb(var(--primary-rgb) / 0.15)', label: 'Pending', icon: '' },
   under_review: { color: 'var(--primary)', bg: 'rgba(255,255,255,0.12)', label: 'Under Review', icon: '' },
   approved: { color: 'var(--primary)', bg: 'rgba(255,255,255,0.12)', label: 'Approved', icon: '' },
   rejected: { color: 'var(--text)', bg: 'rgba(255,255,255,0.08)', label: 'Rejected', icon: '' },
@@ -259,7 +259,7 @@ export default function GrantApplications() {
 
       {/* Rejection Reason Modal */}
       {showRejectModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+        <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => { setShowRejectModal(null); setRejectReason('') }} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '420px', width: '100%' }}>
             <h3 style={{ color: 'var(--text)', fontSize: '16px', margin: '0 0 4px' }}> Reject Application</h3>

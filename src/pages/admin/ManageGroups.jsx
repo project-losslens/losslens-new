@@ -186,13 +186,13 @@ export default function ManageGroups() {
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={fetchGroups} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-label="Refresh groups"></button>
-            <button onClick={openCreate} style={{ padding: '8px 18px', borderRadius: '100px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> New Group</button>
+            <button onClick={openCreate} style={{ padding: '8px 18px', borderRadius: '100px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> New Group</button>
           </div>
         </div>
 
         {/* Form Modal */}
         {showForm && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+          <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowForm(false)} />
             <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '520px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
               <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 1.25rem' }}>{editingGroup ? ' Edit Group' : ' New Group'}</h3>
@@ -283,7 +283,7 @@ export default function ManageGroups() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
                         <span style={{ color: 'var(--text)', fontSize: '14px', fontWeight: 600 }}>{g.name}</span>
                         <span style={{ background: g.active ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.08)', color: g.active ? 'var(--primary)' : 'var(--text)', border: `1px solid ${g.active ? 'var(--primary)' : 'rgba(255,255,255,0.08)'}`, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{g.active ? 'Active' : 'Inactive'}</span>
-                        {g.category && <span style={{ background: 'var(--bg)', color: 'var(--info)', border: '1px solid rgba(45,212,191,0.15)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{g.category}</span>}
+                        {g.category && <span style={{ background: 'var(--bg)', color: 'var(--info)', border: '1px solid rgb(var(--primary-rgb) / 0.15)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{g.category}</span>}
                       </div>
                       <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>
                          {g.facilitator || 'No facilitator'}  ·  {g.meets || 'Schedule TBD'}
@@ -316,7 +316,7 @@ export default function ManageGroups() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowDeleteConfirm(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '360px', width: '100%', textAlign: 'center' }}>
             <AppIcon name="alert" size={36} style={{ display: 'block', margin: '0 auto 12px' }} />

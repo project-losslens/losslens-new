@@ -52,8 +52,8 @@ function buildEncryptedReportPage(payload) {
   const payloadJson = JSON.stringify(payload).replace(/</g, '\\u003c')
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LossLens Recovery Report (encrypted)</title>
-<style>body{font-family:system-ui,sans-serif;background:#0B1220;color:#fff;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:1rem}main{max-width:420px;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:2rem;text-align:center}input{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:#0B1220;color:#fff;font-size:16px;box-sizing:border-box;margin:12px 0}button{width:100%;padding:12px;border:none;border-radius:8px;background:#2DD4BF;color:#0B1220;font-weight:600;font-size:15px;cursor:pointer}#err{color:#ff8080;font-size:13px;min-height:1.2em;margin-top:10px}</style></head><body>
-<main><h1 style="font-size:20px;color:#2DD4BF;margin:0 0 8px">LossLens Recovery Report</h1>
+<style>body{font-family:system-ui,sans-serif;background:#0A1A12;color:#fff;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:1rem}main{max-width:420px;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:2rem;text-align:center}input{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:#0A1A12;color:#fff;font-size:16px;box-sizing:border-box;margin:12px 0}button{width:100%;padding:12px;border:none;border-radius:8px;background:#4ADE80;color:#06140C;font-weight:600;font-size:15px;cursor:pointer}#err{color:#FF8A80;font-size:13px;min-height:1.2em;margin-top:10px}</style></head><body>
+<main><h1 style="font-size:20px;color:#4ADE80;margin:0 0 8px">LossLens Recovery Report</h1>
 <p style="color:rgba(255,255,255,.6);font-size:13px;margin:0 0 16px">This report is encrypted. Enter the passphrase you were given to view it.</p>
 <input id="pw" type="password" autocomplete="off" placeholder="Enter passphrase" aria-label="Report passphrase">
 <button id="go">Unlock report</button>
@@ -270,33 +270,33 @@ export default function Profile() {
 <style>
   @page { margin: 1.8cm; }
   * { box-sizing: border-box; }
-  body { font-family: Arial, sans-serif; background: #fff; color: #17212f; line-height: 1.55; max-width: 820px; margin: auto; padding: 1.5rem; }
-  body:before { content: 'PRIVATE RECOVERY INFORMATION'; position: fixed; inset: 36% -10%; transform: rotate(-24deg); color: rgba(11,18,32,.045); font-size: clamp(24px, 6vw, 56px); font-weight: 700; letter-spacing: .12em; white-space: nowrap; pointer-events: none; z-index: -1; }
-  .header { display: flex; align-items: center; justify-content: center; gap: 12px; border-bottom: 3px solid #2DD4BF; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+  body { font-family: Arial, sans-serif; background: #fff; color: #1F3A29; line-height: 1.55; max-width: 820px; margin: auto; padding: 1.5rem; }
+  body:before { content: 'PRIVATE RECOVERY INFORMATION'; position: fixed; inset: 36% -10%; transform: rotate(-24deg); color: rgba(10,26,18,.045); font-size: clamp(24px, 6vw, 56px); font-weight: 700; letter-spacing: .12em; white-space: nowrap; pointer-events: none; z-index: -1; }
+  .header { display: flex; align-items: center; justify-content: center; gap: 12px; border-bottom: 3px solid #4ADE80; padding-bottom: 1rem; margin-bottom: 1.5rem; }
   .mark { width: 46px; height: 46px; flex: none; }
-  .header h1 { color: #0B1220; margin: 0; font-size: 24px; }
-  .subtitle { color: #475569; font-size: 12px; margin: 4px 0 0; }
-  .confidential { color: #334155; font-size: 10px; margin: 7px 0 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-  h2 { color: #0B1220; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; font-size: 16px; margin: 1.5rem 0 .6rem; }
+  .header h1 { color: #06140C; margin: 0; font-size: 24px; }
+  .subtitle { color: #4A5F52; font-size: 12px; margin: 4px 0 0; }
+  .confidential { color: #3E5443; font-size: 10px; margin: 7px 0 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+  h2 { color: #06140C; border-bottom: 1px solid #C9D8CE; padding-bottom: 6px; font-size: 16px; margin: 1.5rem 0 .6rem; }
   .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
-  .info-item { padding: 5px 0; border-bottom: 1px dotted #cbd5e1; overflow-wrap: anywhere; }
-  .info-item strong { color: #334155; display: inline-block; min-width: 112px; }
+  .info-item { padding: 5px 0; border-bottom: 1px dotted #C9D8CE; overflow-wrap: anywhere; }
+  .info-item strong { color: #3E5443; display: inline-block; min-width: 112px; }
   .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: .8rem 0; }
-  .stat-card { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px 8px; text-align: center; }
-  .stat-card .value { font-size: 20px; font-weight: bold; color: #0f766e; display: block; }
-  .stat-card .label { font-size: 9px; color: #334155; text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
+  .stat-card { background: #F1F7F3; border: 1px solid #C9D8CE; border-radius: 6px; padding: 12px 8px; text-align: center; }
+  .stat-card .value { font-size: 20px; font-weight: bold; color: #15803D; display: block; }
+  .stat-card .label { font-size: 9px; color: #3E5443; text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
   table { width: 100%; border-collapse: collapse; margin: .7rem 0; font-size: 11px; }
-  th { background: #e2e8f0; color: #0B1220; padding: 8px; text-align: left; font-size: 10px; }
-  td { padding: 7px 8px; border-bottom: 1px solid #cbd5e1; }
-  tr:nth-child(even) { background: #f8fafc; }
-  .empty { color: #475569; font-style: italic; }
-  .footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #cbd5e1; text-align: center; }
-  .footer p { font-size: 10px; color: #475569; margin: 3px 0; }
-  .badge { display: inline-block; background: #e6fffb; color: #115e59; border: 1px solid #99f6e4; padding: 3px 9px; border-radius: 4px; font-size: 10px; margin: 2px; }
+  th { background: #E2EDE6; color: #06140C; padding: 8px; text-align: left; font-size: 10px; }
+  td { padding: 7px 8px; border-bottom: 1px solid #C9D8CE; }
+  tr:nth-child(even) { background: #F8FBF9; }
+  .empty { color: #4A5F52; font-style: italic; }
+  .footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #C9D8CE; text-align: center; }
+  .footer p { font-size: 10px; color: #4A5F52; margin: 3px 0; }
+  .badge { display: inline-block; background: #E7F6EC; color: #14532D; border: 1px solid #BBF7D0; padding: 3px 9px; border-radius: 4px; font-size: 10px; margin: 2px; }
   @media print { body { padding: 0; } .stat-card { break-inside: avoid; } }
   @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } body { padding: 1rem; } }
 </style></head><body>
-<div class="header"><svg class="mark" viewBox="0 0 100 100" aria-label="LossLens mark">${Array.from({ length: 8 }, (_, i) => `<ellipse cx="50" cy="26" rx="9" ry="20" fill="${i % 2 === 0 ? '#2DD4BF' : '#7DBDEE'}" opacity=".9" transform="rotate(${i * 45} 50 50)"/>`).join('')}<circle cx="50" cy="50" r="12" stroke="#7DBDEE" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="4" fill="#2DD4BF"/></svg><div><h1>LossLens Recovery Report</h1><p class="subtitle">Generated ${today}</p><p class="confidential">Private recovery information · Share only with your consent</p></div></div>
+<div class="header"><svg class="mark" viewBox="0 0 100 100" aria-label="LossLens mark">${Array.from({ length: 8 }, (_, i) => `<ellipse cx="50" cy="26" rx="9" ry="20" fill="${i % 2 === 0 ? '#4ADE80' : '#86EFAC'}" opacity=".9" transform="rotate(${i * 45} 50 50)"/>`).join('')}<circle cx="50" cy="50" r="12" stroke="#86EFAC" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="4" fill="#4ADE80"/></svg><div><h1>LossLens Recovery Report</h1><p class="subtitle">Generated ${today}</p><p class="confidential">Private recovery information · Share only with your consent</p></div></div>
 <h2>Client Information</h2>
 <div class="info-grid">
   <div class="info-item"><strong>Full Name:</strong> ${reportName}</div>
@@ -516,9 +516,9 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
-          <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
-          <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>Please log in</h2>
-          <button onClick={() => navigate('/login', { replace: true })} className="fs-14" style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%', marginTop: '16px' }}>Go to Login →</button>
+          <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: 'var(--primary)' }} />
+          <h2 style={{ color: 'var(--primary)', fontFamily: 'var(--font-display)' }}>Please log in</h2>
+          <button onClick={() => navigate('/login', { replace: true })} className="fs-14" style={{ padding: '14px 32px', borderRadius: '100px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%', marginTop: '16px' }}>Go to Login →</button>
         </div>
       </div>
     )
@@ -564,7 +564,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
             ].map((s, i) => (
               <div className="stat-card" key={i} style={{ padding: '10px 8px', textAlign: 'center', minHeight: '70px' }}>
                 <span className="fs-16">{s.icon}</span>
-                <span className="fs-14" style={{ display: 'block', fontWeight: 700, color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>{s.value}</span>
+                <span className="fs-14" style={{ display: 'block', fontWeight: 700, color: 'var(--primary)', fontFamily: 'var(--font-display)' }}>{s.value}</span>
                 <span className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>{s.label}</span>
               </div>
             ))}
@@ -577,12 +577,12 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '6px' }}>
                 {stats.badges.map(b => (
                   <button type="button" key={b.id} className="clickable" onClick={() => handleBadgeClick(b)}
-                    style={{ padding: '8px 6px', borderRadius: '8px', cursor: 'pointer', background: b.earned ? 'rgba(255,255,255,0.12)' : '#0B1220', border: `1px solid ${b.earned ? '#2DD4BF' : 'rgba(255,255,255,0.12)'}`, opacity: b.earned ? 1 : 0.4, textAlign: 'center', transition: 'all 0.2s', minHeight: '60px', width: '100%', font: 'inherit', color: 'inherit' }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#2DD4BF'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = b.earned ? '#2DD4BF' : 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'translateY(0)' }}
+                    style={{ padding: '8px 6px', borderRadius: '8px', cursor: 'pointer', background: b.earned ? 'rgba(255,255,255,0.12)' : 'var(--bg)', border: `1px solid ${b.earned ? 'var(--primary)' : 'rgba(255,255,255,0.12)'}`, opacity: b.earned ? 1 : 0.4, textAlign: 'center', transition: 'all 0.2s', minHeight: '60px', width: '100%', font: 'inherit', color: 'inherit' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = b.earned ? 'var(--primary)' : 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'translateY(0)' }}
                     title={b.earned ? `${b.name} — Click to explore` : `${b.name} (Locked)`}>
                     <span className="fs-20" style={{ display: 'block' }}>{b.earned ? <AppIcon name={b.icon || 'star'} size={22} /> : ''}</span>
-                    <span className="fs-12" style={{ color: b.earned ? '#2DD4BF' : 'rgba(255,255,255,0.4)', display: 'block', marginTop: '3px' }}>{b.name}</span>
+                    <span className="fs-12" style={{ color: b.earned ? 'var(--primary)' : 'rgba(255,255,255,0.4)', display: 'block', marginTop: '3px' }}>{b.name}</span>
                   </button>
                 ))}
               </div>
@@ -590,20 +590,20 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
           )}
 
           {/* Report Section */}
-          <div className="dash-section" style={{ marginBottom: '0.75rem', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06))', borderColor: '#2DD4BF' }}>
-            <h3 className="fs-13" style={{ color: '#2DD4BF', marginBottom: '0.75rem' }}>Recovery Report</h3>
+          <div className="dash-section" style={{ marginBottom: '0.75rem', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06))', borderColor: 'var(--primary)' }}>
+            <h3 className="fs-13" style={{ color: 'var(--primary)', marginBottom: '0.75rem' }}>Recovery Report</h3>
 
-            <p className="fs-12" style={{ color: '#7DBDEE', lineHeight: '1.5', marginBottom: '12px' }}>Your professional recovery report is encrypted with a passphrase. Share the passphrase separately from the file.</p>
-            <div style={{ background: '#0B1220', border: '1px solid #7DBDEE', borderRadius: '10px', padding: '12px', marginBottom: '10px', textAlign: 'center' }}>
+            <p className="fs-12" style={{ color: 'var(--secondary)', lineHeight: '1.5', marginBottom: '12px' }}>Your professional recovery report is encrypted with a passphrase. Share the passphrase separately from the file.</p>
+            <div style={{ background: 'var(--bg)', border: '1px solid var(--secondary)', borderRadius: '10px', padding: '12px', marginBottom: '10px', textAlign: 'center' }}>
               <p className="fs-11" style={{ color: 'rgba(255,255,255,0.5)', margin: '0 0 6px' }}>Report passphrase</p>
               <p className="fs-22" style={{ color: '#F2C879', fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: '3px', margin: '0 0 8px' }}>{reportPassphrase}</p>
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                <button type="button" onClick={() => { void copyPassphrase() }} disabled={!reportPassphrase} className="fs-11" style={{ padding: '6px 12px', borderRadius: '100px', background: 'transparent', border: '1px solid #2DD4BF', color: '#2DD4BF', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '32px' }}>Copy</button>
+                <button type="button" onClick={() => { void copyPassphrase() }} disabled={!reportPassphrase} className="fs-11" style={{ padding: '6px 12px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '32px' }}>Copy</button>
                 <button type="button" onClick={generateNewReportPassphrase} disabled={!reportPassphrase} className="fs-11" style={{ padding: '6px 12px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '32px' }}>Generate new passphrase</button>
               </div>
               <p className="fs-10" style={{ color: 'rgba(255,255,255,0.4)', margin: '8px 0 0' }}>Share this passphrase in person or by phone, not in the same message as the file.</p>
             </div>
-            <button onClick={() => { void downloadRecoveryReport() }} disabled={generatingReport || !reportPassphrase} className="fs-12" style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+            <button onClick={() => { void downloadRecoveryReport() }} disabled={generatingReport || !reportPassphrase} className="fs-12" style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
               {generatingReport ? <BrandLoader variant="inline" showWordmark={false} /> : 'Download Report'}
             </button>
           </div>
@@ -611,7 +611,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
           {/* Tabs */}
           <div style={{ display: 'flex', gap: '4px', marginBottom: '0.75rem', background: 'rgba(255,255,255,0.06)', borderRadius: '10px', padding: '3px', border: '1px solid rgba(255,255,255,0.12)' }}>
             {[{ id: TABS.PROFILE, label: 'Profile' }, { id: TABS.SETTINGS, label: 'Prefs' }, { id: TABS.SECURITY, label: 'Security' }, { id: TABS.DATA, label: 'Data' }].map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} className="fs-12" style={{ flex: 1, padding: '10px 6px', borderRadius: '8px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '44px' }}>{tab.label}</button>
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} className="fs-12" style={{ flex: 1, padding: '10px 6px', borderRadius: '8px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '44px' }}>{tab.label}</button>
             ))}
           </div>
 
@@ -621,12 +621,12 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
               <div className="dash-section" style={{ marginBottom: '0.75rem', textAlign: 'center' }}>
                 <div style={{ position: 'relative', display: 'inline-block' }}>
                   <button type="button" className="card-action" aria-label="Change avatar" onClick={() => fileInputRef.current?.click()} style={{ borderRadius: '50%' }} />
-                  {avatarUrl && avatarUrl.startsWith('http') ? <img src={avatarUrl} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #2DD4BF' }} />
-                  : <div className="fs-28" style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', border: '2px solid #7DBDEE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>{initials}</div>}
-                  <div className="fs-12" style={{ position: 'absolute', bottom: '0', right: '0', background: '#2DD4BF', color: '#0B1220', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0B1220' }}><AppIcon name="camera" size={12} /></div>
+                  {avatarUrl && avatarUrl.startsWith('http') ? <img src={avatarUrl} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }} />
+                  : <div className="fs-28" style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.12), var(--secondary))', border: '2px solid var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: 'var(--primary)', fontFamily: 'var(--font-display)' }}>{initials}</div>}
+                  <div className="fs-12" style={{ position: 'absolute', bottom: '0', right: '0', background: 'var(--primary)', color: 'var(--on-primary)', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--bg)' }}><AppIcon name="camera" size={12} /></div>
                 </div>
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarFileSelect} style={{ display: 'none' }} />
-                {uploadingAvatar && <p className="fs-12" style={{ color: '#2DD4BF', marginTop: '8px' }}><BrandLoader variant="inline" showWordmark={false} /> Saving photo…</p>}
+                {uploadingAvatar && <p className="fs-12" style={{ color: 'var(--primary)', marginTop: '8px' }}><BrandLoader variant="inline" showWordmark={false} /> Saving photo…</p>}
               </div>
 
               <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
@@ -635,7 +635,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
                 <div className="form-group"><label>Phone</label><div className="phone-input"><span className="phone-prefix">+254</span><input type="tel" value={phone} onChange={e => setPhone(e.target.value.replace('+254', ''))} placeholder="7XX XXX XXX" /></div></div>
               </div>
               <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
-                <label className="fs-12" style={{ color: '#2DD4BF', marginBottom: '8px', display: 'block' }}>My goal</label>
+                <label className="fs-12" style={{ color: 'var(--primary)', marginBottom: '8px', display: 'block' }}>My goal</label>
                 <div className="chip-group">{['Cut down', 'Abstinence', 'Maintenance'].map(g => <button key={g} className={`chip ${goal === g ? 'chip-active' : ''}`} onClick={() => setGoal(g)}>{g}</button>)}</div>
               </div>
               <button className="btn-primary full fs-12" onClick={handleProfileSave} disabled={savingProfile} style={{ padding: '10px', minHeight: '44px' }}>{savingProfile ? 'Saving...' : 'Save changes'}</button>
@@ -675,7 +675,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
               <hr style={{ borderColor: 'rgba(255,255,255,0.12)', margin: '1rem 0' }} />
               <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Two-factor authentication</h3>
               {mfaEnabled ? (
-                <p role="status" className="fs-12" style={{ color: '#2DD4BF' }}>An authenticator app is enabled for this account.</p>
+                <p role="status" className="fs-12" style={{ color: 'var(--primary)' }}>An authenticator app is enabled for this account.</p>
               ) : mfaEnrollment ? (
                 <div>
                   {mfaEnrollment.totp?.qr_code && <img src={mfaEnrollment.totp.qr_code} alt="Scan this QR code with your authenticator app" style={{ display: 'block', width: '160px', maxWidth: '100%', margin: '12px auto', background: '#FFFFFF', padding: '8px', borderRadius: '8px' }} />}
@@ -686,7 +686,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
               ) : (
                 <button className="btn-ghost full" type="button" onClick={startMfaEnrollment} disabled={mfaLoading}>{mfaLoading ? 'Starting setup...' : 'Set up an authenticator app'}</button>
               )}
-              {mfaError && <p role="alert" className="fs-12" style={{ color: '#ff9b9b', marginTop: '8px' }}>{mfaError}</p>}
+              {mfaError && <p role="alert" className="fs-12" style={{ color: 'var(--danger)', marginTop: '8px' }}>{mfaError}</p>}
             </div>
           )}
 
@@ -718,7 +718,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
                   {deleteStep === 2 && (
                     <div style={{ textAlign: 'center' }}>
                       <p className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>Type <strong>DELETE</strong></p>
-                      <input type="text" value={deleteInput} onChange={e => setDeleteInput(e.target.value)} placeholder="Type DELETE here" className="fs-12" style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#0B1220', border: '2px solid rgba(255,255,255,0.08)', color: '#FFFFFF', textAlign: 'center', fontFamily: 'var(--font-body)', outline: 'none', marginBottom: '0.5rem', boxSizing: 'border-box' }} />
+                      <input type="text" value={deleteInput} onChange={e => setDeleteInput(e.target.value)} placeholder="Type DELETE here" className="fs-12" style={{ width: '100%', padding: '8px', borderRadius: '6px', background: 'var(--bg)', border: '2px solid rgba(255,255,255,0.08)', color: '#FFFFFF', textAlign: 'center', fontFamily: 'var(--font-body)', outline: 'none', marginBottom: '0.5rem', boxSizing: 'border-box' }} />
                       <button className="btn-danger full fs-12" onClick={handleDeleteAccount} disabled={deletingAccount || deleteInput !== 'DELETE'} style={{ padding: '10px', minHeight: '44px', opacity: deleteInput === 'DELETE' ? 1 : 0.5 }}>{deletingAccount ? 'Deleting...' : 'Permanently delete'}</button>
                     </div>
                   )}

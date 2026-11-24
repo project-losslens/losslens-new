@@ -59,7 +59,7 @@ function ProtectionInner() {
                 const s = STRUCTURES[slug]
                 return (
                   <article key={slug} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: 'var(--space-4)' }}>
-                    <h3 style={{ color: '#2DD4BF', fontSize: 'var(--step-1)', margin: '0 0 var(--space-2)' }}>{s.name}</h3>
+                    <h3 style={{ color: 'var(--primary)', fontSize: 'var(--step-1)', margin: '0 0 var(--space-2)' }}>{s.name}</h3>
                     <p className="ll-lede" style={{ marginBottom: 'var(--space-3)' }}>{s.tagline}</p>
                     <Link to={`/protection/${slug}`} className="ll-btn ll-btn--ghost" style={{ fontSize: 'var(--step--1)' }}>{s.cta}</Link>
                   </article>

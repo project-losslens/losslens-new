@@ -196,9 +196,9 @@ export default function Events() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
-          <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
-          <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)' }}>Please log in</h2>
-          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%', marginTop: '16px' }}>Go to Login →</button>
+          <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: 'var(--primary)' }} />
+          <h2 style={{ color: 'var(--primary)', fontFamily: 'var(--font-display)' }}>Please log in</h2>
+          <button onClick={() => navigate('/login', { replace: true })} style={{ padding: '14px 32px', borderRadius: '100px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%', marginTop: '16px' }}>Go to Login →</button>
         </div>
       </div>
     )
@@ -217,8 +217,8 @@ export default function Events() {
 
         <div style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)' }}>
-            <button onClick={() => setActiveTab(TABS.ALL)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === TABS.ALL ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === TABS.ALL ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: activeTab === TABS.ALL ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> All Events</button>
-            <button onClick={() => setActiveTab(TABS.MINE)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === TABS.MINE ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === TABS.MINE ? '#2DD4BF' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: activeTab === TABS.MINE ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> My Events ({Object.keys(rsvps).length})</button>
+            <button onClick={() => setActiveTab(TABS.ALL)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === TABS.ALL ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === TABS.ALL ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: activeTab === TABS.ALL ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> All Events</button>
+            <button onClick={() => setActiveTab(TABS.MINE)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === TABS.MINE ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === TABS.MINE ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: activeTab === TABS.MINE ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> My Events ({Object.keys(rsvps).length})</button>
           </div>
 
           {pageLoading && (
@@ -236,8 +236,8 @@ export default function Events() {
 
           {!pageLoading && !eventsError && filteredEvents.length === 0 && (
             <div className="dash-section" style={{ textAlign: 'center', padding: '3rem' }}>
-              <AppIcon name="calendar" size={48} style={{ display: 'block', margin: '0 auto 12px', color: '#2DD4BF' }} />
-              <p style={{ color: '#2DD4BF', fontSize: '14px' }}>
+              <AppIcon name="calendar" size={48} style={{ display: 'block', margin: '0 auto 12px', color: 'var(--primary)' }} />
+              <p style={{ color: 'var(--primary)', fontSize: '14px' }}>
                 {activeTab === TABS.MINE ? 'You have not responded to any events yet.' : 'No upcoming events.'}
               </p>
             </div>
@@ -255,12 +255,12 @@ export default function Events() {
               const isPast = daysUntil === 'Past'
 
               return (
-                <div key={e.id} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${myRsvp ? '#2DD4BF' : 'rgba(255,255,255,0.12)'}`, borderRadius: '14px', overflow: 'hidden', animation: 'fadeIn 0.3s ease-out', opacity: isPast ? 0.7 : 1 }}>
+                <div key={e.id} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${myRsvp ? 'var(--primary)' : 'rgba(255,255,255,0.12)'}`, borderRadius: '14px', overflow: 'hidden', animation: 'fadeIn 0.3s ease-out', opacity: isPast ? 0.7 : 1 }}>
 
-                  <div style={{ width: '100%', height: '170px', background: e.image_url ? `url(${e.image_url}) center/cover` : 'linear-gradient(135deg, rgba(255,255,255,0.12), #7DBDEE)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '10px', position: 'relative' }}>
+                  <div style={{ width: '100%', height: '170px', background: e.image_url ? `url(${e.image_url}) center/cover` : 'linear-gradient(135deg, rgba(255,255,255,0.12), var(--secondary))', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '10px', position: 'relative' }}>
                     {!e.image_url && <AppIcon name="calendar" size={48} style={{ opacity: 0.3, position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', color: '#FFFFFF' }} />}
-                    <span style={{ background: 'rgba(255,255,255,0.9)', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', color: '#2DD4BF', position: 'relative', zIndex: 'var(--z-base)' }}>{e.type || 'Event'}</span>
-                    <span style={{ background: 'rgba(255,255,255,0.9)', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', color: daysUntil === 'Today' ? '#FFFFFF' : isPast ? 'rgba(255,255,255,0.4)' : '#2DD4BF', position: 'relative', zIndex: 'var(--z-base)' }}>{daysUntil}</span>
+                    <span style={{ background: 'rgba(255,255,255,0.9)', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', color: 'var(--primary)', position: 'relative', zIndex: 'var(--z-base)' }}>{e.type || 'Event'}</span>
+                    <span style={{ background: 'rgba(255,255,255,0.9)', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', color: daysUntil === 'Today' ? '#FFFFFF' : isPast ? 'rgba(255,255,255,0.4)' : 'var(--primary)', position: 'relative', zIndex: 'var(--z-base)' }}>{daysUntil}</span>
                   </div>
 
                   <div style={{ padding: '16px' }}>
@@ -281,18 +281,18 @@ export default function Events() {
                       <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
                         {!myRsvp ? (
                           <>
-                            <button onClick={() => handleRSVP(e.id, 'going')} disabled={rsvpLoading === e.id} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid #2DD4BF', background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '13px', fontWeight: 500, cursor: 'pointer', fontFamily: 'var(--font-body)', opacity: rsvpLoading === e.id ? 0.6 : 1 }} aria-pressed={false}>{rsvpLoading === e.id ? '...' : " I'm going"}</button>
-                            <button onClick={() => handleRSVP(e.id, 'maybe')} disabled={rsvpLoading === e.id} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid #7DBDEE', background: 'transparent', color: '#7DBDEE', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)', opacity: rsvpLoading === e.id ? 0.6 : 1 }} aria-pressed={false}>{rsvpLoading === e.id ? '...' : ' Maybe'}</button>
+                            <button onClick={() => handleRSVP(e.id, 'going')} disabled={rsvpLoading === e.id} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid var(--primary)', background: 'rgba(255,255,255,0.12)', color: 'var(--primary)', fontSize: '13px', fontWeight: 500, cursor: 'pointer', fontFamily: 'var(--font-body)', opacity: rsvpLoading === e.id ? 0.6 : 1 }} aria-pressed={false}>{rsvpLoading === e.id ? '...' : " I'm going"}</button>
+                            <button onClick={() => handleRSVP(e.id, 'maybe')} disabled={rsvpLoading === e.id} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid var(--secondary)', background: 'transparent', color: 'var(--secondary)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)', opacity: rsvpLoading === e.id ? 0.6 : 1 }} aria-pressed={false}>{rsvpLoading === e.id ? '...' : ' Maybe'}</button>
                             <button onClick={() => handleRSVP(e.id, 'cant_go')} disabled={rsvpLoading === e.id} style={{ padding: '10px 12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', background: 'transparent', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)', opacity: rsvpLoading === e.id ? 0.6 : 1 }} aria-label="Remove RSVP">{rsvpLoading === e.id ? '...' : ''}</button>
                           </>
                         ) : myRsvp.attendance === 'going' ? (
                           <>
-                            <button onClick={() => handleRSVP(e.id, 'maybe')} disabled={rsvpLoading === e.id} style={{ flex: 2, padding: '10px', borderRadius: '10px', border: '2px solid #2DD4BF', background: 'rgba(255,255,255,0.12)', color: '#2DD4BF', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-pressed={true}> Going</button>
+                            <button onClick={() => handleRSVP(e.id, 'maybe')} disabled={rsvpLoading === e.id} style={{ flex: 2, padding: '10px', borderRadius: '10px', border: '2px solid var(--primary)', background: 'rgba(255,255,255,0.12)', color: 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-pressed={true}> Going</button>
                             <button onClick={() => handleRSVP(e.id, 'cant_go')} disabled={rsvpLoading === e.id} style={{ padding: '10px 12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', background: 'transparent', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-label="Cancel RSVP"></button>
                           </>
                         ) : (
                           <>
-                            <button onClick={() => handleRSVP(e.id, 'going')} disabled={rsvpLoading === e.id} style={{ flex: 2, padding: '10px', borderRadius: '10px', border: '2px solid #7DBDEE', background: 'rgba(255,255,255,0.12)', color: '#7DBDEE', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-pressed={true}> Maybe</button>
+                            <button onClick={() => handleRSVP(e.id, 'going')} disabled={rsvpLoading === e.id} style={{ flex: 2, padding: '10px', borderRadius: '10px', border: '2px solid var(--secondary)', background: 'rgba(255,255,255,0.12)', color: 'var(--secondary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-pressed={true}> Maybe</button>
                             <button onClick={() => handleRSVP(e.id, 'cant_go')} disabled={rsvpLoading === e.id} style={{ padding: '10px 12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', background: 'transparent', color: '#FFFFFF', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-label="Cancel RSVP"></button>
                           </>
                         )}
@@ -311,25 +311,25 @@ export default function Events() {
                     {isExpanded && (
                       <div style={{ animation: 'fadeIn 0.3s ease-out', paddingTop: '14px', borderTop: '1px solid rgba(255,255,255,0.12)', marginTop: '14px' }}>
                         <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
-                          {[{ label: ' Going', count: attendeeCounts[e.id] || 0, color: '#2DD4BF' }, { label: ' Discussion', count: discussionOn ? eventDiscussions.length : '', color: discussionOn ? '#2DD4BF' : '#FFFFFF' }].map((s, i) => (
-                            <div key={i} style={{ flex: 1, background: '#0B1220', borderRadius: '8px', padding: '8px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.12)' }}>
+                          {[{ label: ' Going', count: attendeeCounts[e.id] || 0, color: 'var(--primary)' }, { label: ' Discussion', count: discussionOn ? eventDiscussions.length : '', color: discussionOn ? 'var(--primary)' : '#FFFFFF' }].map((s, i) => (
+                            <div key={i} style={{ flex: 1, background: 'var(--bg)', borderRadius: '8px', padding: '8px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.12)' }}>
                               <div style={{ fontSize: '16px', fontWeight: 700, color: s.color, fontFamily: 'Georgia, serif' }}>{s.count}</div>
                               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>{s.label}</div>
                             </div>
                           ))}
                         </div>
 
-                        {e.description && <p style={{ color: '#7DBDEE', fontSize: '13px', lineHeight: '1.6', marginBottom: '16px', fontWeight: 300 }}>{e.description}</p>}
+                        {e.description && <p style={{ color: 'var(--secondary)', fontSize: '13px', lineHeight: '1.6', marginBottom: '16px', fontWeight: 300 }}>{e.description}</p>}
 
-                        <div style={{ display: 'flex', background: '#0B1220', borderRadius: '10px', padding: '3px', border: '1px solid rgba(255,255,255,0.12)', marginBottom: '12px' }}>
-                          <button onClick={() => setExpandedTab(prev => ({ ...prev, [e.id]: EXPANDED_TABS.DISCUSSION }))} style={{ flex: 1, padding: '7px 10px', borderRadius: '8px', border: 'none', fontSize: '12px', fontWeight: currentTab === EXPANDED_TABS.DISCUSSION ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', background: currentTab === EXPANDED_TABS.DISCUSSION ? 'rgba(255,255,255,0.12)' : 'transparent', color: currentTab === EXPANDED_TABS.DISCUSSION ? '#2DD4BF' : 'rgba(255,255,255,0.4)' }}> Discussion ({eventDiscussions.length})</button>
-                          <button onClick={() => setExpandedTab(prev => ({ ...prev, [e.id]: EXPANDED_TABS.MESSAGE }))} style={{ flex: 1, padding: '7px 10px', borderRadius: '8px', border: 'none', fontSize: '12px', fontWeight: currentTab === EXPANDED_TABS.MESSAGE ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', background: currentTab === EXPANDED_TABS.MESSAGE ? 'rgba(255,255,255,0.12)' : 'transparent', color: currentTab === EXPANDED_TABS.MESSAGE ? '#2DD4BF' : 'rgba(255,255,255,0.4)' }}> Message Admin</button>
+                        <div style={{ display: 'flex', background: 'var(--bg)', borderRadius: '10px', padding: '3px', border: '1px solid rgba(255,255,255,0.12)', marginBottom: '12px' }}>
+                          <button onClick={() => setExpandedTab(prev => ({ ...prev, [e.id]: EXPANDED_TABS.DISCUSSION }))} style={{ flex: 1, padding: '7px 10px', borderRadius: '8px', border: 'none', fontSize: '12px', fontWeight: currentTab === EXPANDED_TABS.DISCUSSION ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', background: currentTab === EXPANDED_TABS.DISCUSSION ? 'rgba(255,255,255,0.12)' : 'transparent', color: currentTab === EXPANDED_TABS.DISCUSSION ? 'var(--primary)' : 'rgba(255,255,255,0.4)' }}> Discussion ({eventDiscussions.length})</button>
+                          <button onClick={() => setExpandedTab(prev => ({ ...prev, [e.id]: EXPANDED_TABS.MESSAGE }))} style={{ flex: 1, padding: '7px 10px', borderRadius: '8px', border: 'none', fontSize: '12px', fontWeight: currentTab === EXPANDED_TABS.MESSAGE ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', background: currentTab === EXPANDED_TABS.MESSAGE ? 'rgba(255,255,255,0.12)' : 'transparent', color: currentTab === EXPANDED_TABS.MESSAGE ? 'var(--primary)' : 'rgba(255,255,255,0.4)' }}> Message Admin</button>
                         </div>
 
                         {currentTab === EXPANDED_TABS.DISCUSSION && (
                           <div>
                             {!discussionOn ? (
-                              <div style={{ textAlign: 'center', padding: '1.5rem', background: '#0B1220', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)' }}>
+                              <div style={{ textAlign: 'center', padding: '1.5rem', background: 'var(--bg)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)' }}>
                                 <p style={{ fontSize: '20px', marginBottom: '6px' }}></p>
                                 <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', margin: 0 }}>Discussion is closed for this event.</p>
                               </div>
@@ -340,18 +340,18 @@ export default function Events() {
                                 {eventDiscussions.length === 0 && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '10px' }}>No messages yet. Be the first!</p>}
                                 <div ref={el => discussionContainers.current[e.id] = el} style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                   {eventDiscussions.map(d => (
-                                    <div key={d.id} style={{ padding: '10px', background: '#0B1220', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)' }}>
+                                    <div key={d.id} style={{ padding: '10px', background: 'var(--bg)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)' }}>
                                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                        <span style={{ color: '#2DD4BF', fontSize: '11px', fontWeight: 500 }}>{d.profiles?.full_name || 'Anonymous'}{d.is_admin_reply && <span style={{ color: '#2DD4BF', marginLeft: '6px', fontSize: '10px' }}>ADMIN</span>}</span>
+                                        <span style={{ color: 'var(--primary)', fontSize: '11px', fontWeight: 500 }}>{d.profiles?.full_name || 'Anonymous'}{d.is_admin_reply && <span style={{ color: 'var(--primary)', marginLeft: '6px', fontSize: '10px' }}>ADMIN</span>}</span>
                                         <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{new Date(d.created_at).toLocaleDateString('en-KE')}</span>
                                       </div>
-                                      <p style={{ color: '#7DBDEE', fontSize: '12px', margin: 0, lineHeight: '1.5', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{d.message}</p>
+                                      <p style={{ color: 'var(--secondary)', fontSize: '12px', margin: 0, lineHeight: '1.5', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{d.message}</p>
                                     </div>
                                   ))}
                                 </div>
                                 <div style={{ display: 'flex', gap: '6px' }}>
-                                  <input value={questionInputs[e.id] || ''} onChange={ev => setQuestionInputs(prev => ({ ...prev, [e.id]: ev.target.value }))} placeholder="Write a message..." style={{ flex: 1, padding: '8px 12px', borderRadius: '100px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)' }} onKeyDown={ev => ev.key === 'Enter' && handleAskQuestion(e.id)} aria-label="Write a discussion message" />
-                                  <button onClick={() => handleAskQuestion(e.id)} disabled={!questionInputs[e.id]?.trim() || submittingQuestion === e.id} style={{ padding: '8px 14px', borderRadius: '100px', background: questionInputs[e.id]?.trim() ? '#2DD4BF' : 'rgba(255,255,255,0.12)', border: 'none', color: questionInputs[e.id]?.trim() ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: questionInputs[e.id]?.trim() ? 'pointer' : 'not-allowed', fontFamily: 'var(--font-body)', fontWeight: 500 }}>{submittingQuestion === e.id ? '...' : 'Send'}</button>
+                                  <input value={questionInputs[e.id] || ''} onChange={ev => setQuestionInputs(prev => ({ ...prev, [e.id]: ev.target.value }))} placeholder="Write a message..." style={{ flex: 1, padding: '8px 12px', borderRadius: '100px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)' }} onKeyDown={ev => ev.key === 'Enter' && handleAskQuestion(e.id)} aria-label="Write a discussion message" />
+                                  <button onClick={() => handleAskQuestion(e.id)} disabled={!questionInputs[e.id]?.trim() || submittingQuestion === e.id} style={{ padding: '8px 14px', borderRadius: '100px', background: questionInputs[e.id]?.trim() ? 'var(--primary)' : 'rgba(255,255,255,0.12)', border: 'none', color: questionInputs[e.id]?.trim() ? 'var(--bg)' : 'rgba(255,255,255,0.4)', fontSize: '12px', cursor: questionInputs[e.id]?.trim() ? 'pointer' : 'not-allowed', fontFamily: 'var(--font-body)', fontWeight: 500 }}>{submittingQuestion === e.id ? '...' : 'Send'}</button>
                                 </div>
                               </>
                             )}
@@ -361,11 +361,11 @@ export default function Events() {
                         {currentTab === EXPANDED_TABS.MESSAGE && (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: 0 }}>Send a private message to the admin about this event.</p>
-                            <div><label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Your Name</label><input type="text" value={contactName} onChange={ev => setContactName(ev.target.value)} placeholder={userProfile?.full_name || 'Full name'} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} /></div>
-                            <div><label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Phone</label><input type="tel" value={contactPhone} onChange={ev => setContactPhone(ev.target.value)} placeholder={userProfile?.phone || '+254 7XX XXX XXX'} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} /></div>
-                            <div><label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Email (optional)</label><input type="email" value={contactEmail} onChange={ev => setContactEmail(ev.target.value)} placeholder="you@example.com" style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} /></div>
-                            <div><label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Message *</label><textarea value={contactMessage} onChange={ev => setContactMessage(ev.target.value)} rows={3} placeholder="What would you like to ask?" style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: '#0B1220', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', resize: 'vertical', boxSizing: 'border-box' }} /></div>
-                            <button onClick={() => handleContactAdmin(e.id)} disabled={sendingContact || !contactMessage.trim()} style={{ width: '100%', padding: '10px', borderRadius: '10px', background: contactMessage.trim() ? '#2DD4BF' : 'rgba(255,255,255,0.12)', border: 'none', color: contactMessage.trim() ? '#0B1220' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: 600, cursor: contactMessage.trim() ? 'pointer' : 'not-allowed', fontFamily: 'var(--font-body)' }}>{sendingContact ? 'Sending...' : ' Send to Admin'}</button>
+                            <div><label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Your Name</label><input type="text" value={contactName} onChange={ev => setContactName(ev.target.value)} placeholder={userProfile?.full_name || 'Full name'} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} /></div>
+                            <div><label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Phone</label><input type="tel" value={contactPhone} onChange={ev => setContactPhone(ev.target.value)} placeholder={userProfile?.phone || '+254 7XX XXX XXX'} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} /></div>
+                            <div><label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Email (optional)</label><input type="email" value={contactEmail} onChange={ev => setContactEmail(ev.target.value)} placeholder="you@example.com" style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', boxSizing: 'border-box' }} /></div>
+                            <div><label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Message *</label><textarea value={contactMessage} onChange={ev => setContactMessage(ev.target.value)} rows={3} placeholder="What would you like to ask?" style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF', fontSize: '12px', outline: 'none', fontFamily: 'var(--font-body)', resize: 'vertical', boxSizing: 'border-box' }} /></div>
+                            <button onClick={() => handleContactAdmin(e.id)} disabled={sendingContact || !contactMessage.trim()} style={{ width: '100%', padding: '10px', borderRadius: '10px', background: contactMessage.trim() ? 'var(--primary)' : 'rgba(255,255,255,0.12)', border: 'none', color: contactMessage.trim() ? 'var(--bg)' : 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: 600, cursor: contactMessage.trim() ? 'pointer' : 'not-allowed', fontFamily: 'var(--font-body)' }}>{sendingContact ? 'Sending...' : ' Send to Admin'}</button>
                           </div>
                         )}
                       </div>

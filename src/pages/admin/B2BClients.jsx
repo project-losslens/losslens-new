@@ -9,7 +9,7 @@ import { BrandLoader } from '../../components/Brand'
 const PLANS = { STANDARD: 'standard', ENTERPRISE: 'enterprise', CUSTOM: 'custom' }
 const PLAN_COLORS = {
   [PLANS.STANDARD]: { color: 'var(--primary)', bg: 'rgba(255,255,255,0.12)', label: 'Standard' },
-  [PLANS.ENTERPRISE]: { color: 'var(--primary)', bg: 'rgba(45,212,191,0.15)', label: 'Enterprise' },
+  [PLANS.ENTERPRISE]: { color: 'var(--primary)', bg: 'rgb(var(--primary-rgb) / 0.15)', label: 'Enterprise' },
   [PLANS.CUSTOM]: { color: 'var(--info)', bg: 'rgba(255,255,255,0.04)', label: 'Custom' },
 }
 
@@ -224,14 +224,14 @@ export default function B2BClients() {
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={fetchClients} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--info)', color: 'var(--info)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Refresh</button>
-            <button onClick={openCreate} style={{ padding: '8px 18px', borderRadius: '100px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Add Client</button>
+            <button onClick={openCreate} style={{ padding: '8px 18px', borderRadius: '100px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Add Client</button>
           </div>
         </div>
 
         <div style={{ padding: '1.5rem', maxWidth: '1000px', margin: '0 auto' }}>
           {/* Form Modal */}
           {showForm && (
-            <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowForm(false)} />
               <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '560px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
                 <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 1.25rem' }}>{editingClient ? ' Edit Client' : ' New B2B Client'}</h3>
@@ -385,7 +385,7 @@ export default function B2BClients() {
 
       {/* Members Modal */}
       {showMembers && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowMembers(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '600px', width: '100%', maxHeight: '80vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -415,7 +415,7 @@ export default function B2BClients() {
 
       {/* Toggle Modal */}
       {showToggleConfirm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+        <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowToggleConfirm(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: `1px solid ${showToggleConfirm.status === 'active' ? 'var(--info)' : 'var(--primary)'}`, maxWidth: '380px', width: '100%', textAlign: 'center' }}>
             <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>{showToggleConfirm.status === 'active' ? 'Pause' : 'Resume'}</span>
@@ -427,7 +427,7 @@ export default function B2BClients() {
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setShowToggleConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Cancel</button>
-              <button onClick={() => toggleStatus(showToggleConfirm.id, showToggleConfirm.status)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: showToggleConfirm.status === 'active' ? 'rgba(45,212,191,0.15)' : 'rgba(255,255,255,0.12)', border: 'none', color: showToggleConfirm.status === 'active' ? 'var(--primary)' : 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+              <button onClick={() => toggleStatus(showToggleConfirm.id, showToggleConfirm.status)} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: showToggleConfirm.status === 'active' ? 'rgb(var(--primary-rgb) / 0.15)' : 'rgba(255,255,255,0.12)', border: 'none', color: showToggleConfirm.status === 'active' ? 'var(--primary)' : 'var(--primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
                 {showToggleConfirm.status === 'active' ? 'Deactivate' : 'Activate'}
               </button>
             </div>
@@ -437,7 +437,7 @@ export default function B2BClients() {
 
       {/* Delete Modal */}
       {showDeleteConfirm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
+        <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} role="dialog" aria-modal="true">
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowDeleteConfirm(null)} />
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
             <AppIcon name="alert" size={36} style={{ display: 'block', margin: '0 auto 12px' }} />

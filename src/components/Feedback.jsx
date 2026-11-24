@@ -22,7 +22,7 @@ export class ErrorBoundary extends Component {
     if (this.state.hasError) {
       return (
         <div className="state-wrap" role="alert">
-          <AppIcon name="alert" size={40} style={{ color: '#7DBDEE', marginBottom: '12px' }} />
+          <AppIcon name="alert" size={40} style={{ color: 'var(--secondary)', marginBottom: '12px' }} />
           <h2 style={{ color: '#FFFFFF', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>Something went wrong</h2>
           <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', marginBottom: '16px', maxWidth: '320px' }}>
             This page hit an unexpected error. Your data is safe — try again.
@@ -40,7 +40,7 @@ export class ErrorBoundary extends Component {
 export function EmptyState({ icon = 'chat', title, children }) {
   return (
     <div className="state-wrap">
-      <AppIcon name={icon} size={40} style={{ color: '#7DBDEE', marginBottom: '12px' }} />
+      <AppIcon name={icon} size={40} style={{ color: 'var(--secondary)', marginBottom: '12px' }} />
       <h2 style={{ color: '#FFFFFF', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>{title}</h2>
       {children}
     </div>
@@ -50,7 +50,7 @@ export function EmptyState({ icon = 'chat', title, children }) {
 export function ErrorState({ message = 'Could not load this right now.', onRetry }) {
   return (
     <div className="state-wrap" role="alert">
-      <AppIcon name="alert" size={40} style={{ color: '#7DBDEE', marginBottom: '12px' }} />
+      <AppIcon name="alert" size={40} style={{ color: 'var(--secondary)', marginBottom: '12px' }} />
       <h2 style={{ color: '#FFFFFF', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>Something went wrong</h2>
       <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', marginBottom: '16px', maxWidth: '320px' }}>{message}</p>
       {onRetry && (

@@ -267,7 +267,7 @@ export default function ManageEvents() {
 
         {/* Form Modal */}
         {showForm && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+          <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowForm(false)} />
             <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.12)', maxWidth: '540px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
               <h3 style={{ color: 'var(--primary)', fontSize: '16px', margin: '0 0 1.25rem' }}>{editingEvent ? ' Edit Event' : ' New Event'}</h3>
@@ -331,7 +331,7 @@ export default function ManageEvents() {
 
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+          <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.9)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowDeleteConfirm(null)} />
             <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
               <AppIcon name="alert" size={36} style={{ display: 'block', margin: '0 auto 12px' }} />
@@ -356,7 +356,7 @@ export default function ManageEvents() {
               { id: TABS.DISCUSSIONS, label: ` Discussions (${discussions.length})` },
               { id: TABS.CONTACTS, label: ` Messages (${contacts.length})${unreadContacts > 0 ? ' ' : ''}` },
             ].map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? 'rgba(45,212,191,0.15)' : 'transparent', color: activeTab === tab.id ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', minWidth: '100px', transition: 'background 0.2s, color 0.2s' }}>{tab.label}</button>
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? 'rgb(var(--primary-rgb) / 0.15)' : 'transparent', color: activeTab === tab.id ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', minWidth: '100px', transition: 'background 0.2s, color 0.2s' }}>{tab.label}</button>
             ))}
           </div>
 
@@ -391,7 +391,7 @@ export default function ManageEvents() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
                               <span style={{ color: 'var(--text)', fontSize: '14px', fontWeight: 600 }}>{ev.title}</span>
                               <span style={badge(ev.active ? 'var(--primary)' : 'rgba(255,255,255,0.4)', ev.active ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)', ev.active ? 'var(--primary)' : 'rgba(255,255,255,0.4)')}>{ev.active ? 'Active' : 'Inactive'}</span>
-                              {ev.type && <span style={badge('var(--info)', 'rgba(45,212,191,0.15)', 'var(--info)')}>{ev.type}</span>}
+                              {ev.type && <span style={badge('var(--info)', 'rgb(var(--primary-rgb) / 0.15)', 'var(--info)')}>{ev.type}</span>}
                               <span style={badge(discussionOn ? 'var(--primary)' : 'var(--text)', discussionOn ? 'var(--bg)' : 'var(--bg)', discussionOn ? 'var(--primary)' : 'var(--text)')}>{discussionOn ? ' Chat' : ' Chat off'}</span>
                             </div>
                             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 4px' }}> {ev.location || 'No location'}  ·  {fmtTime(ev.date)}{ev.spots ? `  ·  ${ev.spots} spots` : ''}</p>
@@ -492,11 +492,11 @@ export default function ManageEvents() {
                   <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No discussions yet.</p>
                 </div>
               ) : discussions.map((d, i) => (
-                <div key={i} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${d.is_admin_reply ? 'rgba(45,212,191,0.15)' : 'rgba(255,255,255,0.12)'}`, borderRadius: '12px', padding: '16px', marginBottom: '10px' }}>
+                <div key={i} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${d.is_admin_reply ? 'rgb(var(--primary-rgb) / 0.15)' : 'rgba(255,255,255,0.12)'}`, borderRadius: '12px', padding: '16px', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px', marginBottom: '6px' }}>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <span style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500 }}>{d.profiles?.full_name || d.profiles?.username || 'Anonymous'}</span>
-                      {d.is_admin_reply && <span style={badge('var(--primary)', 'rgba(45,212,191,0.15)', 'var(--primary)')}>ADMIN</span>}
+                      {d.is_admin_reply && <span style={badge('var(--primary)', 'rgb(var(--primary-rgb) / 0.15)', 'var(--primary)')}>ADMIN</span>}
                     </div>
                     <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{fmtTime(d.created_at)}</span>
                   </div>
@@ -529,7 +529,7 @@ export default function ManageEvents() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <span style={{ color: 'var(--text)', fontSize: '13px', fontWeight: 500 }}>{c.name || 'User'}</span>
-                      {!c.read && <span style={badge('var(--primary)', 'rgba(45,212,191,0.15)', 'var(--primary)')}>New</span>}
+                      {!c.read && <span style={badge('var(--primary)', 'rgb(var(--primary-rgb) / 0.15)', 'var(--primary)')}>New</span>}
                     </div>
                     <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{fmtTime(c.created_at)}</span>
                   </div>

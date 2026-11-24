@@ -10,9 +10,9 @@ import NumberField from '../../components/NumberField'
 //  insurer_adjudicate_claim / insurer_mark_claim_settled — no clinical data.
 
 const PCL_STATUS_COLOR = {
-  submitted: '#F2C879', under_review: '#7DBDEE', info_requested: '#7DBDEE',
-  approved: '#2DD4BF', partially_approved: '#2DD4BF', paid: '#2DD4BF',
-  rejected: '#ff9b9b', disputed: '#ff9b9b', cancelled: 'rgba(255,255,255,0.4)',
+  submitted: '#F2C879', under_review: 'var(--secondary)', info_requested: 'var(--secondary)',
+  approved: 'var(--primary)', partially_approved: 'var(--primary)', paid: 'var(--primary)',
+  rejected: 'var(--danger)', disputed: 'var(--danger)', cancelled: 'rgba(255,255,255,0.4)',
 }
 
 function ProtectionClaims() {
@@ -136,13 +136,13 @@ function ProtectionClaims() {
             <button type="button" className="btn-ghost fs-11" style={{ padding: '4px 10px' }} disabled={evidenceBusy} onClick={loadEvidence}>
               {evidenceBusy ? 'Loading…' : evidenceFiles ? 'Refresh evidence' : 'View evidence'}
             </button>
-            {evidenceError && <p role="alert" className="portal-notice" style={{ marginTop: '6px', color: '#ff9b9b' }}>{evidenceError}</p>}
+            {evidenceError && <p role="alert" className="portal-notice" style={{ marginTop: '6px', color: 'var(--danger)' }}>{evidenceError}</p>}
             {evidenceFiles && evidenceFiles.length === 0 && <p className="portal-notice" style={{ marginTop: '6px' }}>No evidence attached.</p>}
             {evidenceFiles?.map(ev => (
               <p key={ev.id} className="fs-11" style={{ color: 'rgba(255,255,255,0.6)', margin: '4px 0 0' }}>
                 {ev.evidence_type || 'document'} · {new Date(ev.created_at).toLocaleDateString()}
-                {ev.url && <> · <a href={ev.url} target="_blank" rel="noreferrer" style={{ color: '#7DBDEE' }}>Open (5 min)</a></>}
-                {ev.urlError && <> · <span role="alert" style={{ color: '#ff9b9b' }}>{ev.urlError}</span></>}
+                {ev.url && <> · <a href={ev.url} target="_blank" rel="noreferrer" style={{ color: 'var(--secondary)' }}>Open (5 min)</a></>}
+                {ev.urlError && <> · <span role="alert" style={{ color: 'var(--danger)' }}>{ev.urlError}</span></>}
               </p>
             ))}
           </div>
@@ -151,7 +151,7 @@ function ProtectionClaims() {
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
                 <label style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Decision
                   <select value={decision.decision} onChange={e => setDecision({ ...decision, decision: e.target.value })}
-                    style={{ display: 'block', marginTop: '4px', background: '#0B1220', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '6px 8px' }}>
+                    style={{ display: 'block', marginTop: '4px', background: 'var(--bg)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '6px 8px' }}>
                     <option value="approved">Approve</option>
                     <option value="partially_approved">Partially approve</option>
                     <option value="rejected">Reject</option>
@@ -166,7 +166,7 @@ function ProtectionClaims() {
               </div>
               <input type="text" maxLength={2000} placeholder="Decision reason (required for rejection)"
                 value={decision.reason} onChange={e => setDecision({ ...decision, reason: e.target.value })}
-                style={{ width: '100%', padding: '8px', marginBottom: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: '#0B1220', color: '#fff', fontSize: '13px' }} />
+                style={{ width: '100%', padding: '8px', marginBottom: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '13px' }} />
               <button type="button" className="btn-primary fs-12" disabled={working === detail.id} onClick={adjudicate}>
                 {working === detail.id ? 'Saving…' : 'Record decision'}
               </button>

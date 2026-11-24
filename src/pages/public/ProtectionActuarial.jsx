@@ -49,7 +49,7 @@ export default function ProtectionActuarial() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--space-3)', marginTop: 'var(--space-4)' }}>
               {STATES.map(([code, label]) => (
                 <div key={code} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: 'var(--space-3)' }}>
-                  <strong style={{ color: '#2DD4BF' }}>{code}</strong>
+                  <strong style={{ color: 'var(--primary)' }}>{code}</strong>
                   <p className="ll-lede" style={{ margin: '4px 0 0', fontSize: '0.85rem' }}>{label}</p>
                 </div>
               ))}
@@ -74,9 +74,9 @@ export default function ProtectionActuarial() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                 <thead>
                   <tr>
-                    <th style={{ textAlign: 'left', color: '#2DD4BF', padding: '8px', borderBottom: '1px solid rgba(255,255,255,0.15)' }}>Factor</th>
+                    <th style={{ textAlign: 'left', color: 'var(--primary)', padding: '8px', borderBottom: '1px solid rgba(255,255,255,0.15)' }}>Factor</th>
                     {STRUCTURE_ORDER.map((s) => (
-                      <th key={s} style={{ textAlign: 'left', color: '#2DD4BF', padding: '8px', borderBottom: '1px solid rgba(255,255,255,0.15)' }}>{STRUCTURES[s].name.replace('LossLens ', '')}</th>
+                      <th key={s} style={{ textAlign: 'left', color: 'var(--primary)', padding: '8px', borderBottom: '1px solid rgba(255,255,255,0.15)' }}>{STRUCTURES[s].name.replace('LossLens ', '')}</th>
                     ))}
                   </tr>
                 </thead>

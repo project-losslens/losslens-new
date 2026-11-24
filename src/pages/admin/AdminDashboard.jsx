@@ -196,9 +196,9 @@ export default function AdminDashboard() {
   ]
 
   const getRiskColor = (level) => {
-    if (level === 'high') return { bg: 'rgba(255,255,255,0.08)', color: 'var(--text)', border: 'var(--text)' }
-    if (level === 'medium') return { bg: 'rgba(45,212,191,0.15)', color: 'var(--info)', border: 'var(--info)' }
-    return { bg: 'rgba(255,255,255,0.12)', color: 'var(--primary)', border: 'var(--primary)' }
+    if (level === 'high') return { bg: 'rgb(var(--danger-rgb) / 0.16)', color: 'var(--danger)', border: 'var(--danger)' }
+    if (level === 'medium') return { bg: 'rgb(var(--warning-rgb) / 0.16)', color: 'var(--warning)', border: 'var(--warning)' }
+    return { bg: 'rgb(var(--primary-rgb) / 0.15)', color: 'var(--primary)', border: 'var(--primary)' }
   }
 
   if (loading) {
@@ -266,7 +266,7 @@ export default function AdminDashboard() {
                 {statsCards.map((s, i) => (
                   <button type="button" key={i} className="clickable" onClick={() => s.path && navigate(s.path)}
                     style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${s.urgent ? 'var(--text)' : 'rgba(255,255,255,0.12)'}`, borderRadius: '12px', padding: '14px', textAlign: 'center', cursor: s.path ? 'pointer' : 'default', boxShadow: s.urgent ? '0 0 16px rgba(255,255,255,0.3)' : 'none', animation: s.urgent ? 'urgentPulse 2s ease-in-out infinite' : 'none', transition: 'transform 0.2s, box-shadow 0.2s', width: '100%', font: 'inherit', color: 'inherit' }}
-                    onMouseEnter={e => { if (s.path) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(11,18,32,0.3)' } }}
+                    onMouseEnter={e => { if (s.path) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 16px rgb(var(--bg-rgb) / 0.3)' } }}
                     onMouseLeave={e => { if (s.path) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = s.urgent ? '0 0 16px rgba(255,255,255,0.3)' : 'none' } }}>
                     <span style={{ fontSize: '24px', display: 'block', marginBottom: '6px' }}>{s.icon}</span>
                     <span style={{ display: 'block', fontSize: '22px', fontWeight: 700, color: s.color, fontFamily: 'var(--font-display)' }}>{s.value.toLocaleString()}</span>

@@ -20,7 +20,7 @@ function triggerConfetti() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const isMobile = window.innerWidth < 768
   const count = isMobile ? 25 : 50
-  const colors = ['#2DD4BF', '#2DD4BF', '#2DD4BF', '#FFFFFF', '#7DBDEE', '#7DBDEE']
+  const colors = ['var(--primary)', 'var(--primary)', 'var(--primary)', '#FFFFFF', 'var(--secondary)', 'var(--secondary)']
   for (let i = 0; i < count; i++) {
     setTimeout(() => {
       const piece = document.createElement('div')
@@ -78,9 +78,9 @@ function UsernamePrompt({ userId, onComplete }) {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.97)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.97)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
       <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '400px' }}>
-        <AppIcon name="users" size={40} style={{ display: 'block', margin: '0 auto 12px', color: '#7DBDEE' }} />
+        <AppIcon name="users" size={40} style={{ display: 'block', margin: '0 auto 12px', color: 'var(--secondary)' }} />
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: '#FFFFFF', marginBottom: '8px', textAlign: 'center' }}>{t('dashboard.usernameTitle')}</h2>
         <p className="fs-13" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1.5rem', textAlign: 'center', lineHeight: 1.6 }}>{t('dashboard.usernameSub')}</p>
         {error && <div className="fs-13" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #FFFFFF', borderRadius: '8px', padding: '10px 14px', color: '#FFFFFF', marginBottom: '1rem' }}>{error}</div>}
@@ -88,12 +88,12 @@ function UsernamePrompt({ userId, onComplete }) {
           <label>{t('dashboard.usernameLabel')}</label>
           <div style={{ position: 'relative' }}>
             <input type="text" placeholder="e.g. amina_w" value={username} onChange={e => handleChange(e.target.value)} style={{ paddingRight: 40 }} onKeyDown={e => e.key === 'Enter' && handleSave()} />
-            {status === 'checking' && <AppIcon name="clock" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#7DBDEE' }} />}
-            {status === 'available' && <AppIcon name="check" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#2DD4BF' }} />}
+            {status === 'checking' && <AppIcon name="clock" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--secondary)' }} />}
+            {status === 'available' && <AppIcon name="check" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />}
             {status === 'taken' && <AppIcon name="close" size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#FFFFFF' }} />}
           </div>
           {status === 'taken' && <span className="fs-12" style={{ color: '#FFFFFF' }}>{t('dashboard.usernameTaken')}</span>}
-          {status === 'available' && <span className="fs-12" style={{ color: '#2DD4BF' }}>{t('dashboard.usernameAvailable')}</span>}
+          {status === 'available' && <span className="fs-12" style={{ color: 'var(--primary)' }}>{t('dashboard.usernameAvailable')}</span>}
           <span className="fs-12" style={{ color: 'rgba(255,255,255,0.4)' }}>{t('dashboard.usernameRules')}</span>
         </div>
         <button className="btn-primary full" onClick={handleSave} disabled={loading || status === 'taken' || status === 'checking'}>{loading ? <BrandLoader variant="inline" showWordmark={false} /> : `${t('dashboard.usernameSave')} →`}</button>
@@ -229,10 +229,10 @@ function Dashboard() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ textAlign: 'center', maxWidth: '320px' }}>
-          <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#2DD4BF' }} />
-          <h2 className="fs-22" style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>{t('dashboard.sessionExpired')}</h2>
-          <p className="fs-14" style={{ color: '#2DD4BF', marginBottom: '24px' }}>{t('dashboard.sessionExpiredSub')}</p>
-          <button onClick={() => navigate('/login', { replace: true })} className="fs-14" style={{ padding: '14px 32px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%' }}>{t('dashboard.goToLogin')} →</button>
+          <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: 'var(--primary)' }} />
+          <h2 className="fs-22" style={{ color: 'var(--primary)', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>{t('dashboard.sessionExpired')}</h2>
+          <p className="fs-14" style={{ color: 'var(--primary)', marginBottom: '24px' }}>{t('dashboard.sessionExpiredSub')}</p>
+          <button onClick={() => navigate('/login', { replace: true })} className="fs-14" style={{ padding: '14px 32px', borderRadius: '100px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', width: '100%' }}>{t('dashboard.goToLogin')} →</button>
         </div>
       </div>
     )
@@ -248,7 +248,7 @@ function Dashboard() {
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem',  }}>
           <div>
             <h1 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}>
-              {new Date().getHours() < 12 ? t('dashboard.greeting.morning') : new Date().getHours() < 17 ? t('dashboard.greeting.afternoon') : t('dashboard.greeting.evening')}, <span style={{ color: '#2DD4BF' }}>{firstName}</span>
+              {new Date().getHours() < 12 ? t('dashboard.greeting.morning') : new Date().getHours() < 17 ? t('dashboard.greeting.afternoon') : t('dashboard.greeting.evening')}, <span style={{ color: 'var(--primary)' }}>{firstName}</span>
             </h1>
             <p className="fs-12" style={{ color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{profile?.streak_days ? t('dashboard.streakDays', { count: profile.streak_days }) : t('dashboard.startStreak')}</p>
           </div>
@@ -259,12 +259,12 @@ function Dashboard() {
         </div>
 
         {showInstallPrompt && (
-          <div style={{ background: '#171E2B', border: '2px solid #2DD4BF', borderRadius: '16px', padding: '16px 20px', margin: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', animation: 'slideDown 0.4s ease-out', boxShadow: '0 4px 20px rgba(45,212,191,0.2)' }}>
-            <AppIcon name="download" size={36} style={{ flexShrink: 0, color: '#2DD4BF' }} />
-            <div style={{ flex: 1, minWidth: '200px' }}><p className="fs-14" style={{ color: '#2DD4BF', fontWeight: 600, margin: '0 0 4px' }}>{t('dashboard.installTitle')}</p><p className="fs-12" style={{ color: '#FFFFFF', margin: 0, lineHeight: '1.5' }}>{t('dashboard.installSub')}</p></div>
+          <div style={{ background: 'var(--surface-2)', border: '2px solid var(--primary)', borderRadius: '16px', padding: '16px 20px', margin: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', animation: 'slideDown 0.4s ease-out', boxShadow: '0 4px 20px rgb(var(--primary-rgb) / 0.2)' }}>
+            <AppIcon name="download" size={36} style={{ flexShrink: 0, color: 'var(--primary)' }} />
+            <div style={{ flex: 1, minWidth: '200px' }}><p className="fs-14" style={{ color: 'var(--primary)', fontWeight: 600, margin: '0 0 4px' }}>{t('dashboard.installTitle')}</p><p className="fs-12" style={{ color: '#FFFFFF', margin: 0, lineHeight: '1.5' }}>{t('dashboard.installSub')}</p></div>
             <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
               <button onClick={() => { setShowInstallPrompt(false); sessionStorage.setItem('pwa_install_dismissed', 'true') }} className="fs-12" style={{ padding: '8px 16px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>{t('dashboard.installNotNow')}</button>
-              <button onClick={installPWA} className="fs-12" style={{ padding: '8px 20px', borderRadius: '100px', background: '#2DD4BF', border: 'none', color: '#0B1220', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>{t('dashboard.install')} </button>
+              <button onClick={installPWA} className="fs-12" style={{ padding: '8px 20px', borderRadius: '100px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>{t('dashboard.install')} </button>
             </div>
           </div>
         )}
@@ -272,8 +272,8 @@ function Dashboard() {
         <div onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} style={{ position: 'relative' }}>
           {pullDistance > 0 && (
             <div style={{ position: 'fixed', top: 0, left: '50%', zIndex: 'var(--z-modal)', transform: 'translateX(-50%)', paddingTop: Math.max(pullDistance - 40, 4), pointerEvents: 'none' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '2px solid #2DD4BF', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `rotate(${Math.min(pullDistance * 3, 360)}deg)`, opacity: Math.min(pullDistance / pullThreshold, 1) }}>
-                {refreshing ? <BrandLoader variant="inline" showWordmark={false} /> : <span className="fs-16" style={{ color: '#2DD4BF' }}>{pullDistance >= pullThreshold ? '' : '↓'}</span>}
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '2px solid var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `rotate(${Math.min(pullDistance * 3, 360)}deg)`, opacity: Math.min(pullDistance / pullThreshold, 1) }}>
+                {refreshing ? <BrandLoader variant="inline" showWordmark={false} /> : <span className="fs-16" style={{ color: 'var(--primary)' }}>{pullDistance >= pullThreshold ? '' : '↓'}</span>}
               </div>
             </div>
           )}
@@ -283,10 +283,10 @@ function Dashboard() {
               {stats.map((s, i) => {
                 const inner = (<>
                   <span className="stat-icon" aria-label={s.ariaLabel}>{s.highlight ? <span className="streak-fire"><AppIcon name={s.icon} size={20} /></span> : <AppIcon name={s.icon} size={20} />}</span>
-                  <span className="stat-value" style={s.highlight ? { color: '#2DD4BF' } : {}}>{s.value || '—'}</span>
+                  <span className="stat-value" style={s.highlight ? { color: 'var(--primary)' } : {}}>{s.value || '—'}</span>
                   <span className="stat-label">{s.value === 0 && s.emptyMessage ? s.emptyMessage : s.label}</span>
                 </>)
-                const cardStyle = s.highlight ? { borderColor: '#2DD4BF', boxShadow: '0 0 12px rgba(45,212,191,0.3)' } : {}
+                const cardStyle = s.highlight ? { borderColor: 'var(--primary)', boxShadow: '0 0 12px rgb(var(--primary-rgb) / 0.3)' } : {}
                 return s.onClick ? (
                   <button type="button" key={i} className="stat-card clickable" onClick={s.onClick} aria-expanded={moneyInfoOpen} aria-label={`${s.ariaLabel} — show calculation`} style={{ ...cardStyle, width: '100%', font: 'inherit', color: 'inherit', textAlign: 'inherit' }}>{inner}</button>
                 ) : (
@@ -301,14 +301,14 @@ function Dashboard() {
               </p>
             )}
 
-            <Link to="/diary" className="clickable" style={{ display: 'block', background: 'linear-gradient(135deg, rgba(45,212,191,0.18), rgba(125,189,238,0.12))', border: '1px solid #2DD4BF', borderRadius: '14px', padding: '16px', marginBottom: '1rem', textDecoration: 'none' }}>
+            <Link to="/diary" className="clickable" style={{ display: 'block', background: 'linear-gradient(135deg, rgb(var(--primary-rgb) / 0.18), rgb(var(--secondary-rgb) / 0.12))', border: '1px solid var(--primary)', borderRadius: '14px', padding: '16px', marginBottom: '1rem', textDecoration: 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <AppIcon name="diary" size={28} style={{ color: '#2DD4BF', flexShrink: 0 }} />
+                <AppIcon name="diary" size={28} style={{ color: 'var(--primary)', flexShrink: 0 }} />
                 <div style={{ flex: 1 }}>
                   <h3 className="fs-15" style={{ color: '#FFFFFF', margin: 0 }}>{t('dashboard.checkinTitle')}</h3>
                   <p className="fs-12" style={{ color: 'rgba(255,255,255,0.55)', margin: '2px 0 0' }}>{t('dashboard.checkinSub')}</p>
                 </div>
-                <span className="fs-13" style={{ color: '#2DD4BF', fontWeight: 600, whiteSpace: 'nowrap' }}>{t('dashboard.checkinStart')}</span>
+                <span className="fs-13" style={{ color: 'var(--primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>{t('dashboard.checkinStart')}</span>
               </div>
             </Link>
 
@@ -325,25 +325,25 @@ function Dashboard() {
                   return <p key={i} className="fs-12" style={{ color: getRiskColor(riskData.score).color, opacity: 0.8, margin: '2px 0' }}>• {text}</p>
                 })}
                 <p className="fs-12" style={{ color: getRiskColor(riskData.score).color, opacity: 0.7, margin: '6px 0 0' }}>{t('dashboard.riskSuggested')}</p>
-                {riskData.level !== 'low' && <button onClick={() => navigate('/urge-toolkit')} className="fs-13" style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#2DD4BF', border: 'none', borderRadius: '8px', color: '#0B1220', fontWeight: 600, cursor: 'pointer' }}> {t('dashboard.openToolkit')}</button>}
+                {riskData.level !== 'low' && <button onClick={() => navigate('/urge-toolkit')} className="fs-13" style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'var(--primary)', border: 'none', borderRadius: '8px', color: 'var(--on-primary)', fontWeight: 600, cursor: 'pointer' }}> {t('dashboard.openToolkit')}</button>}
               </div>
             )}
 
             <Link to="/cbt" className="clickable" style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '16px', marginBottom: '1rem', textDecoration: 'none' }}>
-              <AppIcon name="brain" size={28} style={{ color: '#7DBDEE', flexShrink: 0 }} />
+              <AppIcon name="brain" size={28} style={{ color: 'var(--secondary)', flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
                 <h3 className="fs-15" style={{ color: '#FFFFFF', margin: 0 }}>{t('dashboard.continue')}</h3>
                 <p className="fs-12" style={{ color: 'rgba(255,255,255,0.55)', margin: '2px 0 0' }}>{cbtCount > 0 ? t(cbtCount === 1 ? 'dashboard.continueModule' : 'dashboard.continueModules', { count: cbtCount }) : t('dashboard.continueFirst')}</p>
               </div>
-              <span className="fs-13" style={{ color: '#7DBDEE', fontWeight: 600 }}>{t('dashboard.continueOpen')}</span>
+              <span className="fs-13" style={{ color: 'var(--secondary)', fontWeight: 600 }}>{t('dashboard.continueOpen')}</span>
             </Link>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '1rem' }}>
-              <Link to="/circle" className="clickable" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, #7DBDEE 100%)', border: '1px solid #2DD4BF', borderRadius: '12px', padding: '1rem', display: 'block', textDecoration: 'none' }}>
-                <AppIcon name="users" size={24} style={{ color: '#2DD4BF' }} /><h3 className="fs-13" style={{ color: '#2DD4BF', margin: '6px 0 4px' }}>The Circle</h3><p className="fs-12" style={{ color: '#2DD4BF', fontWeight: 300, margin: 0 }}>{circleOnline > 0 ? t('dashboard.circleOnline', { count: circleOnline }) : t('dashboard.circleJoin')}</p>
+              <Link to="/circle" className="clickable" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, var(--secondary) 100%)', border: '1px solid var(--primary)', borderRadius: '12px', padding: '1rem', display: 'block', textDecoration: 'none' }}>
+                <AppIcon name="users" size={24} style={{ color: 'var(--primary)' }} /><h3 className="fs-13" style={{ color: 'var(--primary)', margin: '6px 0 4px' }}>The Circle</h3><p className="fs-12" style={{ color: 'var(--primary)', fontWeight: 300, margin: 0 }}>{circleOnline > 0 ? t('dashboard.circleOnline', { count: circleOnline }) : t('dashboard.circleJoin')}</p>
               </Link>
               <Link to="/whispers" className="clickable" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '1rem', display: 'block', textDecoration: 'none' }}>
-                <AppIcon name="chat" size={24} style={{ color: '#7DBDEE' }} /><h3 className="fs-13" style={{ color: '#FFFFFF', margin: '6px 0 4px' }}>Whispers</h3><p className="fs-12" style={{ color: '#2DD4BF', fontWeight: 300, margin: 0 }}>{whispersActive > 0 ? t('dashboard.whispersActive', { count: whispersActive }) : t('dashboard.whispersFind')}</p>
+                <AppIcon name="chat" size={24} style={{ color: 'var(--secondary)' }} /><h3 className="fs-13" style={{ color: '#FFFFFF', margin: '6px 0 4px' }}>Whispers</h3><p className="fs-12" style={{ color: 'var(--primary)', fontWeight: 300, margin: 0 }}>{whispersActive > 0 ? t('dashboard.whispersActive', { count: whispersActive }) : t('dashboard.whispersFind')}</p>
               </Link>
             </div>
 
@@ -371,15 +371,15 @@ function Dashboard() {
             </div>
 
             {/* Crisis Support Bar - Updated with multiple contacts */}
-            <div style={{ position: 'relative', background: 'rgba(255,255,255,0.12)', border: '2px solid #FFFFFF', borderRadius: '14px', padding: '16px', marginBottom: '1rem' }}>
+            <div style={{ position: 'relative', background: 'rgb(var(--danger-rgb) / 0.14)', border: '2px solid var(--danger)', borderRadius: '14px', padding: '16px', marginBottom: '1rem' }}>
               <button type="button" className="card-action" aria-label={t('dashboard.crisisAria')} onClick={() => setShowCrisisModal(true)} />
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                <AppIcon name="alert" size={24} style={{ color: '#FFFFFF', flexShrink: 0 }} />
+                <AppIcon name="alert" size={24} style={{ color: 'var(--danger)', flexShrink: 0 }} />
                 <div>
                   <p className="fs-13" style={{ color: '#FFFFFF', fontWeight: 600, margin: 0 }}>{t('dashboard.crisisBarTitle')}</p>
-                  <p className="fs-12" style={{ color: '#2DD4BF', margin: '2px 0 0' }}>{t('dashboard.crisisBarSub')}</p>
+                  <p className="fs-12" style={{ color: 'var(--danger)', margin: '2px 0 0' }}>{t('dashboard.crisisBarSub')}</p>
                 </div>
-                <span className="fs-18" style={{ color: '#FFFFFF', marginLeft: 'auto' }}>→</span>
+                <span className="fs-18" style={{ color: 'var(--danger)', marginLeft: 'auto' }}>→</span>
               </div>
             </div>
           </div>
@@ -388,31 +388,31 @@ function Dashboard() {
 
       {/* Crisis Support Modal */}
       {showCrisisModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,32,0.95)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.95)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
             <button type="button" className="modal-backdrop" aria-label="Close" onClick={() => setShowCrisisModal(false)} />
-          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '2px solid #FFFFFF', maxWidth: '450px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2rem', border: '2px solid var(--danger)', maxWidth: '450px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-              <AppIcon name="alert" size={48} style={{ display: 'block', margin: '0 auto 8px', color: '#FFFFFF' }} />
+              <AppIcon name="alert" size={48} style={{ display: 'block', margin: '0 auto 8px', color: 'var(--danger)' }} />
               <h2 style={{ color: '#FFFFFF', fontFamily: 'var(--font-display)', fontSize: '1.5rem', margin: '0 0 8px' }}>{t('dashboard.crisisTitle')}</h2>
-              <p className="fs-13" style={{ color: '#2DD4BF', lineHeight: '1.6', margin: 0 }}>{t('dashboard.crisisSub')}</p>
+              <p className="fs-13" style={{ color: 'var(--danger)', lineHeight: '1.6', margin: 0 }}>{t('dashboard.crisisSub')}</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '1.5rem' }}>
               {CRISIS_CONTACTS.map((contact, i) => (
                 <a key={i} href={`tel:${contact.phone.replace(/\s/g, '')}`} style={{
-                  textDecoration: 'none', background: contact.priority ? 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.08))' : '#0B1220',
-                  border: contact.priority ? '2px solid #FFFFFF' : '1px solid rgba(255,255,255,0.12)',
+                  textDecoration: 'none', background: contact.priority ? 'rgb(var(--danger-rgb) / 0.14)' : 'var(--bg)',
+                  border: contact.priority ? '2px solid var(--danger)' : '1px solid rgba(255,255,255,0.12)',
                   borderRadius: '12px', padding: contact.priority ? '18px' : '14px',
                   display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.2s'
                 }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = '#2DD4BF'; e.currentTarget.style.transform = 'scale(1.02)' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = contact.priority ? '#FFFFFF' : 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'scale(1)' }}>
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--danger)'; e.currentTarget.style.transform = 'scale(1.02)' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = contact.priority ? 'var(--danger)' : 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'scale(1)' }}>
                   {contact.priority && <AppIcon name="star" size={20} style={{ flexShrink: 0, color: '#F2C879' }} />}
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <span style={{ color: contact.priority ? '#FFFFFF' : '#FFFFFF', fontSize: contact.priority ? '15px' : '13px', fontWeight: 600 }}>{contact.name}</span>
                       {contact.priority && <span className="fs-12" style={{ background: 'var(--surface-2)', color: 'var(--text-muted)', padding: '2px 8px', borderRadius: '100px', fontWeight: 600 }}>{t('dashboard.crisisFirstCall')}</span>}
                     </div>
-                    <p className="fs-12" style={{ color: '#2DD4BF', margin: '2px 0 0' }}>{contact.phone}  · {contact.hours}</p>
+                    <p className="fs-12" style={{ color: 'var(--danger)', margin: '2px 0 0' }}>{contact.phone}  · {contact.hours}</p>
                   </div>
                   <span className="fs-18" style={{ color: contact.priority ? '#FFFFFF' : 'rgba(255,255,255,0.4)' }}>→</span>
                 </a>

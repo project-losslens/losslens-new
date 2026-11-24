@@ -171,9 +171,9 @@ export default function Onboarding() {
     else if (impacts.length >= 1) s += 2
 
     let riskLevel, riskColor, riskLabel
-    if (s >= 7) { riskLevel = 'high'; riskColor = '#FFFFFF'; riskLabel = t('onboarding.risk.high') }
-    else if (s >= 4) { riskLevel = 'medium'; riskColor = '#7DBDEE'; riskLabel = t('onboarding.risk.medium') }
-    else { riskLevel = 'low'; riskColor = '#2DD4BF'; riskLabel = t('onboarding.risk.low') }
+    if (s >= 7) { riskLevel = 'high'; riskColor = 'var(--danger)'; riskLabel = t('onboarding.risk.high') }
+    else if (s >= 4) { riskLevel = 'medium'; riskColor = 'var(--warning)'; riskLabel = t('onboarding.risk.medium') }
+    else { riskLevel = 'low'; riskColor = 'var(--primary)'; riskLabel = t('onboarding.risk.low') }
 
     const recs = []
     if (s >= 7) {
@@ -256,10 +256,10 @@ export default function Onboarding() {
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <TopographicBackground variant="app" />
         <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '2.5rem 2rem', maxWidth: '500px', width: '100%', textAlign: 'center', animation: 'fadeIn 0.5s ease-out' }}>
-          <AppIcon name="flame" size={48} style={{ display: 'block', margin: '0 auto 12px', color: '#2DD4BF' }} />
-          <h2 style={{ color: '#2DD4BF', fontFamily: 'var(--font-display)', fontSize: '22px', marginBottom: '8px' }}>{t('onboarding.journeyBegins')}</h2>
+          <AppIcon name="flame" size={48} style={{ display: 'block', margin: '0 auto 12px', color: 'var(--primary)' }} />
+          <h2 style={{ color: 'var(--primary)', fontFamily: 'var(--font-display)', fontSize: '22px', marginBottom: '8px' }}>{t('onboarding.journeyBegins')}</h2>
 
-          <div style={{ background: '#0B1220', borderRadius: '12px', padding: '16px', margin: '16px 0', border: `2px solid ${risk.color}` }}>
+          <div style={{ background: 'var(--bg)', borderRadius: '12px', padding: '16px', margin: '16px 0', border: `2px solid ${risk.color}` }}>
             <p style={{ color: risk.color, fontSize: '14px', fontWeight: 600, margin: '8px 0 4px' }}>{risk.label}</p>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>{t('onboarding.riskNote')}</p>
           </div>
@@ -271,7 +271,7 @@ export default function Onboarding() {
           )}
 
           <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-            <p style={{ color: '#2DD4BF', fontSize: '13px', fontWeight: 500, marginBottom: '10px' }}>{t('onboarding.recommended')}</p>
+            <p style={{ color: 'var(--primary)', fontSize: '13px', fontWeight: 500, marginBottom: '10px' }}>{t('onboarding.recommended')}</p>
             {recommendations.map((r, i) => (
               <button
                 key={i}
@@ -280,7 +280,7 @@ export default function Onboarding() {
                 style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'flex-start', padding: '8px', borderRadius: '8px', border: 'none', background: 'transparent', textAlign: 'left', width: '100%', cursor: 'pointer', fontFamily: 'var(--font-body)' }}
                 onClick={() => r.action && navigate(r.action)}
               >
-                <span style={{ color: '#7DBDEE', fontSize: '13px', lineHeight: '1.5' }}>{t(r.textKey)}</span>
+                <span style={{ color: 'var(--secondary)', fontSize: '13px', lineHeight: '1.5' }}>{t(r.textKey)}</span>
               </button>
             ))}
           </div>
@@ -305,7 +305,7 @@ export default function Onboarding() {
         <TopographicBackground variant="app" />
         <div style={{ textAlign: 'center' }}>
           <BrandLoader variant="section" showWordmark={false} />
-          <p style={{ color: '#2DD4BF', fontSize: '14px' }}>{t('onboarding.setup')}</p>
+          <p style={{ color: 'var(--primary)', fontSize: '14px' }}>{t('onboarding.setup')}</p>
         </div>
       </div>
     )
@@ -324,7 +324,7 @@ export default function Onboarding() {
         <div style={{ marginBottom: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
             <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>{t('onboarding.progress', { current: step + 1, total: QUESTIONS.length })}</span>
-            <span style={{ color: '#2DD4BF', fontSize: '12px' }}>{Math.round(progress)}%</span>
+            <span style={{ color: 'var(--primary)', fontSize: '12px' }}>{Math.round(progress)}%</span>
           </div>
           <div className="progress-bar">
             <div className="progress-fill" style={{ width: `${progress}%`, transition: 'width 0.5s ease' }} />
@@ -335,7 +335,7 @@ export default function Onboarding() {
         <div style={{ marginBottom: '24px', animation: animate ? 'fadeIn 0.3s ease-out' : 'none' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
             <h2 style={{ color: '#FFFFFF', fontSize: '18px', fontWeight: 600, fontFamily: 'var(--font-body)', margin: 0 }}>{t(q.titleKey)}</h2>
-            {q.multi && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', background: '#0B1220', padding: '2px 8px', borderRadius: '100px' }}>{t('onboarding.selected', { count: (answers[q.id] || []).length })}</span>}
+            {q.multi && <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', background: 'var(--bg)', padding: '2px 8px', borderRadius: '100px' }}>{t('onboarding.selected', { count: (answers[q.id] || []).length })}</span>}
           </div>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginBottom: '20px' }}>{t(q.subtitleKey)}</p>
 
@@ -351,8 +351,8 @@ export default function Onboarding() {
                   aria-checked={selected}
                   style={{
                     width: '100%', padding: '14px 16px', borderRadius: '12px',
-                    border: selected ? '2px solid #2DD4BF' : '1px solid rgba(255,255,255,0.12)',
-                    background: selected ? 'rgba(255,255,255,0.12)' : '#0B1220',
+                    border: selected ? '2px solid var(--primary)' : '1px solid rgba(255,255,255,0.12)',
+                    background: selected ? 'rgba(255,255,255,0.12)' : 'var(--bg)',
                     cursor: 'pointer', textAlign: 'left',
                     display: 'flex', alignItems: 'center', gap: '12px',
                     transition: 'all 0.2s', fontFamily: 'var(--font-body)',
@@ -364,7 +364,7 @@ export default function Onboarding() {
                     <p style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 500, margin: 0 }}>{t(`onboarding.q.${q.id}.${option.value}`)}</p>
                     {option.descKey && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '2px 0 0' }}>{t(option.descKey)}</p>}
                   </div>
-                  {selected && <AppIcon name="check" size={18} style={{ marginLeft: 'auto', flexShrink: 0, color: '#2DD4BF' }} />}
+                  {selected && <AppIcon name="check" size={18} style={{ marginLeft: 'auto', flexShrink: 0, color: 'var(--primary)' }} />}
                 </button>
               )
             })}
@@ -397,7 +397,7 @@ export default function Onboarding() {
           {t('onboarding.skip')}
         </button>
 
-        <p style={{ color: '#7DBDEE', fontSize: '10px', textAlign: 'center', marginTop: '8px' }}>
+        <p style={{ color: 'var(--secondary)', fontSize: '10px', textAlign: 'center', marginTop: '8px' }}>
           {t('onboarding.privacyNote')}
         </p>
       </div>

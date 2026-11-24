@@ -144,7 +144,7 @@ export default function UserAnalytics() {
 
   const StatBox = ({ label, value, sub, color = 'var(--primary)', icon }) => (
     <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '14px', textAlign: 'center', transition: 'transform 0.2s, box-shadow 0.2s' }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(11,18,32,0.3)' }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 16px rgb(var(--bg-rgb) / 0.3)' }}
       onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
       {icon && <span style={{ fontSize: '20px', display: 'block', marginBottom: '4px' }}>{icon}</span>}
       <span style={{ display: 'block', fontSize: '24px', fontWeight: 700, color, fontFamily: 'var(--font-display)', marginBottom: '4px' }}>{value}</span>

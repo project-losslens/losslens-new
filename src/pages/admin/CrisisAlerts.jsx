@@ -145,7 +145,7 @@ export default function CrisisAlerts() {
                 <p style={{ color: 'var(--primary)', fontSize: '14px' }}>No open crisis alerts. All clear.</p>
               </div>
             ) : alerts.map(a => (
-              <div key={a.id} style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '16px', marginBottom: '12px', boxShadow: '0 0 16px rgba(255,255,255,0.1)' }}>
+              <div key={a.id} style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgb(var(--danger-rgb) / 0.35)', borderRadius: '12px', padding: '16px', marginBottom: '12px', boxShadow: '0 0 16px rgb(var(--danger-rgb) / 0.15)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
@@ -153,7 +153,7 @@ export default function CrisisAlerts() {
                         {a.profiles?.full_name || a.profiles?.username || `User #${a.user_id?.slice(0, 8)}`}
                       </p>
                       {a.profiles?.risk_level === 'high' && (
-                        <span style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text)', border: '1px solid var(--text)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}> HIGH RISK</span>
+                        <span style={{ background: 'rgb(var(--danger-rgb) / 0.16)', color: 'var(--danger)', border: '1px solid var(--danger)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 700 }}> HIGH RISK</span>
                       )}
                     </div>
                     <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '4px' }}>

@@ -70,11 +70,11 @@ function NotificationBell() {
 
   const getTypeStyle = (type) => {
     switch (type) {
-      case 'danger': return { bg: 'rgba(255,255,255,0.08)', color: '#FFFFFF' }
-      case 'warning': return { bg: 'rgba(45,212,191,0.15)', color: '#7DBDEE' }
-      case 'success': return { bg: 'rgba(255,255,255,0.12)', color: '#2DD4BF' }
-      case 'badge': return { bg: 'rgba(255,255,255,0.12)', color: '#2DD4BF' }
-      default: return { bg: 'rgba(255,255,255,0.06)', color: '#7DBDEE' }
+      case 'danger': return { bg: 'rgb(var(--danger-rgb) / 0.16)', color: 'var(--danger)' }
+      case 'warning': return { bg: 'rgb(var(--warning-rgb) / 0.16)', color: 'var(--warning)' }
+      case 'success': return { bg: 'rgba(255,255,255,0.12)', color: 'var(--primary)' }
+      case 'badge': return { bg: 'rgba(255,255,255,0.12)', color: 'var(--primary)' }
+      default: return { bg: 'rgba(255,255,255,0.06)', color: 'var(--secondary)' }
     }
   }
 
@@ -99,7 +99,7 @@ function NotificationBell() {
         style={{
           background: 'transparent', border: 'none', cursor: 'pointer',
           position: 'relative', fontSize: '20px', padding: '4px 8px',
-          color: unreadCount > 0 ? '#2DD4BF' : 'rgba(255,255,255,0.4)',
+          color: unreadCount > 0 ? 'var(--primary)' : 'rgba(255,255,255,0.4)',
           transition: 'color 0.2s',
         }}
       >
@@ -109,7 +109,7 @@ function NotificationBell() {
             aria-label={`${unreadCount} unread notifications`}
             style={{
               position: 'absolute', top: '0', right: '0',
-              background: '#2DD4BF', color: '#0B1220',
+              background: 'var(--primary)', color: 'var(--on-primary)',
               fontSize: '10px', fontWeight: 700,
               width: '18px', height: '18px', borderRadius: '50%',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -129,7 +129,7 @@ function NotificationBell() {
             position: 'absolute', top: '40px', right: '-10px',
             width: '340px', maxHeight: '420px',
             background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px',
-            boxShadow: '0 8px 32px rgba(11,18,32,0.5)', zIndex: 'var(--z-modal)',
+            boxShadow: '0 8px 32px rgb(var(--bg-rgb) / 0.5)', zIndex: 'var(--z-modal)',
             overflowY: 'auto', animation: 'fadeIn 0.2s ease-out',
           }}
         >
@@ -144,7 +144,7 @@ function NotificationBell() {
               <button
                 onClick={handleMarkAllRead}
                 style={{
-                  background: 'transparent', border: 'none', color: '#2DD4BF',
+                  background: 'transparent', border: 'none', color: 'var(--primary)',
                   fontSize: '11px', cursor: 'pointer',
                 }}
               >
@@ -170,10 +170,10 @@ function NotificationBell() {
                   style={{
                     padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.12)',
                     cursor: 'pointer', transition: 'background 0.15s',
-                    background: n.read ? 'transparent' : '#0B1220',
+                    background: n.read ? 'transparent' : 'var(--bg)',
                   }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.12)'}
-                  onMouseLeave={e => e.currentTarget.style.background = n.read ? 'transparent' : '#0B1220'}
+                  onMouseLeave={e => e.currentTarget.style.background = n.read ? 'transparent' : 'var(--bg)'}
                 >
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
                     <span
@@ -195,12 +195,12 @@ function NotificationBell() {
                             aria-label="Unread"
                             style={{
                               width: '6px', height: '6px', borderRadius: '50%',
-                              background: '#2DD4BF', display: 'inline-block', marginLeft: '6px',
+                              background: 'var(--primary)', display: 'inline-block', marginLeft: '6px',
                             }}
                           />
                         )}
                       </p>
-                      <p style={{ color: '#7DBDEE', fontSize: '12px', margin: '0 0 4px', lineHeight: '1.4' }}>
+                      <p style={{ color: 'var(--secondary)', fontSize: '12px', margin: '0 0 4px', lineHeight: '1.4' }}>
                         {n.message.startsWith('notifications.') ? t(n.message) : n.message}
                       </p>
                       <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>

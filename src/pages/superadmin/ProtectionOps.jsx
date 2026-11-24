@@ -10,8 +10,8 @@ import NumberField from '../../components/NumberField'
 //  verification queue, protection_mode switch (confirmed + audited).
 
 const STATUS_COLOR = {
-  pending_verification: '#F2C879', active: '#2DD4BF', suspended: '#7DBDEE',
-  ended: 'rgba(255,255,255,0.4)', rejected: '#ff9b9b',
+  pending_verification: '#F2C879', active: 'var(--primary)', suspended: 'var(--secondary)',
+  ended: 'rgba(255,255,255,0.4)', rejected: 'var(--danger)',
 }
 
 export default function ProtectionOps() {
@@ -144,9 +144,9 @@ export default function ProtectionOps() {
               onClick={() => changeMode(m)}
               style={{
                 padding: '8px 16px', borderRadius: '100px', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-                border: `1px solid ${mode === m ? '#2DD4BF' : 'rgba(255,255,255,0.2)'}`,
-                background: mode === m ? 'rgba(45,212,191,0.15)' : 'transparent',
-                color: mode === m ? '#2DD4BF' : 'rgba(255,255,255,0.6)',
+                border: `1px solid ${mode === m ? 'var(--primary)' : 'rgba(255,255,255,0.2)'}`,
+                background: mode === m ? 'rgb(var(--primary-rgb) / 0.15)' : 'transparent',
+                color: mode === m ? 'var(--primary)' : 'rgba(255,255,255,0.6)',
               }}>
               {m}
             </button>
@@ -231,7 +231,7 @@ export default function ProtectionOps() {
                 {v.benefit_structure.replace(/_/g, ' ')} · KES {Number(v.premium_amount || 0).toLocaleString()}/{v.premium_frequency}
               </p>
             </div>
-            <span style={{ color: v.status === 'approved' ? '#2DD4BF' : '#F2C879', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{v.status.replace(/_/g, ' ')}</span>
+            <span style={{ color: v.status === 'approved' ? 'var(--primary)' : '#F2C879', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{v.status.replace(/_/g, ' ')}</span>
             {v.status === 'pending_approval' && (
               <>
                 <button type="button" className="btn-primary fs-11" style={{ padding: '6px 10px', minHeight: '32px' }} onClick={() => approveVersion(v)}>Approve</button>
