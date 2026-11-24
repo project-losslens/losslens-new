@@ -727,7 +727,7 @@ function AIChat({ profile }) {
                       padding: '10px 14px',
                       borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                       background: msg.crisis ? 'var(--danger)' : msg.role === 'user' ? 'var(--orchid)' : 'var(--surface-2)',
-                      color: msg.role === 'user' || msg.crisis ? '#FFFFFF' : 'var(--text)',
+                      color: msg.crisis ? 'var(--plum)' : msg.role === 'user' ? '#FFFFFF' : 'var(--text)',
                       fontSize: '13px',
                       lineHeight: '1.6',
                       fontWeight: msg.role === 'user' ? 500 : 300,

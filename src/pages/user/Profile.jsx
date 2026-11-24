@@ -52,13 +52,13 @@ function buildEncryptedReportPage(payload) {
   const payloadJson = JSON.stringify(payload).replace(/</g, '\\u003c')
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LossLens Recovery Report (encrypted)</title>
-<style>body{font-family:system-ui,sans-serif;background:#C8A6E0;color:#351044;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:1rem}main{max-width:420px;width:100%;background:#EAD9F3;border:1px solid rgba(41,35,41,.16);border-radius:16px;padding:2rem;text-align:center}input{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(41,35,41,.16);background:#FFFFFF;color:#351044;font-size:16px;box-sizing:border-box;margin:12px 0}button{width:100%;padding:12px;border:none;border-radius:8px;background:#8736B0;color:#FFFFFF;font-weight:600;font-size:15px;cursor:pointer}#err{color:#A12E3E;font-size:13px;min-height:1.2em;margin-top:10px}</style></head><body>
-<main><h2 style="font-size:20px;color:#8736B0;margin:0 0 8px">LossLens Recovery Report</h2>
-<p style="color:#625B62;font-size:13px;margin:0 0 16px">This report is encrypted. Enter the passphrase you were given to view it.</p>
+<style>body{font-family:system-ui,sans-serif;background:#7136CC;color:#F3EAF8;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:1rem}main{max-width:420px;width:100%;background:#38224F;border:1px solid rgba(243,234,248,.2);border-radius:16px;padding:2rem;text-align:center}input{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(243,234,248,.25);background:#2E1C42;color:#F3EAF8;font-size:16px;box-sizing:border-box;margin:12px 0}button{width:100%;padding:12px;border:none;border-radius:8px;background:#EAD9F3;color:#291447;font-weight:600;font-size:15px;cursor:pointer}#err{color:#F2768A;font-size:13px;min-height:1.2em;margin-top:10px}</style></head><body>
+<main><h2 style="font-size:20px;color:#EAD9F3;margin:0 0 8px">LossLens Recovery Report</h2>
+<p style="color:#DCCBE8;font-size:13px;margin:0 0 16px">This report is encrypted. Enter the passphrase you were given to view it.</p>
 <input id="pw" type="password" autocomplete="off" placeholder="Enter passphrase" aria-label="Report passphrase">
 <button id="go">Unlock report</button>
 <p id="err" role="alert"></p>
-<p style="color:#625B62;font-size:11px;margin-top:16px">Keep your passphrase private. It was shared with you separately from this file.</p>
+<p style="color:#DCCBE8;font-size:11px;margin-top:16px">Keep your passphrase private. It was shared with you separately from this file.</p>
 </main>
 <script>
 const PAYLOAD = ${payloadJson};
@@ -270,33 +270,33 @@ export default function Profile() {
 <style>
   @page { margin: 1.8cm; }
   * { box-sizing: border-box; }
-  body { font-family: Arial, sans-serif; background: #fff; color: #351044; line-height: 1.55; max-width: 820px; margin: auto; padding: 1.5rem; }
-  body:before { content: 'PRIVATE RECOVERY INFORMATION'; position: fixed; inset: 36% -10%; transform: rotate(-24deg); color: rgba(101,59,96,.05); font-size: clamp(24px, 6vw, 56px); font-weight: 700; letter-spacing: .12em; white-space: nowrap; pointer-events: none; z-index: -1; }
-  .header { display: flex; align-items: center; justify-content: center; gap: 12px; border-bottom: 3px solid #8736B0; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+  body { font-family: Arial, sans-serif; background: #fff; color: #291447; line-height: 1.55; max-width: 820px; margin: auto; padding: 1.5rem; }
+  body:before { content: 'PRIVATE RECOVERY INFORMATION'; position: fixed; inset: 36% -10%; transform: rotate(-24deg); color: rgba(41,20,71,.05); font-size: clamp(24px, 6vw, 56px); font-weight: 700; letter-spacing: .12em; white-space: nowrap; pointer-events: none; z-index: -1; }
+  .header { display: flex; align-items: center; justify-content: center; gap: 12px; border-bottom: 3px solid #7136CC; padding-bottom: 1rem; margin-bottom: 1.5rem; }
   .mark { width: 46px; height: 46px; flex: none; }
-  .header h1 { color: #351044; margin: 0; font-size: 24px; }
+  .header h1 { color: #291447; margin: 0; font-size: 24px; }
   .subtitle { color: #625B62; font-size: 12px; margin: 4px 0 0; }
-  .confidential { color: #4B444B; font-size: 10px; margin: 7px 0 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-  h2 { color: #351044; border-bottom: 1px solid #D9D2DA; padding-bottom: 6px; font-size: 16px; margin: 1.5rem 0 .6rem; }
+  .confidential { color: #463A52; font-size: 10px; margin: 7px 0 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+  h2 { color: #291447; border-bottom: 1px solid #D9D2DA; padding-bottom: 6px; font-size: 16px; margin: 1.5rem 0 .6rem; }
   .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
   .info-item { padding: 5px 0; border-bottom: 1px dotted #D9D2DA; overflow-wrap: anywhere; }
-  .info-item strong { color: #4B444B; display: inline-block; min-width: 112px; }
+  .info-item strong { color: #463A52; display: inline-block; min-width: 112px; }
   .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: .8rem 0; }
   .stat-card { background: #EAD9F3; border: 1px solid #D9D2DA; border-radius: 6px; padding: 12px 8px; text-align: center; }
-  .stat-card .value { font-size: 20px; font-weight: bold; color: #8736B0; display: block; }
-  .stat-card .label { font-size: 9px; color: #4B444B; text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
+  .stat-card .value { font-size: 20px; font-weight: bold; color: #7136CC; display: block; }
+  .stat-card .label { font-size: 9px; color: #463A52; text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
   table { width: 100%; border-collapse: collapse; margin: .7rem 0; font-size: 11px; }
-  th { background: #EAD9F3; color: #351044; padding: 8px; text-align: left; font-size: 10px; }
+  th { background: #EAD9F3; color: #291447; padding: 8px; text-align: left; font-size: 10px; }
   td { padding: 7px 8px; border-bottom: 1px solid #D9D2DA; }
-  tr:nth-child(even) { background: #C8A6E0; }
+  tr:nth-child(even) { background: #F3EAF8; }
   .empty { color: #625B62; font-style: italic; }
   .footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #D9D2DA; text-align: center; }
   .footer p { font-size: 10px; color: #625B62; margin: 3px 0; }
-  .badge { display: inline-block; background: #EAD9F3; color: #4F2D4B; border: 1px solid #D9D2DA; padding: 3px 9px; border-radius: 4px; font-size: 10px; margin: 2px; }
+  .badge { display: inline-block; background: #EAD9F3; color: #291447; border: 1px solid #D9D2DA; padding: 3px 9px; border-radius: 4px; font-size: 10px; margin: 2px; }
   @media print { body { padding: 0; } .stat-card { break-inside: avoid; } }
   @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } body { padding: 1rem; } }
 </style></head><body>
-<div class="header"><svg class="mark" viewBox="0 0 100 100" aria-label="LossLens mark">${Array.from({ length: 8 }, (_, i) => `<ellipse cx="50" cy="26" rx="9" ry="20" fill="${i % 2 === 0 ? '#8736B0' : '#B77932'}" opacity=".9" transform="rotate(${i * 45} 50 50)"/>`).join('')}<circle cx="50" cy="50" r="12" stroke="#B77932" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="4" fill="#8736B0"/></svg><div><h2>LossLens Recovery Report</h2><p class="subtitle">Generated ${today}</p><p class="confidential">Private recovery information · Share only with your consent</p></div></div>
+<div class="header"><svg class="mark" viewBox="0 0 100 100" aria-label="LossLens mark">${Array.from({ length: 8 }, (_, i) => `<ellipse cx="50" cy="26" rx="9" ry="20" fill="${i % 2 === 0 ? '#7136CC' : '#C98F3D'}" opacity=".9" transform="rotate(${i * 45} 50 50)"/>`).join('')}<circle cx="50" cy="50" r="12" stroke="#C98F3D" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="4" fill="#7136CC"/></svg><div><h2>LossLens Recovery Report</h2><p class="subtitle">Generated ${today}</p><p class="confidential">Private recovery information · Share only with your consent</p></div></div>
 <h2>Client Information</h2>
 <div class="info-grid">
   <div class="info-item"><strong>Full Name:</strong> ${reportName}</div>

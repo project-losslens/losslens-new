@@ -263,8 +263,8 @@ export default function Events() {
 
                   <div style={{ width: '100%', height: '170px', background: e.image_url ? `url(${e.image_url}) center/cover` : 'linear-gradient(135deg, rgba(255,255,255,0.08), rgb(var(--secondary-rgb) / 0.12))', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '10px', position: 'relative' }}>
                     {!e.image_url && <AppIcon name="calendar" size={48} style={{ opacity: 0.3, position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', color: '#FFFFFF' }} />}
-                    <span style={{ background: 'rgba(255,255,255,0.9)', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', color: 'var(--primary)', position: 'relative', zIndex: 'var(--z-base)' }}>{e.type || 'Event'}</span>
-                    <span style={{ background: 'rgba(255,255,255,0.9)', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', color: daysUntil === 'Today' ? '#FFFFFF' : isPast ? 'rgba(255,255,255,0.4)' : 'var(--primary)', position: 'relative', zIndex: 'var(--z-base)' }}>{daysUntil}</span>
+                    <span style={{ background: 'var(--primary)', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', color: 'var(--on-primary)', position: 'relative', zIndex: 'var(--z-base)' }}>{e.type || 'Event'}</span>
+                    <span style={{ background: daysUntil === 'Today' ? 'var(--danger)' : isPast ? 'rgba(255,255,255,0.08)' : 'var(--primary)', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', color: daysUntil === 'Today' ? 'var(--on-primary)' : isPast ? 'var(--text-muted)' : 'var(--on-primary)', position: 'relative', zIndex: 'var(--z-base)' }}>{daysUntil}</span>
                   </div>
 
                   <div style={{ padding: '16px' }}>

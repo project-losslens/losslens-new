@@ -4,7 +4,6 @@ import { PublicLayout } from '../../layouts/PublicLayout'
 import SupportChoices from '../../components/SupportChoices'
 import { useDocumentTitle } from '../../hooks'
 import { canShowInstall, showInstallPrompt } from '../../lib/pwa'
-import { pgsiPercentage, PGSI_EXPLANATIONS } from '../../lib/pgsi'
 import { PROTECTION_STATUS } from '../../config/protectionProducts'
 
 const INSTALL_DISMISSED_UNTIL = 'll_install_dismissed_until'
@@ -46,17 +45,11 @@ function InstallPrompt() {
 }
 
 function ResultExample() {
-  return <div className="hp-result" aria-label="Fictional PGSI result example">
-    <div className="hp-result__top"><span>PGSI self-check</span><span className="hp-example-label">Example</span></div>
-    <h3>PGSI score · % of maximum</h3>
-    <p className="hp-result__score">{pgsiPercentage(8)}<span>%</span></p>
-    <p className="hp-result__raw">8/27 points · Fictional answers</p>
-    <details className="hp-result__explanation">
-      <summary>Know more</summary>
-      <p>{PGSI_EXPLANATIONS.high}</p>
-      <p>Your answers cover the past 12 months. The percentage is a share of the possible points, not a probability or a measure of recovery. This is a screening tool, not a diagnosis.</p>
-    </details>
-    <p className="hp-result__note">This is not your result. No answers are collected in this example.</p>
+  return <div className="hp-result" aria-label="About the PGSI self-check">
+    <div className="hp-result__top"><span>PGSI self-check</span></div>
+    <h3>What the self-check shows you</h3>
+    <p className="hp-result__explanation" style={{ margin: '0 0 14px' }}>Nine questions about gambling over the past 12 months produce a score out of 27, shown as a percentage of the maximum. It is a screening tool, not a diagnosis — your dashboard explains what your own answers suggest and offers support you can choose to use.</p>
+    <p className="hp-result__note" style={{ margin: 0 }}><Link className="hp-text-link" to="/onboarding">Take the nine-question self-check</Link></p>
   </div>
 }
 

@@ -50,6 +50,7 @@ export default function Whispers() {
   const [initError, setInitError] = useState(false)
   const [activeMatch, setActiveMatch] = useState(null)
   const [matches, setMatches] = useState([])
+  const [matchesError, setMatchesError] = useState(false)
   const [messages, setMessages] = useState([])
   const [messageInputs, setMessageInputs] = useState({})
   const [sending, setSending] = useState(false)
@@ -114,7 +115,9 @@ export default function Whispers() {
 
   const fetchMatches = async (hash) => {
     if (!hash) return
-    const { data } = await supabase.from('whispers_matches').select('*').or(`user1_hash.eq.${hash},user2_hash.eq.${hash}`).order('created_at', { ascending: false }).limit(30)
+    const { data, error } = await supabase.from('whispers_matches').select('*').or(`user1_hash.eq.${hash},user2_hash.eq.${hash}`).order('created_at', { ascending: false }).limit(30)
+    if (error) { console.error('Whispers matches fetch failed:', error); setMatchesError(true); return }
+    setMatchesError(false)
     setMatches(data || [])
   }
 
@@ -385,6 +388,12 @@ export default function Whispers() {
             </>
           ) : (
             <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', WebkitOverflowScrolling: 'touch' }}>
+              {matchesError && (
+                <div role="alert" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '0.75rem', padding: '10px 12px', borderRadius: '10px', background: 'var(--danger-soft)', border: '1px solid var(--danger)' }}>
+                  <span className="fs-12" style={{ color: 'var(--danger)' }}>Could not refresh your whispers.</span>
+                  <button type="button" className="fs-12" onClick={() => identity?.hash && void fetchMatches(identity.hash)} style={{ background: 'transparent', border: '1px solid var(--danger)', color: 'var(--danger)', borderRadius: '100px', padding: '4px 12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Retry</button>
+                </div>
+              )}
               <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)' }}>
                 {[{ id: 'requests', label: ' Requests', count: pendingReceived.length }, { id: 'sent', label: ' Sent', count: pendingSent.length }, { id: 'chats', label: ' Chats', count: activeChats.length }].map(tab => (
                   <button key={tab.id} onClick={() => setActiveTab(tab.id)} className="fs-12" style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent', color: activeTab === tab.id ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{tab.label}{tab.count > 0 ? ` (${tab.count})` : ''}</button>

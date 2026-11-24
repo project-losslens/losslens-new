@@ -2436,8 +2436,9 @@ button:active {
 }
 
 .contact-icons--on-dark .contact-icons__link:hover {
-  color: var(--on-primary);
-  border-color: var(--on-primary);
+  background: var(--pale-lilac);
+  color: var(--plum);
+  border-color: var(--pale-lilac);
 }
 
 .contact-icons--warm .contact-icons__link {
@@ -2962,121 +2963,123 @@ html[data-low-data='true'] canvas:not([data-low-data-keep]) {
   .topo__lines { display: none; }
 }
 
-/* Orchid brand: wisteria canvas, pale lilac content, blackberry structure. */
+/* Royal purple theme: #7136CC canvas, #291447 chrome, #38224F surfaces,
+   soft lilac text, pale lilac primary buttons with deep purple text. */
 .plum-surface,
 .ll-landing .ll-hero,
 .ll-landing .ll-header,
 .ll-landing .ll-footer,
 .sidebar,
 .shell__header {
-  --text: #FFFFFF;
-  --text-primary: #FFFFFF;
-  --text-secondary: #EAD9F3;
-  --text-muted: #C8A6E0;
+  --text: #F3EAF8;
+  --text-primary: #F3EAF8;
+  --text-secondary: #DCCBE8;
+  --text-muted: #C4A9D4;
+  --text-secondary-rgb: 220 203 232;
+  --text-muted-rgb: 196 169 212;
   --primary: #EAD9F3;
   --primary-rgb: 234 217 243;
   --secondary: #C8A6E0;
-  --primary-soft: #8736B0;
-  --on-primary: #351044;
-  --border: rgb(234 217 243 / 0.3);
-  --ll-text: #FFFFFF;
-  --ll-muted: #EAD9F3;
+  --secondary-rgb: 200 166 224;
+  --primary-soft: rgb(234 217 243 / 0.16);
+  --on-primary: #291447;
+  --on-primary-rgb: 41 20 71;
+  --border: rgb(243 234 248 / 0.22);
+  --surface: #38224F;
+  --surface-2: #43295E;
+  --surface-3: #2E1C42;
+  --ll-text: #F3EAF8;
+  --ll-muted: #DCCBE8;
   --ll-accent: #EAD9F3;
-  --ll-on-accent: #351044;
+  --ll-on-accent: #291447;
   background: var(--plum);
-  color: #FFFFFF;
+  color: var(--lilac);
 }
 .plum-surface :focus-visible,
 .sidebar :focus-visible,
 .shell__header :focus-visible { outline-color: var(--lilac); }
 .sidebar__link:hover, .sidebar__logout:hover,
 .sidebar__link:focus-visible, .sidebar__logout:focus-visible { background: var(--purple); }
-.sidebar__link[aria-current="page"] { background: var(--purple); color: #FFFFFF; border-left: 3px solid var(--lilac); }
+.sidebar__link[aria-current="page"] { background: var(--purple); color: var(--lilac); border-left: 3px solid var(--pale-lilac); }
 .sidebar__brand, .sidebar__section-title, .sidebar__section h2 { color: var(--lilac); }
-.shell__header .shell__toggle { background: transparent; color: #FFFFFF; border-color: rgb(234 217 243 / 0.4); }
+.shell__header .shell__toggle { background: transparent; color: var(--lilac); border-color: rgb(234 217 243 / 0.4); }
 .shell__account-menu,
 .ll-landing .ll-phone {
-  --text: #351044;
-  --text-primary: #351044;
-  --text-secondary: #351044;
-  --text-muted: #351044;
-  --primary: #8736B0;
-  --primary-rgb: 135 54 176;
-  --secondary: #8736B0;
-  --primary-soft: #C8A6E0;
-  --on-primary: #FFFFFF;
-  --border: rgb(53 16 68 / 0.16);
-  --ll-text: #351044;
-  --ll-muted: #351044;
-  --ll-accent: #8736B0;
-  background: var(--lilac);
-  color: var(--ink);
+  --text: #F3EAF8;
+  --text-primary: #F3EAF8;
+  --text-secondary: #DCCBE8;
+  --text-muted: #C4A9D4;
+  --primary: #EAD9F3;
+  --primary-rgb: 234 217 243;
+  --secondary: #C8A6E0;
+  --primary-soft: rgb(234 217 243 / 0.16);
+  --on-primary: #291447;
+  --border: rgb(243 234 248 / 0.22);
+  --ll-text: #F3EAF8;
+  --ll-muted: #DCCBE8;
+  --ll-accent: #EAD9F3;
+  background: var(--surface-2);
+  color: var(--text);
 }
-.dashboard-summary .risk-badge { background: var(--lilac); color: var(--ink); }
-/* Identical purple treatment for PGSI results at every score. */
-.pgsi-dashboard { background: var(--lilac); }
+.dashboard-summary .risk-badge { background: var(--primary-soft); color: var(--lilac); }
+.pgsi-dashboard { background: var(--surface); }
 .shell, .shell__main, .shell__content, .ll-landing { background-color: var(--canvas); }
 .topo { background: var(--canvas); }
 .card, .dash-section, .stat-card, .pgsi-dialog, .pgsi-onboarding > .card,
-.crisis-access__sheet, .mobile-nav__sheet { background-color: var(--lilac); }
+.crisis-access__sheet, .mobile-nav__sheet { background-color: var(--surface); color: var(--text); }
 .mobile-nav { background: var(--plum); border-top-color: rgb(234 217 243 / 0.3); }
 .mobile-nav__item { color: var(--lilac); }
-.mobile-nav__item--active, .mobile-nav__item[aria-current] { color: #FFFFFF; background: var(--purple); }
+.mobile-nav__item--active, .mobile-nav__item[aria-current] { color: var(--lilac); background: var(--purple); }
 .mobile-nav__item:focus-visible { outline-color: var(--lilac); }
-/* White is confined to small editing surfaces on the light theme. */
 :is(.shell__content, .pgsi-onboarding, .ll-landing) input:not([type="radio"]):not([type="checkbox"]),
 :is(.shell__content, .pgsi-onboarding, .ll-landing) textarea,
 :is(.shell__content, .pgsi-onboarding, .ll-landing) select,
 .form-group input, .form-group textarea, .form-group select {
-  background-color: #FFFFFF !important;
-  color: var(--ink) !important;
+  background-color: var(--surface-3) !important;
+  color: var(--text) !important;
 }
-.oloo-chat-panel { background: var(--lilac); }
-.oloo-conversation { background: var(--canvas); }
-.oloo-chat-header { color: #FFFFFF; }
+.oloo-chat-panel { background: var(--surface); }
+.oloo-conversation { background: var(--surface-3); }
+.oloo-chat-header { color: var(--lilac); }
 /* Public styles load with route chunks: these selectors intentionally outrank them. */
 .ll-landing .ll-header--solid { background: var(--plum); }
-.ll-landing .ll-menu { background: var(--plum); color: #FFFFFF; }
-.ll-landing .ll-hero { background: linear-gradient(110deg, var(--blackberry) 0%, var(--blackberry) 35%, var(--orchid) 100%); }
+.ll-landing .ll-menu { background: var(--plum); color: var(--lilac); }
+.ll-landing .ll-hero { background: linear-gradient(110deg, var(--plum) 0%, var(--plum) 35%, var(--orchid) 100%); }
 .ll-landing .ll-hero .ll-btn--primary,
-.plum-surface .btn-primary { background: var(--lilac); color: var(--plum) !important; border-color: var(--lilac); }
+.plum-surface .btn-primary { background: var(--pale-lilac); color: var(--plum) !important; border-color: var(--pale-lilac); }
 .ll-landing .ll-hero .ll-btn--primary:hover,
-.plum-surface .btn-primary:hover { background: var(--canvas); color: var(--plum) !important; }
-.ll-landing .ll-hero .ll-btn--ghost { color: #FFFFFF !important; border-color: var(--lilac); }
-.ll-landing .ll-hero .ll-lens { color: var(--lilac); }
+.plum-surface .btn-primary:hover { background: #FFFFFF; color: var(--plum) !important; }
+.ll-landing .ll-hero .ll-btn--ghost { color: var(--lilac) !important; border-color: var(--pale-lilac); }
+.ll-landing .ll-hero .ll-lens { color: var(--pale-lilac); }
 .ll-landing .ll-section { background-color: var(--canvas); }
-.ll-landing .ll-section--tint { background-color: var(--canvas); }
+.ll-landing .ll-section--tint { background-color: var(--surface-2); }
 .ll-landing .ll-fact, .ll-landing .ll-eco__item,
 .ll-landing .ll-protection__card, .ll-landing .ll-pricing__card,
-.ll-landing .ll-faq__item { background: var(--lilac); }
-.ll-landing .ll-oloo__panel { background: var(--plum); --ll-text: #FFFFFF; --ll-muted: #EAD9F3; --ll-accent: #EAD9F3; color: #FFFFFF; }
-.ll-landing .ll-oloo__panel p { color: #FFFFFF; }
+.ll-landing .ll-faq__item { background: var(--surface); }
+.ll-landing .ll-oloo__panel { background: var(--plum); --ll-text: #F3EAF8; --ll-muted: #DCCBE8; --ll-accent: #EAD9F3; color: #F3EAF8; }
+.ll-landing .ll-oloo__panel p { color: #DCCBE8; }
 .ll-landing .ll-footer { background: var(--plum); }
 .ll-landing .protection-page { padding-top: 0 !important; padding-inline: 0; }
 .protection-hero { padding: var(--space-7) 0 var(--space-6); margin-bottom: var(--space-7); }
-.ll-landing .ll-protection-header { background: transparent; color: #FFFFFF !important; }
-.protection-hero .ll-crisis__note { color: var(--lilac); }
-/* Keep the score treatment consistent across every PGSI band. */
-.pgsi-dashboard .pgsi-percentage { color: var(--blackberry); }
+.ll-landing .ll-protection-header { background: transparent; color: var(--lilac) !important; }
+.protection-hero .ll-crisis__note { color: var(--pale-lilac); }
+.pgsi-dashboard .pgsi-percentage { color: var(--lilac); }
 .shell .dashboard-summary { background: var(--plum) !important; }
-.footer { background: var(--plum); color: #FFFFFF; }
-.footer p, .footer a { color: var(--lilac); }
+.footer { background: var(--plum); color: var(--lilac); }
+.footer p, .footer a { color: var(--pale-lilac); }
 .support-hours { color: var(--text-secondary); }
-.ll-landing .ll-oloo__panel li { color: #FFFFFF; }
-.ll-landing .ll-header .ll-btn--primary { background: var(--lilac); color: var(--plum) !important; }
-/* Small orchid links need pale lilac behind them: 4.94:1 rather than 3.14:1 on wisteria. */
+.ll-landing .ll-oloo__panel li { color: #DCCBE8; }
+.ll-landing .ll-header .ll-btn--primary { background: var(--pale-lilac); color: var(--plum) !important; }
 .ll-landing .ll-section a:not(.ll-btn),
 .ll-landing .ll-text-link,
 .shell__content a:not([class]),
-.shell__content .see-all { color: var(--orchid); background-color: var(--pale-lilac); }
-.ll-landing .ll-section--tint { background-color: var(--pale-lilac); }
-.ll-landing .ll-eyebrow { color: var(--blackberry); }
+.shell__content .see-all { color: var(--secondary); }
+.ll-landing .ll-eyebrow { color: var(--pale-lilac); }
 .ll-landing .ll-hero .ll-eyebrow,
 .ll-landing .ll-header .ll-eyebrow,
 .ll-landing .protection-hero .ll-eyebrow { color: var(--pale-lilac); }
 .protection-hero { box-shadow: inset 0 -3px var(--orchid); }
-/* Hover/selection pairs stay readable without changing control geometry. */
-.btn-primary:hover, .ll-landing .ll-btn--primary:hover { background: var(--blackberry); color: #FFFFFF !important; }
-.btn-ghost:hover { background: var(--wisteria); color: var(--blackberry); }
-.ll-landing .ll-section a:not(.ll-btn):hover { color: var(--blackberry); }
-.ll-landing .ll-header .ll-btn--primary:hover { background: var(--wisteria); color: var(--blackberry) !important; }
+.btn-primary:hover, .ll-landing .ll-btn--primary:hover { background: #FFFFFF; color: var(--plum) !important; }
+.btn-ghost:hover { background: var(--primary-soft); color: var(--lilac); }
+.ll-landing .ll-section a:not(.ll-btn):hover { color: var(--pale-lilac); }
+.ll-landing .ll-header .ll-btn--primary:hover { background: var(--wisteria); color: var(--lilac) !important; }

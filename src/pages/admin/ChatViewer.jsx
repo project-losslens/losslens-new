@@ -12,6 +12,8 @@ function ChatViewer() {
   const [conversations, setConversations] = useState([])
   const [loading, setLoading] = useState(true)
   const [chatLoading, setChatLoading] = useState(false)
+  const [usersError, setUsersError] = useState(false)
+  const [chatError, setChatError] = useState(false)
   const [search, setSearch] = useState('')
   const [showUserList, setShowUserList] = useState(true)
 
@@ -30,9 +32,11 @@ function ChatViewer() {
       if (error) {
         console.error('Users fetch error:', error)
         setUsers([])
+        setUsersError(true)
         setLoading(false)
         return
       }
+      setUsersError(false)
 
       const uniqueUsers = []
       const seen = new Set()
@@ -51,6 +55,7 @@ function ChatViewer() {
     } catch (err) {
       console.error('Fetch users error:', err)
       setUsers([])
+      setUsersError(true)
     } finally {
       setLoading(false)
     }
@@ -73,14 +78,17 @@ function ChatViewer() {
       if (error) {
         console.error('Conversations fetch error:', error)
         setConversations([])
+        setChatError(true)
         setChatLoading(false)
         return
       }
 
+      setChatError(false)
       setConversations(data || [])
     } catch (err) {
       console.error('Fetch conversations error:', err)
       setConversations([])
+      setChatError(true)
     } finally {
       setChatLoading(false)
     }
@@ -156,6 +164,11 @@ function ChatViewer() {
 
             {loading ? (
               <BrandLoader variant="section" />
+            ) : usersError ? (
+              <div role="alert" style={{ padding: '1rem', textAlign: 'center' }}>
+                <p style={{ color: 'var(--danger)', fontSize: '13px', margin: '0 0 10px' }}>Could not load chat users.</p>
+                <button type="button" className="btn-secondary" onClick={() => { setLoading(true); void fetchUsers() }}>Try again</button>
+              </div>
             ) : filteredUsers.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: '12px', textAlign: 'center', padding: '1rem' }}>
                 {search ? 'No users found' : 'No chat history yet'}
@@ -226,6 +239,11 @@ function ChatViewer() {
               </div>
             ) : chatLoading ? (
               <BrandLoader variant="section" />
+            ) : chatError ? (
+              <div role="alert" style={{ textAlign: 'center', padding: '3rem' }}>
+                <p style={{ color: 'var(--danger)', fontSize: '13px', margin: '0 0 10px' }}>Could not load conversations.</p>
+                <button type="button" className="btn-secondary" onClick={() => void fetchConversations(selectedUser.id)}>Try again</button>
+              </div>
             ) : conversations.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
                 <p style={{ fontSize: '13px' }}>No conversations found for this user.</p>

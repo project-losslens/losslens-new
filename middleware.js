@@ -24,23 +24,23 @@ const ALLOWLIST = [
 ]
 
 const GATE_HTML = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>LossLens — Access required</title><style>
-:root{color-scheme:light;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#FAF7F2;color:#292329}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 85% 0,rgba(101,59,96,.10),transparent 40%),#FAF7F2}
-main{width:min(100%,440px);padding:32px 24px;border:1px solid rgba(41,35,41,.16);border-radius:20px;background:#FFFFFF;box-shadow:0 24px 64px rgba(41,35,41,.12)}
-.brand{margin:0 0 24px;font-size:1.55rem;font-weight:750;letter-spacing:-.04em}.brand span{color:#653B60}
-.chip{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(183,121,50,.12);color:#7B4A17;font-size:.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+:root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#7136CC;color:#F3EAF8}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 85% 0,rgba(41,20,71,.35),transparent 45%),#7136CC}
+main{width:min(100%,440px);padding:32px 24px;border:1px solid rgba(243,234,248,.2);border-radius:20px;background:#38224F;box-shadow:0 24px 64px rgba(41,20,71,.45)}
+.brand{margin:0 0 24px;font-size:1.55rem;font-weight:750;letter-spacing:-.04em}.brand span{color:#EAD9F3}
+.chip{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(216,154,78,.18);color:#F2B95C;font-size:.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
 h1{margin:18px 0 10px;font-size:clamp(2rem,7vw,2.5rem);line-height:1.1;letter-spacing:-.03em}
-.intro{margin:0 0 24px;color:#4B444B;line-height:1.6;font-size:1rem}
-label{display:block;margin-bottom:8px;color:#4B444B;font-size:.9rem;font-weight:600}
-input{width:100%;min-height:48px;padding:12px 14px;border:1px solid rgba(41,35,41,.25);border-radius:10px;background:#FFFFFF;color:#292329;font-size:1rem}
-input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #653B60;outline-offset:3px}
-button{width:100%;min-height:48px;margin-top:14px;border:0;border-radius:999px;background:#653B60;color:#FFFFFF;font-size:1rem;font-weight:700;cursor:pointer}
-.error{min-height:1.4em;margin:12px 0 0;color:#A12E3E;font-size:.9rem}
-.access{display:flex;align-items:center;justify-content:center;gap:12px;margin:22px 0 0;color:#4B444B;font-size:.9rem}
-.icon-link{display:grid;place-items:center;width:42px;height:42px;border:1px solid rgba(41,35,41,.2);border-radius:50%;color:#653B60}
+.intro{margin:0 0 24px;color:#DCCBE8;line-height:1.6;font-size:1rem}
+label{display:block;margin-bottom:8px;color:#DCCBE8;font-size:.9rem;font-weight:600}
+input{width:100%;min-height:48px;padding:12px 14px;border:1px solid rgba(243,234,248,.3);border-radius:10px;background:#2E1C42;color:#F3EAF8;font-size:1rem}
+input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #EAD9F3;outline-offset:3px}
+button{width:100%;min-height:48px;margin-top:14px;border:0;border-radius:999px;background:#EAD9F3;color:#291447;font-size:1rem;font-weight:700;cursor:pointer}
+.error{min-height:1.4em;margin:12px 0 0;color:#F2768A;font-size:.9rem}
+.access{display:flex;align-items:center;justify-content:center;gap:12px;margin:22px 0 0;color:#DCCBE8;font-size:.9rem}
+.icon-link{display:grid;place-items:center;width:42px;height:42px;border:1px solid rgba(243,234,248,.3);border-radius:50%;color:#EAD9F3}
 .icon-link svg{width:19px;height:19px;fill:currentColor}
-.crisis{margin:20px 0 0;padding-top:18px;border-top:1px solid rgba(41,35,41,.14);color:#4B444B;font-size:.9rem;line-height:1.5;text-align:center}
-.crisis a{color:#653B60;font-weight:700}
+.crisis{margin:20px 0 0;padding-top:18px;border-top:1px solid rgba(243,234,248,.16);color:#DCCBE8;font-size:.9rem;line-height:1.5;text-align:center}
+.crisis a{color:#EAD9F3;font-weight:700}
 </style></head><body><main><p class="brand">Loss<span>Lens</span></p><span class="chip">Under development</span><h1>We&rsquo;re still building LossLens</h1><p class="intro">LossLens is a free, private recovery companion for people affected by betting in Kenya. If you were given access, enter the password below.</p><form method="POST" action="/__gate"><input type="hidden" name="next" value="%NEXT%"><label for="gate-password">Access password</label><input id="gate-password" name="password" type="password" autocomplete="current-password" required autofocus><button type="submit">Enter</button><p class="error" role="alert" aria-live="polite">%ERROR%</p></form><div class="access"><span>Need access?</span><a class="icon-link" href="mailto:projectlosslens@gmail.com?subject=Access%20request" aria-label="Request access by email"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h13A2.5 2.5 0 0 1 21 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 18.5v-13ZM5 6v.25l7 5.25 7-5.25V6H5Zm14 2.75-6.4 4.8a1 1 0 0 1-1.2 0L5 8.75v9.75h14v-9.75Z"/></svg></a></div><p class="crisis">In crisis? Call <a href="tel:${primaryHelpline.tel}">${escapeHtml(primaryHelpline.name)} ${escapeHtml(primaryHelpline.phone)}</a>.</p></main></body></html>`
 
 function escapeHtml(value = '') {
