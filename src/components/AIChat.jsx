@@ -10,7 +10,7 @@ import { useI18n } from '../i18n'
 const OlooCharacter = ({ size = 40 }) => (
   <img
     className="oloo-avatar"
-    src="/oloo-portrait.png"
+    src="/oloo-portrait-128.jpg"
     alt=""
     width={size}
     height={size}

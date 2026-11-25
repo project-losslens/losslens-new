@@ -1,6 +1,8 @@
 @import '@fontsource-variable/bricolage-grotesque';
 @import '@fontsource-variable/instrument-sans';
 
+html[data-low-data='true'] body::before { background-image: none; }
+
 :root {
   color-scheme: dark;
   --blackberry: #291447;

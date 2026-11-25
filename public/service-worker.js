@@ -3,7 +3,7 @@
 // - Never caches /api/, Supabase, or auth endpoints.
 // - Offline fallback page lists crisis helplines (works with no network).
 
-const CACHE_VERSION = 'losslens-v10'
+const CACHE_VERSION = 'losslens-v11'
 const CACHE_NAME = `${CACHE_VERSION}-precache`
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`
 
@@ -56,7 +56,25 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url)
   if (shouldBypass(url)) return
 
-  // Network-first for everything; cache only same-origin GET successes.
+  if (url.origin !== self.location.origin) return
+  const immutableAsset = /^\/assets\/[^/]+-[\w-]{8}\.(?:js|css|woff2)$/.test(url.pathname)
+    || url.pathname === '/oloo-portrait-128.jpg'
+  if (immutableAsset) {
+    event.respondWith((async () => {
+      const cache = await caches.open(RUNTIME_CACHE).catch(() => null)
+      const cached = await cache?.match(request).catch(() => null)
+      if (cached) return cached
+      const response = await fetch(request)
+      const cacheControl = response.headers.get('Cache-Control') || ''
+      if (response.status === 200 && !cacheControl.includes('no-store')) {
+        await cache?.put(request, response.clone()).catch(() => {})
+      }
+      return response
+    })())
+    return
+  }
+
+  // Keep HTML and other unversioned resources network-first.
   event.respondWith(
     fetch(request)
       .then((response) => {
