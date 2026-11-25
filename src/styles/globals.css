@@ -5,7 +5,7 @@ body {
 .portal-page {
   display: grid;
   gap: 1.25rem;
-  max-width: 1120px;
+  max-width: none;
   margin: 0 auto;
   padding: 1.5rem;
   color: var(--text);
@@ -750,8 +750,7 @@ h1 em {
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 16px;
   padding: 0 2rem 2rem;
-  max-width: 960px;
-  margin: 0 auto;
+  max-width: none;
 }
 
 .pricing-card {
@@ -867,8 +866,7 @@ h1 em {
 /* ─── DASHBOARD ─── */
 .dashboard {
   padding: 1.5rem 1.5rem 6rem;
-  max-width: 720px;
-  margin: 0 auto;
+  max-width: none;
 }
 
 .dash-header {
@@ -915,7 +913,7 @@ h1 em {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 10px;
   margin-bottom: 1.5rem;
 }
@@ -2751,7 +2749,7 @@ button:active {
   color: var(--text);
 }
 .pgsi-dashboard h2 { font-size: 1.125rem; }
-.pgsi-onboarding { position: relative; max-width: 800px; margin: 0 auto; padding: 24px 16px 220px; }
+.pgsi-onboarding { position: relative; max-width: 960px; margin: 0 auto; padding: 24px 16px 220px; }
 .pgsi-onboarding > .card { position: relative; z-index: 1; background: var(--surface); padding: 24px; }
 .support-choices { display: grid; gap: 12px; }
 .support-choices .card { background: var(--surface-2); padding: 16px; }
@@ -3152,46 +3150,46 @@ html[data-low-data='true'] canvas:not([data-low-data-keep]) {
 .ll-landing .ll-section a:not(.ll-btn):hover { color: var(--pale-lilac); }
 .ll-landing .ll-header .ll-btn--primary:hover { background: var(--wisteria); color: var(--lilac) !important; }
 
-/* One shared photograph; reserve space before loading to avoid layout shifts.
-   Keep controls on solid plum and faces in a separate, unobstructed strip. */
+/* A single fixed photograph under every route, including independently scrolling panels. */
 html { background: #7136CC; }
+body { isolation: isolate; background: transparent; }
 body::before {
   content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: linear-gradient(100deg, rgb(41 20 71 / .95), rgb(113 54 204 / .72)),
-    var(--hero-photo) right center / cover no-repeat, #7136CC;
+  background-color: #7136CC;
+  background-image: linear-gradient(90deg, rgb(41 20 71 / .66), rgb(41 20 71 / .22)), var(--hero-photo);
+  background-size: cover; background-repeat: no-repeat; background-position: right center;
 }
-.shell__header, .oloo-chat-header { flex-wrap: wrap; background-image: none !important; }
-.ll-landing .ll-header, .ll-landing .ll-header--solid { background: var(--plum); }
-.shell__header::after,
-.ll-landing:not(.ll-homepage) #public-main::before,
-.ll-landing > main::before,
-.pgsi-onboarding::before,
-.family-join::before,
-.auth-retry::before,
-.auth-container:not(.ll-landing *)::before,
-.oloo-chat-header::after {
-  content: ''; display: block; flex: 0 0 100%; height: 128px;
-  background: var(--hero-photo) right center / auto 180px no-repeat, #7136CC;
-  pointer-events: none;
+.topo { display: none; }
+#root, .shell, .shell__main, .shell__content, .page-content, .portal-page,
+.ll-landing, #public-main, .auth-container, .pgsi-onboarding, .family-join,
+.ll-landing > main, .ll-landing .ll-section, .ll-landing .ll-band,
+.ll-landing .ll-hero, .ll-landing .protection-hero,
+.ll-landing.ll-homepage .hp-main > section,
+.ll-homepage .hp-hero__type, .ll-homepage .hp-install {
+  background: transparent;
 }
-.shell__header::after { margin-top: 4px; border-radius: 8px; }
-.pgsi-onboarding::before { margin-bottom: 16px; border-radius: 12px; }
-.auth-container:not(.ll-landing *) { flex-direction: column; gap: 16px; }
-.auth-container:not(.ll-landing *)::before { flex: none; width: 100%; max-width: 440px; border-radius: 12px; }
-.oloo-chat-header::after { height: 96px; background-size: auto 148px; border-radius: 6px; }
+.shell__header, .ll-landing .ll-header, .ll-landing .ll-header--solid {
+  background: rgb(41 20 71 / .84);
+}
+/* Individual reading surfaces stay dark; gaps reveal the same viewport photograph. */
+.ll-homepage .hp-hero__copy,
+.ll-homepage .hp-help__row,
+.ll-homepage .hp-product__copy,
+.ll-homepage .hp-support__intro,
+.ll-homepage .hp-protection__grid {
+  background: rgb(41 20 71 / .9); border-radius: 12px;
+}
+.ll-homepage .hp-help__row, .ll-homepage .hp-product__copy,
+.ll-homepage .hp-support__intro, .ll-homepage .hp-protection__grid { padding: 24px; }
+.ll-homepage .hp-help__row { margin-bottom: 16px; }
+.ll-homepage .hp-hero__type { text-shadow: 0 2px 12px #291447, 0 0 32px #291447; }
+.oloo-chat-panel { background: transparent !important; }
+.oloo-conversation { background: transparent; }
+.pgsi-onboarding .pgsi-dialog__header { flex-wrap: wrap; }
 @media (max-width: 48rem) {
-  .shell__header::after { height: 112px; background-size: auto 164px; }
-}
-
-.family-join[style*="flex"] { flex-direction: column; gap: 16px; }
-.family-join::before, .auth-retry::before { flex: none; width: 100%; }
-
-/* Full-width Protection routes bypass PublicLayout. Keep their reading area solid. */
-.ll-landing > main { padding-top: 0 !important; background-color: var(--plum); }
-.ll-landing > main::before { margin-bottom: 16px; }
-.shell__content { background-color: var(--plum); }
-@media (max-width: 48rem) {
-  .pgsi-onboarding .pgsi-dialog__header { flex-wrap: wrap; }
+  body::before { background-position: 82% center; }
+  .ll-homepage .hp-hero__copy { margin: 12px; }
+  .ll-homepage .hp-hero__type { margin: 12px; }
   .pgsi-onboarding .pgsi-dialog__header h1 { flex-basis: 100%; }
   .user-management-tabs { flex-wrap: wrap; }
   .user-management-tabs > button { flex: 1 1 140px !important; overflow-wrap: normal; white-space: normal !important; }

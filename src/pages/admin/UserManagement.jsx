@@ -262,7 +262,7 @@ export default function UserManagement() {
           </div>
         </div>
 
-        <div style={{ padding: '1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ padding: '1.5rem', maxWidth: '100%' }}>
           {/* Main Tabs: Users | Payments */}
           <div className="user-management-tabs" style={{ display: 'flex', gap: '4px', marginBottom: '1rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)', overflowX: 'auto' }}>
             <button aria-pressed={activeTab === 'users'} onClick={() => { setActiveTab('users'); setSearch(''); setFilter('all') }}

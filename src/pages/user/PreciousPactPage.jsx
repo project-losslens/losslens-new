@@ -347,7 +347,7 @@ export default function LossLensPactPage() {
           </div>
         </div>
 
-        <div style={{ padding: '1rem', maxWidth: '650px', margin: '0 auto' }}>
+        <div style={{ padding: '1rem', maxWidth: '100%' }}>
 
           {/* Explanation Card */}
           <div className="dash-section" style={{ marginBottom: '0.75rem', borderColor: 'var(--primary)' }}>

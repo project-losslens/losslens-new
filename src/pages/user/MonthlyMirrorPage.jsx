@@ -494,7 +494,7 @@ export default function MonthlyMirrorPage() {
           </div>
         )}
 
-        <div style={{ padding: '1rem', maxWidth: '650px', margin: '0 auto' }}>
+        <div style={{ padding: '1rem', maxWidth: '100%' }}>
 
           {/* Review Mode */}
           {reviewMode && reviewBlob && (

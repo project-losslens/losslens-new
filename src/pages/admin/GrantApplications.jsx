@@ -151,7 +151,7 @@ export default function GrantApplications() {
           </div>
         </div>
 
-        <div style={{ padding: '1.5rem', maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ padding: '1.5rem', maxWidth: '100%' }}>
           {/* Filters */}
           <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <input type="text" placeholder=" Search applications..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}

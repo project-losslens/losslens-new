@@ -189,7 +189,7 @@ export default function InsurancePartners() {
           </div>
         </div>
 
-        <div style={{ padding: '1.5rem', maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ padding: '1.5rem', maxWidth: '100%' }}>
           <p style={{ color: 'var(--text-muted)' }}>Manage partner contacts and commercial terms here. <Link to="/super-admin/insurers">Manage insurer portal accounts</Link>.</p>
           {/* Form Modal */}
           {showForm && (

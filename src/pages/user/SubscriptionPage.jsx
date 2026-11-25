@@ -213,7 +213,7 @@ export default function SubscriptionPage() {
 
   return (
     <div className="page-root">
-      <div className="dashboard" style={{ padding: '2rem 1.5rem', maxWidth: '600px', margin: '0 auto' }}>
+      <div className="dashboard" style={{ padding: '2rem 1.5rem', maxWidth: '760px' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div className="pill" style={{ marginBottom: '1rem' }}>
             {isCompanyPlan ? 'Company Plan' : currentPlan === PLANS.FREE ? 'Free Plan' : 'Premium Member'}

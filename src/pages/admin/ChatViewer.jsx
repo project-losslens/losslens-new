@@ -249,7 +249,7 @@ function ChatViewer() {
                 <p style={{ fontSize: '13px' }}>No conversations found for this user.</p>
               </div>
             ) : (
-              <div style={{ maxWidth: '700px', margin: '0 auto', width: '100%' }}>
+              <div style={{ maxWidth: '100%', width: '100%' }}>
                 {Object.entries(groupedConversations).map(([date, msgs]) => (
                   <div key={date} style={{ marginBottom: '24px' }}>
                     <div style={{

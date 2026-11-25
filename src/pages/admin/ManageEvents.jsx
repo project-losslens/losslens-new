@@ -342,7 +342,7 @@ export default function ManageEvents() {
           </div>
         )}
 
-        <div style={{ padding: '1.5rem', maxWidth: '1100px', margin: '0 auto' }}>
+        <div style={{ padding: '1.5rem', maxWidth: '100%' }}>
           {/* Tabs */}
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)', overflowX: 'auto' }}>
             {[

@@ -220,7 +220,7 @@ export default function ManageResources() {
           </div>
         )}
 
-        <div style={{ padding: '1.5rem', maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ padding: '1.5rem', maxWidth: '100%' }}>
           {/* Controls */}
           <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <div style={{ position: 'relative', flex: '0 0 auto' }}>

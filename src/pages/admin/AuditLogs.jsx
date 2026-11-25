@@ -193,7 +193,7 @@ export default function AuditLogs() {
           </div>
         </div>
 
-        <div style={{ padding: '1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ padding: '1.5rem', maxWidth: '100%' }}>
           {/* Filters */}
           <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <input type="text" placeholder=" Search logs..." value={search} onChange={e => setSearch(e.target.value)}

@@ -283,7 +283,7 @@ export default function FamilyJoin() {
         </p>
       </div>
 
-      <div style={{ maxWidth: '600px', margin: '0 auto', padding: '1.5rem' }}>
+      <div style={{ maxWidth: '760px', margin: '0 auto', padding: '1.5rem' }}>
         {/* Progress Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', marginBottom: '1.5rem' }}>
           {permissions.includes(PERMISSIONS.STREAK) && (

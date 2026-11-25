@@ -236,7 +236,7 @@ export default function B2BClients() {
           </div>
         </div>
 
-        <div style={{ padding: '1.5rem', maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ padding: '1.5rem', maxWidth: '100%' }}>
           {/* Form Modal */}
           {showForm && (
             <div style={{ position: 'fixed', inset: 0, background: 'rgb(var(--bg-rgb) / 0.92)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>

@@ -25,7 +25,7 @@ export default function SystemSettings() {
   useEffect(() => { void refresh() }, [refresh])
   if (state.loading) return <BrandLoader variant="section" />
   return (
-    <section className="portal-page" style={{ maxWidth: 900, margin: '0 auto', padding: 24 }}>
+    <section className="portal-page" style={{ padding: 24 }}>
       <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2>System settings</h2>
         <button type="button" className="btn-ghost" onClick={refresh}>Refresh status</button>

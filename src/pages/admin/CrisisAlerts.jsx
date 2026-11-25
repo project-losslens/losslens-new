@@ -131,7 +131,7 @@ export default function CrisisAlerts() {
           </div>
         )}
 
-        <div style={{ padding: '1.5rem', maxWidth: '900px', margin: '0 auto' }}>
+        <div style={{ padding: '1.5rem', maxWidth: '100%' }}>
           <div style={{ display: 'flex', gap: '4px', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)' }}>
             {[{ id: 'open', label: ` Open (${alerts.length})` }, { id: 'resolved', label: ` Resolved (${resolved.length})` }].map(tab => (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === tab.id ? (tab.id === 'open' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.12)') : 'transparent', color: activeTab === tab.id ? (tab.id === 'open' ? 'var(--text)' : 'var(--primary)') : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === tab.id ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>{tab.label}</button>

@@ -200,7 +200,7 @@ export default function UserAnalytics() {
           </div>
         </div>
 
-        <div style={{ padding: '1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ padding: '1.5rem', maxWidth: '100%' }}>
 
           {/* Key Stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px', marginBottom: '1.5rem' }}>

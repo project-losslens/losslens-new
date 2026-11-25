@@ -163,7 +163,7 @@ export default function Pricing() {
 
         {/* Individual Plans */}
         {planType === 'individual' && (
-          <section className="pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', padding: '0 2rem 2rem', maxWidth: '700px', margin: '0 auto' }} aria-label="Individual pricing plans">
+          <section className="pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', padding: '0 2rem 2rem' }} aria-label="Individual pricing plans">
             {individualPlans.map(plan => (
               <article
                 key={plan.id}

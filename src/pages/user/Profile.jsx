@@ -552,7 +552,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
           </div>
         </div>
 
-        <div style={{ padding: '1rem', maxWidth: '650px', margin: '0 auto' }}>
+        <div style={{ padding: '1rem', maxWidth: '100%' }}>
 
           {/* Stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: '6px', marginBottom: '0.75rem' }}>

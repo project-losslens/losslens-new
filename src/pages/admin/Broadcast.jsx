@@ -167,7 +167,7 @@ export default function Broadcast() {
           </div>
         </div>
 
-        <div style={{ padding: '1.5rem', maxWidth: '900px', margin: '0 auto' }}>
+        <div style={{ padding: '1.5rem', maxWidth: '100%' }}>
           {/* Compose */}
           <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '20px', marginBottom: '1.5rem' }}>
             <h3 style={{ color: 'var(--primary)', fontSize: '15px', margin: '0 0 1rem' }}> Compose Message</h3>
