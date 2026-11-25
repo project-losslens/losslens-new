@@ -630,8 +630,11 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
   const [reason, setReason] = useState('')
   const [confirmation, setConfirmation] = useState('')
   const [stepUpPassword, setStepUpPassword] = useState('')
+  const [showRolePassword, setShowRolePassword] = useState(false)
   const [role, setRole] = useState(user.role || 'user')
   const [insurers, setInsurers] = useState([])
+  const [insurerStatus, setInsurerStatus] = useState('loading')
+  const [insurerRefresh, setInsurerRefresh] = useState(0)
   const [therapists, setTherapists] = useState([])
   const [insurerId, setInsurerId] = useState('')
   const [acknowledgeOpenWork, setAcknowledgeOpenWork] = useState(false)
@@ -654,20 +657,36 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
   const confirmationMatches = confirmation.trim() === expectedConfirmation
 
   const roleOptions = useMemo(() => ROLES.filter((item) => item !== user.role), [user.role])
+  const selectedInsurer = insurers.find(item => item.id === insurerId)
+
+  const refreshInsurers = () => {
+    setInsurerStatus('loading')
+    setInsurerRefresh(previous => previous + 1)
+  }
+
+  useEffect(() => {
+    if (role !== 'insurer' || role === user.role) return
+    let active = true
+    const loadInsurers = async () => {
+      const { data, error } = await supabase.from('insurers').select('id, name').eq('status', 'active').order('name')
+      if (!active) return
+      setInsurers(error ? [] : data || [])
+      setInsurerStatus(error ? 'error' : 'ready')
+    }
+    void loadInsurers()
+    return () => { active = false }
+  }, [role, user.role, insurerRefresh])
 
   useEffect(() => {
     let active = true
     const loadSupportingData = async () => {
-      const [insurerResult, therapistResult, historyResult] = await Promise.all([
-        supabase.from('insurers').select('id, name').eq('status', 'active').order('name'),
+      const [therapistResult, historyResult] = await Promise.all([
         supabase.from('profiles').select('id, full_name, username').eq('role', 'therapist').eq('status', 'active'),
         supabase.from('audit_logs').select('id, action, metadata, created_at')
           .eq('target_table', 'profiles').eq('target_id', user.id)
           .in('action', ACTIONS).order('created_at', { ascending: false }).limit(10),
       ])
       if (!active) return
-      if (insurerResult.error) toast.error(insurerResult.error.message)
-      else setInsurers(insurerResult.data || [])
       if (therapistResult.error) toast.error(therapistResult.error.message)
       else setTherapists(therapistResult.data || [])
       if (historyResult.error) toast.error(historyResult.error.message)
@@ -683,6 +702,7 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
     if (action === 'set-role' && !stepUpPassword) { toast.error('Enter your super-admin password.'); return }
     const submittedPassword = stepUpPassword
     setStepUpPassword('')
+    setShowRolePassword(false)
     setBusy(true)
     let response, error
     try {
@@ -718,7 +738,7 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
 
   const saveRole = async () => {
     if (!canEditRole) return
-    if (role === 'insurer' && !insurerId) { toast.error(t('users.selectInsurer')); return }
+    if (role === 'insurer' && (insurerStatus !== 'ready' || !selectedInsurer)) { toast.error(t('users.selectInsurer')); return }
     const result = await runAction('set-role', {
       newRole: role,
       insurerId: role === 'insurer' ? insurerId : null,
@@ -818,19 +838,31 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
               <div className="form-group">
                 <p>Current role: <strong>{user.role?.replace('_', ' ')}</strong></p>
                 <label htmlFor="account-role">New role</label>
-                <select id="account-role" value={role} onChange={(event) => { setRole(event.target.value); setRoleRequestId(crypto.randomUUID()) }}>
+                <select id="account-role" value={role} onChange={(event) => {
+                  setRole(event.target.value)
+                  setRoleRequestId(crypto.randomUUID())
+                  if (event.target.value === 'insurer') refreshInsurers()
+                }}>
                   <option value={user.role}>{t(ROLE_LABELS[user.role] || 'users.roleUser')}</option>
                   {roleOptions.map((item) => <option key={item} value={item}>{t(ROLE_LABELS[item])}</option>)}
                 </select>
                 {roleDisabledReason && <p style={{ color: 'var(--text-muted)', fontSize: 12 }}>{roleDisabledReason}</p>}
               </div>
-              {role === 'insurer' && (
+              {role === 'insurer' && role !== user.role && (
                 <div className="form-group">
                   <label htmlFor="account-insurer">{t('users.insurerOrganisation')}</label>
-                  <select id="account-insurer" value={insurerId} onChange={(event) => setInsurerId(event.target.value)} required>
+                  <select id="account-insurer" value={selectedInsurer?.id || ''} disabled={insurerStatus !== 'ready'} onChange={(event) => {
+                    setInsurerId(event.target.value)
+                    setRoleRequestId(crypto.randomUUID())
+                  }} required>
                     <option value="">{t('users.selectInsurer')}</option>
                     {insurers.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
                   </select>
+                  <button type="button" className="btn-ghost" onClick={refreshInsurers} disabled={insurerStatus === 'loading'}>Refresh insurers</button>
+                  {insurerStatus === 'loading' && <p role="status">Loading active insurers...</p>}
+                  {insurerStatus === 'error' && <p role="alert">Could not load insurers. Try refreshing.</p>}
+                  {insurerStatus === 'ready' && insurers.length === 0 && <p role="status">No active insurer organisations are available.</p>}
+                  <p>Only active organisations from <Link to="/super-admin/insurers">Insurer Management</Link> can be assigned. Public insurance partner listings are separate.</p>
                 </div>
               )}
               {user.role === 'therapist' && role !== 'therapist' && (
@@ -853,9 +885,14 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
               )}
                 <div className="form-group">
                   <label htmlFor="role-step-up">Your super-admin password</label>
-                  <input id="role-step-up" type="password" autoComplete="current-password" value={stepUpPassword} onChange={(event) => setStepUpPassword(event.target.value)} required />
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input id="role-step-up" type={showRolePassword ? 'text' : 'password'} autoComplete="current-password" value={stepUpPassword} onChange={(event) => setStepUpPassword(event.target.value)} required style={{ flex: 1 }} />
+                    <button type="button" className="btn-ghost" aria-controls="role-step-up" aria-label={t(showRolePassword ? 'login.hidePassword' : 'login.showPassword')} onClick={() => setShowRolePassword(!showRolePassword)} style={{ minWidth: 44 }}>
+                      <AppIcon name={showRolePassword ? 'eye-off' : 'eye'} size={18} />
+                    </button>
+                  </div>
                 </div>
-              <button type="submit" className="btn-primary full" disabled={!canEditRole || busy || !stepUpPassword || role === user.role}>
+              <button type="submit" className="btn-primary full" disabled={!canEditRole || busy || !stepUpPassword || role === user.role || (role === 'insurer' && (insurerStatus !== 'ready' || !selectedInsurer))}>
                 {t('users.saveRole')}
               </button>
             </fieldset>
