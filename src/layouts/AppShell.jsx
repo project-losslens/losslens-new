@@ -63,7 +63,6 @@ export default function AppShell({ admin = false }) {
     })
   }
 
-  const handleSignOut = async () => {
   const activityUserId = user?.id
   useEffect(() => {
     if (!activityUserId) return
@@ -82,8 +81,9 @@ export default function AppShell({ admin = false }) {
     }
   }, [activityUserId])
 
-    const { error } = await supabase.auth.signOut({ scope: 'local' })
+  const handleSignOut = async () => {
     try { await recordAccountActivity(true) } catch {}
+    const { error } = await supabase.auth.signOut({ scope: 'local' })
     clearAuthStorage()
     if (error) {
       console.error('Sign-out failed:', error)
