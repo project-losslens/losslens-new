@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate, Link, NavLink } from 'react-router-do
 import AppIcon from '../components/AppIcon'
 import UserAvatar from '../components/UserAvatar'
 import { useAuthProfile } from '../context/AuthProfileContext'
+import LanguageSwitcher from '../components/LanguageSwitcher'
 import { useMediaQuery } from '../hooks'
 import { adminNav, communityPaths, getPageTitle, insurerNav, superAdminNav, therapistNav, userNav, userNavGroups, mobileTabs } from '../config/nav.config'
 import { useCrisisAlertCount } from '../context/CrisisAlertCountContext'
@@ -111,6 +112,7 @@ export default function AppShell({ admin = false }) {
           </div>
           <div className="shell__header-actions">
             {isUserRole && <Link className="protection-status-link" to="/protection-member">LossLens Protection</Link>}
+            <LanguageSwitcher compact={isMobile} />
             <details className="shell__account">
               <summary>
                 <UserAvatar reference={avatarReference} name={accountName} className="shell__account-avatar" size={34} />

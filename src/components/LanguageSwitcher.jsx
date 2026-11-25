@@ -1,6 +1,6 @@
 import { LANGUAGES, useI18n } from '../i18n'
 
-export default function LanguageSwitcher({ className = '' }) {
+export default function LanguageSwitcher({ className = '', compact = false }) {
   const { lang, setLanguage, t } = useI18n()
   return (
     <div className={`language-switcher ${className}`} role="group" aria-label={t('common.language')}>
@@ -10,9 +10,10 @@ export default function LanguageSwitcher({ className = '' }) {
           type="button"
           className={`language-switcher__option${lang === language.code ? ' language-switcher__option--active' : ''}`}
           aria-pressed={lang === language.code}
+          aria-label={compact ? language.label : undefined}
           onClick={() => setLanguage(language.code)}
         >
-          {language.label}
+          {compact ? language.code.toUpperCase() : language.label}
         </button>
       ))}
     </div>
