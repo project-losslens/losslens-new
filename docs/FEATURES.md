@@ -139,7 +139,7 @@ Super Admin pages implement user and administrator management, email lookup thro
 
 Insurance partner records support multiple selected coverage categories. The base migration adds `contact_email`, `coverage_types`, and a validated percentage field while retaining legacy `email` and `commission_rate` columns.
 
-The Super Admin chat viewer conflicts with owner-only chat privacy because direct Super Admin table access was removed. Runtime compatibility requires a future privacy-reviewed server function or product decision rather than migration RLS bypass.
+Oloo chat history is owner-only. There is no staff chat viewer.
 
 ## 11. Backend and database architecture
 
@@ -217,4 +217,4 @@ See `LOSSLENS_FEATURE_IMPLEMENTATION_MATRIX.xlsx` for route-by-route coverage.
 | Mirror | User | MonthlyMirrorPage.jsx | mirror_recordings, Storage | Partially implemented for private bucket |
 | Precious Pacts | User | PreciousPactPage.jsx | precious_pacts, Storage | Partially implemented for private bucket |
 | Admin operations | Admin | admin pages | broad tables, RPC | Fully implemented |
-| Super Admin operations | Super Admin | super-admin pages | privileged tables/functions | Fully implemented except private chat viewer privacy conflict |
+| Super Admin operations | Super Admin | super-admin pages | privileged tables/functions | Fully implemented |

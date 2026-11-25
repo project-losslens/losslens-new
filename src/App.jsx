@@ -57,7 +57,6 @@ const AuditLogs = lazy(() => import('./pages/admin/AuditLogs'))
 const B2BClients = lazy(() => import('./pages/admin/B2BClients'))
 const InsurancePartners = lazy(() => import('./pages/admin/InsurancePartners'))
 const GrantApplications = lazy(() => import('./pages/admin/GrantApplications'))
-const ChatViewer = lazy(() => import('./pages/admin/ChatViewer'))
 const SystemSettings = lazy(() => import('./pages/admin/SystemSettings'))
 const TherapistManagement = lazy(() => import('./pages/admin/TherapistManagement'))
 const InsurerManagement = lazy(() => import('./pages/admin/InsurerManagement'))
@@ -175,7 +174,6 @@ function App() {
             <Route path="/super-admin/insurance" element={<InsurancePartners />} />
             <Route path="/super-admin/b2b" element={<B2BClients />} />
             <Route path="/super-admin/grants" element={<GrantApplications />} />
-            <Route path="/super-admin/chats" element={<ChatViewer />} />
             <Route path="/super-admin/logs" element={<AuditLogs />} />
             <Route path="/super-admin/settings" element={<SystemSettings />} />
             <Route path="/super-admin/therapists" element={<TherapistManagement />} />
@@ -188,7 +186,6 @@ function App() {
           <Route path="/admin/insurance" element={<Navigate to="/super-admin/insurance" replace />} />
           <Route path="/admin/b2b" element={<Navigate to="/super-admin/b2b" replace />} />
           <Route path="/admin/grants" element={<Navigate to="/super-admin/grants" replace />} />
-          <Route path="/admin/chats" element={<Navigate to="/super-admin/chats" replace />} />
           <Route path="/admin/logs" element={<Navigate to="/super-admin/logs" replace />} />
           <Route path="/admin/settings" element={<Navigate to="/super-admin/settings" replace />} />
           <Route path="/admin/therapists" element={<Navigate to="/super-admin/therapists" replace />} />

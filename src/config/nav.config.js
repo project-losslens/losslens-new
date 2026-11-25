@@ -78,7 +78,6 @@ export const superAdminNav = [
   { to: '/super-admin/insurance', label: 'Insurance Partners', icon: 'medical', section: 'super-admin' },
   { to: '/super-admin/b2b', label: 'B2B Clients', icon: 'building', section: 'super-admin' },
   { to: '/super-admin/grants', label: 'Grant Applications', icon: 'document', section: 'super-admin' },
-  { to: '/super-admin/chats', label: 'Chat Viewer', icon: 'chat', section: 'super-admin' },
   { to: '/super-admin/logs', label: 'Audit Logs', icon: 'document', section: 'super-admin' },
   { to: '/super-admin/settings', label: 'System Settings', icon: 'settings', section: 'super-admin' },
   { to: '/super-admin/therapists', label: 'Therapist Management', icon: 'medical', section: 'super-admin' },
