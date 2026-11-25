@@ -1,4 +1,5 @@
 import { BrandLoader } from '../../components/Brand'
+import PasswordInput from '../../components/PasswordInput'
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -15,8 +16,6 @@ function ResetPassword() {
   const [error, setError] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPw, setShowPw] = useState(false)
-  const [showConfirmPw, setShowConfirmPw] = useState(false)
   const [strength, setStrength] = useState(0)
   const [success, setSuccess] = useState(false)
 
@@ -151,27 +150,15 @@ function ResetPassword() {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             <div className="form-group">
               <label htmlFor="password">New password</label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  id="password"
-                  type={showPw ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  required
-                  placeholder="Min 8 chars, 1 letter + 1 number"
-                  value={password}
-                  onChange={e => { setPassword(e.target.value); setStrength(calculateStrength(e.target.value)); if (error) setError('') }}
-                  style={{ paddingRight: 44 }}
-                  aria-describedby="password-requirements"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPw(!showPw)}
-                  aria-label={showPw ? 'Hide password' : 'Show password'}
-                  style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  {showPw ? 'Hide' : 'Show'}
-                </button>
-              </div>
+              <PasswordInput
+                id="password"
+                autoComplete="new-password"
+                required
+                placeholder="Min 8 chars, 1 letter + 1 number"
+                value={password}
+                onChange={e => { setPassword(e.target.value); setStrength(calculateStrength(e.target.value)); if (error) setError('') }}
+                aria-describedby="password-requirements"
+              />
               {password.length > 0 && (
                 <div style={{ marginTop: '6px' }}>
                   <div style={{ height: '4px', background: 'rgba(255,255,255,0.12)', borderRadius: '2px', overflow: 'hidden', transition: 'width 0.3s ease' }}>
@@ -184,26 +171,15 @@ function ResetPassword() {
 
             <div className="form-group">
               <label htmlFor="confirmPassword">Confirm new password</label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  id="confirmPassword"
-                  type={showConfirmPw ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  required
-                  placeholder="Re-enter your password"
-                  value={confirmPassword}
-                  onChange={e => { setConfirmPassword(e.target.value); if (error) setError('') }}
-                  style={{ paddingRight: 44, ...(confirmPassword && password !== confirmPassword ? { borderColor: 'var(--danger)' } : {}) }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPw(!showConfirmPw)}
-                  aria-label={showConfirmPw ? 'Hide password' : 'Show password'}
-                  style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 14, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  {showConfirmPw ? 'Hide' : 'Show'}
-                </button>
-              </div>
+              <PasswordInput
+                id="confirmPassword"
+                autoComplete="new-password"
+                required
+                placeholder="Re-enter your password"
+                value={confirmPassword}
+                onChange={e => { setConfirmPassword(e.target.value); if (error) setError('') }}
+                style={{ ...(confirmPassword && password !== confirmPassword ? { borderColor: 'var(--danger)' } : {}) }}
+              />
               {confirmPassword && password !== confirmPassword && <span style={{ fontSize: '11px', color: 'var(--danger)' }}>Passwords do not match</span>}
               {confirmPassword && password === confirmPassword && <span style={{ fontSize: '11px', color: 'var(--primary)' }}>Passwords match </span>}
             </div>

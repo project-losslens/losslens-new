@@ -1,4 +1,5 @@
 import { BrandLoader } from '../../components/Brand'
+import PasswordInput from '../../components/PasswordInput'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { canAccessPath, roleHome, safeInternalPath } from '../../config/roleHome'
@@ -29,7 +30,6 @@ function Login() {
   const [error, setError] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [showPw, setShowPw] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const [attempts, setAttempts] = useState(() => parseInt(sessionStorage.getItem('login_attempts') || '0'))
   const [cooldown, setCooldown] = useState(() => sessionStorage.getItem('login_cooldown_until') !== null)
@@ -193,10 +193,7 @@ function Login() {
 
             <div className="form-group">
               <label htmlFor="password">{t('login.password')}</label>
-              <div style={{ position: 'relative' }}>
-                <input id="password" type={showPw ? 'text' : 'password'} autoComplete="current-password" placeholder={t('login.passwordPlaceholder')} value={password} onChange={handlePasswordChange} style={{ paddingRight: 44 }} disabled={cooldown} />
-                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? t('login.hidePassword') : t('login.showPassword')} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: 12, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? t('login.hidePassword') : t('login.showPassword')}</button>
-              </div>
+              <PasswordInput id="password" autoComplete="current-password" placeholder={t('login.passwordPlaceholder')} value={password} onChange={handlePasswordChange} disabled={cooldown} />
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>

@@ -1,4 +1,5 @@
 import { BrandLoader } from '../../components/Brand'
+import PasswordInput from '../../components/PasswordInput'
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { resetAuthBeforeSignIn, supabase } from '../../lib/supabase'
@@ -36,8 +37,6 @@ function Signup() {
     name: '', username: '', phone: '', email: '',
     password: '', confirmPassword: ''
   })
-  const [showPw, setShowPw] = useState(false)
-  const [showConfirmPw, setShowConfirmPw] = useState(false)
   const [signedUp, setSignedUp] = useState(() => sessionStorage.getItem('signup_email') !== null)
   const [signedUpEmail, setSignedUpEmail] = useState(() => sessionStorage.getItem('signup_email') || '')
   const [usernameStatus, setUsernameStatus] = useState('')
@@ -400,10 +399,7 @@ function Signup() {
 
             <div className="form-group">
               <label htmlFor="password">{t('signup.passwordLabel')} *</label>
-              <div style={{ position: 'relative' }}>
-                <input id="password" type={showPw ? 'text' : 'password'} autoComplete="new-password" required placeholder={t('signup.passwordPlaceholder')} value={form.password} onChange={e => { setForm(p => ({ ...p, password: e.target.value })); setPasswordStrength(calculateStrength(e.target.value)); setFieldErrors(p => ({ ...p, password: '' })) }} style={{ paddingRight: 44, ...(fieldErrors.password ? { borderColor: 'var(--danger)' } : {}) }} />
-                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? t('signup.hidePwAria') : t('signup.showPwAria')} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: 12, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showPw ? t('signup.hide') : t('signup.show')}</button>
-              </div>
+              <PasswordInput id="password" autoComplete="new-password" required placeholder={t('signup.passwordPlaceholder')} value={form.password} onChange={e => { setForm(p => ({ ...p, password: e.target.value })); setPasswordStrength(calculateStrength(e.target.value)); setFieldErrors(p => ({ ...p, password: '' })) }} style={{ ...(fieldErrors.password ? { borderColor: 'var(--danger)' } : {}) }} />
               {form.password.length > 0 && (
                 <div style={{ marginTop: '6px' }}>
                   <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
@@ -419,10 +415,7 @@ function Signup() {
 
             <div className="form-group">
               <label htmlFor="confirmPassword">{t('signup.confirmLabel')} *</label>
-              <div style={{ position: 'relative' }}>
-                <input id="confirmPassword" type={showConfirmPw ? 'text' : 'password'} autoComplete="new-password" required placeholder={t('signup.confirmPlaceholder')} value={form.confirmPassword} onChange={e => { setForm(p => ({ ...p, confirmPassword: e.target.value })); setFieldErrors(p => ({ ...p, confirmPassword: '' })) }} style={{ paddingRight: 44, ...(fieldErrors.confirmPassword ? { borderColor: 'var(--danger)' } : {}) }} />
-                <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} aria-label={showConfirmPw ? t('signup.hidePwAria') : t('signup.showPwAria')} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: 12, padding: '10px 12px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{showConfirmPw ? t('signup.hide') : t('signup.show')}</button>
-              </div>
+              <PasswordInput id="confirmPassword" autoComplete="new-password" required placeholder={t('signup.confirmPlaceholder')} value={form.confirmPassword} onChange={e => { setForm(p => ({ ...p, confirmPassword: e.target.value })); setFieldErrors(p => ({ ...p, confirmPassword: '' })) }} style={{ ...(fieldErrors.confirmPassword ? { borderColor: 'var(--danger)' } : {}) }} />
               {form.confirmPassword && form.password !== form.confirmPassword && <span style={{ fontSize: '11px', color: 'var(--danger)' }}>{t('signup.mismatch')}</span>}
               {form.confirmPassword && form.password === form.confirmPassword && <span style={{ fontSize: '11px', color: 'var(--primary)' }}>{t('signup.match')} </span>}
               {fieldErrors.confirmPassword && <span style={{ fontSize: '11px', color: 'var(--danger)' }}>{fieldErrors.confirmPassword}</span>}
