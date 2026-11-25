@@ -361,7 +361,7 @@ export default function ManageEvents() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '8px', flexWrap: 'wrap' }}>
                 <div style={{ position: 'relative' }}>
                   <input type="text" placeholder=" Search events..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ ...inputStyle, width: '260px', borderRadius: '100px', paddingRight: '32px' }} />
-                  {searchQuery && <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '14px', padding: '4px 6px' }}></button>}
+                  {searchQuery && <button aria-label="Clear search" onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '14px', padding: '4px 6px' }}><AppIcon name="close" size={14} /></button>}
                 </div>
                 <button onClick={openCreate} style={btnStyle('var(--primary)', 'var(--bg)', 'var(--primary)')}> New Event</button>
               </div>
@@ -400,10 +400,10 @@ export default function ManageEvents() {
                           </div>
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
                             <button onClick={() => setExpandedEvent(isExpanded ? null : ev.id)} style={btnStyle('transparent', 'var(--primary)', 'rgba(255,255,255,0.12)')}>{isExpanded ? '▲' : '▼'}</button>
-                            <button onClick={() => openEdit(ev)} style={btnStyle('transparent', 'var(--info)', 'var(--info)')}></button>
+                            <button onClick={() => openEdit(ev)} style={btnStyle('transparent', 'var(--info)', 'var(--info)')}>Edit</button>
                             <button onClick={() => toggleActive(ev)} style={btnStyle('transparent', ev.active ? 'var(--info)' : 'var(--primary)', ev.active ? 'var(--info)' : 'var(--primary)')}>{ev.active ? 'Hide' : 'Show'}</button>
-                            <button onClick={() => toggleDiscussion(ev)} disabled={togglingDiscussion === ev.id} style={btnStyle(discussionOn ? 'rgba(255,255,255,0.12)' : 'var(--bg)', discussionOn ? 'var(--primary)' : 'var(--text)', discussionOn ? 'var(--primary)' : 'var(--text)')}>{togglingDiscussion === ev.id ? '...' : discussionOn ? '' : ''}</button>
-                            <button onClick={() => setShowDeleteConfirm(ev)} style={btnStyle('transparent', 'var(--text)', 'rgba(255,255,255,0.08)')}></button>
+                            <button onClick={() => toggleDiscussion(ev)} disabled={togglingDiscussion === ev.id} style={btnStyle(discussionOn ? 'rgba(255,255,255,0.12)' : 'var(--bg)', discussionOn ? 'var(--primary)' : 'var(--text)', discussionOn ? 'var(--primary)' : 'var(--text)')}>{togglingDiscussion === ev.id ? 'Saving...' : discussionOn ? 'Disable chat' : 'Enable chat'}</button>
+                            <button onClick={() => setShowDeleteConfirm(ev)} style={btnStyle('transparent', 'var(--text)', 'rgba(255,255,255,0.08)')}>Delete</button>
                           </div>
                         </div>
                         {isExpanded && (

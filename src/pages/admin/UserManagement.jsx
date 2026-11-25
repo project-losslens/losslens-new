@@ -358,6 +358,12 @@ export default function UserManagement() {
 
                           </div>
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                            {isSuperAdmin && u.id !== actor?.id && !(u.role === 'super_admin' && u.status === 'active' && activeSuperAdminCount <= 1) && (
+                              <button type="button" onClick={() => setEditingUser(u)}
+                                style={btn('transparent', 'var(--primary)', 'var(--primary)')}>
+                                Change role
+                              </button>
+                            )}
                             <button onClick={() => setExpandedUser(isExpanded ? null : u.id)} style={btn('transparent', 'var(--primary)', 'rgba(255,255,255,0.12)')}>{isExpanded ? 'Collapse' : 'Expand'}</button>
                           </div>
                         </div>
@@ -804,7 +810,7 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
         </nav>
 
         {section === 'role' && (
-          <div>
+          <form onSubmit={(event) => { event.preventDefault(); if (!busy && role !== user.role) void saveRole() }}>
             <fieldset disabled={!canEditRole || busy} style={{ border: 0, padding: 0, margin: 0 }}>
               <legend style={{ color: 'var(--primary)', marginBottom: 8 }}>{t('users.roleSection')}</legend>
               <div className="form-group">
@@ -819,14 +825,15 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
               {role === 'insurer' && (
                 <div className="form-group">
                   <label htmlFor="account-insurer">{t('users.insurerOrganisation')}</label>
-                  <select id="account-insurer" value={insurerId} onChange={(event) => setInsurerId(event.target.value)}>
+                  <select id="account-insurer" value={insurerId} onChange={(event) => setInsurerId(event.target.value)} required>
                     <option value="">{t('users.selectInsurer')}</option>
                     {insurers.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
                   </select>
                 </div>
               )}
               {user.role === 'therapist' && role !== 'therapist' && (
-                <>
+                <details>
+                  <summary>Reassign open vouchers or claims if required</summary>
                   <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', margin: '12px 0' }}>
                     <input type="checkbox" checked={acknowledgeOpenWork} onChange={(event) => setAcknowledgeOpenWork(event.target.checked)} />
                     <span>{t('users.reassignOpenWork')}</span>
@@ -840,17 +847,17 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
                       ))}
                     </select>
                   </div>
-                </>
+                </details>
               )}
                 <div className="form-group">
                   <label htmlFor="role-step-up">Your super-admin password</label>
                   <input id="role-step-up" type="password" autoComplete="current-password" value={stepUpPassword} onChange={(event) => setStepUpPassword(event.target.value)} required />
                 </div>
-              <button type="button" className="btn-primary full" onClick={saveRole} disabled={!canEditRole || busy || !stepUpPassword || role === user.role}>
+              <button type="submit" className="btn-primary full" disabled={!canEditRole || busy || !stepUpPassword || role === user.role}>
                 {t('users.saveRole')}
               </button>
             </fieldset>
-          </div>
+          </form>
         )}
 
         {section === 'profile' && (
