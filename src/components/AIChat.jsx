@@ -71,7 +71,7 @@ function getProactiveQuestions(userContext) {
 
 // — Main AIChat Component —
 function AIChat({ profile }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const navigate = useNavigate();
   const firstName = profile?.full_name?.split(' ')[0] || 'friend';
   const userId = profile?.id;
@@ -315,14 +315,21 @@ function AIChat({ profile }) {
 
     const utterance = new SpeechSynthesisUtterance(text);
 
-    const hasSwahili = /[a-z].*[a-z].*[a-z]/i.test(text) && (
-      text.includes('sawa') || text.includes('pole') || text.includes('niko') ||
-      text.includes('uko') || text.includes('ako') || text.includes('hapa') ||
-      text.includes('sana') || text.includes('kama') || text.includes('na')
-    );
-    utterance.lang = hasSwahili ? 'sw-KE' : 'en-KE';
-    utterance.rate = 0.9;
-    utterance.pitch = 1.1;
+    const hasSwahili = /\b(?:habari|asante|unaweza|tafadhali|samahani|ninaelewa)\b/i.test(text);
+    const locale = lang === 'sw' || hasSwahili ? 'sw-KE' : 'en-KE';
+    const language = locale.slice(0, 2);
+    const voices = synthRef.current.getVoices().filter(voice => (
+      voice.localService && voice.lang.toLowerCase().split(/[-_]/)[0] === language
+    ));
+    const masculineVoice = /\b(?:male|david|mark|guy|daniel|alex|james|george|arthur|aaron|rafiki)\b/i;
+    const exactLocale = voice => voice.lang.replace('_', '-').toLowerCase() === locale.toLowerCase();
+    const voice = voices.find(item => exactLocale(item) && masculineVoice.test(item.name))
+      || voices.find(exactLocale)
+      || voices.find(item => masculineVoice.test(item.name));
+    if (voice) utterance.voice = voice;
+    utterance.lang = voice?.lang || locale;
+    utterance.rate = 0.94;
+    utterance.pitch = 0.94;
 
     utterance.onstart = () => {
       setSpeakingId(messageId);
