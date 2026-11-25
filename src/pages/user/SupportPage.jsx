@@ -1,8 +1,8 @@
 import SupportChoices from '../../components/SupportChoices'
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { SUPPORT_STATUSES } from '../../lib/supportRequests'
 import { BrandLoader } from '../../components/Brand'
-import { toast } from '../../components/ToastProvider'
 
 const CATEGORIES = [
   ['account', 'Account'],
@@ -12,27 +12,22 @@ const CATEGORIES = [
   ['other', 'Other'],
 ]
 
-const formatDate = (value) => new Date(value).toLocaleString()
-
 export default function SupportPage() {
   const [tickets, setTickets] = useState([])
+  const [composerOpen, setComposerOpen] = useState(false)
   const [subject, setSubject] = useState('')
   const [category, setCategory] = useState('account')
   const [body, setBody] = useState('')
-  const [drafts, setDrafts] = useState({})
+  const [receipt, setReceipt] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
+  const [listError, setListError] = useState(false)
+  const [submitError, setSubmitError] = useState(false)
 
   const loadTickets = useCallback(async () => {
-    const { data, error: loadError } = await supabase.rpc('support_list_tickets')
-    if (loadError) {
-      console.error('Support ticket load failed:', loadError)
-      setError('Could not load your support requests.')
-    } else {
-      setTickets(data || [])
-      setError('')
-    }
+    const { data, error } = await supabase.rpc('support_request_list')
+    if (!error) setTickets(data || [])
+    setListError(Boolean(error))
     setLoading(false)
   }, [])
 
@@ -43,96 +38,68 @@ export default function SupportPage() {
 
   const submitTicket = async (event) => {
     event.preventDefault()
+    if (saving) return
     setSaving(true)
-    setError('')
-    const { error: submitError } = await supabase.rpc('support_submit_ticket', {
-      p_subject: subject,
-      p_category: category,
-      p_body: body,
-    })
-    if (submitError) {
-      console.error('Support ticket submit failed:', submitError)
-      setError(submitError.message || 'Could not submit your request.')
-    } else {
+    setSubmitError(false)
+    try {
+      const { data, error } = await supabase.rpc('support_submit_request', {
+        p_subject: subject,
+        p_category: category,
+        p_body: body,
+      })
+      if (error || !data) throw new Error('Submission not confirmed')
+      setReceipt(data)
       setSubject('')
+      setCategory('account')
       setBody('')
-      toast.success('Your support request was sent.')
+      setComposerOpen(false)
       await loadTickets()
+    } catch {
+      setSubmitError(true)
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
   }
-
-  const reply = async (event, ticketId) => {
-    event.preventDefault()
-    const message = drafts[ticketId]?.trim()
-    if (!message) return
-    setSaving(true)
-    const { error: replyError } = await supabase.rpc('support_add_message', {
-      p_ticket_id: ticketId,
-      p_body: message,
-    })
-    if (replyError) {
-      console.error('Support ticket reply failed:', replyError)
-      setError(replyError.message || 'Could not send your reply.')
-    } else {
-      setDrafts(current => ({ ...current, [ticketId]: '' }))
-      setError('')
-      await loadTickets()
-    }
-    setSaving(false)
-  }
-
-  if (loading) return <BrandLoader variant="section" />
 
   return (
     <section className="portal-page">
       <header className="portal-page__heading">
-        <div><p className="portal-page__eyebrow">Help</p><h2>Support requests</h2>
-      <SupportChoices /></div>
+        <div><p className="portal-page__eyebrow">Help</p><h2>Support requests</h2><SupportChoices /></div>
       </header>
       <p className="portal-notice">For urgent safety concerns, use the crisis support options instead of this form.</p>
-      {error && <p className="portal-error" role="alert">{error} <button type="button" onClick={() => { void loadTickets() }}>Retry</button></p>}
-      <form className="portal-card portal-form" onSubmit={submitTicket}>
-        <h2>Contact support</h2>
-        <label>Topic
-          <select value={category} onChange={event => setCategory(event.target.value)}>
-            {CATEGORIES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-          </select>
-        </label>
-        <label>Subject<input value={subject} onChange={event => setSubject(event.target.value)} minLength={3} maxLength={160} required /></label>
-        <label>Message<textarea value={body} onChange={event => setBody(event.target.value)} maxLength={4000} rows={5} required /></label>
-        <button className="btn-primary" disabled={saving}>{saving ? 'Sending…' : 'Send request'}</button>
-      </form>
-
-      <section className="portal-card">
-        <h2>Your requests</h2>
-        {tickets.length === 0 ? <p>You have not submitted any support requests.</p> : (
-          <div className="portal-list">
-            {tickets.map(ticket => (
-              <article className="portal-list__item" key={ticket.id} style={{ display: 'block' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-                  <strong>{ticket.subject}</strong>
-                  <span>{ticket.status.replace('_', ' ')}</span>
-                </div>
-                <p>{ticket.category} · Updated {formatDate(ticket.updated_at)}</p>
-                <div className="portal-list" style={{ margin: '12px 0' }}>
-                  {(ticket.messages || []).map(message => (
-                    <div key={message.id} style={{ borderLeft: '2px solid var(--border)', padding: '4px 10px' }}>
-                      <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{message.body}</p>
-                      <small>{message.sender_id === ticket.user_id ? 'You' : 'Support'} · {formatDate(message.created_at)}</small>
-                    </div>
-                  ))}
-                </div>
-                {ticket.status !== 'closed' && (
-                  <form className="portal-form" onSubmit={event => { void reply(event, ticket.id) }}>
-                    <label>Reply<textarea value={drafts[ticket.id] || ''} onChange={event => setDrafts(current => ({ ...current, [ticket.id]: event.target.value }))} maxLength={4000} rows={3} required /></label>
-                    <button className="btn-primary" disabled={saving}>Send reply</button>
-                  </form>
-                )}
-              </article>
-            ))}
+      <div role="status">{receipt && <p className="portal-notice">Message sent. Your ticket is <strong>{receipt}</strong>. We’ll review your request.</p>}</div>
+      {!composerOpen && <button type="button" className="btn-primary" onClick={() => { setReceipt(''); setComposerOpen(true) }}>New support request</button>}
+      {composerOpen && (
+        <form className="portal-card portal-form" onSubmit={submitTicket}>
+          <h2>Contact support</h2>
+          <label>Topic
+            <select value={category} onChange={event => setCategory(event.target.value)}>
+              {CATEGORIES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </select>
+          </label>
+          <label>Subject<input value={subject} onChange={event => setSubject(event.target.value)} minLength={3} maxLength={160} required /></label>
+          <label>Message<textarea value={body} onChange={event => setBody(event.target.value)} maxLength={4000} rows={5} required /></label>
+          {submitError && <p className="portal-error" role="alert">Could not confirm your request was sent. Please try again.</p>}
+          <div className="portal-form__actions">
+            <button className="btn-primary" disabled={saving}>{saving ? 'Sending…' : 'Send request'}</button>
+            <button type="button" className="btn-ghost" disabled={saving} onClick={() => setComposerOpen(false)}>Cancel</button>
           </div>
-        )}
+        </form>
+      )}
+      <section className="portal-card">
+        <h2>Your tickets</h2>
+        <button type="button" className="btn-ghost" onClick={() => { void loadTickets() }}>Refresh status</button>
+        {loading ? <BrandLoader variant="section" /> : listError ? <p className="portal-error" role="alert">Could not load your tickets. Try refreshing.</p>
+          : tickets.length === 0 ? <p>You have not submitted any support requests.</p> : (
+            <ul className="portal-list">
+              {tickets.map(ticket => (
+                <li className="portal-list__item" key={ticket.id}>
+                  <div><strong>{ticket.reference} · {ticket.subject}</strong><br /><small>Updated {new Date(ticket.updated_at).toLocaleString()}</small></div>
+                  <span>{SUPPORT_STATUSES[ticket.status] ?? ticket.status}</span>
+                </li>
+              ))}
+            </ul>
+          )}
       </section>
     </section>
   )

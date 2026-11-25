@@ -740,6 +740,8 @@
 .ll-contact-fab__panel p { margin: 0 0 0.8rem; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; }
 .ll-contact-fab__actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
 .ll-contact-fab__note { font-size: 0.75rem !important; color: var(--text-muted) !important; }
+.ll-contact-fab__panel:has(form) { max-height: calc(100dvh - 6rem); overflow-y: auto; }
+.ll-contact-fab__panel textarea { resize: vertical; }
 
 @media (max-width: 860px) {
   .ll-why__grid, .ll-oloo__grid, .ll-trust__grid { grid-template-columns: 1fr; }

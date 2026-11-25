@@ -4,7 +4,7 @@ import AppIcon from '../components/AppIcon'
 import { LogoMark } from '../components/Brand'
 import ContactIcons from '../components/ContactIcons'
 import TopographicBackground from '../components/TopographicBackground'
-import { mailtoHref, telHref } from '../config/site'
+import { supabase } from '../lib/supabase'
 import { roleHome } from '../config/roleHome'
 import { useAuthProfile } from '../context/AuthProfileContext'
 import '../styles/landing.css'
@@ -154,27 +154,54 @@ function Footer({ home = false }) {
   )
 }
 
-// Floating "Talk to the team" control for public visitors. Opens a small
-// panel with the existing email/phone contact mechanisms — it is not a chat
-// widget and sends nothing to a server. Signed-in members are pointed at the
-// existing support ticket page instead.
 function TalkToTeam() {
-  const { authStatus, user } = useAuthProfile()
+  const { authStatus, user, role } = useAuthProfile()
   const [open, setOpen] = useState(false)
+  const [receipt, setReceipt] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
   const buttonRef = useRef(null)
   const panelRef = useRef(null)
   const signedIn = authStatus === 'ready' && Boolean(user)
 
+  const submitRequest = async (event) => {
+    event.preventDefault()
+    if (saving) return
+    const input = new FormData(event.currentTarget)
+    setSaving(true)
+    setError('')
+    try {
+      const { data, error: requestError } = await supabase.rpc('support_submit_request', {
+        p_subject: input.get('subject'),
+        p_category: 'other',
+        p_body: input.get('body'),
+        p_email: input.get('email'),
+      })
+      if (requestError || !data) {
+        setError(requestError?.message === 'Too many requests. Please try again later.'
+          ? requestError.message : 'Could not confirm your message was sent. Please try again.')
+        return
+      }
+      setReceipt(data)
+      setOpen(false)
+      buttonRef.current?.focus()
+    } catch {
+      setError('Could not confirm your message was sent. Please try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   useEffect(() => {
     if (!open) return undefined
     const onKey = (event) => {
-      if (event.key === 'Escape') {
+      if (!saving && event.key === 'Escape') {
         setOpen(false)
         buttonRef.current?.focus()
       }
     }
     const onClick = (event) => {
-      if (panelRef.current && !panelRef.current.contains(event.target)) setOpen(false)
+      if (!saving && panelRef.current && !panelRef.current.contains(event.target)) setOpen(false)
     }
     document.addEventListener('keydown', onKey)
     document.addEventListener('mousedown', onClick)
@@ -182,28 +209,35 @@ function TalkToTeam() {
       document.removeEventListener('keydown', onKey)
       document.removeEventListener('mousedown', onClick)
     }
-  }, [open])
+  }, [open, saving])
 
   return (
     <div className="ll-contact-fab" ref={panelRef}>
+      <div role="status">
+        {!open && receipt && <div className="ll-contact-fab__panel">
+          <p>Message sent. Your ticket is <strong>{receipt}</strong>. Keep this number for follow-up. We’ll review your request.</p>
+          <button type="button" className="ll-btn ll-btn--ghost" onClick={() => { setReceipt(''); buttonRef.current?.focus() }}>Dismiss</button>
+        </div>}
+      </div>
       {open && (
-        <div className="ll-contact-fab__panel" role="dialog" aria-label="Contact LossLens">
-          {signedIn ? (
+        <div id="ll-contact-panel" className="ll-contact-fab__panel" role="dialog" aria-label="Contact LossLens">
+          {signedIn && role === 'user' ? (
             <>
-              <p>Signed in? The fastest route is a support ticket.</p>
+              <p>Send a message and track it from your support page.</p>
               <Link to="/support" className="ll-btn ll-btn--primary" onClick={() => setOpen(false)}>
                 Open support
               </Link>
             </>
           ) : (
-            <>
-              <p>Reach the LossLens team by email or phone.</p>
-              <div className="ll-contact-fab__actions">
-                <a className="ll-btn ll-btn--primary" href={mailtoHref('Website enquiry')}>Email us</a>
-                <a className="ll-btn ll-btn--ghost" href={telHref()}>Call us</a>
-              </div>
-              <p className="ll-contact-fab__note">Need urgent help? See crisis support at the bottom of the page.</p>
-            </>
+            <form className="portal-form" onSubmit={submitRequest}>
+              <p>Send a message to the LossLens team. This form is not for emergencies.</p>
+              <p className="ll-contact-fab__note">Do not include passwords or payment details.</p>
+              {!signedIn && <label>Email for follow-up<input type="email" name="email" autoComplete="email" maxLength={254} required /></label>}
+              <label>Subject<input name="subject" minLength={3} maxLength={160} required /></label>
+              <label>Message<textarea name="body" maxLength={4000} rows={4} required /></label>
+              {error && <p role="alert">{error}</p>}
+              <button className="ll-btn ll-btn--primary" disabled={saving}>{saving ? 'Sending…' : 'Send message'}</button>
+            </form>
           )}
         </div>
       )}
@@ -214,7 +248,8 @@ function TalkToTeam() {
         aria-expanded={open}
         aria-controls="ll-contact-panel"
         aria-label="Talk to the LossLens team"
-        onClick={() => setOpen((value) => !value)}
+        disabled={saving}
+        onClick={() => { setError(''); setOpen((value) => !value) }}
       >
         <AppIcon name="mail" size={20} />
         <span>Talk to the team</span>
@@ -244,7 +279,7 @@ export function PublicLayout({ children, home = false }) {
       <Header home={home} />
       <div id="public-main" tabIndex={home ? -1 : undefined}>{children}</div>
       <Footer home={home} />
-      {!home && <TalkToTeam />}
+      <TalkToTeam />
     </div>
   )
 }
