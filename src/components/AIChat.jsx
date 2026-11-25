@@ -11,7 +11,7 @@ import { useI18n } from '../i18n'
 //    Expressions: calm, happy, concerned, celebrating, thinking, speaking.
 const OlooCharacter = ({ size = 40, emotion = 'calm' }) => {
   const expr = ['calm', 'happy', 'concerned', 'celebrating', 'thinking', 'speaking'].includes(emotion) ? emotion : 'calm'
-  const ink = 'var(--on-primary)'
+  const ink = 'var(--plum)'
   return (
     <div className="oloo-avatar" style={{
       width: size,
@@ -26,14 +26,13 @@ const OlooCharacter = ({ size = 40, emotion = 'calm' }) => {
       overflow: 'hidden',
     }}>
       <svg width={size * 0.9} height={size * 0.9} viewBox="0 0 64 64" aria-hidden="true">
-        {/* leaf sprout */}
-        <path d="M32 9c0-5 4-8 8-8 0 5-3 8-8 8Z" fill="var(--primary)" stroke="var(--primary-deep)" strokeWidth="1" />
-        <path d="M32 9c0-4-3-7-7-7 0 4 3 7 7 7Z" fill="var(--secondary)" stroke="var(--secondary-deep)" strokeWidth="1" />
-        {/* body blob */}
-        <path d="M14 57c-6-8-9-16-9-24C5 19 18 9 32 9s27 10 27 24c0 8-3 16-9 24-4 5-12 6-18 6s-14-1-18-6Z" fill="var(--primary)" stroke="var(--primary-deep)" strokeWidth="1.6" />
-        {/* belly */}
-        <ellipse cx="32" cy="46" rx="12" ry="9" fill="var(--secondary)" opacity="0.9" />
-        {/* face — gentle idle breathe + periodic blink (disabled under reduced motion) */}
+        <circle cx="32" cy="32" r="31" fill="#EAD9F3" />
+        <path d="M8 62c2-12 11-18 24-18s22 6 24 18Z" fill="#7136CC" />
+        <path d="M26 40h12v8a6 6 0 0 1-12 0Z" fill="#A96343" />
+        <path d="M15 26c0-13 7-20 17-20s17 7 17 20v5H15Z" fill="#291447" />
+        <circle cx="17" cy="31" r="4" fill="#B97552" />
+        <circle cx="47" cy="31" r="4" fill="#B97552" />
+        <path d="M19 23c7 0 13-4 16-9 3 5 6 8 10 9v9c0 8-6 14-13 14s-13-6-13-14Z" fill="#D39169" />
         <g className="oloo-face">
           {expr === 'celebrating' ? (
             <g className="oloo-eyes" stroke={ink} strokeWidth="2" fill="none" strokeLinecap="round">
