@@ -7,79 +7,16 @@ import { detectCrisis } from '../lib/crisisDetection'
 import { primaryHelpline } from '../config/helplines'
 import { useI18n } from '../i18n'
 
-// — Oloo Character: flat, hand-drawn-style SVG in brand teal/blue.
-//    Expressions: calm, happy, concerned, celebrating, thinking, speaking.
-const OlooCharacter = ({ size = 40, emotion = 'calm' }) => {
-  const expr = ['calm', 'happy', 'concerned', 'celebrating', 'thinking', 'speaking'].includes(emotion) ? emotion : 'calm'
-  const ink = 'var(--plum)'
-  return (
-    <div className="oloo-avatar" style={{
-      width: size,
-      height: size,
-      borderRadius: '50%',
-      background: 'var(--surface-2)',
-      border: '2px solid var(--primary)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexShrink: 0,
-      overflow: 'hidden',
-    }}>
-      <svg width={size * 0.9} height={size * 0.9} viewBox="0 0 64 64" aria-hidden="true">
-        <circle cx="32" cy="32" r="31" fill="#EAD9F3" />
-        <path d="M8 62c2-12 11-18 24-18s22 6 24 18Z" fill="#7136CC" />
-        <path d="M26 40h12v8a6 6 0 0 1-12 0Z" fill="#A96343" />
-        <path d="M15 26c0-13 7-20 17-20s17 7 17 20v5H15Z" fill="#291447" />
-        <circle cx="17" cy="31" r="4" fill="#B97552" />
-        <circle cx="47" cy="31" r="4" fill="#B97552" />
-        <path d="M19 23c7 0 13-4 16-9 3 5 6 8 10 9v9c0 8-6 14-13 14s-13-6-13-14Z" fill="#D39169" />
-        <g className="oloo-face">
-          {expr === 'celebrating' ? (
-            <g className="oloo-eyes" stroke={ink} strokeWidth="2" fill="none" strokeLinecap="round">
-              <path d="M23 30q2.5-3.5 5 0" />
-              <path d="M36 30q2.5-3.5 5 0" />
-            </g>
-          ) : (
-            <g className="oloo-eyes" fill={ink}>
-              <circle cx="25.5" cy={expr === 'thinking' ? 27 : 29} r="2.1" />
-              <circle cx="38.5" cy={expr === 'thinking' ? 27 : 29} r="2.1" />
-            </g>
-          )}
-          {expr === 'concerned' && (
-            <g stroke={ink} strokeWidth="1.6" strokeLinecap="round" fill="none">
-              <path d="M21 24.5l5 1.6" />
-              <path d="M43 24.5l-5 1.6" />
-            </g>
-          )}
-          {expr === 'happy' && (
-            <g fill="var(--accent-warm)" opacity="0.85">
-              <ellipse cx="20" cy="34" rx="3.4" ry="2" />
-              <ellipse cx="44" cy="34" rx="3.4" ry="2" />
-            </g>
-          )}
-          {expr === 'celebrating' && (
-            <g>
-              <path d="M14 18l1.6 3.4 3.4 1.6-3.4 1.6-1.6 3.4-1.6-3.4-3.4-1.6 3.4-1.6Z" fill="var(--accent-warm)" />
-              <path d="M50 14l1.2 2.6 2.6 1.2-2.6 1.2-1.2 2.6-1.2-2.6-2.6-1.2 2.6-1.2Z" fill="var(--secondary)" />
-            </g>
-          )}
-          {/* mouth */}
-          {expr === 'speaking' ? (
-            <ellipse cx="32" cy="38" rx="4" ry="5" fill={ink} />
-          ) : expr === 'happy' || expr === 'celebrating' ? (
-            <path d={expr === 'celebrating' ? 'M25 34Q32 45 39 34Q32 38 25 34Z' : 'M26 34Q32 42 38 34Q32 37 26 34Z'} fill={ink} />
-          ) : expr === 'concerned' ? (
-            <path d="M27 39.5q5-3.5 10 0" stroke={ink} strokeWidth="2" fill="none" strokeLinecap="round" />
-          ) : expr === 'thinking' ? (
-            <path d="M29 37.5h6" stroke={ink} strokeWidth="2" strokeLinecap="round" />
-          ) : (
-            <path d="M27 36.5q5 3 10 0" stroke={ink} strokeWidth="2" fill="none" strokeLinecap="round" />
-          )}
-        </g>
-      </svg>
-    </div>
-  )
-}
+const OlooCharacter = ({ size = 40 }) => (
+  <img
+    className="oloo-avatar"
+    src="/oloo-portrait.png"
+    alt=""
+    width={size}
+    height={size}
+    style={{ borderRadius: '50%', border: '2px solid var(--primary)', objectFit: 'cover', flexShrink: 0 }}
+  />
+)
 
 // — Proactive Questions —
 function getProactiveQuestions(userContext) {
@@ -152,7 +89,6 @@ function AIChat({ profile }) {
   const [showNotification, setShowNotification] = useState(false);
   const [consentState, setConsentState] = useState({ userId: null, consent: null, error: '' });
   const [aiConsentSaving, setAiConsentSaving] = useState(false);
-  const [olooEmotion, setOlooEmotion] = useState('neutral');
   const [userContextState, setUserContextState] = useState({ userId: null, context: null });
   const aiConsent = consentState.userId === userId ? consentState.consent : null;
   const aiConsentError = consentState.userId === userId ? consentState.error : '';
@@ -390,17 +326,14 @@ function AIChat({ profile }) {
 
     utterance.onstart = () => {
       setSpeakingId(messageId);
-      setOlooEmotion('speaking');
     };
 
     utterance.onend = () => {
       setSpeakingId(null);
-      setOlooEmotion('neutral');
     };
 
     utterance.onerror = () => {
       setSpeakingId(null);
-      setOlooEmotion('neutral');
     };
 
     synthRef.current.speak(utterance);
@@ -412,7 +345,6 @@ function AIChat({ profile }) {
       synthRef.current.cancel();
     }
     setSpeakingId(null);
-    setOlooEmotion('neutral');
   };
 
   // ─── Send message ───
@@ -440,7 +372,6 @@ function AIChat({ profile }) {
     setMessages(updatedMessages);
     setInput('');
     setLoading(true);
-    setOlooEmotion('thinking');
 
     try {
       let immediateShown = false;
@@ -450,7 +381,7 @@ function AIChat({ profile }) {
           if (generation !== messageGeneration.current) return;
           immediateShown = true;
           setMessages([...updatedMessages, { role: 'assistant', content: reply, id: crypto.randomUUID(), crisis: true }]);
-          setLoading(false); setOlooEmotion('concerned');
+          setLoading(false);
         },
       });
       if (generation !== messageGeneration.current) return;
@@ -470,7 +401,6 @@ function AIChat({ profile }) {
         action: res?.action || null,
       };
 
-      setOlooEmotion('neutral');
       setMessages([...updatedMessages, replyMsg]);
 
       if (voiceEnabled && replyMsg.content) {
@@ -478,7 +408,6 @@ function AIChat({ profile }) {
       }
     } catch {
       if (generation !== messageGeneration.current) return;
-      setOlooEmotion('neutral');
       setMessages([...updatedMessages, {
         role: 'assistant',
         content: "I'm having trouble responding right now. Please try again. ",
@@ -516,23 +445,6 @@ function AIChat({ profile }) {
       setActionBusyId(null);
     }
   };
-
-  //  Oloo's expression follows context: streak milestone → celebrating,
-  //  high-risk day → concerned, otherwise calm/happy. thinking/speaking
-  //  are transient states that override it.
-  const contextExpression = (() => {
-    const p = userContext?.profile;
-    if (!p) return 'calm';
-    const streak = p.streak_days || 0;
-    const risk = String(p.risk_level || '').toLowerCase();
-    const lastEntry = userContext?.recentDiary?.[0];
-    const lowMood = lastEntry && (lastEntry.gambled === true || ['rough', 'bad', 'low', 'struggling', 'awful'].includes(String(lastEntry.mood || '').toLowerCase()));
-    if (risk === 'high' || lowMood) return 'concerned';
-    if (streak > 0 && streak % 7 === 0) return 'celebrating';
-    if (streak >= 3) return 'happy';
-    return 'calm';
-  })();
-  const shownEmotion = olooEmotion === 'thinking' ? 'thinking' : olooEmotion === 'speaking' ? 'speaking' : contextExpression;
 
   //  Time-aware greeting + thought for today (EN/SW via i18n keys).
   const hour = new Date().getHours();
@@ -662,7 +574,7 @@ function AIChat({ profile }) {
             padding: '16px', borderBottom: '1px solid var(--border)',
             display: 'flex', alignItems: 'center', gap: '12px',
           }}>
-            <OlooCharacter size={44} emotion={shownEmotion} />
+            <OlooCharacter size={44} />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--primary)', marginBottom: '2px' }}>Oloo</div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -716,7 +628,7 @@ function AIChat({ profile }) {
             {messages.map((msg, i) => (
               <div key={msg.id || i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start', animation: 'messageIn 0.3s ease-out' }}>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', flexDirection: msg.role === 'user' ? 'row-reverse' : 'row' }}>
-                  {msg.role === 'assistant' && <OlooCharacter size={24} emotion={speakingId === msg.id ? 'speaking' : 'calm'} />}
+                  {msg.role === 'assistant' && <OlooCharacter size={24} />}
                   <div
                     className={msg.crisis ? 'oloo-message--crisis' : undefined}
                     role={msg.crisis ? 'alert' : undefined}
@@ -784,7 +696,7 @@ function AIChat({ profile }) {
 
             {loading && (
               <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', animation: 'messageIn 0.3s ease-out' }}>
-                <OlooCharacter size={24} emotion="thinking" />
+                <OlooCharacter size={24} />
                 <div style={{ background: 'var(--surface-2)', padding: '12px 16px', borderRadius: '16px 16px 16px 4px' }}>
                   <div style={{ display: 'flex', gap: '4px' }}>
                     {[0, 1, 2].map(i => (
