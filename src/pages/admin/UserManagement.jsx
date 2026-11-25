@@ -1,5 +1,6 @@
 import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
 import UserAvatar from '../../components/UserAvatar'
@@ -358,6 +359,7 @@ export default function UserManagement() {
 
                           </div>
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                            {isSuperAdmin && <Link to={`/super-admin/logs?user=${u.id}`} style={btn('transparent', 'var(--primary)', 'var(--primary)')}>Activity</Link>}
                             {isSuperAdmin && u.id !== actor?.id && !(u.role === 'super_admin' && u.status === 'active' && activeSuperAdminCount <= 1) && (
                               <button type="button" onClick={() => setEditingUser(u)}
                                 style={btn('transparent', 'var(--primary)', 'var(--primary)')}>

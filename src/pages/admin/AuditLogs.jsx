@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
 import { BrandLoader } from '../../components/Brand'
@@ -45,6 +45,11 @@ function exportToCSV(logs, filename) {
 
 export default function AuditLogs() {
   const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const userFilter = params.get('user') || ''
+  const validUser = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userFilter)
+  const [accountActivity, setAccountActivity] = useState(null)
+  const [activityUnavailable, setActivityUnavailable] = useState(false)
   const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -54,12 +59,25 @@ export default function AuditLogs() {
   const [dateRange, setDateRange] = useState('all')
   const [expandedAll, setExpandedAll] = useState(false)
   const [expandedIds, setExpandedIds] = useState({})
+  const requestVersion = useRef(0)
+  const live = !userFilter && filter === 'all' && actionFilter === 'all' && dateRange === 'all'
 
   const fetchLogs = useCallback(async () => {
+    const version = ++requestVersion.current
     setLoading(true)
     setError(null)
+    setLogs([])
+    setAccountActivity(null)
+    setActivityUnavailable(false)
     try {
-      let query = supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(LOG_LIMIT)
+      if (userFilter && !validUser) {
+        setLogs([])
+        setError('Invalid account filter.')
+        return
+      }
+      const columns = userFilter ? 'id, actor_id, action, target_table, target_id, created_at' : '*'
+      let query = supabase.from('audit_logs').select(columns).order('created_at', { ascending: false }).limit(LOG_LIMIT)
+      if (userFilter) query = query.or(`actor_id.eq.${userFilter},and(target_table.eq.profiles,target_id.eq.${userFilter})`)
 
       //  Server-side filters
       if (filter !== 'all') query = query.eq('target_table', filter)
@@ -77,26 +95,37 @@ export default function AuditLogs() {
         query = query.gte('created_at', monthAgo.toISOString())
       }
 
-      const { data, error: fetchError } = await query
+      const [result, activity] = await Promise.all([
+        query,
+        userFilter ? supabase.rpc('super_admin_account_activity', { p_user_id: userFilter }).maybeSingle() : null,
+      ])
+      if (version !== requestVersion.current) return
+      if (activity) {
+        setAccountActivity(activity.data)
+        setActivityUnavailable(Boolean(activity.error))
+      }
+      const { data, error: fetchError } = result
       if (fetchError) throw fetchError
       setLogs(data || [])
     } catch (err) {
+      if (version !== requestVersion.current) return
       console.error('Audit log fetch error:', err)
       setError('Failed to load audit logs.')
-    } finally { setLoading(false) }
-  }, [filter, actionFilter, dateRange])
+    } finally { if (version === requestVersion.current) setLoading(false) }
+  }, [filter, actionFilter, dateRange, userFilter, validUser])
 
   useEffect(() => { fetchLogs() }, [fetchLogs])
 
   //  Real-time subscription
   useEffect(() => {
+    if (!live) return
     const channel = supabase.channel('audit_logs_live')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'audit_logs' }, (payload) => {
         setLogs(prev => [payload.new, ...prev].slice(0, LOG_LIMIT))
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [])
+  }, [live])
 
   const handleExport = () => {
     exportToCSV(logs, `audit-logs-${new Date().toISOString().split('T')[0]}.csv`)
@@ -185,7 +214,7 @@ export default function AuditLogs() {
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}> Audit Logs</h2>
-            <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>{logs.length} events  · Live monitoring</p>
+            <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>{logs.length} events · {live ? 'Live monitoring' : 'Filtered view'}</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={handleExport} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Export CSV</button>
@@ -194,6 +223,20 @@ export default function AuditLogs() {
         </div>
 
         <div style={{ padding: '1.5rem', maxWidth: '100%' }}>
+          {userFilter && (
+            <section className="card" aria-label="Account activity">
+              <h3>Account activity</h3>
+              <p>Account: {userFilter} · <Link to="/super-admin/logs">View all audit logs</Link></p>
+              {activityUnavailable ? <p role="status">Session activity is unavailable. Check that migration 12 has been applied.</p> : !loading && (
+                <dl>
+                  <dt>Latest sign-in</dt><dd>{accountActivity?.last_sign_in_at ? fmtDateTime(accountActivity.last_sign_in_at) : 'Not recorded'}</dd>
+                  <dt>Last seen in the app (approximate)</dt><dd>{accountActivity?.last_seen_at ? fmtDateTime(accountActivity.last_seen_at) : 'Not recorded'}</dd>
+                  <dt>Last sign-out requested</dt><dd>{accountActivity?.last_sign_out_requested_at ? fmtDateTime(accountActivity.last_sign_out_requested_at) : 'Not recorded'}</dd>
+                </dl>
+              )}
+              <p>Shows recorded changes made by this account or made to its profile. Closing the app or losing a connection does not record a sign-out.</p>
+            </section>
+          )}
           {/* Filters */}
           <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <input type="text" placeholder=" Search logs..." value={search} onChange={e => setSearch(e.target.value)}

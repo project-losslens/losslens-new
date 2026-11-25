@@ -10,6 +10,7 @@ import { useCrisisAlertCount } from '../context/CrisisAlertCountContext'
 import { clearAuthStorage, supabase } from '../lib/supabase'
 import { startOfflineSync } from '../lib/offlineSync'
 import { useI18n } from '../i18n'
+import { recordAccountActivity } from '../lib/accountActivity'
 import TopographicBackground from '../components/TopographicBackground'
 import { ProtectionIntroduction } from '../components/ProtectionWorkflow'
 
@@ -18,7 +19,7 @@ export default function AppShell({ admin = false }) {
   const navigate = useNavigate()
   const mainRef = useRef(null)
   const isMobile = useMediaQuery('(max-width: 768px)')
-  const { isSuperAdmin, role, username, avatar_url: avatarReference } = useAuthProfile()
+  const { isSuperAdmin, role, user, username, avatar_url: avatarReference } = useAuthProfile()
   const { t } = useI18n()
   const openCrisisAlerts = useCrisisAlertCount()
   const [desktopOpen, setDesktopOpen] = useState(() => localStorage.getItem('losslens:sidebar') !== 'closed')
@@ -63,7 +64,26 @@ export default function AppShell({ admin = false }) {
   }
 
   const handleSignOut = async () => {
+  const activityUserId = user?.id
+  useEffect(() => {
+    if (!activityUserId) return
+    let lastAttempt = 0
+    const report = () => {
+      if (document.visibilityState !== 'visible' || Date.now() - lastAttempt < 4 * 60_000) return
+      lastAttempt = Date.now()
+      void recordAccountActivity().then(() => {}, () => {})
+    }
+    report()
+    const interval = window.setInterval(report, 5 * 60_000)
+    document.addEventListener('visibilitychange', report)
+    return () => {
+      window.clearInterval(interval)
+      document.removeEventListener('visibilitychange', report)
+    }
+  }, [activityUserId])
+
     const { error } = await supabase.auth.signOut({ scope: 'local' })
+    try { await recordAccountActivity(true) } catch {}
     clearAuthStorage()
     if (error) {
       console.error('Sign-out failed:', error)
