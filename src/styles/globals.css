@@ -400,9 +400,77 @@ h1 em {
   cursor: default;
 }
 
-.modal-backdrop + * {
+.modal-backdrop ~ * {
   position: relative;
   z-index: 1;
+}
+
+/* Operational screens use the body face and readable, native keyboard controls. */
+:is(.shell--admin, .portal-page, .protection-journey) {
+  font-family: var(--font-body);
+  font-variant-numeric: tabular-nums;
+}
+:is(.shell--admin, .portal-page) { --text-secondary: #EAD9F3; --text-muted: #EAD9F3; }
+:is(.shell--admin, .portal-page) .portal-error { background: #5F1728; color: #FFE4EA; border-color: #F2768A; }
+:is(.shell--admin, .portal-page) :is(p,span,small)[style*="color: var(--danger)"] { color: #FFE4EA !important; }
+.shell--admin button[aria-pressed="true"], .operational-role-badge { background: #291447 !important; color: #EAD9F3 !important; border: 1px solid #C8A6E0 !important; }
+:is(.shell--admin, .portal-page) :is(h1,h2,h3,h4,label,th,button,input,select,textarea),
+.shell--admin [style*="font-family"] {
+  font-family: var(--font-body) !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+:is(.shell--admin, .portal-page) :is(h1,h2,h3,h4) { font-weight: 550 !important; }
+:is(.shell--admin, .portal-page) :is(label,th,small,.portal-page__eyebrow) {
+  color: var(--lilac) !important;
+  font-size: 0.875rem !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+:is(.shell--admin,.portal-page) :is([style*="font-size: 10px"],[style*="font-size: 11px"],[style*="font-size: 12px"],.fs-10,.fs-11,.fs-12,.portal-notice) { font-size: 0.875rem !important; }
+:is(.shell--admin,.portal-page) [style*="text-transform"] { text-transform: none !important; letter-spacing: normal !important; }
+:is(.shell--admin,.portal-page) :is([style*="255, 255, 255, 0.4"],[style*="255,255,255,0.4"]) { color: var(--text-secondary) !important; }
+:is(.shell--admin,.portal-page) [style*="color: rgba(255, 255, 255"] { color: #EAD9F3 !important; }
+:is(.shell--admin, .portal-page, .protection-journey) :is(input,select,textarea) {
+  color-scheme: dark;
+  color: #EAD9F3 !important;
+  background-color: #291447 !important;
+  border-color: #C8A6E0 !important;
+  font-family: var(--font-body);
+  font-size: 1rem !important;
+  min-height: 44px;
+  max-width: 100%;
+}
+:is(.shell--admin, .portal-page, .protection-journey) select option {
+  color: #EAD9F3;
+  background: #291447;
+  font-family: var(--font-body);
+}
+:is(.shell--admin, .portal-page, .protection-journey) select option:checked { color: #291447; background: #EAD9F3; }
+:is(.shell--admin, .portal-page, .protection-journey) :is(select,input,textarea):disabled { color: #C8A6E0 !important; opacity: 0.7; cursor: not-allowed; }
+:is(.shell--admin, .portal-page, .protection-journey) :is(button,a,input,select,textarea):focus-visible { outline: 3px solid #EAD9F3; outline-offset: 3px; }
+/* Chromium's web-rendered native picker avoids OS-controlled option colours.
+   Native semantics retain arrows, type-ahead, Escape and focus restoration. */
+@supports (appearance: base-select) {
+  :is(.shell--admin, .portal-page, .protection-journey) select,
+  :is(.shell--admin, .portal-page, .protection-journey) select::picker(select) { appearance: base-select; }
+  :is(.shell--admin, .portal-page, .protection-journey) select::picker(select) { color: #EAD9F3; background: #291447; border: 1px solid #C8A6E0; border-radius: 8px; }
+  :is(.shell--admin, .portal-page, .protection-journey) option { padding: 10px; }
+  :is(.shell--admin, .portal-page, .protection-journey) option:is(:hover,:focus-visible) { color: #291447; background: #C8A6E0; }
+}
+.operational-table-scroll { overflow-x: auto; }
+.operational-table-scroll table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.operational-table-scroll :is(th,td) { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.consent-label { display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; }
+.consent-label input[type="checkbox"] { flex: 0 0 20px; width: 20px; min-height: 20px; margin-top: 3px; }
+.protection-journey__heading { background: #291447; color: #EAD9F3; }
+.protection-status-link { font-size: 0.875rem; color: #EAD9F3; }
+.protection-journey :is(input,select,textarea), .direct-payments :is(input,select,textarea) { width: 100%; }
+.protection-journey .consent-label input { width: 20px; }
+.protection-journey .portal-card, .direct-payments .portal-card { overflow-wrap: anywhere; }
+@media (max-width: 480px) {
+  .shell__header-actions > .protection-status-link { max-width: 105px; line-height: 1.25; text-align: right; }
+  .protection-journey .portal-form__actions, .direct-payments .portal-form__actions { display: flex; flex-direction: column; align-items: stretch; }
 }
 
 /* Invisible button stretched over a non-interactive card so the whole card is
@@ -3023,8 +3091,8 @@ html[data-low-data='true'] canvas:not([data-low-data-keep]) {
 }
 .dashboard-summary .risk-badge { background: var(--primary-soft); color: var(--lilac); }
 .pgsi-dashboard { background: var(--surface); }
-.shell, .shell__main, .shell__content, .ll-landing { background-color: var(--canvas); }
-.topo { background: var(--canvas); }
+.shell, .shell__main, .shell__content, .ll-landing { background-color: transparent; }
+.topo { background: transparent; }
 .card, .dash-section, .stat-card, .pgsi-dialog, .pgsi-onboarding > .card,
 .crisis-access__sheet, .mobile-nav__sheet { background-color: var(--surface); color: var(--text); }
 .mobile-nav { background: var(--plum); border-top-color: rgb(234 217 243 / 0.3); }
@@ -3083,3 +3151,48 @@ html[data-low-data='true'] canvas:not([data-low-data-keep]) {
 .btn-ghost:hover { background: var(--primary-soft); color: var(--lilac); }
 .ll-landing .ll-section a:not(.ll-btn):hover { color: var(--pale-lilac); }
 .ll-landing .ll-header .ll-btn--primary:hover { background: var(--wisteria); color: var(--lilac) !important; }
+
+/* One shared photograph; reserve space before loading to avoid layout shifts.
+   Keep controls on solid plum and faces in a separate, unobstructed strip. */
+html { background: #7136CC; }
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(100deg, rgb(41 20 71 / .95), rgb(113 54 204 / .72)),
+    var(--hero-photo) right center / cover no-repeat, #7136CC;
+}
+.shell__header, .oloo-chat-header { flex-wrap: wrap; background-image: none !important; }
+.ll-landing .ll-header, .ll-landing .ll-header--solid { background: var(--plum); }
+.shell__header::after,
+.ll-landing:not(.ll-homepage) #public-main::before,
+.ll-landing > main::before,
+.pgsi-onboarding::before,
+.family-join::before,
+.auth-retry::before,
+.auth-container:not(.ll-landing *)::before,
+.oloo-chat-header::after {
+  content: ''; display: block; flex: 0 0 100%; height: 128px;
+  background: var(--hero-photo) right center / auto 180px no-repeat, #7136CC;
+  pointer-events: none;
+}
+.shell__header::after { margin-top: 4px; border-radius: 8px; }
+.pgsi-onboarding::before { margin-bottom: 16px; border-radius: 12px; }
+.auth-container:not(.ll-landing *) { flex-direction: column; gap: 16px; }
+.auth-container:not(.ll-landing *)::before { flex: none; width: 100%; max-width: 440px; border-radius: 12px; }
+.oloo-chat-header::after { height: 96px; background-size: auto 148px; border-radius: 6px; }
+@media (max-width: 48rem) {
+  .shell__header::after { height: 112px; background-size: auto 164px; }
+}
+
+.family-join[style*="flex"] { flex-direction: column; gap: 16px; }
+.family-join::before, .auth-retry::before { flex: none; width: 100%; }
+
+/* Full-width Protection routes bypass PublicLayout. Keep their reading area solid. */
+.ll-landing > main { padding-top: 0 !important; background-color: var(--plum); }
+.ll-landing > main::before { margin-bottom: 16px; }
+.shell__content { background-color: var(--plum); }
+@media (max-width: 48rem) {
+  .pgsi-onboarding .pgsi-dialog__header { flex-wrap: wrap; }
+  .pgsi-onboarding .pgsi-dialog__header h1 { flex-basis: 100%; }
+  .user-management-tabs { flex-wrap: wrap; }
+  .user-management-tabs > button { flex: 1 1 140px !important; overflow-wrap: normal; white-space: normal !important; }
+}

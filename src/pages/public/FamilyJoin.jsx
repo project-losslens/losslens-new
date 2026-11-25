@@ -208,7 +208,7 @@ export default function FamilyJoin() {
   //  Invalid
   if (status === 'invalid') {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div className="family-join" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <TopographicBackground variant="hero" />
         <div style={{ maxWidth: '440px', width: '100%', textAlign: 'center' }}>
           <AppIcon name="alert" size={56} style={{ display: 'block', margin: '0 auto 16px', color: '#FFFFFF' }} />
@@ -223,7 +223,7 @@ export default function FamilyJoin() {
   //  Declined
   if (status === 'declined') {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div className="family-join" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <TopographicBackground variant="hero" />
         <div style={{ maxWidth: '440px', width: '100%', textAlign: 'center', background: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '2.5rem', border: '1px solid rgba(255,255,255,0.12)' }}>
           <AppIcon name="heart" size={56} style={{ display: 'block', margin: '0 auto 16px', color: 'var(--primary)' }} />
@@ -239,7 +239,7 @@ export default function FamilyJoin() {
   if (status === 'pending') {
     const permissions = invitation?.permissions || []
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div className="family-join" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <TopographicBackground variant="hero" />
         <div style={{ maxWidth: '480px', width: '100%', background: 'rgba(255,255,255,0.06)', borderRadius: '20px', padding: '2.5rem 2rem', border: '2px solid var(--primary)', textAlign: 'center' }}>
           <AppIcon name="users" size={48} style={{ display: 'block', margin: '0 auto 16px', color: 'var(--primary)' }} />
@@ -269,7 +269,7 @@ export default function FamilyJoin() {
   const risk = userStats?.riskLevel ? getRisk(userStats.riskLevel) : null
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div className="family-join" style={{ minHeight: '100vh' }}>
       <TopographicBackground variant="hero" />
       <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgb(var(--secondary-rgb) / 0.12))', padding: '2rem 1.5rem', textAlign: 'center', borderBottom: '2px solid var(--primary)' }}>
         <AppIcon name="users" size={40} style={{ display: 'block', margin: '0 auto 8px', color: 'var(--primary)' }} />

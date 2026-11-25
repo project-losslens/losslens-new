@@ -3,7 +3,7 @@
 // - Never caches /api/, Supabase, or auth endpoints.
 // - Offline fallback page lists crisis helplines (works with no network).
 
-const CACHE_VERSION = 'losslens-v9'
+const CACHE_VERSION = 'losslens-v10'
 const CACHE_NAME = `${CACHE_VERSION}-precache`
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`
 

@@ -771,7 +771,7 @@
 .ll-homepage .hp-button--light:hover,
 .ll-homepage .hp-button--outline:hover { background: #FFFFFF; color: var(--plum); border-color: #FFFFFF; }
 .ll-homepage .hp-hero__note { max-width: 48ch; margin: 0; color: var(--pale-lilac); font-size: 0.875rem !important; line-height: 1.5; }
-.ll-homepage .hp-hero__type { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 48px; padding: 48px; overflow: hidden; background: var(--orchid); color: var(--pale-lilac); }
+.ll-homepage .hp-hero__type { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 48px; padding: 48px; overflow: hidden; background: linear-gradient(90deg, rgb(41 20 71 / 0.9) 0%, rgb(41 20 71 / 0.62) 52%, rgb(113 54 204 / 0.38) 100%), var(--hero-photo) right center / cover no-repeat, var(--orchid); color: var(--pale-lilac); }
 .ll-homepage .hp-hero__type p { position: relative; z-index: 1; font-family: var(--ll-font-display); font-size: clamp(2.5rem, 5.8vw, 5.5rem); font-weight: 300; letter-spacing: -0.04em; line-height: 1.1; }
 .ll-homepage .hp-hero__type p span { color: #FFFFFF; }
 .ll-homepage .hp-hero__type-caption { font-size: 0.875rem; letter-spacing: 0.12em; text-transform: uppercase; }
@@ -841,7 +841,7 @@
   .ll-homepage .hp-hero h1 { margin-bottom: 18px; }
   .ll-homepage .hp-hero__actions { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 22px; }
   .ll-homepage .hp-hero__note { font-size: 0.8125rem !important; }
-  .ll-homepage .hp-hero__type { gap: 24px; min-height: 280px; padding: 36px 24px; }
+  .ll-homepage .hp-hero__type { gap: 24px; min-height: 280px; padding: 36px 24px; background-position: 68% center; }
   .ll-homepage .hp-hero__type p { font-size: 3rem; }
   .ll-homepage .hp-help, .ll-homepage .hp-product, .ll-homepage .hp-support { padding: 48px 0; }
   .ll-homepage .hp-help__row, .ll-homepage .hp-product__grid, .ll-homepage .hp-protection__grid, .ll-homepage .hp-support__intro { grid-template-columns: 1fr; gap: 20px; }
@@ -867,3 +867,13 @@
 }
 .ll-homepage .hp-support a.btn-primary { background: var(--pale-lilac); color: var(--plum); }
 .ll-homepage .hp-support a.btn-primary:hover { background: #FFFFFF; color: var(--plum); }
+
+/* Keep the conversation scene visible without placing copy over faces. */
+.ll-homepage .hp-hero::before {
+  content: ''; display: block; grid-column: 1 / -1; height: 200px;
+  background: var(--hero-photo) right center / auto 260px no-repeat, #7136CC;
+}
+.ll-homepage .hp-hero__type { background: var(--plum); }
+@media (max-width: 48rem) {
+  .ll-homepage .hp-hero::before { height: 152px; background-size: auto 180px; }
+}
