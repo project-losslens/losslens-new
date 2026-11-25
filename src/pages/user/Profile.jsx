@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { clearAuthStorage, supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
+import { usePgsi } from '../../context/PgsiContext'
 import { useI18n } from '../../i18n'
 import NumberField from '../../components/NumberField'
 
@@ -80,6 +81,35 @@ document.getElementById('pw').addEventListener('keydown', e => { if (e.key === '
 </script></body></html>`
 }
 
+
+function PgsiPersonalizationSettings() {
+  const pgsi = usePgsi()
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  const changePersonalization = async (event) => {
+    const enabled = event.target.checked
+    setSaving(true)
+    setError('')
+    try { await pgsi.setPersonalization(enabled) }
+    catch { setError('Your personalization choice was not saved. Please retry.') }
+    finally { setSaving(false) }
+  }
+
+  return (
+    <section className="dash-section">
+      <h3>Oloo personalization</h3>
+      {pgsi.error ? <p role="alert">Could not load this setting. <button type="button" className="btn-ghost" onClick={pgsi.refresh}>Retry</button></p>
+        : !pgsi.loaded ? <p role="status">Loading your preference...</p>
+        : <label className="pgsi-personalization">
+          <input type="checkbox" checked={pgsi.personalization_enabled} disabled={saving} onChange={changePersonalization} />
+          Let Oloo use my latest PGSI band and completion date
+        </label>}
+      <p className="pgsi-muted">Optional. When you chat, Oloo’s AI provider can use your latest PGSI band and assessment date, but not your answers. Turning it off applies to future messages.</p>
+      {error && <p role="alert" className="portal-error">{error}</p>}
+    </section>
+  )
+}
 
 export default function Profile() {
   const navigate = useNavigate()
@@ -649,6 +679,7 @@ ${reportBadges || '<p class="empty">No achievements recorded.</p>'}
                 <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>{t('profile.language')}</h3>
                 <LanguageSwitcher />
               </div>
+              <PgsiPersonalizationSettings />
               <div className="dash-section" style={{ marginBottom: '0.75rem' }}>
                 <h3 className="fs-12" style={{ color: '#FFFFFF', marginBottom: '0.5rem' }}>{t('profile.preferences')}</h3>
                 {[{ label: 'Behavioral analytics', key: 'allow_analytics' }, { label: 'Share anonymized data', key: 'share_research_data' }, { label: 'M-Pesa monitoring', key: 'mpesa_monitoring' }].map(item => (
