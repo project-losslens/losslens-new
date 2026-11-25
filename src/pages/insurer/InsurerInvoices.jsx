@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import RefreshButton from '../../components/RefreshButton'
 import { supabase } from '../../lib/supabase'
 import { useAuthProfile } from '../../context/AuthProfileContext'
 import { BrandLoader } from '../../components/Brand'
@@ -18,6 +19,7 @@ export function DirectPaymentTracking({ readOnly = false }) {
     if (result.error || !Array.isArray(result.data)) setError('Could not load direct payments. Refresh or contact LossLens support to check your portal access.')
     else { setRows(result.data || []); setError('') }
     setLoading(false)
+    return !result.error && Array.isArray(result.data)
   }, [])
   useEffect(() => { const timer = setTimeout(() => { void load() }, 0); return () => clearTimeout(timer) }, [load])
   const edit = (id, field, value) => { delete requests.current[id]; setForms(old => ({ ...old, [id]: { ...old[id], [field]: value } })) }
@@ -63,7 +65,7 @@ export function DirectPaymentTracking({ readOnly = false }) {
   return <section className="portal-card direct-payments">
     <h2>Direct insurer payments</h2>
     <p>The insurer pays the therapist outside LossLens. This view tracks reports and receipt acknowledgements; it does not send money or independently verify M-Pesa.</p>
-    {error && <p role="alert" className="portal-error">{error} <button type="button" onClick={load}>Refresh</button></p>}
+    {error && <p role="alert" className="portal-error">{error} <RefreshButton onRefresh={load} /></p>}
     {!error && !rows.length && <p>No approved treatment payments are available.</p>}
     {rows.map(row => { const f = forms[row.claim_id] || {}; return <article className="portal-card" key={row.claim_id}>
       <h3>{row.insurer} to {row.therapist || 'Assigned therapist'}</h3>

@@ -1,17 +1,16 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '../../lib/supabase'
 import { BrandLoader } from '../../components/Brand'
+import RefreshButton from '../../components/RefreshButton'
 
 //  Constants
 const DAY_MS = 86400000
 const WEEK_DAYS = 7
-const MONTH_DAYS = 30
 const DIARY_SAMPLE_LIMIT = 500
 const STREAK_SAMPLE_LIMIT = 300
 
 export default function UserAnalytics() {
   const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState(null)
   const [stats, setStats] = useState({})
   const [featureUsage, setFeatureUsage] = useState([])
@@ -22,20 +21,17 @@ export default function UserAnalytics() {
   const [recentSignups, setRecentSignups] = useState([])
 
   const fetchAll = useCallback(async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true)
-    else setLoading(true)
+    if (!isRefresh) setLoading(true)
     setError(null)
 
     try {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
       const todayStr = today.toISOString().split('T')[0]
-      const weekAgo = new Date(today.getTime() - WEEK_DAYS * DAY_MS).toISOString()
-      const monthAgo = new Date(today.getTime() - MONTH_DAYS * DAY_MS).toISOString()
 
       //  Batch all queries — 15 parallel
       const [
-        totalUsersRes, activeTodayRes, activeWeekRes, activeMonthRes,
+        totalUsersRes, presenceRes,
         highRiskRes, medRiskRes, lowRiskRes,
         totalDiaryRes, diaryTodayRes, cbtDoneRes,
         circleMessagesRes, crisisTotalRes, supportLinksRes,
@@ -44,9 +40,7 @@ export default function UserAnalytics() {
         ...weekQueries
       ] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
-        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('last_active', todayStr),
-        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('last_active', weekAgo),
-        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('last_active', monthAgo),
+        supabase.rpc('admin_recent_account_presence'),
         supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('risk_level', 'high'),
         supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('risk_level', 'medium'),
         supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('risk_level', 'low'),
@@ -115,8 +109,8 @@ export default function UserAnalytics() {
       const topStreakUser = streakDataRes.data?.[0]?.full_name || 'N/A'
 
       setStats({
-        totalUsers, activeToday: activeTodayRes.count || 0,
-        activeWeek: activeWeekRes.count || 0, activeMonth: activeMonthRes.count || 0,
+        totalUsers, activeToday: presenceRes.data?.today ?? null,
+        activeWeek: presenceRes.data?.week ?? null, activeMonth: presenceRes.data?.month ?? null,
         avgStreak, maxStreak, topStreakUser,
         diaryToday: diaryTodayRes.count || 0, totalDiary: totalDiaryRes.count || 0,
       })
@@ -126,12 +120,13 @@ export default function UserAnalytics() {
       setTopCoping(coping)
       setWeeklyActivity(weekActivity)
       setRecentSignups(recentSignupsRes.data || [])
+      return ![totalUsersRes, presenceRes, highRiskRes, medRiskRes, lowRiskRes, totalDiaryRes, diaryTodayRes, cbtDoneRes, circleMessagesRes, crisisTotalRes, supportLinksRes, diaryEntriesRes, streakDataRes, recentSignupsRes, ...weekQueries].some(result => result.error)
     } catch (err) {
       console.error('Analytics fetch error:', err)
       setError('Failed to load analytics. Please try again.')
+      return false
     } finally {
       setLoading(false)
-      setRefreshing(false)
     }
   }, [])
 
@@ -194,9 +189,7 @@ export default function UserAnalytics() {
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>Platform insights  · {stats.totalUsers} total users</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={() => fetchAll(true)} disabled={refreshing} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-              {refreshing ? 'Refreshing...' : ' Refresh'}
-            </button>
+            <RefreshButton onRefresh={() => fetchAll(true)} className="btn-ghost" />
           </div>
         </div>
 
@@ -205,9 +198,9 @@ export default function UserAnalytics() {
           {/* Key Stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px', marginBottom: '1.5rem' }}>
             <StatBox label="Total Users" value={stats.totalUsers.toLocaleString()} icon="" />
-            <StatBox label="Active Today" value={stats.activeToday.toLocaleString()} icon="" color="var(--primary)" />
-            <StatBox label="Active This Week" value={stats.activeWeek.toLocaleString()} icon="" color="var(--info)" />
-            <StatBox label="Active This Month" value={stats.activeMonth.toLocaleString()} icon="" color="var(--primary)" />
+            <StatBox label="Seen today (Nairobi time)" value={stats.activeToday?.toLocaleString() ?? 'Unavailable'} icon="" color="var(--primary)" />
+            <StatBox label="Seen in the last 7 days" value={stats.activeWeek?.toLocaleString() ?? 'Unavailable'} icon="" color="var(--info)" />
+            <StatBox label="Seen in the last 30 days" value={stats.activeMonth?.toLocaleString() ?? 'Unavailable'} icon="" color="var(--primary)" />
             <StatBox label="Avg Streak" value={`${stats.avgStreak}d`} sub={`Top: ${stats.maxStreak}d`} icon="" color="var(--primary)" />
             <StatBox label="Diary Today" value={stats.diaryToday.toLocaleString()} icon="" />
             <StatBox label="Total Diary" value={stats.totalDiary.toLocaleString()} sub="all time" icon="" color="var(--info)" />

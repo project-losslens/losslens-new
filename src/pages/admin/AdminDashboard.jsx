@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import RefreshButton from '../../components/RefreshButton'
 import { useNavigate } from 'react-router-dom'
 import { useCrisisAlertCount } from '../../context/CrisisAlertCountContext'
 import { useAuthProfile } from '../../context/AuthProfileContext'
@@ -102,13 +103,13 @@ export default function AdminDashboard() {
       const today = new Date().toISOString().split('T')[0]
 
       const [
-        totalUsersRes, activeTodayRes, highRiskRes,
+        totalUsersRes, presenceRes, highRiskRes,
         eventsActiveRes, resourcesRes,
         cbtRes, diaryTodayRes, circleRes, supportersRes,
         recentUsersRes, crisisAlertsRes, contactRes, diaryEntriesRes,
       ] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
-        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('last_active', today),
+        supabase.rpc('admin_recent_account_presence'),
         supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('risk_level', 'high'),
         supabase.from('events').select('*', { count: 'exact', head: true }).eq('active', true),
         supabase.from('resources').select('*', { count: 'exact', head: true }).eq('active', true),
@@ -130,7 +131,7 @@ export default function AdminDashboard() {
       const sortedTriggers = Object.entries(triggerCount).sort((a, b) => b[1] - a[1]).slice(0, 5)
 
       setStats({
-        totalUsers: totalUsersRes.count || 0, activeToday: activeTodayRes.count || 0,
+        totalUsers: totalUsersRes.count || 0, activeToday: presenceRes.data?.today ?? null,
         highRisk: highRiskRes.count || 0,
         eventsActive: eventsActiveRes.count || 0, resources: resourcesRes.count || 0,
         cbtCompletions: cbtRes.count || 0, diaryEntriesToday: diaryTodayRes.count || 0,
@@ -147,9 +148,11 @@ export default function AdminDashboard() {
       }
       setTopTriggers(sortedTriggers)
       setContactRequests(contactRes.data || [])
+      return ![totalUsersRes, presenceRes, highRiskRes, eventsActiveRes, resourcesRes, cbtRes, diaryTodayRes, circleRes, supportersRes, recentUsersRes, crisisAlertsRes, contactRes, diaryEntriesRes].some(result => result.error)
     } catch (err) {
       console.error('Admin fetch error:', err)
       setError('Failed to load dashboard data.')
+      return false
     } finally {
       setLoading(false)
     }
@@ -176,7 +179,7 @@ export default function AdminDashboard() {
 
   const statsCards = useMemo(() => [
     { label: 'Total Users', value: stats.totalUsers, icon: '', color: 'var(--primary)', path: ROUTES.USERS },
-    { label: 'Active Today', value: stats.activeToday, icon: '', color: 'var(--primary)' },
+    { label: 'Seen today (Nairobi time)', value: stats.activeToday ?? 'Unavailable', icon: '', color: 'var(--primary)' },
     { label: 'High Risk', value: stats.highRisk, icon: '', color: 'var(--text)', urgent: stats.highRisk > 0, path: ROUTES.USERS },
     { label: 'Crisis Open', value: openCrisisAlerts, icon: '🆘', color: 'var(--text)', urgent: openCrisisAlerts > 0, path: ROUTES.CRISIS },
     { label: 'Active Events', value: stats.eventsActive, icon: '', color: 'var(--info)', path: ROUTES.EVENTS },
@@ -239,10 +242,10 @@ export default function AdminDashboard() {
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', fontFamily: 'var(--font-body)', margin: 0 }}> Admin Dashboard</h2>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{stats.totalUsers} users  · {stats.activeToday} active today</p>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{stats.totalUsers} users · {stats.activeToday === null ? 'Activity unavailable' : `${stats.activeToday} seen today`}</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchAllData} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Refresh</button>
+            <RefreshButton className="btn-ghost" onRefresh={fetchAllData} />
           </div>
         </div>
 

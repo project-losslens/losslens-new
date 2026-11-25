@@ -1,4 +1,5 @@
 import { BrandLoader } from '../../components/Brand'
+import RefreshButton from '../../components/RefreshButton'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -59,9 +60,10 @@ export default function FamilyJoin() {
   //  here we poll every 30s while the tab is visible and on focus regain.
   const [lastUpdated, setLastUpdated] = useState(null)
   const refreshData = useCallback(async () => {
-    if (status !== 'view' || !invitation) return
-    await loadUserData(invitation)
-    setLastUpdated(new Date())
+    if (status !== 'view' || !invitation) return false
+    const refreshed = await loadUserData(invitation)
+    if (refreshed) setLastUpdated(new Date())
+    return refreshed
   }, [status, invitation, token])
 
   useEffect(() => {
@@ -130,9 +132,11 @@ export default function FamilyJoin() {
         riskLevel: summary?.risk_level,
       })
       setMessages(messageRows || [])
+      return true
     } catch (err) {
       console.error('Error loading user data:', err)
       setActError('Could not load the information shared with you.')
+      return false
     }
   }
 
@@ -279,7 +283,7 @@ export default function FamilyJoin() {
         <p style={{ color: 'var(--primary)', fontSize: '13px', margin: 0 }}>Here's how they're doing. What you see is what they've chosen to share.</p>
         <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '8px 0 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
           {lastUpdated ? `Updated ${timeAgo(lastUpdated)}` : 'Loading latest…'}
-          <button type="button" onClick={() => void refreshData()} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--primary)', borderRadius: '100px', padding: '2px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-body)', minHeight: '28px' }}>Refresh</button>
+          <RefreshButton className="btn-ghost" onRefresh={refreshData} />
         </p>
       </div>
 

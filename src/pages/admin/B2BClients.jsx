@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
 import { BrandLoader } from '../../components/Brand'
+import RefreshButton from '../../components/RefreshButton'
 
 const PLANS = { STANDARD: 'standard', ENTERPRISE: 'enterprise', CUSTOM: 'custom' }
 const PLAN_COLORS = {
@@ -44,8 +45,8 @@ export default function B2BClients() {
     return base + random
   }
 
-  const fetchClients = useCallback(async () => {
-    setLoading(true)
+  const fetchClients = useCallback(async (showLoader = true) => {
+    if (showLoader) setLoading(true)
     setError(null)
     try {
       const { data, error: fetchError } = await supabase.from('b2b_clients').select('*').order('created_at', { ascending: false })
@@ -64,12 +65,15 @@ export default function B2BClients() {
           .from('profiles')
           .select('*', { count: 'exact', head: true })
           .eq('b2b_client_id', client.id)
-        if (!countError) memberCounts[client.id] = count
+        if (countError) throw countError
+        memberCounts[client.id] = count
       }
       setClientMembers(memberCounts)
+      return true
     } catch (err) {
       console.error('B2B fetch error:', err)
       setError('Failed to load clients.')
+      return false
     } finally { setLoading(false) }
   }, [])
 
@@ -231,7 +235,7 @@ export default function B2BClients() {
             <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>{clients.length} total  · {activeCount} active</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchClients} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--info)', color: 'var(--info)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Refresh</button>
+            <RefreshButton className="btn-ghost" onRefresh={() => fetchClients(false)} />
             <button onClick={openCreate} style={{ padding: '8px 18px', borderRadius: '100px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Add Client</button>
           </div>
         </div>

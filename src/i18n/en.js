@@ -441,7 +441,7 @@ export default {
   'dashboard.continueModule': '{count} CBT module completed — pick up where you left off',
   'dashboard.continueFirst': 'Start your first CBT module',
   'dashboard.continueOpen': 'Open',
-  'dashboard.circleOnline': '{count} members online',
+  'dashboard.circleOnline': '{count} active in the last 5 min',
   'dashboard.circleJoin': 'Join the conversation',
   'dashboard.whispersActive': '{count} active chats',
   'dashboard.whispersFind': 'Find a peer',

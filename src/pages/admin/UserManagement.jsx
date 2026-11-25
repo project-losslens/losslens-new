@@ -1,6 +1,7 @@
 import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import RefreshButton from '../../components/RefreshButton'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
 import UserAvatar from '../../components/UserAvatar'
@@ -25,6 +26,7 @@ export default function UserManagement() {
   const { t } = useI18n()
   const { user: actor, isSuperAdmin } = useAuthProfile()
   const [users, setUsers] = useState([])
+  const [recentActivity, setRecentActivity] = useState(null)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
   const [activeTab, setActiveTab] = useState('users')
@@ -41,21 +43,25 @@ export default function UserManagement() {
   const [subHistory, setSubHistory] = useState([])
   const [subSaving, setSubSaving] = useState(false)
 
-  const fetchUsers = useCallback(async () => {
-    setLoading(true)
+  const fetchUsers = useCallback(async (showLoader = true) => {
+    if (showLoader) setLoading(true)
     setError(null)
     try {
-      const { data, error: fetchError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false })
+      const [profiles, presence] = await Promise.all([
+        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+        isSuperAdmin ? supabase.rpc('admin_recent_account_presence') : null,
+      ])
+      const { data, error: fetchError } = profiles
 
       if (fetchError) throw fetchError
       setUsers(data || [])
+      setRecentActivity(presence?.data?.recent ?? null)
+      return !presence?.error
     } catch {
       setError('Failed to load users.')
+      return false
     } finally { setLoading(false) }
-  }, [])
+  }, [isSuperAdmin])
 
   useEffect(() => {
     const timer = window.setTimeout(() => { void fetchUsers() }, 0)
@@ -253,13 +259,13 @@ export default function UserManagement() {
             </h2>
             <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>
               {activeTab === 'users'
-                ? `${users.length} total  ${highRiskCount} high risk  ${suspendedCount} suspended`
+                ? `${users.length} total · ${highRiskCount} high risk · ${suspendedCount} suspended${isSuperAdmin ? ` · ${recentActivity === null ? 'Recent activity unavailable' : `${recentActivity} seen in the last 6 min`}` : ''}`
                 : `${paymentStats.premium} premium  ${paymentStats.company} company  ${paymentStats.free} free  ${paymentStats.pending} pending`}
             </p>
           </div>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <button onClick={handleExportCSV} style={btn('transparent', 'var(--primary)', 'var(--primary)')}>Export CSV</button>
-            <button onClick={fetchUsers} style={btn('transparent', 'var(--info)', 'var(--info)')}>Refresh</button>
+            <RefreshButton className="btn-ghost" onRefresh={() => fetchUsers(false)} />
           </div>
         </div>
 
@@ -861,7 +867,7 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
                   <button type="button" className="btn-ghost" onClick={refreshInsurers} disabled={insurerStatus === 'loading'}>Refresh insurers</button>
                   {insurerStatus === 'loading' && <p role="status">Loading active insurers...</p>}
                   {insurerStatus === 'error' && <p role="alert">Could not load insurers. Try refreshing.</p>}
-                  {insurerStatus === 'ready' && insurers.length === 0 && <p role="status">No active insurer organisations are available.</p>}
+                  {insurerStatus === 'ready' && <p role="status">{insurers.length ? `${insurers.length} active insurers loaded.` : 'No active insurer organisations are available.'}</p>}
                   <p>Only active organisations from <Link to="/super-admin/insurers">Insurer Management</Link> can be assigned. Public insurance partner listings are separate.</p>
                 </div>
               )}

@@ -441,7 +441,7 @@ export default {
   'dashboard.continueModule': 'Moduli {count} ya CBT imekamilika — endelea ulipoishia',
   'dashboard.continueFirst': 'Anza moduli yako ya kwanza ya CBT',
   'dashboard.continueOpen': 'Fungua',
-  'dashboard.circleOnline': 'Wanachama {count} mtandaoni',
+  'dashboard.circleOnline': 'Wanachama {count} walikuwa hai katika dakika 5 zilizopita',
   'dashboard.circleJoin': 'Jiunge na mazungumzo',
   'dashboard.whispersActive': 'Mazungumzo {count} yanayoendelea',
   'dashboard.whispersFind': 'Pata mwenzako',

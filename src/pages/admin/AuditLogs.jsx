@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import RefreshButton from '../../components/RefreshButton'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
@@ -62,18 +63,18 @@ export default function AuditLogs() {
   const requestVersion = useRef(0)
   const live = !userFilter && filter === 'all' && actionFilter === 'all' && dateRange === 'all'
 
-  const fetchLogs = useCallback(async () => {
+  const fetchLogs = useCallback(async (showLoader = true) => {
     const version = ++requestVersion.current
-    setLoading(true)
+    if (showLoader) setLoading(true)
     setError(null)
-    setLogs([])
+    if (showLoader) setLogs([])
     setAccountActivity(null)
     setActivityUnavailable(false)
     try {
       if (userFilter && !validUser) {
         setLogs([])
         setError('Invalid account filter.')
-        return
+        return false
       }
       const columns = userFilter ? 'id, actor_id, action, target_table, target_id, created_at' : '*'
       let query = supabase.from('audit_logs').select(columns).order('created_at', { ascending: false }).limit(LOG_LIMIT)
@@ -99,7 +100,7 @@ export default function AuditLogs() {
         query,
         userFilter ? supabase.rpc('super_admin_account_activity', { p_user_id: userFilter }).maybeSingle() : null,
       ])
-      if (version !== requestVersion.current) return
+      if (version !== requestVersion.current) return false
       if (activity) {
         setAccountActivity(activity.data)
         setActivityUnavailable(Boolean(activity.error))
@@ -107,10 +108,12 @@ export default function AuditLogs() {
       const { data, error: fetchError } = result
       if (fetchError) throw fetchError
       setLogs(data || [])
+      return !activity?.error
     } catch (err) {
-      if (version !== requestVersion.current) return
+      if (version !== requestVersion.current) return false
       console.error('Audit log fetch error:', err)
       setError('Failed to load audit logs.')
+      return false
     } finally { if (version === requestVersion.current) setLoading(false) }
   }, [filter, actionFilter, dateRange, userFilter, validUser])
 
@@ -218,7 +221,7 @@ export default function AuditLogs() {
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={handleExport} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Export CSV</button>
-            <button onClick={fetchLogs} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--info)', color: 'var(--info)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Refresh</button>
+            <RefreshButton className="btn-ghost" onRefresh={() => fetchLogs(false)} />
           </div>
         </div>
 
@@ -230,11 +233,12 @@ export default function AuditLogs() {
               {activityUnavailable ? <p role="status">Session activity is unavailable. Check that migration 12 has been applied.</p> : !loading && (
                 <dl>
                   <dt>Latest sign-in</dt><dd>{accountActivity?.last_sign_in_at ? fmtDateTime(accountActivity.last_sign_in_at) : 'Not recorded'}</dd>
-                  <dt>Last seen in the app (approximate)</dt><dd>{accountActivity?.last_seen_at ? fmtDateTime(accountActivity.last_seen_at) : 'Not recorded'}</dd>
+                  <dt>Last seen in the app (approximate)</dt><dd>{accountActivity?.last_seen_at ? fmtDateTime(accountActivity.last_seen_at) : 'Not recorded yet'}</dd>
                   <dt>Last sign-out requested</dt><dd>{accountActivity?.last_sign_out_requested_at ? fmtDateTime(accountActivity.last_sign_out_requested_at) : 'Not recorded'}</dd>
                 </dl>
               )}
-              <p>Shows recorded changes made by this account or made to its profile. Closing the app or losing a connection does not record a sign-out.</p>
+              <p>Last seen is updated while the app is in the foreground. It is not a live connection indicator and is separate from activity in The Circle. Closing the app or losing a connection does not record a sign-out.</p>
+              <p>Shows recorded changes made by this account or made to its profile.</p>
             </section>
           )}
           {/* Filters */}

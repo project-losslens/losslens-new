@@ -1,4 +1,5 @@
 import { recoveryDate } from '../../lib/calendar'
+import RefreshButton from '../../components/RefreshButton'
 import { BrandLoader } from '../../components/Brand'
 import { toast } from '../../components/ToastProvider'
 import { useState, useEffect, useCallback, useRef } from 'react'
@@ -144,7 +145,7 @@ function Dashboard() {
         supabase.from('profiles').select('*').eq('id', uid).single(),
         supabase.from('diary_entries').select('*').eq('user_id', uid).order('date', { ascending: false }).limit(7),
         supabase.from('cbt_progress').select('*', { count: 'exact', head: true }).eq('user_id', uid).eq('completed', true),
-        supabase.from('circle_room_members').select('*', { count: 'exact', head: true }).gte('last_seen', new Date(Date.now() - 5 * 60 * 1000).toISOString()),
+        supabase.rpc('circle_recent_presence'),
         supabase.from('whispers_matches').select('*', { count: 'exact', head: true }).eq('status', 'active'),
       ])
 
@@ -153,7 +154,7 @@ function Dashboard() {
       const profileData = profileRes.data
       const entriesData = entriesRes.data || []
 
-      const failure = profileRes.error || entriesRes.error || cbtRes.error || circleRes.error || whispersRes.error
+      const failure = profileRes.error || entriesRes.error || cbtRes.error || whispersRes.error
       if (failure || !profileData) throw failure || new Error('Your profile could not be loaded')
 
       setProfile(profileData)
@@ -163,7 +164,7 @@ function Dashboard() {
         return
       }
 
-      setEntries(entriesData); setCbtCount(cbtRes.count || 0); setCircleOnline(circleRes.count || 0); setWhispersActive(whispersRes.count || 0)
+      setEntries(entriesData); setCbtCount(cbtRes.count || 0); setCircleOnline(circleRes.data?.total || 0); setWhispersActive(whispersRes.count || 0)
 
       try {
         const risk = await getRiskLevel(uid)
@@ -262,6 +263,7 @@ function Dashboard() {
             <p className="fs-12" style={{ color: 'var(--text-muted)', margin: '2px 0 0' }}>{profile?.streak_days ? t('dashboard.streakDays', { count: profile.streak_days }) : t('dashboard.startStreak')}</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <RefreshButton className="btn-ghost" onRefresh={fetchData} disabled={refreshing} />
             <NotificationBell />
             <span className={`risk-badge ${profile?.risk_level || 'low'}`}>{t('dashboard.riskBadge', { level: (profile?.risk_level || 'low').charAt(0).toUpperCase() + (profile?.risk_level || 'low').slice(1) })}</span>
           </div>

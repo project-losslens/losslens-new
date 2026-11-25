@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { SUPPORT_STATUSES } from '../../lib/supportRequests'
 import { BrandLoader } from '../../components/Brand'
+import RefreshButton from '../../components/RefreshButton'
 
 export default function SupportInbox() {
   const [tickets, setTickets] = useState([])
@@ -14,6 +15,7 @@ export default function SupportInbox() {
     if (!loadError) setTickets(data || [])
     setError(loadError ? 'Could not load support requests.' : '')
     setLoading(false)
+    return !loadError
   }, [])
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export default function SupportInbox() {
     <section className="portal-page">
       <header className="portal-page__heading">
         <div><p className="portal-page__eyebrow">Administration</p><h2>Support inbox</h2></div>
-        <button type="button" className="btn-ghost" disabled={saving} onClick={() => { void loadTickets() }}>Refresh</button>
+        <RefreshButton className="btn-ghost" disabled={saving} onRefresh={loadTickets} />
       </header>
       {error && <p className="portal-error" role="alert">{error}</p>}
       {tickets.length === 0 && !error && <p className="portal-notice">No support requests.</p>}

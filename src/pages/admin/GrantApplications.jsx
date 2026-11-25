@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
 import { BrandLoader } from '../../components/Brand'
+import RefreshButton from '../../components/RefreshButton'
 
 //  Constants
 const STATUS_CONFIG = {
@@ -29,8 +30,8 @@ export default function GrantApplications() {
   const [sortBy, setSortBy] = useState('newest')
   const [searchQuery, setSearchQuery] = useState('')
 
-  const fetchApplications = useCallback(async () => {
-    setLoading(true)
+  const fetchApplications = useCallback(async (showLoader = true) => {
+    if (showLoader) setLoading(true)
     setError(null)
     try {
       let query = supabase.from('grant_applications').select('*').order('created_at', { ascending: false })
@@ -38,9 +39,11 @@ export default function GrantApplications() {
       const { data, error: fetchError } = await query
       if (fetchError) throw fetchError
       setApplications((data || []).map(row => ({ ...row, contact_email: row.email, purpose: row.notes })))
+      return true
     } catch (err) {
       console.error('Grant fetch error:', err)
       setError('Failed to load applications.')
+      return false
     } finally { setLoading(false) }
   }, [filter])
 
@@ -147,7 +150,7 @@ export default function GrantApplications() {
             <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>{applications.length} applications  · {counts.pending} pending</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchApplications} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--info)', color: 'var(--info)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Refresh</button>
+            <RefreshButton className="btn-ghost" onRefresh={() => fetchApplications(false)} />
           </div>
         </div>
 

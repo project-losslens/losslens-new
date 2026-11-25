@@ -2,13 +2,14 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { BrandLoader } from '../../components/Brand'
+import RefreshButton from '../../components/RefreshButton'
 
 // Only show effective configuration. The previous form saved unused values and
 // incorrectly implied that authentication, billing and retention had changed.
 export default function SystemSettings() {
   const [state, setState] = useState({ loading: true, error: '', pricing: null, mode: null })
   const refresh = useCallback(async () => {
-    setState(current => ({ ...current, loading: true, error: '' }))
+    setState(current => ({ ...current, error: '' }))
     try {
       const [response, mode] = await Promise.all([
         fetch('/api/payments/config'),
@@ -20,7 +21,11 @@ export default function SystemSettings() {
       let value = mode.data?.value || 'off'
       try { value = JSON.parse(value) } catch { /* stored as plain text */ }
       setState({ loading: false, error: '', pricing, mode: value })
-    } catch (error) { setState(current => ({ ...current, loading: false, error: error.message })) }
+      return true
+    } catch (error) {
+      setState(current => ({ ...current, loading: false, error: error.message }))
+      return false
+    }
   }, [])
   useEffect(() => { void refresh() }, [refresh])
   if (state.loading) return <BrandLoader variant="section" />
@@ -28,7 +33,7 @@ export default function SystemSettings() {
     <section className="portal-page" style={{ padding: 24 }}>
       <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2>System settings</h2>
-        <button type="button" className="btn-ghost" onClick={refresh}>Refresh status</button>
+        <RefreshButton className="btn-ghost" onRefresh={refresh}>Refresh status</RefreshButton>
       </div>
       {state.error && <p role="alert" style={{ color: 'var(--danger)' }}>{state.error}</p>}
       <div className="card" style={{ marginTop: 16 }}>

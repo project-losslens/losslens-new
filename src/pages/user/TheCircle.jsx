@@ -1,5 +1,5 @@
 import { toast } from '../../components/ToastProvider'
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { createNotification } from '../../lib/notifications'
@@ -19,7 +19,7 @@ const ROOMS = [
 const MAX_MESSAGE_LENGTH = 280
 const MAX_MENTIONS = 3
 const MESSAGE_COOLDOWN_MS = 3000
-const PRESENCE_POLL_INTERVAL = 15000
+const PRESENCE_POLL_INTERVAL = 60000
 
 const REACTIONS = [
   { key: 'reaction_support', emoji: '', label: 'Support' },
@@ -120,7 +120,7 @@ export default function TheCircle() {
   const [sending, setSending] = useState(false)
   const [showCrisisBanner, setShowCrisisBanner] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
-  const [onlineCount, setOnlineCount] = useState(0)
+  const [onlineCount, setOnlineCount] = useState(null)
   const [memberCounts, setMemberCounts] = useState({})
   const [replyTo, setReplyTo] = useState(null)
   const [lastSendTime, setLastSendTime] = useState(0)
@@ -130,7 +130,6 @@ export default function TheCircle() {
   const messagesContainerRef = useRef(null)
   const channelRef = useRef(null)
   const pollRef = useRef(null)
-  const presenceRef = useRef(null)
   const crisisTimerRef = useRef(null)
   const inputRef = useRef(null)
 
@@ -139,13 +138,38 @@ export default function TheCircle() {
     if (userId && identity) {
       subscribeToRoom(activeRoom)
       fetchMessages(activeRoom)
-      updatePresence(activeRoom)
       startPolling(activeRoom)
-      startPresencePolling()
     }
     return () => {
       if (channelRef.current) supabase.removeChannel(channelRef.current)
       if (pollRef.current) clearInterval(pollRef.current)
+    }
+  }, [activeRoom, userId, identity])
+  useEffect(() => {
+    if (!userId || !identity) return
+    let active = true
+    let pending = false
+    const fetchPresence = async () => {
+      if (pending || document.visibilityState !== 'visible') return
+      pending = true
+      try {
+        const { data, error } = await supabase.rpc('circle_recent_presence', { p_room: activeRoom })
+        if (!active) return
+        setOnlineCount(error ? null : data?.total ?? null)
+        setMemberCounts(error ? {} : data?.rooms || {})
+      } catch {
+        if (active) { setOnlineCount(null); setMemberCounts({}) }
+      } finally {
+        pending = false
+      }
+    }
+    void fetchPresence()
+    const timer = window.setInterval(fetchPresence, PRESENCE_POLL_INTERVAL)
+    document.addEventListener('visibilitychange', fetchPresence)
+    return () => {
+      active = false
+      window.clearInterval(timer)
+      document.removeEventListener('visibilitychange', fetchPresence)
     }
   }, [activeRoom, userId, identity])
   useEffect(() => { scrollToBottom() }, [messages.length])
@@ -163,7 +187,6 @@ export default function TheCircle() {
   const cleanup = () => {
     if (channelRef.current) supabase.removeChannel(channelRef.current)
     if (pollRef.current) clearInterval(pollRef.current)
-    if (presenceRef.current) clearInterval(presenceRef.current)
     if (crisisTimerRef.current) clearTimeout(crisisTimerRef.current)
   }
 
@@ -191,25 +214,6 @@ export default function TheCircle() {
   const scrollToBottom = () => {
     if (!showScrollButton) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
-
-  //  Single presence poll — less frequent
-  const startPresencePolling = useCallback(() => {
-    if (presenceRef.current) clearInterval(presenceRef.current)
-    const fetchPresence = async () => {
-      try {
-        const { count } = await supabase.from('circle_room_members').select('*', { count: 'exact', head: true }).gte('last_seen', new Date(Date.now() - 5 * 60 * 1000).toISOString())
-        setOnlineCount(count || 0)
-        const counts = {}
-        for (const r of ROOMS) {
-          const { count: c } = await supabase.from('circle_room_members').select('*', { count: 'exact', head: true }).eq('room', r.id).gte('last_seen', new Date(Date.now() - 5 * 60 * 1000).toISOString())
-          counts[r.id] = c || 0
-        }
-        setMemberCounts(counts)
-      } catch  { /* silent */ }
-    }
-    fetchPresence()
-    presenceRef.current = setInterval(fetchPresence, PRESENCE_POLL_INTERVAL)
-  }, [])
 
   //  Use only Realtime, not polling
   const subscribeToRoom = (room) => {
@@ -248,13 +252,6 @@ export default function TheCircle() {
     } catch  { /* silent */ }
   }
 
-  const updatePresence = async (room) => {
-    if (!identity || !userId) return
-    try {
-      const userHash = await ensureCircleHash(userId)
-      await supabase.from('circle_room_members').upsert({ room, user_hash: userHash, last_seen: new Date().toISOString() }, { onConflict: 'room,user_hash' })
-    } catch  { /* silent */ }
-  }
 
   //  Map user_hash to user_id for notifications
   const resolveUserHash = async (displayName) => {
@@ -395,7 +392,7 @@ export default function TheCircle() {
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', flexShrink: 0 }}>
           <div>
             <h2 className="fs-18" style={{ fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-body)', margin: 0 }}>The Circle</h2>
-            <p className="fs-12" style={{ color: 'var(--text-muted)', margin: '2px 0 0' }}>{onlineCount} online  · You: {identity.displayName}</p>
+            <p className="fs-12" style={{ color: 'var(--text-muted)', margin: '2px 0 0' }}>{onlineCount === null ? 'Circle activity unavailable' : `${onlineCount} active in the Circle in the last 5 min`} · You: {identity.displayName}</p>
           </div>
         </div>
 

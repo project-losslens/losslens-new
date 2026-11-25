@@ -1,4 +1,5 @@
 import { toast } from '../../components/ToastProvider'
+import RefreshButton from '../../components/RefreshButton'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useI18n } from '../../i18n'
@@ -35,13 +36,15 @@ export default function CrisisAlerts() {
       if (failed) {
         console.error('crisis_alerts query failed:', failed.code, failed.message)
         setError(tRef.current('admin.crisis.loadFailed'))
-        return
+        return false
       }
       setAlerts(openRes.data || [])
       setResolved(doneRes.data || [])
+      return true
     } catch (err) {
       console.error('crisis_alerts fetch threw:', err)
       setError(tRef.current('admin.crisis.loadFailed'))
+      return false
     } finally {
       setLoading(false)
     }
@@ -121,7 +124,7 @@ export default function CrisisAlerts() {
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{alerts.length} open  · {resolved.length} resolved</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Refresh</button>
+            <RefreshButton className="btn-ghost" onRefresh={fetchAll} />
           </div>
         </div>
 

@@ -1,4 +1,5 @@
 import { toast } from '../../components/ToastProvider'
+import RefreshButton from '../../components/RefreshButton'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
@@ -44,23 +45,29 @@ export default function Broadcast() {
   const fetchUserCount = useCallback(async (target) => {
     try {
       const config = TARGET_CONFIG[target]
-      if (!config) return
-      const { count } = await config.query()
+      if (!config) return false
+      const { count, error: countError } = await config.query()
+      if (countError) throw countError
       setUserCount(count || 0)
       setTargetLabel(config.label)
-    } catch (err) { console.error('Count fetch error:', err) }
+      return true
+    } catch (err) {
+      console.error('Count fetch error:', err)
+      return false
+    }
   }, [])
 
-  const fetchAll = useCallback(async () => {
-    setLoading(true)
+  const fetchAll = useCallback(async (showLoader = true) => {
+    if (showLoader) setLoading(true)
     setError(null)
     try {
-      const [{ data: broadcastHistory }] = await Promise.all([
-        supabase.from('broadcasts').select('*').order('created_at', { ascending: false }).limit(HISTORY_LIMIT),
-      ])
+      const { data: broadcastHistory, error: historyError } = await supabase.from('broadcasts').select('*').order('created_at', { ascending: false }).limit(HISTORY_LIMIT)
+      if (historyError) throw historyError
       setHistory(broadcastHistory || [])
+      return true
     } catch  {
       setError('Failed to load broadcast data.')
+      return false
     } finally { setLoading(false) }
   }, [])
 
@@ -163,7 +170,10 @@ export default function Broadcast() {
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{userCount.toLocaleString()} {targetLabel.toLowerCase()} reachable</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Refresh</button>
+            <RefreshButton className="btn-ghost" onRefresh={async () => {
+              const results = await Promise.all([fetchAll(false), fetchUserCount(form.target)])
+              return results.every(Boolean)
+            }} />
           </div>
         </div>
 

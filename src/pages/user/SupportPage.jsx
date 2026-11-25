@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { SUPPORT_STATUSES } from '../../lib/supportRequests'
 import { BrandLoader } from '../../components/Brand'
+import RefreshButton from '../../components/RefreshButton'
 
 const CATEGORIES = [
   ['account', 'Account'],
@@ -29,6 +30,7 @@ export default function SupportPage() {
     if (!error) setTickets(data || [])
     setListError(Boolean(error))
     setLoading(false)
+    return !error
   }, [])
 
   useEffect(() => {
@@ -88,7 +90,7 @@ export default function SupportPage() {
       )}
       <section className="portal-card">
         <h2>Your tickets</h2>
-        <button type="button" className="btn-ghost" onClick={() => { void loadTickets() }}>Refresh status</button>
+        <RefreshButton className="btn-ghost" onRefresh={loadTickets} disabled={loading}>Refresh status</RefreshButton>
         {loading ? <BrandLoader variant="section" /> : listError ? <p className="portal-error" role="alert">Could not load your tickets. Try refreshing.</p>
           : tickets.length === 0 ? <p>You have not submitted any support requests.</p> : (
             <ul className="portal-list">

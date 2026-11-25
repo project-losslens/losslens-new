@@ -55,6 +55,7 @@ function ProtectionClaims() {
       toast.error('Some evidence files could not be opened.')
     }
     setEvidenceFiles(withUrls)
+    if (evidenceFiles && !signedUrlFailed) toast.success('Evidence up to date.')
   }
 
   const load = useCallback(async () => {

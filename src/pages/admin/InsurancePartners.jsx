@@ -1,4 +1,5 @@
 import { checkedMutation } from '../../lib/mutations'
+import RefreshButton from '../../components/RefreshButton'
 import { toast } from '../../components/ToastProvider'
 import NumberField from '../../components/NumberField'
 import { useState, useEffect, useCallback, useMemo } from 'react'
@@ -31,16 +32,18 @@ export default function InsurancePartners() {
   const [formErrors, setFormErrors] = useState({})
   const [form, setForm] = useState(EMPTY_FORM)
 
-  const fetchPartners = useCallback(async () => {
-    setLoading(true)
+  const fetchPartners = useCallback(async (showLoader = true) => {
+    if (showLoader) setLoading(true)
     setError(null)
     try {
       const { data, error: fetchError } = await supabase.from('insurance_partners').select('*').order('created_at', { ascending: false })
       if (fetchError) throw fetchError
       setPartners(data || [])
+      return true
     } catch (err) {
       console.error('Insurance fetch error:', err)
       setError('Failed to load partners.')
+      return false
     } finally { setLoading(false) }
   }, [])
 
@@ -184,7 +187,7 @@ export default function InsurancePartners() {
             <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>{partners.length} total  · {activeCount} active</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchPartners} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--info)', color: 'var(--info)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Refresh</button>
+            <RefreshButton className="btn-ghost" onRefresh={() => fetchPartners(false)} />
             <button onClick={openCreate} style={{ padding: '8px 18px', borderRadius: '100px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Add Partner</button>
           </div>
         </div>

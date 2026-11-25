@@ -2,7 +2,7 @@
 
 ## Applying the database
 
-Eight maintained scripts in `supabase/migrations/` — apply **in filename
+Nine maintained scripts in `supabase/migrations/` — apply **in filename
 order** on a **fresh, disposable** Supabase project first:
 
 ```
@@ -14,6 +14,7 @@ order** on a **fresh, disposable** Supabase project first:
 20261125000011_account_protection_workflows.sql
 20261125000012_account_activity.sql
 20261125000013_support_requests.sql
+20261125000014_recent_presence.sql
 ```
 
 Projects that already applied all ten original scripts need no SQL changes for consolidation alone. For the account/Protection workflow update, apply only forward migration `20261125000011_account_protection_workflows.sql` once. Do not rerun consolidated 09: its private-PGSI tables are not guarded with `IF NOT EXISTS`. For partially applied projects, reconcile the original history and review missing original sections before 11. See [workflow verification](WORKFLOW_FIXES.md).
@@ -21,6 +22,8 @@ Projects that already applied all ten original scripts need no SQL changes for c
 Apply `20261125000012_account_activity.sql` once after 11. In Super Admin → User Management → Activity, verify the latest sign-in, approximate foreground activity, and a sign-out request timestamp after using the app’s sign-out button. Confirm a regular user cannot read the summary RPC or activity table. The per-account audit view shows already-audited actions without copying private content. Background tabs, offline sessions, browser closes, and expired sessions are not reliable sign-out signals.
 
 Apply `20261125000013_support_requests.sql` once after 12 before deploying the ticket UI. Existing requests receive ticket numbers. Verify a signed-in request and a guest landing-page request show distinct receipts, both reach the Support Inbox, and a staff status change appears after refreshing the signed-in ticket list. Guests receive a reference only, not access to a public ticket lookup. Verify one member cannot see another member’s requests or the staff inbox data.
+
+Apply `20261125000014_recent_presence.sql` after 13. Test The Circle with two test accounts; switching rooms must not double-count an account in the Circle total. The Circle counts people seen there in the last five minutes, while User Management counts accounts seen anywhere in the foreground app in the last six minutes. Neither is a live connection indicator. In Activity, `Not recorded yet` means the account has not sent a successful app activity update. Verify refresh completion and failure feedback with and without network access.
 
 The inherited function-delimiter errors in 09 are corrected locally for fresh installations; see [database setup](DATABASE.md). Existing projects should not replay the full base file to obtain those corrections.
 

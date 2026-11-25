@@ -1,4 +1,5 @@
 import { checkedMutation } from '../../lib/mutations'
+import RefreshButton from '../../components/RefreshButton'
 import { toast } from '../../components/ToastProvider'
 import NumberField from '../../components/NumberField'
 import { useState, useEffect, useCallback, useMemo } from 'react'
@@ -37,16 +38,18 @@ export default function ManageGroups() {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  const fetchGroups = useCallback(async () => {
-    setLoading(true)
+  const fetchGroups = useCallback(async (showLoader = true) => {
+    if (showLoader) setLoading(true)
     setError(null)
     try {
       const { data, error: fetchError } = await supabase.from('groups').select('*').order('created_at', { ascending: false })
       if (fetchError) throw fetchError
       setGroups(data || [])
+      return true
     } catch (err) {
       console.error('Groups fetch error:', err)
       setError('Failed to load groups.')
+      return false
     } finally { setLoading(false) }
   }, [])
 
@@ -186,7 +189,7 @@ export default function ManageGroups() {
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{groups.length} total  · {activeCount} active</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchGroups} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }} aria-label="Refresh groups"></button>
+            <RefreshButton className="btn-ghost" aria-label="Refresh groups" onRefresh={() => fetchGroups(false)} />
             <button onClick={openCreate} style={{ padding: '8px 18px', borderRadius: '100px', background: 'var(--primary)', border: 'none', color: 'var(--on-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}> New Group</button>
           </div>
         </div>

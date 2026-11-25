@@ -1,4 +1,5 @@
 import { checkedMutation } from '../../lib/mutations'
+import RefreshButton from '../../components/RefreshButton'
 import { toast } from '../../components/ToastProvider'
 import NumberField from '../../components/NumberField'
 import { useState, useEffect, useCallback, useMemo } from 'react'
@@ -37,8 +38,8 @@ export default function ManageEvents() {
     type: 'Workshop', spots: '', image_url: '', active: true, discussion_enabled: true
   })
 
-  const fetchAll = useCallback(async () => {
-    setLoading(true)
+  const fetchAll = useCallback(async (showLoader = true) => {
+    if (showLoader) setLoading(true)
     setError(null)
     try {
       const [
@@ -49,6 +50,9 @@ export default function ManageEvents() {
         supabase.from('event_messages').select('*, events(title)').order('created_at', { ascending: false }).limit(50),
         supabase.from('event_discussions').select('*, events(title), profiles(full_name, username)').order('created_at', { ascending: false }).limit(100),
       ])
+
+      const failure = eventsRes.error || rsvpRes.error || contactRes.error || discussionRes.error
+      if (failure) throw failure
 
       // Group RSVPs by event
       const grouped = {}
@@ -63,9 +67,11 @@ export default function ManageEvents() {
       setRsvps(grouped)
       setContacts(contactRes.data || [])
       setDiscussions(discussionRes.data || [])
+      return true
     } catch (err) {
       console.error('Events fetch error:', err)
       setError('Failed to load events.')
+      return false
     } finally { setLoading(false) }
   }, [])
 
@@ -256,7 +262,7 @@ export default function ManageEvents() {
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{events.length} events  · {contacts.length} messages{unreadContacts > 0 ? `  · ${unreadContacts} unread` : ''}</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={fetchAll} style={{ padding: '6px 14px', borderRadius: '100px', background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}> Refresh</button>
+            <RefreshButton className="btn-ghost" onRefresh={() => fetchAll(false)} />
           </div>
         </div>
 
