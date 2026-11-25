@@ -39,13 +39,14 @@ Deno.serve(async (req) => {
       auth: { persistSession: false, autoRefreshToken: false },
     })
     const { data: { user: actor }, error: authError } = await caller.auth.getUser()
-    if (authError || !actor) return json(401, { error: 'Invalid session' })
+    if (authError && Number(authError.status) >= 500) return json(503, { error: 'Authentication service unavailable. Staff should check function project configuration.', code: 'auth_service_unavailable' })
+    if (authError || !actor) return json(401, { error: 'Your session expired or could not be verified. Sign in again.', code: 'invalid_session' })
 
     const admin = createClient(supabaseUrl, serviceKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     })
     const { data: actorProfile, error: roleError } = await admin.from('profiles')
-      .select('role, status')
+      .select('role, status, must_change_password')
       .eq('id', actor.id)
       .single()
     const body = await req.json()
@@ -57,11 +58,12 @@ Deno.serve(async (req) => {
       'set-role', 'set-profile', 'complete-temporary-password-change',
     ])
     if (!actions.has(action)) return json(400, { error: 'Unsupported action' })
-    if (roleError || actorProfile?.status !== 'active'
+    if (roleError) return json(503, { error: 'Current account authority could not be checked. Staff should verify the profiles schema and function project configuration.', code: 'authority_lookup_failed' })
+    if (actorProfile?.status !== 'active' || (actorProfile?.must_change_password && action !== 'complete-temporary-password-change')
       || (action !== 'complete-temporary-password-change' && actorProfile?.role !== 'super_admin')) {
       return json(403, { error: 'Active super-admin access required' })
     }
-    if (reason.length > 500 || (action !== 'complete-temporary-password-change' && reason.length < 5)) {
+    if (action !== 'set-role' && (reason.length > 500 || (action !== 'complete-temporary-password-change' && reason.length < 5))) {
       return json(400, { error: 'A reason of 5 to 500 characters is required' })
     }
     if (!targetId) return json(400, { error: 'Target account is required' })
@@ -71,7 +73,7 @@ Deno.serve(async (req) => {
         p_actor_id: actor.id,
         p_action: action === 'set-role' ? 'set-role-step-up' : action,
       })
-      if (rateError) return json(503, { error: 'Rate limit check is unavailable' })
+      if (rateError) return json(503, { error: 'Account service database is not ready. Staff must apply the account-workflow migration and deploy admin-user-update.', code: 'database_dependency' })
       if (!allowed) return json(429, { error: 'Too many account-management attempts. Try again later.' })
     }
 
@@ -81,6 +83,7 @@ Deno.serve(async (req) => {
       .single()
     if (targetProfileError || !targetProfile) return json(404, { error: 'Target account not found' })
     const { data: targetAuth, error: targetAuthError } = await admin.auth.admin.getUserById(targetId)
+    if (targetAuthError && [401,403].includes(Number(targetAuthError.status))) return json(503, { error: 'Server credentials cannot read the target account. Staff should verify the function service key and project.', code: 'server_credentials' })
     if (targetAuthError || !targetAuth.user) return json(404, { error: 'Target account not found' })
 
     if (action === 'complete-temporary-password-change') {
@@ -118,25 +121,21 @@ Deno.serve(async (req) => {
     }
 
     const expectedConfirmation = targetProfile.username || targetProfile.email || targetId
-    if (typeof body.typedConfirmation !== 'string' || body.typedConfirmation.trim() !== expectedConfirmation) {
+    if (action !== 'set-role' && (typeof body.typedConfirmation !== 'string' || body.typedConfirmation.trim() !== expectedConfirmation)) {
       return json(400, { error: 'Typed confirmation does not match the target account' })
     }
 
-    const requiresStepUp = action !== 'set-role' || (
-      (targetProfile.role === 'super_admin' && body.newRole !== 'super_admin')
-      || body.newRole === 'super_admin'
-    )
+    const requiresStepUp = true
     if (requiresStepUp) {
       const ownPassword = typeof body.ownPassword === 'string' ? body.ownPassword : ''
       if (!ownPassword) return json(400, { error: 'Your current password is required' })
       const verifier = createClient(supabaseUrl, anonKey, {
         auth: { persistSession: false, autoRefreshToken: false },
       })
-      const { data: verified, error: verifyError } = await verifier.auth.signInWithPassword({
-        email: actor.email || '',
-        password: ownPassword,
-      })
-      if (verifyError || verified.user?.id !== actor.id) return json(403, { error: 'Step-up authentication failed' })
+      const credentials = actor.email ? { email: actor.email, password: ownPassword } : { phone: actor.phone || '', password: ownPassword }
+      const { data: verified, error: verifyError } = await verifier.auth.signInWithPassword(credentials)
+      if (verifyError || verified.user?.id !== actor.id) return json(403, { error: 'Your password was not accepted. Enter your own super-admin password.', code: 'incorrect_password' })
+      await verifier.auth.signOut({ scope: 'local' })
     }
 
     const protectedTarget = targetProfile.role === 'super_admin' || targetId === actor.id
@@ -159,26 +158,27 @@ Deno.serve(async (req) => {
     if (action === 'set-role') {
       if (targetId === actor.id) return json(403, { error: 'You cannot change your own role' })
       const { newRole, insurerId, acknowledgeOpenWork, reassignmentTherapistId } = body
-      const needsPeerStepUp = targetProfile.role === 'super_admin' && newRole !== 'super_admin'
-      const needsPromotionStepUp = newRole === 'super_admin' && targetProfile.role !== 'super_admin'
-      if (needsPeerStepUp || needsPromotionStepUp) {
-        const { error: authorizationError } = await admin.rpc('admin_authorize_user_update', {
-          p_actor_id: actor.id,
-          p_target_id: targetId,
-          p_action: needsPeerStepUp ? 'demote-super-admin' : 'promote-super-admin',
-        })
-        if (authorizationError) return json(500, { error: 'Could not authorize the role change' })
+      if (!['user','admin','super_admin','therapist','insurer'].includes(newRole)) return json(400, { error: 'Select a permitted role' })
+      if (typeof body.requestId !== 'string' || !/^[0-9a-f-]{36}$/i.test(body.requestId)) return json(400, { error: 'A role-change request ID is required' })
+      // The token was verified by getUser above. Never accept actor/claims from the body.
+      const token = authHeader.replace(/^Bearer\s+/i, '')
+      const claims = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')))
+      if (actor.factors?.some((factor) => factor.status === 'verified') && claims.aal !== 'aal2') {
+        return json(403, { error: 'Complete your MFA challenge before changing roles.', code: 'mfa_required' })
       }
-      const { error: roleChangeError } = await caller.rpc('admin_set_role', {
-        p_user_id: targetId,
+      const { data: changed, error: roleChangeError } = await admin.rpc('service_change_account_role', {
+        p_actor_id: actor.id,
+        p_target_id: targetId,
         p_new_role: newRole,
-        p_reason: reason,
+        p_expected_role: body.expectedRole,
+        p_request_id: body.requestId,
+        p_claims: claims,
         p_insurer_id: insurerId || null,
         p_acknowledge_open_work: acknowledgeOpenWork === true,
         p_reassign_to: reassignmentTherapistId || null,
       })
-      if (roleChangeError) return json(400, { error: roleChangeError.message })
-      return json(200, { success: true })
+      if (roleChangeError) return json(roleChangeError.code === 'PGRST202' || roleChangeError.code === '42883' ? 503 : 409, { error: ['PGRST202','42883'].includes(roleChangeError.code || '') ? 'The role-change migration is missing. Staff must apply 20261125000011_account_protection_workflows.sql and redeploy this function.' : roleChangeError.message, code: roleChangeError.code })
+      return json(200, { success: true, ...changed })
     }
 
     if (action === 'set-profile') {

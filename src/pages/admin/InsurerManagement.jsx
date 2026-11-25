@@ -14,7 +14,6 @@ export default function InsurerManagement() {
   const [partnerships, setPartnerships] = useState([])
   const [form, setForm] = useState({ profile_id: '', name: '', license_number: '', contact_email: '', contact_phone: '' })
   const [partnership, setPartnership] = useState({ insurer_id: '', b2b_client_id: '', cohort_name: '', per_member_fee: '', contract_start: '', contract_end: '' })
-  const [invoiceForm, setInvoiceForm] = useState({ insurer_id: '', period_start: '', period_end: '' })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [inviting, setInviting] = useState(false)
@@ -125,32 +124,6 @@ export default function InsurerManagement() {
     setSaving(false)
   }
 
-  const generateInvoice = async (event) => {
-    event.preventDefault()
-    setSaving(true)
-    setError('')
-    const { data: invoiceId, error: createError } = await supabase.rpc('insurer_generate_bulk_invoice', {
-      p_insurer_id: invoiceForm.insurer_id,
-      p_period_start: invoiceForm.period_start,
-      p_period_end: invoiceForm.period_end,
-    })
-    if (createError) {
-      console.error('Insurer invoice generation failed:', createError)
-      setError('Could not generate an invoice for the selected period.')
-      setSaving(false)
-      return
-    }
-    const { error: sendError } = await supabase.rpc('insurer_send_bulk_invoice', { p_invoice_id: invoiceId })
-    if (sendError) {
-      console.error('Insurer invoice dispatch failed:', sendError)
-      setError('The invoice draft was created but could not be sent. Review it before retrying.')
-    } else {
-      setInvoiceForm({ insurer_id: '', period_start: '', period_end: '' })
-      await load()
-    }
-    setSaving(false)
-  }
-
   if (loading) return <BrandLoader variant="section" />
   const linkedProfileIds = new Set(insurers.map((insurer) => insurer.profile_id))
   const availableProfiles = profiles.filter((profile) => !linkedProfileIds.has(profile.id))
@@ -205,16 +178,7 @@ export default function InsurerManagement() {
           </div>
         )}
       </section>
-      <form className="portal-card portal-form" onSubmit={generateInvoice}>
-        <h3>Generate bulk invoice</h3>
-        <label>Insurer<select value={invoiceForm.insurer_id} onChange={(event) => setInvoiceForm((current) => ({ ...current, insurer_id: event.target.value }))} required>
-          <option value="">Select insurer</option>
-          {insurers.filter((insurer) => insurer.status === 'active').map((insurer) => <option key={insurer.id} value={insurer.id}>{insurer.name}</option>)}
-        </select></label>
-        <label>Period start<input type="date" value={invoiceForm.period_start} onChange={(event) => setInvoiceForm((current) => ({ ...current, period_start: event.target.value }))} required /></label>
-        <label>Period end<input type="date" value={invoiceForm.period_end} onChange={(event) => setInvoiceForm((current) => ({ ...current, period_end: event.target.value }))} required /></label>
-        <button className="btn-primary" disabled={saving || !insurers.length}>{saving ? 'Generating...' : 'Generate and mark sent'}</button>
-      </form>
+      <p className="portal-notice">Historical bulk invoicing is retired. Insurers pay therapists directly; subscription payments are separate.</p>
       <form className="portal-card portal-form" onSubmit={createPartnership}>
         <h3>Create cohort partnership</h3>
         <label>Insurer<select value={partnership.insurer_id} onChange={(event) => setPartnership((current) => ({ ...current, insurer_id: event.target.value }))} required>

@@ -7,7 +7,8 @@ import NumberField from '../../components/NumberField'
 
 //  Protection claims adjudication (fixed-sum / treatment-reimbursement).
 //  Whitelisted via insurer_list_protection_claims / insurer_get_claim /
-//  insurer_adjudicate_claim / insurer_mark_claim_settled — no clinical data.
+//  insurer_adjudicate_claim — no clinical data. Direct payment tracking replaces
+//  the retired settlement mutation; an insurer report is not receipt confirmation.
 
 const PCL_STATUS_COLOR = {
   submitted: 'var(--warning)', under_review: 'var(--secondary)', info_requested: 'var(--secondary)',
@@ -90,18 +91,7 @@ function ProtectionClaims() {
     await load()
   }
 
-  const settle = async () => {
-    if (!detail) return
-    setWorking(detail.id)
-    const { error } = await supabase.rpc('insurer_mark_claim_settled', {
-      p_claim_id: detail.id, p_settlement_ref: decision.reason?.trim() || null,
-    })
-    setWorking('')
-    if (error) { toast.error(error.message || 'Settlement failed.'); return }
-    toast.success('Claim marked settled.')
-    setDetail(null)
-    await load()
-  }
+
 
   if (loading) return null
   return (
@@ -173,9 +163,7 @@ function ProtectionClaims() {
             </>
           )}
           {['approved', 'partially_approved'].includes(detail.status) && (
-            <button type="button" className="btn-ghost fs-12" style={{ marginTop: '8px' }} disabled={working === detail.id} onClick={settle}>
-              Mark settled (remittance ref in reason field)
-            </button>
+            <a className="btn-secondary" href="/insurer/invoices">Track direct insurer payment</a>
           )}
           <div style={{ marginTop: '10px' }}>
             <button type="button" className="btn-ghost fs-11" onClick={() => setDetail(null)}>Close</button>

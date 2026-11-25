@@ -12,6 +12,7 @@ export const userNav = [
   { to: '/precious-pact', label: 'LossLens Pact', icon: 'document' },
   { to: '/profile', label: 'Profile', icon: 'profile' },
   { to: '/subscription', label: 'Subscription', icon: 'diamond' },
+  { to: '/protection-member', label: 'LossLens Protection', icon: 'medical' },
   { to: '/support', label: 'Support requests', icon: 'chat' },
 ]
 
@@ -44,6 +45,7 @@ export const userNavGroups = [
       { to: '/precious-pact', label: 'LossLens Pact', icon: 'document' },
       { to: '/profile', label: 'Profile', icon: 'profile' },
       { to: '/subscription', label: 'Subscription', icon: 'diamond' },
+  { to: '/protection-member', label: 'LossLens Protection', icon: 'medical' },
       { to: '/support', label: 'Support requests', icon: 'chat' },
     ],
   },
@@ -91,7 +93,7 @@ export const therapistNav = [
   { to: '/therapist/referrals', label: 'Referrals', icon: 'users' },
   { to: '/therapist/sessions', label: 'Sessions', icon: 'calendar' },
   { to: '/therapist/claims', label: 'Claims', icon: 'document' },
-  { to: '/therapist/payouts', label: 'Payouts', icon: 'document' },
+  { to: '/therapist/payouts', label: 'Payment progress', icon: 'document' },
   { to: '/therapist/milestones', label: 'Milestones', icon: 'medical' },
   { to: '/therapist/onboarding', label: 'Profile & Verification', icon: 'profile' },
 ]
@@ -99,7 +101,7 @@ export const therapistNav = [
 export const insurerNav = [
   { to: '/insurer', label: 'Insurer', icon: 'building', end: true },
   { to: '/insurer/claims', label: 'Claims', icon: 'document' },
-  { to: '/insurer/invoices', label: 'Invoices', icon: 'document' },
+  { to: '/insurer/invoices', label: 'Direct payments', icon: 'document' },
   { to: '/insurer/analytics', label: 'Analytics', icon: 'analytics' },
   { to: '/insurer/members', label: 'Members', icon: 'users' },
   { to: '/insurer/pre-auths', label: 'Pre-auths', icon: 'document' },

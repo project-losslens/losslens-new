@@ -44,21 +44,26 @@ its former Node test consumer has been removed. Keep server imports plain JS.
 
 ## Database
 
-Five consolidated migrations in `supabase/migrations/`
-(`20261112000001`, `04`, `06`, `08`, `20261124000009`), applied in filename order on a fresh project.
+Six maintained migrations in `supabase/migrations/`
+(`20261112000001`, `04`, `06`, `08`, `20261124000009`, `20261125000011`), applied in filename order on a fresh project.
 Full reference + verify queries: `docs/DATABASE.md`; mapping:
 `docs/OPERATIONS.md`. RLS on every table; helpers `is_admin()`,
 `is_super_admin()`, `is_active_user()`, `is_recently_authenticated()`.
 `enforce_profile_privilege_updates` trigger blocks non-super-admin writes to
 privileged profile fields. New users get a `profiles` row from trigger —
 don't create it manually.
+Role changes use the password-verifying `admin-user-update` Edge Function and
+service-only `service_change_account_role`; browser role writes are blocked.
+Protection callback consent, allocation, referrals and direct-payment tracking
+live in migration 11. Insurers pay therapists externally; do not restore the
+retired bulk-disbursement RPCs. Receipt storage is private and tenant-scoped.
 
 ## UI conventions
 
 - Styling: tokens in `src/styles/base.css` (`--*` vars), `globals.css`
   (`.btn-primary`, `.card`, `.form-group`), `landing.css` (`ll-` public pages),
   inline style objects elsewhere. No Tailwind utilities.
-- Brand: bg `#0A1A12`, primary green `#4ADE80`, secondary green `#86EFAC`, warm accent `#F2C879`.
+- Brand: royal-purple canvas `#7136CC`, dark-plum controls `#291447`, lilac `#EAD9F3`, body text `#F3EAF8`. Operational screens use Instrument Sans throughout.
 - Fonts: `--font-display` (Bricolage Grotesque), `--font-body` (Instrument
   Sans) — self-hosted via fontsource packages. Public pages (`.ll-landing`)
   use Jost 300/500 woff2 from `public/fonts` for headings; body is system-ui.

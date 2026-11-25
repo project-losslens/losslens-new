@@ -5,6 +5,7 @@ import { toast } from '../../components/ToastProvider'
 import AppIcon from '../../components/AppIcon'
 import NumberField from '../../components/NumberField'
 import { toCsv, downloadCsv } from '../../lib/csv'
+import { ProtectionEnquiryQueue, ProtectionNetworkSettings, ProtectionAssignmentQueue } from '../../components/ProtectionWorkflow'
 
 //  Insurer portal — Protection policyholders: roster upload, membership
 //  verification, policy issuance. All reads via whitelisted RPCs/views;
@@ -36,17 +37,15 @@ export default function InsurerMembers() {
   const [structureFilter, setStructureFilter] = useState('')
 
   const load = useCallback(async () => {
-    const { data: ins } = await supabase.from('insurers').select('id, name').eq('profile_id', (await supabase.auth.getUser()).data.user?.id).maybeSingle()
+    const setup = await supabase.rpc('protection_portal_setup')
+    if (setup.error || !Array.isArray(setup.data?.insurers) || !Array.isArray(setup.data?.versions)) { setError('Could not verify your insurer organisation. Try again or contact LossLens support to check your portal access.'); setLoading(false); return }
+    const ins = setup.data?.insurers?.[0]
     if (!ins) { setError('No insurer organisation is linked to this account.'); setLoading(false); return }
     setInsurer(ins)
-    const [holders, vers] = await Promise.all([
-      supabase.rpc('insurer_list_policyholders'),
-      supabase.from('protection_plan_versions').select('id, plan_id, version_no, status, premium_amount, premium_frequency')
-        .eq('insurer_id', ins.id).eq('status', 'approved'),
-    ])
+    const holders = await supabase.rpc('insurer_list_policyholders')
     if (holders.error) setError('Could not load policyholders.')
     else setRows(holders.data || [])
-    setVersions(vers.data || [])
+    setVersions(setup.data?.versions || [])
     setLoading(false)
   }, [])
 
@@ -100,8 +99,8 @@ export default function InsurerMembers() {
 
   const issuePolicy = async (m) => {
     const f = issueForm[m.membership_id] || {}
-    if (!f.version_id || !f.policy_number?.trim()) {
-      toast.error('Select a product version and enter the insurer policy number.'); return
+    if (!f.version_id || !f.policy_number?.trim() || !f.commencement || !f.expiry) {
+      toast.error('Select approved terms and enter the policy reference, effective start and end dates.'); return
     }
     setWorking(m.membership_id)
     const { error: rpcError } = await supabase.rpc('insurer_issue_policy', {
@@ -167,6 +166,9 @@ export default function InsurerMembers() {
         <div><p className="portal-page__eyebrow">Insurer portal</p><h2>Protection policyholders</h2></div>
       </header>
       {error && <p className="portal-error" role="alert">{error}</p>}
+      <ProtectionEnquiryQueue />
+      <ProtectionAssignmentQueue />
+      <ProtectionNetworkSettings insurers={insurer ? [insurer] : []} />
 
       <section className="portal-card">
         <h3>Upload member roster (CSV)</h3>

@@ -32,6 +32,7 @@ export default function TherapistClaims() {
         <div><p className="portal-page__eyebrow">Therapist portal</p><h2>Claims</h2></div>
         <Link className="btn-primary" to="/therapist/claims/new">New claim</Link>
       </header>
+      <p>These are historical voucher billing records. Current insurer-to-therapist payment reports and receipt acknowledgements are tracked under Payment progress.</p>
       <section style={cardStyle}>
         {claims.length === 0 ? <p>No claims submitted.</p> : (
           <div className="portal-list">

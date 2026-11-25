@@ -48,6 +48,7 @@ export default function InsurerDashboard() {
       </header>
       {error && <p className="portal-error" role="alert">{error} <button type="button" onClick={load}>Retry</button></p>}
       {!error && !stats && <p className="portal-notice" role="status">Aggregate insights are available once the contracted cohort reaches the privacy minimum.</p>}
+      <p className="portal-notice">The voucher and bulk-invoice figures below are historical platform records. Current treatment settlement is tracked under <Link to="/insurer/invoices">Direct payments</Link>; insurer reports remain unverified until the therapist acknowledges receipt.</p>
       {stats && (
         <div className="portal-stats">
           <article className="portal-card"><span>Eligible cohort</span><strong>{stats.cohort_size}</strong></article>

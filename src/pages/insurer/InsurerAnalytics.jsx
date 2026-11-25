@@ -101,6 +101,7 @@ export default function InsurerAnalytics() {
         <div>
           <p className="portal-page__eyebrow">Insurer portal</p>
           <h2>Analytics</h2>
+          <p className="portal-notice">Legacy voucher and bulk-invoice figures remain historical. Current Protection policy/claim analytics retain their stated definitions; direct-payment reports are tracked separately and are not provider verification or LossLens disbursements.</p>
         </div>
         <div className="portal-page__actions">
           <button type="button" className="btn-secondary" onClick={exportMetricsCsv} disabled={!stats}>Export metrics CSV</button>

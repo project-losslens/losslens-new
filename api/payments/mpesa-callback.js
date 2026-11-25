@@ -66,7 +66,7 @@ export default async function handler(req, res) {
   }
   if (String(verification.ResultCode) !== '0') {
     if (verification.ResultCode == null) return json(res, 503, { error: 'Payment confirmation is pending' })
-    const { error } = await db.from('payments').update({ status: 'failed' })
+    const { error } = await db.from('payments').update({ status: 'failed', raw: { ...payment.raw, providerResultCode: String(verification.ResultCode), providerOutcomeVerified: true } })
       .eq('id', payment.id).eq('status', 'pending')
     if (error) return json(res, 503, { error: 'Payment outcome could not be recorded' })
     return json(res, 200, { ok: true, status: 'failed' })

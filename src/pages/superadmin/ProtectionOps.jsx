@@ -6,6 +6,7 @@ import { BrandLoader } from '../../components/Brand'
 import { toast } from '../../components/ToastProvider'
 const PROTECTION_MODES = ['concept', 'pilot', 'live']
 import NumberField from '../../components/NumberField'
+import { ProtectionNetworkSettings, ProtectionAssignmentQueue } from '../../components/ProtectionWorkflow'
 
 //  Super-admin Protection Ops: pipeline counts, partner list, therapist
 //  verification queue, protection_mode switch (confirmed + audited).
@@ -138,7 +139,7 @@ export default function ProtectionOps() {
 
       <section className="portal-card">
         <h3>Protection mode</h3>
-        <p className="portal-notice">concept = hidden teaser only · pilot/live = member enrolment + portals active. Pilot/live copy is pending legal review.</p>
+        <p className="portal-notice">Concept keeps cover unavailable. Pilot/live also requires eligible partners and approved terms. A callback request does not activate cover. LossLens does not disburse treatment payments.</p>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {PROTECTION_MODES.map(m => (
             <button key={m} type="button" disabled={saving}
@@ -156,6 +157,8 @@ export default function ProtectionOps() {
         <p className="portal-notice" style={{ marginTop: '8px' }}>Current: <strong>{mode}</strong></p>
       </section>
 
+      <ProtectionNetworkSettings insurers={insurers} />
+      <ProtectionAssignmentQueue />
       <section className="portal-card">
         <h3>Membership pipeline</h3>
         <div className="portal-stats">

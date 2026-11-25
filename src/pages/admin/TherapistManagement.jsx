@@ -13,7 +13,6 @@ export default function TherapistManagement() {
   const [working, setWorking] = useState('')
   const [voucherFees, setVoucherFees] = useState({})
   const [voucherAssignments, setVoucherAssignments] = useState({})
-  const [paymentRefs, setPaymentRefs] = useState({})
 
   const load = useCallback(async () => {
     const [therapistResult, voucherResult, claimResult] = await Promise.all([
@@ -112,24 +111,6 @@ export default function TherapistManagement() {
     setWorking('')
   }
 
-  const payClaim = async (claim) => {
-    const ref = paymentRefs[claim.voucher_id]?.trim()
-    if (!ref) {
-      setError('Enter an M-Pesa reference before paying claims.')
-      return
-    }
-    setWorking(claim.voucher_id)
-    const { error: paymentError } = await supabase.rpc('pay_therapist_float', {
-      p_voucher_id: claim.voucher_id,
-      p_mpesa_ref: ref,
-    })
-    if (paymentError) {
-      console.error('Therapist float payment failed:', paymentError)
-      setError('Could not pay approved claims. Check the float balance and claim status.')
-    } else await load()
-    setWorking('')
-  }
-
   if (loading) return <BrandLoader variant="section" />
   return (
     <section className="portal-page">
@@ -190,12 +171,7 @@ export default function TherapistManagement() {
                 <div><strong>{claim.status} · KES {Number(claim.claim_amount).toLocaleString()}</strong><p>{claim.session_date} · Therapist {claim.therapist_id}</p><small>Claim {claim.id}</small></div>
                 <div className="portal-list__actions">
                   {claim.status === 'submitted' && <button className="btn-primary" disabled={working === claim.id} onClick={() => approveClaim(claim.id)}>Approve</button>}
-                  {claim.status === 'approved' && (
-                    <>
-                      <input aria-label={`M-Pesa reference for voucher ${claim.voucher_id}`} maxLength={200} placeholder="M-Pesa reference" value={paymentRefs[claim.voucher_id] || ''} onChange={(event) => setPaymentRefs((current) => ({ ...current, [claim.voucher_id]: event.target.value }))} />
-                      <button className="btn-primary" disabled={working === claim.voucher_id} onClick={() => payClaim(claim)}>Pay voucher claims</button>
-                    </>
-                  )}
+                  {claim.status === 'approved' && <span>Track approved Protection payments in direct insurer payments. LossLens does not disburse funds.</span>}
                   {claim.status === 'paid' && <span>{claim.insurer_reimbursed_at ? 'Paid by insurer' : 'Paid by LossLens — awaiting insurer reimbursement'}</span>}
                 </div>
               </article>

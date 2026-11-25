@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuthProfile } from '../../context/AuthProfileContext'
 import { BrandLoader } from '../../components/Brand'
+import { DirectPaymentTracking } from '../insurer/InsurerInvoices'
 
 export default function TherapistPayouts() {
   const { user } = useAuthProfile()
@@ -35,7 +36,8 @@ export default function TherapistPayouts() {
   return (
     <section className="portal-page">
       <p className="portal-page__eyebrow">Therapist portal</p>
-      <h2>Payout history</h2>
+      <DirectPaymentTracking />
+      <h2>Historical platform payouts (read only)</h2>
       {error && <p className="portal-error" role="alert">{error} <button type="button" onClick={load}>Retry</button></p>}
       {!error && payouts.length === 0 && <p>No payouts recorded yet.</p>}
       <div className="portal-list">

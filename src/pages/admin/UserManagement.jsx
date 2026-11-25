@@ -199,14 +199,14 @@ export default function UserManagement() {
   const activeSuperAdminCount = users.filter(u => u.role === 'super_admin' && u.status === 'active').length
 
   const riskBadge = (risk) => {
-    if (risk === 'high') return { bg: 'rgb(var(--danger-rgb) / 0.16)', color: 'var(--danger)', border: 'var(--danger)', label: 'High' }
-    if (risk === 'medium') return { bg: 'rgb(var(--warning-rgb) / 0.16)', color: 'var(--warning)', border: 'var(--warning)', label: 'Medium' }
-    return { bg: 'rgb(var(--primary-rgb) / 0.15)', color: 'var(--primary)', border: 'var(--primary)', label: 'Low' }
+    if (risk === 'high') return { bg: '#5F1728', color: '#FFE4EA', border: '#F2768A', label: 'High' }
+    if (risk === 'medium') return { bg: '#432D13', color: '#F2B95C', border: '#F2B95C', label: 'Medium' }
+    return { bg: '#291447', color: '#EAD9F3', border: '#C8A6E0', label: 'Low' }
   }
 
   const planBadge = (plan, planType) => {
-    if (planType === 'company') return { bg: 'rgb(var(--primary-rgb) / 0.15)', color: 'var(--primary)', border: 'var(--primary)', label: 'Company' }
-    if (plan === 'premium') return { bg: 'rgba(255,255,255,0.12)', color: 'var(--primary)', border: 'var(--primary)', label: 'Premium' }
+    if (planType === 'company') return { bg: '#291447', color: '#EAD9F3', border: '#C8A6E0', label: 'Company' }
+    if (plan === 'premium') return { bg: '#291447', color: '#EAD9F3', border: '#C8A6E0', label: 'Premium' }
     return { bg: 'transparent', color: 'var(--text-muted)', border: 'rgba(255,255,255,0.12)', label: 'Free' }
   }
 
@@ -248,7 +248,7 @@ export default function UserManagement() {
         <div className="page-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.5rem', flexWrap: 'wrap', gap: '8px' }}>
           <div>
             <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-body)', margin: 0 }}>
-              {activeTab === 'users' ? 'User Management' : 'Payment Management'}
+              {activeTab === 'users' ? 'User management' : activeTab === 'transactions' ? 'Subscription transactions' : 'Subscription access'}
             </h2>
             <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>
               {activeTab === 'users'
@@ -264,15 +264,16 @@ export default function UserManagement() {
 
         <div style={{ padding: '1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
           {/* Main Tabs: Users | Payments */}
-          <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)', overflowX: 'auto' }}>
-            <button onClick={() => { setActiveTab('users'); setSearch(''); setFilter('all') }}
+          <div className="user-management-tabs" style={{ display: 'flex', gap: '4px', marginBottom: '1rem', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.12)', overflowX: 'auto' }}>
+            <button aria-pressed={activeTab === 'users'} onClick={() => { setActiveTab('users'); setSearch(''); setFilter('all') }}
               style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'users' ? 'rgb(var(--primary-rgb) / 0.15)' : 'transparent', color: activeTab === 'users' ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === 'users' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
               Users
             </button>
-            <button onClick={() => { setActiveTab('payments'); setSearch(''); setPaymentFilter('all') }}
+            <button aria-pressed={activeTab === 'payments'} onClick={() => { setActiveTab('payments'); setSearch(''); setPaymentFilter('all') }}
               style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'payments' ? 'rgb(var(--primary-rgb) / 0.15)' : 'transparent', color: activeTab === 'payments' ? 'var(--primary)' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === 'payments' ? 600 : 400, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
-              Payments
+              Subscription access
             </button>
+            <button type="button" aria-pressed={activeTab === 'transactions'} className={activeTab === 'transactions' ? 'btn-primary' : 'btn-secondary'} onClick={() => setActiveTab('transactions')}>Subscription transactions</button>
             {activeTab === 'payments' && filtered.length > 0 && filtered.length <= 100 && (
               <button onClick={() => openSubModal(filtered)}
                 style={{ padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--primary)', background: 'transparent', color: 'var(--primary)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
@@ -281,6 +282,8 @@ export default function UserManagement() {
             )}
           </div>
 
+          {activeTab === 'transactions' && <SubscriptionTransactions />}
+          {activeTab === 'payments' && <p>Manual access grants and adjustments are recorded in subscription history. They do not create a payment or prove that money was received.</p>}
           {/* Users Tab */}
           {activeTab === 'users' && (
             <>
@@ -323,7 +326,7 @@ export default function UserManagement() {
                               </span>
                               <span style={{ background: risk.bg, color: risk.color, border: '1px solid ' + risk.border, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{risk.label} Risk</span>
                               <span style={{ background: plan.bg, color: plan.color, border: '1px solid ' + plan.border, padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>{plan.label}</span>
-                              <span style={{ background: 'rgb(var(--primary-rgb) / 0.15)', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>
+                              <span className="operational-role-badge" style={{ background: 'rgb(var(--primary-rgb) / 0.15)', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '2px 8px', borderRadius: '100px', fontSize: '10px' }}>
                                 {t(({ super_admin: 'users.roleSuperAdmin', admin: 'users.roleAdmin', therapist: 'users.roleTherapist', insurer: 'users.roleInsurer', user: 'users.roleUser' })[u.role] || 'users.roleUser')}
                               </span>
                               {isSuspended && (
@@ -576,6 +579,26 @@ export default function UserManagement() {
   )
 }
 
+function SubscriptionTransactions() {
+  const [rows, setRows] = useState([])
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
+  const load = useCallback(async () => {
+    const result = await supabase.rpc('admin_subscription_transactions')
+    if (result.error || !Array.isArray(result.data)) setError('Transactions could not be loaded. Check super-admin access and the account-workflow migration.')
+    else { setRows(result.data || []); setError('') }
+    setLoading(false)
+  }, [])
+  useEffect(() => { const timer = setTimeout(() => { void load() }, 0); return () => clearTimeout(timer) }, [load])
+  if (loading) return <BrandLoader variant="section" />
+  return <section className="portal-card"><h3>Platform subscription transaction ledger</h3>
+    <p>Amount is the requested transaction value, not insurance premium or a manual access grant. Created is initiation time; updated is the latest ledger change, not necessarily the provider’s settlement time. Only successful M-Pesa rows marked provider-query verified are confirmed real payments. Sandbox transactions are simulations.</p>
+    {error && <p role="alert">{error} <button type="button" onClick={load}>Retry</button></p>}
+    {!error && !rows.length && <p>No platform subscription transactions recorded.</p>}
+    <div className="operational-table-scroll"><table><thead><tr><th>Account</th><th>Amount</th><th>Channel</th><th>Status</th><th>Created</th><th>Updated</th><th>Provider request reference</th></tr></thead><tbody>{rows.map(row => <tr key={row.id}><td>{row.user_id}</td><td>{row.currency} {Number(row.amount).toLocaleString()}</td><td>{row.provider === 'sandbox' ? 'Sandbox simulation' : row.provider}</td><td>{row.status}{row.provider_verified ? ' · provider-query verified' : ' · not provider-verified'}{row.provider_result_code ? ` (code ${row.provider_result_code})` : ''}</td><td>{new Date(row.created_at).toLocaleString()}</td><td>{new Date(row.updated_at).toLocaleString()}</td><td>{row.provider_ref || 'Not recorded'}</td></tr>)}</tbody></table></div>
+  </section>
+}
+
 const ROLES = ['user', 'admin', 'therapist', 'insurer', 'super_admin']
 const ROLE_LABELS = {
   user: 'users.roleUser',
@@ -618,8 +641,7 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
   const isSelf = user.id === actorId
   const protectedTarget = isSelf || user.role === 'super_admin'
   const canEditRole = !isSelf && !(user.role === 'super_admin' && isLastActiveSuperAdmin)
-  const needsRoleStepUp = (user.role === 'super_admin' && role !== 'super_admin')
-    || (role === 'super_admin' && user.role !== 'super_admin')
+  const [roleRequestId, setRoleRequestId] = useState(() => crypto.randomUUID())
   const expectedConfirmation = user.username || user.email || user.id
   const confirmationMatches = confirmation.trim() === expectedConfirmation
 
@@ -648,22 +670,38 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
   }, [user.id])
 
   const runAction = async (action, data) => {
-    if (!confirmationMatches) { toast.error(t('users.confirmationMismatch')); return }
-    if (reason.trim().length < 5) { toast.error(t('users.reasonRequired')); return }
+    if (action !== 'set-role' && !confirmationMatches) { toast.error(t('users.confirmationMismatch')); return }
+    if (action !== 'set-role' && reason.trim().length < 5) { toast.error(t('users.reasonRequired')); return }
+    if (action === 'set-role' && !stepUpPassword) { toast.error('Enter your super-admin password.'); return }
+    const submittedPassword = stepUpPassword
+    setStepUpPassword('')
     setBusy(true)
-    const { data: response, error } = await supabase.functions.invoke('admin-user-update', {
+    let response, error
+    try {
+      const outcome = await supabase.functions.invoke('admin-user-update', {
       body: {
         action,
         targetId: user.id,
-        reason: reason.trim(),
-        typedConfirmation: confirmation.trim(),
-        ownPassword: stepUpPassword,
+        ...(action === 'set-role' ? { requestId: roleRequestId, expectedRole: user.role } : { reason: reason.trim(), typedConfirmation: confirmation.trim() }),
+        ownPassword: submittedPassword,
         ...data,
       },
-    })
+      })
+      response = outcome.data
+      error = outcome.error
+      if (error?.context instanceof Response) {
+        const detail = await error.context.clone().json().catch(() => null)
+        if (detail?.error) response = detail
+        else if (error.context.status === 404) response = { error: 'admin-user-update is not deployed for this Supabase project. Staff must deploy the updated function.' }
+        else if (error.context.status === 401) response = { error: 'Your session expired or could not be verified. Sign in again; staff should check JWT configuration if this continues.' }
+        else if (detail?.message) response = { error: detail.message }
+      }
+    } catch {
+      error = new Error('Cannot reach admin-user-update. Check your connection; staff should check the deployed function, ALLOWED_ORIGIN and server keys.')
+    } finally { setStepUpPassword('') }
     if (error || response?.error || response?.success !== true) {
       if (response?.temporaryPassword) setTemporaryPassword(response.temporaryPassword)
-      toast.error(response?.error || error?.message || t('users.updateFailed'))
+      toast.error(response?.error || (error?.name === 'FunctionsFetchError' ? 'Account service unreachable. Check the function deployment and allowed origin.' : error?.message) || t('users.updateFailed'))
       setBusy(false)
       return null
     }
@@ -680,8 +718,16 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
       reassignmentTherapistId: reassignmentTherapistId || null,
     })
     if (!result) { setBusy(false); return }
-    toast.success(t('users.roleSaved'))
+    const { data: persisted, error: verifyError } = await supabase.from('profiles').select('id, role').eq('id', user.id).single()
+    if (verifyError || persisted?.role !== role) {
+      toast.error('The role could not be verified. Refresh this account before retrying.')
+      setBusy(false)
+      await onUpdated()
+      return
+    }
     await onUpdated()
+    toast.success(t('users.roleSaved'))
+    setRoleRequestId(crypto.randomUUID())
     setBusy(false)
     onClose()
   }
@@ -762,8 +808,9 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
             <fieldset disabled={!canEditRole || busy} style={{ border: 0, padding: 0, margin: 0 }}>
               <legend style={{ color: 'var(--primary)', marginBottom: 8 }}>{t('users.roleSection')}</legend>
               <div className="form-group">
-                <label htmlFor="account-role">{t('users.role')}</label>
-                <select id="account-role" value={role} onChange={(event) => setRole(event.target.value)}>
+                <p>Current role: <strong>{user.role?.replace('_', ' ')}</strong></p>
+                <label htmlFor="account-role">New role</label>
+                <select id="account-role" value={role} onChange={(event) => { setRole(event.target.value); setRoleRequestId(crypto.randomUUID()) }}>
                   <option value={user.role}>{t(ROLE_LABELS[user.role] || 'users.roleUser')}</option>
                   {roleOptions.map((item) => <option key={item} value={item}>{t(ROLE_LABELS[item])}</option>)}
                 </select>
@@ -795,21 +842,11 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
                   </div>
                 </>
               )}
-              <div className="form-group">
-                <label htmlFor="role-reason">{t('users.roleReason')}</label>
-                <input id="role-reason" value={reason} onChange={(event) => setReason(event.target.value)} maxLength={500} required />
-              </div>
-              <div className="form-group">
-                <label htmlFor="role-confirmation">{t('users.confirmAccount')}</label>
-                <input id="role-confirmation" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} autoComplete="off" required />
-              </div>
-              {needsRoleStepUp && (
                 <div className="form-group">
-                  <label htmlFor="role-step-up">{t('users.stepUpPassword')}</label>
+                  <label htmlFor="role-step-up">Your super-admin password</label>
                   <input id="role-step-up" type="password" autoComplete="current-password" value={stepUpPassword} onChange={(event) => setStepUpPassword(event.target.value)} required />
                 </div>
-              )}
-              <button type="button" className="btn-primary full" onClick={saveRole} disabled={!canEditRole || busy || !confirmationMatches}>
+              <button type="button" className="btn-primary full" onClick={saveRole} disabled={!canEditRole || busy || !stepUpPassword || role === user.role}>
                 {t('users.saveRole')}
               </button>
             </fieldset>

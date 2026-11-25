@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuthProfile } from '../../context/AuthProfileContext'
 import { BrandLoader } from '../../components/Brand'
 import { toast } from '../../components/ToastProvider'
+import { ProtectionAssignmentQueue } from '../../components/ProtectionWorkflow'
 
 const cardStyle = { background: 'var(--surface-secondary)', border: '1px solid var(--border)', borderRadius: 14, padding: 18 }
 
@@ -18,6 +19,7 @@ export default function TherapistReferrals() {
     const { data, error } = await supabase.from('provider_vouchers')
       .select('id, status, max_sessions, fee_per_session, expires_at, created_at')
       .eq('therapist_id', userId).in('status', ['assigned', 'accepted'])
+      .is('protection_policy_id', null)
       .order('created_at', { ascending: false })
     if (error) toast.error('Could not load referrals.')
     else setVouchers(data || [])
@@ -43,6 +45,7 @@ export default function TherapistReferrals() {
         <div><p className="portal-page__eyebrow">Therapist portal</p><h2>Referrals</h2></div>
       </header>
       <section style={cardStyle}>
+        <ProtectionAssignmentQueue />
         {vouchers.length === 0 ? <p>No referrals assigned to you.</p> : (
           <div className="portal-list">
             {vouchers.map((voucher) => (

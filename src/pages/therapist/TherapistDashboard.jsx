@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuthProfile } from '../../context/AuthProfileContext'
 import { BrandLoader } from '../../components/Brand'
+import { ProtectionAssignmentQueue } from '../../components/ProtectionWorkflow'
 
 const cardStyle = { background: 'var(--surface-secondary)', border: '1px solid var(--border)', borderRadius: 14, padding: 18 }
 
@@ -21,7 +22,7 @@ export default function TherapistDashboard() {
     const [therapistResult, voucherResult, claimResult] = await Promise.all([
       supabase.rpc('therapist_get_self_profile'),
       supabase.from('provider_vouchers').select('id, pre_auth_voucher_id, status, max_sessions, fee_per_session, expires_at, created_at')
-        .eq('therapist_id', userId).order('created_at', { ascending: false }),
+        .eq('therapist_id', userId).is('protection_policy_id', null).order('created_at', { ascending: false }),
       supabase.from('provider_claims').select('id, voucher_id, session_date, claim_amount, status, paid_at, insurer_reimbursed_at')
         .eq('therapist_id', userId).order('created_at', { ascending: false }),
     ])
@@ -69,6 +70,8 @@ export default function TherapistDashboard() {
           Your therapist account is awaiting verification. Complete your <Link to="/therapist/onboarding" style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'underline' }}>profile and license details</Link>.
         </div>
       )}
+      <ProtectionAssignmentQueue />
+      <p>Voucher billing below is the legacy workflow. Your current Protection payments are reported by the insurer under <Link to="/therapist/payouts">Payment progress</Link>.</p>
       <div className="portal-stats">
         <article style={cardStyle}><span>Assigned vouchers</span><strong>{vouchers.length}</strong></article>
         <article style={cardStyle}><span>Claims submitted</span><strong>{claims.length}</strong></article>

@@ -18,7 +18,7 @@ export default function TherapistSessions() {
     if (!userId) return
     const [voucherResult, claimResult] = await Promise.all([
       supabase.from('provider_vouchers').select('id, pre_auth_voucher_id, status, max_sessions, fee_per_session')
-        .eq('therapist_id', userId).eq('status', 'accepted').order('created_at', { ascending: false }),
+        .eq('therapist_id', userId).eq('status', 'accepted').is('protection_policy_id', null).order('created_at', { ascending: false }),
       supabase.from('provider_claims').select('id, voucher_id, session_date, claim_amount, status')
         .eq('therapist_id', userId).order('session_date', { ascending: false }),
     ])
@@ -42,6 +42,7 @@ export default function TherapistSessions() {
       <header className="portal-page__heading">
         <div><p className="portal-page__eyebrow">Therapist portal</p><h2>Sessions</h2></div>
       </header>
+      <p>Protection referrals use the treatment-consent and <Link to="/therapist/milestones">Treatment milestones</Link> workflow. Approved treatment payments are tracked under <Link to="/therapist/payouts">Payment progress</Link>.</p>
       <section style={cardStyle}>
         {vouchers.length === 0 ? <p>No active session vouchers.</p> : (
           <div className="portal-list">

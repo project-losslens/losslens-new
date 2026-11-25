@@ -10,6 +10,7 @@ import { clearAuthStorage, supabase } from '../lib/supabase'
 import { startOfflineSync } from '../lib/offlineSync'
 import { useI18n } from '../i18n'
 import TopographicBackground from '../components/TopographicBackground'
+import { ProtectionIntroduction } from '../components/ProtectionWorkflow'
 
 export default function AppShell({ admin = false }) {
   const location = useLocation()
@@ -109,6 +110,7 @@ export default function AppShell({ admin = false }) {
             <h1>{getPageTitle(location.pathname)}</h1>
           </div>
           <div className="shell__header-actions">
+            {isUserRole && <Link className="protection-status-link" to="/protection-member">LossLens Protection</Link>}
             <details className="shell__account">
               <summary>
                 <UserAvatar reference={avatarReference} name={accountName} className="shell__account-avatar" size={34} />
@@ -127,6 +129,7 @@ export default function AppShell({ admin = false }) {
         </header>
         <div className="shell__content">
           {showCommunityTabs && <CommunityTabs />}
+          {isUserRole && <ProtectionIntroduction />}
           <Outlet />
         </div>
       </main>

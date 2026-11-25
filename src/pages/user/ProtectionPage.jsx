@@ -5,6 +5,7 @@ import NumberField from '../../components/NumberField'
 import { BrandLoader } from '../../components/Brand'
 import { toast } from '../../components/ToastProvider'
 import AppIcon from '../../components/AppIcon'
+import { MemberProtectionJourney } from '../../components/ProtectionWorkflow'
 
 //  Member-facing LossLens Protection. Mode-gated; all data via whitelisted
 //  RPCs. Copy pending legal review for pilot/live.
@@ -28,16 +29,13 @@ export default function ProtectionPage() {
   const navigate = useNavigate()
   const [mode, setMode] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [insurers, setInsurers] = useState([])
   const [data, setData] = useState({ memberships: [], consents: [], events: [] })
   const [cover, setCover] = useState({ policies: [], benefits: [] })
   const [claims, setClaims] = useState([])
   const [milestones, setMilestones] = useState({ episodes: [], milestones: [] })
-  const [episodeForm, setEpisodeForm] = useState({ therapist_id: '', plan_ref: '' })
+  const [episodeForm, setEpisodeForm] = useState({ therapist_id: '', plan_ref: '', consent: false })
+  const [assignments, setAssignments] = useState([])
   const [therapists, setTherapists] = useState([])
-  const [insurerId, setInsurerId] = useState('')
-  const [memberRef, setMemberRef] = useState('')
-  const [coverStructure, setCoverStructure] = useState('')
   const [saving, setSaving] = useState(false)
   const [preauthSessions, setPreauthSessions] = useState(1)
   const [preauthSent, setPreauthSent] = useState(false)
@@ -49,20 +47,21 @@ export default function ProtectionPage() {
   const load = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { navigate('/login'); return }
-    const [prot, cov, cls, ms, ths, ins] = await Promise.all([
+    await supabase.rpc('protection_refresh_activation')
+    const [prot, cov, cls, ms, ths, assigned] = await Promise.all([
       supabase.rpc('member_list_my_protection'),
       supabase.rpc('member_list_my_cover'),
       supabase.rpc('member_list_my_claims'),
       supabase.rpc('member_list_my_milestones'),
       supabase.rpc('member_list_therapists'),
-      supabase.from('insurers').select('id, name').eq('status', 'active'),
+      supabase.from('protection_assignments').select('policy_id,therapist_id,status'),
     ])
     setData(prot.data || { memberships: [], consents: [], events: [] })
     setCover(cov.data || { policies: [], benefits: [] })
     setClaims(Array.isArray(cls.data) ? cls.data : (cls.data || []))
     setMilestones(ms.data || { episodes: [], milestones: [] })
     setTherapists(ths.data || [])
-    setInsurers(ins.data || [])
+    setAssignments(assigned.data || [])
   }, [navigate])
 
   useEffect(() => {
@@ -81,19 +80,6 @@ export default function ProtectionPage() {
   const activePolicy = (cover.policies || []).find(p => ['active', 'grace'].includes(p.status))
     || (cover.policies || [])[0] || null
   const policyBenefits = (cover.benefits || []).filter(b => b.policy_id === activePolicy?.id)
-
-  const enrol = async () => {
-    if (!insurerId) { toast.error('Choose your insurer.'); return }
-    setSaving(true)
-    const { error } = await supabase.rpc('member_request_enrolment', {
-      p_insurer_id: insurerId, p_member_reference: memberRef || null,
-      p_cover_structure: coverStructure || null,
-    })
-    setSaving(false)
-    if (error) { toast.error(error.message || 'Could not submit enrolment.'); return }
-    toast.success('Enrolment submitted — pending insurer verification.')
-    await load()
-  }
 
   const toggleConsent = async (scope, granted) => {
     if (!membership) return
@@ -263,7 +249,10 @@ export default function ProtectionPage() {
 
   const startEpisode = async () => {
     if (!activePolicy || !episodeForm.therapist_id) { toast.error('Choose a therapist for your active policy.'); return }
+    if (!episodeForm.consent) { toast.error('Confirm consent to begin treatment with your assigned therapist.'); return }
     setSaving(true)
+    const consentResult = await supabase.rpc('member_accept_assigned_treatment', { p_policy: activePolicy.id })
+    if (consentResult.error) { setSaving(false); toast.error(consentResult.error.message); return }
     const { error } = await supabase.rpc('member_start_episode', {
       p_policy_id: activePolicy.id, p_therapist_id: episodeForm.therapist_id,
       p_plan_ref: episodeForm.plan_ref.trim() || null,
@@ -271,7 +260,7 @@ export default function ProtectionPage() {
     setSaving(false)
     if (error) { toast.error(error.message || 'Could not start episode.'); return }
     toast.success('Treatment episode started — your clinician can now verify milestones.')
-    setEpisodeForm({ therapist_id: '', plan_ref: '' })
+    setEpisodeForm({ therapist_id: '', plan_ref: '', consent: false })
     await load()
   }
 
@@ -297,8 +286,7 @@ export default function ProtectionPage() {
   if (!protectionModeAllows(mode)) {
     return (
       <div className="page-root"><div className="page-content" style={{ padding: '2rem' }}>
-        <h2 className="fs-20 protection-page__heading" style={{ color: 'var(--text)' }}>LossLens Protection</h2>
-        <p style={{ color: 'var(--text-muted)' }}>Protection is not available yet. <a href="/protection" style={{ color: 'var(--primary)' }}>Learn more</a> — including the proposed Medical Rider, Individual Cover and Group Cover structures.</p>
+        <MemberProtectionJourney />
       </div></div>
     )
   }
@@ -307,40 +295,10 @@ export default function ProtectionPage() {
 
   return (
     <div className="page-root"><div className="page-content" style={{ padding: '1.5rem' }}>
-      <h2 className="fs-20 protection-page__heading" style={{ color: 'var(--text)', marginBottom: '4px' }}>LossLens Protection</h2>
+      <MemberProtectionJourney />
       <p className="fs-13" style={{ color: 'var(--text-muted)', marginBottom: '1.25rem' }}>Insurance arranged through your insurer. LossLens is not the insurer — your insurer issues the policy, collects premiums and decides claims.</p>
 
-      {!membership ? (
-        <div className="dash-section">
-          <h2 className="fs-15" style={{ color: 'var(--primary)', marginBottom: '12px' }}>Enrol with your insurer</h2>
-          {insurers.length === 0 ? (
-            <p className="fs-13" style={{ color: 'var(--text-muted)' }}>No insurers are currently offering Protection. Check back soon.</p>
-          ) : (
-            <>
-              <div className="form-group"><label>Insurer</label>
-                <select value={insurerId} onChange={e => setInsurerId(e.target.value)}>
-                  <option value="">Select your insurer…</option>
-                  {insurers.map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
-                </select>
-              </div>
-              <div className="form-group"><label>Member reference (from your policy documents)</label>
-                <input type="text" value={memberRef} onChange={e => setMemberRef(e.target.value)} placeholder="e.g. POL-12345" />
-              </div>
-              <div className="form-group"><label>How are you enrolling? (optional — your insurer confirms)</label>
-                <select value={coverStructure} onChange={e => setCoverStructure(e.target.value)}>
-                  <option value="">Not sure yet</option>
-                  <option value="medical_rider">Medical Rider — added to my existing medical policy</option>
-                  <option value="individual">Individual Cover — standalone policy</option>
-                  <option value="group">Group Cover — through my employer or organisation</option>
-                </select>
-              </div>
-              <button className="btn-primary full" onClick={enrol} disabled={saving}>
-                {saving ? <BrandLoader variant="inline" showWordmark={false} /> : 'Request enrolment'}
-              </button>
-            </>
-          )}
-        </div>
-      ) : (
+      {membership && (
         <>
           <div className="dash-section" style={{ marginBottom: '1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -473,14 +431,15 @@ export default function ProtectionPage() {
                     <select value={episodeForm.therapist_id} onChange={e => setEpisodeForm({ ...episodeForm, therapist_id: e.target.value })}
                       style={{ display: 'block', marginTop: '4px', background: 'var(--bg)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '6px 8px' }}>
                       <option value="">Select…</option>
-                      {therapists.map(t => <option key={t.therapist_ref} value={t.therapist_ref}>{t.specialty || 'Therapist'}{t.county ? ` · ${t.county}` : ''}</option>)}
+                      {therapists.filter(t => assignments.some(a => a.policy_id === activePolicy.id && a.status === 'accepted' && a.therapist_id === t.therapist_ref)).map(t => <option key={t.therapist_ref} value={t.therapist_ref}>{t.specialty || 'Assigned therapist'}{t.county ? ` · ${t.county}` : ''}</option>)}
                     </select>
                   </label>
                   <label className="fs-11" style={{ color: 'var(--text-muted)' }}>Treatment plan ref
                     <input value={episodeForm.plan_ref} onChange={e => setEpisodeForm({ ...episodeForm, plan_ref: e.target.value })} maxLength={80}
                       style={{ display: 'block', marginTop: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--bg)', color: '#fff', fontSize: '12px', width: '140px' }} />
                   </label>
-                  <button type="button" className="btn-primary fs-11" style={{ padding: '6px 12px', minHeight: '32px' }} disabled={saving} onClick={startEpisode}>Start episode</button>
+                  <label className="consent-label"><input type="checkbox" checked={episodeForm.consent} onChange={e => setEpisodeForm({ ...episodeForm, consent: e.target.checked })} />I consent to begin treatment with my assigned therapist. This does not share my diary, chat or PGSI results.</label>
+                  <button type="button" className="btn-primary fs-11" style={{ padding: '6px 12px', minHeight: '32px' }} disabled={saving || !episodeForm.consent || !episodeForm.therapist_id} onClick={startEpisode}>Start episode</button>
                 </div>
               )}
               {(milestones.milestones || []).map(m => (
@@ -597,19 +556,13 @@ export default function ProtectionPage() {
   )
 }
 
-// Cache this page module's display mode; server RPCs still enforce access.
-let cached = null
-
 async function getProtectionMode() {
-  if (cached) return cached
   try {
-    const { data } = await supabase.from('system_settings').select('value').eq('key', 'protection_mode').maybeSingle()
-    const v = data?.value
-    cached = typeof v === 'string' ? v.replace(/"/g, '') : (v?.mode || 'concept')
+    const { data, error } = await supabase.rpc('member_protection_journey')
+    return error ? 'concept' : data?.mode || 'concept'
   } catch {
-    cached = 'concept'
+    return 'concept'
   }
-  return cached
 }
 
 function protectionModeAllows(mode) {

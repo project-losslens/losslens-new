@@ -8,10 +8,10 @@ alter table public.grant_applications add column if not exists rejection_reason 
 
 -- A deleted/missing profile must never pass the active-account guard.
 create or replace function public.is_active_user()
-returns boolean language sql stable security definer set search_path = pg_catalog, public as $
+returns boolean language sql stable security definer set search_path = pg_catalog, public as $$
   select coalesce((select p.status <> 'suspended' and not p.must_change_password
     from public.profiles p where p.id=auth.uid()),false);
-$;
+$$;
 
 -- Storage uses its own schema and did not inherit the public-table account guard.
 drop policy if exists losslens_storage_active_account on storage.objects;
@@ -154,12 +154,12 @@ create trigger enforce_storage_plan_quota after insert or update on storage.obje
 -- Aggregate participation without exposing another member's RSVP or identity.
 create or replace function public.event_attendance_counts()
 returns table(event_id uuid, going bigint)
-language sql stable security definer set search_path = pg_catalog, public as $
+language sql stable security definer set search_path = pg_catalog, public as $$
   select e.id, count(r.user_id) filter (where r.attendance='going')
   from public.events e left join public.event_rsvps r on r.event_id=e.id
   where e.active and auth.uid() is not null and public.is_active_user()
   group by e.id;
-$;
+$$;
 revoke all on function public.event_attendance_counts() from public, anon;
 grant execute on function public.event_attendance_counts() to authenticated;
 

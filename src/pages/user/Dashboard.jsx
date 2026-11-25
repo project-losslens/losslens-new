@@ -311,7 +311,7 @@ function Dashboard() {
               </p>
             )}
 
-            <Link to="/diary" className="clickable" style={{ display: 'block', background: 'linear-gradient(135deg, rgb(var(--primary-rgb) / 0.18), rgb(var(--secondary-rgb) / 0.12))', border: '1px solid var(--primary)', borderRadius: '14px', padding: '16px', marginBottom: '1rem', textDecoration: 'none' }}>
+            <Link to="/diary" className="clickable" style={{ display: 'block', background: 'var(--surface)', border: '1px solid var(--primary)', borderRadius: '14px', padding: '16px', marginBottom: '1rem', textDecoration: 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <AppIcon name="diary" size={28} style={{ color: 'var(--primary)', flexShrink: 0 }} />
                 <div style={{ flex: 1 }}>
