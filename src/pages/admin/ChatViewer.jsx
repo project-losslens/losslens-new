@@ -4,9 +4,12 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import AppIcon from '../../components/AppIcon'
 import UserAvatar from '../../components/UserAvatar'
+import { useAuthProfile } from '../../context/AuthProfileContext'
 
 function ChatViewer() {
   const navigate = useNavigate()
+  const { user } = useAuthProfile()
+  const viewerId = user?.id
   const [users, setUsers] = useState([])
   const [selectedUser, setSelectedUser] = useState(null)
   const [conversations, setConversations] = useState([])
@@ -18,8 +21,8 @@ function ChatViewer() {
   const [showUserList, setShowUserList] = useState(true)
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    if (viewerId) void fetchUsers()
+  }, [viewerId])
 
   const fetchUsers = async () => {
     setLoading(true)
@@ -27,7 +30,9 @@ function ChatViewer() {
       const { data, error } = await supabase
         .from('chat_history')
         .select('user_id, profiles(full_name, avatar_url)')
+        .eq('user_id', viewerId)
         .order('created_at', { ascending: false })
+        .limit(1)
 
       if (error) {
         console.error('Users fetch error:', error)
@@ -62,6 +67,7 @@ function ChatViewer() {
   }
 
   const fetchConversations = async (userId) => {
+    if (userId !== viewerId) return
     setChatLoading(true)
     setSelectedUser(userId)
     if (window.innerWidth <= 768) {
@@ -135,9 +141,13 @@ function ChatViewer() {
               Chat Viewer
             </h2>
             <p style={{ fontSize: '12px', color: 'var(--info)', margin: '2px 0 0' }}>
-              {users.length} users with chat history
+              Only your own Oloo chat history is visible here. Member conversations are private.
             </p>
           </div>
+          <button type="button" className="btn-secondary" disabled={loading || chatLoading || !viewerId} onClick={() => {
+            void fetchUsers()
+            if (selectedUser) void fetchConversations(selectedUser)
+          }}>Refresh</button>
         </div>
 
         <div style={{ display: 'flex', height: 'calc(100vh - 60px)' }}>
@@ -171,7 +181,7 @@ function ChatViewer() {
               </div>
             ) : filteredUsers.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: '12px', textAlign: 'center', padding: '1rem' }}>
-                {search ? 'No users found' : 'No chat history yet'}
+                {search ? 'No matches' : 'No saved Oloo messages for this account yet'}
               </p>
             ) : (
               filteredUsers.map(u => (
