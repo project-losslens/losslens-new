@@ -9,7 +9,9 @@ const configuredOrigins = (value: string) => value.split(',').flatMap((entry) =>
   }
 })
 
-const [siteOrigin, ...additionalOrigins] = configuredOrigins(Deno.env.get('ALLOWED_ORIGIN') || '')
+const [siteOrigin, ...additionalOrigins] = configuredOrigins(
+  Deno.env.get('ADMIN_USER_UPDATE_ALLOWED_ORIGINS') || Deno.env.get('ALLOWED_ORIGIN') || '',
+)
 const allowedOrigins = new Set([siteOrigin, ...additionalOrigins])
 const corsHeaders = (origin: string) => ({
   'Access-Control-Allow-Origin': origin,

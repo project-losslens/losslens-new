@@ -68,7 +68,8 @@ manual SQL session. Restore = new project + apply the six scripts +
 - Apply migration 11 in a disposable Supabase project first, then through the
   owner's approved manual production process. Deploy the updated
   `admin-user-update` Edge Function and frontend together. Its existing
-  `ALLOWED_ORIGIN` must include the browser's site origin. Use a comma-separated
+  `ADMIN_USER_UPDATE_ALLOWED_ORIGINS` overrides the shared `ALLOWED_ORIGIN`
+  for this function. The configured value must include the browser's site origin. Use a comma-separated
   list for additional trusted origins (for example, an approved demo host),
   with the primary site first for password reset links. `SUPABASE_URL`,
   `SUPABASE_ANON_KEY` and server-only `SUPABASE_SERVICE_ROLE_KEY` must belong to
