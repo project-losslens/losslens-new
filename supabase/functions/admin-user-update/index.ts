@@ -1,28 +1,38 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
-const allowedOrigin = Deno.env.get('ALLOWED_ORIGIN')
-const corsHeaders = () => ({
-  'Access-Control-Allow-Origin': allowedOrigin || '',
+const configuredOrigins = (value: string) => value.split(',').flatMap((entry) => {
+  try {
+    const url = new URL(entry.trim())
+    return ['https:', 'http:'].includes(url.protocol) ? [url.origin] : []
+  } catch {
+    return []
+  }
+})
+
+const [siteOrigin, ...additionalOrigins] = configuredOrigins(Deno.env.get('ALLOWED_ORIGIN') || '')
+const allowedOrigins = new Set([siteOrigin, ...additionalOrigins])
+const corsHeaders = (origin: string) => ({
+  'Access-Control-Allow-Origin': origin,
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Max-Age': '86400',
   'Vary': 'Origin',
 })
-const json = (status: number, body: Record<string, unknown>) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
-  })
-
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
 }[char] || char))
 
 Deno.serve(async (req) => {
   const origin = req.headers.get('origin')
-  if (!allowedOrigin) return new Response('Service unavailable', { status: 500 })
-  if (origin !== allowedOrigin) return json(403, { error: 'Forbidden' })
-  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders() })
+  if (!siteOrigin) return new Response('Service unavailable', { status: 500, headers: { Vary: 'Origin' } })
+  if (!origin || !allowedOrigins.has(origin)) return new Response('Forbidden', { status: 403, headers: { Vary: 'Origin' } })
+  const headers = corsHeaders(origin)
+  const json = (status: number, body: Record<string, unknown>) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { ...headers, 'Content-Type': 'application/json' },
+    })
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers })
   if (req.method !== 'POST') return json(405, { error: 'Method not allowed' })
 
   let action = 'unknown'
@@ -204,7 +214,7 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'send-reset-link') {
-      const redirectTo = `${allowedOrigin}/reset-password`
+      const redirectTo = `${siteOrigin}/reset-password`
       const { error: resetError } = await admin.auth.resetPasswordForEmail(
         targetAuth.user.email || '',
         { redirectTo },
