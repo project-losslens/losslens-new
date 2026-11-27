@@ -874,7 +874,7 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
                 <details>
                   <summary>Reassign open vouchers or claims if required</summary>
                   <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', margin: '12px 0' }}>
-                    <input type="checkbox" checked={acknowledgeOpenWork} onChange={(event) => setAcknowledgeOpenWork(event.target.checked)} />
+                    <input id="acknowledge-open-work" type="checkbox" checked={acknowledgeOpenWork} onChange={(event) => setAcknowledgeOpenWork(event.target.checked)} />
                     <span>{t('users.reassignOpenWork')}</span>
                   </label>
                   <div className="form-group">

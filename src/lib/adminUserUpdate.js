@@ -7,8 +7,19 @@ export async function invokeAdminUserUpdate(body) {
     return { data: null, error: new Error('Your session expired or could not be verified. Sign in again.') }
   }
 
-  return supabase.functions.invoke('admin-user-update', {
-    headers: { Authorization: `Bearer ${accessToken}` },
-    body,
+  const headers = { Authorization: `Bearer ${accessToken}` }
+  if (import.meta.env.DEV) {
+    return supabase.functions.invoke('admin-user-update', { headers, body })
+  }
+
+  const response = await fetch('/api/admin-user-update', {
+    method: 'POST',
+    headers: { ...headers, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
   })
+  if (!response.ok) {
+    return { data: null, error: Object.assign(new Error('Account update failed.'), { context: response }) }
+  }
+  const result = await response.json()
+  return { data: result, error: null }
 }
