@@ -4,6 +4,7 @@ import { BrandLoader } from '../../components/Brand'
 import { useAuthProfile } from '../../context/AuthProfileContext'
 import { useI18n } from '../../i18n'
 import { supabase } from '../../lib/supabase'
+import { invokeAdminUserUpdate } from '../../lib/adminUserUpdate'
 import { roleHome } from '../../config/roleHome'
 
 export default function ChangeTemporaryPassword() {
@@ -27,14 +28,12 @@ export default function ChangeTemporaryPassword() {
     if (password === currentPassword) { setError(t('account.passwordMustDiffer')); return }
     if (password !== confirmPassword) { setError(t('account.passwordMismatch')); return }
     setSaving(true)
-    const { data, error: invokeError } = await supabase.functions.invoke('admin-user-update', {
-      body: {
-        action: 'complete-temporary-password-change',
-        targetId: user.id,
-        currentPassword,
-        password,
-      },
-    })
+    const { data, error: invokeError } = await invokeAdminUserUpdate({
+      action: 'complete-temporary-password-change',
+      targetId: user.id,
+      currentPassword,
+      password,
+    }).catch(() => ({ error: new Error('Account service unreachable. Try again.') }))
     if (invokeError || data?.error) {
       setError(data?.error || invokeError?.message || t('account.passwordChangeFailed'))
       setSaving(false)

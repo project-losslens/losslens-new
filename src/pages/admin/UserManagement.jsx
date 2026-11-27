@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import RefreshButton from '../../components/RefreshButton'
 import { supabase } from '../../lib/supabase'
+import { invokeAdminUserUpdate } from '../../lib/adminUserUpdate'
 import AppIcon from '../../components/AppIcon'
 import UserAvatar from '../../components/UserAvatar'
 import NumberField from '../../components/NumberField'
@@ -712,14 +713,12 @@ function UserAccountEditor({ user, actorId, isLastActiveSuperAdmin, onClose, onU
     setBusy(true)
     let response, error
     try {
-      const outcome = await supabase.functions.invoke('admin-user-update', {
-      body: {
+      const outcome = await invokeAdminUserUpdate({
         action,
         targetId: user.id,
         ...(action === 'set-role' ? { requestId: roleRequestId, expectedRole: user.role } : { reason: reason.trim(), typedConfirmation: confirmation.trim() }),
         ownPassword: submittedPassword,
         ...data,
-      },
       })
       response = outcome.data
       error = outcome.error
